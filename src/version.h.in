@@ -1,0 +1,21 @@
+#ifndef __OVERLAY__VERSION_H__
+#define __OVERLAY__VERSION_H__
+
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define OVERLAY_MAJOR ${MAJOR}
+#define OVERLAY_MINOR ${MINOR}
+#define OVERLAY_PATCH ${PATCH}
+#define OVERLAY_VERSION "${VERSION}"
+
+const char * overlay_get_version(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // __OVERLAY__VERSION_H__
+
