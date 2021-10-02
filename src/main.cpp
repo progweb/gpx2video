@@ -17,7 +17,8 @@ int main(int argc, char *argv[], char *envp[]) {
 	avcodec_register_all();
 
 
-	MediaContainer *container = Decoder::probe("../video/clip.mp4");
+	MediaContainer *container = Decoder::probe(argv[1]);
+//	MediaContainer *container = Decoder::probe("../video/clip.mp4");
 //	MediaContainer *container = Decoder::probe("../video/GOPR1860.MP4");
 
 	VideoStreamPtr video_stream = container->getVideoStream();
