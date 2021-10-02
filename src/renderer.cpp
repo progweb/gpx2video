@@ -24,14 +24,12 @@ Renderer * Renderer::create(void) {
 }
 
 
-void Renderer::draw(FramePtr frame) {
-	int x, y, w, h;
-
-	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
+void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider) {
+	int w, h;
 
 	// Open picto
 //	OIIO::ImageInput *img = OIIO::ImageInput::open("./assets/picto.png");
-	auto img = OIIO::ImageInput::open("./assets/picto/DataOverlay_icn_speed.png");
+	auto img = OIIO::ImageInput::open(picto);
 	const OIIO::ImageSpec& spec = img->spec();
 	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
@@ -40,18 +38,18 @@ void Renderer::draw(FramePtr frame) {
 	img->read_image(type, buf->localpixels());
 
 	// Resize picto
-	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * 2.5, spec.height * 2.5, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(dst, *buf);
 
-	x = 50;
-	y = 900;
-	w = spec.width * 2.5;
-	h = spec.height * 2.5;
+//	x = 50;
+//	y = 900;
+	w = spec.width * divider;
+	h = spec.height * divider;
 
 	// Image over
 	dst.specmod().x = x;
 	dst.specmod().y = y;
-	OIIO::ImageBufAlgo::over(frame_buffer, dst, frame_buffer, OIIO::ROI());
+	OIIO::ImageBufAlgo::over(*frame, dst, *frame, OIIO::ROI());
 
 	delete buf;
 
@@ -61,12 +59,20 @@ void Renderer::draw(FramePtr frame) {
 	int space = h / 10;
 	pt = (h - (3 *space)) / 3;
 	float white[] = { 1.0, 1.0, 1.0, 1.0 };
-	if (OIIO::ImageBufAlgo::render_text(frame_buffer, x + w + (w/10), y + space + pt, "VITESSE", pt, "./assets/fonts/Helvetica.ttf", white) == false)
+	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + space + pt, label, pt, "./assets/fonts/Helvetica.ttf", white) == false)
 		fprintf(stderr, "render text error\n");
 	pt *= 2;
-	if (OIIO::ImageBufAlgo::render_text(frame_buffer, x + w + (w/10), y + (pt/2) + space + pt + space, "32 km/h", pt, "./assets/fonts/Helvetica.ttf", white) == false)
+	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + (pt/2) + space + pt + space, value, pt, "./assets/fonts/Helvetica.ttf", white) == false)
 		fprintf(stderr, "render text error\n");
+}
 
+
+void Renderer::draw(FramePtr frame) {
+	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
+
+	this->add(&frame_buffer, 50, 500, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", "-1%", 2.5 * 64.0 / 150.0);
+	this->add(&frame_buffer, 50, 700, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", "40 m", 2.5);
+	this->add(&frame_buffer, 50, 900, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", "32 km/h", 2.5);
 
 	frame->fromImageBuf(frame_buffer);
 }

@@ -4,6 +4,10 @@
 #include <string>
 #include <vector>
 
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
+
 #include "frame.h"
 
 
@@ -17,6 +21,8 @@ public:
 
 private:
 	Renderer();
+
+	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
 };
 
 #endif
