@@ -41,7 +41,7 @@ private:
 	static VideoParams::Format getNativePixelFormat(AVPixelFormat pix_fmt);
 	static int getNativeNbChannels(AVPixelFormat pix_fmt);
 
-	Decoder(void);
+	Decoder();
 
 	StreamPtr stream_;
 

@@ -1,6 +1,11 @@
 #include <iostream>
 #include <memory>
 
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
+
+#include "oiioutils.h"
 #include "frame.h"
 
 
@@ -52,17 +57,32 @@ void Frame::setTimestamp(const int64_t &timestamp) {
 }
 
 
-uint8_t * Frame::data(void) {
+uint8_t * Frame::data(void) const {
 	return data_;
 }
 
 
-const uint8_t * Frame::constData(void) {
+const uint8_t * Frame::constData(void) const {
 	return (const uint8_t *) data_;
 }
 
 
 void Frame::setData(uint8_t *data) {
 	data_ = data;
+}
+
+
+OIIO::ImageBuf Frame::toImageBuf(void) const {
+	// OIIO Convert frame to imagebuf
+	OIIO::ImageBuf buffer(OIIO::ImageSpec(this->width(), this->height(), 
+		this->nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(this->format())));
+	OIIOUtils::frameToBuffer(this, &buffer);
+
+	return buffer;
+}
+
+
+void Frame::fromImageBuf(OIIO::ImageBuf &buffer) {
+	OIIOUtils::bufferToFrame(&buffer, this);
 }
 

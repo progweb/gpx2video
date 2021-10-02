@@ -4,6 +4,9 @@
 
 EncoderSettings::EncoderSettings() :
 	video_enabled_(false),
+	video_bit_rate_(0),
+	video_max_bit_rate_(0),
+	video_buffer_size_(0),
 	audio_enabled_(false) {
 }
 
@@ -52,14 +55,17 @@ bool EncoderSettings::isVideoEnabled(void) const {
 
 
 void EncoderSettings::setVideoBitrate(const int64_t rate) {
+	video_bit_rate_ = rate;
 }
 
 
 void EncoderSettings::setVideoMaxBitrate(const int64_t rate) {
+	video_max_bit_rate_ = rate;
 }
 
 
 void EncoderSettings::setVideoBufferSize(const int64_t size) {
+	video_buffer_size_ = size;
 }
 
 

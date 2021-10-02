@@ -3,9 +3,14 @@
 
 #include "decoder.h"
 #include "encoder.h"
+#include "renderer.h"
 
 
 int main(int argc, char *argv[], char *envp[]) {
+	(void) argc;
+	(void) argv;
+	(void) envp;
+
 	av_log_set_level(AV_LOG_INFO);
 
 	av_register_all();
@@ -34,6 +39,9 @@ int main(int argc, char *argv[], char *envp[]) {
 	EncoderSettings settings;
 	settings.setFilename("video.mp4");
 	settings.setVideoParams(video_params, AV_CODEC_ID_H264);
+	settings.setVideoBitrate(4 * 1000 * 1000 * 8);
+	settings.setVideoMaxBitrate(2 * 1000 * 1000 * 16);
+	settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
 //	settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
 
 
@@ -49,6 +57,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	Encoder *encoder = Encoder::create(settings);
 	encoder->open();
+
+	Renderer *renderer = Renderer::create();
 
 	/**
 	 * Choose fps from command line (or from input stream
@@ -72,10 +82,10 @@ int main(int argc, char *argv[], char *envp[]) {
 		frame = decoder->retrieveVideo(real_time);
 //		frame = decoder->retrieveAudio(range);
 		
-//		renderer->draw(frame);
-
 		if (frame == NULL)
 			break;
+
+		renderer->draw(frame);
 
 		int64_t timecode = frame->timestamp();
 

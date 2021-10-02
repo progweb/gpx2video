@@ -43,6 +43,9 @@ private:
 	bool video_enabled_;
 	VideoParams video_params_;
 	AVCodecID video_codec_id_;
+	int64_t video_bit_rate_;
+	int64_t video_max_bit_rate_;
+	int64_t video_buffer_size_;
 
 	bool audio_enabled_;
 	AudioParams audio_params_;
