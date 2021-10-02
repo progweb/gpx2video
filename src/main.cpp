@@ -90,6 +90,10 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		int64_t timecode = frame->timestamp();
 
+		// Max 5 secondes
+		if ((timecode * av_q2d(video_stream->timeBase()) * 1000) > 5000)
+			break;
+
 		printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms\n", frame_time, timecode, 
 			(int64_t) (timecode * av_q2d(video_stream->timeBase()) * 1000));
 
