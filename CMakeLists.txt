@@ -88,6 +88,7 @@ set(OVERLAY_OIIO_SOURCES
 )
 
 set(GPX2VIDEO_SOURCES
+	src/oiioutils.cpp
 	src/ffmpegutils.cpp
 	src/decoder.cpp
 	src/encoder.cpp
@@ -96,6 +97,7 @@ set(GPX2VIDEO_SOURCES
 	src/stream.cpp
 	src/audioparams.cpp
 	src/videoparams.cpp
+	src/renderer.cpp
 	src/main.cpp
 )
 
@@ -125,8 +127,8 @@ target_link_libraries(overlay-ff ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES}
 #add_executable(overlay-qt ${OVERLAY_QT_SOURCES})
 #target_link_libraries(overlay-qt ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${QT_LIBRARIES})
 
-add_executable(overlay-oiio ${OVERLAY_OIIO_SOURCES})
-target_link_libraries(overlay-oiio ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES})
+#add_executable(overlay-oiio ${OVERLAY_OIIO_SOURCES})
+#target_link_libraries(overlay-oiio ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES})
 
 add_executable(gpx2video ${GPX2VIDEO_SOURCES})
 target_link_libraries(gpx2video ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES})
@@ -136,7 +138,7 @@ target_link_libraries(gpx2video ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} 
 #
 install(TARGETS overlay-ff DESTINATION bin)
 #install(TARGETS overlay-qt DESTINATION bin)
-install(TARGETS overlay-oiio DESTINATION bin)
+#install(TARGETS overlay-oiio DESTINATION bin)
 install(TARGETS gpx2video DESTINATION bin)
 
 #

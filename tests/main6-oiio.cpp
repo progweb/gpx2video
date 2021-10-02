@@ -760,7 +760,8 @@ int main(int argc, char **argv)
 					
 					// Open picto
 					int x, y, w, h;
-					OIIO::ImageInput *img = OIIO::ImageInput::open("picto.png");
+//					OIIO::ImageInput *img = OIIO::ImageInput::open("picto.png");
+					auto img = OIIO::ImageInput::open("picto.png");
 					const OIIO::ImageSpec& spec = img->spec();
 					enum video_format_e img_fmt = get_format_from_oiio_base_type(spec.format.basetype);
 					OIIO::TypeDesc::BASETYPE type = get_oiio_base_type_from_format(img_fmt);
