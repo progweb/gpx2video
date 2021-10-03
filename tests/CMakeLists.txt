@@ -1,4 +1,10 @@
 #
+# LIBS
+# 
+FIND_PACKAGE(EXPAT REQUIRED)
+include_directories(. .. ${EXPAT_INCLUDE_DIRS})
+
+#
 # SOURCES
 #
 set(OVERLAY_FF_SOURCES
@@ -12,6 +18,10 @@ set(OVERLAY_OIIO_SOURCES
 	main6-oiio.cpp
 )
 
+set(GPXTRK_SOURCES
+	gpxtrk.cpp
+)
+
 #
 # BINARIES
 # 
@@ -23,6 +33,9 @@ target_link_libraries(overlay-qt ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES}
 
 add_executable(overlay-oiio ${OVERLAY_OIIO_SOURCES})
 target_link_libraries(overlay-oiio ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES})
+
+add_executable(gpxtrk ${GPXTRK_SOURCES})
+target_link_libraries(gpxtrk gpxlib ${EXPAT_LIBRARIES})
 
 #
 # INSTALL

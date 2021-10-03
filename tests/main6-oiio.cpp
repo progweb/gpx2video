@@ -589,6 +589,24 @@ int main(int argc, char **argv)
 	AVFrame *frame = NULL;
     AVPacket *packet = NULL;
 
+	AVStream *vs;
+
+	enum AVPixelFormat ideal_pix_fmt;
+
+	int native_nb_channels;
+	enum video_format_e native_pix_fmt;
+
+	enum AVPixelFormat possible_pix_fmts[] = {
+//		AV_PIX_FMT_RGB24,
+		AV_PIX_FMT_RGBA,
+//		AV_PIX_FMT_RGB48,
+		AV_PIX_FMT_RGBA64,
+		AV_PIX_FMT_NONE
+	};
+
+	struct SwsContext *sws_ctx, *sws_ctx2;
+
+
     unsigned int stream_index;
     unsigned int i;
  
@@ -613,22 +631,7 @@ int main(int argc, char **argv)
 
 
 
-    AVStream *vs = ifmt_ctx->streams[video_stream_index];
-
-	enum AVPixelFormat ideal_pix_fmt;
-
-	int native_nb_channels;
-	enum video_format_e native_pix_fmt;
-
-	enum AVPixelFormat possible_pix_fmts[] = {
-//		AV_PIX_FMT_RGB24,
-		AV_PIX_FMT_RGBA,
-//		AV_PIX_FMT_RGB48,
-		AV_PIX_FMT_RGBA64,
-		AV_PIX_FMT_NONE
-	};
-
-	struct SwsContext *sws_ctx, *sws_ctx2;
+    vs = ifmt_ctx->streams[video_stream_index];
 
 	ideal_pix_fmt = avcodec_find_best_pix_fmt_of_list(possible_pix_fmts, (AVPixelFormat) vs->codecpar->format, 1, NULL);
 
