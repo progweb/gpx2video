@@ -19,20 +19,26 @@ void MediaContainer::setFilename(const std::string &filename) {
 
 
 time_t MediaContainer::startTime(void) const {
+	return start_time_;
+}
+
+
+/**
+ * GoPro creation_time metadata format:
+ *   2021-10-03T19:12:01.000000Z
+ * creation_time is in local time
+ */
+void MediaContainer::setStartTime(const std::string &start_time) {
 	struct tm time;
 
-	const char *s = start_time_.c_str();
+	const char *s = start_time.c_str();
 
 	// creation_time = 2020-12-13T09:56:27.000000Z
 	memset(&time, 0, sizeof(time));
 	strptime(s, "%Y-%m-%dT%H:%M:%S.", &time);
 
-	return mktime(&time);
-}
-
-
-void MediaContainer::setStartTime(const std::string &start_time) {
-	start_time_ = start_time;
+	// Convert GoPro time in UTC time
+	start_time_ = timelocal(&time);
 }
 
 

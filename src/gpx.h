@@ -17,7 +17,7 @@ public:
 		double lat, lon;
 		double x, y;
 		double ele;
-		struct tm time;
+		time_t time;
 	};
 
 	GPXData();
@@ -39,6 +39,14 @@ public:
 		return distance_;
 	}
 
+	const double& elevation(void) const {
+		return cur_pt_.ele;
+	}
+
+	const double& grade(void) const {
+		return grade_;
+	}
+
 	const double& speed(void) const {
 		return speed_;
 	}
@@ -56,6 +64,7 @@ protected:
 	double duration_;
 	double distance_;
 	double speed_;
+	double grade_;
 };
 
 

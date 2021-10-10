@@ -8,6 +8,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "gpx.h"
 #include "frame.h"
 
 
@@ -17,7 +18,7 @@ public:
 
 	static Renderer * create(void);
 
-	void draw(FramePtr frame);
+	void draw(FramePtr frame, const GPXData &data);
 
 private:
 	Renderer();

@@ -42,7 +42,8 @@ GPXData::GPXData()
 	, valid_(false)
 	, duration_(0)
 	, distance_(0)
-	, speed_(0) {
+	, speed_(0) 
+	, grade_(0) {
 }
 
 
@@ -51,12 +52,16 @@ GPXData::~GPXData() {
 
 
 void GPXData::dump(void) {
-	char time[128];
+	char s[128];
 
-	strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", &cur_pt_.time);
+	struct tm time;
 
-	printf("Time: %s. Distance: %.3f km in %.3f seconds, current speed is %.3f (valid: %s)\n",
-		time,
+	localtime_r(&cur_pt_.time, &time);
+
+	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
+
+	printf("  Time: %s. Distance: %.3f km in %.3f seconds, current speed is %.3f (valid: %s)\n",
+		s,
 		distance_/1000.0, duration_, speed_, 
 		valid() ? "true" : "false");  
 }
@@ -66,14 +71,23 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 	char **end;
 	const char *s;
 
+	struct tm time;
+
 	struct Utm_val utm;
 
 	pt->valid = true;
 
-	// Convert time
-	memset(&pt->time, 0, sizeof(pt->time));
+	// Convert time - GPX file contains UTC time
 	s = wpt->time().getValue().c_str();
-	if (strptime(s, "%Y:%m:%d %H:%M:%S.", &(pt->time)) == NULL)
+
+	// Try format: "2020:12:13 08:55:48.215"
+	memset(&time, 0, sizeof(time));
+	if (strptime(s, "%Y:%m:%d %H:%M:%S.", &time) != NULL)
+		pt->time = timegm(&time);
+	// Try format: "2020-07-28T07:04:43.000Z"
+	else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
+		pt->time = timegm(&time);
+	else
 		pt->valid = false;
 
 	// Convert lat, lon & ele
@@ -95,11 +109,15 @@ bool GPXData::compute(void) {
 	double dz = (cur_pt_.ele - prev_pt_.ele);
 
 	double dc = sqrt(dx*dx + dy*dy + dz*dz);
-	double dt = difftime(mktime(&cur_pt_.time), mktime(&prev_pt_.time));
+	double dt = difftime(cur_pt_.time, prev_pt_.time);
 
 	duration_ += dt;
 	distance_ += dc;
 	speed_ = (3600 * dc) / (1000 * dt);
+
+	dc = sqrt(dx*dx + dy*dy);
+
+	grade_ = 100 * dz / dc;
 
 	return true;
 }
@@ -114,8 +132,8 @@ void GPXData::read(gpx::WPT *wpt) {
 	if (!pt.valid)
 		return;
 
-	memcpy(&prev_pt_, &cur_pt_, sizeof(struct point));
-	memcpy(&cur_pt_, &pt, sizeof(struct point));
+	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
+	memcpy(&cur_pt_, &pt, sizeof(cur_pt_));
 
 	nbr_points_++;
 
@@ -201,7 +219,7 @@ void GPX::setStartTime(time_t start_time) {
 
 
 void GPX::setStartTime(struct tm *start_time) {
-	time_t t = mktime(start_time);
+	time_t t = timegm(start_time);
 
 	setStartTime(t);
 }
@@ -243,11 +261,15 @@ const GPXData GPX::retrieveData(const int64_t &timecode) {
 			// Convert time
 			s = wpt->time().getValue().c_str();
 
+			// Try format: "2020:12:13 08:55:48.215"
 			memset(&time, 0, sizeof(time));
-			if (strptime(s, "%Y:%m:%d %H:%M:%S.", &time) == NULL)
+			if (strptime(s, "%Y:%m:%d %H:%M:%S.", &time) != NULL)
+				t = timegm(&time);
+			// Try format: "2020-07-28T07:04:43.000Z"
+			else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
+				t = timegm(&time);
+			else
 				continue;
-			t = mktime(&time);
-			t += 60 * 60 * 2; // TODO remove hook
 
 			// Search timecode in the GPX stream
 			if (t < (start_time_ + (timecode / 1000))) {

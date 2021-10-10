@@ -32,8 +32,8 @@ public:
 	VideoStreamPtr getVideoStream(void);
 
 private:
+	time_t start_time_;
 	std::string filename_;
-	std::string start_time_;
 
 	std::vector<StreamPtr> streams_;
 };

@@ -67,12 +67,19 @@ void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const
 }
 
 
-void Renderer::draw(FramePtr frame) {
+void Renderer::draw(FramePtr frame, const GPXData &data) {
+	char s[128];
+
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
-	this->add(&frame_buffer, 50, 500, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", "-1%", 2.5 * 64.0 / 150.0);
-	this->add(&frame_buffer, 50, 700, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", "40 m", 2.5);
-	this->add(&frame_buffer, 50, 900, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", "32 km/h", 2.5);
+	sprintf(s, "%.0f%%", data.grade());
+	this->add(&frame_buffer, 50, 500, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", s, 2.5 * 64.0 / 150.0);
+
+	sprintf(s, "%.0f m", data.elevation());
+	this->add(&frame_buffer, 50, 700, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, 2.5);
+
+	sprintf(s, "%.0f km/h", data.speed());
+	this->add(&frame_buffer, 50, 900, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", s, 2.5);
 
 	frame->fromImageBuf(frame_buffer);
 }
