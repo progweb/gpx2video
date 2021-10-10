@@ -1,5 +1,6 @@
 #include <iostream>
 #include <memory>
+#include <string>
 
 #include "ffmpegutils.h"
 #include "decoder.h"
@@ -18,6 +19,7 @@ Decoder::~Decoder() {
 
 MediaContainer * Decoder::probe(const std::string &filename) {
 	int result;
+	std::string start_time;
 
 	unsigned int i;
 
@@ -37,6 +39,8 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 	
 	if ((entry != NULL) && (entry->value != NULL)) {
 		av_log(NULL, AV_LOG_INFO, "%s = %s\n", entry->key, entry->value);
+		
+		start_time = entry->value;
 	}
 
 	// Get stream information from format
@@ -47,6 +51,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 
 	container = new MediaContainer();
 
+	container->setStartTime(start_time);
 	container->setFilename(filename);
 
 	// For each stream
@@ -117,6 +122,14 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 			}
 			else if (avstream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
 				AudioStreamPtr audio_stream = std::make_shared<AudioStream>();
+
+				uint64_t channel_layout = avstream->codecpar->channel_layout;
+				if (!channel_layout)
+					channel_layout = static_cast<uint64_t>(av_get_default_channel_layout(avstream->codecpar->channels));
+
+				audio_stream->setChannelLayout(channel_layout);
+				audio_stream->setNbChannels(avstream->codecpar->channels);
+				audio_stream->setSampleRate(avstream->codecpar->sample_rate);
 
 				stream = audio_stream;
 			}
@@ -306,6 +319,96 @@ void Decoder::close(void) {
 }
 
 
+FramePtr Decoder::retrieveAudio(const AudioParams &params, AVRational timecode) {
+	uint8_t *data;
+
+	AudioStreamPtr as = std::static_pointer_cast<AudioStream>(stream());
+
+	int64_t target_ts = as->getTimeInTimeBaseUnits(timecode);
+
+	// Retrieve frame data
+	if ((data = retrieveAudioFrameData(params, target_ts)) == NULL)
+		return NULL;
+
+	// Return the frame
+	FramePtr frame = Frame::create();
+
+	// TODO : do better !!!
+//	frame->setAudioParams();
+	frame->setTimestamp(pts_);
+	frame->setData(data);
+	
+	return frame;
+}
+
+
+uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts) {
+	int result;
+
+	uint8_t *data = NULL;
+
+	AVPacket *packet = av_packet_alloc();
+	AVFrame *frame = av_frame_alloc();
+
+//	printf("RETRIEVE: %ld\n", target_ts);
+
+	// Handle NULL channel layout
+	uint64_t channel_layout = validateChannelLayout(avstream_);
+	if (!channel_layout) {                     
+		fprintf(stderr, "Failed to determine channel layout of audio file, could not conform\n");
+//		return NULL;
+	}                                          
+
+//	// Create resampling context
+//	SwrContext* resampler = swr_alloc_set_opts(NULL,
+//			params.channelLayout(),                        
+//			FFmpegUtils::getFFmpegSampleFormat(params.format()),
+//			params.sampleRate(),                           
+//			channel_layout,                                 
+//			static_cast<AVSampleFormat>(avstream_->codecpar->format),
+//			avstream_->codecpar->sample_rate,    
+//			0,
+//			NULL);                                       
+//  
+//	swr_init(resampler);   
+
+	while (true) {
+		// Pull from decoder
+		result = getFrame(packet, frame);
+
+		// Handle any errors that aren't EOF (EOF is handled later on)
+		if ((result < 0) && (result != AVERROR_EOF)) {
+			break;
+		}
+
+		if (result == AVERROR_EOF) {
+			break;
+		}
+
+//		// Allocate buffers
+//		int nb_samples = swr_get_out_samples(resampler, frame->nb_samples);
+//		size_t size = params.samplesToBytes(nb_samples);
+//		data = (uint8_t *) malloc(size * sizeof(uint8_t));
+
+		// Store data (TOOD...)
+		data = (uint8_t *) frame;
+
+		pts_ = frame->pts;
+
+		break;
+	}
+
+//	swr_free(&resampler);
+
+//	printf("  PTS: %ld\n", pts_);
+
+//	av_frame_free(&frame);
+	av_packet_free(&packet);
+
+	return data;
+}
+
+
 FramePtr Decoder::retrieveVideo(AVRational timecode) {
 	uint8_t *data;
 
@@ -314,7 +417,7 @@ FramePtr Decoder::retrieveVideo(AVRational timecode) {
 	int64_t target_ts = vs->getTimeInTimeBaseUnits(timecode);
 
 	// Retrieve frame data
-	if ((data = retrieveFrameData(target_ts)) == NULL)
+	if ((data = retrieveVideoFrameData(target_ts)) == NULL)
 		return NULL;
 
 	// Return the frame
@@ -332,7 +435,7 @@ FramePtr Decoder::retrieveVideo(AVRational timecode) {
 	return frame;
 }
 
-uint8_t * Decoder::retrieveFrameData(const int64_t& target_ts) {
+uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 	int result;
 
 	uint8_t *data = NULL;
@@ -383,6 +486,14 @@ uint8_t * Decoder::retrieveFrameData(const int64_t& target_ts) {
 
 	return data;
 }
+
+
+uint64_t Decoder::validateChannelLayout(AVStream* stream) {
+	if (stream->codecpar->channel_layout)
+		return stream->codecpar->channel_layout;
+
+	return av_get_default_channel_layout(stream->codecpar->channels);
+} 
 
 
 VideoParams::Format Decoder::getNativePixelFormat(AVPixelFormat pix_fmt) {

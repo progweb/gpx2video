@@ -10,6 +10,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+#include "audioparams.h"
 #include "videoparams.h"
 
 
@@ -58,6 +59,27 @@ class AudioStream : public Stream {
 public:
 	AudioStream();
 	virtual ~AudioStream();
+
+	const int& sampleRate(void) const;
+	void setSampleRate(const int &sample_rate);
+
+	const AudioParams::Format& format(void) const;
+	void setFormat(const AudioParams::Format &format);
+
+	const int& nbChannels(void) const;
+	void setNbChannels(const int &nb_channels);
+
+	const uint64_t& channelLayout(void) const;
+	void setChannelLayout(const uint64_t &channel_layout);
+
+	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
+
+private:
+	int sample_rate_;
+	int nb_channels_;
+	uint64_t channel_layout_;
+
+	AudioParams::Format format_;
 };
 
 

@@ -36,6 +36,7 @@ public:
 	void setVideoBufferSize(const int64_t size);
 
 	bool isAudioEnabled(void) const;
+	void setAudioBitrate(const int64_t rate);
 
 private:
 	std::string filename_;
@@ -50,6 +51,7 @@ private:
 	bool audio_enabled_;
 	AudioParams audio_params_;
 	AVCodecID audio_codec_id_;
+	int64_t audio_bit_rate_;
 };
 
 
@@ -64,6 +66,7 @@ public:
 	bool open(void);
 	void close(void);
 
+	bool writeAudio(FramePtr frame, AVRational time);
 	bool writeFrame(FramePtr frame, AVRational time);
 
 private:

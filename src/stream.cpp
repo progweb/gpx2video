@@ -68,6 +68,51 @@ AudioStream::~AudioStream() {
 }
 
 
+const int& AudioStream::sampleRate(void) const {
+	return sample_rate_;
+}
+
+
+void AudioStream::setSampleRate(const int &sample_rate) {
+	sample_rate_ = sample_rate;
+}
+
+
+const AudioParams::Format& AudioStream::format(void) const {
+	return format_;
+}
+
+
+void AudioStream::setFormat(const AudioParams::Format &format) {
+	format_ = format;
+}
+
+
+const int& AudioStream::nbChannels(void) const {
+	return nb_channels_;
+}
+
+
+void AudioStream::setNbChannels(const int &nb_channels) {
+	nb_channels_ = nb_channels;
+}
+
+
+const uint64_t& AudioStream::channelLayout(void) const {
+	return channel_layout_;
+}
+
+
+void AudioStream::setChannelLayout(const uint64_t &channel_layout) {
+	channel_layout_ = channel_layout;
+}
+
+
+int64_t AudioStream::getTimeInTimeBaseUnits(const AVRational& time) const {
+	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
+}
+
+
 VideoStream::VideoStream() {
 	setType(AVMEDIA_TYPE_VIDEO);
 }

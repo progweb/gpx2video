@@ -74,6 +74,11 @@ bool EncoderSettings::isAudioEnabled(void) const {
 }
 
 
+void EncoderSettings::setAudioBitrate(const int64_t rate) {
+	audio_bit_rate_ = rate;
+}
+
+
 Encoder::Encoder(const EncoderSettings &settings) :
 	settings_(settings),
 	open_(false),
@@ -305,8 +310,8 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		break;
 
 	case AVMEDIA_TYPE_AUDIO:
-//		codec_context->sample_rate = // FIXME
-//		codec_context->channel_layout = // FIXME
+		codec_context->sample_rate = settings().audioParams().sampleRate();
+		codec_context->channel_layout = settings().audioParams().channelLayout();
 		codec_context->channels = av_get_channel_layout_nb_channels(codec_context->channel_layout);
 		// take first format from list of supported formats
 		codec_context->sample_fmt = codec->sample_fmts[0];
@@ -343,6 +348,21 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 
 	*stream_ptr = stream;
 	*codec_context_ptr = codec_context;
+
+	return true;
+}
+
+
+bool Encoder::writeAudio(FramePtr frame, AVRational time) {
+	bool success = false;
+
+	AVFrame *encoded_frame = (AVFrame *) frame->data();
+
+	success = writeAVFrame(encoded_frame, audio_codec_, audio_stream_);
+
+	av_frame_free(&encoded_frame);
+
+	frame->setData(NULL);
 
 	return true;
 }

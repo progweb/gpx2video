@@ -1,6 +1,30 @@
 #include "ffmpegutils.h"
 
 
+AVSampleFormat FFmpegUtils::getFFmpegSampleFormat(const AudioParams::Format &format)
+{
+	switch (format) {
+	case AudioParams::FormatUnsigned8:
+		return AV_SAMPLE_FMT_U8;
+	case AudioParams::FormatSigned16:
+		return AV_SAMPLE_FMT_S16;
+	case AudioParams::FormatSigned32:
+		return AV_SAMPLE_FMT_S32;
+	case AudioParams::FormatSigned64:
+		return AV_SAMPLE_FMT_S64;
+	case AudioParams::FormatFloat32:
+		return AV_SAMPLE_FMT_FLT;
+	case AudioParams::FormatFloat64:
+		return AV_SAMPLE_FMT_DBL;
+	case AudioParams::FormatInvalid:
+	case AudioParams::FormatCount:
+		break;
+	} 
+
+	return AV_SAMPLE_FMT_NONE;
+}
+
+
 AVPixelFormat FFmpegUtils::getCompatiblePixelFormat(const AVPixelFormat &pix_fmt) {
 	enum AVPixelFormat possible_pix_fmts[] = {
 //		AV_PIX_FMT_RGB24,

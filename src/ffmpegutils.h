@@ -9,11 +9,14 @@ extern "C" {
 #include <libavformat/avformat.h>
 }
 
+#include "audioparams.h"
 #include "videoparams.h"
 
 
 class FFmpegUtils {
 public:
+	static AVSampleFormat getFFmpegSampleFormat(const AudioParams::Format &format);
+
 	static AVPixelFormat getCompatiblePixelFormat(const AVPixelFormat &pix_fmt);
 	static VideoParams::Format getCompatiblePixelFormat(const VideoParams::Format &format);
 	static AVPixelFormat getFFmpegPixelFormat(const VideoParams::Format &format, int nb_channels);

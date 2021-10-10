@@ -7,6 +7,7 @@
 extern "C" {
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+#include <libswresample/swresample.h>
 #include <libswscale/swscale.h>
 }
 
@@ -27,8 +28,11 @@ public:
 	int getFrame(AVPacket *packet, AVFrame *frame);
 	void close(void);
 
+	FramePtr retrieveAudio(const AudioParams &params, AVRational timecode);
+	uint8_t * retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts);
+
 	FramePtr retrieveVideo(AVRational timecode);
-	uint8_t * retrieveFrameData(const int64_t& target_ts);
+	uint8_t * retrieveVideoFrameData(const int64_t& target_ts);
 
 protected:
 	StreamPtr stream(void) const {
@@ -38,6 +42,7 @@ protected:
 	bool open(const std::string &filename, const int &index);
 
 private:
+	static uint64_t validateChannelLayout(AVStream* stream);
 	static VideoParams::Format getNativePixelFormat(AVPixelFormat pix_fmt);
 	static int getNativeNbChannels(AVPixelFormat pix_fmt);
 

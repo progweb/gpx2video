@@ -18,6 +18,24 @@ void MediaContainer::setFilename(const std::string &filename) {
 }
 
 
+time_t MediaContainer::startTime(void) const {
+	struct tm time;
+
+	const char *s = start_time_.c_str();
+
+	// creation_time = 2020-12-13T09:56:27.000000Z
+	memset(&time, 0, sizeof(time));
+	strptime(s, "%Y-%m-%dT%H:%M:%S.", &time);
+
+	return mktime(&time);
+}
+
+
+void MediaContainer::setStartTime(const std::string &start_time) {
+	start_time_ = start_time;
+}
+
+
 void MediaContainer::addStream(StreamPtr stream) {
 	stream->setContainer(this);
 

@@ -1,6 +1,8 @@
 #ifndef __GPX2VIDEO__MEDIA_H__
 #define __GPX2VIDEO__MEDIA_H__
 
+#include <time.h>
+
 #include <string>
 #include <vector>
 
@@ -19,6 +21,9 @@ public:
 	const std::string& filename(void) const;
 	void setFilename(const std::string &filename);
 
+	time_t startTime(void) const;
+	void setStartTime(const std::string &start_time);
+
 	void addStream(StreamPtr stream);
 
 	StreamPtr getFirstStreamOfType(const AVMediaType &type) const;
@@ -28,6 +33,7 @@ public:
 
 private:
 	std::string filename_;
+	std::string start_time_;
 
 	std::vector<StreamPtr> streams_;
 };
