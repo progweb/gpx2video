@@ -5,6 +5,7 @@
 #include <string>
 
 #include "gpx.h"
+#include "map.h"
 #include "decoder.h"
 #include "encoder.h"
 #include "renderer.h"
@@ -14,19 +15,22 @@ namespace gpx2video {
 
 
 static struct option options[] = {
-	{ "help",      no_argument,       0, 'h' },
-	{ "verbose",   no_argument,       0, 'v' },
-	{ "quiet",     no_argument,       0, 'q' },
-	{ "duration",  required_argument, 0, 'd' },
-	{ "media",     required_argument, 0, 'm' },
-	{ "gpx",       required_argument, 0, 'g' },
-	{ "output",    required_argument, 0, 'o' },
-	{ 0,           0,                 0, 0 }
+	{ "help",       no_argument,       0, 'h' },
+	{ "verbose",    no_argument,       0, 'v' },
+	{ "quiet",      no_argument,       0, 'q' },
+	{ "duration",   required_argument, 0, 'd' },
+	{ "media",      required_argument, 0, 'm' },
+	{ "gpx",        required_argument, 0, 'g' },
+	{ "output",     required_argument, 0, 'o' },
+	{ "map-source", required_argument, 0, 's' },
+	{ "map-zoom",   required_argument, 0, 'z' },
+	{ "map-list",   no_argument,       0, 'l' },
+	{ 0,            0,                 0, 0 }
 };
 
 
 static void printUsage(const std::string &name) {
-	std::cout << "Usage: " << name << "%s [-v] -m=media -g=gpx -o=output" << std::endl;
+	std::cout << "Usage: " << name << "%s [-v] -m=media -g=gpx -o=output command" << std::endl;
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
@@ -34,12 +38,36 @@ static void printUsage(const std::string &name) {
 	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
+	std::cout << "\t- s, --map-source       : Map source" << std::endl;
+	std::cout << "\t- z, --map-zoom         : Map zoom" << std::endl;
+	std::cout << "\t- l, --map-list         : Dump supported map list" << std::endl;
 	std::cout << "\t- v, --verbose          : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet            : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
 	std::cout << std::endl;
+	std::cout << "Command:" << std::endl;
+	std::cout << "\t map   : Build map from gpx data" << std::endl;
+	std::cout << "\t video : Process output video" << std::endl;
 
 	return;
+}
+
+
+static void printMapList(const std::string &name) {
+	int i;
+
+	std::cout << "Map list: " << name << std::endl;
+
+	for (i=MapSettings::SourceNull; i != MapSettings::SourceCount; i++) {
+		std::string name = MapSettings::getFriendlyName((MapSettings::Source) i);
+		std::string copyright = MapSettings::getCopyright((MapSettings::Source) i);
+		std::string uri = MapSettings::getRepoURI((MapSettings::Source) i);
+
+		if (uri == "")
+			continue;
+
+		std::cout << "\t- " << i << ":\t" << name << " " << copyright << std::endl;
+	}
 }
 
 
@@ -63,9 +91,10 @@ static void quiet(bool enable) {
 }; // namespace log
 
 
-static void process(const std::string &mediafile, const std::string &gpxfile, 
+static void process(int with_video, 
+	const std::string &mediafile, const std::string &gpxfile, 
 	const std::string &outputfile,
-	int max_duration_ms) {
+	int max_duration_ms, MapSettings::Source map_source, int map_zoom) {
 	// Video utc start time
 	time_t start_time;
 
@@ -76,11 +105,23 @@ static void process(const std::string &mediafile, const std::string &gpxfile,
 
 	gpx->dump();
 
-//	gpx->setStartTime(&start_time);
-////	gpx->setStartTime(s);
-//	data = gpx->retrieveData(0);
-//	data.dump();
 
+	// Build map
+	GPXData::point p1, p2;
+	gpx->getBoundingBox(&p1, &p2);
+
+	MapSettings mapSettings;
+	mapSettings.setSource(map_source);
+	mapSettings.setZoom(map_zoom);
+	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+
+	Map *map = Map::create(mapSettings);
+	map->download();
+//	map->drawTrack(gpx);
+//	map->setPosition();
+
+	if (!with_video)
+		return;
 
 	// Probe input media
 	MediaContainer *container = Decoder::probe(mediafile);
@@ -210,8 +251,12 @@ int main(int argc, char *argv[], char *envp[]) {
 	int index;
 	int option;
 
+	int with_video = 0;
 	int verbose = 0;
+	int map_zoom = 12;
 	int max_duration_ms = 5 * 1000; // By default 5 seconds
+
+	MapSettings::Source map_source = MapSettings::SourceOpenStreetMap;
 
 	char *gpxfile = NULL;
 	char *mediafile = NULL;
@@ -223,7 +268,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	for (;;) {
 		index = 0;
-		option = getopt_long(argc, argv, "hqvd:m:g:o:", gpx2video::options, &index);
+		option = getopt_long(argc, argv, "hqvd:m:g:o:s:z:l", gpx2video::options, &index);
 
 		if (option == -1) 
 			break;
@@ -237,7 +282,17 @@ int main(int argc, char *argv[], char *envp[]) {
 			break;
 		case 'h':
 			gpx2video::printUsage(name);
-			exit(0);
+			goto exit;
+			break;
+		case 'l':
+			gpx2video::printMapList(name);
+			goto exit;
+			break;
+		case 'z':
+			map_zoom = atoi(optarg);
+			break;
+		case 's':
+			map_source = (MapSettings::Source) atoi(optarg);
 			break;
 		case 'q':
 			gpx2video::log::quiet(true);
@@ -252,7 +307,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			if (mediafile != NULL) {
 				printf("'media' option is already set!\n");
 				gpx2video::printUsage(name);
-				exit(0);
+				goto exit;
 			}
 			mediafile = strdup(optarg);
 			break;
@@ -260,7 +315,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			if (gpxfile != NULL) {
 				printf("'gpx' option is already set!\n");
 				gpx2video::printUsage(name);
-				exit(0);
+				goto exit;
 			}
 			gpxfile = strdup(optarg);
 			break;
@@ -268,13 +323,13 @@ int main(int argc, char *argv[], char *envp[]) {
 			if (outputfile != NULL) {
 				printf("'output' option is already set!\n");
 				gpx2video::printUsage(name);
-				exit(0);
+				goto exit;
 			}
 			outputfile = strdup(optarg);
 			break;
 		default:
 			gpx2video::printUsage(name);
-			exit(0);
+			goto exit;
 			break;
 		}
 	}
@@ -303,6 +358,22 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 	}
 
+	if (argc == 1) {
+		if (!strcmp(argv[0], "map")) {
+			with_video = 0;
+		}
+		else if (!strcmp(argv[0], "video")) {
+			with_video = 1;
+		}
+		else {
+			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;
+			gpx2video::printUsage(name);
+			goto exit;
+		}
+	}
+	else
+		with_video = 1;
+
 	av_log_set_level(AV_LOG_INFO);
 
 	// Init
@@ -312,7 +383,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	gpx2video::log::setLevel(AV_LOG_INFO);
 
 	// Process
-	gpx2video::process(mediafile, gpxfile, outputfile, max_duration_ms);
+	gpx2video::process(with_video, mediafile, gpxfile, outputfile, max_duration_ms, map_source, map_zoom);
 
 exit:
 	if (mediafile != NULL)

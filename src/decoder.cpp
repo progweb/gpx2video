@@ -350,6 +350,9 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 	AVPacket *packet = av_packet_alloc();
 	AVFrame *frame = av_frame_alloc();
 
+	(void) params;
+	(void) target_ts;
+
 //	printf("RETRIEVE: %ld\n", target_ts);
 
 	// Handle NULL channel layout
@@ -442,6 +445,8 @@ uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 
 	AVPacket *packet = av_packet_alloc();
 	AVFrame *frame = av_frame_alloc();
+
+	(void) target_ts;
 
 //	printf("RETRIEVE: %ld\n", target_ts);
 

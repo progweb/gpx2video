@@ -59,7 +59,7 @@ include_directories(${LIBSWSCALE_INCLUDE_DIRS})
 PKG_CHECK_MODULES(LIBGEOGRAPHIC REQUIRED geographiclib)
 include_directories(${LIBGEOGRAPHIC_INCLUDE_DIRS})
 
-FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+#FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
 #
 # INCLUDE
@@ -90,12 +90,14 @@ set(GPX2VIDEO_SOURCES
 	src/decoder.cpp
 	src/encoder.cpp
 	src/frame.cpp
+	src/map.cpp
 	src/media.cpp
 	src/stream.cpp
 	src/audioparams.cpp
 	src/videoparams.cpp
 	src/renderer.cpp
 	src/main.cpp
+	src/utils.cpp
 
  	utmconvert/utmconvert.cpp
 )
@@ -103,9 +105,9 @@ set(GPX2VIDEO_SOURCES
 # 
 # QT
 #
-SET(QT_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets)
+#SET(QT_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets)
 SET(OIIO_LIBRARIES OpenImageIO) ## OpenImageIO_Util)
-SET(CMAKE_AUTOMOC ON)
+#SET(CMAKE_AUTOMOC ON)
 
 #
 # LINK

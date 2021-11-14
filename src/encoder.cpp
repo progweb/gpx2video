@@ -79,7 +79,7 @@ void EncoderSettings::setAudioBitrate(const int64_t rate) {
 }
 
 
-Encoder::Encoder(const EncoderSettings &settings) :
+Encoder::Encoder(const EncoderSettings &settings) : 
 	settings_(settings),
 	open_(false),
 	fmt_ctx_(NULL),
@@ -358,13 +358,15 @@ bool Encoder::writeAudio(FramePtr frame, AVRational time) {
 
 	AVFrame *encoded_frame = (AVFrame *) frame->data();
 
+	(void) time;
+
 	success = writeAVFrame(encoded_frame, audio_codec_, audio_stream_);
 
 	av_frame_free(&encoded_frame);
 
 	frame->setData(NULL);
 
-	return true;
+	return success;
 }
 
 

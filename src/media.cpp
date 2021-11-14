@@ -37,6 +37,8 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 	memset(&time, 0, sizeof(time));
 	strptime(s, "%Y-%m-%dT%H:%M:%S.", &time);
 
+	time.tm_isdst = -1;
+
 	// Convert GoPro time in UTC time
 	start_time_ = timelocal(&time);
 }
