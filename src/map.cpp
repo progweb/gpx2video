@@ -10,6 +10,10 @@
 #include <unistd.h>
 #include <math.h>
 
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
+
 #include "utils.h"
 #include "log.h"
 #include "evcurl.h"
@@ -287,6 +291,8 @@ Map * Map::create(const MapSettings &settings, struct event_base *evbase) {
 
 	map = new Map(settings, evbase);
 
+	map->init();
+
 	return map;
 }
 
@@ -407,9 +413,8 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 }
 
 
-void Map::download(void) {
+void Map::init(void) {
 	int zoom;
-	int x1, y1, x2, y2;
 
 	double lat1, lon1;
 	double lat2, lon2;
@@ -419,8 +424,6 @@ void Map::download(void) {
 	Tile *tile;
 
 	log_call();
-
-	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
 
 	zoom = settings().zoom();
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
@@ -434,36 +437,75 @@ void Map::download(void) {
 	// | x1,y2 |       |       |       | x2,y2 |
 	// +-------+-------+-------+ ..... +-------+
 
-	x1 = floorf((float) Map::lon2pixel(zoom, lon1) / (float) TILESIZE);
-	y1 = floorf((float) Map::lat2pixel(zoom, lat1) / (float) TILESIZE);
+	x1_ = floorf((float) Map::lon2pixel(zoom, lon1) / (float) TILESIZE);
+	y1_ = floorf((float) Map::lat2pixel(zoom, lat1) / (float) TILESIZE);
 
-	x2 = floorf((float) Map::lon2pixel(zoom, lon2) / (float) TILESIZE);
-	y2 = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE);
+	x2_ = floorf((float) Map::lon2pixel(zoom, lon2) / (float) TILESIZE) + 1;
+	y2_ = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE) + 1;
 
-	nbr_downloads_ = 1;
-
-	for (int y=y1; y<y2; y++) {
-		for (int x=x1; x<x2; x++) {
-//			printf("URI: curl -q -o tile-%04d-%04d.png \"%s\"\n", y, x, uri.c_str());
-
-			// Download tile
+	// Build each tile
+	for (int y=y1_; y<y2_; y++) {
+		for (int x=x1_; x<x2_; x++) {
 			tile = new Tile(*this, zoom, x, y);
-			tile->download();
-		
-//			log_info("Download tile: %s", tile->uri().c_str());
-
-			// Create download task
-			// evtask = evcurl_->download(uri.c_str(), downloadComplete, this);
-			// evtask->perform();
-
 			tiles_.push_back(tile);
 		}
 	}
 }
 
 
-void Map::build(void) {
+void Map::download(void) {
+	std::string uri;
+
 	log_call();
+
+	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
+
+	nbr_downloads_ = 1;
+
+	// Build & download each tile
+	for (Tile *tile : tiles_) {
+//		log_info("Download tile: %s", tile->uri().c_str());
+
+		tile->download();
+	}
+}
+
+
+void Map::build(void) {
+	int width, height;
+
+	log_call();
+
+	log_notice("Build map...");
+
+	// Map size
+	width = (x2_ - x1_) * TILESIZE;
+	height = (y2_ - y1_) * TILESIZE;
+
+	// Create map
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
+	OIIO::ImageSpec outspec(width, height, 3);
+	outspec.tile_width = TILESIZE;
+	outspec.tile_height = TILESIZE;
+	out->open("map.png", outspec);
+
+	// Collapse echo tile
+	for (Tile *tile : tiles_) {
+		std::string filename = tile->path() + "/" + tile->filename();
+
+		// Open tile image
+		auto img = OIIO::ImageInput::open(filename.c_str());
+		const OIIO::ImageSpec& spec = img->spec();
+		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+
+		OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
+		img->read_image(type, buf.localpixels());
+
+		// Image over
+		out->write_tile((tile->x() - x1_) * TILESIZE, (tile->y() - y1_) * TILESIZE, 0, type, buf.localpixels());
+	}
+
+	out->close();
 }
 
 
@@ -507,8 +549,13 @@ void Map::downloadComplete(Map::Tile &tile) {
 
 	map.nbr_downloads_++;
 
-	if (map.nbr_downloads_ > (unsigned int) map.tiles_.size())
-		printf("\n");
+	if (map.nbr_downloads_ <= (unsigned int) map.tiles_.size())
+		return;
+
+	printf("\n");
+
+	// Now build full map
+	map.build();
 }
 
 
@@ -537,6 +584,11 @@ Map& Map::Tile::map(void) {
 
 const std::string& Map::Tile::uri(void) {
 	return uri_;
+}
+
+
+const std::string& Map::Tile::path(void) {
+	return path_;
 }
 
 

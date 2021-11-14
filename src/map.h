@@ -73,7 +73,14 @@ public:
 		virtual ~Tile();
 
 		Map& map(void);
+		int x(void) {
+			return x_;
+		}
+		int y(void) {
+			return y_;
+		}
 		const std::string& uri(void);
+		const std::string& path(void);
 		const std::string& filename(void);
 		bool download(void);
 
@@ -121,6 +128,8 @@ protected:
 private:
 	Map(const MapSettings &settings, struct event_base *evbase);
 
+	void init(void);
+
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
@@ -130,6 +139,8 @@ private:
 	struct event_base *evbase_;
 
 	EVCurl *evcurl_;
+
+	int x1_, y1_, x2_, y2_;
 
 	unsigned int nbr_downloads_;
 	std::list<Tile *> tiles_;
