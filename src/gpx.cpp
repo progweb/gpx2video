@@ -190,7 +190,7 @@ void GPX::dump(void) {
 	std::cout << "  Source      : " << trk_->src()   .getValue() << std::endl;
 	std::cout << "  Type        : " << trk_->type()  .getValue() << std::endl;
 	std::cout << "  Number      : " << trk_->number().getValue() << std::endl;
-	std::cout << "  Segments:   : " << trk_->trksegs().list().size()  << std::endl << std::endl;
+	std::cout << "  Segments:   : " << trk_->trksegs().list().size()  << std::endl;
 }
 
 
@@ -286,5 +286,49 @@ const GPXData GPX::retrieveData(const int64_t &timecode) {
 	printf("FAILURE\n");
 
 	return data;
+}
+
+
+bool GPX::getBoundingBox(GPXData::point *p1, GPXData::point *p2) {
+	GPXData::point p;
+
+	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	p1->valid = false;
+	p2->valid = false;
+
+	for (std::list<gpx::TRKSeg*>::iterator iter2 = trksegs.begin(); iter2 != trksegs.end(); ++iter2) {
+		gpx::TRKSeg *seg = (*iter2);
+
+		std::list<gpx::WPT*> &trkpts = seg->trkpts().list();
+
+		for (std::list<gpx::WPT*>::iterator iter3 = trkpts.begin(); iter3 != trkpts.end(); ++iter3) {
+			gpx::WPT *wpt = (*iter3);
+
+			GPXData::convert(&p, wpt);
+
+			if (!p.valid)
+				continue;
+
+			if (!p1->valid)
+				*p1 = p;
+			if (!p2->valid)
+				*p2 = p;
+
+			// top-left bounding box
+			if (p.lon < p1->lon)
+				p1->lon = p.lon;
+			if (p.lat > p1->lat)
+				p1->lat = p.lat;
+
+			// bottom-right bounding box
+			if (p.lon > p2->lon)
+				p2->lon = p.lon;
+			if (p.lat < p2->lat)
+				p2->lat = p.lat;
+		}
+	}
+
+	return (p1->valid && p2->valid);
 }
 

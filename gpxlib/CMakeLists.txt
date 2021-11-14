@@ -1,4 +1,10 @@
 #
+# CONFIGURATION
+#
+remove_definitions(-Wall)
+add_definitions(-Wno-unused-parameter)
+
+#
 # LIBS
 # 
 FIND_PACKAGE(EXPAT REQUIRED)

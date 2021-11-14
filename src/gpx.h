@@ -80,6 +80,7 @@ public:
 	void setStartTime(time_t start_time);
 	void setStartTime(struct tm *start_time);
 	const GPXData retrieveData(const int64_t &timecode);
+	bool getBoundingBox(GPXData::point *p1, GPXData::point *p2);
 
 protected:
 	bool parse(void);
