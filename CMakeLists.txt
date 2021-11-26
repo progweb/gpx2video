@@ -90,6 +90,7 @@ set(GPX2VIDEO_HEADERS
 # SOURCES
 #
 set(GPX2VIDEO_SOURCES
+	src/log.c
 	src/evcurl.c
 	src/evcurl.cpp
 	src/gpx.cpp

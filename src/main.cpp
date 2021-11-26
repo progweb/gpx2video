@@ -12,6 +12,8 @@
 #include <iostream>
 #include <string>
 
+#include "log.h"
+#include "version.h"
 #include "evcurl.h"
 #include "gpx.h"
 #include "map.h"
@@ -37,6 +39,8 @@ static const struct option options[] = {
 };
 
 static void print_usage(const std::string &name) {
+	log_call();
+
 	std::cout << "Usage: " << name << "%s [-v] -m=media -g=gpx -o=output command" << std::endl;
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
@@ -62,6 +66,8 @@ static void print_usage(const std::string &name) {
 static void print_map_list(const std::string &name) {
 	int i;
 
+	log_call();
+
 	std::cout << "Map list: " << name << std::endl;
 
 	for (i=MapSettings::SourceNull; i != MapSettings::SourceCount; i++) {
@@ -86,6 +92,8 @@ static void process(int with_video,
 
 	// GPX input file
 	GPXData data;
+
+	log_call();
 
 	GPX *gpx = GPX::open(gpxfile);
 
@@ -233,10 +241,13 @@ static void process(int with_video,
 }; // namespace gpx2video
 
 
+
 class GPX2Video {
 public:
-	GPX2Video(struct event_base *evbase) :
-		evbase_(evbase) {
+	GPX2Video(struct event_base *evbase) 
+		: evbase_(evbase) {
+		log_call();
+
 		setLogLevel(AV_LOG_INFO);
 
 		av_register_all();
@@ -246,22 +257,36 @@ public:
 	}
 
 	~GPX2Video() {
+		log_call();
+
 		// Signal event
 		event_del(ev_signal_);
 		event_free(ev_signal_);
 	}
 
 	void setLogLevel(int level) {
+		log_call();
+
 		av_log_set_level(level);
+	}
+
+	static const std::string version(void) {
+		log_call();
+
+		return GPX2VIDEO_VERSION;
 	}
 
 	int parseCommandLine(int argc, char *argv[]);
 
 	void exec(void) {
+		log_call();
+
 		loop();
 	}
 
 	void abort(void) {
+		log_call();
+
 		loopexit();
 	}
 
@@ -278,16 +303,18 @@ protected:
 
 		(void) kind;
 
+		log_call();
+
 		s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
 
 		if (s != sizeof(struct signalfd_siginfo)) {
-//			log_error("Read signal message failure");
+			log_error("Read signal message failure");
 			goto sighandler_error;
 		}
 
 		switch (fdsi.ssi_signo) {
 		case SIGCHLD:
-//			log_debug("SIGCHLD signal received");
+			log_debug("SIGCHLD signal received");
 
 			for (;;) {
 				pid = waitpid((pid_t)(-1), &status, WNOHANG | WUNTRACED | WCONTINUED);
@@ -295,48 +322,48 @@ protected:
 				if (pid <= 0)
 					goto sighandler_error;
 
-//				log_warn("Received SIGCHLD from PID: %d", pid);
+				log_warn("Received SIGCHLD from PID: %d", pid);
 
-//				if (WIFEXITED(status))
-//					log_info("Completed and returned %d", WEXITSTATUS(status));
-//				else if (WIFSIGNALED(status))
-//					log_info("Killed due to the signal %d", WTERMSIG(status));
-//				else if (WIFSTOPPED(status))
-//					log_info("Stopped by %d and returned %d", WSTOPSIG(status), WEXITSTATUS(status));
-//				else if (WIFCONTINUED(status)) {
-//					log_debug("Child continue");
-//					continue;
-//				}
+				if (WIFEXITED(status))
+					log_info("Completed and returned %d", WEXITSTATUS(status));
+				else if (WIFSIGNALED(status))
+					log_info("Killed due to the signal %d", WTERMSIG(status));
+				else if (WIFSTOPPED(status))
+					log_info("Stopped by %d and returned %d", WSTOPSIG(status), WEXITSTATUS(status));
+				else if (WIFCONTINUED(status)) {
+					log_debug("Child continue");
+					continue;
+				}
 			}
 
 			break;
 
 		case SIGINT:
-//			log_error("SIGINT %d", fdsi.ssi_pid);
+			log_error("SIGINT %d", fdsi.ssi_pid);
 			app->abort();
 			break;
 
 		case SIGPIPE:
-//			log_error("SIGPIPE signal received (fd: %d)", fdsi.ssi_fd);
+			log_error("SIGPIPE signal received (fd: %d)", fdsi.ssi_fd);
 			break;
 
 		case SIGTERM:
-//			log_error("SIGTERM %d", fdsi.ssi_pid);
+			log_error("SIGTERM %d", fdsi.ssi_pid);
 			app->abort();
 			break;
 
 		case SIGQUIT:
-//			log_error("SIGQUIT %d", fdsi.ssi_pid);
+			log_error("SIGQUIT %d", fdsi.ssi_pid);
 			app->abort();
 			break;
 
 		default:
-//			log_error("UNDEFINED");
+			log_error("UNDEFINED");
 			break;
 		}
 
 sighandler_error:
-//		app->loopexit();
+		app->loopexit();
 		return;
 	}
 
@@ -344,6 +371,8 @@ sighandler_error:
 		int sfd = -1;
 	
 		sigset_t mask;
+
+		log_call();
 
 		// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
 		sigemptyset(&mask);
@@ -355,14 +384,14 @@ sighandler_error:
 		sigaddset(&mask, SIGCHLD);
 
 		if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1) {
-//			log_error("sigprocmask failure");
+			log_error("sigprocmask failure");
 			return;
 		}
 
 		sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
 
 		if (sfd == -1) {
-//			log_error("signalfd failure");
+			log_error("signalfd failure");
 			return;
 		}
 
@@ -372,11 +401,15 @@ sighandler_error:
 
 
 	void loop(void) {
+		log_call();
+
 		event_base_loop(evbase_, 0);
 	}
 
 
 	void loopexit(void) {
+		log_call();
+
 		event_base_loopexit(evbase_, NULL);
 	}
 
@@ -403,6 +436,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	const std::string name(argv[0]);
 
+	log_call();
+
 	for (;;) {
 		index = 0;
 		option = getopt_long(argc, argv, "hqvd:m:g:o:s:z:l", gpx2video::options, &index);
@@ -421,7 +456,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			return -1;
 			break;
 		case 'l':
-			return -1;
+			return -2;
 			break;
 		case 'z':
 			map_zoom = atoi(optarg);
@@ -513,6 +548,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 
 int main(int argc, char *argv[], char *envp[]) {
+	int result;
+
 	struct event_base *evbase;
 
 	const std::string name(argv[0]);
@@ -522,6 +559,9 @@ int main(int argc, char *argv[], char *envp[]) {
 	// Event loop
 	evbase = event_base_new();
 
+	// Baner info
+	log_notice("gpx2video v%s", GPX2Video::version().c_str());
+
 	// Init
 	GPX2Video app(evbase);
 
@@ -529,10 +569,12 @@ int main(int argc, char *argv[], char *envp[]) {
 	app.setLogLevel(AV_LOG_INFO);
 
 	// Parse args
-	if (app.parseCommandLine(argc, argv) < 0) {
+	result = app.parseCommandLine(argc, argv);
+	if (result < 1)
+		gpx2video::print_map_list(name);
+	else if (result < 0)
 		gpx2video::print_usage(name);
-		goto exit;
-	}
+	goto exit;
 
 	// Infinite loop
 	app.exec();

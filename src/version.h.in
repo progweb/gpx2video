@@ -1,21 +1,20 @@
-#ifndef __OVERLAY__VERSION_H__
-#define __OVERLAY__VERSION_H__
+#ifndef __GPX2VIDEO__VERSION_H__
+#define __GPX2VIDEO__VERSION_H__
 
+#include <string>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define OVERLAY_MAJOR ${MAJOR}
-#define OVERLAY_MINOR ${MINOR}
-#define OVERLAY_PATCH ${PATCH}
-#define OVERLAY_VERSION "${VERSION}"
-
-const char * overlay_get_version(void);
+#define GPX2VIDEO_MAJOR ${MAJOR}
+#define GPX2VIDEO_MINOR ${MINOR}
+#define GPX2VIDEO_PATCH ${PATCH}
+#define GPX2VIDEO_VERSION "${VERSION}"
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // __OVERLAY__VERSION_H__
+#endif // __GPX2VIDEO__VERSION_H__
 
