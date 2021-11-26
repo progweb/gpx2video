@@ -244,6 +244,32 @@ static void process(int with_video,
 
 class GPX2Video {
 public:
+	class Settings {
+	public:
+		Settings(std::string gpx_file="", 
+			std::string media_file="", 
+			std::string output_file="",
+			int map_zoom=8, 
+			int max_duration_ms=0,
+			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap)
+			: gpx_file_(gpx_file)
+			, media_file_(media_file)
+			, output_file_(output_file)
+			, map_zoom_(map_zoom)
+			, max_duration_ms_(max_duration_ms)
+			, map_source_(map_source) {
+		}
+
+	private:
+		std::string gpx_file_;
+		std::string media_file_;
+		std::string output_file_;
+
+		int map_zoom_;
+		int max_duration_ms_;
+		MapSettings::Source map_source_;
+	};
+
 	GPX2Video(struct event_base *evbase) 
 		: evbase_(evbase) {
 		log_call();
@@ -274,6 +300,14 @@ public:
 		log_call();
 
 		return GPX2VIDEO_VERSION;
+	}
+
+	Settings& settings(void) {
+		return settings_;
+	}
+
+	void setSettings(const Settings &settings) {
+		settings_ = settings;
 	}
 
 	int parseCommandLine(int argc, char *argv[]);
@@ -416,6 +450,8 @@ sighandler_error:
 private:
 	struct event *ev_signal_;
 	struct event_base *evbase_;
+
+	Settings settings_;
 };
 
 
@@ -535,6 +571,16 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	}
 	else
 		with_video = 1;
+
+	// Save app settings
+	setSettings(GPX2Video::Settings(
+		gpxfile,
+		mediafile,
+		outputfile,
+		map_zoom,
+		max_duration_ms,
+		map_source)
+	);
 
 	if (mediafile != NULL)
 		free(mediafile);
