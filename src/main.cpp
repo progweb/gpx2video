@@ -1,9 +1,18 @@
 #include <string.h>
 #include <getopt.h>
+#include <signal.h>
+#include <errno.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <sys/prctl.h>
+#include <sys/types.h>
+#include <sys/resource.h>
+#include <sys/signalfd.h>
 
 #include <iostream>
 #include <string>
 
+#include "evcurl.h"
 #include "gpx.h"
 #include "map.h"
 #include "decoder.h"
@@ -13,8 +22,7 @@
 
 namespace gpx2video {
 
-
-static struct option options[] = {
+static const struct option options[] = {
 	{ "help",       no_argument,       0, 'h' },
 	{ "verbose",    no_argument,       0, 'v' },
 	{ "quiet",      no_argument,       0, 'q' },
@@ -28,8 +36,7 @@ static struct option options[] = {
 	{ 0,            0,                 0, 0 }
 };
 
-
-static void printUsage(const std::string &name) {
+static void print_usage(const std::string &name) {
 	std::cout << "Usage: " << name << "%s [-v] -m=media -g=gpx -o=output command" << std::endl;
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
@@ -52,8 +59,7 @@ static void printUsage(const std::string &name) {
 	return;
 }
 
-
-static void printMapList(const std::string &name) {
+static void print_map_list(const std::string &name) {
 	int i;
 
 	std::cout << "Map list: " << name << std::endl;
@@ -69,26 +75,6 @@ static void printMapList(const std::string &name) {
 		std::cout << "\t- " << i << ":\t" << name << " " << copyright << std::endl;
 	}
 }
-
-
-static void init(void) {
-	av_register_all();
-	avcodec_register_all();
-}
-
-
-namespace log {
-
-static void setLevel(int level) {
-	av_log_set_level(level);
-}
-
-
-static void quiet(bool enable) {
-	(void) enable;
-}
-
-}; // namespace log
 
 
 static void process(int with_video, 
@@ -247,7 +233,160 @@ static void process(int with_video,
 }; // namespace gpx2video
 
 
-int main(int argc, char *argv[], char *envp[]) {
+class GPX2Video {
+public:
+	GPX2Video(struct event_base *evbase) :
+		evbase_(evbase) {
+		setLogLevel(AV_LOG_INFO);
+
+		av_register_all();
+		avcodec_register_all();
+
+		init();
+	}
+
+	~GPX2Video() {
+		// Signal event
+		event_del(ev_signal_);
+		event_free(ev_signal_);
+	}
+
+	void setLogLevel(int level) {
+		av_log_set_level(level);
+	}
+
+	int parseCommandLine(int argc, char *argv[]);
+
+	void exec(void) {
+		loop();
+	}
+
+	void abort(void) {
+		loopexit();
+	}
+
+protected:
+	static void sighandler(int sfd, short kind, void *data) {
+		pid_t pid;
+
+		int status;
+
+		ssize_t s;
+		struct signalfd_siginfo fdsi;
+
+		GPX2Video *app = (GPX2Video *) data;
+
+		(void) kind;
+
+		s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
+
+		if (s != sizeof(struct signalfd_siginfo)) {
+//			log_error("Read signal message failure");
+			goto sighandler_error;
+		}
+
+		switch (fdsi.ssi_signo) {
+		case SIGCHLD:
+//			log_debug("SIGCHLD signal received");
+
+			for (;;) {
+				pid = waitpid((pid_t)(-1), &status, WNOHANG | WUNTRACED | WCONTINUED);
+
+				if (pid <= 0)
+					goto sighandler_error;
+
+//				log_warn("Received SIGCHLD from PID: %d", pid);
+
+//				if (WIFEXITED(status))
+//					log_info("Completed and returned %d", WEXITSTATUS(status));
+//				else if (WIFSIGNALED(status))
+//					log_info("Killed due to the signal %d", WTERMSIG(status));
+//				else if (WIFSTOPPED(status))
+//					log_info("Stopped by %d and returned %d", WSTOPSIG(status), WEXITSTATUS(status));
+//				else if (WIFCONTINUED(status)) {
+//					log_debug("Child continue");
+//					continue;
+//				}
+			}
+
+			break;
+
+		case SIGINT:
+//			log_error("SIGINT %d", fdsi.ssi_pid);
+			app->abort();
+			break;
+
+		case SIGPIPE:
+//			log_error("SIGPIPE signal received (fd: %d)", fdsi.ssi_fd);
+			break;
+
+		case SIGTERM:
+//			log_error("SIGTERM %d", fdsi.ssi_pid);
+			app->abort();
+			break;
+
+		case SIGQUIT:
+//			log_error("SIGQUIT %d", fdsi.ssi_pid);
+			app->abort();
+			break;
+
+		default:
+//			log_error("UNDEFINED");
+			break;
+		}
+
+sighandler_error:
+//		app->loopexit();
+		return;
+	}
+
+	void init(void) {
+		int sfd = -1;
+	
+		sigset_t mask;
+
+		// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
+		sigemptyset(&mask);
+		sigaddset(&mask, SIGHUP);
+		sigaddset(&mask, SIGINT);
+		sigaddset(&mask, SIGPIPE);
+		sigaddset(&mask, SIGTERM);
+		sigaddset(&mask, SIGQUIT);
+		sigaddset(&mask, SIGCHLD);
+
+		if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1) {
+//			log_error("sigprocmask failure");
+			return;
+		}
+
+		sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
+
+		if (sfd == -1) {
+//			log_error("signalfd failure");
+			return;
+		}
+
+		ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
+		event_add(ev_signal_, NULL);
+	}
+
+
+	void loop(void) {
+		event_base_loop(evbase_, 0);
+	}
+
+
+	void loopexit(void) {
+		event_base_loopexit(evbase_, NULL);
+	}
+
+private:
+	struct event *ev_signal_;
+	struct event_base *evbase_;
+};
+
+
+int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
@@ -264,8 +403,6 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	const std::string name(argv[0]);
 
-	(void) envp;
-
 	for (;;) {
 		index = 0;
 		option = getopt_long(argc, argv, "hqvd:m:g:o:s:z:l", gpx2video::options, &index);
@@ -275,18 +412,16 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		switch (option) {
 		case 0:
-			printf("option %s", gpx2video::options[index].name);
+			std::cout << "option " << gpx2video::options[index].name;
 			if (optarg)
-				printf(" with arg %s", optarg);
-			printf("\n");
+				std::cout << " with arg " << optarg;
+			std::cout << std::endl;
 			break;
 		case 'h':
-			gpx2video::printUsage(name);
-			goto exit;
+			return -1;
 			break;
 		case 'l':
-			gpx2video::printMapList(name);
-			goto exit;
+			return -1;
 			break;
 		case 'z':
 			map_zoom = atoi(optarg);
@@ -295,7 +430,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			map_source = (MapSettings::Source) atoi(optarg);
 			break;
 		case 'q':
-			gpx2video::log::quiet(true);
+//			GPX2Video::setLogQuiet(true);
 			break;
 		case 'v':
 			verbose++;
@@ -305,31 +440,27 @@ int main(int argc, char *argv[], char *envp[]) {
 			break;
 		case 'm':
 			if (mediafile != NULL) {
-				printf("'media' option is already set!\n");
-				gpx2video::printUsage(name);
-				goto exit;
+				std::cout << "'media' option is already set!" << std::endl;
+				return -1;
 			}
 			mediafile = strdup(optarg);
 			break;
 		case 'g':
 			if (gpxfile != NULL) {
-				printf("'gpx' option is already set!\n");
-				gpx2video::printUsage(name);
-				goto exit;
+				std::cout << "'gpx' option is already set!" << std::endl;
+				return -1;
 			}
 			gpxfile = strdup(optarg);
 			break;
 		case 'o':
 			if (outputfile != NULL) {
-				printf("'output' option is already set!\n");
-				gpx2video::printUsage(name);
-				goto exit;
+				std::cout << "'output' option is already set!" << std::endl;
+				return -1;
 			}
 			outputfile = strdup(optarg);
 			break;
 		default:
-			gpx2video::printUsage(name);
-			goto exit;
+			return -1;
 			break;
 		}
 	}
@@ -342,20 +473,17 @@ int main(int argc, char *argv[], char *envp[]) {
 	// Check required options
 	if (mediafile == NULL) {
 		std::cout << name << ": option '--media' is required" << std::endl;
-		gpx2video::printUsage(name);
-		goto exit;
+		return -1;
 	}
 
 	if (gpxfile == NULL) {
 		std::cout << name << ": option '--gpx' is required" << std::endl;
-		gpx2video::printUsage(name);
-		goto exit;
+		return -1;
 	}
 
 	if (outputfile == NULL) {
 		std::cout << name << ": option '--output' is required" << std::endl;
-		gpx2video::printUsage(name);
-		goto exit;
+		return -1;
 	}
 
 	if (argc == 1) {
@@ -367,31 +495,53 @@ int main(int argc, char *argv[], char *envp[]) {
 		}
 		else {
 			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;
-			gpx2video::printUsage(name);
-			goto exit;
+			return -1;
 		}
 	}
 	else
 		with_video = 1;
 
-	av_log_set_level(AV_LOG_INFO);
-
-	// Init
-	gpx2video::init();
-
-	// Logs
-	gpx2video::log::setLevel(AV_LOG_INFO);
-
-	// Process
-	gpx2video::process(with_video, mediafile, gpxfile, outputfile, max_duration_ms, map_source, map_zoom);
-
-exit:
 	if (mediafile != NULL)
 		free(mediafile);
 	if (gpxfile != NULL)
 		free(gpxfile);
 	if (outputfile != NULL)
 		free(outputfile);
+
+	return 0;
+}
+
+
+int main(int argc, char *argv[], char *envp[]) {
+	struct event_base *evbase;
+
+	const std::string name(argv[0]);
+
+	(void) envp;
+
+	// Event loop
+	evbase = event_base_new();
+
+	// Init
+	GPX2Video app(evbase);
+
+	// Logs
+	app.setLogLevel(AV_LOG_INFO);
+
+	// Parse args
+	if (app.parseCommandLine(argc, argv) < 0) {
+		gpx2video::print_usage(name);
+		goto exit;
+	}
+
+	// Infinite loop
+	app.exec();
+
+//	// Process
+//	gpx2video::process(with_video, mediafile, gpxfile, outputfile, max_duration_ms, map_source, map_zoom);
+
+exit:
+	event_base_free(evbase);
 
 	exit(EXIT_SUCCESS);
 }
