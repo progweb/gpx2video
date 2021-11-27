@@ -158,8 +158,8 @@ GPX * GPX::open(const std::string &filename) {
 	GPX *gpx = NULL;
 
 	gpx::GPX *root;
-	gpx::ReportCerr report;
-	gpx::Parser parser(&report);
+//	gpx::ReportCerr report;
+	gpx::Parser parser(NULL); //&report);
 
     std::ifstream stream = std::ifstream(filename);
 

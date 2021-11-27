@@ -1,3 +1,7 @@
+#include <iostream>
+#include <cstdlib>
+#include <string>
+
 #include <string.h>
 #include <getopt.h>
 #include <signal.h>
@@ -5,12 +9,10 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <sys/prctl.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/signalfd.h>
-
-#include <iostream>
-#include <string>
 
 #include "log.h"
 #include "version.h"
@@ -100,22 +102,22 @@ static void process(int with_video,
 	gpx->dump();
 
 
-	// Build map
-	GPXData::point p1, p2;
-	gpx->getBoundingBox(&p1, &p2);
-
-	MapSettings mapSettings;
-	mapSettings.setSource(map_source);
-	mapSettings.setZoom(map_zoom);
-	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
-
-	Map *map = Map::create(mapSettings);
-	map->download();
-//	map->drawTrack(gpx);
-//	map->setPosition();
-
-	if (!with_video)
-		return;
+//	// Build map
+//	GPXData::point p1, p2;
+//	gpx->getBoundingBox(&p1, &p2);
+//
+//	MapSettings mapSettings;
+//	mapSettings.setSource(map_source);
+//	mapSettings.setZoom(map_zoom);
+//	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+//
+//	Map *map = Map::create(mapSettings);
+//	map->download();
+////	map->drawTrack(gpx);
+////	map->setPosition();
+//
+//	if (!with_video)
+//		return;
 
 	// Probe input media
 	MediaContainer *container = Decoder::probe(mediafile);
@@ -260,6 +262,18 @@ public:
 			, map_source_(map_source) {
 		}
 
+		const std::string& gpxfile(void) const {
+			return gpx_file_;
+		}
+		
+		const MapSettings::Source& mapsource(void) const {
+			return  map_source_;
+		}
+
+		const int& mapzoom(void) const {
+			return map_zoom_;
+		}
+
 	private:
 		std::string gpx_file_;
 		std::string media_file_;
@@ -312,8 +326,36 @@ public:
 
 	int parseCommandLine(int argc, char *argv[]);
 
+	void buildMap(void) {
+		// GPX input file
+		GPXData data;
+
+		log_call();
+
+		// Open GPX file
+		GPX *gpx = GPX::open(settings().gpxfile());
+
+		gpx->dump();
+
+		// Create map bounding box
+		GPXData::point p1, p2;
+		gpx->getBoundingBox(&p1, &p2);
+
+		MapSettings mapSettings;
+		mapSettings.setSource(settings().mapsource());
+		mapSettings.setZoom(settings().mapzoom());
+		mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+
+		Map *map = Map::create(mapSettings, evbase_);
+		map->download();
+//		map->drawTrack(gpx);
+//		map->setPosition();
+	}
+
 	void exec(void) {
 		log_call();
+
+		buildMap();
 
 		loop();
 	}
@@ -431,6 +473,12 @@ sighandler_error:
 
 		ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
 		event_add(ev_signal_, NULL);
+
+		// Create gpx2video cache directories
+		std::string path = std::getenv("HOME") + std::string("/.gpx2video");
+		::mkdir(path.c_str(), 0700);
+		path += "/cache";
+		::mkdir(path.c_str(), 0700);
 	}
 
 
@@ -616,11 +664,12 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	// Parse args
 	result = app.parseCommandLine(argc, argv);
-	if (result < 1)
+	if (result < -1)
 		gpx2video::print_map_list(name);
 	else if (result < 0)
 		gpx2video::print_usage(name);
-	goto exit;
+	if (result < 0)
+		goto exit;
 
 	// Infinite loop
 	app.exec();

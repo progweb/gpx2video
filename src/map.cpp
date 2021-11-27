@@ -1,7 +1,18 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <math.h>
 
 #include "utils.h"
+#include "log.h"
+#include "evcurl.h"
 #include "map.h"
 
 
@@ -241,24 +252,42 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 
-Map::Map(const MapSettings &settings) :
-	settings_(settings) {
+Map::Map(const MapSettings &settings, struct event_base *evbase)
+	: settings_(settings)
+	, evbase_(evbase)
+	, nbr_downloads_(0) {
+	log_call();
+
+	evcurl_ = EVCurl::init(evbase);
+	
+	evcurl_->setOption(CURLMOPT_MAXCONNECTS, 1);
+	evcurl_->setOption(CURLMOPT_MAX_HOST_CONNECTIONS, 1);
+	evcurl_->setOption(CURLMOPT_MAX_PIPELINE_LENGTH, 1);
 }
 
 
 Map::~Map() {
+	log_call();
+
+	delete evcurl_;
 }
 
 
 const MapSettings& Map::settings() const {
+	log_call();
+
 	return settings_;
 }
 
 
-Map * Map::create(const MapSettings &settings) {
-	Map *encoder = new Map(settings);
+Map * Map::create(const MapSettings &settings, struct event_base *evbase) {
+	Map *map;
 
-	return encoder;
+	log_call();
+
+	map = new Map(settings, evbase);
+
+	return map;
 }
 
 
@@ -267,6 +296,8 @@ int Map::lat2pixel(int zoom, float lat) {
     int pixel_y;
 
     double latrad = lat * M_PI / 180.0;
+
+	log_call();
 
     lat_m = atanh(sin(latrad));
 
@@ -286,6 +317,8 @@ int Map::lon2pixel(int zoom, float lon) {
 
     double lonrad = lon * M_PI / 180.0;
 
+	log_call();
+
     // the formula is
     //
     // pixel_x = (2^zoom * TILESIZE * lon) / 2PI + (2^zoom * TILESIZE) / 2
@@ -302,6 +335,8 @@ std::string Map::buildURI(int zoom, int x, int y) {
 	int max_zoom = settings().getMaxZoom(settings().source());
 
 	std::string uri = settings().getRepoURI(settings().source());
+
+	log_call();
 
 	if (std::strstr(uri.c_str(), URI_MARKER_X)) {
 		snprintf(s, sizeof(s), "%d", x);
@@ -348,6 +383,30 @@ std::string Map::buildURI(int zoom, int x, int y) {
 }
 
 
+std::string Map::buildPath(int zoom, int x, int y) {
+	std::ostringstream stream;
+
+	(void) x;
+	(void) y;
+
+	stream << std::getenv("HOME");
+	stream << "/.gpx2video/cache/" << zoom;
+
+	return stream.str();
+}
+
+
+std::string Map::buildFilename(int zoom, int x, int y) {
+	std::ostringstream stream;
+
+	(void) zoom;
+
+	stream << "tile_" << y << "_" << x << ".png";
+
+	return stream.str();
+}
+
+
 void Map::download(void) {
 	int zoom;
 	int x1, y1, x2, y2;
@@ -357,8 +416,23 @@ void Map::download(void) {
 
 	std::string uri;
 
+	Tile *tile;
+
+	log_call();
+
+	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
+
 	zoom = settings().zoom();
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
+
+	// Tiles:
+	// +-------+-------+-------+ ..... +-------+
+	// | x1,y1 |       |       |       | x2,y1 |
+	// +-------+-------+-------+ ..... +-------+
+	// |       |       |       |       |       |
+	// +-------+-------+-------+ ..... +-------+
+	// | x1,y2 |       |       |       | x2,y2 |
+	// +-------+-------+-------+ ..... +-------+
 
 	x1 = floorf((float) Map::lon2pixel(zoom, lon1) / (float) TILESIZE);
 	y1 = floorf((float) Map::lat2pixel(zoom, lat1) / (float) TILESIZE);
@@ -366,13 +440,194 @@ void Map::download(void) {
 	x2 = floorf((float) Map::lon2pixel(zoom, lon2) / (float) TILESIZE);
 	y2 = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE);
 
+	nbr_downloads_ = 1;
+
 	for (int y=y1; y<y2; y++) {
 		for (int x=x1; x<x2; x++) {
-			uri = this->buildURI(zoom, x, y);
-		
 //			printf("URI: curl -q -o tile-%04d-%04d.png \"%s\"\n", y, x, uri.c_str());
-			printf("URI: %s\n", uri.c_str());
+
+			// Download tile
+			tile = new Tile(*this, zoom, x, y);
+			tile->download();
+		
+//			log_info("Download tile: %s", tile->uri().c_str());
+
+			// Create download task
+			// evtask = evcurl_->download(uri.c_str(), downloadComplete, this);
+			// evtask->perform();
+
+			tiles_.push_back(tile);
 		}
 	}
+}
+
+
+void Map::build(void) {
+	log_call();
+}
+
+
+void Map::draw(void) {
+	log_call();
+}
+
+
+void Map::downloadProgress(Map::Tile &tile, double dltotal, double dlnow) {
+	char buf[64];
+	const char *label = "Download tile";
+
+	Map& map = tile.map();
+
+	int percent = (dltotal > 0) ? (int) (dlnow * 100 / dltotal) : 0;
+
+	memset(buf, '.', 50);          
+	memset(buf, '#', percent / 2); 
+	buf[50] = '\0';
+
+	if (percent == 100) 
+		printf("\r  %s %d / %d [%s] DONE      ",          
+				label, map.nbr_downloads_, (unsigned int) map.tiles_.size(), buf);
+	else
+		printf("\r  %s %d / %d [%s] %3d %%",
+				label, map.nbr_downloads_, (unsigned int) map.tiles_.size(), buf, percent);
+}
+
+
+void Map::downloadComplete(Map::Tile &tile) {
+	char buf[64];
+	const char *label = "Download tile";
+
+	Map& map = tile.map();
+
+	memset(buf, '#', 50);          
+	buf[50] = '\0';
+
+	printf("\r  %s %d / %d [%s] DONE      ",          
+			label, map.nbr_downloads_, (unsigned int) map.tiles_.size(), buf);
+
+	map.nbr_downloads_++;
+
+	if (map.nbr_downloads_ > (unsigned int) map.tiles_.size())
+		printf("\n");
+}
+
+
+Map::Tile::Tile(Map &map, int zoom, int x, int y)
+	: map_(map)
+	, zoom_(zoom)
+	, x_(x)
+	, y_(y) {
+	fp_ = NULL;
+	evtaskh_ = NULL;
+
+	uri_ = map_.buildURI(zoom_, x_, y_);
+	path_ = map_.buildPath(zoom_, x_, y_);
+	filename_ = map_.buildFilename(zoom_, x_, y_);
+}
+
+
+Map::Tile::~Tile() {
+}
+
+
+Map& Map::Tile::map(void) {
+	return map_;
+}
+
+
+const std::string& Map::Tile::uri(void) {
+	return uri_;
+}
+
+
+const std::string& Map::Tile::filename(void) {
+	return filename_;
+}
+
+
+int Map::Tile::downloadDebug(CURL *curl, curl_infotype type, char *ptr, size_t size, void *userdata) {
+	(void) curl;
+	(void) type;
+	(void) userdata;
+
+	fwrite(ptr, size, 1, stdout);
+
+	return 0;
+}
+
+
+int Map::Tile::downloadProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
+	Map::Tile *tile = (Map::Tile *) clientp;
+
+	(void) ultotal;
+	(void) ulnow;
+
+	Map::downloadProgress(*tile, dltotal, dlnow);
+
+	return 0;
+}
+
+
+size_t Map::Tile::downloadWrite(char *ptr, size_t size, size_t nmemb, void *userdata) {
+	Map::Tile *tile = (Map::Tile *) userdata;
+
+	if (ptr == NULL)
+		return 0;
+
+	fwrite(ptr, size, nmemb, tile->fp_);
+
+	return size * nmemb;
+}
+
+
+void Map::Tile::downloadComplete(EVCurlTask *evtaskh, CURLcode result, void *userdata) {
+	Map::Tile *tile = (Map::Tile *) userdata;
+
+	log_call();
+
+	(void) evtaskh;
+	(void) result;
+
+	std::fclose(tile->fp_);
+
+	tile->fp_ = NULL;
+	tile->evtaskh_ = NULL;
+
+	Map::downloadComplete(*tile);
+}
+
+
+bool Map::Tile::download(void) {
+	std::string output = path_ + "/" + filename_;
+
+	log_call();
+
+	::mkdir(path_.c_str(), 0700);
+
+	fp_ = std::fopen(output.c_str(), "w+");
+
+	if (fp_ == NULL)
+		return false;
+
+	evtaskh_ = map_.evcurl()->download(uri_.c_str(), downloadComplete, this);
+
+//	evtaskh_->setOption(CURLOPT_VERBOSE, 1L);
+//	evtaskh_->setOption(CURLOPT_DEBUGFUNCTION, downloadDebug);
+//	evtaskh_->setOption(CURLOPT_DEBUGDATA, this);
+
+	evtaskh_->setOption(CURLOPT_NOPROGRESS, 0L);
+	evtaskh_->setOption(CURLOPT_PROGRESSFUNCTION, downloadProgress);
+	evtaskh_->setOption(CURLOPT_PROGRESSDATA, this);
+	
+	evtaskh_->setOption(CURLOPT_WRITEFUNCTION, downloadWrite);
+	evtaskh_->setOption(CURLOPT_WRITEDATA, this);
+
+	evtaskh_->setOption(CURLOPT_FOLLOWLOCATION, 1L);
+
+	evtaskh_->setHeader("User-Agent: gpx2video");
+
+	evtaskh_->perform();
+
+	return true;
 }
 
