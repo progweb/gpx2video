@@ -11,7 +11,12 @@
 #include <stdlib.h>
 #include <event2/event.h>
 
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
+
 #include "evcurl.h"
+#include "gpx.h"
 
 
 class MapSettings {
@@ -115,7 +120,7 @@ public:
 	// Draw the full map
 	void build(void);
 	// Draw track path
-	void draw(void);
+	void draw(GPX *gpx);
 
 	static void downloadProgress(Tile &tile, double dltotal, double dlnow);
 	static void downloadComplete(Tile &tile);
@@ -133,6 +138,8 @@ private:
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
+
+	void drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider=1.0);
 
 	MapSettings settings_;
 

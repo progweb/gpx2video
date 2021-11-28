@@ -347,8 +347,9 @@ public:
 		mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
 
 		Map *map = Map::create(mapSettings, evbase_);
-		map->download();
-//		map->drawTrack(gpx);
+//		map->download();
+//		map->build();
+		map->draw(gpx);
 //		map->setPosition();
 	}
 

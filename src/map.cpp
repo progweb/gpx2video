@@ -17,6 +17,7 @@
 #include "utils.h"
 #include "log.h"
 #include "evcurl.h"
+#include "gpx.h"
 #include "map.h"
 
 
@@ -485,8 +486,10 @@ void Map::build(void) {
 	// Create map
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
 	OIIO::ImageSpec outspec(width, height, 3);
+
 	outspec.tile_width = TILESIZE;
 	outspec.tile_height = TILESIZE;
+
 	out->open("map.png", outspec);
 
 	// Collapse echo tile
@@ -498,6 +501,7 @@ void Map::build(void) {
 		const OIIO::ImageSpec& spec = img->spec();
 		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
 
+		// Create tile buffer
 		OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
 		img->read_image(type, buf.localpixels());
 
@@ -509,8 +513,100 @@ void Map::build(void) {
 }
 
 
-void Map::draw(void) {
+void Map::draw(GPX *gpx) {
+	int zoom;
+	double max_speed;
+
+	GPXData data;
+
 	log_call();
+
+	log_notice("Draw track...");
+
+	zoom = settings().zoom();
+	max_speed = gpx->getMaxSpeed();
+
+	// Open map image
+	auto img = OIIO::ImageInput::open("map.png");
+	const OIIO::ImageSpec& spec = img->spec();
+	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+	OIIO::ImageBuf buf(spec);
+
+	img->read_image(type, buf.localpixels());
+	
+	// Create map buffer (with alpha channel)
+	int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+	float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+	std::string channelnames[] = { "", "", "", "A" };
+
+	OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+
+	// Draw track
+	int x = 0, y = 0;
+
+	int x_end, y_end;
+	int x_start, y_start;
+
+	gpx->retrieveFirst(data);
+
+	x_start = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+	y_start = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+
+	// Draw each WPT
+	for (gpx->retrieveFirst(data); data.valid(); gpx->retrieveNext(data)) {
+		float color[4] = { 0.0, 0.8, 0.2, 1.0 };
+
+		x = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+
+//		// Color track with speed
+//		color[0] = (data.speed() * 1.0 / max_speed);
+//		color[1] = 0.0;
+//		color[2] = ((max_speed - data.speed()) / max_speed) * 1.0;
+
+		OIIO::ImageBufAlgo::fill(outbuf, color, OIIO::ROI(x - 1, x + 1, y - 1, y + 1));
+	}
+
+	x_end = x;
+	y_end = y;
+
+	// At last, draw markers
+	drawPicto(outbuf, x_start, y_start, "./assets/marker/start.png", 0.3);
+	drawPicto(outbuf, x_end, y_end, "./assets/marker/end.png", 0.3);
+
+	// Save
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("track.png");
+	out->open("track.png", outbuf.spec());
+	out->write_image(type, outbuf.localpixels());
+	out->close();
+}
+
+
+void Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
+	bool result;
+
+	float black[4] = { 0.0, 0.0, 0.0, 0.0 };
+
+	// Open picto
+	auto img = OIIO::ImageInput::open(picto);
+	const OIIO::ImageSpec& spec = img->spec();
+	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+
+	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
+	img->read_image(type, buf.localpixels());
+
+	// Resize picto
+	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));
+	OIIO::ImageBufAlgo::resize(dst, buf);
+
+	// Marker position
+	x -= dst.spec().width / 2;
+	y -= dst.spec().height - (25 * divider);
+
+	// Image over
+	dst.specmod().x = x;
+	dst.specmod().y = y;
+	result = OIIO::ImageBufAlgo::over(map, dst, map, OIIO::ROI());
 }
 
 

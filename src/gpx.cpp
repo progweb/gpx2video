@@ -138,7 +138,9 @@ void GPXData::read(gpx::WPT *wpt) {
 	nbr_points_++;
 
 	if (nbr_points_ > 1)
-		valid_ = compute();
+		compute();
+
+	valid_ = true;
 }
 
 
@@ -236,6 +238,66 @@ void GPX::setStartTime(char *start_time) {
 }
 
 
+void GPX::retrieveFirst(GPXData &data) {
+	gpx::WPT *wpt;
+	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	data = GPXData();
+
+	iter_seg_ = trksegs.begin();
+	
+	if (iter_seg_ != trksegs.end()) {
+		gpx::TRKSeg *trkseg = (*iter_seg_);
+
+		std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
+		iter_pts_ = trkpts.begin();
+
+		if (iter_pts_ != trkpts.end()) {
+			wpt = (*iter_pts_);
+
+			data.read(wpt);
+		}
+	}
+}
+
+
+void GPX::retrieveNext(GPXData &data) {
+	gpx::WPT *wpt;
+	gpx::TRKSeg *trkseg = (*iter_seg_);
+
+	std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
+	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	// Next point
+	iter_pts_++;
+
+	if (iter_pts_ == trkpts.end()) {
+		iter_seg_++;
+
+		if (iter_seg_ == trksegs.end())
+			goto done;
+
+		trkseg = (*iter_seg_);
+
+		trkpts = trkseg->trkpts().list();
+		iter_pts_ = trkpts.begin();
+	}
+
+	if (iter_pts_ == trkpts.end())
+		goto done;
+
+	wpt = (*iter_pts_);
+
+	data.read(wpt);
+
+	return;
+
+done:
+	data = GPXData();
+	return;
+}
+
+
 const GPXData GPX::retrieveData(const int64_t &timecode) {
 	GPXData data;
 
@@ -330,5 +392,40 @@ bool GPX::getBoundingBox(GPXData::point *p1, GPXData::point *p2) {
 	}
 
 	return (p1->valid && p2->valid);
+}
+
+double GPX::getMaxSpeed(void) {
+	GPXData data;
+
+	double max_speed = 0.0;
+	double last_speed = 0.0;
+
+	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	for (std::list<gpx::TRKSeg*>::iterator iter2 = trksegs.begin(); iter2 != trksegs.end(); ++iter2) {
+		gpx::TRKSeg *seg = (*iter2);
+
+		std::list<gpx::WPT*> &trkpts = seg->trkpts().list();
+
+		for (std::list<gpx::WPT*>::iterator iter3 = trkpts.begin(); iter3 != trkpts.end(); ++iter3) {
+			gpx::WPT *wpt = (*iter3);
+
+			data.read(wpt);
+
+			if (!data.valid())
+				continue;
+
+			// Skip incoherent values
+			if (abs(last_speed - data.speed()) > 10)
+				continue;
+
+			if (data.speed() > max_speed)
+				max_speed = data.speed();
+
+			last_speed = data.speed();
+		}
+	}
+
+	return max_speed;
 }
 

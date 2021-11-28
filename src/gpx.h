@@ -27,6 +27,10 @@ public:
 
 	void dump(void);
 
+	const struct point& position(void) const {
+		return cur_pt_;
+	}
+
 	const bool& valid(void) const {
 		return valid_;
 	}
@@ -81,6 +85,10 @@ public:
 	void setStartTime(struct tm *start_time);
 	const GPXData retrieveData(const int64_t &timecode);
 	bool getBoundingBox(GPXData::point *p1, GPXData::point *p2);
+	double getMaxSpeed(void);
+
+	void retrieveFirst(GPXData &data);
+	void retrieveNext(GPXData &data);
 
 protected:
 	bool parse(void);
@@ -93,6 +101,9 @@ private:
 	gpx::GPX *root_;
 
 	gpx::TRK *trk_;
+
+	std::list<gpx::WPT*>::iterator iter_pts_;
+	std::list<gpx::TRKSeg*>::iterator iter_seg_;
 
 	time_t start_time_;
 };
