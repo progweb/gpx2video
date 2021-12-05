@@ -257,8 +257,9 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 
-Map::Map(const MapSettings &settings, struct event_base *evbase)
-	: settings_(settings)
+Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
+	: GPX2Video::Task(app)
+	, settings_(settings)
 	, evbase_(evbase)
 	, nbr_downloads_(0) {
 	log_call();
@@ -285,12 +286,12 @@ const MapSettings& Map::settings() const {
 }
 
 
-Map * Map::create(const MapSettings &settings, struct event_base *evbase) {
+Map * Map::create(GPX2Video &app, const MapSettings &settings, struct event_base *evbase) {
 	Map *map;
 
 	log_call();
 
-	map = new Map(settings, evbase);
+	map = new Map(app, settings, evbase);
 
 	map->init();
 
@@ -485,7 +486,7 @@ void Map::build(void) {
 
 	// Create map
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
-	OIIO::ImageSpec outspec(width, height, 3);
+	OIIO::ImageSpec outspec(width, height, 4); // 3);
 
 	outspec.tile_width = TILESIZE;
 	outspec.tile_height = TILESIZE;
@@ -505,11 +506,21 @@ void Map::build(void) {
 		OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
 		img->read_image(type, buf.localpixels());
 
+		// Add alpha channel
+		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+		float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+		std::string channelnames[] = { "", "", "", "A" };
+
+		OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+
 		// Image over
-		out->write_tile((tile->x() - x1_) * TILESIZE, (tile->y() - y1_) * TILESIZE, 0, type, buf.localpixels());
+		out->write_tile((tile->x() - x1_) * TILESIZE, (tile->y() - y1_) * TILESIZE, 0, type, outbuf.localpixels());
 	}
 
 	out->close();
+
+	// Done
+	complete();
 }
 
 
@@ -530,22 +541,24 @@ void Map::draw(GPX *gpx) {
 	auto img = OIIO::ImageInput::open("map.png");
 	const OIIO::ImageSpec& spec = img->spec();
 	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
-	OIIO::ImageBuf buf(spec);
+	OIIO::ImageBuf outbuf(spec);
 
-	img->read_image(type, buf.localpixels());
+	img->read_image(type, outbuf.localpixels());
 	
-	// Create map buffer (with alpha channel)
-	int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
-	float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
-	std::string channelnames[] = { "", "", "", "A" };
-
-	OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+//	// Create map buffer (with alpha channel)
+//	int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+//	float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+//	std::string channelnames[] = { "", "", "", "A" };
+//
+//	OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
 
 	// Draw track
 	int x = 0, y = 0;
 
 	int x_end, y_end;
 	int x_start, y_start;
+
+	int thickness = 2;
 
 	gpx->retrieveFirst(data);
 
@@ -582,10 +595,10 @@ void Map::draw(GPX *gpx) {
 }
 
 
-void Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
+bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
 	bool result;
 
-	float black[4] = { 0.0, 0.0, 0.0, 0.0 };
+//	float black[4] = { 0.0, 0.0, 0.0, 0.0 };
 
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
@@ -607,6 +620,8 @@ void Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double
 	dst.specmod().x = x;
 	dst.specmod().y = y;
 	result = OIIO::ImageBufAlgo::over(map, dst, map, OIIO::ROI());
+
+	return result;
 }
 
 
@@ -650,7 +665,7 @@ void Map::downloadComplete(Map::Tile &tile) {
 
 	printf("\n");
 
-	// Now build full map
+	// Now build full map)
 	map.build();
 }
 
@@ -752,6 +767,13 @@ bool Map::Tile::download(void) {
 
 	::mkdir(path_.c_str(), 0700);
 
+	// Check if file exists in cache
+	if (access(output.c_str(), F_OK) == 0) {
+		Map::downloadComplete(*this);
+		return true;
+	}
+	
+	// Open output tile file
 	fp_ = std::fopen(output.c_str(), "w+");
 
 	if (fp_ == NULL)

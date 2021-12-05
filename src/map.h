@@ -15,62 +15,14 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "log.h"
 #include "evcurl.h"
 #include "gpx.h"
+#include "mapsettings.h"
+#include "gpx2video.h"
 
 
-class MapSettings {
-public:
-	enum Source {
-		SourceNull,
-
-		SourceOpenStreetMap,
-		SourceOpenStreetMapRenderer,
-		SourceOpenAerialMap,
-		SourceMapsForFree,
-		SourceOpenCycleMap,
-		SourceOpenTopoMap,
-		SourceOSMPublicTransport,
-		SourceGoogleStreet,
-		SourceGoogleSatellite,
-		SourceGoogleHybrid,
-		SourceVirtualEarthStreet,
-		SourceVirtualEarthSatellite,
-		SourceVirtualEarthHybrid,
-		SourceOSMCTrails,
-
-		SourceCount
-	};
-
-	MapSettings();
-	virtual ~MapSettings();
-
-	const Source& source(void) const;
-	void setSource(const Source &source);
-
-	const int& zoom(void) const;
-	void setZoom(const int &zoom);
-
-	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
-	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
-
-	static const std::string getFriendlyName(const Source &source);
-	static const std::string getCopyright(const Source &source);
-	static int getMinZoom(const Source &source);
-	static int getMaxZoom(const Source &source);
-	static const std::string getRepoURI(const Source &source);
-
-private:
-	int zoom_;
-
-	enum Source source_;
-
-	double lat1_, lat2_;
-	double lon1_, lon2_;
-};
-
-
-class Map {
+class Map : public GPX2Video::Task {
 public:
 	class Tile {
 	public:
@@ -108,17 +60,19 @@ public:
 
 	virtual ~Map();
 
-	static Map * create(const MapSettings& settings, struct event_base *evbase);
+	static Map * create(GPX2Video &app, const MapSettings& settings, struct event_base *evbase);
 
 	const MapSettings& settings() const;
 
 	static int lat2pixel(int zoom, float lat);
 	static int lon2pixel(int zoom, float lon);
 
-	// Download each tule
-	void download(void);
-	// Draw the full map
-	void build(void);
+	void run(void) {
+		log_call();
+
+		download();
+	}
+
 	// Draw track path
 	void draw(GPX *gpx);
 
@@ -130,8 +84,14 @@ protected:
 		return evcurl_;
 	}
 
+	// Download each tule
+	void download(void);
+	// Draw the full map
+	void build(void);
+
 private:
-	Map(const MapSettings &settings, struct event_base *evbase);
+//	Map(const MapSettings &settings, struct event_base *evbase);
+	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
 
 	void init(void);
 
@@ -139,7 +99,7 @@ private:
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
-	void drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider=1.0);
+	bool drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider=1.0);
 
 	MapSettings settings_;
 

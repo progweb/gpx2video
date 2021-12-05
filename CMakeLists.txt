@@ -99,6 +99,7 @@ set(GPX2VIDEO_SOURCES
 	src/decoder.cpp
 	src/encoder.cpp
 	src/frame.cpp
+	src/gpx2video.cpp
 	src/map.cpp
 	src/media.cpp
 	src/stream.cpp
