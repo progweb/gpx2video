@@ -31,11 +31,22 @@ public:
 	MapSettings();
 	virtual ~MapSettings();
 
+	const int& x(void) const;
+	const int& y(void) const;
+	void setPosition(const int &x, const int &y);
+
+	const int& width(void) const;
+	const int& height(void) const;
+	void setSize(const int &width, const int &height);
+
 	const Source& source(void) const;
 	void setSource(const Source &source);
 
 	const int& zoom(void) const;
 	void setZoom(const int &zoom);
+
+	const double& divider(void) const;
+	void setDivider(const double &divier);
 
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
@@ -47,7 +58,11 @@ public:
 	static const std::string getRepoURI(const Source &source);
 
 private:
+	int x_, y_;
+	int width_, height_;
+
 	int zoom_;
+	double divider_;
 
 	enum Source source_;
 

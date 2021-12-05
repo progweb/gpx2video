@@ -9,21 +9,42 @@
 #include <OpenImageIO/imagebufalgo.h>
 
 #include "gpx.h"
+#include "map.h"
 #include "frame.h"
+#include "media.h"
+#include "decoder.h"
+#include "encoder.h"
+#include "gpx2video.h"
 
 
-class Renderer {
+class Renderer : public GPX2Video::Task {
 public:
 	virtual ~Renderer();
 
-	static Renderer * create(void);
+	static Renderer * create(GPX2Video &app, Map *map=NULL);
+
+	void run(void);
 
 	void draw(FramePtr frame, const GPXData &data);
 
 private:
-	Renderer();
+	GPX2Video &app_;
+	Map *map_;
 
-	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
+	GPX *gpx_;
+	MediaContainer *container_;
+	Decoder *decoder_audio_;
+	Decoder *decoder_video_;
+	Encoder *encoder_;
+
+	int64_t frame_time_ = 0;
+
+	Renderer(GPX2Video &app, Map *map);
+
+	void init(void);
+
+	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
+//	void drawMap(OIIO::ImageBuf *frame, int x, int y, int width, int height, double divider=1.0);
 };
 
 #endif

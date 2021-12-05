@@ -9,7 +9,6 @@
 #include <list>
 
 #include <stdlib.h>
-#include <event2/event.h>
 
 #include <OpenImageIO/imageio.h>
 #include <OpenImageIO/imagebuf.h>
@@ -76,6 +75,9 @@ public:
 	// Draw track path
 	void draw(GPX *gpx);
 
+	// Render map
+	void render(OIIO::ImageBuf *frame, const GPXData &data);
+
 	static void downloadProgress(Tile &tile, double dltotal, double dlnow);
 	static void downloadComplete(Tile &tile);
 
@@ -83,6 +85,9 @@ protected:
 	EVCurl *evcurl(void) {
 		return evcurl_;
 	}
+
+	void init(void);
+	void load(void);
 
 	// Download each tule
 	void download(void);
@@ -93,24 +98,30 @@ private:
 //	Map(const MapSettings &settings, struct event_base *evbase);
 	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
 
-	void init(void);
-
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider=1.0);
 
+	GPX2Video &app_;
 	MapSettings settings_;
 
 	struct event_base *evbase_;
 
 	EVCurl *evcurl_;
 
+	OIIO::ImageBuf *mapbuf_;
+
+	// Bounding box
 	int x1_, y1_, x2_, y2_;
 
 	unsigned int nbr_downloads_;
 	std::list<Tile *> tiles_;
+
+	// Start & end position
+	int x_end_, y_end_;
+	int x_start_, y_start_;
 };
 
 #endif

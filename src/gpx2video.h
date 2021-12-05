@@ -19,12 +19,14 @@ public:
 		Settings(std::string gpx_file="", 
 			std::string media_file="", 
 			std::string output_file="",
+			double map_factor=1.0,
 			int map_zoom=8, 
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap)
 			: gpx_file_(gpx_file)
 			, media_file_(media_file)
 			, output_file_(output_file)
+			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
 			, map_source_(map_source) {
@@ -34,12 +36,28 @@ public:
 			return gpx_file_;
 		}
 		
+		const std::string& mediafile(void) const {
+			return media_file_;
+		}
+
+		const std::string& outputfile(void) const {
+			return output_file_;
+		}
+
 		const MapSettings::Source& mapsource(void) const {
 			return  map_source_;
 		}
 
+		const double& mapfactor(void) const {
+			return map_factor_;
+		}
+
 		const int& mapzoom(void) const {
 			return map_zoom_;
+		}
+
+		const int& maxDuration(void) const {
+			return max_duration_ms_;
 		}
 
 	private:
@@ -47,6 +65,7 @@ public:
 		std::string media_file_;
 		std::string output_file_;
 
+		double map_factor_;
 		int map_zoom_;
 		int max_duration_ms_;
 		MapSettings::Source map_source_;
@@ -127,17 +146,8 @@ protected:
 
 	void init(void);
 
-	void loop(void) {
-		log_call();
-
-		event_base_loop(evbase_, 0);
-	}
-
-	void loopexit(void) {
-		log_call();
-
-		event_base_loopexit(evbase_, NULL);
-	}
+	void loop(void);
+	void loopexit(void);
 
 private:
 	struct event *ev_signal_;

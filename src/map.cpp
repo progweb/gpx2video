@@ -18,6 +18,8 @@
 #include "log.h"
 #include "evcurl.h"
 #include "gpx.h"
+#include "oiioutils.h"
+#include "videoparams.h"
 #include "map.h"
 
 
@@ -42,10 +44,47 @@
 
 
 MapSettings::MapSettings() {
+	x_ = 0;
+	y_ = 0;
+	width_ = 320;
+	height_ = 240;
+	divider_ = 2.0;
 }
 
 
 MapSettings::~MapSettings() {
+}
+
+
+const int& MapSettings::x(void) const {
+	return x_;
+}
+
+
+const int& MapSettings::y(void) const {
+	return y_;
+}
+
+
+void MapSettings::setPosition(const int &x, const int &y) {
+	x_ = x;
+	y_ = y;
+}
+
+
+const int& MapSettings::width(void) const {
+	return width_;
+}
+
+
+const int& MapSettings::height(void) const {
+	return height_;
+}
+
+
+void MapSettings::setSize(const int &width, const int &height) {
+	width_ = width;
+	height_ = height;
 }
 
 
@@ -66,6 +105,16 @@ const int& MapSettings::zoom(void) const {
 
 void MapSettings::setZoom(const int &zoom) {
 	zoom_ = zoom;
+}
+
+
+const double& MapSettings::divider(void) const {
+	return divider_;
+}
+
+
+void MapSettings::setDivider(const double &divider) {
+	divider_ = divider;
 }
 
 
@@ -259,10 +308,13 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
 	: GPX2Video::Task(app)
+	, app_(app)
 	, settings_(settings)
 	, evbase_(evbase)
 	, nbr_downloads_(0) {
 	log_call();
+
+	mapbuf_ = NULL;
 
 	evcurl_ = EVCurl::init(evbase);
 	
@@ -274,6 +326,9 @@ Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
 
 Map::~Map() {
 	log_call();
+
+	if (mapbuf_ != NULL)
+		delete mapbuf_;
 
 	delete evcurl_;
 }
@@ -468,7 +523,8 @@ void Map::download(void) {
 	for (Tile *tile : tiles_) {
 //		log_info("Download tile: %s", tile->uri().c_str());
 
-		tile->download();
+		if (tile->download() == false)
+			log_error("Download failure!");
 	}
 }
 
@@ -545,13 +601,6 @@ void Map::draw(GPX *gpx) {
 
 	img->read_image(type, outbuf.localpixels());
 	
-//	// Create map buffer (with alpha channel)
-//	int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
-//	float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
-//	std::string channelnames[] = { "", "", "", "A" };
-//
-//	OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
-
 	// Draw track
 	int x = 0, y = 0;
 
@@ -595,8 +644,118 @@ void Map::draw(GPX *gpx) {
 }
 
 
+void Map::load(void) {
+	if (mapbuf_)
+		return;
+
+	int x = 0, y = 0;
+
+	int thickness = 3;
+
+	int zoom = settings().zoom();
+	double divider = settings().divider();
+
+	GPXData data;
+
+	GPX *gpx = GPX::open(app_.settings().gpxfile());
+
+	// Open map
+	auto img = OIIO::ImageInput::open("map.png");
+	const OIIO::ImageSpec& spec = img->spec();
+	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
+	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
+
+	OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	img->read_image(type, buf.localpixels());
+
+	// Resize map
+	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
+
+	// Draw track
+	gpx->retrieveFirst(data);
+
+	x_start_ = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+	y_start_ = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+
+	x_start_ *= divider;
+	y_start_ *= divider;
+
+	// Draw each WPT
+	for (gpx->retrieveFirst(data); data.valid(); gpx->retrieveNext(data)) {
+		float color[4] = { 0.2, 0.4, 0.9, 1.0 }; // #669df6
+
+		x = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+
+		x *= divider;
+		y *= divider;
+
+		OIIO::ImageBufAlgo::fill(*mapbuf_, color, OIIO::ROI(x - thickness, x + thickness, y - thickness, y + thickness));
+	}
+
+	x_end_ = x;
+	y_end_ = y;
+}
+
+void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
+	int x = settings().x(); // 1700;
+	int y = settings().y(); // 900;
+	int width = settings().width(); // 800;
+	int height = settings().height(); // 500;
+
+	int posX, posY;
+	int offsetX, offsetY;
+
+	int zoom = settings().zoom();
+	double divider = settings().divider();
+
+	int offsetMaxX = ((x2_ - x1_) * TILESIZE * divider) - width;
+	int offsetMaxY = ((y2_ - y1_) * TILESIZE * divider) - height;
+
+	// Load map buffer
+	this->load();
+
+	// Center map
+	posX = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+	posY = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+
+	posX *= divider;
+	posY *= divider;
+
+	offsetX = posX - (width / 2);
+	offsetY = posY - (height / 2);
+
+	if (offsetX > offsetMaxX)
+		offsetX = offsetMaxX; 
+	if (offsetY > offsetMaxY)
+		offsetY = offsetMaxY; 
+
+	// Background
+	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
+	OIIO::ImageBufAlgo::fill(*frame, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
+
+	// Image over
+	mapbuf_->specmod().x = x - offsetX;
+	mapbuf_->specmod().y = y - offsetY;
+	OIIO::ImageBufAlgo::over(*frame, *mapbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
+
+	// Draw track
+	// ...
+
+	// Draw picto
+	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, "./assets/marker/start.png", 0.3);
+	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, "./assets/marker/end.png", 0.3);
+	
+	drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, "./assets/marker/position.png", 0.3);
+}
+
+
 bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
 	bool result;
+
+	int width = settings().width();
+	int height = settings().height();
 
 //	float black[4] = { 0.0, 0.0, 0.0, 0.0 };
 
@@ -619,7 +778,8 @@ bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double
 	// Image over
 	dst.specmod().x = x;
 	dst.specmod().y = y;
-	result = OIIO::ImageBufAlgo::over(map, dst, map, OIIO::ROI());
+	result = OIIO::ImageBufAlgo::over(map, dst, map, 
+		OIIO::ROI(settings().x(), settings().x() + width, settings().y(), settings().y() + height));
 
 	return result;
 }
@@ -737,6 +897,16 @@ size_t Map::Tile::downloadWrite(char *ptr, size_t size, size_t nmemb, void *user
 	if (ptr == NULL)
 		return 0;
 
+	std::string output = tile->path_ + "/" + tile->filename_;
+
+	// Open output tile file
+	if (tile->fp_ == NULL) {
+		tile->fp_ = std::fopen(output.c_str(), "w+");
+
+		if (tile->fp_ == NULL)
+			return 0;
+	}
+
 	fwrite(ptr, size, nmemb, tile->fp_);
 
 	return size * nmemb;
@@ -761,6 +931,8 @@ void Map::Tile::downloadComplete(EVCurlTask *evtaskh, CURLcode result, void *use
 
 
 bool Map::Tile::download(void) {
+	struct stat st;
+
 	std::string output = path_ + "/" + filename_;
 
 	log_call();
@@ -769,16 +941,16 @@ bool Map::Tile::download(void) {
 
 	// Check if file exists in cache
 	if (access(output.c_str(), F_OK) == 0) {
-		Map::downloadComplete(*this);
-		return true;
+		// Check file content
+		stat(output.c_str(), &st);
+
+		if (st.st_size > 0) {
+			Map::downloadComplete(*this);
+			return true;
+		}
 	}
 	
-	// Open output tile file
-	fp_ = std::fopen(output.c_str(), "w+");
-
-	if (fp_ == NULL)
-		return false;
-
+	// Download
 	evtaskh_ = map_.evcurl()->download(uri_.c_str(), downloadComplete, this);
 
 //	evtaskh_->setOption(CURLOPT_VERBOSE, 1L);

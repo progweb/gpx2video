@@ -12,6 +12,7 @@ extern "C" {
 
 #include "log.h"
 #include "map.h"
+#include "renderer.h"
 #include "gpx2video.h"
 
 
@@ -42,6 +43,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
+	std::cout << "\t- f, --map-factor       : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t- s, --map-source       : Map source" << std::endl;
 	std::cout << "\t- z, --map-zoom         : Map zoom" << std::endl;
 	std::cout << "\t- l, --map-list         : Dump supported map list" << std::endl;
@@ -76,10 +78,15 @@ static void print_map_list(const std::string &name) {
 }
 
 
-//static void process(int with_video, 
-//	const std::string &mediafile, const std::string &gpxfile, 
-//	const std::string &outputfile,
-//	int max_duration_ms, MapSettings::Source map_source, int map_zoom) {
+//static void process(GPX2Video &app) {
+//	int with_video = 1;
+//	const std::string &mediafile = app.settings().mediafile();
+//	const std::string &gpxfile = app.settings().gpxfile();
+//	const std::string &outputfile = app.settings().outputfile();
+//	int max_duration_ms = app.settings().maxDuration();
+//	MapSettings::Source map_source = app.settings().mapsource();
+//	int map_zoom = app.settings().mapzoom();
+//
 //	// Video utc start time
 //	time_t start_time;
 //
@@ -159,7 +166,7 @@ static void print_map_list(const std::string &name) {
 //	encoder->open();
 //
 //	// Renderer
-//	Renderer *renderer = Renderer::create();
+//	Renderer *renderer = Renderer::create(app);
 //
 //	/**
 //	 * Choose fps from command line (or from input stream
@@ -244,6 +251,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int map_zoom = 12;
 	int max_duration_ms = 5 * 1000; // By default 5 seconds
 
+	double map_factor = 1.0;
+
 	MapSettings::Source map_source = MapSettings::SourceOpenStreetMap;
 
 	char *gpxfile = NULL;
@@ -256,7 +265,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	for (;;) {
 		index = 0;
-		option = getopt_long(argc, argv, "hqvd:m:g:o:s:z:l", gpx2video::options, &index);
+		option = getopt_long(argc, argv, "hqvd:m:g:o:f:s:z:l", gpx2video::options, &index);
 
 		if (option == -1) 
 			break;
@@ -273,6 +282,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			break;
 		case 'l':
 			return -2;
+			break;
+		case 'f':
+			map_factor = strtod(optarg, NULL);
 			break;
 		case 'z':
 			map_zoom = atoi(optarg);
@@ -357,6 +369,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		gpxfile,
 		mediafile,
 		outputfile,
+		map_factor,
 		map_zoom,
 		max_duration_ms,
 		map_source)
@@ -369,7 +382,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	if (outputfile != NULL)
 		free(outputfile);
 
-	return 0;
+	return with_video;
 }
 
 
@@ -377,6 +390,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	int result;
 
 	Map *map = NULL;
+	Renderer *renderer = NULL;
 
 	struct event_base *evbase;
 
@@ -405,16 +419,23 @@ int main(int argc, char *argv[], char *envp[]) {
 	if (result < 0)
 		goto exit;
 
-	// Create gpx2video tasks
+	// Create gpx2video map task
 	map = app.buildMap();
 
 	app.append(map);
+
+	// Create gpx2video renderer task
+	if (result == 1) {
+		renderer = Renderer::create(app, map);
+
+		app.append(renderer);
+	}
 
 	// Infinite loop
 	app.exec();
 
 //	// Process
-//	gpx2video::process(with_video, mediafile, gpxfile, outputfile, max_duration_ms, map_source, map_zoom);
+//	gpx2video::process(app);
 
 exit:
 	event_base_free(evbase);

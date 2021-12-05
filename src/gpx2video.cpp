@@ -89,8 +89,11 @@ Map * GPX2Video::buildMap(void) {
 	gpx->getBoundingBox(&p1, &p2);
 
 	MapSettings mapSettings;
+	mapSettings.setPosition(1700, 900);
+	mapSettings.setSize(800, 500);
 	mapSettings.setSource(settings().mapsource());
 	mapSettings.setZoom(settings().mapzoom());
+	mapSettings.setDivider(settings().mapfactor());
 	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
 
 	Map *map = Map::create(*this, mapSettings, evbase_);
@@ -213,3 +216,18 @@ void GPX2Video::init(void) {
 	path += "/cache";
 	::mkdir(path.c_str(), 0700);
 }
+
+
+void GPX2Video::loop(void) {
+	log_call();
+
+	event_base_loop(evbase_, 0);
+}
+
+void GPX2Video::loopexit(void) {
+	log_call();
+
+	event_base_loopexit(evbase_, NULL);
+}
+
+
