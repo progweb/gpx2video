@@ -91,6 +91,7 @@ Encoder::Encoder(const EncoderSettings &settings) :
 
 
 Encoder::~Encoder() {
+	close();
 }
 
 

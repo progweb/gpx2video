@@ -14,6 +14,7 @@ Decoder::Decoder()
 
 
 Decoder::~Decoder() {
+	close();
 }
 
 

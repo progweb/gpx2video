@@ -98,6 +98,18 @@ public:
 		GPX2Video &app_;
 	};
 
+	enum Command {
+		CommandNull,
+
+		CommandSync,
+		CommandClear,
+		CommandMap,
+		CommandTrack,
+		CommandVideo,
+
+		CommandCount
+	};
+
 	GPX2Video(struct event_base *evbase);
 	~GPX2Video();
 
@@ -106,6 +118,9 @@ public:
 
 	Settings& settings(void);
 	void setSettings(const Settings &settings);
+
+	Command& command(void);
+	void setCommand(const Command &command);
 
 	int parseCommandLine(int argc, char *argv[]);
 
@@ -168,6 +183,7 @@ private:
 	struct event *ev_signal_;
 	struct event_base *evbase_;
 
+	Command command_;
 	Settings settings_;
 
 	std::list<Task *> tasks_;

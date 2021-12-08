@@ -27,6 +27,12 @@ Renderer::Renderer(GPX2Video &app, Map *map)
 
 
 Renderer::~Renderer() {
+	if (encoder_)
+		delete encoder_;
+	if (decoder_audio_)
+		delete decoder_audio_;
+	if (decoder_video_)
+		delete decoder_video_;
 }
 
 
