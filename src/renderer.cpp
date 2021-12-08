@@ -192,7 +192,7 @@ void Renderer::draw(FramePtr frame, const GPXData &data) {
 
 	// Draw map
 	if (map_ != NULL)
-		map_->render(&frame_buffer, data); // x:1700, y:900, w:800, h:500);
+		map_->render(&frame_buffer, data); // x:1700, y:900, w:800, h:500
 
 	frame->fromImageBuf(frame_buffer);
 }
@@ -202,7 +202,6 @@ void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const
 	int w, h;
 
 	// Open picto
-//	OIIO::ImageInput *img = OIIO::ImageInput::open("./assets/picto.png");
 	auto img = OIIO::ImageInput::open(picto);
 	const OIIO::ImageSpec& spec = img->spec();
 	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
@@ -231,12 +230,12 @@ void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const
 	// Add label
 	int pt;
 	int space = h / 10;
-	pt = (h - (3 *space)) / 3;
+	pt = (h - 3 * space) / 3;
 	float white[] = { 1.0, 1.0, 1.0, 1.0 };
 	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + space + pt, label, pt, "./assets/fonts/Helvetica.ttf", white) == false)
 		fprintf(stderr, "render text error\n");
 	pt *= 2;
-	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + (pt/2) + space + pt + space, value, pt, "./assets/fonts/Helvetica.ttf", white) == false)
+	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + h - (pt/2), value, pt, "./assets/fonts/Helvetica.ttf", white) == false)
 		fprintf(stderr, "render text error\n");
 }
 
