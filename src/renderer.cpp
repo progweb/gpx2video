@@ -48,15 +48,13 @@ Renderer * Renderer::create(GPX2Video &app, Map *map) {
 void Renderer::init(void) {
 	time_t start_time;
 
-	std::string mediafile = app_.settings().mediafile();
-
 	gpx_ = GPX::open(app_.settings().gpxfile());
 
-	// Probe input media
-	container_ = Decoder::probe(mediafile);
+	// Media
+	container_ = app_.media();
 
 	// Set start time in GPX stream
-	start_time = container_->startTime();
+	start_time = container_->startTime() + container_->timeOffset();
 	gpx_->setStartTime(start_time);
 
 	// Retrieve audio & video streams
@@ -114,9 +112,13 @@ void Renderer::run(void) {
 	VideoStreamPtr video_stream = container_->getVideoStream();
 //	AudioStreamPtr audio_stream = container_->getAudioStream();
 
-	start_time = container_->startTime();
+	start_time = container_->startTime() + container_->timeOffset();
 
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
+
+	// Update start time in GPX stream
+	start_time = container_->startTime() + container_->timeOffset();
+	gpx_->setStartTime(start_time);
 
 	// Read audio data
 	frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);

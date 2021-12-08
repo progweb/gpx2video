@@ -4,6 +4,11 @@
 #include "media.h"
 
 
+MediaContainer::MediaContainer() 
+	: offset_(0) {
+}
+
+
 MediaContainer::~MediaContainer() {
 }
 
@@ -44,6 +49,16 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 }
 
 
+int MediaContainer::timeOffset(void) const {
+	return offset_;
+}
+
+
+void MediaContainer::setTimeOffset(const int& offset) {
+	offset_ = offset;
+}
+
+
 void MediaContainer::addStream(StreamPtr stream) {
 	stream->setContainer(this);
 
@@ -54,6 +69,18 @@ void MediaContainer::addStream(StreamPtr stream) {
 StreamPtr MediaContainer::getFirstStreamOfType(const AVMediaType &type) const {
 	for (StreamPtr stream : streams_) {
 		if (stream->type() == type)
+			return stream;
+	}
+
+	return NULL;
+}
+
+
+StreamPtr MediaContainer::getDataStream(const std::string &name) const {
+	(void) name;
+
+	for (StreamPtr stream : streams_) {
+		if (stream->name().find(name) != std::string::npos)
 			return stream;
 	}
 

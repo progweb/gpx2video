@@ -29,6 +29,16 @@ void Stream::setIndex(const int &index) {
 }
 
 
+const std::string& Stream::name(void) const {
+	return name_;
+}
+
+
+void Stream::setName(const std::string &name) {
+	name_ = name;
+}
+
+
 const AVMediaType& Stream::type(void) const {
 	return type_;
 }

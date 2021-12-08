@@ -4,10 +4,12 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <list>
 
 #include <unistd.h>
 
 #include "log.h"
+#include "media.h"
 #include "mapsettings.h"
 
 
@@ -101,6 +103,7 @@ public:
 	enum Command {
 		CommandNull,
 
+		CommandSource,
 		CommandSync,
 		CommandClear,
 		CommandMap,
@@ -128,6 +131,7 @@ public:
 		tasks_.push_back(task);
 	}
 
+	MediaContainer * media(void);
 	Map * buildMap(void);
 
 	void perform(bool done=false) {
@@ -185,6 +189,8 @@ private:
 
 	Command command_;
 	Settings settings_;
+
+	MediaContainer *container_;
 
 	std::list<Task *> tasks_;
 };

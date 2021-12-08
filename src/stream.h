@@ -35,6 +35,9 @@ public:
 	const int& index(void) const;
 	void setIndex(const int &index);
 
+	const std::string& name(void) const;
+	void setName(const std::string &name);
+
 	const AVMediaType& type(void) const;
 	void setType(const AVMediaType &type);
 
@@ -46,6 +49,7 @@ public:
 
 private:
 	int index_;
+	std::string name_;
 
 	MediaContainer *container_;
 

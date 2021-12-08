@@ -106,6 +106,7 @@ set(GPX2VIDEO_SOURCES
 	src/audioparams.cpp
 	src/videoparams.cpp
 	src/renderer.cpp
+	src/timesync.cpp
 	src/main.cpp
 	src/utils.cpp
 

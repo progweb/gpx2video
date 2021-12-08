@@ -29,7 +29,8 @@ extern "C" {
 
 
 GPX2Video::GPX2Video(struct event_base *evbase) 
-	: evbase_(evbase) {
+	: evbase_(evbase)
+	, container_(NULL) {
 	log_call();
 
 	setLogLevel(AV_LOG_INFO);
@@ -68,8 +69,20 @@ GPX2Video::Settings& GPX2Video::settings(void) {
 	return settings_;
 }
 
+
 void GPX2Video::setSettings(const GPX2Video::Settings &settings) {
 	settings_ = settings;
+}
+
+
+MediaContainer * GPX2Video::media(void) {
+	std::string mediafile = settings().mediafile();
+	
+	// Probe input media
+	if (container_ == NULL)
+		container_ = Decoder::probe(mediafile);
+
+	return container_;
 }
 
 

@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <algorithm>
 
 #include "ffmpegutils.h"
 #include "decoder.h"
@@ -20,6 +21,7 @@ Decoder::~Decoder() {
 
 MediaContainer * Decoder::probe(const std::string &filename) {
 	int result;
+	std::string name;
 	std::string start_time;
 
 	unsigned int i;
@@ -62,6 +64,16 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 		// Get reference to correct AVStream
 		AVStream *avstream = fmt_ctx->streams[i];
 		
+		// Get stream name
+		const AVDictionaryEntry *entry = av_dict_get(avstream->metadata, "handler_name", NULL, 0);
+	
+		if ((entry != NULL) && (entry->value != NULL))
+			name = entry->value;
+		else
+			name = "";
+
+		name.erase(std::remove(name.begin(), name.end(), 0xb), name.end());
+
 		// Find decoder for this stream
 		const AVCodec *decoder = avcodec_find_decoder(avstream->codecpar->codec_id);
 
@@ -143,6 +155,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 			stream->setType(avstream->codecpar->codec_type);
 		}
 
+		stream->setName(name);
 		stream->setIndex(avstream->index);
 		stream->setTimeBase(avstream->time_base);
 		stream->setDuration(avstream->duration);

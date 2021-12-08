@@ -13,6 +13,7 @@ extern "C" {
 #include "log.h"
 #include "map.h"
 #include "renderer.h"
+#include "timesync.h"
 #include "gpx2video.h"
 
 
@@ -132,7 +133,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			return -1;
 			break;
 		case 'l':
-			return -2;
+			setCommand(GPX2Video::CommandSource);
+			return 0;
 			break;
 		case 'f':
 			map_factor = strtod(optarg, NULL);
@@ -246,6 +248,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	Map *map = NULL;
 	Renderer *renderer = NULL;
+	TimeSync *timesync = NULL;
 
 	struct event_base *evbase;
 
@@ -272,21 +275,52 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 	}
 
-	if (app.command() == GPX2Video::CommandMap) {
+	switch (app.command()) {
+	case GPX2Video::CommandSource:
 		gpx2video::print_map_list(name);
 		goto exit;
-	}
+		break;
 
-	// Create gpx2video map task
-	map = app.buildMap();
+	case GPX2Video::CommandSync:
+		// Create gpx2video timesync task
+		timesync = TimeSync::create(app);
+		app.append(timesync);
+		break;
 
-	app.append(map);
+	case GPX2Video::CommandClear:
+		log_notice("Not yet implemented");
+		goto exit;
+		break;
 
-	// Create gpx2video renderer task
-	if (app.command() == GPX2Video::CommandVideo) {
+	case GPX2Video::CommandMap:
+		// Create gpx2video map task
+		map = app.buildMap();
+		app.append(map);
+		break;
+
+	case GPX2Video::CommandTrack:
+		log_notice("Not yet implemented");
+		goto exit;
+		break;
+
+	case GPX2Video::CommandVideo:
+		// Create gpx2video timesync task
+		timesync = TimeSync::create(app);
+		app.append(timesync);
+
+		// Create gpx2video map task
+		map = app.buildMap();
+		app.append(map);
+
+		// Create gpx2video renderer task
 		renderer = Renderer::create(app, map);
-
 		app.append(renderer);
+		break;
+
+	default:
+		log_notice("Command not supported");
+		goto exit;
+		break;
 	}
 
 	// Infinite loop
@@ -297,6 +331,8 @@ exit:
 		delete map;
 	if (renderer)
 		delete renderer;
+	if (timesync)
+		delete timesync;
 
 	event_base_free(evbase);
 

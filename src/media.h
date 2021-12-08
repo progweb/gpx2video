@@ -16,6 +16,7 @@ extern "C" {
 
 class MediaContainer {
 public:
+	MediaContainer();
 	virtual ~MediaContainer();
 
 	const std::string& filename(void) const;
@@ -24,14 +25,19 @@ public:
 	time_t startTime(void) const;
 	void setStartTime(const std::string &start_time);
 
+	int timeOffset(void) const;
+	void setTimeOffset(const int& offset);
+
 	void addStream(StreamPtr stream);
 
 	StreamPtr getFirstStreamOfType(const AVMediaType &type) const;
+	StreamPtr getDataStream(const std::string &name) const;
 
 	AudioStreamPtr getAudioStream(void);
 	VideoStreamPtr getVideoStream(void);
 
 private:
+	int offset_;
 	time_t start_time_;
 	std::string filename_;
 
