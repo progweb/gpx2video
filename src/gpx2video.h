@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <string>
 
+#include <unistd.h>
+
 #include "log.h"
 #include "mapsettings.h"
 
@@ -114,8 +116,16 @@ public:
 	Map * buildMap(void);
 
 	void perform(bool done=false) {
+		int32_t info;
+
 		log_call();
 
+		info = (int32_t) done;
+
+		write(pipe_out_, &info, sizeof(info));
+	}
+
+	void run(bool done) {
 		if (done && !tasks_.empty())
 			tasks_.pop_front();
 
@@ -143,6 +153,7 @@ public:
 
 protected:
 	static void sighandler(int sfd, short kind, void *data);
+	static void pipehandler(int sfd, short kind, void *data);
 
 	void init(void);
 
@@ -150,6 +161,10 @@ protected:
 	void loopexit(void);
 
 private:
+	int pipe_in_;
+	int pipe_out_;
+
+	struct event *ev_pipe_;
 	struct event *ev_signal_;
 	struct event_base *evbase_;
 

@@ -179,7 +179,30 @@ sighandler_error:
 }
 
 
+void GPX2Video::pipehandler(int sfd, short kind, void *data) {
+	int32_t info;
+
+	size_t bytes;
+
+	GPX2Video *app = (GPX2Video *) data;
+
+	log_call();
+
+	(void) sfd;
+	(void) kind;
+
+	bytes = read(app->pipe_in_, &info, sizeof(info));
+
+	(void) bytes;
+
+	app->run((bool) info);
+}
+
+
 void GPX2Video::init(void) {
+	int error;
+
+	int fds[2];
 	int sfd = -1;
 
 	sigset_t mask;
@@ -209,6 +232,19 @@ void GPX2Video::init(void) {
 
 	ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
 	event_add(ev_signal_, NULL);
+
+	// Create pipe to schedule tasks
+	error = pipe(fds);
+
+	if (error == -1) {
+		log_error("Unable to create pipe");
+		return;
+	}
+
+	pipe_in_ = fds[0];
+	pipe_out_ = fds[1];
+	ev_pipe_ = event_new(evbase_, pipe_in_, EV_READ | EV_PERSIST, pipehandler, this);
+	event_add(ev_pipe_, NULL);
 
 	// Create gpx2video cache directories
 	std::string path = std::getenv("HOME") + std::string("/.gpx2video");
