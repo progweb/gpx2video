@@ -28,6 +28,7 @@ static const struct option options[] = {
 	{ "gpx",        required_argument, 0, 'g' },
 	{ "output",     required_argument, 0, 'o' },
 	{ "map-source", required_argument, 0, 's' },
+	{ "map-factor", required_argument, 0, 'f' },
 	{ "map-zoom",   required_argument, 0, 'z' },
 	{ "map-list",   no_argument,       0, 'l' },
 	{ 0,            0,                 0, 0 }
