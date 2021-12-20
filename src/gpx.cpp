@@ -15,7 +15,6 @@
 #include "gpx.h"
 
 
-
 void show(gpx::Node &node, unsigned width)
 {
 	std::string value(width, ' ');
@@ -43,7 +42,8 @@ GPXData::GPXData()
 	, duration_(0)
 	, distance_(0)
 	, speed_(0) 
-	, grade_(0) {
+	, grade_(0) 
+	, cadence_(0) {
 }
 
 
@@ -132,6 +132,24 @@ void GPXData::read(gpx::WPT *wpt) {
 	if (!pt.valid)
 		return;
 
+	// Extensions
+	gpx::Node *extensions = wpt->extensions().getElements().front();
+
+	for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
+		iter != extensions->getElements().end(); ++iter) {
+		gpx::Node *node = (*iter);
+
+		std::string name = node->getName();
+
+		if (name.find("atemp") != std::string::npos)
+			temperature_ = std::stod(node->getValue());
+		else if (name.find("cad") != std::string::npos)
+			cadence_ = std::stoi(node->getValue());
+		else if (name.find("hr") != std::string::npos)
+			heartrate_ = std::stoi(node->getValue());
+	}
+
+	// Delta
 	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
 	memcpy(&cur_pt_, &pt, sizeof(cur_pt_));
 

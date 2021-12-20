@@ -55,6 +55,18 @@ public:
 		return speed_;
 	}
 
+	const double& temperature(void) const {
+		return temperature_;
+	}
+
+	const int& cadence(void) const {
+		return cadence_;
+	}
+
+	const int& heartrate(void) const {
+		return heartrate_;
+	}
+
 	static void convert(struct point *pt, gpx::WPT *wpt);
 
 protected:
@@ -69,6 +81,9 @@ protected:
 	double distance_;
 	double speed_;
 	double grade_;
+	double temperature_;
+	int heartrate_;
+	int cadence_;
 };
 
 

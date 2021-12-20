@@ -186,17 +186,25 @@ done:
 void Renderer::draw(FramePtr frame, const GPXData &data) {
 	char s[128];
 
+	int pos = 400;
+
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
 	// Draw gauges
 	sprintf(s, "%.0f%%", data.grade());
-	this->add(&frame_buffer, 50, 500, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", s, 2.5 * 64.0 / 150.0);
+	this->add(&frame_buffer, 50, pos, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", s, 2.5 * 64.0 / 150.0);
 
 	sprintf(s, "%.0f m", data.elevation());
-	this->add(&frame_buffer, 50, 700, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, 2.5);
+	this->add(&frame_buffer, 50, pos + 200, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, 2.5);
 
 	sprintf(s, "%.0f km/h", data.speed());
-	this->add(&frame_buffer, 50, 900, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", s, 2.5);
+	this->add(&frame_buffer, 50, pos + 400, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", s, 2.5);
+
+	sprintf(s, "%d tr/min", data.cadence());
+	this->add(&frame_buffer, 50, pos + 600, "./assets/picto/DataOverlay_icn_cadence.png", "CADENCE", s, 2.5);
+
+//	sprintf(s, "%d bpm", data.heartrate());
+//	this->add(&frame_buffer, 50, 1100, "./assets/picto/DataOverlay_icn_heartrate.png", "FREQ. CARDIAQUE", s, 2.5);
 
 	// Draw map
 	if (map_ != NULL)

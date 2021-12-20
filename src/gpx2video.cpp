@@ -102,7 +102,7 @@ Map * GPX2Video::buildMap(void) {
 	gpx->getBoundingBox(&p1, &p2);
 
 	MapSettings mapSettings;
-	mapSettings.setPosition(1700, 900);
+	mapSettings.setPosition(1850, 970);
 	mapSettings.setSize(800, 500);
 	mapSettings.setSource(settings().mapsource());
 	mapSettings.setZoom(settings().mapzoom());
