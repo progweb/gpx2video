@@ -103,12 +103,13 @@ public:
 	enum Command {
 		CommandNull,
 
-		CommandSource,
-		CommandSync,
-		CommandClear,
-		CommandMap,
-		CommandTrack,
-		CommandVideo,
+		CommandSource,	// Dump map source list
+		CommandSync,	// Auto sync video time with gps sensor
+		CommandExtract,	// Extract gps sensor data from video
+		CommandClear,	// Clear cache directories
+		CommandMap,		// Download & build map
+		CommandTrack,	// Download, build map & draw track
+		CommandVideo,	// Render video with telemtry overlay
 
 		CommandCount
 	};

@@ -55,11 +55,12 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
-	std::cout << "\t sync  : Synchronize GoPro stream timestamp with embedded GPS" << std::endl;
-	std::cout << "\t clear : Clear cache" << std::endl;
-	std::cout << "\t map   : Build map from gpx data" << std::endl;
-	std::cout << "\t track : Build map with track from gpx data" << std::endl;
-	std::cout << "\t video : Process video" << std::endl;
+	std::cout << "\t extract: Extract GPS sensor data from media stream" << std::endl;
+	std::cout << "\t sync   : Synchronize GoPro stream timestamp with embedded GPS" << std::endl;
+	std::cout << "\t clear  : Clear cache" << std::endl;
+	std::cout << "\t map    : Build map from gpx data" << std::endl;
+	std::cout << "\t track  : Build map with track from gpx data" << std::endl;
+	std::cout << "\t video  : Process video" << std::endl;
 
 	return;
 }
@@ -194,7 +195,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	// Check command
 	if (argc == 1) {
-		if (!strcmp(argv[0], "sync")) {
+		if (!strcmp(argv[0], "extract")) {
+			setCommand(GPX2Video::CommandExtract);
+
+			mediafile_required = true;
+		}
+		else if (!strcmp(argv[0], "sync")) {
 			setCommand(GPX2Video::CommandSync);
 
 			mediafile_required = true;
@@ -302,6 +308,12 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPX2Video::CommandSource:
 		gpx2video::print_map_list(name);
 		goto exit;
+		break;
+
+	case GPX2Video::CommandExtract:
+		// Create gpx2video timesync task
+		timesync = TimeSync::create(app);
+		app.append(timesync);
 		break;
 
 	case GPX2Video::CommandSync:

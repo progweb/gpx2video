@@ -111,7 +111,7 @@ void TimeSync::run(void) {
 			int64_t timecode_ms = timecode * av_q2d(avstream->time_base) * 1000;
 
 			// Parsing stream packet
-			parse(gpmd, packet->data, packet->size);
+			parse(gpmd, packet->data, packet->size, (app_.command() == GPX2Video::CommandExtract));
 
 			// Camera time
 			char s[128];
@@ -146,6 +146,12 @@ void TimeSync::run(void) {
 
 			n++;
 
+			// Fix ?
+			if ((app_.command() != GPX2Video::CommandExtract) && (gpmd.fix > 1)) {
+				log_notice("Video stream synchronized with success");
+				break;
+			}
+
 			if (result < 0)
 				break;
 		}
@@ -163,7 +169,7 @@ done:
 }
 
 
-void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size) {
+void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size, bool dump) {
 	int i;
 
 	size_t n;
@@ -171,21 +177,35 @@ void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size) {
 
 	int remain;
 
+	uint32_t key;
 	char string[128];
 
 	struct gpmd_data *data;
+
+#define MAKEKEY(label)		((uint32_t *) &label)[0]
+#define STR2FOURCC(s)		((s[0]<<0)|(s[1]<<8)|(s[2]<<16)|(s[3]<<24))
 
 	for (n=0; n<size; n=n+sizeof(data->header)) {
 		data = (struct gpmd_data *) (buffer + n);
 
 		data->header.count = bswap_16(data->header.count);
 
-//		printf("%c%c%c%c %c 0x%X %u %u\n", 
-//				data->header.label[0], data->header.label[1], data->header.label[2], data->header.label[3], 
-//				data->header.type, data->header.type,
-//				data->header.size, data->header.count);
+		if (dump) {
+			printf("%c%c%c%c %c 0x%X %u %u\n", 
+					data->header.label[0], data->header.label[1], data->header.label[2], data->header.label[3], 
+					data->header.type, data->header.type,
+					data->header.size, data->header.count);
+		}
 
 		len = data->header.count * data->header.size;
+
+		key = MAKEKEY(data->header);
+
+		if (key == STR2FOURCC("GPSF")) {
+			if ((data->header.type == 'L') && data->header.count) {
+				gpmd.fix = __bswap_32(data->value.u32[0]);
+			}
+		}
 
 		switch (data->header.type) {
 		case 0x00:
@@ -195,34 +215,44 @@ void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size) {
 		case 'c': // 0x63
 			memcpy(string, data->value.string, len);
 			string[len] = '\0';
-//			printf("  value: %s\n", string);
+
+			if (dump)
+				printf("  value: %s\n", string);
 			break;
 
 		case 'L': // 0x4c
 			for (i=0; i<data->header.count; i++) {
 				data->value.u32[i] = __bswap_32(data->value.u32[i]);
-//				printf("  value[%d]: %u\n", i, data->value.u32[i]);
+
+				if (dump)
+					printf("  value[%d]: %u\n", i, data->value.u32[i]);
 			}
 			break;
 
 		case 'S': // 0x53
 			for (i=0; i<data->header.count; i++) {
 				data->value.u16[i] = bswap_16(data->value.u16[i]);
-//				printf("  value[%d]: %u\n", i, data->value.u16[i]);
+
+				if (dump)
+					printf("  value[%d]: %u\n", i, data->value.u16[i]);
 			}
 			break;
 
 		case 's': // 0x73
 			for (i=0; i<data->header.count; i++) {
 				data->value.s16[i] = bswap_16(data->value.s16[i]);
-//				printf("  value: %d\n", data->value.s16[i]);
+
+				if (dump)
+					printf("  value: %d\n", data->value.s16[i]);
 			}
 			break;
 
 		case 'f': // 0x66
 			for (i=0; i<data->header.count; i++) {
 				data->value.real[i] = __bswap_32(data->value.real[i]);
-//				printf("  value: %f\n", data->value.real[i]);
+
+				if (dump)
+					printf("  value: %f\n", data->value.real[i]);
 			}
 			break;
 
@@ -243,7 +273,9 @@ void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size) {
 					);
 
 				gpmd.date = string;
-//				printf("  value: %s\n", string);
+				
+				if (dump)
+					printf("  value: %s\n", string);
 			}
 			break;
 

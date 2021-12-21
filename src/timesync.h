@@ -11,6 +11,7 @@
 
 class GPMD {
 public:
+	uint32_t fix;
 	std::string date;
 };
 
@@ -48,7 +49,7 @@ public:
 		return offset_;
 	}
 
-	static void parse(GPMD &gpmd, uint8_t *buffer, size_t size);
+	static void parse(GPMD &gpmd, uint8_t *buffer, size_t size, bool dump=false);
 
 private:
 	GPX2Video &app_;
