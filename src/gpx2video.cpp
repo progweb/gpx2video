@@ -20,6 +20,7 @@ extern "C" {
 
 #include "log.h"
 #include "version.h"
+#include "utils.h"
 #include "evcurl.h"
 #include "map.h"
 #include "decoder.h"
@@ -258,12 +259,6 @@ void GPX2Video::init(void) {
 	pipe_out_ = fds[1];
 	ev_pipe_ = event_new(evbase_, pipe_in_, EV_READ | EV_PERSIST, pipehandler, this);
 	event_add(ev_pipe_, NULL);
-
-	// Create gpx2video cache directories
-	std::string path = std::getenv("HOME") + std::string("/.gpx2video");
-	::mkdir(path.c_str(), 0700);
-	path += "/cache";
-	::mkdir(path.c_str(), 0700);
 }
 
 

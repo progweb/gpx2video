@@ -101,6 +101,7 @@ set(GPX2VIDEO_SOURCES
 	src/frame.cpp
 	src/gpx2video.cpp
 	src/map.cpp
+	src/cache.cpp
 	src/media.cpp
 	src/stream.cpp
 	src/audioparams.cpp

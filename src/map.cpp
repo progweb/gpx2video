@@ -453,7 +453,7 @@ std::string Map::buildPath(int zoom, int x, int y) {
 	(void) y;
 
 	stream << std::getenv("HOME");
-	stream << "/.gpx2video/cache/" << zoom;
+	stream << "/.gpx2video/cache/" << settings().source() << "/" << zoom;
 
 	return stream.str();
 }
@@ -937,7 +937,7 @@ bool Map::Tile::download(void) {
 
 	log_call();
 
-	::mkdir(path_.c_str(), 0700);
+	::mkpath(path_, 0700);
 
 	// Check if file exists in cache
 	if (access(output.c_str(), F_OK) == 0) {

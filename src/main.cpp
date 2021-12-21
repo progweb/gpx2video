@@ -12,6 +12,7 @@ extern "C" {
 
 #include "log.h"
 #include "map.h"
+#include "cache.h"
 #include "renderer.h"
 #include "timesync.h"
 #include "gpx2video.h"
@@ -108,9 +109,13 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	MapSettings::Source map_source = MapSettings::SourceOpenStreetMap;
 
-	char *gpxfile = NULL;
-	char *mediafile = NULL;
-	char *outputfile = NULL;
+	std::string gpxfile;
+	std::string mediafile;
+	std::string outputfile;
+
+	bool gpxfile_required = false;
+	bool mediafile_required = false;
+	bool outputfile_required = false;
 
 	const std::string name(argv[0]);
 
@@ -156,25 +161,25 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			max_duration_ms = atoi(optarg);
 			break;
 		case 'm':
-			if (mediafile != NULL) {
+			if (!mediafile.empty()) {
 				std::cout << "'media' option is already set!" << std::endl;
 				return -1;
 			}
-			mediafile = strdup(optarg);
+			mediafile = std::string(optarg);
 			break;
 		case 'g':
-			if (gpxfile != NULL) {
+			if (!gpxfile.empty()) {
 				std::cout << "'gpx' option is already set!" << std::endl;
 				return -1;
 			}
-			gpxfile = strdup(optarg);
+			gpxfile = std::string(optarg);
 			break;
 		case 'o':
-			if (outputfile != NULL) {
+			if (!outputfile.empty()) {
 				std::cout << "'output' option is already set!" << std::endl;
 				return -1;
 			}
-			outputfile = strdup(optarg);
+			outputfile = std::string(optarg);
 			break;
 		default:
 			return -1;
@@ -187,40 +192,63 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	argv += optind;
 	optind = 0;
 
-	// Check required options
-	if (mediafile == NULL) {
-		std::cout << name << ": option '--media' is required" << std::endl;
-		return -1;
-	}
-
-	if (gpxfile == NULL) {
-		std::cout << name << ": option '--gpx' is required" << std::endl;
-		return -1;
-	}
-
-	if (outputfile == NULL) {
-		std::cout << name << ": option '--output' is required" << std::endl;
-		return -1;
-	}
-
+	// Check command
 	if (argc == 1) {
-		if (!strcmp(argv[0], "sync"))
+		if (!strcmp(argv[0], "sync")) {
 			setCommand(GPX2Video::CommandSync);
-		else if (!strcmp(argv[0], "clear"))
+
+			mediafile_required = true;
+		}
+		else if (!strcmp(argv[0], "clear")) {
 			setCommand(GPX2Video::CommandClear);
-		else if (!strcmp(argv[0], "map"))
+		}
+		else if (!strcmp(argv[0], "map")) {
 			setCommand(GPX2Video::CommandMap);
-		else if (!strcmp(argv[0], "track"))
+
+			gpxfile_required = true;
+			outputfile_required = true;
+		}
+		else if (!strcmp(argv[0], "track")) {
 			setCommand(GPX2Video::CommandTrack);
-		else if (!strcmp(argv[0], "video"))
+
+			gpxfile_required = true;
+			outputfile_required = true;
+		}
+		else if (!strcmp(argv[0], "video")) {
 			setCommand(GPX2Video::CommandVideo);
+			
+			gpxfile_required = true;
+			mediafile_required = true;
+			outputfile_required = true;
+		}
 		else {
 			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;
 			return -1;
 		}
 	}
-	else
+	else {
 		setCommand(GPX2Video::CommandVideo);
+			
+		gpxfile_required = true;
+		mediafile_required = true;
+		outputfile_required = true;
+	}
+
+	// Check required options
+	if (mediafile_required && mediafile.empty()) {
+		std::cout << name << ": option '--media' is required" << std::endl;
+		return -1;
+	}
+
+	if (gpxfile_required && gpxfile.empty()) {
+		std::cout << name << ": option '--gpx' is required" << std::endl;
+		return -1;
+	}
+
+	if (outputfile_required && outputfile.empty()) {
+		std::cout << name << ": option '--output' is required" << std::endl;
+		return -1;
+	}
 
 	// Save app settings
 	setSettings(GPX2Video::Settings(
@@ -233,13 +261,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_source)
 	);
 
-	if (mediafile != NULL)
-		free(mediafile);
-	if (gpxfile != NULL)
-		free(gpxfile);
-	if (outputfile != NULL)
-		free(outputfile);
-
 	return 0;
 }
 
@@ -248,6 +269,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	int result;
 
 	Map *map = NULL;
+	Cache *cache = NULL;
 	Renderer *renderer = NULL;
 	TimeSync *timesync = NULL;
 
@@ -289,11 +311,16 @@ int main(int argc, char *argv[], char *envp[]) {
 		break;
 
 	case GPX2Video::CommandClear:
-		log_notice("Not yet implemented");
-		goto exit;
+		// Create cache task
+		cache = Cache::create(app);
+		app.append(cache);
 		break;
 
 	case GPX2Video::CommandMap:
+		// Create cache directories
+		cache = Cache::create(app);
+		app.append(cache);
+
 		// Create gpx2video map task
 		map = app.buildMap();
 		app.append(map);
@@ -305,6 +332,10 @@ int main(int argc, char *argv[], char *envp[]) {
 		break;
 
 	case GPX2Video::CommandVideo:
+		// Create cache directories
+		cache = Cache::create(app);
+		app.append(cache);
+
 		// Create gpx2video timesync task
 		timesync = TimeSync::create(app);
 		app.append(timesync);
@@ -330,6 +361,8 @@ int main(int argc, char *argv[], char *envp[]) {
 exit:
 	if (map)
 		delete map;
+	if (cache)
+		delete cache;
 	if (renderer)
 		delete renderer;
 	if (timesync)
