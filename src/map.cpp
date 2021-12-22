@@ -532,22 +532,29 @@ void Map::download(void) {
 void Map::build(void) {
 	int width, height;
 
+	std::string filename = "map.png";
+
 	log_call();
 
 	log_notice("Build map...");
+
+	// Filename is output if user builds map/track
+	if (app_.command() == GPX2Video::CommandMap) {
+		filename = app_.settings().outputfile();
+	}
 
 	// Map size
 	width = (x2_ - x1_) * TILESIZE;
 	height = (y2_ - y1_) * TILESIZE;
 
 	// Create map
-	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 	OIIO::ImageSpec outspec(width, height, 4); // 3);
 
 	outspec.tile_width = TILESIZE;
 	outspec.tile_height = TILESIZE;
 
-	out->open("map.png", outspec);
+	out->open(filename, outspec);
 
 	// Collapse echo tile
 	for (Tile *tile : tiles_) {
@@ -575,23 +582,36 @@ void Map::build(void) {
 
 	out->close();
 
+	// User requests track draw
+	if (app_.command() == GPX2Video::CommandTrack)
+		draw();
+
 	// Done
 	complete();
 }
 
 
-void Map::draw(GPX *gpx) {
+void Map::draw(void) {
 	int zoom;
-	double max_speed;
+//	double max_speed;
+
+	std::string filename = "track.png";
 
 	GPXData data;
+
+	GPX *gpx = GPX::open(app_.settings().gpxfile());
 
 	log_call();
 
 	log_notice("Draw track...");
 
 	zoom = settings().zoom();
-	max_speed = gpx->getMaxSpeed();
+//	max_speed = gpx->getMaxSpeed();
+
+	// Filename is output if user builds map/track
+	if (app_.command() == GPX2Video::CommandTrack) {
+		filename = app_.settings().outputfile();
+	}
 
 	// Open map image
 	auto img = OIIO::ImageInput::open("map.png");
@@ -607,7 +627,7 @@ void Map::draw(GPX *gpx) {
 	int x_end, y_end;
 	int x_start, y_start;
 
-	int thickness = 2;
+	int thickness = 3;
 
 	gpx->retrieveFirst(data);
 
@@ -616,7 +636,7 @@ void Map::draw(GPX *gpx) {
 
 	// Draw each WPT
 	for (gpx->retrieveFirst(data); data.valid(); gpx->retrieveNext(data)) {
-		float color[4] = { 0.0, 0.8, 0.2, 1.0 };
+		float color[4] = { 0.2, 0.4, 0.9, 1.0 }; // #669df6
 
 		x = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
 		y = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
@@ -626,7 +646,7 @@ void Map::draw(GPX *gpx) {
 //		color[1] = 0.0;
 //		color[2] = ((max_speed - data.speed()) / max_speed) * 1.0;
 
-		OIIO::ImageBufAlgo::fill(outbuf, color, OIIO::ROI(x - 1, x + 1, y - 1, y + 1));
+		OIIO::ImageBufAlgo::fill(outbuf, color, OIIO::ROI(x - thickness, x + thickness, y - thickness, y + thickness));
 	}
 
 	x_end = x;
@@ -637,10 +657,12 @@ void Map::draw(GPX *gpx) {
 	drawPicto(outbuf, x_end, y_end, "./assets/marker/end.png", 0.3);
 
 	// Save
-	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("track.png");
-	out->open("track.png", outbuf.spec());
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
+	out->open(filename, outbuf.spec());
 	out->write_image(type, outbuf.localpixels());
 	out->close();
+
+	delete gpx;
 }
 
 
@@ -698,6 +720,7 @@ void Map::load(void) {
 	y_end_ = y;
 }
 
+
 void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int x = settings().x(); // 1700;
 	int y = settings().y(); // 900;
@@ -754,11 +777,6 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
 	bool result;
 
-	int width = settings().width();
-	int height = settings().height();
-
-//	float black[4] = { 0.0, 0.0, 0.0, 0.0 };
-
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
 	const OIIO::ImageSpec& spec = img->spec();
@@ -778,8 +796,10 @@ bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double
 	// Image over
 	dst.specmod().x = x;
 	dst.specmod().y = y;
-	result = OIIO::ImageBufAlgo::over(map, dst, map, 
-		OIIO::ROI(settings().x(), settings().x() + width, settings().y(), settings().y() + height));
+	result = OIIO::ImageBufAlgo::over(map, dst, map);
+
+	if (!result)
+		log_error("ImageBufAlgo::over failure");
 
 	return result;
 }

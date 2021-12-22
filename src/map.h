@@ -73,7 +73,7 @@ public:
 	}
 
 	// Draw track path
-	void draw(GPX *gpx);
+	void draw(void);
 
 	// Render map
 	void render(OIIO::ImageBuf *frame, const GPXData &data);

@@ -339,8 +339,13 @@ int main(int argc, char *argv[], char *envp[]) {
 		break;
 
 	case GPX2Video::CommandTrack:
-		log_notice("Not yet implemented");
-		goto exit;
+		// Create cache directories
+		cache = Cache::create(app);
+		app.append(cache);
+
+		// Create gpx2video map task
+		map = app.buildMap();
+		app.append(map);
 		break;
 
 	case GPX2Video::CommandVideo:
