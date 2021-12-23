@@ -219,5 +219,6 @@ gpx2video is based on several open source libraries:
   - ffmpeg - (https://ffmpeg.org)
   - gpxlib - (http://irdvo.nl/gpxlib)
   - osm-gps-map - (http://nzjrs.github.io/osm-gps-map)
+  - cairo - (https://www.cairographics.org)
   - olive - (https://www.olivevideoeditor.org)
 

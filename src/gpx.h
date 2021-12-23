@@ -104,6 +104,7 @@ public:
 
 	void retrieveFirst(GPXData &data);
 	void retrieveNext(GPXData &data);
+	void retrieveLast(GPXData &data);
 
 protected:
 	bool parse(void);

@@ -316,6 +316,33 @@ done:
 }
 
 
+void GPX::retrieveLast(GPXData &data) {
+	gpx::WPT *wpt;
+	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	data = GPXData();
+
+	iter_seg_ = trksegs.end();
+
+	if (!trksegs.empty()) {
+		iter_seg_--;
+	
+		gpx::TRKSeg *trkseg = (*iter_seg_);
+
+		std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
+		iter_pts_ = trkpts.end();
+
+		if (!trkpts.empty()) {
+			iter_pts_--;
+
+			wpt = (*iter_pts_);
+
+			data.read(wpt);
+		}
+	}
+}
+
+
 const GPXData GPX::retrieveData(const int64_t &timecode) {
 	GPXData data;
 

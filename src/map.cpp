@@ -14,6 +14,8 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include <cairo.h>
+
 #include "utils.h"
 #include "log.h"
 #include "evcurl.h"
@@ -592,77 +594,114 @@ void Map::build(void) {
 
 
 void Map::draw(void) {
-	int zoom;
-//	double max_speed;
-
 	std::string filename = "track.png";
 
-	GPXData data;
-
-	GPX *gpx = GPX::open(app_.settings().gpxfile());
-
 	log_call();
-
-	log_notice("Draw track...");
-
-	zoom = settings().zoom();
-//	max_speed = gpx->getMaxSpeed();
 
 	// Filename is output if user builds map/track
 	if (app_.command() == GPX2Video::CommandTrack) {
 		filename = app_.settings().outputfile();
 	}
 
-	// Open map image
-	auto img = OIIO::ImageInput::open("map.png");
-	const OIIO::ImageSpec& spec = img->spec();
-	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
-	OIIO::ImageBuf outbuf(spec);
+	log_notice("Draw track...");
 
-	img->read_image(type, outbuf.localpixels());
-	
-	// Draw track
-	int x = 0, y = 0;
+	// Load map
+	load();
 
-	int x_end, y_end;
-	int x_start, y_start;
+	// Create output image buffer
+	OIIO::ImageBuf buf(mapbuf_->spec());
 
-	int thickness = 3;
+	// Draw map
+	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
 
-	gpx->retrieveFirst(data);
-
-	x_start = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-	y_start = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
-
-	// Draw each WPT
-	for (gpx->retrieveFirst(data); data.valid(); gpx->retrieveNext(data)) {
-		float color[4] = { 0.2, 0.4, 0.9, 1.0 }; // #669df6
-
-		x = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
-
-//		// Color track with speed
-//		color[0] = (data.speed() * 1.0 / max_speed);
-//		color[1] = 0.0;
-//		color[2] = ((max_speed - data.speed()) / max_speed) * 1.0;
-
-		OIIO::ImageBufAlgo::fill(outbuf, color, OIIO::ROI(x - thickness, x + thickness, y - thickness, y + thickness));
-	}
-
-	x_end = x;
-	y_end = y;
-
-	// At last, draw markers
-	drawPicto(outbuf, x_start, y_start, "./assets/marker/start.png", 0.3);
-	drawPicto(outbuf, x_end, y_end, "./assets/marker/end.png", 0.3);
+	// Draw markers
+	drawPicto(buf, x_start_, y_start_, "./assets/marker/start.png", 0.3);
+	drawPicto(buf, x_end_, y_end_, "./assets/marker/end.png", 0.3);
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
-	out->open(filename, outbuf.spec());
-	out->write_image(type, outbuf.localpixels());
+	out->open(filename, buf.spec());
+	out->write_image(buf.spec().format, buf.localpixels());
 	out->close();
+}
 
-	delete gpx;
+
+void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
+	int zoom;
+	int stride;
+	unsigned char *data;
+
+	int x = 0, y = 0;
+
+	GPXData wpt;
+
+	log_call();
+
+	zoom = settings().zoom();
+
+	// Cairo buffer
+	OIIO::ImageBuf buf(outbuf.spec());
+
+	// Create the cairo destination surface
+	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, outbuf.spec().width, outbuf.spec().height);
+
+	// Cairo context
+	cairo_t *cairo = cairo_create(surface);
+
+	// Path border
+	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
+	cairo_set_line_width (cairo, 4.4); //40.96);
+	cairo_set_line_join (cairo, CAIRO_LINE_JOIN_ROUND);
+
+	// Draw each WPT
+	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
+		x = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+
+		x *= divider;
+		y *= divider;
+
+		cairo_line_to (cairo, x, y);
+	}
+
+	// Cairo draw
+	cairo_stroke (cairo);
+
+	// Path color
+	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
+	cairo_set_line_width (cairo, 3.0); //40.96);
+	cairo_set_line_join (cairo, CAIRO_LINE_JOIN_ROUND);
+
+	// Draw each WPT
+	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
+		x = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+
+		x *= divider;
+		y *= divider;
+
+		cairo_line_to (cairo, x, y);
+	}
+
+	// Cairo draw
+	cairo_stroke (cairo);
+
+	data = cairo_image_surface_get_data(surface);
+	stride = cairo_image_surface_get_stride(surface);
+
+	// Cairo to OIIO
+	buf.set_pixels(OIIO::ROI(),
+		buf.spec().format,
+		data, 
+		OIIO::AutoStride,
+		stride);
+
+	// Cairo over
+	OIIO::ImageBufAlgo::over(outbuf, buf, outbuf);
+
+	// Release
+	cairo_surface_destroy(surface);
+	cairo_destroy(cairo);
 }
 
 
@@ -670,14 +709,10 @@ void Map::load(void) {
 	if (mapbuf_)
 		return;
 
-	int x = 0, y = 0;
-
-	int thickness = 3;
-
 	int zoom = settings().zoom();
 	double divider = settings().divider();
 
-	GPXData data;
+	GPXData wpt;
 
 	GPX *gpx = GPX::open(app_.settings().gpxfile());
 
@@ -694,30 +729,26 @@ void Map::load(void) {
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
 
-	// Draw track
-	gpx->retrieveFirst(data);
+	// Draw path
+	path(*mapbuf_, gpx, divider);
 
-	x_start_ = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-	y_start_ = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+	// Compute begin
+	gpx->retrieveFirst(wpt);
+
+	x_start_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+	y_start_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
 	x_start_ *= divider;
 	y_start_ *= divider;
 
-	// Draw each WPT
-	for (gpx->retrieveFirst(data); data.valid(); gpx->retrieveNext(data)) {
-		float color[4] = { 0.2, 0.4, 0.9, 1.0 }; // #669df6
+	// Compute end
+	gpx->retrieveLast(wpt);
 
-		x = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+	x_end_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+	y_end_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
-		x *= divider;
-		y *= divider;
-
-		OIIO::ImageBufAlgo::fill(*mapbuf_, color, OIIO::ROI(x - thickness, x + thickness, y - thickness, y + thickness));
-	}
-
-	x_end_ = x;
-	y_end_ = y;
+	x_end_ *= divider;
+	y_end_ *= divider;
 }
 
 
