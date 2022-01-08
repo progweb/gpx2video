@@ -1,9 +1,6 @@
-#ifndef STRING__H
-#define STRING__H
-
 //==============================================================================
 //
-//           String - the string simple type in the GPX library
+//           Unsigned - the Unsigned simple type in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -23,53 +20,61 @@
 //
 //==============================================================================
 // 
-//  $Date$ $Revision$
+//  $Date: 2013-03-10 12:02:27 +0100 (Sun, 10 Mar 2013) $ $Revision: 5 $
 //
 //==============================================================================
 
-#include "export.h"
-#include "Node.h"
+#include "Unsigned.h"
 
-namespace gpx
+using namespace std;
+
+namespace layout
 {
-  ///
-  /// @class String
-  ///
-  /// @brief The string class.
-  ///
-  
-  class DLL_API String : public Node
+  Unsigned::Unsigned(Node *parent, const char *name, Node::Type type, bool mandatory) :
+    Node(parent, name, type, mandatory)
   {
-    public:
+  }
 
-    ///
-    /// Constructor
-    ///
-    /// @param  parent     the parent node
-    /// @param  name       the name of the attribute or element
-    /// @param  type       the node type (ATTRIBUTE or ELEMENT)
-    /// @param  mandatory  is the attribute or element mandatory ?
-    ///
-    String(Node *parent, const char *name, Type type, bool mandatory = false);
+  Unsigned::~Unsigned()
+  {
+  }
+  
+  bool Unsigned::validate(Report *report) const
+  {
+    bool ok = Node::validate(report);
+    
+    if (ok)
+    {
+      size_t length = getValue().length();
+      size_t i      = 0;
+      
+      while ((i < length) && (isspace(getValue().at(i))))
+      {
+        i++;
+      }
+      
+      while ((i < length) && (isdigit(getValue().at(i))))
+      {
+        i++;
+      }
+      
+      while ((i < length) && (isspace(getValue().at(i))))
+      {
+        i++;
+      }
+      
+      if (i != length)
+      {
+        if (report != nullptr)
+        {
+          report->report(this, Report::INCORRECT_VALUE, this->getValue());
+        }
+        ok = false;
+      }
 
-    ///
-    /// Deconstructor
-    ///
-    virtual ~String();
+    }
     
-	operator const char *() const { 
-		return this->getValue().c_str();
-	}
-    
-    private:
-    
-    // Members
-    
-    // Disable copy constructors
-    String(const String &);
-    String& operator=(const String &);  
-  };
+    return ok;
+  }
 }
-
-#endif
 

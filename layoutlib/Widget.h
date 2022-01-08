@@ -1,9 +1,9 @@
-#ifndef DECIMAL_H
-#define DECIMAL_H
+#ifndef __LAYOUT__WIDGET_H__
+#define __LAYOUT__WIDGET_H__
 
 //==============================================================================
 //
-//           Decimal - the decimal simple type in the GPX library
+//               Widget - the track class in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -27,18 +27,23 @@
 //
 //==============================================================================
 
+#include "export.h"
 #include "Node.h"
 
+#include "String_.h"
+#include "Unsigned.h"
+#include "List.h"
 
-namespace gpx
+
+namespace layout
 {
   ///
-  /// @class Decimal
+  /// @class Widget
   ///
-  /// @brief The decimal class.
+  /// @brief The track class.
   ///
   
-  class Decimal : public Node
+  class DLL_API Widget : public Node
   {
     public:
 
@@ -50,51 +55,84 @@ namespace gpx
     /// @param  type       the node type (ATTRIBUTE or ELEMENT)
     /// @param  mandatory  is the attribute or element mandatory ?
     ///
-    Decimal(Node *parent, const char *name, Type type, bool mandatory = false);
+    Widget(Node *parent, const char *name, Type type, bool mandatory = false);
 
     ///
     /// Deconstructor
     ///
-    virtual ~Decimal();
+    virtual ~Widget();
     
     ///
-    /// Validate the Decimal object
+    /// Get name
     ///
-    /// @param  report  the optional report stream
+    /// @return the name element
     ///
-    /// @return is validation succesfull
+    String  &name() { return _name; }
+    
     ///
-    
-    virtual bool validate(Report *report = nullptr) const;
-    
-	operator int() const { 
-		return std::stoi(this->getValue());
-	}
-    
-	operator double() const { 
-		return std::stod(this->getValue());
-	}
-    
-  protected:
+    /// Get type
+    ///
+    /// @return the type element
+    ///
+    String  &type() { return _type; }
 
     ///
-    /// Convert to a double value of the Decimal object
+    /// Get align
     ///
-    /// @param  value  the double value
+    /// @return the align attribute
     ///
-    /// @return is the value correct
-    ///
+    String  &align() { return _align; }
 
-    bool convert(double &value) const;
+    ///
+    /// Get x
+    ///
+    /// @return the x attribute
+    ///
+    Unsigned  &x() { return _x; }
 
-  private:
+    ///
+    /// Get y
+    ///
+    /// @return the y attribute
+    ///
+    Unsigned  &y() { return _y; }
+
+    ///
+    /// Get width
+    ///
+    /// @return the width attribute
+    ///
+    Unsigned  &width() { return _width; }
+
+    ///
+    /// Get height
+    ///
+    /// @return the height attribute
+    ///
+    Unsigned  &height() { return _height; }
+
+    ///
+    /// Get margin
+    ///
+    /// @return the margin attribute
+    ///
+    Unsigned  &margin() { return _margin; }
+
+    // Methods
+
+    private:
     
     // Members
-    float          _value;
+    String       _name;
+    String       _type;
+    String       _align;
+    Unsigned     _x, _y;
+	Unsigned     _width, _height;
+	Unsigned     _margin;
     
     // Disable copy constructors
-    Decimal(const Decimal &);
-    Decimal& operator=(const Decimal &);  
+    Widget(const Widget &);
+    Widget& operator=(const Widget &);  
   };
 }
 

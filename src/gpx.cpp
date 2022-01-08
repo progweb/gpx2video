@@ -68,7 +68,6 @@ void GPXData::dump(void) {
 
 
 void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
-	char **end;
 	const char *s;
 
 	struct tm time;
@@ -91,9 +90,9 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 		pt->valid = false;
 
 	// Convert lat, lon & ele
-	pt->lat = strtod(wpt->lat().getValue().c_str(), (char**)&end);
-	pt->lon = strtod(wpt->lon().getValue().c_str(), (char**)&end);
-	pt->ele = strtod(wpt->ele().getValue().c_str(), (char**)&end);
+	pt->lat = (double) wpt->lat();
+	pt->lon = (double) wpt->lon();
+	pt->ele = (double) wpt->ele();
 
 	utm = to_utm(pt->lat, pt->lon);
 
@@ -217,7 +216,7 @@ void GPX::dump(void) {
 bool GPX::parse(void) {
 	std::list<gpx::TRK*> &trks = root_->trks().list();
 
-	for (std::list<gpx::TRK*>::iterator node = trks.begin(); node != trks.end(); ++node) {
+	for (std::list<gpx::TRK *>::iterator node = trks.begin(); node != trks.end(); ++node) {
 		gpx::TRK *trk = (*node);
          
 		if (trk == nullptr)

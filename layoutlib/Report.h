@@ -1,11 +1,11 @@
-#ifndef UNSIGNED_H
-#define UNSIGNED_H
+#ifndef __LAYOUT__REPORT_H__
+#define __LAYOUT__REPORT_H__
 
 //==============================================================================
 //
-//           Unsigned - the unsigned simple type in the GPX library
+//                Report - the report interface
 //
-//               Copyright (C) 2013  Dick van Oudheusden
+//               Copyright (C) 2016 Dick van Oudheusden
 //  
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -27,57 +27,68 @@
 //
 //==============================================================================
 
-#include "Node.h"
+#include "export.h"
+#include <string>
 
-
-namespace gpx
+namespace layout
 {
+  class Node;
+
   ///
-  /// @class Unsigned
+  /// @interface Report
   ///
-  /// @brief The unsigned class.
+  /// @brief The report interface for reporting warnings
   ///
   
-  class Unsigned : public Node
+  class DLL_API Report
   {
     public:
+
+    enum Warning
+    {
+      SUCCESS,
+      ADD_ALREADY_PRESENT_NODE,
+      ADD_UNKNOWN_NODE,
+      MISSING_MANDATORY_NODE,
+      REMOVE_UNKNOWN_CHILD,
+      INCORRECT_VALUE,
+      DOUBLE_LAYOUT,
+      MISSING_LAYOUT,
+      MISFORMED_LAYOUT,
+      INSERT_BEFORE_NODE_NOT_FOUND
+    };
 
     ///
     /// Constructor
     ///
-    /// @param  parent     the parent node
-    /// @param  name       the name of the attribute or element
-    /// @param  type       the node type (ATTRIBUTE or ELEMENT)
-    /// @param  mandatory  is the attribute or element mandatory ?
-    ///
-    Unsigned(Node *parent, const char *name, Type type, bool mandatory = false);
+
+    Report();
 
     ///
     /// Deconstructor
     ///
-    virtual ~Unsigned();
+
+    virtual ~Report();
     
     ///
-    /// Validate the Unsigned object
+    /// Report a warning for a node
     ///
-    /// @param  report  the optional report stream
+    /// @param  node    the node for with the warning (can be 0)
+    /// @param  warning the warning
+    /// @param  extra   the extra information
     ///
-    /// @return is validation succesfull
+
+    virtual void report(const Node *node, Warning warning, const std::string &extra) = 0;
+
     ///
-    
-    virtual bool validate(Report *report = nullptr) const;
-    
-	operator unsigned int() const { 
-		return std::stoi(this->getValue());
-	}
-    
-    private:
-    
-    // Members
-    
-    // Disable copy constructors
-    Unsigned(const Unsigned &);
-    Unsigned& operator=(const Unsigned &);  
+    /// Convert a warning to a text
+    ///
+    /// @param  warning the warning
+    ///
+    /// @return the text
+    ///
+
+    static std::string text(Warning warning);
   };
 }
 

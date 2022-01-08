@@ -1,11 +1,11 @@
-#ifndef UNSIGNED_H
-#define UNSIGNED_H
+#ifndef REPORT_CERR_H
+#define REPORT_CERR_H
 
 //==============================================================================
 //
-//           Unsigned - the unsigned simple type in the GPX library
+//              ReportCerr - the report on cerr class
 //
-//               Copyright (C) 2013  Dick van Oudheusden
+//               Copyright (C) 2016 Dick van Oudheusden
 //  
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -27,57 +27,42 @@
 //
 //==============================================================================
 
-#include "Node.h"
+#include "export.h"
+#include "Report.h"
 
-
-namespace gpx
+namespace layout
 {
   ///
-  /// @class Unsigned
+  /// @class ReportCerr
   ///
-  /// @brief The unsigned class.
+  /// @brief The report on cerr class for reporting warnings
   ///
   
-  class Unsigned : public Node
+  class DLL_API ReportCerr : public Report
   {
     public:
 
     ///
     /// Constructor
     ///
-    /// @param  parent     the parent node
-    /// @param  name       the name of the attribute or element
-    /// @param  type       the node type (ATTRIBUTE or ELEMENT)
-    /// @param  mandatory  is the attribute or element mandatory ?
-    ///
-    Unsigned(Node *parent, const char *name, Type type, bool mandatory = false);
+
+    ReportCerr();
 
     ///
     /// Deconstructor
     ///
-    virtual ~Unsigned();
+
+    virtual ~ReportCerr();
     
     ///
-    /// Validate the Unsigned object
+    /// Report a warning for a node
     ///
-    /// @param  report  the optional report stream
+    /// @param  node    the node for with the warning (can be 0)
+    /// @param  warning the warning
+    /// @param  extra   the extra information
     ///
-    /// @return is validation succesfull
-    ///
-    
-    virtual bool validate(Report *report = nullptr) const;
-    
-	operator unsigned int() const { 
-		return std::stoi(this->getValue());
-	}
-    
-    private:
-    
-    // Members
-    
-    // Disable copy constructors
-    Unsigned(const Unsigned &);
-    Unsigned& operator=(const Unsigned &);  
+
+    virtual void report(const Node *node, Report::Warning warning, const std::string &extra);
   };
 }
 

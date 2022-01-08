@@ -88,6 +88,9 @@ MediaContainer * GPX2Video::media(void) {
 
 
 Map * GPX2Video::buildMap(void) {
+	int x, y;
+	int width, height;
+
 	// GPX input file
 	GPXData data;
 
@@ -98,13 +101,27 @@ Map * GPX2Video::buildMap(void) {
 
 	gpx->dump();
 
+	// Media
+	MediaContainer *container = media();
+
+	VideoStreamPtr video_stream = container->getVideoStream();
+
+	// 2704x1520 => 800x500
+	// 1920x1080 => 560x350
+	width = 800 * video_stream->width() / 2704;
+	height = 500 * video_stream->height() / 1520;
+
+	// Position
+	x = video_stream->width() - width - 50;
+	y = video_stream->height() - height - 50;
+
 	// Create map bounding box
 	GPXData::point p1, p2;
 	gpx->getBoundingBox(&p1, &p2);
 
 	MapSettings mapSettings;
-	mapSettings.setPosition(1850, 970);
-	mapSettings.setSize(800, 500);
+	mapSettings.setPosition(x, y);
+	mapSettings.setSize(width, height);
 	mapSettings.setSource(settings().mapsource());
 	mapSettings.setZoom(settings().mapzoom());
 	mapSettings.setDivider(settings().mapfactor());

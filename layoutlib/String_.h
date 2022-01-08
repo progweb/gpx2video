@@ -1,9 +1,9 @@
-#ifndef DECIMAL_H
-#define DECIMAL_H
+#ifndef __LAYOUT__STRING_H__
+#define __LAYOUT__STRING_H__
 
 //==============================================================================
 //
-//           Decimal - the decimal simple type in the GPX library
+//           String - the string simple type in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -27,18 +27,18 @@
 //
 //==============================================================================
 
+#include "export.h"
 #include "Node.h"
 
-
-namespace gpx
+namespace layout
 {
   ///
-  /// @class Decimal
+  /// @class String
   ///
-  /// @brief The decimal class.
+  /// @brief The string class.
   ///
   
-  class Decimal : public Node
+  class DLL_API String : public Node
   {
     public:
 
@@ -50,51 +50,24 @@ namespace gpx
     /// @param  type       the node type (ATTRIBUTE or ELEMENT)
     /// @param  mandatory  is the attribute or element mandatory ?
     ///
-    Decimal(Node *parent, const char *name, Type type, bool mandatory = false);
+    String(Node *parent, const char *name, Type type, bool mandatory = false);
 
     ///
     /// Deconstructor
     ///
-    virtual ~Decimal();
+    virtual ~String();
     
-    ///
-    /// Validate the Decimal object
-    ///
-    /// @param  report  the optional report stream
-    ///
-    /// @return is validation succesfull
-    ///
-    
-    virtual bool validate(Report *report = nullptr) const;
-    
-	operator int() const { 
-		return std::stoi(this->getValue());
+	operator const char *() const { 
+		return this->getValue().c_str();
 	}
-    
-	operator double() const { 
-		return std::stod(this->getValue());
-	}
-    
-  protected:
 
-    ///
-    /// Convert to a double value of the Decimal object
-    ///
-    /// @param  value  the double value
-    ///
-    /// @return is the value correct
-    ///
-
-    bool convert(double &value) const;
-
-  private:
+    private:
     
     // Members
-    float          _value;
     
     // Disable copy constructors
-    Decimal(const Decimal &);
-    Decimal& operator=(const Decimal &);  
+    String(const String &);
+    String& operator=(const String &);  
   };
 }
 

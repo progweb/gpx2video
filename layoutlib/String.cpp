@@ -1,9 +1,6 @@
-#ifndef STRING__H
-#define STRING__H
-
 //==============================================================================
 //
-//           String - the string simple type in the GPX library
+//           String - the string simple type in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -23,53 +20,23 @@
 //
 //==============================================================================
 // 
-//  $Date$ $Revision$
+//  $Date: 2013-03-10 12:02:27 +0100 (Sun, 10 Mar 2013) $ $Revision: 5 $
 //
 //==============================================================================
 
-#include "export.h"
-#include "Node.h"
+#include "String_.h"
 
-namespace gpx
+using namespace std;
+
+namespace layout
 {
-  ///
-  /// @class String
-  ///
-  /// @brief The string class.
-  ///
-  
-  class DLL_API String : public Node
+  String::String(Node *parent, const char *name, Node::Type type, bool mandatory) :
+    Node(parent, name, type, mandatory)
   {
-    public:
+  }
 
-    ///
-    /// Constructor
-    ///
-    /// @param  parent     the parent node
-    /// @param  name       the name of the attribute or element
-    /// @param  type       the node type (ATTRIBUTE or ELEMENT)
-    /// @param  mandatory  is the attribute or element mandatory ?
-    ///
-    String(Node *parent, const char *name, Type type, bool mandatory = false);
-
-    ///
-    /// Deconstructor
-    ///
-    virtual ~String();
-    
-	operator const char *() const { 
-		return this->getValue().c_str();
-	}
-    
-    private:
-    
-    // Members
-    
-    // Disable copy constructors
-    String(const String &);
-    String& operator=(const String &);  
-  };
+  String::~String()
+  {
+  }
 }
-
-#endif
 

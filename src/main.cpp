@@ -15,6 +15,11 @@ extern "C" {
 #include "cache.h"
 #include "renderer.h"
 #include "timesync.h"
+//#include "widgets/grade.h"
+//#include "widgets/elevation.h"
+//#include "widgets/cadence.h"
+//#include "widgets/heartrate.h"
+//#include "widgets/speed.h"
 #include "gpx2video.h"
 
 
@@ -27,11 +32,12 @@ static const struct option options[] = {
 	{ "duration",   required_argument, 0, 'd' },
 	{ "media",      required_argument, 0, 'm' },
 	{ "gpx",        required_argument, 0, 'g' },
+	{ "layout",     required_argument, 0, 'l' },
 	{ "output",     required_argument, 0, 'o' },
 	{ "map-source", required_argument, 0, 's' },
 	{ "map-factor", required_argument, 0, 'f' },
 	{ "map-zoom",   required_argument, 0, 'z' },
-	{ "map-list",   no_argument,       0, 'l' },
+	{ "map-list",   no_argument,       0, 0 },
 	{ 0,            0,                 0, 0 }
 };
 
@@ -44,12 +50,13 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- m, --media=file       : Input media file name" << std::endl;
 	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
+	std::cout << "\t- l, --layout=file      : Layout fie name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
 	std::cout << "\t- f, --map-factor       : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t- s, --map-source       : Map source" << std::endl;
 	std::cout << "\t- z, --map-zoom         : Map zoom" << std::endl;
-	std::cout << "\t- l, --map-list         : Dump supported map list" << std::endl;
+	std::cout << "\t-    --map-list         : Dump supported map list" << std::endl;
 	std::cout << "\t- v, --verbose          : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet            : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
@@ -108,14 +115,18 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	double map_factor = 1.0;
 
+	const char *s;
+
 	MapSettings::Source map_source = MapSettings::SourceOpenStreetMap;
 
 	std::string gpxfile;
 	std::string mediafile;
+	std::string layoutfile;
 	std::string outputfile;
 
 	bool gpxfile_required = false;
 	bool mediafile_required = false;
+	bool layoutfile_required = false;
 	bool outputfile_required = false;
 
 	const std::string name(argv[0]);
@@ -124,24 +135,27 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	for (;;) {
 		index = 0;
-		option = getopt_long(argc, argv, "hqvd:m:g:o:f:s:z:l", gpx2video::options, &index);
+		option = getopt_long(argc, argv, "hqvd:m:g:o:f:s:z:l:", gpx2video::options, &index);
 
 		if (option == -1) 
 			break;
 
 		switch (option) {
 		case 0:
-			std::cout << "option " << gpx2video::options[index].name;
-			if (optarg)
-				std::cout << " with arg " << optarg;
-			std::cout << std::endl;
+			s = gpx2video::options[index].name;
+			if (s && !strcmp(s, "map-list")) {
+				setCommand(GPX2Video::CommandSource);
+				return 0;
+			}
+			else {
+				std::cout << "option " << s;
+				if (optarg)
+					std::cout << " with arg " << optarg;
+				std::cout << std::endl;
+			}
 			break;
 		case 'h':
 			return -1;
-			break;
-		case 'l':
-			setCommand(GPX2Video::CommandSource);
-			return 0;
 			break;
 		case 'f':
 			map_factor = strtod(optarg, NULL);
@@ -174,6 +188,13 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				return -1;
 			}
 			gpxfile = std::string(optarg);
+			break;
+		case 'l':
+			if (!layoutfile.empty()) {
+				std::cout << "'layout' option is already set!" << std::endl;
+				return -1;
+			}
+			layoutfile = std::string(optarg);
 			break;
 		case 'o':
 			if (!outputfile.empty()) {
@@ -251,6 +272,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		return -1;
 	}
 
+	if (layoutfile_required && layoutfile.empty()) {
+		std::cout << name << ": option '--layout' is required" << std::endl;
+		return -1;
+	}
+
 	if (outputfile_required && outputfile.empty()) {
 		std::cout << name << ": option '--output' is required" << std::endl;
 		return -1;
@@ -260,6 +286,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	setSettings(GPX2Video::Settings(
 		gpxfile,
 		mediafile,
+		layoutfile,
 		outputfile,
 		map_factor,
 		map_zoom,
@@ -363,6 +390,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		// Create gpx2video renderer task
 		renderer = Renderer::create(app, map);
+
 		app.append(renderer);
 		break;
 

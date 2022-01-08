@@ -1,9 +1,9 @@
-#ifndef DECIMAL_H
-#define DECIMAL_H
+#ifndef __LAYOUT__UNSIGNED_H__
+#define __LAYOUT__UNSIGNED_H__
 
 //==============================================================================
 //
-//           Decimal - the decimal simple type in the GPX library
+//           Unsigned - the unsigned simple type in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -30,15 +30,15 @@
 #include "Node.h"
 
 
-namespace gpx
+namespace layout
 {
   ///
-  /// @class Decimal
+  /// @class Unsigned
   ///
-  /// @brief The decimal class.
+  /// @brief The unsigned class.
   ///
   
-  class Decimal : public Node
+  class Unsigned : public Node
   {
     public:
 
@@ -50,15 +50,15 @@ namespace gpx
     /// @param  type       the node type (ATTRIBUTE or ELEMENT)
     /// @param  mandatory  is the attribute or element mandatory ?
     ///
-    Decimal(Node *parent, const char *name, Type type, bool mandatory = false);
+    Unsigned(Node *parent, const char *name, Type type, bool mandatory = false);
 
     ///
     /// Deconstructor
     ///
-    virtual ~Decimal();
+    virtual ~Unsigned();
     
     ///
-    /// Validate the Decimal object
+    /// Validate the Unsigned object
     ///
     /// @param  report  the optional report stream
     ///
@@ -66,35 +66,18 @@ namespace gpx
     ///
     
     virtual bool validate(Report *report = nullptr) const;
-    
-	operator int() const { 
+
+	operator unsigned int() const { 
 		return std::stoi(this->getValue());
 	}
     
-	operator double() const { 
-		return std::stod(this->getValue());
-	}
-    
-  protected:
-
-    ///
-    /// Convert to a double value of the Decimal object
-    ///
-    /// @param  value  the double value
-    ///
-    /// @return is the value correct
-    ///
-
-    bool convert(double &value) const;
-
-  private:
+    private:
     
     // Members
-    float          _value;
     
     // Disable copy constructors
-    Decimal(const Decimal &);
-    Decimal& operator=(const Decimal &);  
+    Unsigned(const Unsigned &);
+    Unsigned& operator=(const Unsigned &);  
   };
 }
 

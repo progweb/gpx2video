@@ -11,6 +11,11 @@
 
 class GPMD {
 public:
+	GPMD() {
+		fix = 0;
+		date = "";
+	}
+
 	uint32_t fix;
 	std::string date;
 };

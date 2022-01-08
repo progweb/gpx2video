@@ -22,6 +22,7 @@ public:
 	public:
 		Settings(std::string gpx_file="", 
 			std::string media_file="", 
+			std::string layout_file="",
 			std::string output_file="",
 			double map_factor=1.0,
 			int map_zoom=8, 
@@ -29,6 +30,7 @@ public:
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap)
 			: gpx_file_(gpx_file)
 			, media_file_(media_file)
+			, layout_file_(layout_file)
 			, output_file_(output_file)
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
@@ -42,6 +44,10 @@ public:
 		
 		const std::string& mediafile(void) const {
 			return media_file_;
+		}
+
+		const std::string& layoutfile(void) const {
+			return layout_file_;
 		}
 
 		const std::string& outputfile(void) const {
@@ -67,6 +73,7 @@ public:
 	private:
 		std::string gpx_file_;
 		std::string media_file_;
+		std::string layout_file_;
 		std::string output_file_;
 
 		double map_factor_;

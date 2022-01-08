@@ -8,12 +8,15 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "layoutlib/Widget.h"
+
 #include "gpx.h"
 #include "map.h"
 #include "frame.h"
 #include "media.h"
 #include "decoder.h"
 #include "encoder.h"
+#include "videowidget.h"
 #include "gpx2video.h"
 
 
@@ -22,6 +25,8 @@ public:
 	virtual ~Renderer();
 
 	static Renderer * create(GPX2Video &app, Map *map=NULL);
+
+	void append(VideoWidget *widget);
 
 	void run(void);
 
@@ -37,11 +42,16 @@ private:
 	Decoder *decoder_video_;
 	Encoder *encoder_;
 
+	std::list<VideoWidget *> widgets_;
+
 	int64_t frame_time_ = 0;
 
 	Renderer(GPX2Video &app, Map *map);
 
 	void init(void);
+	bool loadWidgets(void);
+	bool loadWidget(layout::Widget *w);
+	void computeWidgetsPosition(void);
 
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
 //	void drawMap(OIIO::ImageBuf *frame, int x, int y, int width, int height, double divider=1.0);

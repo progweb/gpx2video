@@ -5,11 +5,19 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "layoutlib/Parser.h"
+#include "layoutlib/ReportCerr.h"
+
 #include "oiioutils.h"
 #include "decoder.h"
 #include "audioparams.h"
 #include "videoparams.h"
 #include "encoder.h"
+#include "widgets/grade.h"
+#include "widgets/elevation.h"
+#include "widgets/cadence.h"
+#include "widgets/heartrate.h"
+#include "widgets/speed.h"
 #include "renderer.h"
 
 
@@ -40,6 +48,8 @@ Renderer * Renderer::create(GPX2Video &app, Map *map) {
 	Renderer *renderer = new Renderer(app, map);
 
 	renderer->init();
+	renderer->loadWidgets();
+	renderer->computeWidgetsPosition();
 
 	return renderer;
 }
@@ -94,6 +104,162 @@ void Renderer::init(void) {
 	// Open & encode output video
 	encoder_ = Encoder::create(settings);
 	encoder_->open();
+}
+
+
+bool Renderer::loadWidgets(void) {
+	std::ifstream stream;
+
+	layout::Layout *root;
+	layout::ReportCerr report;
+	layout::Parser parser(&report);
+
+	std::list<layout::Widget *> widgets;
+
+	std::string filename = app_.settings().layoutfile();
+
+	if (filename.empty())
+		goto done;
+
+    stream = std::ifstream(filename);
+
+	if (!stream.is_open())
+		goto failure;
+
+	root = parser.parse(stream);
+
+	if (root == NULL) {
+		std::cerr << "Parsing of " << filename << " failed due to " << parser.errorText() << " on line " << parser.errorLineNumber() << " and column " << parser.errorColumnNumber() << std::endl;
+		goto failure;
+	}
+
+	std::cout << "Parsing '" << filename << "' layout file" << std::endl;
+
+	widgets = root->widgets().list();
+
+	for (std::list<layout::Widget *>::iterator node = widgets.begin(); node != widgets.end(); ++node) {
+		layout::Widget *widget = (*node);
+         
+		if (widget == nullptr)
+ 			continue;
+
+		loadWidget(widget);
+	}
+
+done:
+	return true;
+
+failure:
+	return false;
+}
+
+
+bool Renderer::loadWidget(layout::Widget *w) {
+	std::string s;
+
+	VideoWidget *widget = NULL;
+
+	VideoWidget::Align align = VideoWidget::AlignNone;
+
+	// Type
+	s = (const char *) w->type();
+
+	// Create widget
+	if (s == "speed") 
+		widget = SpeedWidget::create(app_);
+	else if (s == "grade") 
+		widget = GradeWidget::create(app_);
+	else if (s == "elevation") 
+		widget = ElevationWidget::create(app_);
+	else if (s == "cadence") 
+		widget = CadenceWidget::create(app_);
+	else if (s == "heartrate") 
+		widget = HeartRateWidget::create(app_);
+	else {
+		log_error("Widget loading error, '%s' type unknown", s.c_str());
+		goto error;
+	}
+
+	// Alignment
+	s = (const char *) w->align();
+
+	if (s.empty())
+		align = VideoWidget::AlignNone;
+	else if (s == "left")
+		align = VideoWidget::AlignLeft;
+	else if (s == "right")
+		align = VideoWidget::AlignRight;
+	else if (s == "bottom")
+		align = VideoWidget::AlignBottom;
+	else if (s == "top")
+		align = VideoWidget::AlignTop;
+	else {
+		log_error("Widget loading error, align value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	log_info("Load widget '%s'", (const char *) w->type());
+
+	// Widget settings
+	widget->setAlign(align);
+	widget->setPosition(w->x(), w->y());
+	widget->setSize(w->width(), w->height());
+	widget->setMargin(w->margin());
+
+	// Append
+	app_.append(widget);
+
+	this->append(widget);
+
+	return true;
+
+error:
+	if (widget)
+		delete widget;
+
+	return false;
+}
+
+
+void Renderer::append(VideoWidget *widget) {
+	log_info("Initialize %s widget", widget->name().c_str());
+
+	widgets_.push_back(widget);
+}
+
+
+void Renderer::computeWidgetsPosition(void) {
+	int n = 0;
+	int height = 0;
+
+	int x, y;
+	int space, offset;
+
+	VideoStreamPtr video_stream = container_->getVideoStream();
+
+	// Get align position (left, top, bottom, right)
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() != VideoWidget::AlignLeft)
+			continue;
+
+		height += widget->height();
+		height += 2 * widget->margin();
+		n++;
+	}
+
+	// Compute position for each widget
+	space = video_stream->height() - height;
+
+	// Set position (for 'left' align)
+	offset = space / 2;
+	for (VideoWidget *widget : widgets_) {
+		x = widget->margin();
+		y = offset + widget->margin();
+
+		widget->setPosition(x, y);
+
+		offset += widget->height() + 2 * widget->margin();
+	}
 }
 
 
@@ -184,27 +350,11 @@ done:
 
 
 void Renderer::draw(FramePtr frame, const GPXData &data) {
-	char s[128];
-
-	int pos = 400;
-
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
-	// Draw gauges
-	sprintf(s, "%.0f%%", data.grade());
-	this->add(&frame_buffer, 50, pos, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", s, 2.5 * 64.0 / 150.0);
-
-	sprintf(s, "%.0f m", data.elevation());
-	this->add(&frame_buffer, 50, pos + 200, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, 2.5);
-
-	sprintf(s, "%.0f km/h", data.speed());
-	this->add(&frame_buffer, 50, pos + 400, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", s, 2.5);
-
-	sprintf(s, "%d tr/min", data.cadence());
-	this->add(&frame_buffer, 50, pos + 600, "./assets/picto/DataOverlay_icn_cadence.png", "CADENCE", s, 2.5);
-
-//	sprintf(s, "%d bpm", data.heartrate());
-//	this->add(&frame_buffer, 50, 1100, "./assets/picto/DataOverlay_icn_heartrate.png", "FREQ. CARDIAQUE", s, 2.5);
+	// Draw each widget
+	for (VideoWidget *widget : widgets_)
+		widget->draw(&frame_buffer, data);
 
 	// Draw map
 	if (map_ != NULL)

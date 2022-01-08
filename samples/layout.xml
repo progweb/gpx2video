@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>grade</type>
+		<name>PENTE</name>
+		<margin>20</margin>
+	</widget>		
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>speed</type>
+		<name>VITESSE</name>
+		<margin>20</margin>
+	</widget>		
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>elevation</type>
+		<name>ALTITUDE</name>
+		<margin>20</margin>
+	</widget>
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>cadence</type>
+		<name>CADENCE</name>
+		<margin>20</margin>
+	</widget>
+	<!--
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>heartrate</type>
+		<name>FREQ. CARDIAQUE</name>
+		<margin>20</margin>
+	</widget>		
+	-->
+</layout>

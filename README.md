@@ -112,7 +112,7 @@ $ ./gpx2video -h
 gpx2video is a command line tool.
 
 ```
-$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -o output.mp4 --map-source=1 --map-zoom=11 -f 2.0
+$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 --map-source=1 --map-zoom=11 -f 2.0
 gpx2video v0.0.0
 creation_time = 2021-12-08T10:34:50.000000Z
 ...
@@ -129,11 +129,20 @@ Track info:
 Output #0, mp4, to 'output-overview.mp4':
   Stream #0:0: Video: h264, yuvj420p(pc), 2704x1520 [SAR 1:1 DAR 169:95], q=2-31, 32000 kb/s, 50 tbn
   Stream #0:1: Audio: aac (LC), 48000 Hz, stereo, fltp, 128 kb/s
+Parsing layout.xml
+Load widget 'grade'
+Initialize grade widget
+Load widget 'speed'
+Initialize speed widget
+Load widget 'elevation'
+Initialize elevation widget
+Load widget 'cadence'
+Initialize cadence widget
+Cache initialiization...
 Time synchronization...
-PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 2021-12-08 09:34:50 - GPS TIME: 2021-12-08 09:38:35.860 - OFFSET: 225
+PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 2021-12-08 09:34:50 - GPS TIME: - OFFSET: 478042309
 PACKET: 1 - PTS: 1000 - TIMESTAMP: 1000 ms - TIME: 2021-12-08 09:34:51 - GPS TIME: 2021-12-08 09:38:36.850 - OFFSET: 225
-[read the GoPro MET stream]
-...
+Video stream synchronized with success
 Download map from OpenStreetMap I...
   Download tile 6 / 6 [##################################################] DONE
 ...
@@ -151,40 +160,44 @@ FRAME: 1 - PTS: 1800 - TIMESTAMP: 20 ms - TIME: 2021-12-08 10:38:35
 
 ### How change gauges ?
 
-For the moment, all can't be set from the command line or better a config file.
+Gauges size and position can be set from the layout.xml file. (see: samples/layout.xml)
 
-You can edit `src/render.cpp` file to enable/disable gauge or edit label and position:
+You can edit `samples/layout.xml` file to enable/disable gauge or edit label and position:
 ```
-void Renderer::draw(FramePtr frame, const GPXData &data) {
-    char s[128];
-
-    int pos = 400;
-
-    OIIO::ImageBuf frame_buffer = frame->toImageBuf();
-
-    // Draw gauges
-    sprintf(s, "%.0f%%", data.grade());
-    this->add(&frame_buffer, 50, pos, "./assets/picto/DataOverlay_icn_grade.png", "PENTE", s, 2.5 * 64.0 / 150.0);
-
-    sprintf(s, "%.0f m", data.elevation());
-    this->add(&frame_buffer, 50, pos + 200, "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, 2.5);
-
-    sprintf(s, "%.0f km/h", data.speed());
-    this->add(&frame_buffer, 50, pos + 400, "./assets/picto/DataOverlay_icn_speed.png", "VITESSE", s, 2.5);
-
-    sprintf(s, "%d tr/min", data.cadence());
-    this->add(&frame_buffer, 50, pos + 600, "./assets/picto/DataOverlay_icn_cadence.png", "CADENCE", s, 2.5);
-
-//  sprintf(s, "%d bpm", data.heartrate());
-//  this->add(&frame_buffer, 50, 1100, "./assets/picto/DataOverlay_icn_heartrate.png", "FREQ. CARDIAQUE", s, 2.5);
-
-    // Draw map
-    if (map_ != NULL)
-        map_->render(&frame_buffer, data); // x:1700, y:900, w:800, h:500
-
-    frame->fromImageBuf(frame_buffer);
-}
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>grade</type>
+		<name>PENTE</name>
+		<margin>20</margin>
+	</widget>		
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>speed</type>
+		<name>VITESSE</name>
+		<margin>20</margin>
+	</widget>		
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>elevation</type>
+		<name>ALTITUDE</name>
+		<margin>20</margin>
+	</widget>
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>cadence</type>
+		<name>CADENCE</name>
+		<margin>20</margin>
+	</widget>
+	<!--
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>heartrate</type>
+		<name>FREQ. CARDIAQUE</name>
+		<margin>20</margin>
+	</widget>		
+	-->
+</layout>
 ```
+
+Align values are none or left (right, top, bottom not yet supported). If align attribute is defined, 
+gpx2video computes 'x' and 'y' values.
 
 
 ## Maps
@@ -201,6 +214,11 @@ Finally, gpx2video draws a mapbox in applying the zoom factor.
 
 ## ToDo
 
+  - Render gauge:
+    - alignment: right, top and bottom
+    - hflip: filp icon and label
+    - gpx fix mode: disable gauge on nofix
+    - svg: convert in svg
   - Render more gauges (color, size, position...)
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)

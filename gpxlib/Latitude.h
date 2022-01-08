@@ -66,6 +66,10 @@ namespace gpx
     ///
     virtual bool validate(Report *report = nullptr) const;
     
+	operator double() const { 
+		return std::stod(this->getValue());
+	}
+    
     private:
     
     // Members
