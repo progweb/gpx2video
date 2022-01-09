@@ -86,7 +86,7 @@ void TimeSync::run(void) {
 	start_time = container_->startTime();
 
 	while (!eof) {
-		GPMD gpmd;
+		TimeSync::GPMD gpmd;
 
 		do {
 			// Free buffer in packet if there is one
@@ -111,7 +111,7 @@ void TimeSync::run(void) {
 			int64_t timecode_ms = timecode * av_q2d(avstream->time_base) * 1000;
 
 			// Parsing stream packet
-			parse(gpmd, packet->data, packet->size, (app_.command() == GPX2Video::CommandExtract));
+			parse(gpmd, packet->data, packet->size, 0);
 
 			// Camera time
 			char s[128];
@@ -147,7 +147,7 @@ void TimeSync::run(void) {
 			n++;
 
 			// Fix ?
-			if ((app_.command() != GPX2Video::CommandExtract) && (gpmd.fix > 1)) {
+			if (gpmd.fix > 1) {
 				log_notice("Video stream synchronized with success");
 				break;
 			}
@@ -169,7 +169,7 @@ done:
 }
 
 
-void TimeSync::parse(GPMD &gpmd, uint8_t *buffer, size_t size, bool dump) {
+void TimeSync::parse(TimeSync::GPMD &gpmd, uint8_t *buffer, size_t size, bool dump) {
 	int i;
 
 	size_t n;

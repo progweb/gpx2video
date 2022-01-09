@@ -15,30 +15,28 @@ extern "C" {
 #include "cache.h"
 #include "renderer.h"
 #include "timesync.h"
-//#include "widgets/grade.h"
-//#include "widgets/elevation.h"
-//#include "widgets/cadence.h"
-//#include "widgets/heartrate.h"
-//#include "widgets/speed.h"
+#include "extractor.h"
 #include "gpx2video.h"
 
 
 namespace gpx2video {
 
 static const struct option options[] = {
-	{ "help",       no_argument,       0, 'h' },
-	{ "verbose",    no_argument,       0, 'v' },
-	{ "quiet",      no_argument,       0, 'q' },
-	{ "duration",   required_argument, 0, 'd' },
-	{ "media",      required_argument, 0, 'm' },
-	{ "gpx",        required_argument, 0, 'g' },
-	{ "layout",     required_argument, 0, 'l' },
-	{ "output",     required_argument, 0, 'o' },
-	{ "map-source", required_argument, 0, 's' },
-	{ "map-factor", required_argument, 0, 'f' },
-	{ "map-zoom",   required_argument, 0, 'z' },
-	{ "map-list",   no_argument,       0, 0 },
-	{ 0,            0,                 0, 0 }
+	{ "help",           no_argument,       0, 'h' },
+	{ "verbose",        no_argument,       0, 'v' },
+	{ "quiet",          no_argument,       0, 'q' },
+	{ "format",         required_argument, 0, 'f' },
+	{ "duration",       required_argument, 0, 'd' },
+	{ "media",          required_argument, 0, 'm' },
+	{ "gpx",            required_argument, 0, 'g' },
+	{ "layout",         required_argument, 0, 'l' },
+	{ "output",         required_argument, 0, 'o' },
+	{ "map-source",     required_argument, 0, 0 },
+	{ "map-factor",     required_argument, 0, 0 },
+	{ "map-zoom",       required_argument, 0, 0 },
+	{ "map-list",       no_argument,       0, 0 },
+	{ "extract-format", no_argument,       0, 0 },
+	{ 0,                0,                 0, 0 }
 };
 
 static void print_usage(const std::string &name) {
@@ -53,10 +51,12 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- l, --layout=file      : Layout fie name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
-	std::cout << "\t- f, --map-factor       : Map factor (default: 1.0)" << std::endl;
-	std::cout << "\t- s, --map-source       : Map source" << std::endl;
-	std::cout << "\t- z, --map-zoom         : Map zoom" << std::endl;
+	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;
+	std::cout << "\t-    --map-source       : Map source" << std::endl;
+	std::cout << "\t-    --map-zoom         : Map zoom" << std::endl;
 	std::cout << "\t-    --map-list         : Dump supported map list" << std::endl;
+	std::cout << "\t-    --extract-format   : Dump extract format supported" << std::endl;
 	std::cout << "\t- v, --verbose          : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet            : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
@@ -88,6 +88,21 @@ static void print_map_list(const std::string &name) {
 			continue;
 
 		std::cout << "\t- " << i << ":\t" << name << " " << copyright << std::endl;
+	}
+}
+
+
+static void print_format_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Extract format supported: " << name << std::endl;
+
+	for (i=ExtractorSettings::FormatDump; i != ExtractorSettings::FormatCount; i++) {
+		std::string name = ExtractorSettings::getFriendlyName((ExtractorSettings::Format) i);
+
+		std::cout << "\t- " << i << ":\t" << name << std::endl;
 	}
 }
 
@@ -124,6 +139,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	std::string layoutfile;
 	std::string outputfile;
 
+	ExtractorSettings::Format extract_format = ExtractorSettings::FormatDump;
+
 	bool gpxfile_required = false;
 	bool mediafile_required = false;
 	bool layoutfile_required = false;
@@ -147,6 +164,19 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				setCommand(GPX2Video::CommandSource);
 				return 0;
 			}
+			else if (s && !strcmp(s, "map-factor")) {
+				map_factor = strtod(optarg, NULL);
+			}
+			else if (s && !strcmp(s, "map-zoom")) {
+				map_zoom = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "map-source")) {
+				map_source = (MapSettings::Source) atoi(optarg);
+			}
+			else if (s && !strcmp(s, "extract-format")) {
+				setCommand(GPX2Video::CommandFormat);
+				return 0;
+			}
 			else {
 				std::cout << "option " << s;
 				if (optarg)
@@ -158,13 +188,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			return -1;
 			break;
 		case 'f':
-			map_factor = strtod(optarg, NULL);
-			break;
-		case 'z':
-			map_zoom = atoi(optarg);
-			break;
-		case 's':
-			map_source = (MapSettings::Source) atoi(optarg);
+			extract_format = (ExtractorSettings::Format) atoi(optarg);
 			break;
 		case 'q':
 //			GPX2Video::setLogQuiet(true);
@@ -220,6 +244,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			setCommand(GPX2Video::CommandExtract);
 
 			mediafile_required = true;
+			outputfile_required = true;
 		}
 		else if (!strcmp(argv[0], "sync")) {
 			setCommand(GPX2Video::CommandSync);
@@ -291,7 +316,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_factor,
 		map_zoom,
 		max_duration_ms,
-		map_source)
+		map_source,
+		extract_format)
 	);
 
 	return 0;
@@ -305,6 +331,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	Cache *cache = NULL;
 	Renderer *renderer = NULL;
 	TimeSync *timesync = NULL;
+	Extractor *extractor = NULL;
 
 	struct event_base *evbase;
 
@@ -337,10 +364,14 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 		break;
 
+	case GPX2Video::CommandFormat:
+		gpx2video::print_format_supported(name);
+		goto exit;
+		break;
+
 	case GPX2Video::CommandExtract:
-		// Create gpx2video timesync task
-		timesync = TimeSync::create(app);
-		app.append(timesync);
+		extractor = app.buildExtractor();
+		app.append(extractor);
 		break;
 
 	case GPX2Video::CommandSync:
@@ -412,6 +443,8 @@ exit:
 		delete renderer;
 	if (timesync)
 		delete timesync;
+	if (extractor)
+		delete extractor;
 
 	event_base_free(evbase);
 

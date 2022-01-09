@@ -11,10 +11,11 @@
 #include "log.h"
 #include "media.h"
 #include "mapsettings.h"
+#include "extractorsettings.h"
 
 
 class Map;
-
+class Extractor;
 
 class GPX2Video {
 public:
@@ -27,7 +28,8 @@ public:
 			double map_factor=1.0,
 			int map_zoom=8, 
 			int max_duration_ms=0,
-			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap)
+			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
+			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump)
 			: gpx_file_(gpx_file)
 			, media_file_(media_file)
 			, layout_file_(layout_file)
@@ -35,7 +37,8 @@ public:
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
-			, map_source_(map_source) {
+			, map_source_(map_source)
+	   		, extract_format_(extract_format) {
 		}
 
 		const std::string& gpxfile(void) const {
@@ -55,7 +58,11 @@ public:
 		}
 
 		const MapSettings::Source& mapsource(void) const {
-			return  map_source_;
+			return map_source_;
+		}
+
+		const ExtractorSettings::Format& extractFormat(void) const {
+			return extract_format_;
 		}
 
 		const double& mapfactor(void) const {
@@ -80,6 +87,8 @@ public:
 		int map_zoom_;
 		int max_duration_ms_;
 		MapSettings::Source map_source_;
+
+		ExtractorSettings::Format extract_format_;
 	};
 
 	class Task {
@@ -111,6 +120,7 @@ public:
 		CommandNull,
 
 		CommandSource,	// Dump map source list
+		CommandFormat,  // Dump extract format supported
 		CommandSync,	// Auto sync video time with gps sensor
 		CommandExtract,	// Extract gps sensor data from video
 		CommandClear,	// Clear cache directories
@@ -141,6 +151,7 @@ public:
 
 	MediaContainer * media(void);
 	Map * buildMap(void);
+	Extractor * buildExtractor(void);
 
 	void perform(bool done=false) {
 		int32_t info;

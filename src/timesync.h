@@ -9,18 +9,6 @@
 #include "gpx2video.h"
 
 
-class GPMD {
-public:
-	GPMD() {
-		fix = 0;
-		date = "";
-	}
-
-	uint32_t fix;
-	std::string date;
-};
-
-
 class TimeSync : public GPX2Video::Task {
 public:
 	struct gpmd_header {
@@ -43,6 +31,17 @@ public:
 		struct gpmd_header header;
 		union gpmd_value value;
 	} __attribute__((__packed__));
+
+	class GPMD {
+	public:
+		GPMD() {
+			fix = 0;
+			date = "";
+		}
+
+		uint32_t fix;
+		std::string date;
+	};
 
 	virtual ~TimeSync();
 

@@ -28,6 +28,11 @@ gpx2video can read and extract:
   - cadence
 from your gpx input file.
 
+gpx2video can extract GPMD data from GoPro GPMD stream in several format:
+  - Text dump
+  - RAW dump
+  - GPX data
+
 gpx2video can draw a map widget with your track. It supports multi map source: 
   - OpenStreetMap I © OpenStreetMap contributors
   - Maps-For-Free Maps © Maps-For-Free
@@ -111,8 +116,25 @@ $ ./gpx2video -h
 
 gpx2video is a command line tool.
 
+To extract GoPro GPMD data from media stream:
+
 ```
-$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 --map-source=1 --map-zoom=11 -f 2.0
+$ ./gpx2video -m GOPR1860.MP4 -o output.gpx -f 2 extract                                                                              18:33
+gpx2video v0.0.0
+creation_time = 2020-12-13T09:56:27.000000Z
+Failed to find decoder for stream #2
+Failed to find decoder for stream #3
+Input #0, mov,mp4,m4a,3gp,3g2,mj2, from '../../video/GOPR1860.MP4':
+...
+Extract GPMD data...
+PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 1970-01-01 00:00:00
+PACKET: 1 - PTS: 1001 - TIMESTAMP: 1001 ms - TIME: 1970-01-01 00:00:01
+```
+
+To render a video stream with telemetry data:
+
+```
+$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 --map-source=1 --map-zoom=11 --map-factor 2.0
 gpx2video v0.0.0
 creation_time = 2021-12-08T10:34:50.000000Z
 ...

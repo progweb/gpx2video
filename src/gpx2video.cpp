@@ -23,6 +23,7 @@ extern "C" {
 #include "utils.h"
 #include "evcurl.h"
 #include "map.h"
+#include "extractor.h"
 #include "decoder.h"
 #include "encoder.h"
 #include "renderer.h"
@@ -130,6 +131,16 @@ Map * GPX2Video::buildMap(void) {
 	Map *map = Map::create(*this, mapSettings, evbase_);
 
 	return map;
+}
+
+
+Extractor * GPX2Video::buildExtractor(void) {
+	ExtractorSettings extractorSettings;
+	extractorSettings.setFormat(settings().extractFormat());
+
+	Extractor *extractor = Extractor::create(*this, extractorSettings);
+
+	return extractor;
 }
 
 

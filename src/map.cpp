@@ -51,6 +51,7 @@ MapSettings::MapSettings() {
 	width_ = 320;
 	height_ = 240;
 	divider_ = 2.0;
+	source_ = MapSettings::SourceNull;
 }
 
 
