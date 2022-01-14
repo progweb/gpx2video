@@ -99,6 +99,17 @@ If gpx2video finds the 'GoPro MET' stream, it determines the offset time to use.
 
 
 ## Build
+
+To build gpx2video, please install all dependancies (on Debian):
+
+```
+apt-get install libevent-dev libcurl4-gnutls-dev \
+    libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev libswresample-dev libswscale-dev \
+    libopenimageio-dev libgeographic-dev libcairo2-dev
+```
+
+Then build in using cmake tools:
+
 ```
 $ git clone https://github.com/progweb/gpx2video.git
 $ mkdir gpx2video/build
@@ -119,7 +130,7 @@ gpx2video is a command line tool.
 To extract GoPro GPMD data from media stream:
 
 ```
-$ ./gpx2video -m GOPR1860.MP4 -o output.gpx -f 2 extract                                                                              18:33
+$ ./gpx2video -m GOPR1860.MP4 -o output.gpx -f 2 extract
 gpx2video v0.0.0
 creation_time = 2020-12-13T09:56:27.000000Z
 Failed to find decoder for stream #2
@@ -261,4 +272,5 @@ gpx2video is based on several open source libraries:
   - osm-gps-map - (http://nzjrs.github.io/osm-gps-map)
   - cairo - (https://www.cairographics.org)
   - olive - (https://www.olivevideoeditor.org)
+  - OpenImageIO - (https://sites.google.com/site/openimageio/home)
 
