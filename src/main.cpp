@@ -238,6 +238,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	argv += optind;
 	optind = 0;
 
+	// Debug
+	gpx2video_log_debug_enable(verbose);
+
 	// Check command
 	if (argc == 1) {
 		if (!strcmp(argv[0], "extract")) {

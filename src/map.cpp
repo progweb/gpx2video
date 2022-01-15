@@ -363,8 +363,6 @@ int Map::lat2pixel(int zoom, float lat) {
 
     double latrad = lat * M_PI / 180.0;
 
-	log_call();
-
     lat_m = atanh(sin(latrad));
 
     // the formula is some more notes
@@ -382,8 +380,6 @@ int Map::lon2pixel(int zoom, float lon) {
     int pixel_x;
 
     double lonrad = lon * M_PI / 180.0;
-
-	log_call();
 
     // the formula is
     //
@@ -557,7 +553,10 @@ void Map::build(void) {
 	outspec.tile_width = TILESIZE;
 	outspec.tile_height = TILESIZE;
 
-	out->open(filename, outspec);
+	if (out->open(filename, outspec) == false) {
+		log_error("Build map failure, can't open '%s' file", filename.c_str());
+		goto error;
+	}
 
 	// Collapse echo tile
 	for (Tile *tile : tiles_) {
@@ -565,6 +564,12 @@ void Map::build(void) {
 
 		// Open tile image
 		auto img = OIIO::ImageInput::open(filename.c_str());
+
+		if (img == NULL) {
+			log_warn("Can't open '%s' tile", filename.c_str());
+			continue;
+		}
+
 		const OIIO::ImageSpec& spec = img->spec();
 		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
 
@@ -589,6 +594,7 @@ void Map::build(void) {
 	if (app_.command() == GPX2Video::CommandTrack)
 		draw();
 
+error:
 	// Done
 	complete();
 }
@@ -621,9 +627,15 @@ void Map::draw(void) {
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
-	out->open(filename, buf.spec());
-	out->write_image(buf.spec().format, buf.localpixels());
-	out->close();
+
+	if (out) {
+		out->open(filename, buf.spec());
+		out->write_image(buf.spec().format, buf.localpixels());
+		out->close();
+	}
+	else {
+		log_error("Can't open '%s' track file", filename.c_str());
+	}
 }
 
 
@@ -713,9 +725,13 @@ void Map::load(void) {
 	int zoom = settings().zoom();
 	double divider = settings().divider();
 
+	std::string filename = app_.settings().gpxfile();
+
 	GPXData wpt;
 
-	GPX *gpx = GPX::open(app_.settings().gpxfile());
+	log_call();
+
+	GPX *gpx = GPX::open(filename);
 
 	// Open map
 	auto img = OIIO::ImageInput::open("map.png");
@@ -730,26 +746,31 @@ void Map::load(void) {
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
 
-	// Draw path
-	path(*mapbuf_, gpx, divider);
+	if (gpx != NULL) {
+		// Draw path
+		path(*mapbuf_, gpx, divider);
 
-	// Compute begin
-	gpx->retrieveFirst(wpt);
+		// Compute begin
+		gpx->retrieveFirst(wpt);
 
-	x_start_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-	y_start_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		x_start_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y_start_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
-	x_start_ *= divider;
-	y_start_ *= divider;
+		x_start_ *= divider;
+		y_start_ *= divider;
 
-	// Compute end
-	gpx->retrieveLast(wpt);
+		// Compute end
+		gpx->retrieveLast(wpt);
 
-	x_end_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-	y_end_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		x_end_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y_end_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
-	x_end_ *= divider;
-	y_end_ *= divider;
+		x_end_ *= divider;
+		y_end_ *= divider;
+	}
+	else {
+		log_warn("Can't open '%s' GPX data file", filename.c_str());
+	}
 }
 
 

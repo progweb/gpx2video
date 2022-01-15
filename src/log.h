@@ -3,6 +3,11 @@
 
 #include "macros.h"
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern int gpx2video_log_debug_enabled;
 
 
@@ -89,9 +94,14 @@ MACRO_END
 /*
  * Initialize the log module.
  */
+
 void gpx2video_log_quiet(int quiet);
 void gpx2video_log_setup(const char *ident);
 void gpx2video_log_debug_enable(int enabled);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif 
 

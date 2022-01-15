@@ -58,6 +58,8 @@ Renderer * Renderer::create(GPX2Video &app, Map *map) {
 void Renderer::init(void) {
 	time_t start_time;
 
+	log_call();
+
 	gpx_ = GPX::open(app_.settings().gpxfile());
 
 	// Media
