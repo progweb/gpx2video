@@ -12,6 +12,7 @@
 #include "gpxlib/Parser.h"
 #include "gpxlib/ReportCerr.h"
 
+#include "log.h"
 #include "gpx.h"
 
 
@@ -182,13 +183,17 @@ GPX * GPX::open(const std::string &filename) {
 
     std::ifstream stream = std::ifstream(filename);
 
-	if (!stream.is_open())
+	if (!stream.is_open()) {
+		log_error("Open '%s' GPX file failure, please check that file is readable", filename.c_str());
 		goto failure;
+	}
 
 	root = parser.parse(stream);
 
 	if (root == NULL) {
-		std::cerr << "Parsing of " << filename << " failed due to " << parser.errorText() << " on line " << parser.errorLineNumber() << " and column " << parser.errorColumnNumber() << std::endl;
+		log_error("Parsing of '%s' failed due to %s on line %d and column %d", 
+			filename.c_str(), parser.errorText().c_str(),
+			parser.errorLineNumber(), parser.errorColumnNumber());
 		goto failure;
 	}
 

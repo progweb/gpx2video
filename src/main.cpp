@@ -358,6 +358,19 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 	}
 
+	// ::TMP:: Check assets directory 
+	{
+    	std::ifstream stream = std::ifstream("./assets/marker/position.png");
+
+		if (!stream.is_open()) {
+			log_error("Can't read assets directory");
+			log_error("Please ready to build & use gpx2video");
+			log_error("Don't forget to create assets link");
+			goto exit;
+		}
+	}
+
+	// Process
 	switch (app.command()) {
 	case GPX2Video::CommandSource:
 		gpx2video::print_map_list(name);
@@ -392,8 +405,18 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(cache);
 
 		// Create gpx2video map task
-		map = app.buildMap();
-		app.append(map);
+		if (!app.settings().gpxfile().empty()) {
+			map = app.buildMap();
+			if (map == NULL) {
+				log_error("Build map failure.");
+				goto exit;
+			}
+			app.append(map);
+		}
+		else {
+			log_error("Please provide GPX data file.");
+			goto exit;
+		}
 		break;
 
 	case GPX2Video::CommandTrack:
@@ -402,8 +425,18 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(cache);
 
 		// Create gpx2video map task
-		map = app.buildMap();
-		app.append(map);
+		if (!app.settings().gpxfile().empty()) {
+			map = app.buildMap();
+			if (map == NULL) {
+				log_error("Build map failure.");
+				goto exit;
+			}
+			app.append(map);
+		}
+		else {
+			log_error("Please provide GPX data file.");
+			goto exit;
+		}
 		break;
 
 	case GPX2Video::CommandVideo:
@@ -416,8 +449,18 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(timesync);
 
 		// Create gpx2video map task
-		map = app.buildMap();
-		app.append(map);
+		if (!app.settings().gpxfile().empty()) {
+			map = app.buildMap();
+			if (map == NULL) {
+				log_error("Build map failure.");
+				goto exit;
+			}
+			app.append(map);
+		}
+		else {
+			log_error("Please provide GPX data file.");
+			goto exit;
+		}
 
 		// Create gpx2video renderer task
 		renderer = Renderer::create(app, map);

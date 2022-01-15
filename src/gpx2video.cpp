@@ -100,6 +100,9 @@ Map * GPX2Video::buildMap(void) {
 	// Open GPX file
 	GPX *gpx = GPX::open(settings().gpxfile());
 
+	if (gpx == NULL)
+		return NULL;
+
 	gpx->dump();
 
 	// Media

@@ -65,7 +65,8 @@ void Renderer::init(void) {
 
 	// Set start time in GPX stream
 	start_time = container_->startTime() + container_->timeOffset();
-	gpx_->setStartTime(start_time);
+	if (gpx_)
+		gpx_->setStartTime(start_time);
 
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
@@ -123,13 +124,17 @@ bool Renderer::loadWidgets(void) {
 
     stream = std::ifstream(filename);
 
-	if (!stream.is_open())
+	if (!stream.is_open()) {
+		log_error("Open '%s' layout file failure, please check that file is readable", filename.c_str());
 		goto failure;
+	}
 
 	root = parser.parse(stream);
 
 	if (root == NULL) {
-		std::cerr << "Parsing of " << filename << " failed due to " << parser.errorText() << " on line " << parser.errorLineNumber() << " and column " << parser.errorColumnNumber() << std::endl;
+		log_error("Parsing of '%s' failed due to %s on line %d and column %d", 
+			filename.c_str(), parser.errorText().c_str(),
+			parser.errorLineNumber(), parser.errorColumnNumber());
 		goto failure;
 	}
 
@@ -284,7 +289,8 @@ void Renderer::run(void) {
 
 	// Update start time in GPX stream
 	start_time = container_->startTime() + container_->timeOffset();
-	gpx_->setStartTime(start_time);
+	if (gpx_)
+		gpx_->setStartTime(start_time);
 
 	// Read audio data
 	frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);
@@ -301,11 +307,13 @@ void Renderer::run(void) {
 	timecode = frame->timestamp();
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
-	// Read GPX data
-	data = gpx_->retrieveData(timecode_ms);
+	if (gpx_) {
+		// Read GPX data
+		data = gpx_->retrieveData(timecode_ms);
 
-	// Draw
-	this->draw(frame, data);
+		// Draw
+		this->draw(frame, data);
+	}
 
 	// Max 5 secondes
 	if (app_.settings().maxDuration() > 0) {
@@ -328,7 +336,8 @@ void Renderer::run(void) {
 	}
 
 	// Dump GPX data
-	data.dump();
+	if (gpx_)
+		data.dump();
 
 	real_time = av_mul_q(av_make_q(timecode, 1), video_stream->timeBase());
 
