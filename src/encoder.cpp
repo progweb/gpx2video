@@ -386,10 +386,10 @@ bool Encoder::writeFrame(FramePtr frame, AVRational time) {
 	encoded_frame->height = frame->videoParams().height();
 	encoded_frame->format = video_codec_->pix_fmt;
 
-	// TODO / FIXME !!!
-	encoded_frame->linesize[0] = 2752;
-	encoded_frame->linesize[1] = 1376;
-	encoded_frame->linesize[2] = 1376;
+//	// TODO / FIXME !!!
+//	encoded_frame->linesize[0] = 2752;
+//	encoded_frame->linesize[1] = 1376;
+//	encoded_frame->linesize[2] = 1376;
 	
 //printf("width x height: %d x %d\n", encoded_frame->width, encoded_frame->height);
 //printf("format = %d\n", encoded_frame->format);
