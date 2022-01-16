@@ -3,6 +3,7 @@
 #include <string>
 #include <algorithm>
 
+#include "log.h"
 #include "ffmpegutils.h"
 #include "decoder.h"
 
@@ -209,6 +210,11 @@ bool Decoder::open(StreamPtr stream) {
 				avstream_->codecpar->width, avstream_->codecpar->height, 
 				ideal_pix_fmt_,
 				SWS_FAST_BILINEAR, NULL, NULL, NULL);
+
+		if (sws_ctx_ == NULL) {
+			log_error("Decoder fails to create scale context");
+			return false;
+		}
 	}
 
 	return true;

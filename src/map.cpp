@@ -628,14 +628,16 @@ void Map::draw(void) {
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 
-	if (out) {
-		out->open(filename, buf.spec());
-		out->write_image(buf.spec().format, buf.localpixels());
-		out->close();
+	if (out->open(filename, buf.spec()) == false) {
+		log_error("Draw track failure, can't open '%s' file", filename.c_str());
+		goto error;
 	}
-	else {
-		log_error("Can't open '%s' track file", filename.c_str());
-	}
+
+	out->write_image(buf.spec().format, buf.localpixels());
+	out->close();
+
+error:
+	return;
 }
 
 

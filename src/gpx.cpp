@@ -135,18 +135,20 @@ void GPXData::read(gpx::WPT *wpt) {
 	// Extensions
 	gpx::Node *extensions = wpt->extensions().getElements().front();
 
-	for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
-		iter != extensions->getElements().end(); ++iter) {
-		gpx::Node *node = (*iter);
+	if (extensions) {
+		for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
+			iter != extensions->getElements().end(); ++iter) {
+			gpx::Node *node = (*iter);
 
-		std::string name = node->getName();
+			std::string name = node->getName();
 
-		if (name.find("atemp") != std::string::npos)
-			temperature_ = std::stod(node->getValue());
-		else if (name.find("cad") != std::string::npos)
-			cadence_ = std::stoi(node->getValue());
-		else if (name.find("hr") != std::string::npos)
-			heartrate_ = std::stoi(node->getValue());
+			if (name.find("atemp") != std::string::npos)
+				temperature_ = std::stod(node->getValue());
+			else if (name.find("cad") != std::string::npos)
+				cadence_ = std::stoi(node->getValue());
+			else if (name.find("hr") != std::string::npos)
+				heartrate_ = std::stoi(node->getValue());
+		}
 	}
 
 	// Delta
