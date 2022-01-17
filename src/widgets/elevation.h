@@ -1,14 +1,14 @@
-
 #ifndef __GPX2VIDEO__WIDGETS__ELEVATION_H__
 #define __GPX2VIDEO__WIDGETS__ELEVATION_H__
 
+#include "log.h"
 #include "videowidget.h"
 
 
 class ElevationWidget : public VideoWidget {
 public:
 	~ElevationWidget() {
-		VideoWidget::~VideoWidget();
+		log_call();
 	}
 
 	static ElevationWidget * create(GPX2Video &app) {
@@ -29,7 +29,8 @@ public:
 		double divider = (double) this->height() / (double) w;
 
 		sprintf(s, "%.0f m", data.elevation());
-		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_elevation.png", "ALTITUDE", s, divider);
+		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_elevation.png", 
+				label().c_str(), s, divider);
 	}
 
 private:

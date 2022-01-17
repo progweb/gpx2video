@@ -88,7 +88,7 @@ protected:
 	}
 
 	void init(void);
-	void load(void);
+	bool load(void);
 
 	// Download each tule
 	void download(void);

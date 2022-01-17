@@ -16,11 +16,26 @@
 		<margin>20</margin>
 	</widget>
 	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>time</type>
+		<name>HEURE</name>
+		<margin>20</margin>
+	</widget>
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>date</type>
+		<name>DATE</name>
+		<margin>20</margin>
+	</widget>
+	<!--
+	<widget x="250" y="450" width="120" height="120" align="left">
+		<type>maxspeed</type>
+		<name>VITESSE MAX.</name>
+		<margin>20</margin>
+	</widget>		
+	<widget x="250" y="450" width="120" height="120" align="left">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>20</margin>
 	</widget>
-	<!--
 	<widget x="250" y="450" width="120" height="120" align="left">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>

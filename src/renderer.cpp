@@ -13,11 +13,14 @@
 #include "audioparams.h"
 #include "videoparams.h"
 #include "encoder.h"
+#include "widgets/date.h"
 #include "widgets/grade.h"
 #include "widgets/elevation.h"
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
 #include "widgets/speed.h"
+#include "widgets/maxspeed.h"
+#include "widgets/time.h"
 #include "renderer.h"
 
 
@@ -172,8 +175,14 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	s = (const char *) w->type();
 
 	// Create widget
-	if (s == "speed") 
+	if (s == "date") 
+		widget = DateWidget::create(app_);
+	else if (s == "time") 
+		widget = TimeWidget::create(app_);
+	else if (s == "speed") 
 		widget = SpeedWidget::create(app_);
+	else if (s == "maxspeed") 
+		widget = MaxSpeedWidget::create(app_);
 	else if (s == "grade") 
 		widget = GradeWidget::create(app_);
 	else if (s == "elevation") 
@@ -212,6 +221,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setPosition(w->x(), w->y());
 	widget->setSize(w->width(), w->height());
 	widget->setMargin(w->margin());
+	widget->setLabel((const char *) w->name());
 
 	// Append
 	app_.append(widget);
@@ -309,6 +319,9 @@ void Renderer::run(void) {
 	timecode = frame->timestamp();
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
+	// Compute video time
+	app_.setTime(start_time + (timecode_ms / 1000));
+
 	if (gpx_) {
 		// Read GPX data
 		data = gpx_->retrieveData(timecode_ms);
@@ -326,10 +339,10 @@ void Renderer::run(void) {
 	// Dump frame info
 	{
 		char s[128];
-		const time_t t = start_time + (timecode_ms / 1000);
+//		const time_t t = start_time + (timecode_ms / 1000);
 		struct tm time;
 
-		localtime_r(&t, &time);
+		localtime_r(&app_.time(), &time);
 
 		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 

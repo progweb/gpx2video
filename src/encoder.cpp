@@ -1,3 +1,4 @@
+#include "log.h"
 #include "ffmpegutils.h"
 #include "encoder.h"
 
@@ -87,6 +88,7 @@ Encoder::Encoder(const EncoderSettings &settings) :
 	video_codec_(NULL),
 	audio_stream_(NULL),
 	audio_codec_(NULL) {
+	log_call();
 }
 
 
@@ -192,6 +194,8 @@ bool Encoder::open(void) {
 
 
 void Encoder::close(void) {
+	log_call();
+
 	if (open_) {
 		this->flush();
 

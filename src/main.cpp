@@ -132,7 +132,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	const char *s;
 
-	MapSettings::Source map_source = MapSettings::SourceOpenStreetMap;
+	MapSettings::Source map_source = MapSettings::SourceNull;
 
 	std::string gpxfile;
 	std::string mediafile;
@@ -409,12 +409,18 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		// Create gpx2video map task
 		if (!app.settings().gpxfile().empty()) {
-			map = app.buildMap();
-			if (map == NULL) {
-				log_error("Build map failure.");
+			if (app.settings().mapsource() != MapSettings::SourceNull) {
+				map = app.buildMap();
+				if (map == NULL) {
+					log_error("Build map failure.");
+					goto exit;
+				}
+				app.append(map);
+			}
+			else {
+				log_error("Please choose map source.");
 				goto exit;
 			}
-			app.append(map);
 		}
 		else {
 			log_error("Please provide GPX data file.");
@@ -429,12 +435,18 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		// Create gpx2video map task
 		if (!app.settings().gpxfile().empty()) {
-			map = app.buildMap();
-			if (map == NULL) {
-				log_error("Build map failure.");
+			if (app.settings().mapsource() != MapSettings::SourceNull) {
+				map = app.buildMap();
+				if (map == NULL) {
+					log_error("Build map failure.");
+					goto exit;
+				}
+				app.append(map);
+			}
+			else {
+				log_error("Please choose map source.");
 				goto exit;
 			}
-			app.append(map);
 		}
 		else {
 			log_error("Please provide GPX data file.");
@@ -453,12 +465,16 @@ int main(int argc, char *argv[], char *envp[]) {
 
 		// Create gpx2video map task
 		if (!app.settings().gpxfile().empty()) {
-			map = app.buildMap();
-			if (map == NULL) {
-				log_error("Build map failure.");
-				goto exit;
+			if (app.settings().mapsource() != MapSettings::SourceNull) {
+				map = app.buildMap();
+				if (map == NULL) {
+					log_error("Build map failure.");
+					goto exit;
+				}
+				app.append(map);
 			}
-			app.append(map);
+			else
+				log_notice("No map selected");
 		}
 		else {
 			log_error("Please provide GPX data file.");

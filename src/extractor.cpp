@@ -110,6 +110,9 @@ void Extractor::run(void) {
 		goto done;
 	}
 
+	// Get start time from metadata
+	start_time = container_->startTime();
+
 	// Open GPMD stream
 	log_notice("Extract GPMD data...");
 
@@ -211,6 +214,8 @@ void Extractor::run(void) {
 						out << "      </trkpt>" << std::endl;
 					}
 				}
+				else if (settings().format() == ExtractorSettings::FormatDump)
+					out << "###############################################" << std::endl;
 			}
 
 			// We don't needd the packet anymore, so free it
@@ -385,7 +390,10 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 
 		// Save data
-		if (key == STR2FOURCC("GPSF")) {
+		if (key == STR2FOURCC("DVNM")) {
+			gpmd.device_name = string;
+		}
+		else if (key == STR2FOURCC("GPSF")) {
 			if ((data->header.type == 'L') && data->header.count) {
 				gpmd.fix = __bswap_32(data->value.u32[0]);
 			}

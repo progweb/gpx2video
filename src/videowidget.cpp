@@ -37,15 +37,14 @@ void VideoWidget::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, co
 
 	delete buf;
 
-
 	// Add label
 	int pt;
 	int space = h / 10;
 	pt = (h - 3 * space) / 3;
 	float white[] = { 1.0, 1.0, 1.0, 1.0 };
 	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + space + pt, label, pt, "./assets/fonts/Helvetica.ttf", white) == false)
-		fprintf(stderr, "render text error\n");
+		fprintf(stderr, "render label text error\n");
 	pt *= 2;
 	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + h - (pt/2), value, pt, "./assets/fonts/Helvetica.ttf", white) == false)
-		fprintf(stderr, "render text error\n");
+		fprintf(stderr, "render value text error\n");
 }

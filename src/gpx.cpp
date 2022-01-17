@@ -43,6 +43,7 @@ GPXData::GPXData()
 	, duration_(0)
 	, distance_(0)
 	, speed_(0) 
+	, maxspeed_(0)
 	, grade_(0) 
 	, cadence_(0) {
 }
@@ -114,6 +115,8 @@ bool GPXData::compute(void) {
 	duration_ += dt;
 	distance_ += dc;
 	speed_ = (3600 * dc) / (1000 * dt);
+	if (speed_ > maxspeed_)
+		maxspeed_ = speed_;
 
 	dc = sqrt(dx*dx + dy*dy);
 
@@ -171,8 +174,6 @@ GPX::GPX(std::ifstream &stream, gpx::GPX *root)
 
 
 GPX::~GPX() {
-	if (stream_.is_open())
-		stream_.close();
 }
 
 

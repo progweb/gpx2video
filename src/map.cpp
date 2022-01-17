@@ -720,9 +720,9 @@ void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 }
 
 
-void Map::load(void) {
+bool Map::load(void) {
 	if (mapbuf_)
-		return;
+		return true;
 
 	int zoom = settings().zoom();
 	double divider = settings().divider();
@@ -733,10 +733,14 @@ void Map::load(void) {
 
 	log_call();
 
-	GPX *gpx = GPX::open(filename);
-
 	// Open map
 	auto img = OIIO::ImageInput::open("map.png");
+
+	if (img == NULL) {
+		log_warn("Can't load '%s' map file", "map.png");
+		return false;
+	}
+
 	const OIIO::ImageSpec& spec = img->spec();
 	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
@@ -747,6 +751,8 @@ void Map::load(void) {
 	// Resize map
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
+
+	GPX *gpx = GPX::open(filename);
 
 	if (gpx != NULL) {
 		// Draw path
@@ -773,6 +779,11 @@ void Map::load(void) {
 	else {
 		log_warn("Can't open '%s' GPX data file", filename.c_str());
 	}
+
+	if (gpx != NULL)
+		delete gpx;
+
+	return (mapbuf_ != NULL);
 }
 
 
@@ -792,7 +803,10 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int offsetMaxY = ((y2_ - y1_) * TILESIZE * divider) - height;
 
 	// Load map buffer
-	this->load();
+	if (this->load() == false) {
+		log_warn("Map renderer failure");
+		return;
+	}
 
 	// Center map
 	posX = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
@@ -996,7 +1010,8 @@ void Map::Tile::downloadComplete(EVCurlTask *evtaskh, CURLcode result, void *use
 	(void) evtaskh;
 	(void) result;
 
-	std::fclose(tile->fp_);
+	if (tile->fp_)
+		std::fclose(tile->fp_);
 
 	tile->fp_ = NULL;
 	tile->evtaskh_ = NULL;

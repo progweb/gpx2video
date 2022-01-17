@@ -27,6 +27,10 @@ public:
 
 	void dump(void);
 
+	const time_t& time(void) const {
+		return cur_pt_.time;
+	}
+
 	const struct point& position(void) const {
 		return cur_pt_;
 	}
@@ -55,6 +59,10 @@ public:
 		return speed_;
 	}
 
+	const double& maxspeed(void) const {
+		return maxspeed_;
+	}
+
 	const double& temperature(void) const {
 		return temperature_;
 	}
@@ -80,6 +88,7 @@ protected:
 	double duration_;
 	double distance_;
 	double speed_;
+	double maxspeed_;
 	double grade_;
 	double temperature_;
 	int heartrate_;

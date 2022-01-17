@@ -69,11 +69,15 @@ public:
 	class GPMD {
 	public:
 		GPMD() {
+			device_name = "";
+
 			fix = 0;
 			date = "";
 
 			lat = lon = ele = 0.0;
 		}
+
+		std::string device_name;
 
 		uint32_t fix;
 		struct tm utc_time;

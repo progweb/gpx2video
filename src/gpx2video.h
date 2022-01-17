@@ -153,6 +153,14 @@ public:
 	Map * buildMap(void);
 	Extractor * buildExtractor(void);
 
+	const time_t& time(void) {
+		return time_;
+	}
+
+	void setTime(const time_t &time) {
+		time_ = time;
+	}
+
 	void perform(bool done=false) {
 		int32_t info;
 
@@ -212,6 +220,8 @@ private:
 	MediaContainer *container_;
 
 	std::list<Task *> tasks_;
+
+	time_t time_;
 };
 
 #endif

@@ -25,7 +25,7 @@ public:
 		AlignTop
 	};
 
-	~VideoWidget() {
+	virtual ~VideoWidget() {
 		log_call();
 	}
 
@@ -75,6 +75,14 @@ public:
 		return name_;
 	}
 
+	const std::string& label(void) const {
+		return label_;
+	}
+
+	void setLabel(std::string label) {
+		label_ = label;
+	}
+
 	virtual void run(void) {
 		log_call();
 
@@ -94,6 +102,7 @@ protected:
 		setPosition(0, 0);
 		setSize(64, 64);
 		setMargin(10);
+		setLabel(name);
 	}
 
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
@@ -105,6 +114,7 @@ protected:
 	int width_;
 	int height_;
 	int margin_;
+	std::string label_;
 
 private:
 	std::string name_;

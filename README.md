@@ -232,6 +232,13 @@ You can edit `samples/layout.xml` file to enable/disable gauge or edit label and
 Align values are none or left (right, top, bottom not yet supported). If align attribute is defined, 
 gpx2video computes 'x' and 'y' values.
 
+Type gauges supported are:
+  - speed, maxspeed
+  - grade, elevation
+  - date, time
+  - cadence
+  - heartrate
+
 
 ## Maps
 
@@ -243,6 +250,8 @@ Then build the map.
 *map is saved in the current path in the 'map.png' file.*
 
 Finally, gpx2video draws a mapbox in applying the zoom factor.
+
+By default, map isn't rendered.
 
 
 ## ToDo

@@ -1,22 +1,22 @@
-#ifndef __GPX2VIDEO__WIDGETS__SPEED_H__
-#define __GPX2VIDEO__WIDGETS__SPEED_H__
+#ifndef __GPX2VIDEO__WIDGETS__MAXSPEED_H__
+#define __GPX2VIDEO__WIDGETS__MAXSPEED_H__
 
 #include "log.h"
 #include "videowidget.h"
 
 
-class SpeedWidget : public VideoWidget {
+class MaxSpeedWidget : public VideoWidget {
 public:
-	~SpeedWidget() {
+	~MaxSpeedWidget() {
 		log_call();
 	}
 
-	static SpeedWidget * create(GPX2Video &app) {
-		SpeedWidget *widget;
+	static MaxSpeedWidget * create(GPX2Video &app) {
+		MaxSpeedWidget *widget;
 
 		log_call();
 
-		widget = new SpeedWidget(app, "speed");
+		widget = new MaxSpeedWidget(app, "maxspeed");
 
 		return widget;
 	}
@@ -28,13 +28,13 @@ public:
 
 		double divider = (double) this->height() / (double) w;
 
-		sprintf(s, "%.0f km/h", data.speed());
+		sprintf(s, "%.0f km/h", data.maxspeed());
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_speed.png",
 				label().c_str(), s, divider);
 	}
 
 private:
-	SpeedWidget(GPX2Video &app, std::string name)
+	MaxSpeedWidget(GPX2Video &app, std::string name)
 		: VideoWidget(app, name) {
 	}
 };
