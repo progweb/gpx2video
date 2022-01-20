@@ -149,6 +149,10 @@ public:
 		tasks_.push_back(task);
 	}
 
+	struct event_base *evbase(void) {
+		return evbase_;
+	}
+
 	MediaContainer * media(void);
 	Map * buildMap(void);
 	Extractor * buildExtractor(void);

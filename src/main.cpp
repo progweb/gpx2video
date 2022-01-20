@@ -463,27 +463,8 @@ int main(int argc, char *argv[], char *envp[]) {
 		timesync = TimeSync::create(app);
 		app.append(timesync);
 
-		// Create gpx2video map task
-		if (!app.settings().gpxfile().empty()) {
-			if (app.settings().mapsource() != MapSettings::SourceNull) {
-				map = app.buildMap();
-				if (map == NULL) {
-					log_error("Build map failure.");
-					goto exit;
-				}
-				app.append(map);
-			}
-			else
-				log_notice("No map selected");
-		}
-		else {
-			log_error("Please provide GPX data file.");
-			goto exit;
-		}
-
 		// Create gpx2video renderer task
-		renderer = Renderer::create(app, map);
-
+		renderer = Renderer::create(app);
 		app.append(renderer);
 		break;
 

@@ -31,10 +31,6 @@ public:
 	MapSettings();
 	virtual ~MapSettings();
 
-	const int& x(void) const;
-	const int& y(void) const;
-	void setPosition(const int &x, const int &y);
-
 	const int& width(void) const;
 	const int& height(void) const;
 	void setSize(const int &width, const int &height);
@@ -58,7 +54,6 @@ public:
 	static const std::string getRepoURI(const Source &source);
 
 private:
-	int x_, y_;
 	int width_, height_;
 
 	int zoom_;

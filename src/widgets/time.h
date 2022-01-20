@@ -21,7 +21,7 @@ public:
 		return widget;
 	}
 
-	void draw(OIIO::ImageBuf *buf, const GPXData &data) {
+	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
 		struct tm time;

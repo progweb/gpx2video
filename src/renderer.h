@@ -8,6 +8,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "layoutlib/Map.h"
 #include "layoutlib/Widget.h"
 
 #include "gpx.h"
@@ -24,7 +25,7 @@ class Renderer : public GPX2Video::Task {
 public:
 	virtual ~Renderer();
 
-	static Renderer * create(GPX2Video &app, Map *map=NULL);
+	static Renderer * create(GPX2Video &app); //, Map *map=NULL);
 
 	void append(VideoWidget *widget);
 
@@ -34,7 +35,6 @@ public:
 
 private:
 	GPX2Video &app_;
-	Map *map_;
 
 	GPX *gpx_;
 	MediaContainer *container_;
@@ -46,15 +46,15 @@ private:
 
 	int64_t frame_time_ = 0;
 
-	Renderer(GPX2Video &app, Map *map);
+	Renderer(GPX2Video &app); //, Map *map);
 
 	void init(void);
-	bool loadWidgets(void);
+	bool load(void);
+	bool loadMap(layout::Map *m);
 	bool loadWidget(layout::Widget *w);
 	void computeWidgetsPosition(void);
 
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
-//	void drawMap(OIIO::ImageBuf *frame, int x, int y, int width, int height, double divider=1.0);
 };
 
 #endif

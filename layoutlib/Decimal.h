@@ -1,9 +1,9 @@
-#ifndef __LAYOUT__UNSIGNED_H__
-#define __LAYOUT__UNSIGNED_H__
+#ifndef __LAYOUT__DECIMAL_H__
+#define __LAYOUT__DECIMAL_H__
 
 //==============================================================================
 //
-//           Unsigned - the unsigned simple type in the LAYOUT library
+//           Decimal - the decimal simple type in the layout library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -27,18 +27,19 @@
 //
 //==============================================================================
 
+#include <iostream>
 #include "Node.h"
 
 
 namespace layout
 {
   ///
-  /// @class Unsigned
+  /// @class Decimal
   ///
-  /// @brief The unsigned class.
+  /// @brief The decimal class.
   ///
   
-  class Unsigned : public Node
+  class Decimal : public Node
   {
     public:
 
@@ -50,15 +51,15 @@ namespace layout
     /// @param  type       the node type (ATTRIBUTE or ELEMENT)
     /// @param  mandatory  is the attribute or element mandatory ?
     ///
-    Unsigned(Node *parent, const char *name, Type type, bool mandatory = false);
+    Decimal(Node *parent, const char *name, Type type, bool mandatory = false);
 
     ///
     /// Deconstructor
     ///
-    virtual ~Unsigned();
+    virtual ~Decimal();
     
     ///
-    /// Validate the Unsigned object
+    /// Validate the Decimal object
     ///
     /// @param  report  the optional report stream
     ///
@@ -66,21 +67,35 @@ namespace layout
     ///
     
     virtual bool validate(Report *report = nullptr) const;
-
-	operator unsigned int() const { 
-		if (this->getValue().empty())
-			return 0;
-
+    
+	operator int() const { 
 		return std::stoi(this->getValue());
 	}
     
-    private:
+	operator double() const { 
+		return std::stod(this->getValue());
+	}
+    
+  protected:
+
+    ///
+    /// Convert to a double value of the Decimal object
+    ///
+    /// @param  value  the double value
+    ///
+    /// @return is the value correct
+    ///
+
+    bool convert(double &value) const;
+
+  private:
     
     // Members
+    float          _value;
     
     // Disable copy constructors
-    Unsigned(const Unsigned &);
-    Unsigned& operator=(const Unsigned &);  
+    Decimal(const Decimal &);
+    Decimal& operator=(const Decimal &);  
   };
 }
 

@@ -41,5 +41,15 @@
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 	</widget>		
+	<map x="800" y="300" align="none">
+		<source>1</source>
+		<zoom>11</zoom>
+		<factor>1.2</factor>
+	</map>
 	-->
+	<map align="none">
+		<source>1</source>
+		<zoom>12</zoom>
+		<factor>2.0</factor>
+	</map>
 </layout>

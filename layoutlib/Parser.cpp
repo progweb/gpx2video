@@ -74,6 +74,7 @@ namespace layout
     else if (_current != nullptr)
     {
       _current = _current->add(name, Node::ELEMENT, _report);
+      _current->setValue("");
     }
     else if (_report != nullptr)
     {
@@ -88,6 +89,7 @@ namespace layout
     if (_current != nullptr)
     {
       _current = _current->add(name, Node::ATTRIBUTE, _report);
+      _current->setValue("");
     }
     else if (_report != nullptr)
     {

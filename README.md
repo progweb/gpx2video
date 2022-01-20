@@ -171,6 +171,8 @@ Load widget 'elevation'
 Initialize elevation widget
 Load widget 'cadence'
 Initialize cadence widget
+Load map widget
+Initialize map widget
 Cache initialiization...
 Time synchronization...
 PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 2021-12-08 09:34:50 - GPS TIME: - OFFSET: 478042309
@@ -226,6 +228,11 @@ You can edit `samples/layout.xml` file to enable/disable gauge or edit label and
 		<margin>20</margin>
 	</widget>		
 	-->
+	<map x="800" y="300" width="640" height="480" align="none">
+		<source>1</source>
+		<zoom>12</zoom>
+		<factor>2.0</factor>
+	</map>
 </layout>
 ```
 
@@ -239,6 +246,9 @@ Type gauges supported are:
   - cadence
   - heartrate
 
+Map widget can be auto positionned as x, y and/or width, height aren't set. At last, you can now
+define several map widgets.
+
 
 ## Maps
 
@@ -247,11 +257,10 @@ You can specify map source from a list. Warning, all maps aren't free.
 gpx2video downloads each tile with the zoom level in your `~/.gpx2video/cach` path. 
 Then build the map.
 
-*map is saved in the current path in the 'map.png' file.*
+Finally, gpx2video renders a mapbox in applying the zoom factor.
 
-Finally, gpx2video draws a mapbox in applying the zoom factor.
-
-By default, map isn't rendered.
+As you use map or track command line, please provide map settings (source, zoom, factor) on the
+command lines.
 
 
 ## ToDo

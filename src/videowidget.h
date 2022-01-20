@@ -33,11 +33,11 @@ public:
 		return align_;
 	}
 
-	void setAlign(Align align) {
+	virtual void setAlign(Align align) {
 		align_ = align;
 	}
 
-	void setPosition(int x, int y) {
+	virtual void setPosition(int x, int y) {
 		x_ = x;
 		y_ = y;
 	}
@@ -50,7 +50,7 @@ public:
 		return y_;
 	}
 
-	void setSize(int width, int height) {
+	virtual void setSize(int width, int height) {
 		width_ = width;
 		height_ = height;
 	}
@@ -67,7 +67,7 @@ public:
 		return margin_;
 	}
 
-	void setMargin(int margin) {
+	virtual void setMargin(int margin) {
 		margin_ = margin;
 	}
 
@@ -79,7 +79,7 @@ public:
 		return label_;
 	}
 
-	void setLabel(std::string label) {
+	virtual void setLabel(std::string label) {
 		label_ = label;
 	}
 
@@ -89,10 +89,10 @@ public:
 		complete();
 	}
 
-	virtual void draw(OIIO::ImageBuf *buf, const GPXData &data) = 0;
+	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
 protected:
-	VideoWidget(GPX2Video &app, std::string &name)  
+	VideoWidget(GPX2Video &app, std::string name)  
 		: GPX2Video::Task(app)
 		, app_(app) 
 		, name_(name) {

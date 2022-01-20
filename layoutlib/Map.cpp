@@ -1,8 +1,8 @@
 //==============================================================================
 //
-//                LAYOUT - the root node in the LAYOUT library
+//               Map - the track class in the LAYOUT library
 //
-//          Copyright (C) 2013-2016 Dick van Oudheusden
+//               Copyright (C) 2013  Dick van Oudheusden
 //  
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -24,29 +24,40 @@
 //
 //==============================================================================
 
-#include "Layout.h"
-
+#include "Map.h"
 
 using namespace std;
 
 namespace layout
 {
-
-  Layout::Layout() :
-    Node(nullptr, "layout", Node::ELEMENT, true),
-    _version(this, "version", Node::ATTRIBUTE, true),
-    _creator(this, "creator", Node::ATTRIBUTE, true),
-    _widgets(this, "widget", Node::ELEMENT, false),
-    _maps(this, "map", Node::ELEMENT, false)
+  Map::Map(Node *parent, const char *name, Node::Type type, bool mandatory) :
+    Node(parent, name, type, mandatory),
+    _source(this, "source",   Node::ELEMENT, true),
+    _align(this, "align",   Node::ATTRIBUTE, false),
+    _x(this, "x", Node::ATTRIBUTE, false),
+    _y(this, "y", Node::ATTRIBUTE, false),
+    _width(this, "width", Node::ATTRIBUTE, false),
+    _height(this, "height", Node::ATTRIBUTE, false),
+    _margin(this, "margin", Node::ELEMENT, false),
+    _zoom(this, "zoom", Node::ELEMENT, false),
+    _factor(this, "factor", Node::ELEMENT, false)
   {
-    getInterfaces().push_back(&_version);
-    getInterfaces().push_back(&_creator);
+    getInterfaces().push_back(&_source);
+    getInterfaces().push_back(&_align);
+    getInterfaces().push_back(&_x);
+    getInterfaces().push_back(&_y);
+    getInterfaces().push_back(&_width);
+    getInterfaces().push_back(&_height);
+    getInterfaces().push_back(&_margin);
+    getInterfaces().push_back(&_zoom);
+    getInterfaces().push_back(&_factor);
 
-    getInterfaces().push_back(&_widgets);
-    getInterfaces().push_back(&_maps);
+	_zoom.setValue("12");
+	_factor.setValue("1.0");
   }
 
-  Layout::~Layout()
+  Map::~Map()
   {
   }
 }
+

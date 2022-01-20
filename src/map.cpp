@@ -46,8 +46,6 @@
 
 
 MapSettings::MapSettings() {
-	x_ = 0;
-	y_ = 0;
 	width_ = 320;
 	height_ = 240;
 	divider_ = 2.0;
@@ -56,22 +54,6 @@ MapSettings::MapSettings() {
 
 
 MapSettings::~MapSettings() {
-}
-
-
-const int& MapSettings::x(void) const {
-	return x_;
-}
-
-
-const int& MapSettings::y(void) const {
-	return y_;
-}
-
-
-void MapSettings::setPosition(const int &x, const int &y) {
-	x_ = x;
-	y_ = y;
 }
 
 
@@ -310,7 +292,7 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
-	: GPX2Video::Task(app)
+	: VideoWidget(app, "map")
 	, app_(app)
 	, settings_(settings)
 	, evbase_(evbase)
@@ -344,16 +326,21 @@ const MapSettings& Map::settings() const {
 }
 
 
-Map * Map::create(GPX2Video &app, const MapSettings &settings, struct event_base *evbase) {
+Map * Map::create(GPX2Video &app, const MapSettings &settings) {
 	Map *map;
 
 	log_call();
 
-	map = new Map(app, settings, evbase);
+	map = new Map(app, settings, app.evbase());
 
 	map->init();
 
 	return map;
+}
+
+
+void Map::setSize(int width, int height) {
+	settings_.setSize(width, height);
 }
 
 
@@ -529,9 +516,11 @@ void Map::download(void) {
 
 
 void Map::build(void) {
+	int fd;
+
 	int width, height;
 
-	std::string filename = "map.png";
+	const char *template_name = "/tmp/map-XXXXXX";
 
 	log_call();
 
@@ -539,7 +528,19 @@ void Map::build(void) {
 
 	// Filename is output if user builds map/track
 	if (app_.command() == GPX2Video::CommandMap) {
-		filename = app_.settings().outputfile();
+		filename_ = app_.settings().outputfile();
+	}
+	else {
+		char *s;
+
+		// Make tmp filename
+		s = strdup(template_name);
+		fd = mkstemp(s);
+
+		filename_ = s;
+
+		close(fd);
+		free(s);
 	}
 
 	// Map size
@@ -547,14 +548,14 @@ void Map::build(void) {
 	height = (y2_ - y1_) * TILESIZE;
 
 	// Create map
-	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
-	OIIO::ImageSpec outspec(width, height, 4); // 3);
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
+	OIIO::ImageSpec outspec(width, height, 4);
 
 	outspec.tile_width = TILESIZE;
 	outspec.tile_height = TILESIZE;
 
-	if (out->open(filename, outspec) == false) {
-		log_error("Build map failure, can't open '%s' file", filename.c_str());
+	if (out->open(filename_, outspec) == false) {
+		log_error("Build map failure, can't open '%s' file", filename_.c_str());
 		goto error;
 	}
 
@@ -622,8 +623,8 @@ void Map::draw(void) {
 	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
 
 	// Draw markers
-	drawPicto(buf, x_start_, y_start_, "./assets/marker/start.png", 0.3);
-	drawPicto(buf, x_end_, y_end_, "./assets/marker/end.png", 0.3);
+	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", 0.3);
+	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", 0.3);
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -680,12 +681,12 @@ void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	}
 
 	// Cairo draw
-	cairo_stroke (cairo);
+	cairo_stroke(cairo);
 
 	// Path color
 	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
-	cairo_set_line_width (cairo, 3.0); //40.96);
-	cairo_set_line_join (cairo, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_width(cairo, 3.0); //40.96);
+	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT
 	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
@@ -695,7 +696,7 @@ void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 		x *= divider;
 		y *= divider;
 
-		cairo_line_to (cairo, x, y);
+		cairo_line_to(cairo, x, y);
 	}
 
 	// Cairo draw
@@ -734,10 +735,10 @@ bool Map::load(void) {
 	log_call();
 
 	// Open map
-	auto img = OIIO::ImageInput::open("map.png");
+	auto img = OIIO::ImageInput::open(filename_);
 
 	if (img == NULL) {
-		log_warn("Can't load '%s' map file", "map.png");
+		log_warn("Can't load '%s' map file", filename_.c_str());
 		return false;
 	}
 
@@ -788,8 +789,8 @@ bool Map::load(void) {
 
 
 void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
-	int x = settings().x(); // 1700;
-	int y = settings().y(); // 900;
+	int x = this->x(); // 1700;
+	int y = this->y(); // 900;
 	int width = settings().width(); // 800;
 	int height = settings().height(); // 500;
 
@@ -836,14 +837,14 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	// ...
 
 	// Draw picto
-	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, "./assets/marker/start.png", 0.3);
-	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, "./assets/marker/end.png", 0.3);
+	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", 0.3);
+	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", 0.3);
 	
-	drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, "./assets/marker/position.png", 0.3);
+	drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", 0.3);
 }
 
 
-bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider) {
+bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider) {
 	bool result;
 
 	// Open picto
@@ -865,7 +866,7 @@ bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double
 	// Image over
 	dst.specmod().x = x;
 	dst.specmod().y = y;
-	result = OIIO::ImageBufAlgo::over(map, dst, map);
+	result = OIIO::ImageBufAlgo::over(map, dst, map, roi);
 
 	if (!result)
 		log_error("ImageBufAlgo::over failure");

@@ -18,10 +18,11 @@
 #include "evcurl.h"
 #include "gpx.h"
 #include "mapsettings.h"
+#include "videowidget.h"
 #include "gpx2video.h"
 
 
-class Map : public GPX2Video::Task {
+class Map : public VideoWidget {
 public:
 	class Tile {
 	public:
@@ -59,9 +60,11 @@ public:
 
 	virtual ~Map();
 
-	static Map * create(GPX2Video &app, const MapSettings& settings, struct event_base *evbase);
+	static Map * create(GPX2Video &app, const MapSettings& settings);
 
 	const MapSettings& settings() const;
+
+	void setSize(int width, int height);
 
 	static int lat2pixel(int zoom, float lat);
 	static int lon2pixel(int zoom, float lon);
@@ -103,7 +106,7 @@ private:
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, const char *picto, double divider=1.0);
+	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider=1.0);
 
 	GPX2Video &app_;
 	MapSettings settings_;
@@ -113,6 +116,9 @@ private:
 	EVCurl *evcurl_;
 
 	OIIO::ImageBuf *mapbuf_;
+
+	// Map filename to tmp save
+	std::string filename_;
 
 	// Bounding box
 	int x1_, y1_, x2_, y2_;

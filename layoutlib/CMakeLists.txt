@@ -27,35 +27,15 @@ set(LAYOUTLIB_HEADERS
 #
 set(LAYOUTLIB_SOURCES
 	Node.cpp
-#	Decimal.cpp
-#	DateTime.cpp
+	Decimal.cpp
 	String.cpp
 	Unsigned.cpp
-#	DGPSStation.cpp
-#	Fix.cpp
-#	Degrees.cpp
-#	Longitude.cpp
-#	Latitude.cpp
-#	Bounds.cpp
-#	PTSeg.cpp
-#	PT.cpp
-#	EMail.cpp
-#	Link.cpp
-#	Person.cpp
-#	URI.cpp
-#	Copyright.cpp
-#	TRKSeg.cpp
-#	Extensions.cpp
+	Map.cpp
 	Widget.cpp
-#	WPT.cpp
-#	RTE.cpp
-#	Metadata.cpp
 	Layout.cpp
 	Parser.cpp
-#	Writer.cpp
 	Report.cpp
 	ReportCerr.cpp
-#	Algorithm.cpp
 )
 
 #

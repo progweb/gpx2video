@@ -31,13 +31,9 @@
 #include "Node.h" 
 
 #include "String_.h"
-//#include "Metadata.h" 
-//#include "Extensions.h"
 #include "List.h"
-//#include "RTE.h"
-//#include "TRK.h"
-//#include "WPT.h"
 #include "Widget.h"
+#include "Map.h"
 
 ///
 /// @mainpage
@@ -95,47 +91,19 @@ namespace layout
     ///
     String  &creator() { return _creator; }
 
-//    ///
-//    /// Get metadata
-//    ///
-//    /// @return the metadata element
-//    ///
-//    Metadata  &metadata() { return _metadata; }
-//
-//    ///
-//    /// Get wpt
-//    ///
-//    /// @return the list of wpt elements
-//    ///
-//    List<WPT> &wpts() { return _wpts;}
-//
-//    ///
-//    /// Get rte
-//    ///
-//    /// @return the list of rte elements
-//    ///
-//    List<RTE> &rtes() {return _rtes;}
-//
-//    ///
-//    /// Get trk
-//    ///
-//    /// @return the list of trk elements
-//    ///
-//    List<TRK> &trks() {return _trks;}
-//
-//    ///
-//    /// Get extensions
-//    ///
-//    /// @return the extensions element
-//    ///
-//    Extensions  &extensions() { return _extensions; }
-
     ///
     /// Get widget
     ///
     /// @return the list of widget elements
     ///
     List<Widget> &widgets() {return _widgets;}
+
+    ///
+    /// Get maps
+    ///
+    /// @return the list of map elements
+    ///
+    List<Map> &maps() {return _maps;}
 
   private:
 
@@ -150,6 +118,7 @@ namespace layout
 //    List<TRK>   _trks;
 
     List<Widget>   _widgets;
+    List<Map>   _maps;
 
     // Disable copy constructors
     Layout(const Layout &);

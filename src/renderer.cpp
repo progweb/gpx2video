@@ -24,10 +24,9 @@
 #include "renderer.h"
 
 
-Renderer::Renderer(GPX2Video &app, Map *map) 
+Renderer::Renderer(GPX2Video &app)
 	: Task(app) 
-	, app_(app) 
-	, map_(map) {
+	, app_(app) {
 	container_ = NULL;
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
@@ -47,11 +46,11 @@ Renderer::~Renderer() {
 }
 
 
-Renderer * Renderer::create(GPX2Video &app, Map *map) {
-	Renderer *renderer = new Renderer(app, map);
+Renderer * Renderer::create(GPX2Video &app) {
+	Renderer *renderer = new Renderer(app);
 
 	renderer->init();
-	renderer->loadWidgets();
+	renderer->load();
 	renderer->computeWidgetsPosition();
 
 	return renderer;
@@ -113,19 +112,22 @@ void Renderer::init(void) {
 }
 
 
-bool Renderer::loadWidgets(void) {
+bool Renderer::load(void) {
 	std::ifstream stream;
 
 	layout::Layout *root;
 	layout::ReportCerr report;
 	layout::Parser parser(&report);
 
+	std::list<layout::Map *> maps;
 	std::list<layout::Widget *> widgets;
 
 	std::string filename = app_.settings().layoutfile();
 
-	if (filename.empty())
+	if (filename.empty()) {
+		log_warn("None layout file");
 		goto done;
+	}
 
     stream = std::ifstream(filename);
 
@@ -145,6 +147,7 @@ bool Renderer::loadWidgets(void) {
 
 	std::cout << "Parsing '" << filename << "' layout file" << std::endl;
 
+	// Widgets
 	widgets = root->widgets().list();
 
 	for (std::list<layout::Widget *>::iterator node = widgets.begin(); node != widgets.end(); ++node) {
@@ -156,11 +159,116 @@ bool Renderer::loadWidgets(void) {
 		loadWidget(widget);
 	}
 
+	// Maps
+	maps = root->maps().list();
+
+	for (std::list<layout::Map *>::iterator node = maps.begin(); node != maps.end(); ++node) {
+		layout::Map *map = (*node);
+         
+		if (map == nullptr)
+ 			continue;
+
+		loadMap(map);
+	}
+
 done:
 	return true;
 
 failure:
 	return false;
+}
+
+
+bool Renderer::loadMap(layout::Map *m) {
+	int x, y;
+	int width, height;
+
+	std::string s;
+
+	unsigned int mapsource;
+
+	// GPX input file
+	GPXData data;
+
+	VideoWidget::Align align = VideoWidget::AlignNone;
+
+	log_call();
+
+	// Map source
+	mapsource = m->source();
+
+	if ((MapSettings::Source) mapsource == MapSettings::SourceNull) {
+		log_warn("Map source undefined, skip map widget");
+		return false;
+	}
+
+	// Open GPX file
+	GPX *gpx = GPX::open(app_.settings().gpxfile());
+
+	if (gpx == NULL) {
+		log_warn("Can't read GPS data, skip map widget");
+		return false;
+	}
+
+	// Media
+	MediaContainer *container = app_.media();
+
+	VideoStreamPtr video_stream = container->getVideoStream();
+
+	// 2704x1520 => 800x500
+	// 1920x1080 => 560x350
+	width = (m->width() > 0) ? m->width() : 800 * video_stream->width() / 2704;
+	height = (m->height() > 0) ? m->height() : 500 * video_stream->height() / 1520;
+
+	// Position
+	x = (m->x() > 0) ? m->x() : video_stream->width() - width - 50;
+	y = (m->y() > 0) ? m->y() : video_stream->height() - height - 50;
+
+	// Create map bounding box
+	GPXData::point p1, p2;
+	gpx->getBoundingBox(&p1, &p2);
+
+	// Alignment
+	s = (const char *) m->align();
+
+	if (s.empty() || (s == "none"))
+		align = VideoWidget::AlignNone;
+	else if (s == "left")
+		align = VideoWidget::AlignLeft;
+	else if (s == "right")
+		align = VideoWidget::AlignRight;
+	else if (s == "bottom")
+		align = VideoWidget::AlignBottom;
+	else if (s == "top")
+		align = VideoWidget::AlignTop;
+	else {
+		log_error("Map align value '%s' unknown", s.c_str());
+	}
+
+	// Map settings
+	MapSettings mapSettings;
+	mapSettings.setSize(width, height);
+	mapSettings.setSource((MapSettings::Source) mapsource);
+	mapSettings.setZoom(m->zoom());
+	mapSettings.setDivider(m->factor());
+	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+
+	Map *map = Map::create(app_, mapSettings);
+
+	log_info("Load map widget");
+
+	// Widget settings
+	map->setAlign(align);
+	map->setPosition(x, y);
+	map->setSize(mapSettings.width(), mapSettings.height());
+	map->setMargin(m->margin());
+
+	// Append
+	app_.append(map);
+
+	this->append(map);
+
+	return true;
 }
 
 
@@ -199,7 +307,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Alignment
 	s = (const char *) w->align();
 
-	if (s.empty())
+	if (s.empty() || (s == "none"))
 		align = VideoWidget::AlignNone;
 	else if (s == "left")
 		align = VideoWidget::AlignLeft;
@@ -254,6 +362,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
+	// Left side
+	//-----------------------------------------------------------
+
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
 		if (widget->align() != VideoWidget::AlignLeft)
@@ -270,6 +381,9 @@ void Renderer::computeWidgetsPosition(void) {
 	// Set position (for 'left' align)
 	offset = space / 2;
 	for (VideoWidget *widget : widgets_) {
+		if (widget->align() != VideoWidget::AlignLeft)
+			continue;
+
 		x = widget->margin();
 		y = offset + widget->margin();
 
@@ -376,13 +490,9 @@ done:
 void Renderer::draw(FramePtr frame, const GPXData &data) {
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
-	// Draw each widget
+	// Draw each widget, map...
 	for (VideoWidget *widget : widgets_)
-		widget->draw(&frame_buffer, data);
-
-	// Draw map
-	if (map_ != NULL)
-		map_->render(&frame_buffer, data); // x:1700, y:900, w:800, h:500
+		widget->render(&frame_buffer, data);
 
 	frame->fromImageBuf(frame_buffer);
 }
@@ -428,31 +538,4 @@ void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const
 	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10), y + h - (pt/2), value, pt, "./assets/fonts/Helvetica.ttf", white) == false)
 		fprintf(stderr, "render text error\n");
 }
-
-
-//void Renderer::drawMap(OIIO::ImageBuf *frame, int x, int y, int width, int height, double divider) {
-//	int w, h;
-//
-//	// Open map
-//	auto img = OIIO::ImageInput::open("map.png");
-//	const OIIO::ImageSpec& spec = img->spec();
-//	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
-//	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
-//
-//	OIIO::ImageBuf *buf = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-//	img->read_image(type, buf->localpixels());
-//
-//	// Resize map
-//	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-//	OIIO::ImageBufAlgo::resize(dst, *buf);
-//
-//	// Draw track
-//
-//	// Image over
-//	dst.specmod().x = x;
-//	dst.specmod().y = y;
-//	OIIO::ImageBufAlgo::over(*frame, dst, *frame, OIIO::ROI(x, x + width, y, y + height));
-//
-//	delete buf;
-//}
 
