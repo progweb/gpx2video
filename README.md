@@ -17,7 +17,7 @@ gpx2video is **only a test tool and isn't yet a final release!**
 
 ## Features
 
-gpx2video can read and extract:
+gpx2video can read and extract from your gpx input file:
   - time, 
   - position, 
   - elevation, 
@@ -26,7 +26,6 @@ gpx2video can read and extract:
   - max speed,
   - heartrate, 
   - cadence
-from your gpx input file.
 
 gpx2video can extract GPMD data from GoPro GPMD stream in several format:
   - Text dump
@@ -278,6 +277,14 @@ command lines.
   - User interface integration
   - GPS interpolate data between two waypoints.
   - Progress rendering status
+
+
+## Overlay software
+
+Here, you can find other solutions working on Linux:
+
+  - GoPro Map Sync - (https://github.com/thomergil/gopro-map-sync)
+  - Overlaying Dashboard - (https://github.com/time4tea/gopro-dashboard-overlay)
 
 
 ## Credits
