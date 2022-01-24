@@ -88,6 +88,9 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 	// Try format: "2020-07-28T07:04:43.000Z"
 	else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
 		pt->time = timegm(&time);
+	// Try format: "2020-07-28T07:04:43Z"
+	else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
+		pt->time = timegm(&time);
 	else
 		pt->valid = false;
 
@@ -381,6 +384,9 @@ const GPXData GPX::retrieveData(const int64_t &timecode) {
 				t = timegm(&time);
 			// Try format: "2020-07-28T07:04:43.000Z"
 			else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
+				t = timegm(&time);
+			// Try format: "2020-07-28T07:04:43Z"
+			else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
 				t = timegm(&time);
 			else
 				continue;

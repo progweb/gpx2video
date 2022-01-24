@@ -183,6 +183,9 @@ namespace gpx
       }
     }
 
+	if (!ok)
+		return NULL;
+
     return _root;
   }
 

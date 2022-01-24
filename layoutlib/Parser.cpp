@@ -185,6 +185,9 @@ namespace layout
       }
     }
 
+	if (!ok)
+		return NULL;
+
     return _root;
   }
 
