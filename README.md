@@ -102,7 +102,7 @@ If gpx2video finds the 'GoPro MET' stream, it determines the offset time to use.
 To build gpx2video, please install all dependancies (on Debian):
 
 ```
-apt-get install libevent-dev libcurl4-gnutls-dev \
+apt-get install libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev libswresample-dev libswscale-dev \
     libopenimageio-dev libgeographic-dev libcairo2-dev
 ```
