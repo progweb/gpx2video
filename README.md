@@ -52,7 +52,7 @@ gpx2video can synchronize your video with your gpx input file.
 
 gpx2video is able to extract and parse metadata and sensor data recorded by your GoPro.
 
-```
+```bash
 $ ffprobe GH010337.MP4
 ffprobe version 3.2.2 Copyright (c) 2007-2016 the FFmpeg developers
   built with gcc 6.2.1 (Debian 6.2.1-5) 20161124
@@ -94,14 +94,32 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010337.MP4':
 gpx2video uses the `creation_time` field to synchronize your video with your GPX file. 
 But this date isn't synchronized with the GPS source.
 
-If gpx2video finds the 'GoPro MET' stream, it determines the offset time to use.
+If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to determine the offset time to use.
+
+"sync" command permits to test the sychronization process:
+
+```bash
+$ ./gpx2video -m GOPR1860.MP4 sync
+Time synchronization...
+PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 2022-01-16 10:05:03 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:38.959 - OFFSET: -205
+PACKET: 1 - PTS: 1000 - TIMESTAMP: 1000 ms - TIME: 2022-01-16 10:05:04 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:40.939 - OFFSET: -204
+PACKET: 2 - PTS: 2000 - TIMESTAMP: 2000 ms - TIME: 2022-01-16 10:05:05 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:41.929 - OFFSET: -204
+PACKET: 3 - PTS: 3000 - TIMESTAMP: 3000 ms - TIME: 2022-01-16 10:05:06 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:42.919 - OFFSET: -204
+...
+PACKET: 20 - PTS: 20000 - TIMESTAMP: 20000 ms - TIME: 2022-01-16 10:05:23 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:59.969 - OFFSET: -204
+PACKET: 21 - PTS: 21000 - TIMESTAMP: 21000 ms - TIME: 2022-01-16 10:05:24 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:00.959 - OFFSET: -204
+PACKET: 22 - PTS: 22000 - TIMESTAMP: 22000 ms - TIME: 2022-01-16 10:05:25 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:01.949 - OFFSET: -204
+PACKET: 23 - PTS: 23000 - TIMESTAMP: 23000 ms - TIME: 2022-01-16 10:05:26 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:02.939 - OFFSET: -204
+PACKET: 24 - PTS: 24000 - TIMESTAMP: 24000 ms - TIME: 2022-01-16 10:05:27 - GPS FIX: 2 - GPS TIME: 2022-01-16 10:02:03.929 - OFFSET: -204
+Video stream synchronized with success
+```
 
 
 ## Build
 
 To build gpx2video, please install all dependancies (on Debian):
 
-```
+```bash
 apt-get install libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev libswresample-dev libswscale-dev \
     libopenimageio-dev libgeographic-dev libcairo2-dev
@@ -109,7 +127,7 @@ apt-get install libevent-dev libssl-dev libcurl4-gnutls-dev \
 
 Then build in using cmake tools:
 
-```
+```bash
 $ git clone https://github.com/progweb/gpx2video.git
 $ mkdir gpx2video/build
 $ cd gpx2video/build
@@ -126,9 +144,9 @@ $ ./gpx2video -h
 
 gpx2video is a command line tool.
 
-To extract GoPro GPMD data from media stream:
+  - To extract GoPro GPMD data from media stream:
 
-```
+```bash
 $ ./gpx2video -m GOPR1860.MP4 -o output.gpx -f 2 extract
 gpx2video v0.0.0
 creation_time = 2020-12-13T09:56:27.000000Z
@@ -141,10 +159,10 @@ PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 1970-01-01 00:00:00
 PACKET: 1 - PTS: 1001 - TIMESTAMP: 1001 ms - TIME: 1970-01-01 00:00:01
 ```
 
-To render a video stream with telemetry data:
+  - To render a video stream with telemetry data:
 
-```
-$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 --map-source=1 --map-zoom=11 --map-factor 2.0
+```bash
+$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 video
 gpx2video v0.0.0
 creation_time = 2021-12-08T10:34:50.000000Z
 ...
@@ -197,7 +215,7 @@ FRAME: 1 - PTS: 1800 - TIMESTAMP: 20 ms - TIME: 2021-12-08 10:38:35
 Gauges size and position can be set from the layout.xml file. (see: samples/layout.xml)
 
 You can edit `samples/layout.xml` file to enable/disable gauge or edit label and position:
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
 	<widget x="250" y="450" width="120" height="120" align="left">
@@ -260,6 +278,40 @@ Finally, gpx2video renders a mapbox in applying the zoom factor.
 
 As you use map or track command line, please provide map settings (source, zoom, factor) on the
 command lines.
+
+  - To render map:
+
+```bash
+$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 map
+```
+
+  - To render map & track:
+
+```bash
+$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 track
+```
+
+## Extract tools
+
+exiftool permits to extract GPX from GoPro MP4 video file. You can use gpx2video tool too:
+
+```bash
+$ ./gpx2video -m GH010434.MP4 -o track.gpx -f 0 extract
+```
+
+You can extract the GoPro MET stream:
+
+```bash
+$ ./gpx2video -m GH010434.MP4 -o data.bin -f 1 extract
+```
+
+Or, you can extract and parse GoPro MET stream:
+
+```bash
+$ ./gpx2video -m GH010434.MP4 -o data.txt -f 2 extract
+```
+
+In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.
 
 
 ## ToDo

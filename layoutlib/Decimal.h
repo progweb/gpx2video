@@ -69,10 +69,16 @@ namespace layout
     virtual bool validate(Report *report = nullptr) const;
     
 	operator int() const { 
+		if (this->getValue().empty())
+			return 0;
+
 		return std::stoi(this->getValue());
 	}
     
 	operator double() const { 
+		if (this->getValue().empty())
+			return 0.0;
+
 		return std::stod(this->getValue());
 	}
     

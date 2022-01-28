@@ -34,7 +34,7 @@ void Cache::init(void) {
 void Cache::run(void) {
 	log_call();
 
-	log_notice("Cache initialiization...");
+	log_notice("Cache initialization...");
 
 	if (app_.command() != GPX2Video::CommandClear)
 		goto done;
