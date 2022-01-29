@@ -96,6 +96,11 @@ public:
 
 	void run(void);
 
+	bool open(void);
+	void close(void);
+
+	int getPacket(AVPacket *packet);
+
 	void parse(GPMD &gpmd, uint8_t *buffer, size_t size, std::ofstream &out);
 
 protected:
@@ -103,6 +108,10 @@ protected:
 	ExtractorSettings settings_;
 
 	MediaContainer *container_;
+
+	AVFormatContext *fmt_ctx_;
+
+	AVStream *avstream_;
 
 	Extractor(GPX2Video &app, const ExtractorSettings &settings);
 

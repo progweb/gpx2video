@@ -8,7 +8,9 @@
 class ExtractorSettings {
 public:
 	enum Format {
-		FormatDump = 0,
+		FormatNone = 0,
+
+		FormatDump,
 		FormatRAW,
 		FormatGPX,
 

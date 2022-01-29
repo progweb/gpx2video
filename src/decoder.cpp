@@ -277,7 +277,7 @@ bool Decoder::open(const std::string &filename, const int &index) {
 
 
 int Decoder::getFrame(AVPacket *packet, AVFrame *frame) {
-	int result;
+	int result = -1;
 
 	bool eof = false;
 

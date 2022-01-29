@@ -11,11 +11,9 @@ extern "C" {
 #include "timesync.h"
 
 
-TimeSync::TimeSync(GPX2Video &app) 
-	: Task(app) 
-	, app_(app) {
-	container_ = NULL;
-	offset_ = 0;
+
+TimeSync::TimeSync(GPX2Video &app, const ExtractorSettings &settings) 
+	: Extractor(app, settings) {
 }
 
 
@@ -24,19 +22,14 @@ TimeSync::~TimeSync() {
 
 
 TimeSync * TimeSync::create(GPX2Video &app) {
-	TimeSync *timesync = new TimeSync(app);
+	ExtractorSettings extractorSettings;
+	extractorSettings.setFormat(ExtractorSettings::FormatNone);
+
+	TimeSync *timesync = new TimeSync(app, extractorSettings);
 
 	timesync->init();
 
 	return timesync;
-}
-
-
-void TimeSync::init(void) {
-	log_call();
-
-	// Media
-	container_ = app_.media();
 }
 
 
@@ -47,37 +40,25 @@ void TimeSync::run(void) {
 	int offset = 0;
 	int start_time = 0;
 
-	bool eof = false;
-
     AVPacket *packet = NULL;
-	AVStream *avstream = NULL;
-	AVFormatContext *fmt_ctx = NULL;
 
 	log_call();
 
 	log_notice("Time synchronization...");
 
-	StreamPtr stream = container_->getDataStream("GoPro MET");
-
-	if (stream == NULL) {
-		log_error("No GPS data stream found");
-		goto done;
-	};
-
-	// Try to open
-	if (avformat_open_input(&fmt_ctx, stream->container()->filename().c_str(), NULL, NULL) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot open input file '%s'", stream->container()->filename().c_str());
+	// Open output stream
+    std::ofstream out = std::ofstream("/dev/null");
+       
+	if (!out.is_open()) {
+		log_error("Open '/dev/null' failure");
 		goto done;
 	}
 
-	// Get stream information from format
-	if (avformat_find_stream_info(fmt_ctx, NULL) < 0) {
-		av_log(NULL, AV_LOG_ERROR, "Cannot find stream information\n");
+	// Open GoPro MET stream
+	if (open() != true) {
+		log_warn("Time synchronization failure!");
 		goto done;
 	}
-
-	// Get reference to correct AVStream
-	avstream = fmt_ctx->streams[stream->index()];
 
 	if (!(packet = av_packet_alloc()))
 		goto done;
@@ -85,76 +66,69 @@ void TimeSync::run(void) {
 	// Get start time from metadata
 	start_time = container_->startTime();
 
-	while (!eof) {
+	while (true) {
 		TimeSync::GPMD gpmd;
 
-		do {
-			// Free buffer in packet if there is one
-			av_packet_unref(packet);
-		
-			result = av_read_frame(fmt_ctx, packet);
-		} while (packet->stream_index != avstream->index && result >= 0);
+		// Pull from stream
+		result = getPacket(packet);
 
-		if (result == AVERROR_EOF) {
-			// Don't break so that receive gets called again, but don't try to read again
-			eof = true;
-		}
-		else if (result < 0) {
-			// Handle other error by breaking loop and returning the code we received
+		// Handle any errors that aren't EOF (EOF is handled later on)
+		if ((result < 0) && (result != AVERROR_EOF)) {
 			break;
 		}
-		else {
-        	av_log(NULL, AV_LOG_DEBUG, "Extract GPX from stream %u\n", packet->stream_index);
 
-			// Stream timestamp
-			int64_t timecode = packet->pts;
-			int64_t timecode_ms = timecode * av_q2d(avstream->time_base) * 1000;
-
-			// Parsing stream packet
-			parse(gpmd, packet->data, packet->size, 0);
-
-			// Camera time
-			char s[128];
-
-			struct tm camera_time;
-
-			const time_t camera_t = start_time + (timecode_ms / 1000);
-
-			gmtime_r(&camera_t, &camera_time);
-
-			strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
-
-			// GPS time - format = 2021-12-08 08:55:46.039
-			struct tm gps_time;
-
-			const char *str = gpmd.date.c_str();
-
-			memset(&gps_time, 0, sizeof(gps_time));
-			strptime(str, "%Y-%m-%d %H:%M:%S.", &gps_time);
-
-			const time_t gps_t = timegm(&gps_time);
-
-			// Offset in seconds
-			offset = gps_t - camera_t;
-
-			// Dump
-			printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s - GPS TIME: %s - OFFSET: %d\n", 
-				n, timecode, timecode_ms, s, gpmd.date.c_str(), offset);
-
-			// We don't needd the packet anymore, so free it
-			av_packet_unref(packet);
-
-			n++;
-
-			// Fix ?
-			if (gpmd.fix > 1) {
-				log_notice("Video stream synchronized with success");
-				break;
-			}
-
-			if (result < 0)
-				break;
+		if (result == AVERROR_EOF) {
+			break;
 		}
+
+		// Stream timestamp
+		int64_t timecode = packet->pts;
+		int64_t timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
+
+		// Parsing stream packet
+		parse(gpmd, packet->data, packet->size, out);
+
+		// Camera time
+		char s[128];
+
+		struct tm camera_time;
+
+		const time_t camera_t = start_time + (timecode_ms / 1000);
+
+		gmtime_r(&camera_t, &camera_time);
+
+		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
+
+		// GPS time - format = 2021-12-08 08:55:46.039
+		struct tm gps_time;
+
+		const char *str = gpmd.date.c_str();
+
+		memset(&gps_time, 0, sizeof(gps_time));
+		strptime(str, "%Y-%m-%d %H:%M:%S.", &gps_time);
+
+		const time_t gps_t = timegm(&gps_time);
+
+		// Offset in seconds
+		offset = gps_t - camera_t;
+
+		// Dump
+		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s - GPS FIX: %d - GPS TIME: %s - OFFSET: %d\n", 
+			n, timecode, timecode_ms, s, gpmd.fix, gpmd.date.c_str(), offset);
+
+		// We don't needd the packet anymore, so free it
+		av_packet_unref(packet);
+
+		n++;
+
+		// Fix ?
+		if (gpmd.fix > 1) {
+			log_notice("Video stream synchronized with success");
+			break;
+		}
+
+		if (result < 0)
+			break;
 	}
 
 	offset_ = offset;
@@ -162,131 +136,8 @@ void TimeSync::run(void) {
 	container_->setTimeOffset(offset);
 
 done:
-	if (fmt_ctx)
-		avformat_close_input(&fmt_ctx);
+	close();
 
 	complete();
-}
-
-
-void TimeSync::parse(TimeSync::GPMD &gpmd, uint8_t *buffer, size_t size, bool dump) {
-	int i;
-
-	size_t n;
-	size_t len;
-
-	int remain;
-
-	uint32_t key;
-	char string[128];
-
-	struct gpmd_data *data;
-
-#define MAKEKEY(label)		((uint32_t *) &label)[0]
-#define STR2FOURCC(s)		((s[0]<<0)|(s[1]<<8)|(s[2]<<16)|(s[3]<<24))
-
-	for (n=0; n<size; n=n+sizeof(data->header)) {
-		data = (struct gpmd_data *) (buffer + n);
-
-		data->header.count = bswap_16(data->header.count);
-
-		if (dump) {
-			printf("%c%c%c%c %c 0x%X %u %u\n", 
-					data->header.label[0], data->header.label[1], data->header.label[2], data->header.label[3], 
-					data->header.type, data->header.type,
-					data->header.size, data->header.count);
-		}
-
-		len = data->header.count * data->header.size;
-
-		key = MAKEKEY(data->header);
-
-		if (key == STR2FOURCC("GPSF")) {
-			if ((data->header.type == 'L') && data->header.count) {
-				gpmd.fix = __bswap_32(data->value.u32[0]);
-			}
-		}
-
-		switch (data->header.type) {
-		case 0x00:
-			continue;
-			break;
-
-		case 'c': // 0x63
-			memcpy(string, data->value.string, len);
-			string[len] = '\0';
-
-			if (dump)
-				printf("  value: %s\n", string);
-			break;
-
-		case 'L': // 0x4c
-			for (i=0; i<data->header.count; i++) {
-				data->value.u32[i] = __bswap_32(data->value.u32[i]);
-
-				if (dump)
-					printf("  value[%d]: %u\n", i, data->value.u32[i]);
-			}
-			break;
-
-		case 'S': // 0x53
-			for (i=0; i<data->header.count; i++) {
-				data->value.u16[i] = bswap_16(data->value.u16[i]);
-
-				if (dump)
-					printf("  value[%d]: %u\n", i, data->value.u16[i]);
-			}
-			break;
-
-		case 's': // 0x73
-			for (i=0; i<data->header.count; i++) {
-				data->value.s16[i] = bswap_16(data->value.s16[i]);
-
-				if (dump)
-					printf("  value: %d\n", data->value.s16[i]);
-			}
-			break;
-
-		case 'f': // 0x66
-			for (i=0; i<data->header.count; i++) {
-				data->value.real[i] = __bswap_32(data->value.real[i]);
-
-				if (dump)
-					printf("  value: %f\n", data->value.real[i]);
-			}
-			break;
-
-		case 'U': { // 0x55 16 bytes
-				char *bytes = data->value.string;
-
-				// 2020-12-13T09:56:27.000000Z
-				// buffer contains: 201213085548.215
-				// so format to : YY:MM:DD HH:MM:SS.
-				sprintf(string, "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c.%c%c%c",
-						bytes[0], bytes[1], // YY
-						bytes[2], bytes[3], // MM 
-						bytes[4], bytes[5], // DD
-						bytes[6], bytes[7], // HH
-						bytes[8], bytes[9], // MM
-						bytes[10], bytes[11], // SS
-						bytes[13], bytes[14], bytes[15] // SS
-					);
-
-				gpmd.date = string;
-				
-				if (dump)
-					printf("  value: %s\n", string);
-			}
-			break;
-
-		default:
-			break;
-		}
-
-		n += len;
-		remain = len % 4;
-		if (remain > 0)
-			n += 4 - remain;
-	}
 }
 
