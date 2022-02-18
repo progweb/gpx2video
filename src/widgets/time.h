@@ -33,6 +33,7 @@ public:
 		double divider = (double) this->height() / (double) w;
 
 		// Don't use gps time, but camera time!
+		// Indeed, with garmin devices, gpx time has an offset.
 		localtime_r(&app_.time(), &time);
 
 		strftime(s, sizeof(s), "%H:%M:%S", &time);

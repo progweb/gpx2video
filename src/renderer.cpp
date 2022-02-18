@@ -14,12 +14,15 @@
 #include "videoparams.h"
 #include "encoder.h"
 #include "widgets/date.h"
+#include "widgets/distance.h"
+#include "widgets/duration.h"
 #include "widgets/grade.h"
 #include "widgets/elevation.h"
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
 #include "widgets/speed.h"
 #include "widgets/maxspeed.h"
+#include "widgets/avgspeed.h"
 #include "widgets/time.h"
 #include "renderer.h"
 
@@ -69,8 +72,10 @@ void Renderer::init(void) {
 
 	// Set start time in GPX stream
 	start_time = container_->startTime() + container_->timeOffset();
-	if (gpx_)
+	if (gpx_) {
 		gpx_->setStartTime(start_time);
+		gpx_->setTimeOffset(app_.settings().offset());
+	}
 
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
@@ -221,8 +226,8 @@ bool Renderer::loadMap(layout::Map *m) {
 	height = (m->height() > 0) ? m->height() : 500 * video_stream->height() / 1520;
 
 	// Position
-	x = (m->x() > 0) ? m->x() : video_stream->width() - width - 50;
-	y = (m->y() > 0) ? m->y() : video_stream->height() - height - 50;
+	x = (m->x() > 0) ? m->x() : video_stream->width() - width - m->margin();
+	y = (m->y() > 0) ? m->y() : video_stream->height() - height - m->margin();
 
 	// Create map bounding box
 	GPXData::point p1, p2;
@@ -231,19 +236,10 @@ bool Renderer::loadMap(layout::Map *m) {
 	// Alignment
 	s = (const char *) m->align();
 
-	if (s.empty() || (s == "none"))
-		align = VideoWidget::AlignNone;
-	else if (s == "left")
-		align = VideoWidget::AlignLeft;
-	else if (s == "right")
-		align = VideoWidget::AlignRight;
-	else if (s == "bottom")
-		align = VideoWidget::AlignBottom;
-	else if (s == "top")
-		align = VideoWidget::AlignTop;
-	else {
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::AlignUnknown)
 		log_error("Map align value '%s' unknown", s.c_str());
-	}
 
 	// Map settings
 	MapSettings mapSettings;
@@ -278,6 +274,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget *widget = NULL;
 
 	VideoWidget::Align align = VideoWidget::AlignNone;
+	VideoWidget::Units units = VideoWidget::UnitNone;
 
 	// Type
 	s = (const char *) w->type();
@@ -287,10 +284,16 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = DateWidget::create(app_);
 	else if (s == "time") 
 		widget = TimeWidget::create(app_);
+	else if (s == "distance") 
+		widget = DistanceWidget::create(app_);
+	else if (s == "duration") 
+		widget = DurationWidget::create(app_);
 	else if (s == "speed") 
 		widget = SpeedWidget::create(app_);
 	else if (s == "maxspeed") 
 		widget = MaxSpeedWidget::create(app_);
+	else if (s == "avgspeed") 
+		widget = AvgSpeedWidget::create(app_);
 	else if (s == "grade") 
 		widget = GradeWidget::create(app_);
 	else if (s == "elevation") 
@@ -307,18 +310,20 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Alignment
 	s = (const char *) w->align();
 
-	if (s.empty() || (s == "none"))
-		align = VideoWidget::AlignNone;
-	else if (s == "left")
-		align = VideoWidget::AlignLeft;
-	else if (s == "right")
-		align = VideoWidget::AlignRight;
-	else if (s == "bottom")
-		align = VideoWidget::AlignBottom;
-	else if (s == "top")
-		align = VideoWidget::AlignTop;
-	else {
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::AlignUnknown) {
 		log_error("Widget loading error, align value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Units
+	s = (const char *) w->units();
+
+	units = VideoWidget::string2units(s);
+
+	if (units == VideoWidget::UnitUnknown) {
+		log_error("Widget loading error, units value '%s' unknown", s.c_str());
 		goto error;
 	}
 
@@ -327,9 +332,13 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Widget settings
 	widget->setAlign(align);
 	widget->setPosition(w->x(), w->y());
+	widget->setFormat((const char *) w->format());
 	widget->setSize(w->width(), w->height());
 	widget->setMargin(w->margin());
+	widget->setPadding(w->padding());
 	widget->setLabel((const char *) w->name());
+	if (units != VideoWidget::UnitNone)
+		widget->setUnits(units);
 
 	// Append
 	app_.append(widget);
@@ -354,19 +363,69 @@ void Renderer::append(VideoWidget *widget) {
 
 
 void Renderer::computeWidgetsPosition(void) {
-	int n = 0;
-	int height = 0;
+	int n;
+	int width, height;
 
 	int x, y;
 	int space, offset;
+	
+	int margintop, marginbottom;
+	int marginleft, marginright;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
-	// Left side
+	// TopLeft, TopRight, BottomLeft, BottomRight
 	//-----------------------------------------------------------
 
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
+		switch (widget->align()) {
+		case VideoWidget::AlignTopLeft:
+			x = widget->margin();
+			y = widget->margin();
+			break;
+
+		case VideoWidget::AlignTopRight:
+			x = video_stream->width() - widget->margin() - widget->width();
+			y = widget->margin();
+			break;
+
+		case VideoWidget::AlignBottomLeft:
+			x = widget->margin();
+			y = video_stream->height() - widget->margin() - widget->height();
+			break;
+
+		case VideoWidget::AlignBottomRight:
+			x = video_stream->width() - widget->margin() - widget->width();
+			y = video_stream->height() - widget->margin() - widget->height();
+			break;
+
+		default:
+			continue;
+		}
+
+		widget->setPosition(x, y);
+	}
+
+	// Left side
+	//-----------------------------------------------------------
+	n = 0;
+	height = 0;
+	margintop = 0;
+	marginbottom = 0;
+
+	// Get align position (left, top, bottom, right)
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() == VideoWidget::AlignTopLeft) {
+			margintop = MAX(widget->height() + 2 * widget->margin(), margintop);
+			continue;
+		}
+
+		if (widget->align() == VideoWidget::AlignBottomLeft) {
+			marginbottom = MAX(widget->height() + 2 * widget->margin(), marginbottom);
+			continue;
+		}
+
 		if (widget->align() != VideoWidget::AlignLeft)
 			continue;
 
@@ -376,7 +435,8 @@ void Renderer::computeWidgetsPosition(void) {
 	}
 
 	// Compute position for each widget
-	space = video_stream->height() - height;
+	space = video_stream->height() - (height + margintop + marginbottom);
+	space = MAX(0, space);
 
 	// Set position (for 'left' align)
 	offset = space / 2;
@@ -385,11 +445,146 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		x = widget->margin();
-		y = offset + widget->margin();
+		y = margintop + offset + widget->margin();
 
 		widget->setPosition(x, y);
 
 		offset += widget->height() + 2 * widget->margin();
+	}
+
+	// Right side
+	//-----------------------------------------------------------
+	n = 0;
+	height = 0;
+	margintop = 0;
+	marginbottom = 0;
+
+	// Get align position (left, top, bottom, right)
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() == VideoWidget::AlignTopRight) {
+			margintop = MAX(widget->height() + 2 * widget->margin(), margintop);
+			continue;
+		}
+
+		if (widget->align() == VideoWidget::AlignBottomRight) {
+			marginbottom = MAX(widget->height() + 2 * widget->margin(), marginbottom);
+			continue;
+		}
+
+		if (widget->align() != VideoWidget::AlignRight)
+			continue;
+
+		height += widget->height();
+		height += 2 * widget->margin();
+		n++;
+	}
+
+	// Compute position for each widget
+	space = video_stream->height() - (height + margintop + marginbottom);
+	space = MAX(0, space);
+
+	// Set position (for 'right' align)
+	offset = space / 2;
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() != VideoWidget::AlignRight)
+			continue;
+
+		x = video_stream->width() - widget->margin() - widget->width();
+		y = margintop + offset + widget->margin();
+
+		widget->setPosition(x, y);
+
+		offset += widget->height() + 2 * widget->margin();
+	}
+
+	// Top side
+	//-----------------------------------------------------------
+	n = 0;
+	width = 0;
+	marginleft = 0;
+	marginright = 0;
+
+	// Get align position (left, top, bottom, right)
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() == VideoWidget::AlignTopLeft) {
+			marginleft = MAX(widget->width() + 2 * widget->margin(), marginleft);
+			continue;
+		}
+
+		if (widget->align() == VideoWidget::AlignTopRight) {
+			marginright = MAX(widget->width() + 2 * widget->margin(), marginright);
+			continue;
+		}
+
+		if (widget->align() != VideoWidget::AlignTop)
+			continue;
+
+		width += widget->width();
+		width += 2 * widget->margin();
+		n++;
+	}
+
+	// Compute position for each widget
+	space = video_stream->width() - (width + marginleft + marginright);
+	space = MAX(0, space);
+
+	// Set position (for 'top' align)
+	offset = space / 2;
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() != VideoWidget::AlignTop)
+			continue;
+
+		x = marginleft + offset + widget->margin();
+		y = widget->margin();
+
+		widget->setPosition(x, y);
+
+		offset += widget->width() + 2 * widget->margin();
+	}
+
+	// Bottom side
+	//-----------------------------------------------------------
+	n = 0;
+	width = 0;
+	marginleft = 0;
+	marginright = 0;
+
+	// Get align position (left, top, bottom, right)
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() == VideoWidget::AlignBottomLeft) {
+			marginleft = MAX(widget->width() + 2 * widget->margin(), marginleft);
+			continue;
+		}
+
+		if (widget->align() == VideoWidget::AlignBottomRight) {
+			marginright = MAX(widget->width() + 2 * widget->margin(), marginright);
+			continue;
+		}
+
+		if (widget->align() != VideoWidget::AlignBottom)
+			continue;
+
+		width += widget->width();
+		width += 2 * widget->margin();
+		n++;
+	}
+
+	// Compute position for each widget
+	space = video_stream->width() - (width + marginleft + marginright);
+	space = MAX(0, space);
+
+	// Set position (for 'bottom' align)
+	offset = space / 2;
+	for (VideoWidget *widget : widgets_) {
+		if (widget->align() != VideoWidget::AlignBottom)
+			continue;
+
+		x = marginleft + offset + widget->margin();
+		y = video_stream->height() - widget->margin() - widget->height();
+
+		widget->setPosition(x, y);
+
+		offset += widget->width() + 2 * widget->margin();
 	}
 }
 
@@ -414,7 +609,6 @@ void Renderer::run(void) {
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
 
 	// Update start time in GPX stream
-	start_time = container_->startTime() + container_->timeOffset();
 	if (gpx_)
 		gpx_->setStartTime(start_time);
 
@@ -453,7 +647,6 @@ void Renderer::run(void) {
 	// Dump frame info
 	{
 		char s[128];
-//		const time_t t = start_time + (timecode_ms / 1000);
 		struct tm time;
 
 		localtime_r(&app_.time(), &time);

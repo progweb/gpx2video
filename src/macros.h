@@ -14,8 +14,8 @@
 #define ARRAY_SIZE(x)   (sizeof(x) / sizeof((x)[0]))
 #endif
 
-//#define MIN(a, b)       ((a) < (b) ? (a) : (b))
-//#define MAX(a, b)       ((a) > (b) ? (a) : (b))
+#define MIN(a, b)       ((a) < (b) ? (a) : (b))
+#define MAX(a, b)       ((a) > (b) ? (a) : (b))
 
 #define P2ALIGNED(x, a) (((x) & ((a) - 1)) == 0)
 #define ISP2(x)         P2ALIGNED(x, x)

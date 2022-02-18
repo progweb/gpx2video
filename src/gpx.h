@@ -63,6 +63,10 @@ public:
 		return maxspeed_;
 	}
 
+	const double& avgspeed(void) const {
+		return avgspeed_;
+	}
+
 	const double& temperature(void) const {
 		return temperature_;
 	}
@@ -89,6 +93,7 @@ protected:
 	double distance_;
 	double speed_;
 	double maxspeed_;
+	double avgspeed_;
 	double grade_;
 	double temperature_;
 	int heartrate_;
@@ -107,6 +112,10 @@ public:
 	void setStartTime(char *start_time);
 	void setStartTime(time_t start_time);
 	void setStartTime(struct tm *start_time);
+
+	int timeOffset(void) const;
+	void setTimeOffset(const int& offset);
+
 	const GPXData retrieveData(const int64_t &timecode);
 	bool getBoundingBox(GPXData::point *p1, GPXData::point *p2);
 	double getMaxSpeed(void);
@@ -130,6 +139,7 @@ private:
 	std::list<gpx::WPT*>::iterator iter_pts_;
 	std::list<gpx::TRKSeg*>::iterator iter_seg_;
 
+	int offset_;
 	time_t start_time_;
 };
 

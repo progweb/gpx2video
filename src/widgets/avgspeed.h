@@ -1,22 +1,22 @@
-#ifndef __GPX2VIDEO__WIDGETS__SPEED_H__
-#define __GPX2VIDEO__WIDGETS__SPEED_H__
+#ifndef __GPX2VIDEO__WIDGETS__AVGSPEED_H__
+#define __GPX2VIDEO__WIDGETS__AVGSPEED_H__
 
 #include "log.h"
 #include "videowidget.h"
 
 
-class SpeedWidget : public VideoWidget {
+class AvgSpeedWidget : public VideoWidget {
 public:
-	~SpeedWidget() {
+	~AvgSpeedWidget() {
 		log_call();
 	}
 
-	static SpeedWidget * create(GPX2Video &app) {
-		SpeedWidget *widget;
+	static AvgSpeedWidget * create(GPX2Video &app) {
+		AvgSpeedWidget *widget;
 
 		log_call();
 
-		widget = new SpeedWidget(app, "speed");
+		widget = new AvgSpeedWidget(app, "avgspeed");
 
 		widget->setUnits(VideoWidget::UnitMPH);
 
@@ -25,7 +25,7 @@ public:
 
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
-		double speed = data.speed();
+		double speed = data.avgspeed();
 
 		const int w = 64;
 
@@ -39,12 +39,12 @@ public:
 
 		sprintf(s, "%.0f %s", speed, units2string(units()).c_str());
 
-		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_speed.png",
+		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_avgspeed.png",
 				label().c_str(), s, divider);
 	}
 
 private:
-	SpeedWidget(GPX2Video &app, std::string name)
+	AvgSpeedWidget(GPX2Video &app, std::string name)
 		: VideoWidget(app, name) {
 	}
 };

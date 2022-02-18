@@ -1,55 +1,91 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>grade</type>
 		<name>PENTE</name>
 		<margin>20</margin>
+		<padding>5</padding>
 	</widget>		
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
+		<padding>10</padding>
+		<padding>5</padding>
+		<units>kph</units>
 	</widget>		
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
+		<padding>5</padding>
+		<units>m</units>
 	</widget>
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="right">
 		<type>time</type>
 		<name>HEURE</name>
 		<margin>20</margin>
+		<padding>5</padding>
 	</widget>
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="right">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
+		<padding>5</padding>
+		<format>%d-%m-%Y</format>
 	</widget>
-	<!--
-	<widget x="250" y="450" width="120" height="120" align="left">
-		<type>maxspeed</type>
-		<name>VITESSE MAX.</name>
+	<widget x="250" y="450" width="600" height="120" align="right">
+		<type>duration</type>
+		<name>DUREE</name>
 		<margin>20</margin>
-	</widget>		
-	<widget x="250" y="450" width="120" height="120" align="left">
+		<padding>5</padding>
+	</widget>
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>20</margin>
+		<padding>5</padding>
 	</widget>
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<!--
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
+		<padding>5</padding>
 	</widget>		
+	-->
+	<widget x="250" y="450" width="600" height="120" align="bottom">
+		<type>distance</type>
+		<name>DISTANCE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>km</units>
+	</widget>		
+	<widget x="250" y="450" width="600" height="120" align="bottom">
+		<type>avgspeed</type>
+		<name>MOYENNE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>kph</units>
+	</widget>		
+	<widget x="250" y="450" width="600" height="120" align="bottom">
+		<type>maxspeed</type>
+		<name>VITESSE MAX.</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>kph</units>
+	</widget>		
+	<!--
 	<map x="800" y="300" align="none">
 		<source>1</source>
 		<zoom>11</zoom>
 		<factor>1.2</factor>
 	</map>
 	-->
-	<map align="none">
+	<map align="bottom-right">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
+		<margin>20</margin>
 	</map>
 </layout>

@@ -22,7 +22,22 @@ public:
 		AlignLeft,
 		AlignRight,
 		AlignBottom,
-		AlignTop
+		AlignTop,
+		AlignBottomLeft,
+		AlignBottomRight,
+		AlignTopLeft,
+		AlignTopRight,
+		AlignUnknown
+	};
+
+	enum Units {
+		UnitNone,
+		UnitMPH,
+		UnitKPH,
+		UnitKm,
+		UnitMeter,
+		UnitMiles,
+		UnitUnknown
 	};
 
 	virtual ~VideoWidget() {
@@ -35,6 +50,22 @@ public:
 
 	virtual void setAlign(Align align) {
 		align_ = align;
+	}
+
+	Units& units(void) {
+		return units_;
+	}
+
+	virtual void setUnits(Units units) {
+		units_ = units;
+	}
+
+	const std::string& format(void) {
+		return format_;
+	}
+
+	void setFormat(std::string format) {
+		format_ = format;
 	}
 
 	virtual void setPosition(int x, int y) {
@@ -71,6 +102,14 @@ public:
 		margin_ = margin;
 	}
 
+	const int& padding(void) const {
+		return padding_;
+	}
+
+	virtual void setPadding(int padding) {
+		padding_ = padding;
+	}
+
 	const std::string& name(void) const {
 		return name_;
 	}
@@ -91,6 +130,10 @@ public:
 
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
+	static Align string2align(std::string &s);
+	static Units string2units(std::string &s);
+	static std::string units2string(Units units);
+
 protected:
 	VideoWidget(GPX2Video &app, std::string name)  
 		: GPX2Video::Task(app)
@@ -102,18 +145,24 @@ protected:
 		setPosition(0, 0);
 		setSize(64, 64);
 		setMargin(10);
+		setPadding(0);
 		setLabel(name);
+		setUnits(VideoWidget::UnitNone);
 	}
 
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
 
 	GPX2Video &app_;
 	Align align_;
+	Units units_;
+	std::string format_;
+
 	int x_;
 	int y_;
 	int width_;
 	int height_;
 	int margin_;
+	int padding_;
 	std::string label_;
 
 private:

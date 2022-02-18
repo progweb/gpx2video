@@ -18,6 +18,8 @@ public:
 
 		widget = new DateWidget(app, "date");
 
+		widget->setFormat("%Y-%m-%d");
+
 		return widget;
 	}
 
@@ -33,9 +35,10 @@ public:
 		double divider = (double) this->height() / (double) w;
 
 		// Don't use gps time, but camera time!
+		// Indeed, with garmin devices, gpx time has an offset.
 		localtime_r(&app_.time(), &time);
 
-		strftime(s, sizeof(s), "%Y-%m-%d", &time);
+		strftime(s, sizeof(s), format().c_str(), &time);
 
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_date.png", 
 				label().c_str(), s, divider);

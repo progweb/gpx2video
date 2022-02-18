@@ -84,6 +84,20 @@ namespace layout
     String  &align() { return _align; }
 
     ///
+    /// Get units
+    ///
+    /// @return the units element
+    ///
+    String  &units() { return _units; }
+
+    ///
+    /// Get format
+    ///
+    /// @return the format element
+    ///
+    String  &format() { return _format; }
+
+    ///
     /// Get x
     ///
     /// @return the x attribute
@@ -118,6 +132,13 @@ namespace layout
     ///
     Unsigned  &margin() { return _margin; }
 
+    ///
+    /// Get padding
+    ///
+    /// @return the padding attribute
+    ///
+    Unsigned  &padding() { return _padding; }
+
     // Methods
 
     private:
@@ -126,9 +147,12 @@ namespace layout
     String       _name;
     String       _type;
     String       _align;
+    String       _units;
+    String       _format;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;
+	Unsigned     _padding;
     
     // Disable copy constructors
     Widget(const Widget &);

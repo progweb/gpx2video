@@ -18,17 +18,27 @@ public:
 
 		widget = new ElevationWidget(app, "elevation");
 
+		widget->setUnits(VideoWidget::UnitMiles);
+
 		return widget;
 	}
 
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
+		double elevation = data.elevation();
 
 		const int w = 64;
 
 		double divider = (double) this->height() / (double) w;
 
-		sprintf(s, "%.0f m", data.elevation());
+		if (units() == VideoWidget::UnitMeter) {
+		}
+		else {
+			elevation *= 0.6213711922;
+		}
+
+		sprintf(s, "%.0f %s", elevation, units2string(units()).c_str());
+
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_elevation.png", 
 				label().c_str(), s, divider);
 	}

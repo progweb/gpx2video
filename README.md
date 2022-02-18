@@ -91,8 +91,8 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010337.MP4':
       handler_name    : GoPro SOS  
 ```
 
-gpx2video uses the `creation_time` field to synchronize your video with your GPX file. 
-But this date isn't synchronized with the GPS source.
+gpx2video uses the `creation_time` field to synchronize your video with your GPX file. Warning, `creation_time`
+is in local time. But this date isn't synchronized with the GPS source.
 
 If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to determine the offset time to use.
 
@@ -112,6 +112,12 @@ PACKET: 22 - PTS: 22000 - TIMESTAMP: 22000 ms - TIME: 2022-01-16 10:05:25 - GPS 
 PACKET: 23 - PTS: 23000 - TIMESTAMP: 23000 ms - TIME: 2022-01-16 10:05:26 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:02.939 - OFFSET: -204
 PACKET: 24 - PTS: 24000 - TIMESTAMP: 24000 ms - TIME: 2022-01-16 10:05:27 - GPS FIX: 2 - GPS TIME: 2022-01-16 10:02:03.929 - OFFSET: -204
 Video stream synchronized with success
+```
+
+At last, but not least, you can add an user offset (in ms).
+
+```bash
+$ ./gpx2video -m GOPR1860.MP4 --offset 9000 ...
 ```
 
 
@@ -218,31 +224,33 @@ You can edit `samples/layout.xml` file to enable/disable gauge or edit label and
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="120" height="120" align="left">
-		<type>grade</type>
-		<name>PENTE</name>
-		<margin>20</margin>
-	</widget>		
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
+		<padding>5</padding>
+		<units>kph</units>
 	</widget>		
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
+		<padding>5</padding>
+		<units>m</units>
 	</widget>
-	<widget x="250" y="450" width="120" height="120" align="left">
-		<type>cadence</type>
-		<name>CADENCE</name>
+	<widget x="250" y="450" width="600" height="120" align="right">
+		<type>date</type>
+		<name>DATE</name>
 		<margin>20</margin>
+		<padding>5</padding>
+		<format>%d-%m-%Y</format>
 	</widget>
 	<!--
-	<widget x="250" y="450" width="120" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
+		<padding>5</padding>
 	</widget>		
 	-->
 	<map x="800" y="300" width="640" height="480" align="none">
@@ -253,18 +261,23 @@ You can edit `samples/layout.xml` file to enable/disable gauge or edit label and
 </layout>
 ```
 
-Align values are none or left (right, top, bottom not yet supported). If align attribute is defined, 
-gpx2video computes 'x' and 'y' values.
-
 Type gauges supported are:
-  - speed, maxspeed
+  - speed, maxspeed, avgspeed
   - grade, elevation
-  - date, time
+  - date, time, duration
+  - distance
   - cadence
   - heartrate
 
-Map widget can be auto positionned as x, y and/or width, height aren't set. At last, you can now
-define several map widgets.
+Align values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
+If align attribute is defined, gpx2video ignores and computes 'x' and 'y' values.
+
+Units values are: mph, kph, km, m and miles.
+
+*Note: Widget date accepts format element.*
+
+Map widget can be auto positionned as x, y and/or width, height aren't set. At last, you can define
+several map widgets.
 
 
 ## Maps
@@ -317,18 +330,19 @@ In future release, gpx2video should be able to use more data from this stream as
 ## ToDo
 
   - Render gauge:
-    - alignment: right, top and bottom
-    - hflip: filp icon and label
+    - hflip: flip icon and label
     - gpx fix mode: disable gauge on nofix
-    - svg: convert in svg
-  - Render more gauges (color, size, position...)
+    - svg: add icon svg support
+    - color: text color
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
+  - Widget debug
+  - Title gauge
   - Photo import
-  - GPS fix mode (doesn't render gauge if no signal)
   - User interface integration
   - GPS interpolate data between two waypoints.
   - Progress rendering status
+  - 360 videos support
 
 
 ## Overlay software
@@ -337,6 +351,7 @@ Here, you can find other solutions working on Linux:
 
   - GoPro Map Sync - (https://github.com/thomergil/gopro-map-sync)
   - Overlaying Dashboard - (https://github.com/time4tea/gopro-dashboard-overlay)
+  - GPS data overlay on videos - (https://github.com/peregin/gps-overlay-on-video)
 
 
 ## Credits

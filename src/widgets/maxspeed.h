@@ -18,18 +18,28 @@ public:
 
 		widget = new MaxSpeedWidget(app, "maxspeed");
 
+		widget->setUnits(VideoWidget::UnitMPH);
+
 		return widget;
 	}
 
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
+		double speed = data.maxspeed();
 
 		const int w = 64;
 
 		double divider = (double) this->height() / (double) w;
 
-		sprintf(s, "%.0f km/h", data.maxspeed());
-		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_speed.png",
+		if (units() == VideoWidget::UnitKPH) {
+		}
+		else {
+			speed *= 0.6213711922;
+		}
+
+		sprintf(s, "%.0f %s", speed, units2string(units()).c_str());
+
+		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_maxspeed.png",
 				label().c_str(), s, divider);
 	}
 

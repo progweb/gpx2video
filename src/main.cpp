@@ -31,6 +31,7 @@ static const struct option options[] = {
 	{ "gpx",            required_argument, 0, 'g' },
 	{ "layout",         required_argument, 0, 'l' },
 	{ "output",         required_argument, 0, 'o' },
+	{ "offset",         required_argument, 0, 0 },
 	{ "map-source",     required_argument, 0, 0 },
 	{ "map-factor",     required_argument, 0, 0 },
 	{ "map-zoom",       required_argument, 0, 0 },
@@ -52,6 +53,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --offset           : Add a time offset (in ms)" << std::endl;
 	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source       : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom         : Map zoom" << std::endl;
@@ -124,6 +126,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
+	int offset = 0;
 	int verbose = 0;
 	int map_zoom = 12;
 	int max_duration_ms = 0; // By default process whole media
@@ -160,7 +163,10 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		switch (option) {
 		case 0:
 			s = gpx2video::options[index].name;
-			if (s && !strcmp(s, "map-list")) {
+			if (s && !strcmp(s, "offset")) {
+				offset = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "map-list")) {
 				setCommand(GPX2Video::CommandSource);
 				return 0;
 			}
@@ -316,6 +322,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		mediafile,
 		layoutfile,
 		outputfile,
+		offset,
 		map_factor,
 		map_zoom,
 		max_duration_ms,

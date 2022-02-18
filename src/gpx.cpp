@@ -44,6 +44,7 @@ GPXData::GPXData()
 	, distance_(0)
 	, speed_(0) 
 	, maxspeed_(0)
+	, avgspeed_(0)
 	, grade_(0) 
 	, cadence_(0) {
 }
@@ -62,7 +63,7 @@ void GPXData::dump(void) {
 
 	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
-	printf("  Time: %s. Distance: %.3f km in %.3f seconds, current speed is %.3f (valid: %s)\n",
+	printf("  GPX Time: %s Distance: %.3f km in %.3f seconds, current speed is %.3f (valid: %s)\n",
 		s,
 		distance_/1000.0, duration_, speed_, 
 		valid() ? "true" : "false");  
@@ -120,6 +121,7 @@ bool GPXData::compute(void) {
 	speed_ = (3600 * dc) / (1000 * dt);
 	if (speed_ > maxspeed_)
 		maxspeed_ = speed_;
+	avgspeed_ = (3600 * distance_) / (1000 * duration_);
 
 	dc = sqrt(dx*dx + dy*dy);
 
@@ -172,7 +174,8 @@ void GPXData::read(gpx::WPT *wpt) {
 
 GPX::GPX(std::ifstream &stream, gpx::GPX *root) 
 	: stream_(stream)
-	, root_(root) {
+	, root_(root)
+	, offset_(0) {
 }
 
 
@@ -266,6 +269,16 @@ void GPX::setStartTime(char *start_time) {
 }
 
 
+int GPX::timeOffset(void) const {
+	return offset_;
+}
+
+
+void GPX::setTimeOffset(const int& offset) {
+	offset_ = offset;
+}
+
+
 void GPX::retrieveFirst(GPXData &data) {
 	gpx::WPT *wpt;
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
@@ -356,6 +369,8 @@ void GPX::retrieveLast(GPXData &data) {
 const GPXData GPX::retrieveData(const int64_t &timecode) {
 	GPXData data;
 
+	int64_t timestamp = timecode + offset_;
+
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
 	for (std::list<gpx::TRKSeg*>::iterator iter2 = trksegs.begin(); iter2 != trksegs.end(); ++iter2) {
@@ -391,9 +406,9 @@ const GPXData GPX::retrieveData(const int64_t &timecode) {
 			else
 				continue;
 
-			// Search timecode in the GPX stream
-			if (t < (start_time_ + (timecode / 1000))) {
-//				printf("t = %ld vs %ld\n", t, start_time_ + (timecode / 1000));
+			// Search timestamp in the GPX stream
+			if (t < (start_time_ + (timestamp / 1000))) {
+//				printf("t = %ld vs %ld\n", t, start_time_ + (timestamp / 1000));
 				continue;	   
 			}
 
@@ -451,6 +466,7 @@ bool GPX::getBoundingBox(GPXData::point *p1, GPXData::point *p2) {
 
 	return (p1->valid && p2->valid);
 }
+
 
 double GPX::getMaxSpeed(void) {
 	GPXData data;

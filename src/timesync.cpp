@@ -131,11 +131,13 @@ void TimeSync::run(void) {
 			break;
 	}
 
-	offset_ = offset;
-
+done:
+	// Apply offset
 	container_->setTimeOffset(offset);
 
-done:
+	// Save offset value
+	offset_ = offset;
+
 	close();
 
 	complete();

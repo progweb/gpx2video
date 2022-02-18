@@ -299,6 +299,8 @@ Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
 	, nbr_downloads_(0) {
 	log_call();
 
+	VideoWidget::setSize(settings_.width(), settings_.height()); 
+
 	mapbuf_ = NULL;
 
 	evcurl_ = EVCurl::init(evbase);
@@ -340,6 +342,8 @@ Map * Map::create(GPX2Video &app, const MapSettings &settings) {
 
 
 void Map::setSize(int width, int height) {
+	VideoWidget::setSize(width, height); 
+
 	settings_.setSize(width, height);
 }
 
@@ -457,6 +461,7 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 
 
 void Map::init(void) {
+	int i;
 	int zoom;
 
 	double lat1, lon1;
@@ -465,6 +470,8 @@ void Map::init(void) {
 	std::string uri;
 
 	Tile *tile;
+
+	double divider = settings().divider();
 
 	log_call();
 
@@ -485,6 +492,18 @@ void Map::init(void) {
 
 	x2_ = floorf((float) Map::lon2pixel(zoom, lon2) / (float) TILESIZE) + 1;
 	y2_ = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE) + 1;
+
+	// Append tile so as width tiles sum is enough
+	while ((x2_ - x1_) * TILESIZE * divider < settings().width()) {
+		x1_ -= 1;
+		x2_ += 1;
+	}
+
+	// Append tile so as height tiles sum is enough
+	while ((y2_ - y1_) * TILESIZE * divider  < settings().height()) {
+		y1_ -= 1;
+		y2_ += 1;
+	}
 
 	// Build each tile
 	for (int y=y1_; y<y2_; y++) {
@@ -819,6 +838,10 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	offsetX = posX - (width / 2);
 	offsetY = posY - (height / 2);
 
+	if (offsetX < 0)
+		offsetX = 0;
+	if (offsetY < 0)
+		offsetY = 0;
 	if (offsetX > offsetMaxX)
 		offsetX = offsetMaxX; 
 	if (offsetY > offsetMaxY)

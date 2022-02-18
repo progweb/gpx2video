@@ -35,20 +35,26 @@ namespace layout
     _name(this, "name", Node::ELEMENT, true),
     _type(this, "type",   Node::ELEMENT, true),
     _align(this, "align",   Node::ATTRIBUTE, false),
+    _units(this, "units",   Node::ELEMENT, false),
+    _format(this, "format",   Node::ELEMENT, false),
     _x(this, "x", Node::ATTRIBUTE, false),
     _y(this, "y", Node::ATTRIBUTE, false),
     _width(this, "width", Node::ATTRIBUTE, false),
     _height(this, "height", Node::ATTRIBUTE, false),
-    _margin(this, "margin", Node::ELEMENT, false)
+    _margin(this, "margin", Node::ELEMENT, false),
+    _padding(this, "padding", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
     getInterfaces().push_back(&_align);
+    getInterfaces().push_back(&_units);
+    getInterfaces().push_back(&_format);
     getInterfaces().push_back(&_x);
     getInterfaces().push_back(&_y);
     getInterfaces().push_back(&_width);
     getInterfaces().push_back(&_height);
     getInterfaces().push_back(&_margin);
+    getInterfaces().push_back(&_padding);
   }
 
   Widget::~Widget()
