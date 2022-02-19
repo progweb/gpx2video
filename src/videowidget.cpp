@@ -79,8 +79,65 @@ std::string VideoWidget::units2string(VideoWidget::Units units) {
 }
 
 
+bool VideoWidget::hex2color(float color[4], std::string hex) {
+	if (hex.empty())
+		return false;
+
+	if (hex.at(0) == '#')
+		hex.erase(0, 1);
+
+	while (hex.length() < 8)
+		hex += "0";
+
+	color[0] = std::stoi(hex.substr(0, 2), NULL, 16) / 255.0;
+	color[1] = std::stoi(hex.substr(2, 2), NULL, 16) / 255.0;
+	color[2] = std::stoi(hex.substr(4, 2), NULL, 16) / 255.0;
+	color[3] = std::stoi(hex.substr(6, 2), NULL, 16) / 255.0;
+
+	return true;
+}
+
+
+void VideoWidget::fillBackground(OIIO::ImageBuf *frame) {
+	int i;
+	int x, y;
+	int width, height;
+
+	int border;
+	float bgcolor[4];
+	float bordercolor[4];
+	
+	x = this->x();
+	y = this->y();
+	
+	width = this->width();
+	height = this->height();
+
+	border = this->border();
+	memcpy(bgcolor, this->backgroundColor(), sizeof(bgcolor));
+	memcpy(bordercolor, this->borderColor(), sizeof(bordercolor));
+
+	if ((border > 0) && (bordercolor[3] != 0.0)) {
+		for (i=0; i<border; i++)
+			OIIO::ImageBufAlgo::render_box(*frame, x + i, y + i, x + width - i, y + height -i, bordercolor, false);
+	}
+
+	if (bgcolor[3] != 0.0)
+		OIIO::ImageBufAlgo::render_box(*frame, x + border, y + border, x + width - border, y + height - border, bgcolor, true);
+}
+
+
 void VideoWidget::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider) {
 	int w, h;
+
+	bool result;
+
+	int border = this->border();
+	int padding = this->padding();
+
+	// Apply border
+	x += border;
+	y += border;
 
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
@@ -111,17 +168,35 @@ void VideoWidget::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, co
 	// |  Value    2 * px
 	// +-------------
 	//        h = px + 2 * px + 2 * padding
-	int px = h / 2 - padding();
+	int px = h / 2 - padding;
 	int pt = 3 * px / 4;
 
-	float white[] = { 1.0, 1.0, 1.0, 1.0 };
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
 
-	OIIO::ROI roi = OIIO::ImageBufAlgo::text_size(label, pt, "./assets/fonts/Helvetica.ttf");
+	memcpy(color, this->textColor(), sizeof(color));
 
-	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10) + padding(), y + roi.height() + padding(), label, pt, "./assets/fonts/Helvetica.ttf", white) == false)
+	result = OIIO::ImageBufAlgo::render_text(*frame, 
+		x + w + (w/10) + padding, 
+		y + padding, 
+		label, 
+		pt, "./assets/fonts/Helvetica.ttf", color, 
+		OIIO::ImageBufAlgo::TextAlignX::Left, 
+		OIIO::ImageBufAlgo::TextAlignY::Top, 
+		this->textShadow());
+
+	if (result == false)
 		fprintf(stderr, "render label text error\n");
 
-	if (OIIO::ImageBufAlgo::render_text(*frame, x + w + (w/10) + padding(), y + h - padding(), value, 2 * pt, "./assets/fonts/Helvetica.ttf", white) == false)
+	result = OIIO::ImageBufAlgo::render_text(*frame, 
+		x + w + (w/10) + padding, 
+		y + h - padding, 
+		value, 
+		2 * pt, "./assets/fonts/Helvetica.ttf", color, 
+		OIIO::ImageBufAlgo::TextAlignX::Left, 
+		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
+		this->textShadow());
+
+	if (result == false)
 		fprintf(stderr, "render value text error\n");
 }
 

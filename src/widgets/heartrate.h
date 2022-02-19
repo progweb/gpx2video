@@ -26,9 +26,11 @@ public:
 
 		const int w = 64;
 
-		double divider = (double) this->height() / (double) w;
+		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
 		sprintf(s, "%d bpm", data.heartrate());
+
+		this->fillBackground(buf);
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_heartrate.png",
 				label().c_str(), s, divider);
 	}

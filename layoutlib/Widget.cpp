@@ -42,7 +42,12 @@ namespace layout
     _width(this, "width", Node::ATTRIBUTE, false),
     _height(this, "height", Node::ATTRIBUTE, false),
     _margin(this, "margin", Node::ELEMENT, false),
-    _padding(this, "padding", Node::ELEMENT, false)
+    _padding(this, "padding", Node::ELEMENT, false),
+	_txtcolor(this, "text-color", Node::ELEMENT, false),
+	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
+	_border(this, "border", Node::ELEMENT, false),
+	_bordercolor(this, "border-color", Node::ELEMENT, false),
+	_bgcolor(this, "background-color", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
@@ -55,6 +60,11 @@ namespace layout
     getInterfaces().push_back(&_height);
     getInterfaces().push_back(&_margin);
     getInterfaces().push_back(&_padding);
+    getInterfaces().push_back(&_txtcolor);
+    getInterfaces().push_back(&_txtshadow);
+    getInterfaces().push_back(&_border);
+    getInterfaces().push_back(&_bordercolor);
+    getInterfaces().push_back(&_bgcolor);
   }
 
   Widget::~Widget()

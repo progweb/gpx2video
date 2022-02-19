@@ -29,7 +29,7 @@ public:
 
 		const int w = 64;
 
-		double divider = (double) this->height() / (double) w;
+		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
 		if (units() == VideoWidget::UnitKPH) {
 		}
@@ -39,6 +39,7 @@ public:
 
 		sprintf(s, "%.0f %s", speed, units2string(units()).c_str());
 
+		this->fillBackground(buf);
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_speed.png",
 				label().c_str(), s, divider);
 	}

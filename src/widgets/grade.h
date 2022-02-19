@@ -26,9 +26,11 @@ public:
 
 		const int w = 150;
 
-		double divider = (double) this->height() / (double) w;
+		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
 		sprintf(s, "%.0f%%", data.grade());
+
+		this->fillBackground(buf);
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_grade.png", 
 				label().c_str(), s, divider);
 	}

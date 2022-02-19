@@ -461,7 +461,6 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 
 
 void Map::init(void) {
-	int i;
 	int zoom;
 
 	double lat1, lon1;

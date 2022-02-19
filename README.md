@@ -261,6 +261,23 @@ You can edit `samples/layout.xml` file to enable/disable gauge or edit label and
 </layout>
 ```
 
+Here all widget element settings:
+
+```xml
+<widget x="250" y="450" width="600" height="120" align="left">
+	<type>speed</type>
+	<name>VITESSE</name>
+	<margin>20</margin>
+	<padding>5</padding>
+	<units>kph</units>
+	<text-color>#00ff00ff</text-color>
+	<text-shadow>3</text-shadow>
+	<border>5</border>
+	<border-color>#000000b0</border-color>
+	<background-color>#0000004c</background-color>
+</widget>		
+```
+
 Type gauges supported are:
   - speed, maxspeed, avgspeed
   - grade, elevation
@@ -274,7 +291,9 @@ If align attribute is defined, gpx2video ignores and computes 'x' and 'y' values
 
 Units values are: mph, kph, km, m and miles.
 
-*Note: Widget date accepts format element.*
+*Note: Widget date accepts format element too.*
+
+You can set border size and color, the background color and text color too. Color is as html "#RGBA".
 
 Map widget can be auto positionned as x, y and/or width, height aren't set. At last, you can define
 several map widgets.

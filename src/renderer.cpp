@@ -337,6 +337,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setMargin(w->margin());
 	widget->setPadding(w->padding());
 	widget->setLabel((const char *) w->name());
+	widget->setTextColor((const char *) w->textColor());
+	widget->setTextShadow(w->textShadow());
+	widget->setBorder(w->border());
+	widget->setBorderColor((const char *) w->borderColor());
+	widget->setBackgroundColor((const char *) w->backgroundColor());
 	if (units != VideoWidget::UnitNone)
 		widget->setUnits(units);
 

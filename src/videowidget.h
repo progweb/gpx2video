@@ -122,6 +122,46 @@ public:
 		label_ = label;
 	}
 
+	const float * textColor(void) const {
+		return txtcolor_;
+	}
+
+	virtual bool setTextColor(std::string color) {
+		return hex2color(txtcolor_, color);
+	}
+
+	int textShadow(void) const {
+		return txtshadow_;
+	}
+
+	void setTextShadow(int shadow_) {
+		txtshadow_ = shadow_;
+	}
+
+	int border(void) const {
+		return border_;
+	}
+
+	virtual void setBorder(int border) {
+		border_ = border;
+	}
+
+	const float * borderColor(void) const {
+		return bordercolor_;
+	}
+
+	virtual bool setBorderColor(std::string color) {
+		return hex2color(bordercolor_, color);
+	}
+
+	const float * backgroundColor(void) const {
+		return bgcolor_;
+	}
+
+	virtual bool setBackgroundColor(std::string color) {
+		return hex2color(bgcolor_, color);
+	}
+
 	virtual void run(void) {
 		log_call();
 
@@ -133,6 +173,7 @@ public:
 	static Align string2align(std::string &s);
 	static Units string2units(std::string &s);
 	static std::string units2string(Units units);
+	static bool hex2color(float color[4], std::string html);
 
 protected:
 	VideoWidget(GPX2Video &app, std::string name)  
@@ -147,9 +188,15 @@ protected:
 		setMargin(10);
 		setPadding(0);
 		setLabel(name);
+		setTextShadow(0);
 		setUnits(VideoWidget::UnitNone);
+		setTextColor("#ffffffff");
+		setBorder(0);
+		setBorderColor("#00000000");
+		setBackgroundColor("#00000000");
 	}
 
+	void fillBackground(OIIO::ImageBuf *frame);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
 
 	GPX2Video &app_;
@@ -163,7 +210,14 @@ protected:
 	int height_;
 	int margin_;
 	int padding_;
+
 	std::string label_;
+	int txtshadow_;
+	float txtcolor_[4];
+
+	int border_;
+	float bordercolor_[4];
+	float bgcolor_[4];
 
 private:
 	std::string name_;

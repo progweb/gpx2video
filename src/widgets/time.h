@@ -30,7 +30,7 @@ public:
 
 		(void) data;
 
-		double divider = (double) this->height() / (double) w;
+		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
 		// Don't use gps time, but camera time!
 		// Indeed, with garmin devices, gpx time has an offset.
@@ -38,6 +38,7 @@ public:
 
 		strftime(s, sizeof(s), "%H:%M:%S", &time);
 
+		this->fillBackground(buf);
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_time.png", "HEURE", s, divider);
 	}
 

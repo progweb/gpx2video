@@ -139,6 +139,41 @@ namespace layout
     ///
     Unsigned  &padding() { return _padding; }
 
+    ///
+    /// Get text color
+    ///
+    /// @return the text color element
+    ///
+    String  &textColor() { return _txtcolor; }
+
+    ///
+    /// Get text shadow
+    ///
+    /// @return the text shadow attribute
+    ///
+    Unsigned  &textShadow() { return _txtshadow; }
+
+    ///
+    /// Get border
+    ///
+    /// @return the border attribute
+    ///
+    Unsigned  &border() { return _border; }
+
+    ///
+    /// Get border color
+    ///
+    /// @return the border color element
+    ///
+    String  &borderColor() { return _bordercolor; }
+
+    ///
+    /// Get background color
+    ///
+    /// @return the background color element
+    ///
+    String  &backgroundColor() { return _bgcolor; }
+
     // Methods
 
     private:
@@ -153,6 +188,11 @@ namespace layout
 	Unsigned     _width, _height;
 	Unsigned     _margin;
 	Unsigned     _padding;
+	String       _txtcolor;
+	Unsigned     _txtshadow;
+	Unsigned     _border;
+	String       _bordercolor;
+	String       _bgcolor;
     
     // Disable copy constructors
     Widget(const Widget &);

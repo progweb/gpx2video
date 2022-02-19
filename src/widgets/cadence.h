@@ -26,9 +26,11 @@ public:
 
 		const int w = 64;
 
-		double divider = (double) this->height() / (double) w;
+		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
 		sprintf(s, "%d tr/min", data.cadence());
+
+		this->fillBackground(buf);
 		this->add(buf, this->x(), this->y(), "./assets/picto/DataOverlay_icn_cadence.png", 
 				label().c_str(), s, divider);
 	}
