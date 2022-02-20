@@ -278,7 +278,7 @@ Here all widget element settings:
 </widget>		
 ```
 
-Type gauges supported are:
+**type** gauges supported are:
   - speed, maxspeed, avgspeed
   - grade, elevation
   - date, time, duration
@@ -286,17 +286,22 @@ Type gauges supported are:
   - cadence
   - heartrate
 
-Align values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
-If align attribute is defined, gpx2video ignores and computes 'x' and 'y' values.
+**align** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
+If **align** attribute is defined, gpx2video ignores and computes **x** and **y** values.
 
-Units values are: mph, kph, km, m and miles.
+**units** values are: mph, kph, km, m and miles.
 
 *Note: Widget date accepts format element too.*
 
-You can set border size and color, the background color and text color too. Color is as html "#RGBA".
+You can set **border** size and color, the background color and text color too. Color is hex value as html "#RRGGBBAA".
 
-Map widget can be auto positionned as x, y and/or width, height aren't set. At last, you can define
+![legend](./assets/legend.png)
+
+**padding** value set the space around the text. Whereas, **margin** value defines the space around the widget.
+
+Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. At last, you can define
 several map widgets.
+
 
 
 ## Maps
