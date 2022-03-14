@@ -39,6 +39,14 @@ public:
 		return valid_;
 	}
 
+	const int& elapsedTime(void) const {
+		return elapsedtime_;
+	}
+
+	void setElapsedTime(const int &time) {
+		elapsedtime_ = time;
+	}
+
 	const double& duration(void) const {
 		return duration_;
 	}
@@ -89,6 +97,7 @@ protected:
 	struct point prev_pt_;
 
 	bool valid_;
+	int elapsedtime_;
 	double duration_;
 	double distance_;
 	double speed_;
@@ -141,6 +150,7 @@ private:
 
 	int offset_;
 	time_t start_time_;
+	time_t start_activity_;
 };
 
 #endif

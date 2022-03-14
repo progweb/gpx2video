@@ -123,7 +123,9 @@ void Extractor::run(void) {
 
 	// Write GPX header
 	if (settings().format() == ExtractorSettings::FormatGPX) {
+		out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
 		out << "<gpx version=\"1.0\"" << std::endl;
+		out << "  creator=\"gpx2video\"" << std::endl;
 		out << "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl;
 		out << "  xmlns=\"http://www.topografix.com/GPX/1/0\"" << std::endl;
 		out << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" << std::endl;
@@ -152,7 +154,8 @@ void Extractor::run(void) {
 		int64_t timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
 
 		// Camera time
-		char s[128];
+		char s[92];
+		char buf[128];
 
 		struct tm camera_time;
 
@@ -179,12 +182,13 @@ void Extractor::run(void) {
 			// </trkpt>
 			if (settings().format() == ExtractorSettings::FormatGPX) {
 				if (gpmd.fix > 0) {
-					strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S.000Z", &gpmd.utc_time);
+					strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", &gpmd.utc_time);
+					snprintf(buf, sizeof(buf), "%s.%03d", s, gpmd.utc_ms);
 
-					out << std::setprecision(8);
+					out << std::setprecision(9);
 					out << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
 					out << "        <ele>" << gpmd.ele << "</ele>" << std::endl;
-					out << "        <time>" << s << "</time>" << std::endl;
+					out << "        <time>" << buf << "</time>" << std::endl;
 					out << "      </trkpt>" << std::endl;
 				}
 			}
@@ -377,7 +381,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 			}
 			break;
 
-		case Extractor::GPMF_TYPE_SIGNED_LONG: // 0x4c
+		case Extractor::GPMF_TYPE_SIGNED_LONG: // 0x6c
 			inputtypesize = 4;
 			for (i=0, k=0; i<data->header.count; i++) {
 				for (j=0; j<data->header.size / inputtypesize; j++) {
@@ -426,12 +430,13 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 						bytes[6], bytes[7], // HH
 						bytes[8], bytes[9], // MM
 						bytes[10], bytes[11], // SS
-						bytes[13], bytes[14], bytes[15] // SS
+						bytes[13], bytes[14], bytes[15] // MS
 					);
 
 				// GPS time - format = 2021-12-08 08:55:46.039
 				memset(&gpmd.utc_time, 0, sizeof(gpmd.utc_time));
 				strptime(string, "%Y-%m-%d %H:%M:%S.", &gpmd.utc_time);
+				gpmd.utc_ms = (bytes[13] - '0') * 100 + (bytes[14] - '0') * 10 + (bytes[15] - '0');
 
 				if (dump)
 					out << "  value: " << string << std::endl;
@@ -443,7 +448,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				data->value.u64[i] = __bswap_64(data->value.u64[i]);
 
 				if (dump)
-					out << "  value: " << (double) data->value.u64[i] << std::endl;
+					out << "  mmmmmvalue: " << (double) data->value.u64[i] << std::endl;
 			}
 			break;
 
@@ -473,9 +478,9 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 		else if (key == STR2FOURCC("GPS5")) {
 			for (i=0, k=0; i<data->header.count; i++) {
-				gpmd.lat = (double) data->value.u32[k] / (double) scal[0];
-				gpmd.lon = (double) data->value.u32[k+1] / (double) scal[1];
-				gpmd.ele = (double) data->value.u32[k+2] / (double) scal[2];
+				gpmd.lat = (double) data->value.s32[k] / (double) scal[0];
+				gpmd.lon = (double) data->value.s32[k+1] / (double) scal[1];
+				gpmd.ele = (double) data->value.s32[k+2] / (double) scal[2];
 
 				k += data->header.size / inputtypesize;
 			}

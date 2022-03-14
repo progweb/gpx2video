@@ -20,6 +20,7 @@
 #include "widgets/elevation.h"
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
+#include "widgets/position.h"
 #include "widgets/speed.h"
 #include "widgets/maxspeed.h"
 #include "widgets/avgspeed.h"
@@ -288,6 +289,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = DistanceWidget::create(app_);
 	else if (s == "duration") 
 		widget = DurationWidget::create(app_);
+	else if (s == "position") 
+		widget = PositionWidget::create(app_);
 	else if (s == "speed") 
 		widget = SpeedWidget::create(app_);
 	else if (s == "maxspeed") 
@@ -613,7 +616,7 @@ void Renderer::run(void) {
 
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
 
-	// Update start time in GPX stream
+	// Update start time in GPX stream (start_time can change after sync step)
 	if (gpx_)
 		gpx_->setStartTime(start_time);
 
@@ -643,7 +646,7 @@ void Renderer::run(void) {
 		this->draw(frame, data);
 	}
 
-	// Max 5 secondes
+	// Max rendering duration
 	if (app_.settings().maxDuration() > 0) {
 		if (timecode_ms > app_.settings().maxDuration())
 			goto done;

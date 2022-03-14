@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
+	<widget x="250" y="450" width="780" height="120" align="top">
+		<type>position</type>
+		<name>POSITION</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+		<background-color>#00000066</background-color>
+	</widget>		
 	<widget x="250" y="450" width="580" height="120" align="left">
 		<type>grade</type>
 		<name>PENTE</name>

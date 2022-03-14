@@ -80,6 +80,7 @@ public:
 		std::string device_name;
 
 		uint32_t fix;
+		int utc_ms;
 		struct tm utc_time;
 		std::string date;
 

@@ -36,7 +36,7 @@ public:
 
 		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
 
-		duration = data.duration();
+		duration = data.elapsedTime();
 		seconds = duration % 60;
 		duration = duration / 60;
 		minutes = duration % 60;

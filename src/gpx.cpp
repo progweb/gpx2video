@@ -40,6 +40,7 @@ void show(gpx::Node &node, unsigned width)
 GPXData::GPXData() 
 	: nbr_points_(0)
 	, valid_(false)
+	, elapsedtime_(0)
 	, duration_(0)
 	, distance_(0)
 	, speed_(0) 
@@ -63,9 +64,9 @@ void GPXData::dump(void) {
 
 	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
-	printf("  GPX Time: %s Distance: %.3f km in %.3f seconds, current speed is %.3f (valid: %s)\n",
+	printf("  GPX Time: %s Distance: %.3f km in %d seconds, current speed is %.3f (valid: %s)\n",
 		s,
-		distance_/1000.0, duration_, speed_, 
+		distance_/1000.0, elapsedtime_, speed_, 
 		valid() ? "true" : "false");  
 }
 
@@ -186,6 +187,8 @@ GPX::~GPX() {
 GPX * GPX::open(const std::string &filename) {
 	GPX *gpx = NULL;
 
+	GPXData data;
+
 	gpx::GPX *root;
 //	gpx::ReportCerr report;
 	gpx::Parser parser(NULL); //&report);
@@ -208,7 +211,11 @@ GPX * GPX::open(const std::string &filename) {
 
 	gpx = new GPX(stream, root);
 
+	// Parse activity start time
 	gpx->parse();
+	gpx->retrieveFirst(data);
+
+	gpx->start_activity_ = data.time();
 
 failure:
 	return gpx;
@@ -411,6 +418,9 @@ const GPXData GPX::retrieveData(const int64_t &timecode) {
 //				printf("t = %ld vs %ld\n", t, start_time_ + (timestamp / 1000));
 				continue;	   
 			}
+
+			// Save time
+			data.setElapsedTime((start_time_ - start_activity_) + (timecode / 1000));
 
 //			printf("OK %d\n", n);
 

@@ -282,6 +282,7 @@ Here all widget element settings:
   - speed, maxspeed, avgspeed
   - grade, elevation
   - date, time, duration
+  - position
   - distance
   - cadence
   - heartrate
@@ -357,7 +358,6 @@ In future release, gpx2video should be able to use more data from this stream as
     - hflip: flip icon and label
     - gpx fix mode: disable gauge on nofix
     - svg: add icon svg support
-    - color: text color
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
   - Widget debug

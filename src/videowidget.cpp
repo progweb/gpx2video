@@ -187,6 +187,9 @@ void VideoWidget::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, co
 	if (result == false)
 		fprintf(stderr, "render label text error\n");
 
+	if (value == NULL)
+		return;
+
 	result = OIIO::ImageBufAlgo::render_text(*frame, 
 		x + w + (w/10) + padding, 
 		y + h - padding, 
