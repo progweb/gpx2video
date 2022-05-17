@@ -270,7 +270,7 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 	AVCodecContext *codec_context;
 
 	// Find encoder with this name
-	AVCodec *codec = avcodec_find_encoder(codec_id);
+	const AVCodec *codec = avcodec_find_encoder(codec_id);
 
 	if (!codec) {
 		av_log(NULL, AV_LOG_FATAL, "Failed to find codec\n");

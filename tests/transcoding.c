@@ -263,8 +263,16 @@ int transcode_video(StreamingContext *decoder, StreamingContext *encoder, AVPack
 
 int main(int argc, char *argv[])
 {
+	// Register FFmpeg codecs and filters (deprecated in 4.0+)
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 	av_register_all();
+#endif
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 	avcodec_register_all();
+#endif
+//#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(7, 14, 100)
+//	avfilter_register_all();
+//#endif
 
   /*
    * H264 -> H265

@@ -239,7 +239,7 @@ bool Decoder::open(const std::string &filename, const int &index) {
 	avstream_ = fmt_ctx_->streams[index];
 
 	// Find decoder
-	AVCodec *decoder = avcodec_find_decoder(avstream_->codecpar->codec_id);
+	const AVCodec *decoder = avcodec_find_decoder(avstream_->codecpar->codec_id);
 
 	// Handle failure to find decoder
 	if (decoder == NULL) {

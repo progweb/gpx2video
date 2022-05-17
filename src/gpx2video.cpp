@@ -37,8 +37,16 @@ GPX2Video::GPX2Video(struct event_base *evbase)
 
 	setLogLevel(AV_LOG_INFO);
 
+	// Register FFmpeg codecs and filters (deprecated in 4.0+)
+#if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 	av_register_all();
+#endif
+#if LIBAVCODEC_VERSION_INT < AV_VERSION_INT(58, 9, 100)
 	avcodec_register_all();
+#endif
+//#if LIBAVFILTER_VERSION_INT < AV_VERSION_INT(7, 14, 100)
+//	avfilter_register_all();
+//#endif
 
 	init();
 }
