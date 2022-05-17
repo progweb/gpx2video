@@ -5,6 +5,7 @@
 #include <vector>
 
 extern "C" {
+#include <libavutil/channel_layout.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 }
