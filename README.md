@@ -99,7 +99,7 @@ If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to de
 "sync" command permits to test the sychronization process:
 
 ```bash
-$ ./gpx2video -m GOPR1860.MP4 sync
+$ ./gpx2video -v -m GOPR1860.MP4 sync
 Time synchronization...
 PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 2022-01-16 10:05:03 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:38.959 - OFFSET: -205
 PACKET: 1 - PTS: 1000 - TIMESTAMP: 1000 ms - TIME: 2022-01-16 10:05:04 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:01:40.939 - OFFSET: -204
@@ -153,7 +153,7 @@ gpx2video is a command line tool.
   - To extract GoPro GPMD data from media stream:
 
 ```bash
-$ ./gpx2video -m GOPR1860.MP4 -o output.gpx -f 2 extract
+$ ./gpx2video -v -m GOPR1860.MP4 -o output.gpx -f 2 extract
 gpx2video v0.0.0
 creation_time = 2020-12-13T09:56:27.000000Z
 Failed to find decoder for stream #2
@@ -168,7 +168,7 @@ PACKET: 1 - PTS: 1001 - TIMESTAMP: 1001 ms - TIME: 1970-01-01 00:00:01
   - To render a video stream with telemetry data:
 
 ```bash
-$ ./gpx2video -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 video
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o output.mp4 video
 gpx2video v0.0.0
 creation_time = 2021-12-08T10:34:50.000000Z
 ...
@@ -218,9 +218,9 @@ FRAME: 1 - PTS: 1800 - TIMESTAMP: 20 ms - TIME: 2021-12-08 10:38:35
 
 ### How change gauges ?
 
-Gauges size and position can be set from the layout.xml file. (see: samples/layout.xml)
+Gauges size and position can be set from the layout.xml file. (see: samples/layout-1920x1080.xml)
 
-You can edit `samples/layout.xml` file to enable/disable gauge or edit label and position:
+You can edit `layout.xml` file to enable/disable gauge or edit label and position:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
@@ -329,6 +329,8 @@ $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-fact
 $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 track
 ```
 
+
+
 ## Extract tools
 
 You can extract and parse GoPro MET stream:
@@ -352,6 +354,22 @@ $ ./gpx2video -m GH010434.MP4 -o track.gpx -f 3 extract
 In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.
 
 
+
+## Telemetry tools
+
+You can convert, filter and interpolate GPX data.
+
+```bash
+$ ./gpx2video -g ACTIVITY.gpx -o data.csv --telemetry=0 compute
+```
+
+This tool permits to convert GPX to CSV and/or apply a filter on the GPS data (lat. and lon. values).
+Since gpx2video interpolates data each 1s in using different filters: linear, kalman or interpolation.
+
+*Note: The result isn't yet satisfactory* 
+
+
+
 ## ToDo
 
   - Render gauge:
@@ -365,7 +383,6 @@ In future release, gpx2video should be able to use more data from this stream as
   - Photo import
   - User interface integration
   - GPS interpolate data between two waypoints.
-  - Progress rendering status
   - 360 videos support
 
 
