@@ -36,6 +36,8 @@ Renderer::Renderer(GPX2Video &app)
 	decoder_video_ = NULL;
 	encoder_ = NULL;
 
+	overlay_ = NULL;
+
 	frame_time_ = 0;
 	duration_ms_ = 0;
 }
@@ -612,10 +614,13 @@ bool Renderer::start(void) {
 
 	time_t start_time;
 
+	VideoStreamPtr video_stream = container_->getVideoStream();
+
 	log_call();
 
 	log_notice("Rendering...");
 
+	// Compute start time
 	start_time = container_->startTime() + container_->timeOffset();
 
 	// Update start time in GPX stream (start_time can change after sync step)
@@ -624,9 +629,13 @@ bool Renderer::start(void) {
 
 	started_at_ = now;
 
+	// Create overlay buffer
+	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(video_stream->width(), video_stream->height(), 
+		video_stream->nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
+
 	// Prepare each widget, map...
 	for (VideoWidget *widget : widgets_)
-		widget->prepare();
+		widget->prepare(overlay_);
 
 	return true;
 }
@@ -757,12 +766,20 @@ bool Renderer::stop(void) {
 	decoder_audio_->close();
 	decoder_video_->close();
 
+	if (overlay_)
+		delete overlay_;
+
+	overlay_ = NULL;
+
 	return true;
 }
 
 
 void Renderer::draw(FramePtr frame, const GPXData &data) {
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
+
+	// Draw overlay
+	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
 
 	// Draw each widget, map...
 	for (VideoWidget *widget : widgets_)

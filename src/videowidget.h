@@ -170,8 +170,7 @@ public:
 		return true;
 	}
 
-	virtual void prepare(void) { // = 0;
-	}
+	virtual void prepare(OIIO::ImageBuf *buf) = 0;
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
 	static Align string2align(std::string &s);
@@ -207,9 +206,6 @@ protected:
 	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, double divider);
 	void drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label);
 	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
-
-	void fillBackground(OIIO::ImageBuf *frame);
-	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);
 
 	GPX2Video &app_;
 	Align align_;

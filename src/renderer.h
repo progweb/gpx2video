@@ -48,6 +48,8 @@ private:
 
 	std::list<VideoWidget *> widgets_;
 
+	OIIO::ImageBuf *overlay_;
+
 	time_t started_at_;
 
 	char duration_[16];

@@ -24,7 +24,7 @@ public:
 		return widget;
 	}
 
-	void prepare(void) {
+	void prepare(OIIO::ImageBuf *buf) {
 		const int w = 64;
 
 		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
@@ -35,6 +35,11 @@ public:
 		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_time.png", divider);
 //		this->drawLabel(buf_, 0, 0, label().c_str());
 //		this->drawValue(buf_, 0, 0, "22 km");
+
+		// Image over
+		buf_->specmod().x = this->x();
+		buf_->specmod().y = this->y();
+		OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
 	}
 
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
@@ -49,11 +54,6 @@ public:
 		localtime_r(&app_.time(), &time);
 
 		strftime(s, sizeof(s), "%H:%M:%S", &time);
-
-		// Image over
-		buf_->specmod().x = this->x();
-		buf_->specmod().y = this->y();
-		OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x(), this->y(), label().c_str());

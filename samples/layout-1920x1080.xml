@@ -61,7 +61,6 @@
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<!--
 	<widget x="250" y="450" width="400" height="80" align="left">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
@@ -69,7 +68,6 @@
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	-->
 	<widget x="250" y="450" width="400" height="80" align="bottom">
 		<type>distance</type>
 		<name>DISTANCE</name>
@@ -94,6 +92,7 @@
 		<units>kph</units>
 		<text-shadow>3</text-shadow>
 	</widget>		
+
 	<!--
 	<map x="800" y="300" align="none">
 		<source>1</source>
@@ -101,10 +100,12 @@
 		<factor>1.2</factor>
 	</map>
 	-->
+	<!--
 	<map align="top-right">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
 		<margin>20</margin>
 	</map>
+	-->
 </layout>

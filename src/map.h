@@ -82,6 +82,7 @@ public:
 	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
 
 	// Render map
+	void prepare(OIIO::ImageBuf *buf);
 	void render(OIIO::ImageBuf *frame, const GPXData &data);
 
 	static void downloadProgress(Tile &tile, double dltotal, double dlnow);

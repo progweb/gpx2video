@@ -684,8 +684,8 @@ void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 
 	// Path border
 	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
-	cairo_set_line_width (cairo, 4.4); //40.96);
-	cairo_set_line_join (cairo, CAIRO_LINE_JOIN_ROUND);
+	cairo_set_line_width(cairo, 4.4); //40.96);
+	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT
 	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
@@ -695,7 +695,7 @@ void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 		x *= divider;
 		y *= divider;
 
-		cairo_line_to (cairo, x, y);
+		cairo_line_to(cairo, x, y);
 	}
 
 	// Cairo draw
@@ -806,6 +806,21 @@ bool Map::load(void) {
 }
 
 
+void Map::prepare(OIIO::ImageBuf *buf) {
+	int x = this->x(); // 1700;
+	int y = this->y(); // 900;
+	int width = settings().width(); // 800;
+	int height = settings().height(); // 500;
+
+	if (this->load() == false)
+		log_warn("Map renderer failure");
+
+	// Background
+	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
+	OIIO::ImageBufAlgo::fill(*buf, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
+}
+
+
 void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int x = this->x(); // 1700;
 	int y = this->y(); // 900;
@@ -821,8 +836,8 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int offsetMaxX = ((x2_ - x1_) * TILESIZE * divider) - width;
 	int offsetMaxY = ((y2_ - y1_) * TILESIZE * divider) - height;
 
-	// Load map buffer
-	if (this->load() == false) {
+	// Check map buffer
+	if (mapbuf_ == NULL) {
 		log_warn("Map renderer failure");
 		return;
 	}
@@ -845,10 +860,6 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 		offsetX = offsetMaxX; 
 	if (offsetY > offsetMaxY)
 		offsetY = offsetMaxY; 
-
-	// Background
-	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
-	OIIO::ImageBufAlgo::fill(*frame, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
 
 	// Image over
 	mapbuf_->specmod().x = x - offsetX;
