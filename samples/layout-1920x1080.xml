@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<widget x="250" y="450" width="500" height="80" align="top">
+		<type>position</type>
+		<name>POSITION</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+		<background-color>#00000066</background-color>
+	</widget>		
+	<widget x="250" y="450" width="400" height="80" align="left">
+		<type>grade</type>
+		<name>PENTE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="400" height="80" align="left">
+		<type>speed</type>
+		<name>VITESSE</name>
+		<margin>20</margin>
+		<padding>10</padding>
+		<padding>5</padding>
+		<units>kph</units>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="400" height="80" align="left">
+		<type>elevation</type>
+		<name>ALTITUDE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>m</units>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="400" height="80" align="right">
+		<type>time</type>
+		<name>HEURE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="400" height="80" align="right">
+		<type>date</type>
+		<name>DATE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<format>%d-%m-%Y</format>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="400" height="80" align="right">
+		<type>duration</type>
+		<name>DUREE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="400" height="80" align="left">
+		<type>cadence</type>
+		<name>CADENCE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<!--
+	<widget x="250" y="450" width="400" height="80" align="left">
+		<type>heartrate</type>
+		<name>FREQ. CARDIAQUE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	-->
+	<widget x="250" y="450" width="400" height="80" align="bottom">
+		<type>distance</type>
+		<name>DISTANCE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>km</units>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="400" height="80" align="bottom">
+		<type>avgspeed</type>
+		<name>MOYENNE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>kph</units>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="400" height="80" align="bottom">
+		<type>maxspeed</type>
+		<name>VITESSE MAX.</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<units>kph</units>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<!--
+	<map x="800" y="300" align="none">
+		<source>1</source>
+		<zoom>11</zoom>
+		<factor>1.2</factor>
+	</map>
+	-->
+	<map align="top-right">
+		<source>1</source>
+		<zoom>12</zoom>
+		<factor>2.0</factor>
+		<margin>20</margin>
+	</map>
+</layout>
