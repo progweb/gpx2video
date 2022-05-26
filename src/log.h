@@ -29,7 +29,7 @@ extern int gpx2video_log_debug_enabled;
 
 #define log_debug_raw(format, ...) \
     fprintf(stderr, LOG_PREFIX "DEBUG: %s:%d: " format "\n", \
-            __func__, __LINE__, ## __VA_ARGS__)
+            __PRETTY_FUNCTION__, __LINE__, ## __VA_ARGS__)
 
 #define log_info(format, ...) \
     fprintf(stderr, LOG_PREFIX format "\n", ## __VA_ARGS__)

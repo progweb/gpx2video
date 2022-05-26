@@ -6,8 +6,10 @@
 #include <string>
 #include <vector>
 
+#include "kalman.h"
 #include "gpxlib/Parser.h"
 #include "gpxlib/ReportCerr.h"
+#include "telemetrysettings.h"
 
 
 class GPXData {
@@ -20,19 +22,41 @@ public:
 		time_t time;
 	};
 
+	enum Position {
+		PositionCurrent,	// Interpolated position in the GPX stream
+		PositionPrevious,	// Last read position in the GPX stream
+		PositionNext		// Next read position in the GPX stream
+	};
+
 	GPXData();
 	virtual ~GPXData();
 
+	void init(void);
+	void predict(enum TelemetrySettings::Filter filter);
+	void update(enum TelemetrySettings::Filter filter);
+
 	void read(gpx::WPT *wpt);
+
+	bool compute(void);
 
 	void dump(void);
 
-	const time_t& time(void) const {
-		return cur_pt_.time;
+	const time_t& time(Position p = PositionCurrent) const {
+		if (p == PositionCurrent)
+			return cur_pt_.time;
+		if (p == PositionPrevious)
+			return prev_pt_.time;
+
+		return next_pt_.time;
 	}
 
-	const struct point& position(void) const {
-		return cur_pt_;
+	const struct point& position(Position p = PositionCurrent) const {
+		if (p == PositionCurrent)
+			return cur_pt_;
+		if (p == PositionPrevious)
+			return prev_pt_;
+
+		return next_pt_;
 	}
 
 	const bool& valid(void) const {
@@ -55,8 +79,13 @@ public:
 		return distance_;
 	}
 
-	const double& elevation(void) const {
-		return cur_pt_.ele;
+	const double& elevation(Position p = PositionCurrent) const {
+		if (p == PositionCurrent)
+			return cur_pt_.ele;
+		if (p == PositionPrevious)
+			return prev_pt_.ele;
+
+		return next_pt_.ele;
 	}
 
 	const double& grade(void) const {
@@ -90,11 +119,13 @@ public:
 	static void convert(struct point *pt, gpx::WPT *wpt);
 
 protected:
-	bool compute(void);
-
 	int nbr_points_;
 	struct point cur_pt_;
 	struct point prev_pt_;
+	struct point next_pt_;
+
+	int nbr_predictions_;
+	KalmanFilter filter_;
 
 	bool valid_;
 	int elapsedtime_;
@@ -112,9 +143,16 @@ protected:
 
 class GPX {
 public:
+	enum Data {
+		DataMeasured,
+		DataPredicted,
+		DataUnchanged,
+		DataEof
+	};
+
 	virtual ~GPX();
 
-	static GPX * open(const std::string &filename);
+	static GPX * open(const std::string &filename, enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 
 	void dump(void);
 
@@ -125,19 +163,20 @@ public:
 	int timeOffset(void) const;
 	void setTimeOffset(const int& offset);
 
-	const GPXData retrieveData(const int64_t &timecode);
+//	const GPXData retrieveData(const int64_t &timecode);
 	bool getBoundingBox(GPXData::point *p1, GPXData::point *p2);
 	double getMaxSpeed(void);
 
-	void retrieveFirst(GPXData &data);
-	void retrieveNext(GPXData &data);
-	void retrieveLast(GPXData &data);
+	enum Data retrieveFirst(GPXData &data);
+	enum Data retrieveNext(GPXData &data, int timestamp=-1);
+	enum Data retrieveData(GPXData &data);
+	enum Data retrieveLast(GPXData &data);
 
 protected:
 	bool parse(void);
 
 private:
-	GPX(std::ifstream &stream, gpx::GPX *root);
+	GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter filter);
 
     std::ifstream &stream_;
 
@@ -151,6 +190,8 @@ private:
 	int offset_;
 	time_t start_time_;
 	time_t start_activity_;
+
+	enum TelemetrySettings::Filter filter_;
 };
 
 #endif

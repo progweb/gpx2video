@@ -16,7 +16,7 @@ public:
 		return path_;
 	}
 
-	void run(void);
+	bool run(void);
 
 private:
 	GPX2Video &app_;

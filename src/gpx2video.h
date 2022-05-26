@@ -12,6 +12,7 @@
 #include "media.h"
 #include "mapsettings.h"
 #include "extractorsettings.h"
+#include "telemetrysettings.h"
 
 
 class Map;
@@ -30,7 +31,8 @@ public:
 			int map_zoom=8, 
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
-			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump)
+			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
+			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone)
 			: gpx_file_(gpx_file)
 			, media_file_(media_file)
 			, layout_file_(layout_file)
@@ -40,7 +42,8 @@ public:
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
 			, map_source_(map_source)
-	   		, extract_format_(extract_format) {
+	   		, extract_format_(extract_format) 
+			, telemetry_filter_(telemetry_filter) {
 		}
 
 		const std::string& gpxfile(void) const {
@@ -71,6 +74,10 @@ public:
 			return extract_format_;
 		}
 
+		const TelemetrySettings::Filter& telemetryFilter(void) const {
+			return telemetry_filter_;
+		}
+
 		const double& mapfactor(void) const {
 			return map_factor_;
 		}
@@ -79,7 +86,7 @@ public:
 			return map_zoom_;
 		}
 
-		const int& maxDuration(void) const {
+		const unsigned int& maxDuration(void) const {
 			return max_duration_ms_;
 		}
 
@@ -93,14 +100,21 @@ public:
 
 		double map_factor_;
 		int map_zoom_;
-		int max_duration_ms_;
+		unsigned int max_duration_ms_;
 		MapSettings::Source map_source_;
 
 		ExtractorSettings::Format extract_format_;
+		TelemetrySettings::Filter telemetry_filter_;
 	};
 
 	class Task {
 	public:
+		enum Action {
+			ActionStart,
+			ActionPerform,
+			ActionStop
+		};
+
 		typedef void (*callback_t)(void *object);
 
 		Task(GPX2Video &app)
@@ -110,14 +124,22 @@ public:
 		virtual ~Task() {
 		}
 
-		virtual void run(void) = 0;
+		virtual bool start(void) {
+			return true;
+		};
+
+		virtual bool run(void) = 0;
+
+		virtual bool stop(void) {
+			return true;
+		};
 
 		void schedule(void) {
-			app_.perform();
+			app_.perform(ActionPerform);
 		}
 
 		void complete(void) {
-			app_.perform(true);
+			app_.perform(ActionStop);
 		}
 
 	private:
@@ -129,11 +151,13 @@ public:
 
 		CommandSource,	// Dump map source list
 		CommandFormat,  // Dump extract format supported
+		CommandFilter,  // Dump telemetry filter supported
 		CommandSync,	// Auto sync video time with gps sensor
 		CommandExtract,	// Extract gps sensor data from video
 		CommandClear,	// Clear cache directories
 		CommandMap,		// Download & build map
 		CommandTrack,	// Download, build map & draw track
+		CommandCompute, // Compute telemetry data from gpx
 		CommandVideo,	// Render video with telemtry overlay
 
 		CommandCount
@@ -143,6 +167,10 @@ public:
 	~GPX2Video();
 
 	void setLogLevel(int level);
+
+	bool progressInfo(void);
+	void setProgressInfo(bool enable);
+
 	static const std::string version(void);
 
 	Settings& settings(void);
@@ -173,38 +201,71 @@ public:
 		time_ = time;
 	}
 
-	void perform(bool done=false) {
+	void perform(enum Task::Action action=Task::ActionPerform) {
 		int32_t info;
 
 		log_call();
 
-		info = (int32_t) done;
+		info = (int32_t) action;
 
 		write(pipe_out_, &info, sizeof(info));
 	}
 
-	void run(bool done) {
-		if (done && !tasks_.empty())
+	void run(enum Task::Action action) {
+		Task *task;
+
+		if (tasks_.empty())
+			goto done;
+
+		switch (action) {
+		case Task::ActionStart:
+			task = tasks_.front();
+			if (task->start() == true)
+				perform(Task::ActionPerform);
+			else
+				perform(Task::ActionStop);
+			break;
+
+		case Task::ActionPerform:
+			task = tasks_.front();
+			task->run();
+			break;
+
+		case Task::ActionStop:
+			task = tasks_.front();
+			task->stop();
+
 			tasks_.pop_front();
 
-		if (!tasks_.empty()) {
-			Task *task = tasks_.front();
+			perform(Task::ActionStart);
+			break;
 
-			task->run();
+		default:
+			break;
 		}
-		else
-			abort();
+
+		return;
+
+	done:
+		abort();
 	}
 
 	void exec(void) {
 		log_call();
 
-		perform();
+		perform(Task::ActionStart);
 		loop();
 	}
 
 	void abort(void) {
 		log_call();
+
+		// Before loop exit, stop the current task
+		if (!tasks_.empty()) {
+			Task *task = tasks_.front();
+
+			task->stop();
+		}
 
 		loopexit();
 	}
@@ -225,6 +286,8 @@ private:
 	struct event *ev_pipe_;
 	struct event *ev_signal_;
 	struct event_base *evbase_;
+
+	bool progress_info_;
 
 	Command command_;
 	Settings settings_;

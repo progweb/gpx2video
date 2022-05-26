@@ -37,6 +37,7 @@ Renderer::Renderer(GPX2Video &app)
 	encoder_ = NULL;
 
 	frame_time_ = 0;
+	duration_ms_ = 0;
 }
 
 
@@ -66,7 +67,7 @@ void Renderer::init(void) {
 
 	log_call();
 
-	gpx_ = GPX::open(app_.settings().gpxfile());
+	gpx_ = GPX::open(app_.settings().gpxfile(), app_.settings().telemetryFilter());
 
 	// Media
 	container_ = app_.media();
@@ -76,6 +77,7 @@ void Renderer::init(void) {
 	if (gpx_) {
 		gpx_->setStartTime(start_time);
 		gpx_->setTimeOffset(app_.settings().offset());
+		gpx_->retrieveFirst(data_);
 	}
 
 	// Retrieve audio & video streams
@@ -105,6 +107,14 @@ void Renderer::init(void) {
 	settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
 	settings.setAudioBitrate(44 * 1000);
 
+	// Compute duration
+	duration_ms_ = video_stream->duration() * av_q2d(video_stream->timeBase()) * 1000;
+	duration_ms_ = MAX(duration_ms_, app_.settings().maxDuration());
+
+	snprintf(duration_, sizeof(duration_), "%02d:%02d:%02d.%03d", 
+		(unsigned int) (duration_ms_ / 3600000), (unsigned int) ((duration_ms_ / 60000) % 60), (unsigned int) ((duration_ms_ / 1000) % 60), (unsigned int) (duration_ms_ % 1000));
+	duration_[sizeof(duration_) - 1] = '\0';
+
 	// Open & decode input media
 	decoder_video_ = Decoder::create();
 	decoder_video_->open(video_stream);
@@ -122,8 +132,8 @@ bool Renderer::load(void) {
 	std::ifstream stream;
 
 	layout::Layout *root;
-	layout::ReportCerr report;
-	layout::Parser parser(&report);
+//	layout::ReportCerr report;
+	layout::Parser parser(NULL); //&report);
 
 	std::list<layout::Map *> maps;
 	std::list<layout::Widget *> widgets;
@@ -597,9 +607,26 @@ void Renderer::computeWidgetsPosition(void) {
 }
 
 
-void Renderer::run(void) {
-	GPXData data;
+bool Renderer::start(void) {
+	time_t now = time(NULL);
 
+	time_t start_time;
+
+	start_time = container_->startTime() + container_->timeOffset();
+
+	// Update start time in GPX stream (start_time can change after sync step)
+	if (gpx_)
+		gpx_->setStartTime(start_time);
+
+	started_at_ = now;
+
+	fclose(stderr);
+
+	return true;
+}
+
+
+bool Renderer::run(void) {
 	FramePtr frame;
 
 	time_t start_time;
@@ -615,10 +642,6 @@ void Renderer::run(void) {
 	start_time = container_->startTime() + container_->timeOffset();
 
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
-
-	// Update start time in GPX stream (start_time can change after sync step)
-	if (gpx_)
-		gpx_->setStartTime(start_time);
 
 	// Read audio data
 	frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);
@@ -640,10 +663,11 @@ void Renderer::run(void) {
 
 	if (gpx_) {
 		// Read GPX data
-		data = gpx_->retrieveData(timecode_ms);
+//		data_ = gpx_->retrieveData(timecode_ms);
+		gpx_->retrieveNext(data_, timecode_ms);
 
 		// Draw
-		this->draw(frame, data);
+		this->draw(frame, data_);
 	}
 
 	// Max rendering duration
@@ -657,17 +681,34 @@ void Renderer::run(void) {
 		char s[128];
 		struct tm time;
 
+		time_t now = ::time(NULL);
+
 		localtime_r(&app_.time(), &time);
 
 		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
-		printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-			frame_time_, timecode, timecode_ms, s);
+		if (app_.progressInfo()) {
+			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
+				frame_time_, timecode, timecode_ms, s);
+		}
+		else {
+			int percent = 100 * timecode_ms / duration_ms_;
+			int remaining = (timecode_ms > 0) ? (now - started_at_) * (duration_ms_ - timecode_ms) / timecode_ms : -1;
+
+			printf("\r[FRAME %5ld] %02d:%02d:%02d.%03d / %s | %3d%% - Remaining time: %02d:%02d:%02d", 
+				frame_time_, 
+				(int) (timecode_ms / 3600000), (int) ((timecode_ms / 60000) % 60), (int) ((timecode_ms / 1000) % 60), (int) (timecode_ms % 1000),
+				duration_,
+				percent,
+				(remaining / 3600), (remaining / 60) % 60, (remaining) % 60
+				); //label, buf, percent,
+			fflush(stdout);
+		}
 	}
 
 	// Dump GPX data
-	if (gpx_)
-		data.dump();
+	if (gpx_ && app_.progressInfo())
+		data_.dump();
 
 	real_time = av_mul_q(av_make_q(timecode, 1), video_stream->timeBase());
 
@@ -677,14 +718,40 @@ void Renderer::run(void) {
 
 	schedule();
 
-	return;
+	return true;
 
 done:
+	complete();
+
+	return true;
+}
+
+
+bool Renderer::stop(void) {
+	int working;
+
+	time_t now = ::time(NULL);
+
+	if (!app_.progressInfo())
+		printf("\n");
+
+	// Retrieve audio & video streams
+	VideoStreamPtr video_stream = container_->getVideoStream();
+
+	// Sum-up
+	working = now - started_at_;
+
+	printf("%ld frames %dx%d to %dx%d proceed in %02d:%02d:%02d\n",
+		frame_time_,
+		video_stream->width(), video_stream->height(),
+		encoder_->settings().videoParams().width(), encoder_->settings().videoParams().height(),
+		(working / 3600), (working / 60) % 60, (working) % 60);
+
 	encoder_->close();
 	decoder_audio_->close();
 	decoder_video_->close();
 
-	complete();
+	return true;
 }
 
 

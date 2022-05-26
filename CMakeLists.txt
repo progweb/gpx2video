@@ -105,6 +105,7 @@ set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/evcurl.c
 	src/evcurl.cpp
+	src/kalman.c
 	src/gpx.cpp
 	src/oiioutils.cpp
 	src/ffmpegutils.cpp
@@ -112,6 +113,7 @@ set(GPX2VIDEO_SOURCES
 	src/encoder.cpp
 	src/frame.cpp
 	src/extractor.cpp
+	src/telemetry.cpp
 	src/gpx2video.cpp
 	src/map.cpp
 	src/cache.cpp

@@ -29,7 +29,9 @@ public:
 
 	void append(VideoWidget *widget);
 
-	void run(void);
+	bool start(void);
+	bool run(void);
+	bool stop(void);
 
 	void draw(FramePtr frame, const GPXData &data);
 
@@ -37,12 +39,19 @@ private:
 	GPX2Video &app_;
 
 	GPX *gpx_;
+	GPXData data_;
+
 	MediaContainer *container_;
 	Decoder *decoder_audio_;
 	Decoder *decoder_video_;
 	Encoder *encoder_;
 
 	std::list<VideoWidget *> widgets_;
+
+	time_t started_at_;
+
+	char duration_[16];
+	unsigned int duration_ms_;
 
 	int64_t frame_time_ = 0;
 

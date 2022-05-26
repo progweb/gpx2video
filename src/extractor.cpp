@@ -13,6 +13,9 @@ extern "C" {
 #include "extractor.h"
 
 
+// Extractor settings
+//--------------------
+
 ExtractorSettings::ExtractorSettings() {
 }
 
@@ -50,6 +53,9 @@ const std::string ExtractorSettings::getFriendlyName(const ExtractorSettings::Fo
 }
 
 
+// Extractor API
+//---------------
+
 Extractor::Extractor(GPX2Video &app, const ExtractorSettings &settings) 
 	: Task(app) 
 	, app_(app) 
@@ -86,139 +92,177 @@ void Extractor::init(void) {
 }
 
 
-void Extractor::run(void) {
-	int result;
-
-	int n = 0;
-	int start_time = 0;
-
-    AVPacket *packet = NULL;
+bool Extractor::start(void) {
+	bool result = true;
 
 	std::string filename = app_.settings().outputfile();
 
 	log_call();
 
-	// Open output stream
-    std::ofstream out = std::ofstream(filename);
-       
-	if (!out.is_open()) {
-		log_error("Open '%s' failure", filename.c_str());
-		goto done;
-	}
-
-	// Get start time from metadata
-	start_time = container_->startTime();
+	n_ = 0;
+	ok_ = false;
 
 	// Open GPMD stream
 	log_notice("Extract GPMD data...");
 
+	// Open output stream
+    out_ = std::ofstream(filename);
+       
+	if (!out_.is_open()) {
+		log_error("Open '%s' failure", filename.c_str());
+		result = false;
+		goto done;
+	}
+
 	// Open GoPro MET stream
 	if (open() != true) {
 		log_warn("Time synchronization failure!");
+		result = false;
 		goto done;
 	}
+
+	// Write GPX header
+	if (settings().format() == ExtractorSettings::FormatGPX) {
+		out_ << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
+		out_ << "<gpx version=\"1.0\"" << std::endl;
+		out_ << "  creator=\"gpx2video\"" << std::endl;
+		out_ << "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl;
+		out_ << "  xmlns=\"http://www.topografix.com/GPX/1/0\"" << std::endl;
+		out_ << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" << std::endl;
+		out_ << "  <trk>" << std::endl;
+		out_ << "    <number>1</number>" << std::endl;
+		out_ << "    <trkseg>" << std::endl;
+	}
+
+done:
+	return result;
+}
+
+
+bool Extractor::run(void) {
+	char s[92];
+	char buf[128];
+
+	int result;
+
+	int start_time = 0;
+
+	time_t camera_t;
+	struct tm camera_time;
+
+	int64_t timecode, timecode_ms;
+
+    AVPacket *packet = NULL;
+
+	Extractor::GPMD gpmd;
+
+	log_call();
+
+	// Get start time from metadata
+	start_time = container_->startTime();
 
 	if (!(packet = av_packet_alloc()))
 		goto done;
 
-	// Write GPX header
-	if (settings().format() == ExtractorSettings::FormatGPX) {
-		out << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
-		out << "<gpx version=\"1.0\"" << std::endl;
-		out << "  creator=\"gpx2video\"" << std::endl;
-		out << "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl;
-		out << "  xmlns=\"http://www.topografix.com/GPX/1/0\"" << std::endl;
-		out << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" << std::endl;
-		out << "  <trk>" << std::endl;
-		out << "    <number>1</number>" << std::endl;
-		out << "    <trkseg>" << std::endl;
+	// Pull from stream
+	result = getPacket(packet);
+
+	// Handle any errors that aren't EOF (EOF is handled later on)
+	if ((result < 0) && (result != AVERROR_EOF))
+		goto done;
+
+	if (result == AVERROR_EOF) {
+		ok_ = true;
+		goto done;
 	}
 
-	while (true) {
-		Extractor::GPMD gpmd;
+	// Stream timestamp
+	timecode = packet->pts;
+	timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
 
-		// Pull from stream
-		result = getPacket(packet);
+	// Camera time
+	camera_t = start_time + (timecode_ms / 1000);
 
-		// Handle any errors that aren't EOF (EOF is handled later on)
-		if ((result < 0) && (result != AVERROR_EOF)) {
-			break;
-		}
+	gmtime_r(&camera_t, &camera_time);
 
-		if (result == AVERROR_EOF) {
-			break;
-		}
+	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
 
-		// Stream timestamp
-		int64_t timecode = packet->pts;
-		int64_t timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
-
-		// Camera time
-		char s[92];
-		char buf[128];
-
-		struct tm camera_time;
-
-		const time_t camera_t = start_time + (timecode_ms / 1000);
-
-		gmtime_r(&camera_t, &camera_time);
-
-		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
-
-		// Dump
+	// Dump
+	if (app_.progressInfo()) {
 		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-			n, timecode, timecode_ms, s);
+			n_, timecode, timecode_ms, s);
+	}
 
-		if (settings().format() == ExtractorSettings::FormatRAW) {
-			out.write(reinterpret_cast<char*>(packet->data), packet->size); //reinterpret_cast<char*>(&myuint), sizeof(myuint));
-		}
-		else {
-			// Parsing stream packet
-			parse(gpmd, packet->data, packet->size, out); //(settings().format() == ExtractorSettings::FormatDump));
+	if (settings().format() == ExtractorSettings::FormatRAW) {
+		out_.write(reinterpret_cast<char*>(packet->data), packet->size); //reinterpret_cast<char*>(&myuint), sizeof(myuint));
+	}
+	else {
+		// Parsing stream packet
+		parse(gpmd, packet->data, packet->size, out_); //(settings().format() == ExtractorSettings::FormatDump));
 
-			// <trkpt lat="42.4586662211" lon="2.017777">
-			//	 <ele>31.4122</ele>
-			//   <time>2021-10-10T06:14:52.000Z</time>
-			// </trkpt>
-			if (settings().format() == ExtractorSettings::FormatGPX) {
-				if (gpmd.fix > 0) {
-					strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", &gpmd.utc_time);
-					snprintf(buf, sizeof(buf), "%s.%03d", s, gpmd.utc_ms);
+		// <trkpt lat="42.4586662211" lon="2.017777">
+		//	 <ele>31.4122</ele>
+		//   <time>2021-10-10T06:14:52.000Z</time>
+		// </trkpt>
+		if (settings().format() == ExtractorSettings::FormatGPX) {
+			if (gpmd.fix > 0) {
+				strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", &gpmd.utc_time);
+				snprintf(buf, sizeof(buf), "%s.%03d", s, gpmd.utc_ms);
 
-					out << std::setprecision(9);
-					out << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
-					out << "        <ele>" << gpmd.ele << "</ele>" << std::endl;
-					out << "        <time>" << buf << "</time>" << std::endl;
-					out << "      </trkpt>" << std::endl;
-				}
+				out_ << std::setprecision(9);
+				out_ << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
+				out_ << "        <ele>" << gpmd.ele << "</ele>" << std::endl;
+				out_ << "        <time>" << buf << "</time>" << std::endl;
+				out_ << "      </trkpt>" << std::endl;
 			}
-			else if (settings().format() == ExtractorSettings::FormatDump)
-				out << "###############################################" << std::endl;
 		}
-
-		// We don't needd the packet anymore, so free it
-		av_packet_unref(packet);
-
-		n++;
-
-		if (result < 0)
-			break;
+		else if (settings().format() == ExtractorSettings::FormatDump)
+			out_ << "###############################################" << std::endl;
 	}
 
-	// Write GPX footer
-	if (settings().format() == ExtractorSettings::FormatGPX) {
-		out << "    </trkseg>" << std::endl;
-		out << "  </trk>" << std::endl;
-		out << "</gpx>" << std::endl;
-	}
+	n_++;
+
+	// We don't needd the packet anymore, so free it
+	av_packet_unref(packet);
+
+	packet = NULL;
+
+	if (result < 0)
+		goto done;
+
+	schedule();
+
+	return true;
 
 done:
-	close();
-
-	if (out.is_open())
-		out.close();
+	if (packet != NULL)
+		av_packet_unref(packet);
 
 	complete();
+
+	return true;
+}
+
+
+bool Extractor::stop(void) {
+	// Write GPX footer
+	if (settings().format() == ExtractorSettings::FormatGPX) {
+		out_ << "    </trkseg>" << std::endl;
+		out_ << "  </trk>" << std::endl;
+		out_ << "</gpx>" << std::endl;
+	}
+
+	close();
+
+	if (out_.is_open())
+		out_.close();
+
+	if (ok_)
+		log_notice("GPMD data extracted with success");
+	else
+		log_error("GPMD data extraction failure");
+
+	return true;
 }
 
 

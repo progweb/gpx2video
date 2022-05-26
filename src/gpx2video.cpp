@@ -36,6 +36,7 @@ GPX2Video::GPX2Video(struct event_base *evbase)
 	log_call();
 
 	setLogLevel(AV_LOG_INFO);
+	setProgressInfo(false);
 
 	// Register FFmpeg codecs and filters (deprecated in 4.0+)
 #if LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100)
@@ -65,6 +66,20 @@ void GPX2Video::setLogLevel(int level) {
 	log_call();
 
 	av_log_set_level(level);
+}
+
+
+bool GPX2Video::progressInfo(void) {
+	log_call();
+
+	return progress_info_;
+}
+
+
+void GPX2Video::setProgressInfo(bool enable) {
+	log_call();
+
+	progress_info_ = enable;
 }
 
 
@@ -186,7 +201,6 @@ void GPX2Video::sighandler(int sfd, short kind, void *data) {
 		break;
 
 	case SIGINT:
-		log_error("SIGINT %d", fdsi.ssi_pid);
 		app->abort();
 		break;
 
@@ -208,6 +222,8 @@ void GPX2Video::sighandler(int sfd, short kind, void *data) {
 		log_error("UNDEFINED");
 		break;
 	}
+
+	return;
 
 sighandler_error:
 	app->loopexit();
@@ -231,7 +247,7 @@ void GPX2Video::pipehandler(int sfd, short kind, void *data) {
 
 	(void) bytes;
 
-	app->run((bool) info);
+	app->run((enum GPX2Video::Task::Action) info);
 }
 
 

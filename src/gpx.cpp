@@ -36,6 +36,11 @@ void show(gpx::Node &node, unsigned width)
 
 
 
+#define NOISE 0.1
+
+
+// GPX Data Point
+//----------------
 
 GPXData::GPXData() 
 	: nbr_points_(0)
@@ -48,10 +53,15 @@ GPXData::GPXData()
 	, avgspeed_(0)
 	, grade_(0) 
 	, cadence_(0) {
+
+	nbr_predictions_ = 0;
+
+	filter_ = alloc_filter_velocity2d(10.0);
 }
 
 
 GPXData::~GPXData() {
+//	free_filter(filter_);
 }
 
 
@@ -119,16 +129,110 @@ bool GPXData::compute(void) {
 
 	duration_ += dt;
 	distance_ += dc;
-	speed_ = (3600 * dc) / (1000 * dt);
+	if (dt > 0)
+		speed_ = (3600.0 * dc) / (1000.0 * dt);
 	if (speed_ > maxspeed_)
 		maxspeed_ = speed_;
-	avgspeed_ = (3600 * distance_) / (1000 * duration_);
+	avgspeed_ = (3600.0 * distance_) / (1000.0 * duration_);
 
 	dc = sqrt(dx*dx + dy*dy);
 
 	grade_ = 100 * dz / dc;
 
 	return true;
+}
+
+
+void GPXData::init(void) {
+	memcpy(&cur_pt_, &next_pt_, sizeof(cur_pt_));
+	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
+}
+
+
+void GPXData::predict(enum TelemetrySettings::Filter filter) {
+	struct Utm_val utm;
+
+	struct point prev_pt;
+
+	nbr_predictions_++;
+
+	// Save previous point
+	memcpy(&prev_pt, &prev_pt_, sizeof(prev_pt));
+	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
+
+	cur_pt_.time += 1; // Prediction should occur each 1 second
+
+	switch (filter) {
+	case TelemetrySettings::FilterKalman:
+		// Predict
+		::update(filter_);
+		::get_lat_long(filter_, &cur_pt_.lat, &cur_pt_.lon);
+		break;
+
+	case TelemetrySettings::FilterLinear:
+		cur_pt_.lat += (prev_pt_.lat - prev_pt.lat);
+		cur_pt_.lon += (prev_pt_.lon - prev_pt.lon);
+		cur_pt_.ele += (prev_pt_.ele - prev_pt.ele);
+		break;
+
+	case TelemetrySettings::FilterInterpolate:
+		cur_pt_.lat += (next_pt_.lat - prev_pt_.lat) / (next_pt_.time - prev_pt_.time);
+		cur_pt_.lon += (next_pt_.lon - prev_pt_.lon) / (next_pt_.time - prev_pt_.time);
+		cur_pt_.ele += (next_pt_.ele - prev_pt_.ele) / (next_pt_.time - prev_pt_.time);
+		break;
+
+	case TelemetrySettings::FilterNone:
+	default:
+		break;
+	}
+
+	if (filter != TelemetrySettings::FilterNone) {
+		utm = to_utm(cur_pt_.lat, cur_pt_.lon);
+
+		cur_pt_.x = utm.x;
+		cur_pt_.y = utm.y;
+
+		compute();
+	}
+
+	elapsedtime_ += (cur_pt_.time - prev_pt_.time);
+
+	return;
+}
+
+
+void GPXData::update(enum TelemetrySettings::Filter filter) {
+	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
+
+	switch (filter) {
+	case TelemetrySettings::FilterKalman:
+		// Measure
+		memcpy(&cur_pt_, &next_pt_, sizeof(cur_pt_));
+
+		// Correct
+		::update_velocity2d(filter_, next_pt_.lat, next_pt_.lon, 1.0);
+
+		// Filter
+		::get_lat_long(filter_, &cur_pt_.lat, &cur_pt_.lon);
+		break;
+	
+	case TelemetrySettings::FilterLinear:
+	case TelemetrySettings::FilterInterpolate:
+	case TelemetrySettings::FilterNone:
+	default:
+		memcpy(&cur_pt_, &next_pt_, sizeof(cur_pt_));
+
+		break;
+	}
+
+	elapsedtime_ += (cur_pt_.time - prev_pt_.time);
+
+	if (filter == TelemetrySettings::FilterNone)
+		prev_pt_.time -= nbr_predictions_;
+
+	compute();
+
+	nbr_predictions_ = 0;
 }
 
 
@@ -160,23 +264,21 @@ void GPXData::read(gpx::WPT *wpt) {
 		}
 	}
 
-	// Delta
-	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
-	memcpy(&cur_pt_, &pt, sizeof(cur_pt_));
-
-	nbr_points_++;
-
-	if (nbr_points_ > 1)
-		compute();
+	// Save point
+	memcpy(&next_pt_, &pt, sizeof(next_pt_));
 
 	valid_ = true;
 }
 
 
-GPX::GPX(std::ifstream &stream, gpx::GPX *root) 
+// GPX File Reader
+//-----------------
+
+GPX::GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter filter) 
 	: stream_(stream)
 	, root_(root)
-	, offset_(0) {
+	, offset_(0) 
+	, filter_(filter) {
 }
 
 
@@ -184,7 +286,7 @@ GPX::~GPX() {
 }
 
 
-GPX * GPX::open(const std::string &filename) {
+GPX * GPX::open(const std::string &filename, enum TelemetrySettings::Filter filter) {
 	GPX *gpx = NULL;
 
 	GPXData data;
@@ -209,7 +311,7 @@ GPX * GPX::open(const std::string &filename) {
 		goto failure;
 	}
 
-	gpx = new GPX(stream, root);
+	gpx = new GPX(stream, root, filter);
 
 	// Parse activity start time
 	gpx->parse();
@@ -286,7 +388,7 @@ void GPX::setTimeOffset(const int& offset) {
 }
 
 
-void GPX::retrieveFirst(GPXData &data) {
+enum GPX::Data GPX::retrieveFirst(GPXData &data) {
 	gpx::WPT *wpt;
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
@@ -304,12 +406,73 @@ void GPX::retrieveFirst(GPXData &data) {
 			wpt = (*iter_pts_);
 
 			data.read(wpt);
+			data.init();
+
+			return GPX::DataMeasured;
 		}
 	}
+
+	return GPX::DataEof;
 }
 
 
-void GPX::retrieveNext(GPXData &data) {
+enum GPX::Data GPX::retrieveNext(GPXData &data, int timecode_ms) {
+	enum GPX::Data result = GPX::DataEof;
+
+	int timestamp = start_time_ + ((offset_ + timecode_ms) / 1000);
+
+	do {
+		if (timecode_ms == -1) {
+			data.update(filter_);
+
+			if (this->retrieveData(data) == GPX::DataEof)
+				goto eof;
+
+			result = GPX::DataMeasured;
+		}
+		else if (data.time(GPXData::PositionCurrent) == timestamp) {
+			result = GPX::DataUnchanged;
+		}
+		else if (timestamp < data.time(GPXData::PositionNext)) {
+			data.predict(filter_);
+
+			result = GPX::DataPredicted;
+		}
+		else if (timestamp == data.time(GPXData::PositionNext)) {
+			data.update(filter_);
+
+			if (this->retrieveData(data) == GPX::DataEof)
+				goto eof;
+	
+			result = GPX::DataMeasured;
+		}
+		else if (timestamp > data.time(GPXData::PositionNext)) {
+			if ((data.time(GPXData::PositionCurrent) + 1) >= data.time(GPXData::PositionNext)) {
+				data.update(filter_);
+			
+				if (this->retrieveData(data) == GPX::DataEof)
+					goto eof;
+			
+				result = GPX::DataMeasured;
+			}
+			else {
+				data.predict(filter_);
+			
+				result = GPX::DataPredicted;
+			}
+		}
+	} while ((timecode_ms != -1) && (data.time(GPXData::PositionCurrent) < timestamp));
+
+	return result;
+
+eof:
+	data = GPXData();
+
+	return GPX::DataEof;
+}
+
+
+enum GPX::Data GPX::retrieveData(GPXData &data) {
 	gpx::WPT *wpt;
 	gpx::TRKSeg *trkseg = (*iter_seg_);
 
@@ -338,15 +501,16 @@ void GPX::retrieveNext(GPXData &data) {
 
 	data.read(wpt);
 
-	return;
+	return GPX::DataMeasured;
 
 done:
 	data = GPXData();
-	return;
+
+	return GPX::DataEof;
 }
 
 
-void GPX::retrieveLast(GPXData &data) {
+enum GPX::Data GPX::retrieveLast(GPXData &data) {
 	gpx::WPT *wpt;
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
@@ -368,69 +532,12 @@ void GPX::retrieveLast(GPXData &data) {
 			wpt = (*iter_pts_);
 
 			data.read(wpt);
-		}
-	}
-}
 
-
-const GPXData GPX::retrieveData(const int64_t &timecode) {
-	GPXData data;
-
-	int64_t timestamp = timecode + offset_;
-
-	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
-
-	for (std::list<gpx::TRKSeg*>::iterator iter2 = trksegs.begin(); iter2 != trksegs.end(); ++iter2) {
-		int n = 0;
-		gpx::TRKSeg *seg = (*iter2);
-
-		std::list<gpx::WPT*> &trkpts = seg->trkpts().list();
-
-		for (std::list<gpx::WPT*>::iterator iter3 = trkpts.begin(); iter3 != trkpts.end(); ++iter3) {
-			const char *s;
-
-			time_t t;
-			struct tm time;
-
-			gpx::WPT *wpt = (*iter3);
-
-			n++;
-			data.read(wpt);
-
-			// Convert time
-			s = wpt->time().getValue().c_str();
-
-			// Try format: "2020:12:13 08:55:48.215"
-			memset(&time, 0, sizeof(time));
-			if (strptime(s, "%Y:%m:%d %H:%M:%S.", &time) != NULL)
-				t = timegm(&time);
-			// Try format: "2020-07-28T07:04:43.000Z"
-			else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
-				t = timegm(&time);
-			// Try format: "2020-07-28T07:04:43Z"
-			else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
-				t = timegm(&time);
-			else
-				continue;
-
-			// Search timestamp in the GPX stream
-			if (t < (start_time_ + (timestamp / 1000))) {
-//				printf("t = %ld vs %ld\n", t, start_time_ + (timestamp / 1000));
-				continue;	   
-			}
-
-			// Save time
-			data.setElapsedTime((start_time_ - start_activity_) + (timecode / 1000));
-
-//			printf("OK %d\n", n);
-
-			return data;
+			return GPX::DataMeasured;
 		}
 	}
 
-	printf("FAILURE\n");
-
-	return data;
+	return GPX::DataEof;
 }
 
 

@@ -31,7 +31,7 @@ void Cache::init(void) {
 }
 
 
-void Cache::run(void) {
+bool Cache::run(void) {
 	log_call();
 
 	log_notice("Cache initialization...");
@@ -43,5 +43,7 @@ void Cache::run(void) {
 
 done:
 	complete();
+
+	return true;
 }
 

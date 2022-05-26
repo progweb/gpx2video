@@ -95,7 +95,9 @@ public:
 
 	const ExtractorSettings& settings() const;
 
-	void run(void);
+	bool start(void);
+	bool run(void);
+	bool stop(void);
 
 	bool open(void);
 	void close(void);
@@ -117,6 +119,13 @@ protected:
 	Extractor(GPX2Video &app, const ExtractorSettings &settings);
 
 	void init(void);
+
+private:
+	int n_;
+
+	bool ok_;
+
+	std::ofstream out_;
 };
 
 #endif

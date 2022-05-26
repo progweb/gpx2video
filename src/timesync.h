@@ -17,12 +17,19 @@ public:
 
 	virtual ~TimeSync();
 
-	void run(void);
+	bool start(void);
+	bool run(void);
+	bool stop(void);
 
 private:
 	TimeSync(GPX2Video &app, const ExtractorSettings &settings);
 
+	bool ok_;
+
+	int n_;
 	int offset_;
+
+    std::ofstream out_;
 };
 
 #endif

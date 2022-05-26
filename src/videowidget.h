@@ -162,10 +162,12 @@ public:
 		return hex2color(bgcolor_, color);
 	}
 
-	virtual void run(void) {
+	virtual bool run(void) {
 		log_call();
 
 		complete();
+
+		return true;
 	}
 
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;

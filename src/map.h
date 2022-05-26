@@ -69,10 +69,12 @@ public:
 	static int lat2pixel(int zoom, float lat);
 	static int lon2pixel(int zoom, float lon);
 
-	void run(void) {
+	bool run(void) {
 		log_call();
 
 		download();
+		
+		return true;
 	}
 
 	// Draw track path
