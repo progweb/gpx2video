@@ -226,8 +226,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			break;
 		case 't':
 			telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
+			break;
 		case 'q':
-//			GPX2Video::setLogQuiet(true);
+			GPX2Video::setLogQuiet(true);
 			break;
 		case 'v':
 			verbose++;

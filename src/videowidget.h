@@ -170,6 +170,8 @@ public:
 		return true;
 	}
 
+	virtual void prepare(void) { // = 0;
+	}
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
 	static Align string2align(std::string &s);
@@ -197,6 +199,14 @@ protected:
 		setBorderColor("#00000000");
 		setBackgroundColor("#00000000");
 	}
+
+	void createBox(OIIO::ImageBuf **buf, int width, int height);
+
+	void drawBorder(OIIO::ImageBuf *buf);
+	void drawBackground(OIIO::ImageBuf *buf);
+	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, double divider);
+	void drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label);
+	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
 
 	void fillBackground(OIIO::ImageBuf *frame);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider);

@@ -98,6 +98,161 @@ bool VideoWidget::hex2color(float color[4], std::string hex) {
 }
 
 
+void VideoWidget::createBox(OIIO::ImageBuf **buf, int width, int height) {
+	// Create an image buffer with static render
+	*buf = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8));
+}
+
+void VideoWidget::drawBorder(OIIO::ImageBuf *buf) {
+	int i;
+	int width, height;
+
+	int border;
+	float bordercolor[4];
+
+	width = this->width();
+	height = this->height();
+
+	border = this->border();
+	memcpy(bordercolor, this->borderColor(), sizeof(bordercolor));
+
+	// Draw border
+	if ((border > 0) && (bordercolor[3] != 0.0)) {
+		for (i=0; i<border; i++)
+			OIIO::ImageBufAlgo::render_box(*buf, i, i, width - i, height -i, bordercolor, false);
+	}
+}
+
+void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
+	int width, height;
+
+	int border;
+	float bgcolor[4];
+
+	width = this->width();
+	height = this->height();
+
+	border = this->border();
+	memcpy(bgcolor, this->backgroundColor(), sizeof(bgcolor));
+
+	if (bgcolor[3] != 0.0)
+		OIIO::ImageBufAlgo::render_box(*buf, border, border, width - border, height - border, bgcolor, true);
+}
+
+void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, double divider) {
+	int width, height;
+
+	// Open image
+	auto img = OIIO::ImageInput::open(name);
+	const OIIO::ImageSpec& spec = img->spec();
+	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
+	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
+
+	OIIO::ImageBuf *b = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	img->read_image(type, b->localpixels());
+
+	// Compute new size
+	width = spec.width * divider;
+	height = spec.height * divider;
+
+	// Resize picto
+	OIIO::ImageBuf d(OIIO::ImageSpec(width, height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	OIIO::ImageBufAlgo::resize(d, *b);
+
+	// Image over
+	d.specmod().x = x;
+	d.specmod().y = y;
+	OIIO::ImageBufAlgo::over(*buf, d, *buf, OIIO::ROI());
+
+	delete b;
+}
+
+void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label) {
+	bool result;
+
+	int w, h;
+
+	int border = this->border();
+	int padding = this->padding();
+
+	// Apply border
+	x += border;
+	y += border;
+
+	// width x height
+	w = this->height() - 2 * border;
+	h = this->height() - 2 * border;
+
+	// Add label (1 pt = 1.333 px)
+	// +-------------
+	// |  Label    px
+	// |  Value    2 * px
+	// +-------------
+	//        h = px + 2 * px + 2 * padding
+	int px = h / 2 - padding;
+	int pt = 3 * px / 4;
+
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
+
+	memcpy(color, this->textColor(), sizeof(color));
+
+	result = OIIO::ImageBufAlgo::render_text(*buf, 
+		x + w + (w/10) + padding, 
+		y + padding, 
+		label, 
+		pt, "./assets/fonts/Helvetica.ttf", color, 
+		OIIO::ImageBufAlgo::TextAlignX::Left, 
+		OIIO::ImageBufAlgo::TextAlignY::Top, 
+		this->textShadow());
+
+	if (result == false)
+		fprintf(stderr, "render label text error\n");
+}
+
+
+void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value) {
+	bool result;
+
+	int w, h;
+
+	int border = this->border();
+	int padding = this->padding();
+
+	// Apply border
+	x += border;
+	y += border;
+
+	// width x height
+	w = this->height() - 2 * border;
+	h = this->height() - 2 * border;
+
+	// Add label (1 pt = 1.333 px)
+	// +-------------
+	// |  Label    px
+	// |  Value    2 * px
+	// +-------------
+	//        h = px + 2 * px + 2 * padding
+	int px = h / 2 - padding;
+	int pt = 3 * px / 4;
+
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
+
+	memcpy(color, this->textColor(), sizeof(color));
+
+	result = OIIO::ImageBufAlgo::render_text(*buf, 
+		x + w + (w/10) + padding, 
+		y + h - padding, 
+		value, 
+		2 * pt, "./assets/fonts/Helvetica.ttf", color, 
+		OIIO::ImageBufAlgo::TextAlignX::Left, 
+		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
+		this->textShadow());
+
+	if (result == false)
+		fprintf(stderr, "render value text error\n");
+}
+
+
 void VideoWidget::fillBackground(OIIO::ImageBuf *frame) {
 	int i;
 	int x, y;

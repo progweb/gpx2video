@@ -69,6 +69,14 @@ void GPX2Video::setLogLevel(int level) {
 }
 
 
+void GPX2Video::setLogQuiet(bool enable) {
+	log_call();
+
+	if (enable)
+		fclose(stderr);
+}
+
+
 bool GPX2Video::progressInfo(void) {
 	log_call();
 

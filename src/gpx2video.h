@@ -167,6 +167,7 @@ public:
 	~GPX2Video();
 
 	void setLogLevel(int level);
+	void setLogQuiet(bool enable);
 
 	bool progressInfo(void);
 	void setProgressInfo(bool enable);

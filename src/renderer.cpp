@@ -612,6 +612,10 @@ bool Renderer::start(void) {
 
 	time_t start_time;
 
+	log_call();
+
+	log_notice("Rendering...");
+
 	start_time = container_->startTime() + container_->timeOffset();
 
 	// Update start time in GPX stream (start_time can change after sync step)
@@ -620,7 +624,9 @@ bool Renderer::start(void) {
 
 	started_at_ = now;
 
-	fclose(stderr);
+	// Prepare each widget, map...
+	for (VideoWidget *widget : widgets_)
+		widget->prepare();
 
 	return true;
 }
