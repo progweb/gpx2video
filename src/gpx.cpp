@@ -118,24 +118,44 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 	pt->y = utm.y;
 }
 
+#include <GeographicLib/Geodesic.hpp>
 
 bool GPXData::compute(void) {
-	double dx = (cur_pt_.x - prev_pt_.x);
-	double dy = (cur_pt_.y - prev_pt_.y);
+//	double dx = (cur_pt_.x - prev_pt_.x);
+//	double dy = (cur_pt_.y - prev_pt_.y);
 	double dz = (cur_pt_.ele - prev_pt_.ele);
 
-	double dc = sqrt(dx*dx + dy*dy + dz*dz);
+//	double dc = sqrt(dx*dx + dy*dy + dz*dz);
+
+	double dc;
+
+	double speed = 0;
+
+	GeographicLib::Math::real lat1 = cur_pt_.lat;
+	GeographicLib::Math::real lon1 = cur_pt_.lon;
+	GeographicLib::Math::real lat2 = prev_pt_.lat;
+	GeographicLib::Math::real lon2 = prev_pt_.lon;
+	GeographicLib::Math::real d;
+
+	GeographicLib::Geodesic gsic(6378388, 1/297.0);
+	gsic.Inverse(lat1, lon1, lat2, lon2,
+		d);
+
+	dc = d;
+
 	double dt = difftime(cur_pt_.time, prev_pt_.time);
 
 	duration_ += dt;
 	distance_ += dc;
 	if (dt > 0)
-		speed_ = (3600.0 * dc) / (1000.0 * dt);
+		speed = (3600.0 * dc) / (1000.0 * dt);
+	if (abs((int) (speed - speed_)) < 50)
+		speed_ = speed;
 	if (speed_ > maxspeed_)
 		maxspeed_ = speed_;
 	avgspeed_ = (3600.0 * distance_) / (1000.0 * duration_);
 
-	dc = sqrt(dx*dx + dy*dy);
+//	dc = sqrt(dx*dx + dy*dy);
 
 	grade_ = 100 * dz / dc;
 
