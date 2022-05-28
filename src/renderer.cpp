@@ -94,10 +94,6 @@ void Renderer::init(void) {
 		video_stream->nbChannels(),
 		video_stream->pixelAspectRatio(),
 		video_stream->interlacing());
-	AudioParams audio_params(audio_stream->sampleRate(),
-		audio_stream->channelLayout(),
-		audio_stream->format());
-
 	video_params.setPixelFormat(video_stream->pixelFormat());
 
 	EncoderSettings settings;
@@ -106,8 +102,15 @@ void Renderer::init(void) {
 	settings.setVideoBitrate(4 * 1000 * 1000 * 8);
 	settings.setVideoMaxBitrate(2 * 1000 * 1000 * 16);
 	settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
-	settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
-	settings.setAudioBitrate(44 * 1000);
+
+	if (audio_stream) {
+		AudioParams audio_params(audio_stream->sampleRate(),
+			audio_stream->channelLayout(),
+			audio_stream->format());
+
+		settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
+		settings.setAudioBitrate(44 * 1000);
+	}
 
 	// Compute duration
 	duration_ms_ = video_stream->duration() * av_q2d(video_stream->timeBase()) * 1000;
@@ -121,8 +124,10 @@ void Renderer::init(void) {
 	decoder_video_ = Decoder::create();
 	decoder_video_->open(video_stream);
 
-	decoder_audio_ = Decoder::create();
-	decoder_audio_->open(audio_stream);
+	if (audio_stream) {
+		decoder_audio_ = Decoder::create();
+		decoder_audio_->open(audio_stream);
+	}
 
 	// Open & encode output video
 	encoder_ = Encoder::create(settings);
@@ -659,10 +664,12 @@ bool Renderer::run(void) {
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
 
 	// Read audio data
-	frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);
+	if (decoder_audio_) {
+		frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);
 
-	if (frame != NULL)
-		encoder_->writeAudio(frame, real_time);
+		if (frame != NULL)
+			encoder_->writeAudio(frame, real_time);
+	}
 
 	// Read video data
 	frame = decoder_video_->retrieveVideo(real_time);
@@ -763,12 +770,15 @@ bool Renderer::stop(void) {
 		(working / 3600), (working / 60) % 60, (working) % 60);
 
 	encoder_->close();
-	decoder_audio_->close();
+	if (decoder_audio_)
+		decoder_audio_->close();
 	decoder_video_->close();
 
 	if (overlay_)
 		delete overlay_;
 
+	decoder_audio_ = NULL;
+	decoder_video_ = NULL;
 	overlay_ = NULL;
 
 	return true;
