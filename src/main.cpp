@@ -52,7 +52,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- m, --media=file       : Input media file name" << std::endl;
 	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
-	std::cout << "\t- l, --layout=file      : Layout fie name" << std::endl;
+	std::cout << "\t- l, --layout=file      : Layout file name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
