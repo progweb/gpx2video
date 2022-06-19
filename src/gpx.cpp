@@ -8,6 +8,8 @@
 #include <math.h>
 
 #include "utmconvert/utmconvert.h"
+#include <GeographicLib/Geodesic.hpp>
+
 
 #include "gpxlib/Parser.h"
 #include "gpxlib/ReportCerr.h"
@@ -118,7 +120,6 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 	pt->y = utm.y;
 }
 
-#include <GeographicLib/Geodesic.hpp>
 
 bool GPXData::compute(void) {
 //	double dx = (cur_pt_.x - prev_pt_.x);

@@ -5,7 +5,8 @@
 
 
 MediaContainer::MediaContainer() 
-	: offset_(0) {
+	: offset_(0) 
+	, start_time_(0) {
 }
 
 
@@ -37,6 +38,9 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 	struct tm time;
 
 	const char *s = start_time.c_str();
+
+	if ((s == NULL) || !strcmp(s, ""))
+		return;
 
 	// creation_time = 2020-12-13T09:56:27.000000Z
 	memset(&time, 0, sizeof(time));
