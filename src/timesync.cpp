@@ -34,7 +34,7 @@ TimeSync * TimeSync::create(GPX2Video &app) {
 
 
 bool TimeSync::start(void) {
-	bool result = true;
+	bool result = false;
 
 	log_call();
 
@@ -49,7 +49,6 @@ bool TimeSync::start(void) {
        
 	if (!out_.is_open()) {
 		log_error("Open '/dev/null' failure");
-		result = false;
 		goto done;
 	}
 
@@ -58,6 +57,8 @@ bool TimeSync::start(void) {
 		log_warn("Time synchronization failure!");
 		goto done;
 	}
+
+	result = true;
 
 done:
 	return result;
