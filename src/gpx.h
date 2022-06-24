@@ -32,8 +32,8 @@ public:
 	virtual ~GPXData();
 
 	void init(void);
-	void predict(enum TelemetrySettings::Filter filter);
-	void update(enum TelemetrySettings::Filter filter);
+	void predict(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
+	void update(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 
 	void read(gpx::WPT *wpt);
 

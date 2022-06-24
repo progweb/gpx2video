@@ -553,6 +553,7 @@ enum GPX::Data GPX::retrieveLast(GPXData &data) {
 			wpt = (*iter_pts_);
 
 			data.read(wpt);
+			data.update();
 
 			return GPX::DataMeasured;
 		}
