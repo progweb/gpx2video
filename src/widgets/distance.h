@@ -48,11 +48,14 @@ public:
 		char s[128];
 		double distance = data.distance();
 
-		distance /= 1000.0;
 
 		if (units() == VideoWidget::UnitKm) {
+			distance /= 1000.0;
+		}
+		else if (units() == VideoWidget::UnitMeter) {
 		}
 		else {
+			distance /= 1000.0;
 			distance *= 0.6213711922;
 		}
 
