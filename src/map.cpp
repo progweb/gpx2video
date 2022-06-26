@@ -493,13 +493,13 @@ void Map::init(void) {
 	y2_ = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE) + 1;
 
 	// Append tile so as width tiles sum is enough
-	while ((x2_ - x1_) * TILESIZE * divider < settings().width()) {
+	while ((x2_ - x1_) * TILESIZE * divider < 2 * settings().width()) {
 		x1_ -= 1;
 		x2_ += 1;
 	}
 
 	// Append tile so as height tiles sum is enough
-	while ((y2_ - y1_) * TILESIZE * divider  < settings().height()) {
+	while ((y2_ - y1_) * TILESIZE * divider  < 2 * settings().height()) {
 		y1_ -= 1;
 		y2_ += 1;
 	}
