@@ -207,7 +207,7 @@ bool Extractor::run(void) {
 		if (settings().format() == ExtractorSettings::FormatGPX) {
 			if (gpmd.fix > 0) {
 				strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", &gpmd.utc_time);
-				snprintf(buf, sizeof(buf), "%s.%03d", s, gpmd.utc_ms);
+				snprintf(buf, sizeof(buf), "%s.%03dZ", s, gpmd.utc_ms);
 
 				out_ << std::setprecision(9);
 				out_ << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
