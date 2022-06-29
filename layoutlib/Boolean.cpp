@@ -1,8 +1,8 @@
 //==============================================================================
 //
-//                LAYOUT - the root node in the LAYOUT library
+//           Boolean - the Boolean simple type in the layout library
 //
-//          Copyright (C) 2013-2016 Dick van Oudheusden
+//               Copyright (C) 2013  Dick van Oudheusden
 //  
 // This library is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Lesser General Public
@@ -23,32 +23,53 @@
 //  $Date: 2013-03-10 12:02:27 +0100 (Sun, 10 Mar 2013) $ $Revision: 5 $
 //
 //==============================================================================
-
-#include "Layout.h"
-
+#include <iostream>
+#include "Boolean.h"
 
 using namespace std;
 
 namespace layout
 {
-
-  Layout::Layout() :
-    Node(nullptr, "layout", Node::ELEMENT, true),
-    _version(this, "version", Node::ATTRIBUTE, true),
-    _creator(this, "creator", Node::ATTRIBUTE, true),
-    _widgets(this, "widget", Node::ELEMENT, false),
-    _tracks(this, "track", Node::ELEMENT, false),
-    _maps(this, "map", Node::ELEMENT, false)
+  Boolean::Boolean(Node *parent, const char *name, Node::Type type, bool mandatory) :
+    Node(parent, name, type, mandatory)
   {
-    getInterfaces().push_back(&_version);
-    getInterfaces().push_back(&_creator);
-
-    getInterfaces().push_back(&_widgets);
-    getInterfaces().push_back(&_tracks);
-    getInterfaces().push_back(&_maps);
   }
 
-  Layout::~Layout()
+  Boolean::~Boolean()
   {
+  }
+  
+  bool Boolean::validate(Report *report) const
+  {
+    bool ok = Node::validate(report);
+    
+    if (ok)
+    {
+      bool value = false;
+
+      if (!convert(value))
+      {
+        if (report != nullptr)
+        {
+          report->report(this, Report::INCORRECT_VALUE, this->getValue());
+        }
+        ok = false;
+      }
+    }
+
+    return ok;
+  }
+
+  bool Boolean::convert(bool &value) const
+  {
+    if (getValue() == "true")
+		value = true;
+	else if (getValue() == "false")
+		value = false;
+	else
+		return false;
+
+    return true;
   }
 }
+

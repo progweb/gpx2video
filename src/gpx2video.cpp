@@ -23,6 +23,7 @@ extern "C" {
 #include "utils.h"
 #include "evcurl.h"
 #include "map.h"
+#include "track.h"
 #include "extractor.h"
 #include "decoder.h"
 #include "encoder.h"

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="780" height="120" align="top">
+	<widget x="250" y="450" width="780" height="120" align="top" display="false">
 		<type>position</type>
 		<name>POSITION</name>
 		<margin>20</margin>
@@ -21,7 +21,7 @@
 		<margin>20</margin>
 		<padding>10</padding>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="580" height="120" align="left">
@@ -29,7 +29,7 @@
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>m</units>
+		<unit>m</unit>
 		<text-shadow>3</text-shadow>
 	</widget>
 	<widget x="250" y="450" width="580" height="120" align="right">
@@ -61,21 +61,19 @@
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<!--
-	<widget x="250" y="450" width="580" height="120" align="left">
+	<widget x="250" y="450" width="580" height="120" align="left" display="false">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	-->
 	<widget x="250" y="450" width="580" height="120" align="bottom">
 		<type>distance</type>
 		<name>DISTANCE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>km</units>
+		<unit>km</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="580" height="120" align="bottom">
@@ -83,7 +81,7 @@
 		<name>MOYENNE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="580" height="120" align="bottom">
@@ -91,20 +89,28 @@
 		<name>VITESSE MAX.</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<!--
-	<map x="800" y="300" align="none">
+
+	<track x="500" y="350" width="1800" height="350" align="top">
+		<border>1</border>
+		<border-color>#000000ff</border-color>
+		<background-color>#00000033</background-color>
+	</track>
+
+	<map x="800" y="300" align="none" display="false">
 		<source>1</source>
 		<zoom>11</zoom>
 		<factor>1.2</factor>
 	</map>
-	-->
-	<map align="top-right">
+
+	<map width="800" height="500" align="top-right">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
 		<margin>20</margin>
+		<border>6</border>
+		<border-color>#000000ff</border-color>
 	</map>
 </layout>

@@ -229,14 +229,14 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 		<name>VITESSE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 	</widget>		
 	<widget x="250" y="450" width="600" height="120" align="left">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>m</units>
+		<unit>m</unit>
 	</widget>
 	<widget x="250" y="450" width="600" height="120" align="right">
 		<type>date</type>
@@ -245,14 +245,14 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 		<padding>5</padding>
 		<format>%d-%m-%Y</format>
 	</widget>
-	<!--
-	<widget x="250" y="450" width="600" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" align="left" display="false">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 	</widget>		
-	-->
+	<track x="800" y="300" width="640" height="480" align="none" display="false">
+	</track>
 	<map x="800" y="300" width="640" height="480" align="none">
 		<source>1</source>
 		<zoom>12</zoom>
@@ -264,12 +264,12 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 Here all widget element settings:
 
 ```xml
-<widget x="250" y="450" width="600" height="120" align="left">
+<widget x="250" y="450" width="600" height="120" align="left" display="true">
 	<type>speed</type>
 	<name>VITESSE</name>
 	<margin>20</margin>
 	<padding>5</padding>
-	<units>kph</units>
+	<unit>kph</unit>
 	<text-color>#00ff00ff</text-color>
 	<text-shadow>3</text-shadow>
 	<border>5</border>
@@ -287,10 +287,13 @@ Here all widget element settings:
   - cadence
   - heartrate
 
+**display** values are: true or false. It permits to render or not the widget.
+The **display** default value is true.
+
 **align** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
 If **align** attribute is defined, gpx2video ignores and computes **x** and **y** values.
 
-**units** values are: mph, kph, km, m and miles.
+**unit** values are: mph, kph, km, m and miles.
 
 *Note: Widget date accepts format element too.*
 
@@ -298,7 +301,7 @@ You can set **border** size and color, the background color and text color too. 
 
 ![legend](./assets/legend.png)
 
-**padding** value set the space around the text. Whereas, **margin** value defines the space around the widget.
+**padding** value sets the space around the text. Whereas, **margin** value defines the space around the widget.
 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. At last, you can define
 several map widgets.
@@ -329,6 +332,37 @@ $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-fact
 $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 track
 ```
 
+Map settings: 
+
+```xml
+<map x="250" y="450" width="600" height="120" align="left" display="true">
+	<source>1</source>
+	<zoom>11</zoom>
+	<factor>1.2</factor>
+	<border>5</border>
+	<border-color>#000000b0</border-color>
+	<background-color>#0000004c</background-color>
+</map>		
+```
+
+**zoom** value sets the map details.
+**factor** value applies a zoom factor as render.
+
+
+
+## Tracks
+
+You can also display only the track without the map background in using track widget.
+
+Track settings: 
+
+```xml
+<track x="250" y="450" width="600" height="120" align="left" display="true">
+	<border>5</border>
+	<border-color>#000000b0</border-color>
+	<background-color>#0000004c</background-color>
+</widget>		
+```
 
 
 ## Extract tools
@@ -378,8 +412,7 @@ Since gpx2video interpolates data each 1s in using different filters: linear, ka
     - svg: add icon svg support
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
-  - Widget debug
-  - Title gauge
+  - Widget text
   - Photo import
   - User interface integration
   - GPS interpolate data between two waypoints.

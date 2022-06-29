@@ -27,10 +27,12 @@ set(LAYOUTLIB_HEADERS
 #
 set(LAYOUTLIB_SOURCES
 	Node.cpp
+	Boolean.cpp
 	Decimal.cpp
 	String.cpp
 	Unsigned.cpp
 	Map.cpp
+	Track.cpp
 	Widget.cpp
 	Layout.cpp
 	Parser.cpp

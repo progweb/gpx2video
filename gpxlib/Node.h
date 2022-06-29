@@ -120,6 +120,16 @@ namespace gpx
     ///
     bool isMandatory() const { return _mandatory; }
     
+	///
+	/// Get line
+	///
+	int line() const { return _line; }
+
+	///
+	/// Set line
+	///
+	virtual void setLine(int line) { _line = line; }
+
     ///
     /// Set the value
     ///
@@ -300,6 +310,7 @@ namespace gpx
 
     // Members
     Node              *_parent;
+	int                _line;
     std::string        _name;
     Type               _type;
     std::string        _value;

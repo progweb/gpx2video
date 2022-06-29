@@ -21,7 +21,7 @@
 		<margin>20</margin>
 		<padding>10</padding>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="400" height="80" align="left">
@@ -29,7 +29,7 @@
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>m</units>
+		<unit>m</unit>
 		<text-shadow>3</text-shadow>
 	</widget>
 	<widget x="250" y="450" width="400" height="80" align="right">
@@ -73,7 +73,7 @@
 		<name>DISTANCE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>km</units>
+		<unit>km</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="400" height="80" align="bottom">
@@ -81,7 +81,7 @@
 		<name>MOYENNE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="250" y="450" width="400" height="80" align="bottom">
@@ -89,23 +89,38 @@
 		<name>VITESSE MAX.</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
+	<widget x="700" y="300" width="400" height="400" align="none" display="false">
+		<type>gpx</type>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>0</text-shadow>
+		<border>6</border>
+		<border-color>#000000ff</border-color>
+		<background-color>#00000066</background-color>
+	</widget>		
 
-	<!--
-	<map x="800" y="300" align="none">
+
+	<track x="500" y="350" width="320" height="400" align="none">
+		<border>6</border>
+		<border-color>#000000ff</border-color>
+		<background-color>#00000066</background-color>
+	</track>
+
+	<map x="850" y="350" align="none" display="true">
 		<source>1</source>
 		<zoom>11</zoom>
 		<factor>1.2</factor>
+		<border>6</border>
+		<border-color>#000000ff</border-color>
 	</map>
-	-->
-	<!--
-	<map align="top-right">
+
+	<map align="top-right" display="false">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
 		<margin>20</margin>
 	</map>
-	-->
 </layout>

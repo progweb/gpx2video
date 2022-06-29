@@ -21,20 +21,16 @@ public:
 
 		widget = new DistanceWidget(app, "distance");
 
-		widget->setUnits(VideoWidget::UnitMiles);
+		widget->setUnit(VideoWidget::UnitMiles);
 
 		return widget;
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
-		const int w = 64;
-
-		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
-
 		this->createBox(&buf_, this->width(), this->height());
 		this->drawBorder(buf_);
 		this->drawBackground(buf_);
-		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_distance.png", divider);
+		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_distance.png", VideoWidget::ZoomFit);
 //		this->drawLabel(buf_, 0, 0, label().c_str());
 //		this->drawValue(buf_, 0, 0, "22 km");
 
@@ -48,22 +44,21 @@ public:
 		char s[128];
 		double distance = data.distance();
 
-
-		if (units() == VideoWidget::UnitKm) {
+		if (unit() == VideoWidget::UnitKm) {
 			distance /= 1000.0;
 		}
-		else if (units() == VideoWidget::UnitMeter) {
+		else if (unit() == VideoWidget::UnitMeter) {
 		}
 		else {
 			distance /= 1000.0;
 			distance *= 0.6213711922;
 		}
 
-		sprintf(s, "%.0f %s", distance, units2string(units()).c_str());
+		sprintf(s, "%.0f %s", distance, unit2string(unit()).c_str());
 
 		// Append dynamic info
-		this->drawLabel(buf, this->x(), this->y(), label().c_str());
-		this->drawValue(buf, this->x(), this->y(), s);
+		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());
+		this->drawValue(buf, this->x() + this->height() + this->padding(), this->y(), s);
 	}
 
 private:

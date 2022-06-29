@@ -30,6 +30,7 @@
 #include "export.h"
 #include "Node.h"
 
+#include "Boolean.h"
 #include "String_.h"
 #include "Unsigned.h"
 #include "List.h"
@@ -76,6 +77,13 @@ namespace layout
     ///
     String  &type() { return _type; }
 
+	/// 
+	/// Get display
+	///
+	/// @return the display attribute
+	///
+	Boolean  &display() { return _display; }
+
     ///
     /// Get align
     ///
@@ -84,11 +92,11 @@ namespace layout
     String  &align() { return _align; }
 
     ///
-    /// Get units
+    /// Get unit
     ///
-    /// @return the units element
+    /// @return the unit element
     ///
-    String  &units() { return _units; }
+    String  &unit() { return _unit; }
 
     ///
     /// Get format
@@ -181,8 +189,9 @@ namespace layout
     // Members
     String       _name;
     String       _type;
+	Boolean      _display;
     String       _align;
-    String       _units;
+    String       _unit;
     String       _format;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;

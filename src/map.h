@@ -102,6 +102,8 @@ protected:
 	void build(void);
 
 private:
+	OIIO::ImageBuf *buf_;
+
 //	Map(const MapSettings &settings, struct event_base *evbase);
 	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
 
@@ -123,8 +125,12 @@ private:
 	// Map filename to tmp save
 	std::string filename_;
 
-	// Bounding box
+	// Bounding box (map area)
 	int x1_, y1_, x2_, y2_;
+	int px1_, py1_, px2_, py2_;
+
+	// Bounding box (track area)
+	int lim_x1_, lim_y1_, lim_x2_, lim_y2_;
 
 	unsigned int nbr_downloads_;
 	std::list<Tile *> tiles_;

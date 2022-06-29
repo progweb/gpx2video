@@ -33,6 +33,7 @@
 #include "String_.h"
 #include "List.h"
 #include "Widget.h"
+#include "Track.h"
 #include "Map.h"
 
 ///
@@ -99,6 +100,13 @@ namespace layout
     List<Widget> &widgets() {return _widgets;}
 
     ///
+    /// Get tracks
+    ///
+    /// @return the list of track elements
+    ///
+    List<Track> &tracks() {return _tracks;}
+
+    ///
     /// Get maps
     ///
     /// @return the list of map elements
@@ -109,8 +117,8 @@ namespace layout
 
     // Members
 
-    String      _version;
-    String      _creator;
+    String        _version;
+    String        _creator;
 //    Metadata    _metadata;
 //    Extensions  _extensions;
 //    List<WPT>   _wpts;
@@ -118,7 +126,8 @@ namespace layout
 //    List<TRK>   _trks;
 
     List<Widget>   _widgets;
-    List<Map>   _maps;
+	List<Track>    _tracks;
+    List<Map>      _maps;
 
     // Disable copy constructors
     Layout(const Layout &);

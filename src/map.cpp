@@ -48,6 +48,7 @@
 MapSettings::MapSettings() {
 	width_ = 320;
 	height_ = 240;
+	zoom_ = 10;
 	divider_ = 2.0;
 	source_ = MapSettings::SourceNull;
 }
@@ -301,6 +302,7 @@ Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
 
 	VideoWidget::setSize(settings_.width(), settings_.height()); 
 
+	buf_ = NULL;
 	mapbuf_ = NULL;
 
 	evcurl_ = EVCurl::init(evbase);
@@ -316,6 +318,8 @@ Map::~Map() {
 
 	if (mapbuf_ != NULL)
 		delete mapbuf_;
+	if (buf_)
+		delete buf_;
 
 	delete evcurl_;
 }
@@ -462,19 +466,24 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 
 void Map::init(void) {
 	int zoom;
+	int padding;
+	double divider;
 
 	double lat1, lon1;
 	double lat2, lon2;
+
+	int w, h;
+	int width = settings().width();
+	int height = settings().height();
 
 	std::string uri;
 
 	Tile *tile;
 
-	double divider = settings().divider();
-
 	log_call();
 
 	zoom = settings().zoom();
+	divider = settings().divider();
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
 
 	// Tiles:
@@ -486,20 +495,28 @@ void Map::init(void) {
 	// | x1,y2 |       |       |       | x2,y2 |
 	// +-------+-------+-------+ ..... +-------+
 
-	x1_ = floorf((float) Map::lon2pixel(zoom, lon1) / (float) TILESIZE);
-	y1_ = floorf((float) Map::lat2pixel(zoom, lat1) / (float) TILESIZE);
+	// lat/lon to pixel
+	px1_ = Map::lon2pixel(zoom, lon1);
+	py1_ = Map::lat2pixel(zoom, lat1);
 
-	x2_ = floorf((float) Map::lon2pixel(zoom, lon2) / (float) TILESIZE) + 1;
-	y2_ = floorf((float) Map::lat2pixel(zoom, lat2) / (float) TILESIZE) + 1;
+	px2_ = Map::lon2pixel(zoom, lon2);
+	py2_ = Map::lat2pixel(zoom, lat2);
+
+	// lat/lon to tile index
+	x1_ = floorf((float) px1_ / (float) TILESIZE);
+	y1_ = floorf((float) py1_ / (float) TILESIZE);
+
+	x2_ = floorf((float) px2_ / (float) TILESIZE) + 1;
+	y2_ = floorf((float) py2_ / (float) TILESIZE) + 1;
 
 	// Append tile so as width tiles sum is enough
-	while ((x2_ - x1_) * TILESIZE * divider < 2 * settings().width()) {
+	while (((x2_ - x1_) * TILESIZE * divider) < (2 * width)) {
 		x1_ -= 1;
 		x2_ += 1;
 	}
 
 	// Append tile so as height tiles sum is enough
-	while ((y2_ - y1_) * TILESIZE * divider  < 2 * settings().height()) {
+	while (((y2_ - y1_) * TILESIZE * divider) < (2 * height)) {
 		y1_ -= 1;
 		y2_ += 1;
 	}
@@ -510,6 +527,53 @@ void Map::init(void) {
 			tile = new Tile(*this, zoom, x, y);
 			tiles_.push_back(tile);
 		}
+	}
+
+	// Use padding (to see markers)
+	padding = this->border() + 50;
+
+	// width x height of track
+	w = floorf((float) px2_ - px1_);
+	h = floorf((float) py2_ - py1_);
+
+	w *= divider;
+	h *= divider;
+
+	// Compute display limits
+	if ((w + 2 * padding) < width) {
+		lim_x1_ = floorf((float) Map::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
+		lim_x1_ *= divider;
+		lim_x1_ -= (width - w) / 2;
+
+		lim_x2_ = lim_x1_;
+	}
+	else {
+		lim_x1_ = floorf((float) Map::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
+		lim_x1_ *= divider;
+		lim_x1_ -= padding;
+
+		lim_x2_ = floorf((float) Map::lon2pixel(zoom, lon2)) - (x1_ * TILESIZE);
+		lim_x2_ *= divider;
+		lim_x2_ -= width;
+		lim_x2_ += padding;
+	}
+
+	if ((h + 2 * padding) < height) {
+		lim_y1_ = floorf((float) Map::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
+		lim_y1_ *= divider;
+		lim_y1_ -= (height - h) / 2;
+
+		lim_y2_ = lim_y1_;
+	}
+	else {
+		lim_y1_ = floorf((float) Map::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
+		lim_y1_ *= divider;
+		lim_y1_ -= padding;
+
+		lim_y2_ = floorf((float) Map::lat2pixel(zoom, lat2)) - (y1_ * TILESIZE);
+		lim_y2_ *= divider;
+		lim_y2_ -= height;
+		lim_y2_ += padding;
 	}
 }
 
@@ -807,25 +871,38 @@ bool Map::load(void) {
 
 
 void Map::prepare(OIIO::ImageBuf *buf) {
-	int x = this->x(); // 1700;
-	int y = this->y(); // 900;
-	int width = settings().width(); // 800;
-	int height = settings().height(); // 500;
+//	int x = this->x(); // 1700;
+//	int y = this->y(); // 900;
+//	int w, width = settings().width(); // 800;
+//	int h, height = settings().height(); // 500;
+//
+//	int zoom = settings().zoom();
+//	double divider = settings().divider();
 
+	
+	this->createBox(&buf_, this->width(), this->height());
+	this->drawBorder(buf_);
+
+	// Load map
 	if (this->load() == false)
 		log_warn("Map renderer failure");
 
-	// Background
-	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
-	OIIO::ImageBufAlgo::fill(*buf, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
+//	// Background
+//	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
+//	OIIO::ImageBufAlgo::fill(*buf, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
+
+	// Image over
+	buf_->specmod().x = this->x();
+	buf_->specmod().y = this->y();
+	OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
 }
 
 
 void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
-	int x = this->x(); // 1700;
-	int y = this->y(); // 900;
-	int width = settings().width(); // 800;
-	int height = settings().height(); // 500;
+	int x = this->x();
+	int y = this->y();
+	int width = settings().width();
+	int height = settings().height();
 
 	int posX, posY;
 	int offsetX, offsetY;
@@ -833,8 +910,7 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int zoom = settings().zoom();
 	double divider = settings().divider();
 
-	int offsetMaxX = ((x2_ - x1_) * TILESIZE * divider) - width;
-	int offsetMaxY = ((y2_ - y1_) * TILESIZE * divider) - height;
+	int border = this->border();
 
 	// Check map buffer
 	if (mapbuf_ == NULL) {
@@ -842,7 +918,13 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 		return;
 	}
 
-	// Center map
+	// Map size
+	x += border;
+	y += border;
+	width -= 2 * border;
+	height -= 2 * border;
+
+	// Center map on current position
 	posX = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
 	posY = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
 
@@ -852,14 +934,14 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	offsetX = posX - (width / 2);
 	offsetY = posY - (height / 2);
 
-	if (offsetX < 0)
-		offsetX = 0;
-	if (offsetY < 0)
-		offsetY = 0;
-	if (offsetX > offsetMaxX)
-		offsetX = offsetMaxX; 
-	if (offsetY > offsetMaxY)
-		offsetY = offsetMaxY; 
+	if (offsetX < lim_x1_)
+		offsetX = lim_x1_;
+	if (offsetY < lim_y1_)
+		offsetY = lim_y1_;
+	if (offsetX > lim_x2_)
+		offsetX = lim_x2_;
+	if (offsetY > lim_y2_)
+		offsetY = lim_y2_;
 
 	// Image over
 	mapbuf_->specmod().x = x - offsetX;

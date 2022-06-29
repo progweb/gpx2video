@@ -18,14 +18,14 @@
 		<name>VITESSE</name>
 		<margin>5</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" align="left">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>5</margin>
 		<padding>5</padding>
-		<units>m</units>
+		<unit>m</unit>
 	</widget>
 	<widget x="25" y="45" width="110" height="30" align="right">
 		<type>time</type>
@@ -65,33 +65,31 @@
 		<name>DISTANCE</name>
 		<margin>5</margin>
 		<padding>5</padding>
-		<units>km</units>
+		<unit>km</unit>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" align="bottom">
 		<type>avgspeed</type>
 		<name>MOYENNE</name>
 		<margin>5</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" align="bottom">
 		<type>maxspeed</type>
 		<name>VITESSE MAX.</name>
 		<margin>5</margin>
 		<padding>5</padding>
-		<units>kph</units>
+		<unit>kph</unit>
 	</widget>		
-	<!--
-	<map x="300" y="300" align="none">
+	<map x="300" y="300" align="none" display="false">
 		<source>1</source>
 		<zoom>11</zoom>
 		<factor>1.2</factor>
 	</map>
-	<map align="top-right">
+	<map align="top-right" display="false">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
 		<margin>5</margin>
 	</map>
-	-->
 </layout>

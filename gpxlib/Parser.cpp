@@ -65,6 +65,7 @@ namespace gpx
       if (_root == nullptr)
       {
         _current = _root = new GPX();
+        _current->setLine(XML_GetCurrentLineNumber(_parser));
       }
       else if (_report != nullptr)
       {
@@ -74,6 +75,7 @@ namespace gpx
     else if (_current != nullptr)
     {
       _current = _current->add(name, Node::ELEMENT, _report);
+      _current->setLine(XML_GetCurrentLineNumber(_parser));
     }
     else if (_report != nullptr)
     {

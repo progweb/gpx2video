@@ -9,10 +9,12 @@
 #include <OpenImageIO/imagebufalgo.h>
 
 #include "layoutlib/Map.h"
+#include "layoutlib/Track.h"
 #include "layoutlib/Widget.h"
 
 #include "gpx.h"
 #include "map.h"
+#include "track.h"
 #include "frame.h"
 #include "media.h"
 #include "decoder.h"
@@ -62,6 +64,7 @@ private:
 	void init(void);
 	bool load(void);
 	bool loadMap(layout::Map *m);
+	bool loadTrack(layout::Track *t);
 	bool loadWidget(layout::Widget *w);
 	void computeWidgetsPosition(void);
 

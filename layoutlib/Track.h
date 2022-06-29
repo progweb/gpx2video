@@ -1,9 +1,9 @@
-#ifndef __LAYOUT__MAP_H__
-#define __LAYOUT__MAP_H__
+#ifndef __LAYOUT__TRACK_H__
+#define __LAYOUT__TRACK_H__
 
 //==============================================================================
 //
-//               Map - the track class in the LAYOUT library
+//               Track - the track class in the LAYOUT library
 //
 //               Copyright (C) 2013  Dick van Oudheusden
 //  
@@ -40,12 +40,12 @@
 namespace layout
 {
   ///
-  /// @class Map
+  /// @class Track
   ///
   /// @brief The track class.
   ///
   
-  class DLL_API Map : public Node
+  class DLL_API Track : public Node
   {
     public:
 
@@ -57,12 +57,12 @@ namespace layout
     /// @param  type       the node type (ATTRIBUTE or ELEMENT)
     /// @param  mandatory  is the attribute or element mandatory ?
     ///
-    Map(Node *parent, const char *name, Type type, bool mandatory = false);
+    Track(Node *parent, const char *name, Type type, bool mandatory = false);
 
     ///
     /// Deconstructor
     ///
-    virtual ~Map();
+    virtual ~Track();
     
     ///
     /// Get source
@@ -121,20 +121,6 @@ namespace layout
     Unsigned  &margin() { return _margin; }
 
     ///
-    /// Get zoom
-    ///
-    /// @return the zoom element
-    ///
-    Unsigned  &zoom() { return _zoom; }
-
-	///
-	/// Get factor
-	/// 
-	/// @return the factor elememnt
-	///
-	Decimal &factor() { return _factor; }
-
-    ///
     /// Get border
     ///
     /// @return the border attribute
@@ -148,6 +134,13 @@ namespace layout
     ///
     String  &borderColor() { return _bordercolor; }
 
+    ///
+    /// Get background color
+    ///
+    /// @return the background color element
+    ///
+    String  &backgroundColor() { return _bgcolor; }
+
     // Methods
 
     private:
@@ -159,14 +152,13 @@ namespace layout
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;
-	Unsigned     _zoom;
-	Decimal      _factor;
 	Unsigned     _border;
 	String       _bordercolor;
+	String       _bgcolor;
     
     // Disable copy constructors
-    Map(const Map &);
-    Map& operator=(const Map &);  
+    Track(const Track &);
+    Track& operator=(const Track &);  
   };
 }
 

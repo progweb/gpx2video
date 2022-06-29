@@ -46,6 +46,7 @@ void show(gpx::Node &node, unsigned width)
 
 GPXData::GPXData() 
 	: nbr_points_(0)
+	, line_(0)
 	, valid_(false)
 	, elapsedtime_(0)
 	, duration_(0)
@@ -265,6 +266,9 @@ void GPXData::read(gpx::WPT *wpt) {
 	// Skip point if not valid
 	if (!pt.valid)
 		return;
+
+	// Line
+	line_ = wpt->line();
 
 	// Extensions
 	gpx::Node *extensions = wpt->extensions().getElements().front();

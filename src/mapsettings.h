@@ -65,7 +65,5 @@ private:
 	double lon1_, lon2_;
 };
 
-
-
 #endif
 

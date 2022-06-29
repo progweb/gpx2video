@@ -13,6 +13,7 @@
 #include "audioparams.h"
 #include "videoparams.h"
 #include "encoder.h"
+#include "widgets/gpx.h"
 #include "widgets/date.h"
 #include "widgets/distance.h"
 #include "widgets/duration.h"
@@ -143,6 +144,7 @@ bool Renderer::load(void) {
 	layout::Parser parser(NULL); //&report);
 
 	std::list<layout::Map *> maps;
+	std::list<layout::Track *> tracks;
 	std::list<layout::Widget *> widgets;
 
 	std::string filename = app_.settings().layoutfile();
@@ -178,8 +180,32 @@ bool Renderer::load(void) {
          
 		if (widget == nullptr)
  			continue;
+	
+		// Display
+		if ((bool) widget->display() == false) {
+			log_info("Skip widget '%s'", (const char *) widget->type());
+			continue;
+		}
 
 		loadWidget(widget);
+	}
+
+	// Tracks
+	tracks = root->tracks().list();
+
+	for (std::list<layout::Track *>::iterator node = tracks.begin(); node != tracks.end(); ++node) {
+		layout::Track *track = (*node);
+         
+		if (track == nullptr)
+ 			continue;
+
+		// Display
+		if ((bool) track->display() == false) {
+			log_info("Skip track widget");
+			continue;
+		}
+
+		loadTrack(track);
 	}
 
 	// Maps
@@ -190,6 +216,12 @@ bool Renderer::load(void) {
          
 		if (map == nullptr)
  			continue;
+
+		// Display
+		if ((bool) map->display() == false) {
+			log_info("Skip map widget");
+			continue;
+		}
 
 		loadMap(map);
 	}
@@ -238,12 +270,13 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	VideoStreamPtr video_stream = container->getVideoStream();
 
-	// 2704x1520 => 800x500
-	// 1920x1080 => 560x350
+	// Default size
+	//   2704x1520 => 800x500
+	//   1920x1080 => 560x350
 	width = (m->width() > 0) ? m->width() : 800 * video_stream->width() / 2704;
 	height = (m->height() > 0) ? m->height() : 500 * video_stream->height() / 1520;
 
-	// Position
+	// Default position
 	x = (m->x() > 0) ? m->x() : video_stream->width() - width - m->margin();
 	y = (m->y() > 0) ? m->y() : video_stream->height() - height - m->margin();
 
@@ -276,11 +309,86 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setPosition(x, y);
 	map->setSize(mapSettings.width(), mapSettings.height());
 	map->setMargin(m->margin());
+	map->setBorder(m->border());
+	map->setBorderColor((const char *) m->borderColor());
 
 	// Append
 	app_.append(map);
 
 	this->append(map);
+
+	return true;
+}
+
+
+bool Renderer::loadTrack(layout::Track *t) {
+	int x, y;
+	int width, height;
+
+	std::string s;
+
+	// GPX input file
+	GPXData data;
+
+	VideoWidget::Align align = VideoWidget::AlignNone;
+
+	log_call();
+
+	// Open GPX file
+	GPX *gpx = GPX::open(app_.settings().gpxfile());
+
+	if (gpx == NULL) {
+		log_warn("Can't read GPS data, skip map widget");
+		return false;
+	}
+
+	// Media
+	MediaContainer *container = app_.media();
+
+	VideoStreamPtr video_stream = container->getVideoStream();
+
+	// Default size
+	//   2704x1520 => 800x500
+	//   1920x1080 => 560x350
+	width = (t->width() > 0) ? t->width() : 800 * video_stream->width() / 2704;
+	height = (t->height() > 0) ? t->height() : 500 * video_stream->height() / 1520;
+
+	// Default position
+	x = (t->x() > 0) ? t->x() : video_stream->width() - width - t->margin();
+	y = (t->y() > 0) ? t->y() : video_stream->height() - height - t->margin();
+
+	// Create map bounding box
+	GPXData::point p1, p2;
+	gpx->getBoundingBox(&p1, &p2);
+
+	// Alignment
+	s = (const char *) t->align();
+
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::AlignUnknown)
+		log_error("Track align value '%s' unknown", s.c_str());
+
+	// Track settings
+	TrackSettings trackSettings;
+	trackSettings.setSize(width, height);
+	trackSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+
+	Track *track = Track::create(app_, trackSettings);
+
+	// Widget settings
+	track->setAlign(align);
+	track->setPosition(x, y);
+	track->setSize(trackSettings.width(), trackSettings.height());
+	track->setMargin(t->margin());
+	track->setBorder(t->border());
+	track->setBorderColor((const char *) t->borderColor());
+	track->setBackgroundColor((const char *) t->backgroundColor());
+
+	// Append
+	app_.append(track);
+
+	this->append(track);
 
 	return true;
 }
@@ -292,13 +400,15 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget *widget = NULL;
 
 	VideoWidget::Align align = VideoWidget::AlignNone;
-	VideoWidget::Units units = VideoWidget::UnitNone;
+	VideoWidget::Unit unit = VideoWidget::UnitNone;
 
 	// Type
 	s = (const char *) w->type();
 
 	// Create widget
-	if (s == "date") 
+	if (s == "gpx") 
+		widget = GPXWidget::create(app_);
+	else if (s == "date") 
 		widget = DateWidget::create(app_);
 	else if (s == "time") 
 		widget = TimeWidget::create(app_);
@@ -337,13 +447,13 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
-	// Units
-	s = (const char *) w->units();
+	// Unit
+	s = (const char *) w->unit();
 
-	units = VideoWidget::string2units(s);
+	unit = VideoWidget::string2unit(s);
 
-	if (units == VideoWidget::UnitUnknown) {
-		log_error("Widget loading error, units value '%s' unknown", s.c_str());
+	if (unit == VideoWidget::UnitUnknown) {
+		log_error("Widget loading error, unit value '%s' unknown", s.c_str());
 		goto error;
 	}
 
@@ -362,8 +472,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setBorder(w->border());
 	widget->setBorderColor((const char *) w->borderColor());
 	widget->setBackgroundColor((const char *) w->backgroundColor());
-	if (units != VideoWidget::UnitNone)
-		widget->setUnits(units);
+	if (unit != VideoWidget::UnitNone)
+		widget->setUnit(unit);
 
 	// Append
 	app_.append(widget);

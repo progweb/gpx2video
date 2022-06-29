@@ -116,6 +116,7 @@ set(GPX2VIDEO_SOURCES
 	src/telemetry.cpp
 	src/gpx2video.cpp
 	src/map.cpp
+	src/track.cpp
 	src/cache.cpp
 	src/media.cpp
 	src/stream.cpp

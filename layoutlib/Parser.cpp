@@ -65,6 +65,7 @@ namespace layout
       if (_root == nullptr)
       {
         _current = _root = new Layout();
+        _current->setLine(XML_GetCurrentLineNumber(_parser));
       }
       else if (_report != nullptr)
       {
@@ -74,6 +75,7 @@ namespace layout
     else if (_current != nullptr)
     {
       _current = _current->add(name, Node::ELEMENT, _report);
+      _current->setLine(XML_GetCurrentLineNumber(_parser));
       _current->setValue("");
     }
     else if (_report != nullptr)

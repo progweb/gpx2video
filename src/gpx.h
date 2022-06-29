@@ -41,6 +41,10 @@ public:
 
 	void dump(void);
 
+	int line(void) const {
+		return line_;
+	}
+
 	const time_t& time(Position p = PositionCurrent) const {
 		if (p == PositionCurrent)
 			return cur_pt_.time;
@@ -127,6 +131,7 @@ protected:
 	int nbr_predictions_;
 	KalmanFilter filter_;
 
+	int line_;
 	bool valid_;
 	int elapsedtime_;
 	double duration_;

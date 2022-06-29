@@ -34,8 +34,9 @@ namespace layout
     Node(parent, name, type, mandatory),
     _name(this, "name", Node::ELEMENT, true),
     _type(this, "type",   Node::ELEMENT, true),
+	_display(this, "display", Node::ATTRIBUTE, false),
     _align(this, "align",   Node::ATTRIBUTE, false),
-    _units(this, "units",   Node::ELEMENT, false),
+    _unit(this, "unit",   Node::ELEMENT, false),
     _format(this, "format",   Node::ELEMENT, false),
     _x(this, "x", Node::ATTRIBUTE, false),
     _y(this, "y", Node::ATTRIBUTE, false),
@@ -51,8 +52,9 @@ namespace layout
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
+    getInterfaces().push_back(&_display);
     getInterfaces().push_back(&_align);
-    getInterfaces().push_back(&_units);
+    getInterfaces().push_back(&_unit);
     getInterfaces().push_back(&_format);
     getInterfaces().push_back(&_x);
     getInterfaces().push_back(&_y);
@@ -65,6 +67,8 @@ namespace layout
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
+
+	_display.setValue("true");
   }
 
   Widget::~Widget()

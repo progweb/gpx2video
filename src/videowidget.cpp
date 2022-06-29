@@ -37,30 +37,30 @@ VideoWidget::Align VideoWidget::string2align(std::string &s) {
 }
 
 
-VideoWidget::Units VideoWidget::string2units(std::string &s) {
-	VideoWidget::Units units;
+VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
+	VideoWidget::Unit unit;
 
 	if (s.empty() || (s == "none"))
-		units = VideoWidget::UnitNone;
+		unit = VideoWidget::UnitNone;
 	else if (s == "mph")
-		units = VideoWidget::UnitMPH;
+		unit = VideoWidget::UnitMPH;
 	else if (s == "kph")
-		units = VideoWidget::UnitKPH;
+		unit = VideoWidget::UnitKPH;
 	else if (s == "km")
-		units = VideoWidget::UnitKm;
+		unit = VideoWidget::UnitKm;
 	else if (s == "m")
-		units = VideoWidget::UnitMeter;
+		unit = VideoWidget::UnitMeter;
 	else if (s == "miles")
-		units = VideoWidget::UnitMiles;
+		unit = VideoWidget::UnitMiles;
 	else
-		units = VideoWidget::UnitUnknown;
+		unit = VideoWidget::UnitUnknown;
 
-	return units;
+	return unit;
 }
 
 
-std::string VideoWidget::units2string(VideoWidget::Units units) {
-	switch (units) {
+std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
+	switch (unit) {
 	case VideoWidget::UnitMPH:
 		return "m/h";
 	case VideoWidget::UnitKPH:
@@ -103,6 +103,7 @@ void VideoWidget::createBox(OIIO::ImageBuf **buf, int width, int height) {
 	*buf = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8));
 }
 
+
 void VideoWidget::drawBorder(OIIO::ImageBuf *buf) {
 	int i;
 	int width, height;
@@ -110,8 +111,8 @@ void VideoWidget::drawBorder(OIIO::ImageBuf *buf) {
 	int border;
 	float bordercolor[4];
 
-	width = this->width();
-	height = this->height();
+	width = this->width() - 1;
+	height = this->height() - 1;
 
 	border = this->border();
 	memcpy(bordercolor, this->borderColor(), sizeof(bordercolor));
@@ -119,9 +120,10 @@ void VideoWidget::drawBorder(OIIO::ImageBuf *buf) {
 	// Draw border
 	if ((border > 0) && (bordercolor[3] != 0.0)) {
 		for (i=0; i<border; i++)
-			OIIO::ImageBufAlgo::render_box(*buf, i, i, width - i, height -i, bordercolor, false);
+			OIIO::ImageBufAlgo::render_box(*buf, i, i, width - i, height - i, bordercolor, false);
 	}
 }
+
 
 void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
 	int width, height;
@@ -129,8 +131,8 @@ void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
 	int border;
 	float bgcolor[4];
 
-	width = this->width();
-	height = this->height();
+	width = this->width() - 1;
+	height = this->height() - 1;
 
 	border = this->border();
 	memcpy(bgcolor, this->backgroundColor(), sizeof(bgcolor));
@@ -139,7 +141,10 @@ void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
 		OIIO::ImageBufAlgo::render_box(*buf, border, border, width - border, height - border, bgcolor, true);
 }
 
-void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, double divider) {
+
+void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, VideoWidget::Zoom zoom) {
+	double ratio;
+
 	int width, height;
 
 	// Open image
@@ -151,9 +156,26 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 	OIIO::ImageBuf *b = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	img->read_image(type, b->localpixels());
 
+	// Ratio
+	ratio = spec.width / spec.height;
+
 	// Compute new size
-	width = spec.width * divider;
-	height = spec.height * divider;
+	switch(zoom) {
+	case ZoomFit:
+		width = this->width() - this->border() - x;
+		height = this->height() - this->border() - y;
+
+		if (width * spec.height > spec.width * height)
+			width = height * ratio;
+		else
+			height = width / ratio;
+		break;
+
+	default:
+		width = spec.width;
+		height = spec.height;
+		break;
+	}
 
 	// Resize picto
 	OIIO::ImageBuf d(OIIO::ImageSpec(width, height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
@@ -167,10 +189,36 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 	delete b;
 }
 
+
+void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label) {
+	bool result;
+
+	int padding = this->padding();
+
+	// Add text (1 pt = 1.333 px)
+
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
+
+	memcpy(color, this->textColor(), sizeof(color));
+
+	result = OIIO::ImageBufAlgo::render_text(*buf, 
+		x + padding, 
+		y + padding, 
+		label, 
+		pt, "./assets/fonts/Helvetica.ttf", color, 
+		OIIO::ImageBufAlgo::TextAlignX::Left, 
+		OIIO::ImageBufAlgo::TextAlignY::Top, 
+		this->textShadow());
+
+	if (result == false)
+		fprintf(stderr, "render label text error\n");
+}
+
+
 void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label) {
 	bool result;
 
-	int w, h;
+	int h;
 
 	int border = this->border();
 	int padding = this->padding();
@@ -180,7 +228,6 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 	y += border;
 
 	// width x height
-	w = this->height() - 2 * border;
 	h = this->height() - 2 * border;
 
 	// Add label (1 pt = 1.333 px)
@@ -197,7 +244,7 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 	memcpy(color, this->textColor(), sizeof(color));
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
-		x + w + (w/10) + padding, 
+		x + padding, 
 		y + padding, 
 		label, 
 		pt, "./assets/fonts/Helvetica.ttf", color, 
@@ -213,7 +260,7 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value) {
 	bool result;
 
-	int w, h;
+	int h;
 
 	int border = this->border();
 	int padding = this->padding();
@@ -223,7 +270,6 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	y += border;
 
 	// width x height
-	w = this->height() - 2 * border;
 	h = this->height() - 2 * border;
 
 	// Add label (1 pt = 1.333 px)
@@ -240,7 +286,7 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	memcpy(color, this->textColor(), sizeof(color));
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
-		x + w + (w/10) + padding, 
+		x + padding, 
 		y + h - padding, 
 		value, 
 		2 * pt, "./assets/fonts/Helvetica.ttf", color, 

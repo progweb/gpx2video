@@ -30,7 +30,7 @@ public:
 		AlignUnknown
 	};
 
-	enum Units {
+	enum Unit {
 		UnitNone,
 		UnitMPH,
 		UnitKPH,
@@ -38,6 +38,12 @@ public:
 		UnitMeter,
 		UnitMiles,
 		UnitUnknown
+	};
+
+	enum Zoom {
+		ZoomNone,
+		ZoomFit,
+		ZoomUnknown
 	};
 
 	virtual ~VideoWidget() {
@@ -52,12 +58,12 @@ public:
 		align_ = align;
 	}
 
-	Units& units(void) {
-		return units_;
+	Unit& unit(void) {
+		return unit_;
 	}
 
-	virtual void setUnits(Units units) {
-		units_ = units;
+	virtual void setUnit(Unit unit) {
+		unit_ = unit;
 	}
 
 	const std::string& format(void) {
@@ -174,8 +180,8 @@ public:
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
 	static Align string2align(std::string &s);
-	static Units string2units(std::string &s);
-	static std::string units2string(Units units);
+	static Unit string2unit(std::string &s);
+	static std::string unit2string(Unit unit);
 	static bool hex2color(float color[4], std::string html);
 
 protected:
@@ -192,7 +198,7 @@ protected:
 		setPadding(0);
 		setLabel(name);
 		setTextShadow(0);
-		setUnits(VideoWidget::UnitNone);
+		setUnit(VideoWidget::UnitNone);
 		setTextColor("#ffffffff");
 		setBorder(0);
 		setBorderColor("#00000000");
@@ -203,13 +209,14 @@ protected:
 
 	void drawBorder(OIIO::ImageBuf *buf);
 	void drawBackground(OIIO::ImageBuf *buf);
-	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, double divider);
+	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, Zoom zoom);
+	void drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label);
 	void drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label);
 	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
 
 	GPX2Video &app_;
 	Align align_;
-	Units units_;
+	Unit unit_;
 	std::string format_;
 
 	int x_;

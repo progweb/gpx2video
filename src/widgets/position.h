@@ -25,14 +25,10 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
-		const int w = 64;
-
-		double divider = (double) (this->height() - (2 * this->border())) / (double) w;
-
 		this->createBox(&buf_, this->width(), this->height());
 		this->drawBorder(buf_);
 		this->drawBackground(buf_);
-		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_position.png", divider);
+		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_position.png", VideoWidget::ZoomFit);
 //		this->drawLabel(buf_, 0, 0, label().c_str());
 //		this->drawValue(buf_, 0, 0, "22 km");
 
@@ -49,8 +45,8 @@ public:
 		sprintf(s, "%.4f, %.4f", pt.lat, pt.lon);
 
 		// Append dynamic info
-		this->drawLabel(buf, this->x(), this->y(), label().c_str());
-		this->drawValue(buf, this->x(), this->y(), s);
+		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());
+		this->drawValue(buf, this->x() + this->height() + this->padding(), this->y(), s);
 	}
 
 private:
