@@ -91,6 +91,14 @@
 		<padding>5</padding>
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
+	</widget>	
+	<widget x="250" y="450" width="400" height="80" align="bottom">
+		<type>temperature</type>
+		<name>TEMPERATURE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<unit>celsius</unit>
+		<text-shadow>3</text-shadow>
 	</widget>		
 	<widget x="700" y="300" width="400" height="400" align="none" display="false">
 		<type>gpx</type>
