@@ -24,6 +24,8 @@ public:
 		SourceVirtualEarthSatellite,
 		SourceVirtualEarthHybrid,
 		SourceOSMCTrails,
+		SourceIGNEssentielMap,
+		SourceIGNEssentielPhoto,
 
 		SourceCount
 	};
