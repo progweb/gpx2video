@@ -124,37 +124,41 @@ void MapSettings::setBoundingBox(double lat1, double lon1, double lat2, double l
 
 const std::string MapSettings::getFriendlyName(const MapSettings::Source &source) {
 	switch (source) {
-	case SourceNull:
+	case MapSettings::SourceNull:
 		return "None";
-	case SourceOpenStreetMap:
+	case MapSettings::SourceOpenStreetMap:
 		return "OpenStreetMap I";
-	case SourceOpenStreetMapRenderer:
+	case MapSettings::SourceOpenStreetMapRenderer:
 		return "OpenStreetMap II";
-	case SourceOpenAerialMap:
+	case MapSettings::SourceOpenAerialMap:
 		return "OpenAerialMap";
-	case SourceOpenCycleMap:
+	case MapSettings::SourceOpenCycleMap:
 		return "OpenCycleMap";
-	case SourceOpenTopoMap: 
+	case MapSettings::SourceOpenTopoMap: 
 		return "OpenTopoMap";
-	case SourceOSMPublicTransport:
+	case MapSettings::SourceOSMPublicTransport:
 		return "Public Transport";
-	case SourceOSMCTrails:
+	case MapSettings::SourceOSMCTrails:
 		return "OSMC Trails";
-	case SourceMapsForFree:
+	case MapSettings::SourceMapsForFree:
 		return "Maps-For-Free";
-	case SourceGoogleStreet:
+	case MapSettings::SourceGoogleStreet:
 		return "Google Maps";
-	case SourceGoogleSatellite:
+	case MapSettings::SourceGoogleSatellite:
 		return "Google Satellite";
-	case SourceGoogleHybrid:
+	case MapSettings::SourceGoogleHybrid:
 		return "Google Hybrid";
-	case SourceVirtualEarthStreet:
+	case MapSettings::SourceVirtualEarthStreet:
 		return "Virtual Earth";
-	case SourceVirtualEarthSatellite:
+	case MapSettings::SourceVirtualEarthSatellite:
 		return "Virtual Earth Satellite";
-	case SourceVirtualEarthHybrid:
+	case MapSettings::SourceVirtualEarthHybrid:
 		return "Virtual Earth Hybrid";
-	case SourceCount:
+	case MapSettings::SourceIGNEssentielMap:
+		return "IGN Essentiel Map";
+	case MapSettings::SourceIGNEssentielPhoto:
+		return "IGN Essentiel Photo";
+	case MapSettings::SourceCount:
 	default:
 		return "";
 	}
@@ -165,30 +169,29 @@ const std::string MapSettings::getFriendlyName(const MapSettings::Source &source
 
 const std::string MapSettings::getCopyright(const MapSettings::Source &source) {
 	switch (source) {
-	case SourceOpenStreetMap:
+	case MapSettings::SourceOpenStreetMap:
 		// https://www.openstreetmap.org/copyright
 		return "© OpenStreetMap contributors";
-	case SourceOpenCycleMap:
+	case MapSettings::SourceOpenCycleMap:
 		// http://www.thunderforest.com/terms/
 		return "Maps © thunderforest.com, Data © osm.org/copyright";
-	case SourceOSMPublicTransport:
+	case MapSettings::SourceOSMPublicTransport:
 		return "Maps © ÖPNVKarte, Data © OpenStreetMap contributors";
-	case SourceMapsForFree:
+	case MapSettings::SourceMapsForFree:
 		return "Maps © Maps-For-Free";
-	case SourceOpenTopoMap:
+	case MapSettings::SourceOpenTopoMap:
 		return "© OpenTopoMap (CC-BY-SA)";
-	case SourceGoogleStreet:
+	case MapSettings::SourceGoogleStreet:
+	case MapSettings::SourceGoogleSatellite:
+	case MapSettings::SourceGoogleHybrid:
 		return "Map provided by Google";
-	case SourceGoogleSatellite:
-		return "Map provided by Google ";
-	case SourceGoogleHybrid:
-		return "Map provided by Google";
-	case SourceVirtualEarthStreet:
+	case MapSettings::SourceVirtualEarthStreet:
+	case MapSettings::SourceVirtualEarthSatellite:
+	case MapSettings::SourceVirtualEarthHybrid:
 		return "Map provided by Microsoft";
-	case SourceVirtualEarthSatellite:
-		return "Map provided by Microsoft";
-	case SourceVirtualEarthHybrid:
-		return "Map provided by Microsoft";
+	case MapSettings::SourceIGNEssentielMap:
+	case MapSettings::SourceIGNEssentielPhoto:
+		return "Map provided by IGN";
 	default:
 		return "";
 	}
@@ -239,6 +242,10 @@ const std::string MapSettings::getRepoURI(const MapSettings::Source &source) {
 		return "http://a#R.ortho.tiles.virtualearth.net/tiles/a#W.jpeg?g=50";
 	case MapSettings::SourceVirtualEarthHybrid:
 		return "http://a#R.ortho.tiles.virtualearth.net/tiles/h#W.jpeg?g=50";
+	case MapSettings::SourceIGNEssentielMap:
+		return "https://wxs.ign.fr/essentiels/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIXSET=PM&TILEMATRIX=#Z&TILECOL=#X&TILEROW=#Y&STYLE=normal&FORMAT=image/png";
+	case MapSettings::SourceIGNEssentielPhoto:
+		return "https://wxs.ign.fr/essentiels/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIXSET=PM&TILEMATRIX=#Z&TILECOL=#X&TILEROW=#Y&STYLE=normal&FORMAT=image/jpeg";
 	case MapSettings::SourceCount:
 	default:
 		return "";
@@ -259,28 +266,31 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 	switch (source) {
 	case MapSettings::SourceNull:
 		return 18;
-	case SourceOpenStreetMap:
+	case MapSettings::SourceOpenStreetMap:
 		return 19;
-	case SourceOpenCycleMap:
+	case MapSettings::SourceOpenCycleMap:
 		return 18;
-	case SourceOSMPublicTransport:
+	case MapSettings::SourceOSMPublicTransport:
 		return OSM_MAX_ZOOM;
-	case SourceOpenStreetMapRenderer:
-	case SourceOpenAerialMap:
-	case SourceOpenTopoMap:
+	case MapSettings::SourceOpenStreetMapRenderer:
+	case MapSettings::SourceOpenAerialMap:
+	case MapSettings::SourceOpenTopoMap:
 		return 17;
-	case SourceGoogleStreet:
-	case SourceGoogleSatellite:
-	case SourceGoogleHybrid:
+	case MapSettings::SourceGoogleStreet:
+	case MapSettings::SourceGoogleSatellite:
+	case MapSettings::SourceGoogleHybrid:
 		return OSM_MAX_ZOOM;
-	case SourceVirtualEarthStreet:
-	case SourceVirtualEarthSatellite:
-	case SourceVirtualEarthHybrid:
+	case MapSettings::SourceVirtualEarthStreet:
+	case MapSettings::SourceVirtualEarthSatellite:
+	case MapSettings::SourceVirtualEarthHybrid:
 		return 19;
 	case MapSettings::SourceOSMCTrails:
 		return 15;
-	case SourceMapsForFree:
+	case MapSettings::SourceMapsForFree:
 		return 11;
+	case MapSettings::SourceIGNEssentielMap:
+	case MapSettings::SourceIGNEssentielPhoto:
+		return 18;
 	case MapSettings::SourceCount:
 	default:
 		return 17;
@@ -1128,6 +1138,14 @@ void Map::Tile::downloadComplete(EVCurlTask *evtaskh, CURLcode result, void *use
 
 	if (tile->fp_)
 		std::fclose(tile->fp_);
+
+	if (result != CURLE_OK) {
+		std::string output = tile->path_ + "/" + tile->filename_;
+
+		log_error("\nDownload tile failure: %s", tile->uri().c_str());
+
+		unlink(output.c_str());
+	}
 
 	tile->fp_ = NULL;
 	tile->evtaskh_ = NULL;
