@@ -37,6 +37,7 @@ public:
 		UnitKm,
 		UnitMeter,
 		UnitMiles,
+		UnitCelsius,
 		UnitUnknown
 	};
 

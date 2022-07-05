@@ -52,6 +52,8 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitMeter;
 	else if (s == "miles")
 		unit = VideoWidget::UnitMiles;
+	else if (s == "celsius")
+		unit = VideoWidget::UnitCelsius;
 	else
 		unit = VideoWidget::UnitUnknown;
 
@@ -71,6 +73,8 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 		return "m";
 	case VideoWidget::UnitMiles:
 		return "miles";
+	case VideoWidget::UnitCelsius:
+		return "C";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:

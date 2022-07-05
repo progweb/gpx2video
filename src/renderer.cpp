@@ -26,6 +26,7 @@
 #include "widgets/maxspeed.h"
 #include "widgets/avgspeed.h"
 #include "widgets/time.h"
+#include "widgets/temperature.h"
 #include "renderer.h"
 
 
@@ -432,6 +433,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = CadenceWidget::create(app_);
 	else if (s == "heartrate") 
 		widget = HeartRateWidget::create(app_);
+	else if (s == "temperature")
+		widget = TemperatureWidget::create(app_);
 	else {
 		log_error("Widget loading error, '%s' type unknown", s.c_str());
 		goto error;
