@@ -7,7 +7,7 @@
 
 class TimeWidget : public VideoWidget {
 public:
-	~TimeWidget() {
+	virtual ~TimeWidget() {
 		log_call();
 
 		if (buf_)

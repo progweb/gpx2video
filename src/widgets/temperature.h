@@ -21,6 +21,8 @@ public:
 
 		widget = new TemperatureWidget(app, "temperature");
 
+		widget->setUnit(VideoWidget::UnitCelsius);
+
 		return widget;
 	}
 
@@ -39,7 +41,15 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		sprintf(s, "%.1f %s", data.temperature(), unit2string(unit()).c_str());
+		double temperature = data.temperature();
+
+		if (unit() == VideoWidget::UnitCelsius) {
+		}
+		else {
+			temperature = (temperature * 9/5) + 32;
+		}
+
+		sprintf(s, "%.0f %s", temperature, unit2string(unit()).c_str());
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

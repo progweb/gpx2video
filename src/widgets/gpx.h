@@ -7,7 +7,7 @@
 
 class GPXWidget : public VideoWidget {
 public:
-	~GPXWidget() {
+	virtual ~GPXWidget() {
 		log_call();
 
 		if (buf_)

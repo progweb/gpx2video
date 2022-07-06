@@ -99,11 +99,25 @@ namespace layout
     String  &unit() { return _unit; }
 
     ///
+    /// Get zoom
+    ///
+    /// @return the zoom element
+    ///
+    String  &zoom() { return _zoom; }
+
+    ///
     /// Get format
     ///
     /// @return the format element
     ///
     String  &format() { return _format; }
+
+    ///
+    /// Get source
+    ///
+    /// @return the source element
+    ///
+    String  &source() { return _source; }
 
     ///
     /// Get x
@@ -192,7 +206,9 @@ namespace layout
 	Boolean      _display;
     String       _align;
     String       _unit;
+    String       _zoom;
     String       _format;
+	String       _source;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;

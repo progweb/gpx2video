@@ -7,7 +7,7 @@
 
 class MaxSpeedWidget : public VideoWidget {
 public:
-	~MaxSpeedWidget() {
+	virtual ~MaxSpeedWidget() {
 		log_call();
 
 		if (buf_)

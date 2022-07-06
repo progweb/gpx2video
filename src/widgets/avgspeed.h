@@ -7,7 +7,7 @@
 
 class AvgSpeedWidget : public VideoWidget {
 public:
-	~AvgSpeedWidget() {
+	virtual ~AvgSpeedWidget() {
 		log_call();
 
 		if (buf_)

@@ -7,7 +7,7 @@
 
 class PositionWidget : public VideoWidget {
 public:
-	~PositionWidget() {
+	virtual ~PositionWidget() {
 		log_call();
 
 		if (buf_)

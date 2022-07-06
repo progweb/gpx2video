@@ -52,12 +52,34 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitMeter;
 	else if (s == "miles")
 		unit = VideoWidget::UnitMiles;
-	else if (s == "celsius")
+	else if ((s == "C") || (s == "celsius"))
 		unit = VideoWidget::UnitCelsius;
+	else if ((s == "F") || (s == "farenheit"))
+		unit = VideoWidget::UnitFarenheit;
 	else
 		unit = VideoWidget::UnitUnknown;
 
 	return unit;
+}
+
+
+VideoWidget::Zoom VideoWidget::string2zoom(std::string &s) {
+	VideoWidget::Zoom zoom;
+
+	if (s.empty() || (s == "none"))
+		zoom = VideoWidget::ZoomNone;
+	else if (s == "fit")
+		zoom = VideoWidget::ZoomFit;
+	else if (s == "fill")
+		zoom = VideoWidget::ZoomFill;
+	else if (s == "crop")
+		zoom = VideoWidget::ZoomCrop;
+	else if (s == "stretch")
+		zoom = VideoWidget::ZoomStretch;
+	else
+		zoom = VideoWidget::ZoomUnknown;
+
+	return zoom;
 }
 
 
@@ -75,6 +97,8 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 		return "miles";
 	case VideoWidget::UnitCelsius:
 		return "C";
+	case VideoWidget::UnitFarenheit:
+		return "F";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:
@@ -147,9 +171,12 @@ void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
 
 
 void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, VideoWidget::Zoom zoom) {
+	bool ok;
+
 	double ratio;
 
 	int width, height;
+	int max_width, max_height;
 
 	// Open image
 	auto img = OIIO::ImageInput::open(name);
@@ -157,14 +184,17 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
 
-	OIIO::ImageBuf *b = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-	img->read_image(type, b->localpixels());
+	OIIO::ImageBuf *inbuf = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	ok = img->read_image(type, inbuf->localpixels());
 
-	// Ratio
-	ratio = spec.width / spec.height;
+	if (!ok)
+		log_warn("Read '%s' image (%dx%d) failure!", name, spec.width, spec.height);
+
+	// Input image ratio
+	ratio = (double) spec.width / (double) spec.height;
 
 	// Compute new size
-	switch(zoom) {
+	switch (zoom) {
 	case ZoomFit:
 		width = this->width() - this->border() - x;
 		height = this->height() - this->border() - y;
@@ -175,22 +205,51 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 			height = width / ratio;
 		break;
 
+	case ZoomFill:
+		width = this->width() - this->border() - x;
+		height = this->height() - this->border() - y;
+
+		if (width * spec.height < spec.width * height)
+			width = height * ratio;
+		else
+			height = width / ratio;
+		break;
+
+	case ZoomStretch:
+		width = this->width() - this->border() - x;
+		height = this->height() - this->border() - y;
+		break;
+
+	case ZoomCrop:
 	default:
 		width = spec.width;
 		height = spec.height;
 		break;
 	}
 
+	// Max width & height
+	max_width = this->width() - (2 * this->border());
+	max_height = this->height() - (2 * this->border());
+
 	// Resize picto
-	OIIO::ImageBuf d(OIIO::ImageSpec(width, height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-	OIIO::ImageBufAlgo::resize(d, *b);
+	OIIO::ImageBuf outbuf(OIIO::ImageSpec(width, height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+	OIIO::ImageBufAlgo::resize(outbuf, *inbuf);
+
+	// Add alpha channel
+	if (spec.nchannels != 4) {
+		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+		float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+		std::string channelnames[] = { "", "", "", "A" };
+
+		outbuf = OIIO::ImageBufAlgo::channels(outbuf, 4, channelorder, channelvalues, channelnames);
+	}
 
 	// Image over
-	d.specmod().x = x;
-	d.specmod().y = y;
-	OIIO::ImageBufAlgo::over(*buf, d, *buf, OIIO::ROI());
+	outbuf.specmod().x = x;
+	outbuf.specmod().y = y;
+	OIIO::ImageBufAlgo::over(*buf, outbuf, *buf, OIIO::ROI(x, x + max_width, y, y + max_height));
 
-	delete b;
+	delete inbuf;
 }
 
 

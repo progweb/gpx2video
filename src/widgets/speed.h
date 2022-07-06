@@ -7,7 +7,7 @@
 
 class SpeedWidget : public VideoWidget {
 public:
-	~SpeedWidget() {
+	virtual ~SpeedWidget() {
 		log_call();
 
 		if (buf_)

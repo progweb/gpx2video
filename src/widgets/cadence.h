@@ -7,7 +7,7 @@
 
 class CadenceWidget : public VideoWidget {
 public:
-	~CadenceWidget() {
+	virtual ~CadenceWidget() {
 		log_call();
 
 		if (buf_)

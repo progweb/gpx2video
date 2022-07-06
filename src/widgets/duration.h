@@ -7,7 +7,7 @@
 
 class DurationWidget : public VideoWidget {
 public:
-	~DurationWidget() {
+	virtual ~DurationWidget() {
 		log_call();
 
 		if (buf_)

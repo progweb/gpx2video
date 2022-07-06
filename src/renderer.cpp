@@ -22,6 +22,7 @@
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
 #include "widgets/position.h"
+#include "widgets/image.h"
 #include "widgets/speed.h"
 #include "widgets/maxspeed.h"
 #include "widgets/avgspeed.h"
@@ -402,6 +403,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Unit unit = VideoWidget::UnitNone;
+	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
 	// Type
 	s = (const char *) w->type();
@@ -427,6 +429,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = AvgSpeedWidget::create(app_);
 	else if (s == "grade") 
 		widget = GradeWidget::create(app_);
+	else if (s == "image")
+		widget = ImageWidget::create(app_);
 	else if (s == "elevation") 
 		widget = ElevationWidget::create(app_);
 	else if (s == "cadence") 
@@ -460,6 +464,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Zoom
+	s = (const char *) w->zoom();
+
+	zoom = VideoWidget::string2zoom(s);
+
 	log_info("Load widget '%s'", (const char *) w->type());
 
 	// Widget settings
@@ -477,6 +486,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setBackgroundColor((const char *) w->backgroundColor());
 	if (unit != VideoWidget::UnitNone)
 		widget->setUnit(unit);
+	widget->setZoom(zoom);
+	widget->setSource((const char *) w->source());
 
 	// Append
 	app_.append(widget);

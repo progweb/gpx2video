@@ -7,7 +7,7 @@
 
 class ElevationWidget : public VideoWidget {
 public:
-	~ElevationWidget() {
+	virtual ~ElevationWidget() {
 		log_call();
 
 		if (buf_)

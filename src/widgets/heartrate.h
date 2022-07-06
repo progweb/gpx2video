@@ -7,7 +7,7 @@
 
 class HeartRateWidget : public VideoWidget {
 public:
-	~HeartRateWidget() {
+	virtual ~HeartRateWidget() {
 		log_call();
 
 		if (buf_)

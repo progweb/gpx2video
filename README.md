@@ -25,7 +25,8 @@ gpx2video can read and extract from your gpx input file:
   - average speed, 
   - max speed,
   - heartrate, 
-  - cadence
+  - cadence,
+  - temperature
 
 gpx2video can extract GPMD data from GoPro GPMD stream in several format:
   - Text dump
@@ -44,6 +45,8 @@ gpx2video can draw a map widget with your track. It supports multi map source:
   - Virtual Earth Map provided by Microsoft
   - Virtual Earth Satellite Map provided by Microsoft
   - Virtual Earth Hybrid Map provided by Microsoft
+  - IGN Essentiel Map Map provided by IGN
+  - IGN Essentiel Photo Map provided by IGN
 
 gpx2video can synchronize your video with your gpx input file.
 
@@ -270,6 +273,8 @@ Here all widget element settings:
 	<margin>20</margin>
 	<padding>5</padding>
 	<unit>kph</unit>
+	<zoom>stretch</zoom>
+	<source>fichier.jpg</source>
 	<text-color>#00ff00ff</text-color>
 	<text-shadow>3</text-shadow>
 	<border>5</border>
@@ -286,6 +291,8 @@ Here all widget element settings:
   - distance
   - cadence
   - heartrate
+  - temperature
+  - image
 
 **display** values are: true or false. It permits to render or not the widget.
 The **display** default value is true.
@@ -293,7 +300,12 @@ The **display** default value is true.
 **align** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
 If **align** attribute is defined, gpx2video ignores and computes **x** and **y** values.
 
-**unit** values are: mph, kph, km, m and miles.
+**unit** values are: 
+  - mph, kph, 
+  - km, m or miles.
+  - C, celsius or F, fahrenheit
+
+**zoom** values are: none, fit, fill, crop and stretch. This parameter is used only by the image widget.
 
 *Note: Widget date accepts format element too.*
 
@@ -413,7 +425,7 @@ Since gpx2video interpolates data each 1s in using different filters: linear, ka
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
   - Widget text
-  - Photo import
+  - Gallery photo import
   - User interface integration
   - GPS interpolate data between two waypoints.
   - 360 videos support

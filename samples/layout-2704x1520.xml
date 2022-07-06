@@ -54,6 +54,14 @@
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
+	<widget x="250" y="450" width="580" height="120" align="right">
+		<type>temperature</type>
+		<name>TEMPERATURE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<unit>C</unit>
+		<text-shadow>3</text-shadow>
+	</widget>
 	<widget x="250" y="450" width="580" height="120" align="left">
 		<type>cadence</type>
 		<name>CADENCE</name>
@@ -92,8 +100,14 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
+	<widget width="200" height="200" align="top-left" display="true">
+		<type>image</type>
+		<margin>5</margin>
+		<zoom>fit</zoom>
+		<source>./assets/linux.png</source>
+	</widget>
 
-	<track x="500" y="350" width="1800" height="350" align="top">
+	<track x="500" y="350" width="1800" height="350" align="top" display="false">
 		<border>1</border>
 		<border-color>#000000ff</border-color>
 		<background-color>#00000033</background-color>
@@ -105,7 +119,7 @@
 		<factor>1.2</factor>
 	</map>
 
-	<map width="800" height="500" align="top-right">
+	<map width="800" height="500" align="top-right" display="true">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>

@@ -7,7 +7,7 @@
 
 class DistanceWidget : public VideoWidget {
 public:
-	~DistanceWidget() {
+	virtual ~DistanceWidget() {
 		log_call();
 
 		if (buf_)

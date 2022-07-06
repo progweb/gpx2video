@@ -38,12 +38,16 @@ public:
 		UnitMeter,
 		UnitMiles,
 		UnitCelsius,
+		UnitFarenheit,
 		UnitUnknown
 	};
 
 	enum Zoom {
 		ZoomNone,
 		ZoomFit,
+		ZoomFill,
+		ZoomCrop,
+		ZoomStretch,
 		ZoomUnknown
 	};
 
@@ -67,12 +71,28 @@ public:
 		unit_ = unit;
 	}
 
+	Zoom& zoom(void) {
+		return zoom_;
+	}
+
+	virtual void setZoom(Zoom zoom) {
+		zoom_ = zoom;
+	}
+
 	const std::string& format(void) {
 		return format_;
 	}
 
-	void setFormat(std::string format) {
+	virtual void setFormat(std::string format) {
 		format_ = format;
+	}
+
+	const std::string& source(void) {
+		return source_;
+	}
+
+	virtual void setSource(std::string source) {
+		source_ = source;
 	}
 
 	virtual void setPosition(int x, int y) {
@@ -141,7 +161,7 @@ public:
 		return txtshadow_;
 	}
 
-	void setTextShadow(int shadow_) {
+	virtual void setTextShadow(int shadow_) {
 		txtshadow_ = shadow_;
 	}
 
@@ -182,6 +202,7 @@ public:
 
 	static Align string2align(std::string &s);
 	static Unit string2unit(std::string &s);
+	static Zoom string2zoom(std::string &s);
 	static std::string unit2string(Unit unit);
 	static bool hex2color(float color[4], std::string html);
 
@@ -218,7 +239,9 @@ protected:
 	GPX2Video &app_;
 	Align align_;
 	Unit unit_;
+	Zoom zoom_;
 	std::string format_;
+	std::string source_;
 
 	int x_;
 	int y_;

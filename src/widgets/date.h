@@ -7,7 +7,7 @@
 
 class DateWidget : public VideoWidget {
 public:
-	~DateWidget() {
+	virtual ~DateWidget() {
 		log_call();
 
 		if (buf_)
