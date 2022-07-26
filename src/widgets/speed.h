@@ -50,7 +50,10 @@ public:
 			speed *= 0.6213711922;
 		}
 
-		sprintf(s, "%.0f %s", speed, unit2string(unit()).c_str());
+		if (data.hasValue())
+			sprintf(s, "%.0f %s", speed, unit2string(unit()).c_str());
+		else
+			sprintf(s, "-- %s", unit2string(unit()).c_str());
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

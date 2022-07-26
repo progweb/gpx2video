@@ -82,6 +82,10 @@ bool Telemetry::start(void) {
 
 	log_call();
 
+	// GPX limits
+	gpx_->setFrom(app_.settings().gpxFrom());
+	gpx_->setTo(app_.settings().gpxTo());
+
 	// Start time activity
 	gpx_->retrieveFirst(data_);
 	gpx_->setStartTime(data_.time());
@@ -96,7 +100,7 @@ bool Telemetry::start(void) {
 	}
 
 	// Header
-	out_ << "# Timestamp, Time, Duration, Data, Lat, Lon, Ele, Distance, Speed, MaxSpeed, Average" << std::endl;
+	out_ << "# Timestamp, Time, Partial duration, Total duration, Data, Lat, Lon, Ele, Distance, Speed, MaxSpeed, Average" << std::endl;
 
 	// Read GPX from start
 	timecode_ms_ = 0;
@@ -127,6 +131,7 @@ bool Telemetry::run(void) {
 	out_ << std::setprecision(8);
 	out_ << data_.time();
 	out_ << ", \"" << time << "\"";
+	out_ << ", " << data_.duration();
 	out_ << ", " << data_.elapsedTime();
 	out_ << ", " << ((type == GPX::DataPredicted) ? "P" : "M");
 	out_ << ", " << data_.position().lat;

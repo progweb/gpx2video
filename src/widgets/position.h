@@ -42,7 +42,10 @@ public:
 		char s[128];
 		struct GPXData::point pt = data.position();
 
-		sprintf(s, "%.4f, %.4f", pt.lat, pt.lon);
+		if (data.hasValue())
+			sprintf(s, "%.4f, %.4f", pt.lat, pt.lon);
+		else
+			sprintf(s, "--, --");
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

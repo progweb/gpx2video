@@ -41,21 +41,27 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		int hours;
-		int minutes;
-		int seconds;
+		int hours = 0;
+		int minutes = 0;
+		int seconds = 0;
 
 		int duration;
 
 //		struct tm time;
 
 		duration = data.elapsedTime();
-		seconds = duration % 60;
-		duration = duration / 60;
-		minutes = duration % 60;
-		hours = duration / 60;
 
-		sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
+		if (duration > 0) {
+			seconds = duration % 60;
+			duration = duration / 60;
+			minutes = duration % 60;
+			hours = duration / 60;
+		}
+
+		if (data.hasValue())
+			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
+		else
+			sprintf(s, "--:--:--");
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

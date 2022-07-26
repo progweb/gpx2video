@@ -331,6 +331,10 @@ bool Track::load(void) {
 	GPX *gpx = GPX::open(filename);
 
 	if (gpx != NULL) {
+		// GPX limits
+		gpx->setFrom(app_.settings().gpxFrom());
+		gpx->setTo(app_.settings().gpxTo());
+
 		// Draw path
 		path(*trackbuf_, gpx, divider_);
 

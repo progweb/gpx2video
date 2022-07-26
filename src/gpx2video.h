@@ -31,6 +31,8 @@ public:
 			int map_zoom=8, 
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
+			std::string gpx_from="",
+			std::string gpx_to="",
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone)
 			: gpx_file_(gpx_file)
@@ -42,6 +44,8 @@ public:
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
 			, map_source_(map_source)
+			, gpx_from_(gpx_from)
+			, gpx_to_(gpx_to)
 	   		, extract_format_(extract_format) 
 			, telemetry_filter_(telemetry_filter) {
 		}
@@ -90,6 +94,14 @@ public:
 			return max_duration_ms_;
 		}
 
+		const std::string& gpxFrom(void) const {
+			return gpx_from_;
+		}
+
+		const std::string& gpxTo(void) const {
+			return gpx_to_;
+		}
+
 	private:
 		std::string gpx_file_;
 		std::string media_file_;
@@ -102,6 +114,9 @@ public:
 		int map_zoom_;
 		unsigned int max_duration_ms_;
 		MapSettings::Source map_source_;
+
+		std::string gpx_from_;
+		std::string gpx_to_;
 
 		ExtractorSettings::Format extract_format_;
 		TelemetrySettings::Filter telemetry_filter_;

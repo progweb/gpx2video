@@ -41,7 +41,10 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		sprintf(s, "%d bpm", data.heartrate());
+		if (data.hasValue())
+			sprintf(s, "%d bpm", data.heartrate());
+		else
+			sprintf(s, "-- bpm");
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

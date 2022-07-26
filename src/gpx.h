@@ -12,6 +12,7 @@
 #include "telemetrysettings.h"
 
 
+
 class GPXData {
 public:
 	struct point {
@@ -32,10 +33,23 @@ public:
 	virtual ~GPXData();
 
 	void init(void);
+	void reset(void);
 	void predict(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 	void update(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 
 	void read(gpx::WPT *wpt);
+
+	void enableCompute(void) {
+		enable_ = true;
+	}
+
+	void disableCompute(void) {
+		enable_ = false;
+	}
+
+	bool hasValue(void) const {
+		return has_value_;
+	}
 
 	bool compute(void);
 
@@ -61,6 +75,10 @@ public:
 			return prev_pt_;
 
 		return next_pt_;
+	}
+
+	void unvalid(void) {
+		valid_ = false;
 	}
 
 	const bool& valid(void) const {
@@ -123,6 +141,9 @@ public:
 	static void convert(struct point *pt, gpx::WPT *wpt);
 
 protected:
+	bool enable_;
+	bool has_value_;
+
 	int nbr_points_;
 	struct point cur_pt_;
 	struct point prev_pt_;
@@ -149,6 +170,7 @@ protected:
 class GPX {
 public:
 	enum Data {
+		DataUnknown,
 		DataMeasured,
 		DataPredicted,
 		DataUnchanged,
@@ -161,6 +183,9 @@ public:
 
 	void dump(void);
 
+	bool setFrom(std::string from);
+	bool setTo(std::string to);
+
 	void setStartTime(char *start_time);
 	void setStartTime(time_t start_time);
 	void setStartTime(struct tm *start_time);
@@ -168,17 +193,23 @@ public:
 	int timeOffset(void) const;
 	void setTimeOffset(const int& offset);
 
+//	void compute(GPXData &data) {
+//		data.enableCompute();
+//	}
+
 //	const GPXData retrieveData(const int64_t &timecode);
 	bool getBoundingBox(GPXData::point *p1, GPXData::point *p2);
 	double getMaxSpeed(void);
 
 	enum Data retrieveFirst(GPXData &data);
-	enum Data retrieveNext(GPXData &data, int timestamp=-1);
+	enum Data retrieveNext(GPXData &data, int64_t timestamp=-1);
 	enum Data retrieveData(GPXData &data);
 	enum Data retrieveLast(GPXData &data);
 
 protected:
 	bool parse(void);
+
+	enum Data retrieveFirst_i(GPXData &data);
 
 private:
 	GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter filter);
@@ -193,6 +224,9 @@ private:
 	std::list<gpx::TRKSeg*>::iterator iter_seg_;
 
 	int offset_;
+
+	time_t from_;
+	time_t to_;
 	time_t start_time_;
 	time_t start_activity_;
 

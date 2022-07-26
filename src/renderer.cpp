@@ -80,6 +80,11 @@ void Renderer::init(void) {
 	// Set start time in GPX stream
 	start_time = container_->startTime() + container_->timeOffset();
 	if (gpx_) {
+		// GPX limits
+		gpx_->setFrom(app_.settings().gpxFrom());
+		gpx_->setTo(app_.settings().gpxTo());
+
+		// GPX time fixing
 		gpx_->setStartTime(start_time);
 		gpx_->setTimeOffset(app_.settings().offset());
 		gpx_->retrieveFirst(data_);
@@ -244,9 +249,6 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	unsigned int mapsource;
 
-	// GPX input file
-	GPXData data;
-
 	VideoWidget::Align align = VideoWidget::AlignNone;
 
 	log_call();
@@ -266,6 +268,10 @@ bool Renderer::loadMap(layout::Map *m) {
 		log_warn("Can't read GPS data, skip map widget");
 		return false;
 	}
+
+	// GPX limits
+	gpx->setFrom(app_.settings().gpxFrom());
+	gpx->setTo(app_.settings().gpxTo());
 
 	// Media
 	MediaContainer *container = app_.media();
@@ -329,9 +335,6 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	std::string s;
 
-	// GPX input file
-	GPXData data;
-
 	VideoWidget::Align align = VideoWidget::AlignNone;
 
 	log_call();
@@ -343,6 +346,10 @@ bool Renderer::loadTrack(layout::Track *t) {
 		log_warn("Can't read GPS data, skip map widget");
 		return false;
 	}
+
+	// GPX limits
+	gpx->setFrom(app_.settings().gpxFrom());
+	gpx->setTo(app_.settings().gpxTo());
 
 	// Media
 	MediaContainer *container = app_.media();
@@ -753,8 +760,10 @@ bool Renderer::start(void) {
 	start_time = container_->startTime() + container_->timeOffset();
 
 	// Update start time in GPX stream (start_time can change after sync step)
-	if (gpx_)
+	if (gpx_) {
 		gpx_->setStartTime(start_time);
+//		data_.init();
+	}
 
 	started_at_ = now;
 
@@ -809,7 +818,6 @@ bool Renderer::run(void) {
 
 	if (gpx_) {
 		// Read GPX data
-//		data_ = gpx_->retrieveData(timecode_ms);
 		gpx_->retrieveNext(data_, timecode_ms);
 
 		// Draw

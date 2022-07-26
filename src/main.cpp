@@ -28,6 +28,7 @@ static const struct option options[] = {
 	{ "quiet",            no_argument,       0, 'q' },
 	{ "format",           required_argument, 0, 'f' },
 	{ "duration",         required_argument, 0, 'd' },
+	{ "trim",             required_argument, 0, 0 },
 	{ "media",            required_argument, 0, 'm' },
 	{ "gpx",              required_argument, 0, 'g' },
 	{ "layout",           required_argument, 0, 'l' },
@@ -38,6 +39,8 @@ static const struct option options[] = {
 	{ "map-factor",       required_argument, 0, 0 },
 	{ "map-zoom",         required_argument, 0, 0 },
 	{ "map-list",         no_argument,       0, 0 },
+	{ "gpx-from",         required_argument, 0, 0 },
+	{ "gpx-to",           required_argument, 0, 0 },
 	{ "extract-format",   no_argument,       0, 0 },
 	{ "telemetry-filter", no_argument,       0, 0 },
 	{ 0,                  0,                 0, 0 }
@@ -52,9 +55,12 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- m, --media=file       : Input media file name" << std::endl;
 	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
+	std::cout << "\t-    --gpx-from         : Set GPX begin (yyyy-mm-dd hh:mm:ss)" << std::endl;
+	std::cout << "\t-    --gpx-to           : Set GPX end (yyyy-mm-dd hh:mm:ss)" << std::endl;
 	std::cout << "\t- l, --layout=file      : Layout file name" << std::endl;
 	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
 	std::cout << "\t- d, --duration         : Duration (in ms)" << std::endl;
+	std::cout << "\t-    --trim             : Left trim crop (in ms)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, kalman)" << std::endl;
 	std::cout << "\t-    --offset           : Add a time offset (in ms)" << std::endl;
@@ -164,6 +170,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	std::string layoutfile;
 	std::string outputfile;
 
+	std::string gpx_to;
+	std::string gpx_from;
+
 	ExtractorSettings::Format extract_format = ExtractorSettings::FormatDump;
 
 	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterNone;
@@ -190,6 +199,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			if (s && !strcmp(s, "offset")) {
 				offset = atoi(optarg);
 			}
+			else if (s && !strcmp(s, "trim")) {
+				// TODO
+				printf("Not yet implemented\n");
+				return 0;
+			}
 			else if (s && !strcmp(s, "map-list")) {
 				setCommand(GPX2Video::CommandSource);
 				return 0;
@@ -202,6 +216,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "map-source")) {
 				map_source = (MapSettings::Source) atoi(optarg);
+			}
+			else if (s && !strcmp(s, "gpx-from")) {
+				gpx_from = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "gpx-to")) {
+				gpx_to = std::string(optarg);
 			}
 			else if (s && !strcmp(s, "extract-format")) {
 				setCommand(GPX2Video::CommandFormat);
@@ -365,6 +385,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_zoom,
 		max_duration_ms,
 		map_source,
+		gpx_from,
+		gpx_to,
 		extract_format,
 		telemetry_filter)
 	);

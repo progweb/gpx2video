@@ -852,6 +852,10 @@ bool Map::load(void) {
 	GPX *gpx = GPX::open(filename);
 
 	if (gpx != NULL) {
+		// GPX limits
+		gpx->setFrom(app_.settings().gpxFrom());
+		gpx->setTo(app_.settings().gpxTo());
+
 		// Draw path
 		path(*mapbuf_, gpx, divider);
 
@@ -965,11 +969,16 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	// Draw track
 	// ...
 
+	// TODO
+	// 0.3 => 2704x1520
+	// xx => 432x240
+
 	// Draw picto
 	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", 0.3);
 	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", 0.3);
 	
-	drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", 0.3);
+	if (data.valid())
+		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", 0.3);
 }
 
 

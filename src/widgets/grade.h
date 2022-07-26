@@ -41,7 +41,10 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		sprintf(s, "%.0f%%", data.grade());
+		if (data.hasValue())
+			sprintf(s, "%.0f%%", data.grade());
+		else
+			sprintf(s, "--%%");
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

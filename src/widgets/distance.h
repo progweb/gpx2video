@@ -54,7 +54,20 @@ public:
 			distance *= 0.6213711922;
 		}
 
-		sprintf(s, "%.0f %s", distance, unit2string(unit()).c_str());
+		if (data.hasValue()) {
+			const char *format;
+
+			if (distance < 10)
+				format = "%.2f %s";
+			else if (distance < 100)
+				format = "%.1f %s";
+			else
+				format = "%.0f %s";
+
+			sprintf(s, format, distance, unit2string(unit()).c_str());
+		}
+		else
+			sprintf(s, "-- %s", unit2string(unit()).c_str());
 
 		// Append dynamic info
 		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());

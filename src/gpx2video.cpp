@@ -134,6 +134,10 @@ Map * GPX2Video::buildMap(void) {
 		return NULL;
 	}
 
+	// GPX limits
+	gpx->setFrom(settings().gpxFrom());
+	gpx->setTo(settings().gpxTo());
+
 	gpx->dump();
 
 	// Create map bounding box
