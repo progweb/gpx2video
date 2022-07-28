@@ -86,7 +86,8 @@
 		<zoom>11</zoom>
 		<factor>1.2</factor>
 	</map>
-	<map align="top-right" display="false">
+
+	<map align="top-right" display="true">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>

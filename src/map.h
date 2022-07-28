@@ -111,7 +111,7 @@ private:
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider=1.0);
+	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
 	GPX2Video &app_;
 	MapSettings settings_;

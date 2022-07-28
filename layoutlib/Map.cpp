@@ -40,8 +40,13 @@ namespace layout
     _width(this, "width", Node::ATTRIBUTE, false),
     _height(this, "height", Node::ATTRIBUTE, false),
     _margin(this, "margin", Node::ELEMENT, false),
+    _margin_left(this, "margin-left", Node::ELEMENT, false),
+    _margin_right(this, "margin-right", Node::ELEMENT, false),
+    _margin_top(this, "margin-top", Node::ELEMENT, false),
+    _margin_bottom(this, "margin-bottom", Node::ELEMENT, false),
     _zoom(this, "zoom", Node::ELEMENT, false),
     _factor(this, "factor", Node::ELEMENT, false),
+    _marker(this, "marker", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false)
   {
@@ -53,12 +58,23 @@ namespace layout
     getInterfaces().push_back(&_width);
     getInterfaces().push_back(&_height);
     getInterfaces().push_back(&_margin);
+    getInterfaces().push_back(&_margin_left);
+    getInterfaces().push_back(&_margin_right);
+    getInterfaces().push_back(&_margin_top);
+    getInterfaces().push_back(&_margin_bottom);
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_factor);
+    getInterfaces().push_back(&_marker);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
 
 	_display.setValue("true");
+
+	_margin_left.setValue("-1");
+	_margin_right.setValue("-1");
+	_margin_top.setValue("-1");
+	_margin_bottom.setValue("-1");
+
 	_zoom.setValue("12");
 	_factor.setValue("1.0");
   }

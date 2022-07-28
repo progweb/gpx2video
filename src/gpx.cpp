@@ -380,8 +380,8 @@ GPX * GPX::open(const std::string &filename, enum TelemetrySettings::Filter filt
 
 	gpx->start_activity_ = data.time();
 
-	// Initialize
-	gpx->from_ = data.time(GPXData::PositionCurrent);
+//	// Initialize
+//	gpx->from_ = data.time(GPXData::PositionCurrent);
 
 failure:
 	return gpx;

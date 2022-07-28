@@ -45,6 +45,10 @@ namespace layout
     _width(this, "width", Node::ATTRIBUTE, false),
     _height(this, "height", Node::ATTRIBUTE, false),
     _margin(this, "margin", Node::ELEMENT, false),
+    _margin_left(this, "margin-left", Node::ELEMENT, false),
+    _margin_right(this, "margin-right", Node::ELEMENT, false),
+    _margin_top(this, "margin-top", Node::ELEMENT, false),
+    _margin_bottom(this, "margin-bottom", Node::ELEMENT, false),
     _padding(this, "padding", Node::ELEMENT, false),
 	_txtcolor(this, "text-color", Node::ELEMENT, false),
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
@@ -65,6 +69,10 @@ namespace layout
     getInterfaces().push_back(&_width);
     getInterfaces().push_back(&_height);
     getInterfaces().push_back(&_margin);
+    getInterfaces().push_back(&_margin_left);
+    getInterfaces().push_back(&_margin_right);
+    getInterfaces().push_back(&_margin_top);
+    getInterfaces().push_back(&_margin_bottom);
     getInterfaces().push_back(&_padding);
     getInterfaces().push_back(&_txtcolor);
     getInterfaces().push_back(&_txtshadow);
@@ -73,6 +81,11 @@ namespace layout
     getInterfaces().push_back(&_bgcolor);
 
 	_display.setValue("true");
+
+	_margin_left.setValue("-1");
+	_margin_right.setValue("-1");
+	_margin_top.setValue("-1");
+	_margin_bottom.setValue("-1");
   }
 
   Widget::~Widget()

@@ -30,6 +30,14 @@ public:
 		AlignUnknown
 	};
 
+	enum Margin {
+		MarginAll,
+		MarginLeft,
+		MarginRight,
+		MarginBottom,
+		MarginTop
+	};
+
 	enum Unit {
 		UnitNone,
 		UnitMPH,
@@ -121,12 +129,47 @@ public:
 		return height_;
 	}
 
-	const int& margin(void) const {
-		return margin_;
+	const int& margin(enum Margin side) const {
+		switch (side) {
+		case MarginLeft:
+			return margin_left_;
+		case MarginRight:
+			return margin_right_;
+		case MarginTop:
+			return margin_top_;
+		case MarginBottom:
+			return margin_bottom_;
+		default:
+			return null_;
+		}
 	}
 
-	virtual void setMargin(int margin) {
-		margin_ = margin;
+	virtual void setMargin(enum Margin side, int margin) {
+		if (margin < 0)
+			return;
+
+		switch (side) {
+		case MarginAll:
+			margin_left_ = margin;
+			margin_right_ = margin;
+			margin_top_ = margin;
+			margin_bottom_ = margin;
+			break;
+		case MarginLeft:
+			margin_left_ = margin;
+			break;
+		case MarginRight:
+			margin_right_ = margin;
+			break;
+		case MarginTop:
+			margin_top_ = margin;
+			break;
+		case MarginBottom:
+			margin_bottom_ = margin;
+			break;
+		default:
+			break;
+		}
 	}
 
 	const int& padding(void) const {
@@ -216,7 +259,7 @@ protected:
 		setAlign(AlignNone);
 		setPosition(0, 0);
 		setSize(64, 64);
-		setMargin(10);
+		setMargin(MarginAll, 10);
 		setPadding(0);
 		setLabel(name);
 		setTextShadow(0);
@@ -243,11 +286,16 @@ protected:
 	std::string format_;
 	std::string source_;
 
+	const int null_ = 0;
+
 	int x_;
 	int y_;
 	int width_;
 	int height_;
-	int margin_;
+	int margin_top_;
+	int margin_bottom_;
+	int margin_left_;
+	int margin_right_;
 	int padding_;
 
 	std::string label_;

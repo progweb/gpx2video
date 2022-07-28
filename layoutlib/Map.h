@@ -121,6 +121,34 @@ namespace layout
     Unsigned  &margin() { return _margin; }
 
     ///
+    /// Get marginLeft
+    ///
+    /// @return the margin left attribute
+    ///
+    Decimal  &marginLeft() { return _margin_left; }
+
+    ///
+    /// Get marginRight
+    ///
+    /// @return the margin right attribute
+    ///
+    Decimal  &marginRight() { return _margin_right; }
+
+    ///
+    /// Get marginTop
+    ///
+    /// @return the margin top attribute
+    ///
+    Decimal  &marginTop() { return _margin_top; }
+
+    ///
+    /// Get marginBottom
+    ///
+    /// @return the margin bottom attribute
+    ///
+    Decimal  &marginBottom() { return _margin_bottom; }
+
+    ///
     /// Get zoom
     ///
     /// @return the zoom element
@@ -133,6 +161,13 @@ namespace layout
 	/// @return the factor elememnt
 	///
 	Decimal &factor() { return _factor; }
+
+	///
+	/// Get marker
+	/// 
+	/// @return the marker elememnt
+	///
+	Unsigned &marker() { return _marker; }
 
     ///
     /// Get border
@@ -159,8 +194,13 @@ namespace layout
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;
+	Decimal      _margin_left;
+	Decimal      _margin_right;
+	Decimal      _margin_top;
+	Decimal      _margin_bottom;
 	Unsigned     _zoom;
 	Decimal      _factor;
+	Unsigned     _marker;
 	Unsigned     _border;
 	String       _bordercolor;
     

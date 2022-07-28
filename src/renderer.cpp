@@ -245,6 +245,8 @@ bool Renderer::loadMap(layout::Map *m) {
 	int x, y;
 	int width, height;
 
+	int marker_size;
+
 	std::string s;
 
 	unsigned int mapsource;
@@ -280,13 +282,18 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	// Default size
 	//   2704x1520 => 800x500
-	//   1920x1080 => 560x350
+	//   1920x1080 =>   ?x?
 	width = (m->width() > 0) ? m->width() : 800 * video_stream->width() / 2704;
 	height = (m->height() > 0) ? m->height() : 500 * video_stream->height() / 1520;
 
 	// Default position
 	x = (m->x() > 0) ? m->x() : video_stream->width() - width - m->margin();
 	y = (m->y() > 0) ? m->y() : video_stream->height() - height - m->margin();
+
+	// Default marker size (132x200)
+	// 2704x1520 => 40x60
+	//  432x240  =>  ?x?
+	marker_size = (m->marker() > 0) ? m->marker() : 60 * video_stream->height() / 1520.0;
 
 	// Create map bounding box
 	GPXData::point p1, p2;
@@ -306,6 +313,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setSource((MapSettings::Source) mapsource);
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setDivider(m->factor());
+	mapSettings.setMarkerSize(marker_size);
 	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
 
 	Map *map = Map::create(app_, mapSettings);
@@ -316,7 +324,11 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setAlign(align);
 	map->setPosition(x, y);
 	map->setSize(mapSettings.width(), mapSettings.height());
-	map->setMargin(m->margin());
+	map->setMargin(VideoWidget::MarginAll, m->margin());
+	map->setMargin(VideoWidget::MarginLeft, m->marginLeft());
+	map->setMargin(VideoWidget::MarginRight, m->marginRight());
+	map->setMargin(VideoWidget::MarginTop, m->marginTop());
+	map->setMargin(VideoWidget::MarginBottom, m->marginBottom());
 	map->setBorder(m->border());
 	map->setBorderColor((const char *) m->borderColor());
 
@@ -389,7 +401,11 @@ bool Renderer::loadTrack(layout::Track *t) {
 	track->setAlign(align);
 	track->setPosition(x, y);
 	track->setSize(trackSettings.width(), trackSettings.height());
-	track->setMargin(t->margin());
+	track->setMargin(VideoWidget::MarginAll, t->margin());
+	track->setMargin(VideoWidget::MarginLeft, t->marginLeft());
+	track->setMargin(VideoWidget::MarginRight, t->marginRight());
+	track->setMargin(VideoWidget::MarginTop, t->marginTop());
+	track->setMargin(VideoWidget::MarginBottom, t->marginBottom());
 	track->setBorder(t->border());
 	track->setBorderColor((const char *) t->borderColor());
 	track->setBackgroundColor((const char *) t->backgroundColor());
@@ -483,7 +499,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setPosition(w->x(), w->y());
 	widget->setFormat((const char *) w->format());
 	widget->setSize(w->width(), w->height());
-	widget->setMargin(w->margin());
+	widget->setMargin(VideoWidget::MarginAll, w->margin());
+	widget->setMargin(VideoWidget::MarginLeft, w->marginLeft());
+	widget->setMargin(VideoWidget::MarginRight, w->marginRight());
+	widget->setMargin(VideoWidget::MarginTop, w->marginTop());
+	widget->setMargin(VideoWidget::MarginBottom, w->marginBottom());
 	widget->setPadding(w->padding());
 	widget->setLabel((const char *) w->name());
 	widget->setTextColor((const char *) w->textColor());
@@ -537,23 +557,23 @@ void Renderer::computeWidgetsPosition(void) {
 	for (VideoWidget *widget : widgets_) {
 		switch (widget->align()) {
 		case VideoWidget::AlignTopLeft:
-			x = widget->margin();
-			y = widget->margin();
+			x = widget->margin(VideoWidget::MarginLeft);
+			y = widget->margin(VideoWidget::MarginTop);
 			break;
 
 		case VideoWidget::AlignTopRight:
-			x = video_stream->width() - widget->margin() - widget->width();
-			y = widget->margin();
+			x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
+			y = widget->margin(VideoWidget::MarginTop);
 			break;
 
 		case VideoWidget::AlignBottomLeft:
-			x = widget->margin();
-			y = video_stream->height() - widget->margin() - widget->height();
+			x = widget->margin(VideoWidget::MarginLeft);
+			y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
 			break;
 
 		case VideoWidget::AlignBottomRight:
-			x = video_stream->width() - widget->margin() - widget->width();
-			y = video_stream->height() - widget->margin() - widget->height();
+			x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
+			y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
 			break;
 
 		default:
@@ -573,12 +593,12 @@ void Renderer::computeWidgetsPosition(void) {
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
 		if (widget->align() == VideoWidget::AlignTopLeft) {
-			margintop = MAX(widget->height() + 2 * widget->margin(), margintop);
+			margintop = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
 			continue;
 		}
 
 		if (widget->align() == VideoWidget::AlignBottomLeft) {
-			marginbottom = MAX(widget->height() + 2 * widget->margin(), marginbottom);
+			marginbottom = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
 			continue;
 		}
 
@@ -586,7 +606,8 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		height += widget->height();
-		height += 2 * widget->margin();
+		height += widget->margin(VideoWidget::MarginTop);
+		height += widget->margin(VideoWidget::MarginBottom);
 		n++;
 	}
 
@@ -600,12 +621,14 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->align() != VideoWidget::AlignLeft)
 			continue;
 
-		x = widget->margin();
-		y = margintop + offset + widget->margin();
+		x = widget->margin(VideoWidget::MarginLeft);
+		y = margintop + offset + widget->margin(VideoWidget::MarginTop);
 
 		widget->setPosition(x, y);
 
-		offset += widget->height() + 2 * widget->margin();
+		offset += widget->height();
+		offset += widget->margin(VideoWidget::MarginTop);
+		offset += widget->margin(VideoWidget::MarginBottom);
 	}
 
 	// Right side
@@ -618,12 +641,12 @@ void Renderer::computeWidgetsPosition(void) {
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
 		if (widget->align() == VideoWidget::AlignTopRight) {
-			margintop = MAX(widget->height() + 2 * widget->margin(), margintop);
+			margintop = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
 			continue;
 		}
 
 		if (widget->align() == VideoWidget::AlignBottomRight) {
-			marginbottom = MAX(widget->height() + 2 * widget->margin(), marginbottom);
+			marginbottom = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
 			continue;
 		}
 
@@ -631,7 +654,8 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		height += widget->height();
-		height += 2 * widget->margin();
+		height += widget->margin(VideoWidget::MarginTop);
+		height += widget->margin(VideoWidget::MarginBottom);
 		n++;
 	}
 
@@ -645,12 +669,14 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->align() != VideoWidget::AlignRight)
 			continue;
 
-		x = video_stream->width() - widget->margin() - widget->width();
-		y = margintop + offset + widget->margin();
+		x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
+		y = margintop + offset + widget->margin(VideoWidget::MarginTop);
 
 		widget->setPosition(x, y);
 
-		offset += widget->height() + 2 * widget->margin();
+		offset += widget->height();
+		offset += widget->margin(VideoWidget::MarginTop);
+		offset += widget->margin(VideoWidget::MarginBottom);
 	}
 
 	// Top side
@@ -663,12 +689,12 @@ void Renderer::computeWidgetsPosition(void) {
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
 		if (widget->align() == VideoWidget::AlignTopLeft) {
-			marginleft = MAX(widget->width() + 2 * widget->margin(), marginleft);
+			marginleft = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
 			continue;
 		}
 
 		if (widget->align() == VideoWidget::AlignTopRight) {
-			marginright = MAX(widget->width() + 2 * widget->margin(), marginright);
+			marginright = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
 			continue;
 		}
 
@@ -676,7 +702,8 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		width += widget->width();
-		width += 2 * widget->margin();
+		width += widget->margin(VideoWidget::MarginLeft);
+		width += widget->margin(VideoWidget::MarginRight);
 		n++;
 	}
 
@@ -690,12 +717,14 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->align() != VideoWidget::AlignTop)
 			continue;
 
-		x = marginleft + offset + widget->margin();
-		y = widget->margin();
+		x = marginleft + offset + widget->margin(VideoWidget::MarginLeft);
+		y = widget->margin(VideoWidget::MarginTop);
 
 		widget->setPosition(x, y);
 
-		offset += widget->width() + 2 * widget->margin();
+		offset += widget->width();
+		offset += widget->margin(VideoWidget::MarginLeft);
+		offset += widget->margin(VideoWidget::MarginRight);
 	}
 
 	// Bottom side
@@ -708,12 +737,12 @@ void Renderer::computeWidgetsPosition(void) {
 	// Get align position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
 		if (widget->align() == VideoWidget::AlignBottomLeft) {
-			marginleft = MAX(widget->width() + 2 * widget->margin(), marginleft);
+			marginleft = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
 			continue;
 		}
 
 		if (widget->align() == VideoWidget::AlignBottomRight) {
-			marginright = MAX(widget->width() + 2 * widget->margin(), marginright);
+			marginright = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
 			continue;
 		}
 
@@ -721,7 +750,8 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		width += widget->width();
-		width += 2 * widget->margin();
+		width += widget->margin(VideoWidget::MarginLeft);
+		width += widget->margin(VideoWidget::MarginRight);
 		n++;
 	}
 
@@ -735,12 +765,14 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->align() != VideoWidget::AlignBottom)
 			continue;
 
-		x = marginleft + offset + widget->margin();
-		y = video_stream->height() - widget->margin() - widget->height();
+		x = marginleft + offset + widget->margin(VideoWidget::MarginLeft);
+		y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
 
 		widget->setPosition(x, y);
 
-		offset += widget->width() + 2 * widget->margin();
+		offset += widget->width();
+		offset += widget->margin(VideoWidget::MarginLeft);
+		offset += widget->margin(VideoWidget::MarginRight);
 	}
 }
 

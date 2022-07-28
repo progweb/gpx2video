@@ -50,6 +50,7 @@ MapSettings::MapSettings() {
 	height_ = 240;
 	zoom_ = 10;
 	divider_ = 2.0;
+	marker_size_ = 60;
 	source_ = MapSettings::SourceNull;
 }
 
@@ -101,6 +102,16 @@ const double& MapSettings::divider(void) const {
 
 void MapSettings::setDivider(const double &divider) {
 	divider_ = divider;
+}
+
+
+const int& MapSettings::markerSize(void) const {
+	return marker_size_;
+}
+
+
+void MapSettings::setMarkerSize(const int &size) {
+	marker_size_ = size;
 }
 
 
@@ -719,8 +730,8 @@ void Map::draw(void) {
 	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
 
 	// Draw markers
-	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", 0.3);
-	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", 0.3);
+	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", settings().markerSize());
+	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", settings().markerSize());
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -927,6 +938,7 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 
 	int zoom = settings().zoom();
 	double divider = settings().divider();
+	double marker_size = settings().markerSize();
 
 	int border = this->border();
 
@@ -974,16 +986,18 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	// xx => 432x240
 
 	// Draw picto
-	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", 0.3);
-	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", 0.3);
+	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
 	
 	if (data.valid())
-		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", 0.3);
+		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 }
 
 
-bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider) {
+bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size) {
 	bool result;
+
+	double divider;
 
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
@@ -992,6 +1006,9 @@ bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char
 
 	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
 	img->read_image(type, buf.localpixels());
+
+	// Compute divider
+	divider = (double) size / (double) spec.height;
 
 	// Resize picto
 	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));

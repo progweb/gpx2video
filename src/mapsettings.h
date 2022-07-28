@@ -46,6 +46,9 @@ public:
 	const double& divider(void) const;
 	void setDivider(const double &divier);
 
+	const int& markerSize(void) const;
+	void setMarkerSize(const int &size);
+
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
@@ -60,6 +63,7 @@ private:
 
 	int zoom_;
 	double divider_;
+	int marker_size_;
 
 	enum Source source_;
 
