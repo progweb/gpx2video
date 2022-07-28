@@ -15,15 +15,20 @@ public:
 	void setSize(const int &width, const int &height);
 
 	const int& zoom(void) const;
-	void setZoom(const int &zoom);
+
+	const int& markerSize(void) const;
+	void setMarkerSize(const int &size);
 
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
+protected:
+	int zoom_;
+
+	int marker_size_;
+
 private:
 	int width_, height_;
-
-	int zoom_;
 
 	double lat1_, lat2_;
 	double lon1_, lon2_;

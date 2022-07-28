@@ -351,6 +351,7 @@ Map settings:
 	<source>1</source>
 	<zoom>11</zoom>
 	<factor>1.2</factor>
+	<marker>60</marker>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -359,6 +360,7 @@ Map settings:
 
 **zoom** value sets the map details.
 **factor** value applies a zoom factor as render.
+**marker** marker size in pixels.
 
 
 
@@ -370,6 +372,7 @@ Track settings:
 
 ```xml
 <track x="250" y="450" width="600" height="120" align="left" display="true">
+	<marker>60</marker>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>

@@ -663,26 +663,6 @@ enum GPX::Data GPX::retrieveLast(GPXData &data) {
 
 	iter_seg_ = trksegs.end();
 
-//	if (!trksegs.empty()) {
-//		iter_seg_--;
-//	
-//		gpx::TRKSeg *trkseg = (*iter_seg_);
-//
-//		std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
-//		iter_pts_ = trkpts.end();
-//
-//		if (!trkpts.empty()) {
-//			iter_pts_--;
-//
-//			wpt = (*iter_pts_);
-//
-//			data.read(wpt);
-//			data.update();
-//
-//			return GPX::DataMeasured;
-//		}
-//	}
-
 	if (!trksegs.empty()) {
 		do {
 			iter_seg_--;
@@ -699,8 +679,6 @@ enum GPX::Data GPX::retrieveLast(GPXData &data) {
 					wpt = (*iter_pts_);
 
 					data.read(wpt);
-					data.update();
-
 
 					if (to_ != 0) {
 						if (data.time(GPXData::PositionCurrent) < to_)

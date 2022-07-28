@@ -119,8 +119,8 @@
 
 	<map x="850" y="350" align="none" display="true">
 		<source>1</source>
-		<zoom>11</zoom>
-		<factor>1.2</factor>
+		<zoom>12</zoom>
+		<factor>2.0</factor>
 		<border>6</border>
 		<border-color>#000000ff</border-color>
 	</map>

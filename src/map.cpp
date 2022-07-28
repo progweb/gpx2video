@@ -46,32 +46,12 @@
 
 
 MapSettings::MapSettings() {
-	width_ = 320;
-	height_ = 240;
-	zoom_ = 10;
 	divider_ = 2.0;
-	marker_size_ = 60;
 	source_ = MapSettings::SourceNull;
 }
 
 
 MapSettings::~MapSettings() {
-}
-
-
-const int& MapSettings::width(void) const {
-	return width_;
-}
-
-
-const int& MapSettings::height(void) const {
-	return height_;
-}
-
-
-void MapSettings::setSize(const int &width, const int &height) {
-	width_ = width;
-	height_ = height;
 }
 
 
@@ -82,11 +62,6 @@ const MapSettings::Source& MapSettings::source(void) const {
 
 void MapSettings::setSource(const MapSettings::Source &source) {
 	source_ = source;
-}
-
-
-const int& MapSettings::zoom(void) const {
-	return zoom_;
 }
 
 
@@ -102,34 +77,6 @@ const double& MapSettings::divider(void) const {
 
 void MapSettings::setDivider(const double &divider) {
 	divider_ = divider;
-}
-
-
-const int& MapSettings::markerSize(void) const {
-	return marker_size_;
-}
-
-
-void MapSettings::setMarkerSize(const int &size) {
-	marker_size_ = size;
-}
-
-
-void MapSettings::getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const {
-	*lat1 = lat1_;
-	*lon1 = lon1_;
-
-	*lat2 = lat2_;
-	*lon2 = lon2_;
-}
-
-
-void MapSettings::setBoundingBox(double lat1, double lon1, double lat2, double lon2) {
-	lat1_ = lat1;
-	lon1_ = lon1;
-
-	lat2_ = lat2;
-	lon2_ = lon2;
 }
 
 
@@ -318,14 +265,10 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
-	: VideoWidget(app, "map")
-	, app_(app)
+	: Track(app, settings, evbase)
 	, settings_(settings)
-	, evbase_(evbase)
 	, nbr_downloads_(0) {
 	log_call();
-
-	VideoWidget::setSize(settings_.width(), settings_.height()); 
 
 	buf_ = NULL;
 	mapbuf_ = NULL;
@@ -365,49 +308,16 @@ Map * Map::create(GPX2Video &app, const MapSettings &settings) {
 	map = new Map(app, settings, app.evbase());
 
 	map->init();
+	map->limits();
 
 	return map;
 }
 
 
 void Map::setSize(int width, int height) {
-	VideoWidget::setSize(width, height); 
+	Track::setSize(width, height); 
 
 	settings_.setSize(width, height);
-}
-
-
-int Map::lat2pixel(int zoom, float lat) {
-    float lat_m;
-    int pixel_y;
-
-    double latrad = lat * M_PI / 180.0;
-
-    lat_m = atanh(sin(latrad));
-
-    // the formula is some more notes
-    // http://manialabs.wordpress.com/2013/01/26/converting-latitude-and-longitude-to-map-tile-in-mercator-projection/
-    //
-    // pixel_y = -(2^zoom * TILESIZE * lat_m) / 2PI + (2^zoom * TILESIZE) / 2
-    pixel_y = -(int)( (lat_m * TILESIZE * (1 << zoom) ) / (2*M_PI)) +
-        ((1 << zoom) * (TILESIZE/2) );
-
-    return pixel_y;
-}
-
-
-int Map::lon2pixel(int zoom, float lon) {
-    int pixel_x;
-
-    double lonrad = lon * M_PI / 180.0;
-
-    // the formula is
-    //
-    // pixel_x = (2^zoom * TILESIZE * lon) / 2PI + (2^zoom * TILESIZE) / 2
-    pixel_x = (int)(( lonrad * TILESIZE * (1 << zoom) ) / (2*M_PI)) +
-        ( (1 << zoom) * (TILESIZE/2) );
-
-    return pixel_x;
 }
 
 
@@ -489,17 +399,8 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 }
 
 
-void Map::init(void) {
+void Map::init(bool zoomfit) {
 	int zoom;
-	int padding;
-	double divider;
-
-	double lat1, lon1;
-	double lat2, lon2;
-
-	int w, h;
-	int width = settings().width();
-	int height = settings().height();
 
 	std::string uri;
 
@@ -508,43 +409,10 @@ void Map::init(void) {
 	log_call();
 
 	zoom = settings().zoom();
-	divider = settings().divider();
-	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
+	divider_ = settings().divider();
 
-	// Tiles:
-	// +-------+-------+-------+ ..... +-------+
-	// | x1,y1 |       |       |       | x2,y1 |
-	// +-------+-------+-------+ ..... +-------+
-	// |       |       |       |       |       |
-	// +-------+-------+-------+ ..... +-------+
-	// | x1,y2 |       |       |       | x2,y2 |
-	// +-------+-------+-------+ ..... +-------+
-
-	// lat/lon to pixel
-	px1_ = Map::lon2pixel(zoom, lon1);
-	py1_ = Map::lat2pixel(zoom, lat1);
-
-	px2_ = Map::lon2pixel(zoom, lon2);
-	py2_ = Map::lat2pixel(zoom, lat2);
-
-	// lat/lon to tile index
-	x1_ = floorf((float) px1_ / (float) TILESIZE);
-	y1_ = floorf((float) py1_ / (float) TILESIZE);
-
-	x2_ = floorf((float) px2_ / (float) TILESIZE) + 1;
-	y2_ = floorf((float) py2_ / (float) TILESIZE) + 1;
-
-	// Append tile so as width tiles sum is enough
-	while (((x2_ - x1_) * TILESIZE * divider) < (2 * width)) {
-		x1_ -= 1;
-		x2_ += 1;
-	}
-
-	// Append tile so as height tiles sum is enough
-	while (((y2_ - y1_) * TILESIZE * divider) < (2 * height)) {
-		y1_ -= 1;
-		y2_ += 1;
-	}
+	// Track compute
+	Track::init(zoomfit);
 
 	// Build each tile
 	for (int y=y1_; y<y2_; y++) {
@@ -553,6 +421,17 @@ void Map::init(void) {
 			tiles_.push_back(tile);
 		}
 	}
+}
+
+
+void Map::limits(void) {
+	int w, h;
+	int width = settings().width();
+	int height = settings().height();
+
+	int padding;
+
+	log_call();
 
 	// Use padding (to see markers)
 	padding = this->border() + 50;
@@ -561,42 +440,42 @@ void Map::init(void) {
 	w = floorf((float) px2_ - px1_);
 	h = floorf((float) py2_ - py1_);
 
-	w *= divider;
-	h *= divider;
+	w *= divider_;
+	h *= divider_;
 
 	// Compute display limits
 	if ((w + 2 * padding) < width) {
-		lim_x1_ = floorf((float) Map::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
-		lim_x1_ *= divider;
+		lim_x1_ = px1_ - (x1_ * TILESIZE);
+		lim_x1_ *= divider_;
 		lim_x1_ -= (width - w) / 2;
 
 		lim_x2_ = lim_x1_;
 	}
 	else {
-		lim_x1_ = floorf((float) Map::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
-		lim_x1_ *= divider;
+		lim_x1_ = px1_ - (x1_ * TILESIZE);
+		lim_x1_ *= divider_;
 		lim_x1_ -= padding;
 
-		lim_x2_ = floorf((float) Map::lon2pixel(zoom, lon2)) - (x1_ * TILESIZE);
-		lim_x2_ *= divider;
+		lim_x2_ = px2_ - (x1_ * TILESIZE);
+		lim_x2_ *= divider_;
 		lim_x2_ -= width;
 		lim_x2_ += padding;
 	}
 
 	if ((h + 2 * padding) < height) {
-		lim_y1_ = floorf((float) Map::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
-		lim_y1_ *= divider;
+		lim_y1_ = py1_ - (y1_ * TILESIZE);
+		lim_y1_ *= divider_;
 		lim_y1_ -= (height - h) / 2;
 
 		lim_y2_ = lim_y1_;
 	}
 	else {
-		lim_y1_ = floorf((float) Map::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
-		lim_y1_ *= divider;
+		lim_y1_ = py1_ - (y1_ * TILESIZE);
+		lim_y1_ *= divider_;
 		lim_y1_ -= padding;
 
-		lim_y2_ = floorf((float) Map::lat2pixel(zoom, lat2)) - (y1_ * TILESIZE);
-		lim_y2_ *= divider;
+		lim_y2_ = py2_ - (y1_ * TILESIZE);
+		lim_y2_ *= divider_;
 		lim_y2_ -= height;
 		lim_y2_ += padding;
 	}
@@ -709,6 +588,8 @@ error:
 
 
 void Map::draw(void) {
+	int marker_size = settings().markerSize();
+
 	std::string filename = "track.png";
 
 	log_call();
@@ -728,10 +609,12 @@ void Map::draw(void) {
 
 	// Draw map
 	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
+	// Draw track
+	OIIO::ImageBufAlgo::over(buf, *trackbuf_, buf);
 
 	// Draw markers
-	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", settings().markerSize());
-	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", settings().markerSize());
+	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", marker_size);
+	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", marker_size);
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -749,91 +632,14 @@ error:
 }
 
 
-void Map::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
-	int zoom;
-	int stride;
-	unsigned char *data;
-
-	int x = 0, y = 0;
-
-	GPXData wpt;
-
-	log_call();
-
-	zoom = settings().zoom();
-
-	// Cairo buffer
-	OIIO::ImageBuf buf(outbuf.spec());
-
-	// Create the cairo destination surface
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, outbuf.spec().width, outbuf.spec().height);
-
-	// Cairo context
-	cairo_t *cairo = cairo_create(surface);
-
-	// Path border
-	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
-	cairo_set_line_width(cairo, 4.4); //40.96);
-	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
-
-	// Draw each WPT
-	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
-		x = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
-
-		x *= divider;
-		y *= divider;
-
-		cairo_line_to(cairo, x, y);
-	}
-
-	// Cairo draw
-	cairo_stroke(cairo);
-
-	// Path color
-	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
-	cairo_set_line_width(cairo, 3.0); //40.96);
-	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
-
-	// Draw each WPT
-	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
-		x = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
-
-		x *= divider;
-		y *= divider;
-
-		cairo_line_to(cairo, x, y);
-	}
-
-	// Cairo draw
-	cairo_stroke (cairo);
-
-	data = cairo_image_surface_get_data(surface);
-	stride = cairo_image_surface_get_stride(surface);
-
-	// Cairo to OIIO
-	buf.set_pixels(OIIO::ROI(),
-		buf.spec().format,
-		data, 
-		OIIO::AutoStride,
-		stride);
-
-	// Cairo over
-	OIIO::ImageBufAlgo::over(outbuf, buf, outbuf);
-
-	// Release
-	cairo_surface_destroy(surface);
-	cairo_destroy(cairo);
-}
-
-
 bool Map::load(void) {
+	if (Track::load() == false)
+		return false;
+
 	if (mapbuf_)
 		return true;
 
-	int zoom = settings().zoom();
-	double divider = settings().divider();
+	double divider = divider_; //settings().divider();
 
 	std::string filename = app_.settings().gpxfile();
 
@@ -860,65 +666,17 @@ bool Map::load(void) {
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
 
-	GPX *gpx = GPX::open(filename);
-
-	if (gpx != NULL) {
-		// GPX limits
-		gpx->setFrom(app_.settings().gpxFrom());
-		gpx->setTo(app_.settings().gpxTo());
-
-		// Draw path
-		path(*mapbuf_, gpx, divider);
-
-		// Compute begin
-		gpx->retrieveFirst(wpt);
-
-		x_start_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y_start_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
-
-		x_start_ *= divider;
-		y_start_ *= divider;
-
-		// Compute end
-		gpx->retrieveLast(wpt);
-
-		x_end_ = floorf((float) Map::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y_end_ = floorf((float) Map::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
-
-		x_end_ *= divider;
-		y_end_ *= divider;
-	}
-	else {
-		log_warn("Can't open '%s' GPX data file", filename.c_str());
-	}
-
-	if (gpx != NULL)
-		delete gpx;
-
 	return (mapbuf_ != NULL);
 }
 
 
 void Map::prepare(OIIO::ImageBuf *buf) {
-//	int x = this->x(); // 1700;
-//	int y = this->y(); // 900;
-//	int w, width = settings().width(); // 800;
-//	int h, height = settings().height(); // 500;
-//
-//	int zoom = settings().zoom();
-//	double divider = settings().divider();
-
-	
 	this->createBox(&buf_, this->width(), this->height());
 	this->drawBorder(buf_);
 
 	// Load map
 	if (this->load() == false)
 		log_warn("Map renderer failure");
-
-//	// Background
-//	float color[4] = { 0.0, 0.0, 0.0, 1.0 }; // #000000
-//	OIIO::ImageBufAlgo::fill(*buf, color, OIIO::ROI(x - 2, x + width + 2, y - 2, y + height + 2));
 
 	// Image over
 	buf_->specmod().x = this->x();
@@ -937,13 +695,13 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int offsetX, offsetY;
 
 	int zoom = settings().zoom();
-	double divider = settings().divider();
+	double divider = divider_; //settings().divider();
 	double marker_size = settings().markerSize();
 
 	int border = this->border();
 
-	// Check map buffer
-	if (mapbuf_ == NULL) {
+	// Check map & track buffers
+	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
 		log_warn("Map renderer failure");
 		return;
 	}
@@ -973,60 +731,27 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	if (offsetY > lim_y2_)
 		offsetY = lim_y2_;
 
-	// Image over
+	// Map image over
 	mapbuf_->specmod().x = x - offsetX;
 	mapbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*frame, *mapbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
 
+	// Track image over
+	trackbuf_->specmod().x = x - offsetX;
+	trackbuf_->specmod().y = y - offsetY;
+	OIIO::ImageBufAlgo::over(*frame, *trackbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
+
 	// Draw track
 	// ...
 
-	// TODO
-	// 0.3 => 2704x1520
-	// xx => 432x240
-
 	// Draw picto
-	drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
-	drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+	if (marker_size > 0) {
+		drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+		drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
-	if (data.valid())
-		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
-}
-
-
-bool Map::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size) {
-	bool result;
-
-	double divider;
-
-	// Open picto
-	auto img = OIIO::ImageInput::open(picto);
-	const OIIO::ImageSpec& spec = img->spec();
-	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
-
-	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
-	img->read_image(type, buf.localpixels());
-
-	// Compute divider
-	divider = (double) size / (double) spec.height;
-
-	// Resize picto
-	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));
-	OIIO::ImageBufAlgo::resize(dst, buf);
-
-	// Marker position
-	x -= dst.spec().width / 2;
-	y -= dst.spec().height - (25 * divider);
-
-	// Image over
-	dst.specmod().x = x;
-	dst.specmod().y = y;
-	result = OIIO::ImageBufAlgo::over(map, dst, map, roi);
-
-	if (!result)
-		log_error("ImageBufAlgo::over failure");
-
-	return result;
+		if (data.valid())
+			drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+	}
 }
 
 

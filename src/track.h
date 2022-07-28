@@ -34,12 +34,6 @@ public:
 	static int lat2pixel(int zoom, float lat);
 	static int lon2pixel(int zoom, float lon);
 
-//	bool run(void) {
-//		log_call();
-//
-//		return true;
-//	}
-
 	// Draw track path
 	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
 
@@ -48,15 +42,14 @@ public:
 	void render(OIIO::ImageBuf *frame, const GPXData &data);
 
 protected:
-	void init(void);
-	bool load(void);
-
-private:
 	OIIO::ImageBuf *buf_;
 
 	Track(GPX2Video &app, const TrackSettings &settings, struct event_base *evbase);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider=1.0);
+	void init(bool zoomfit=true);
+	bool load(void);
+
+	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
 	GPX2Video &app_;
 	TrackSettings settings_;

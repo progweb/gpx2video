@@ -17,12 +17,13 @@
 #include "log.h"
 #include "evcurl.h"
 #include "gpx.h"
+#include "track.h"
 #include "mapsettings.h"
 #include "videowidget.h"
 #include "gpx2video.h"
 
 
-class Map : public VideoWidget {
+class Map : public Track {
 public:
 	class Tile {
 	public:
@@ -66,9 +67,6 @@ public:
 
 	void setSize(int width, int height);
 
-	static int lat2pixel(int zoom, float lat);
-	static int lon2pixel(int zoom, float lon);
-
 	bool run(void) {
 		log_call();
 
@@ -79,7 +77,6 @@ public:
 
 	// Draw track path
 	void draw(void);
-	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
 
 	// Render map
 	void prepare(OIIO::ImageBuf *buf);
@@ -93,7 +90,8 @@ protected:
 		return evcurl_;
 	}
 
-	void init(void);
+	void init(bool zoomfit=false);
+	void limits(void);
 	bool load(void);
 
 	// Download each tule
@@ -104,19 +102,13 @@ protected:
 private:
 	OIIO::ImageBuf *buf_;
 
-//	Map(const MapSettings &settings, struct event_base *evbase);
 	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
 
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
-
-	GPX2Video &app_;
 	MapSettings settings_;
-
-	struct event_base *evbase_;
 
 	EVCurl *evcurl_;
 
@@ -125,19 +117,11 @@ private:
 	// Map filename to tmp save
 	std::string filename_;
 
-	// Bounding box (map area)
-	int x1_, y1_, x2_, y2_;
-	int px1_, py1_, px2_, py2_;
-
 	// Bounding box (track area)
 	int lim_x1_, lim_y1_, lim_x2_, lim_y2_;
 
 	unsigned int nbr_downloads_;
 	std::list<Tile *> tiles_;
-
-	// Start & end position
-	int x_end_, y_end_;
-	int x_start_, y_start_;
 };
 
 #endif

@@ -31,7 +31,8 @@
 TrackSettings::TrackSettings() {
 	width_ = 320;
 	height_ = 240;
-	zoom_ = 14;
+	zoom_ = 12;
+	marker_size_ = 60;
 }
 
 
@@ -60,8 +61,13 @@ const int& TrackSettings::zoom(void) const {
 }
 
 
-void TrackSettings::setZoom(const int &zoom) {
-	zoom_ = zoom;
+const int& TrackSettings::markerSize(void) const {
+	return marker_size_;
+}
+
+
+void TrackSettings::setMarkerSize(const int &size) {
+	marker_size_ = size;
 }
 
 
@@ -96,7 +102,6 @@ Track::Track(GPX2Video &app, const TrackSettings &settings, struct event_base *e
 	trackbuf_ = NULL;
 
 	divider_ = 1.0;
-//	padding_ = 0;
 }
 
 
@@ -171,10 +176,9 @@ int Track::lon2pixel(int zoom, float lon) {
 }
 
 
-void Track::init(void) {
+void Track::init(bool zoomfit) {
 	int zoom;
 	int padding;
-	double divider;
 
 	double lat1, lon1;
 	double lat2, lon2;
@@ -211,23 +215,39 @@ void Track::init(void) {
 	x2_ = floorf((float) px2_ / (float) TILESIZE) + 1;
 	y2_ = floorf((float) py2_ / (float) TILESIZE) + 1;
 
-	// Use padding (to see markers)
-	padding = this->border() + 50;
+	if (zoomfit) {
+		double divider;
 
-	width -= 2 * padding;
-	height -= 2 * padding;
+		// Use padding (to see markers)
+		padding = this->border() + 50;
 
-	// Compute divider to match with the size of widget
-	w = floorf((float) px2_ - px1_);
-	h = floorf((float) py2_ - py1_);
+		width -= 2 * padding;
+		height -= 2 * padding;
 
-	if (((float) width / w) > ((float) height / h))
-		divider = (float) height / h;
-	else
-		divider = (float) width / w;
+		// Compute divider to match with the size of widget
+		w = floorf((float) px2_ - px1_);
+		h = floorf((float) py2_ - py1_);
 
-	divider_ = divider;
+		if (((float) width / w) > ((float) height / h))
+			divider = (float) height / h;
+		else
+			divider = (float) width / w;
 
+		// Save computed divider value
+		divider_ = divider;
+	}
+
+	// Append tile so as width tiles sum is enough
+	while (((x2_ - x1_) * TILESIZE * divider_) < (2 * width)) {
+		x1_ -= 1;
+		x2_ += 1;
+	}
+
+	// Append tile so as height tiles sum is enough
+	while (((y2_ - y1_) * TILESIZE * divider_) < (2 * height)) {
+		y1_ -= 1;
+		y2_ += 1;
+	}
 }
 
 
@@ -260,8 +280,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 
 	// Draw each WPT
 	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
-		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - px1_; // (x1_ * TILESIZE);
-		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - py1_; // (y1_ * TILESIZE);
+		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
 		x *= divider;
 		y *= divider;
@@ -279,8 +299,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 
 	// Draw each WPT
 	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
-		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - px1_; // (x1_ * TILESIZE);
-		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - py1_; // (y1_ * TILESIZE);
+		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
 		x *= divider;
 		y *= divider;
@@ -325,8 +345,12 @@ bool Track::load(void) {
 
 	log_call();
 
-	// Resize map
-	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
+	// Compute track size
+	width = (x2_ - x1_) * TILESIZE;
+	height = (y2_ - y1_) * TILESIZE;
+
+	// Create track buffer
+	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
 	GPX *gpx = GPX::open(filename);
 
@@ -341,8 +365,8 @@ bool Track::load(void) {
 		// Compute begin
 		gpx->retrieveFirst(wpt);
 
-		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - px1_; //(x1_ * TILESIZE);
-		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - py1_; //(y1_ * TILESIZE);
+		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
 		x_start_ *= divider_;
 		y_start_ *= divider_;
@@ -350,8 +374,8 @@ bool Track::load(void) {
 		// Compute end
 		gpx->retrieveLast(wpt);
 
-		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - px1_; // (x1_ * TILESIZE);
-		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - py1_; // (y1_ * TILESIZE);
+		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
 		x_end_ *= divider_;
 		y_end_ *= divider_;
@@ -392,6 +416,7 @@ void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	int offsetX, offsetY;
 
 	int zoom = settings().zoom();
+	int marker_size = settings().markerSize();
 
 	// Check track buffer
 	if (trackbuf_ == NULL) {
@@ -400,8 +425,8 @@ void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	}
 
 	// Current position
-	posX = floorf((float) Track::lon2pixel(zoom, data.position().lon)) - px1_;
-	posY = floorf((float) Track::lat2pixel(zoom, data.position().lat)) - py1_;
+	posX = floorf((float) Track::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
+	posY = floorf((float) Track::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
 
 	posX *= divider_;
 	posY *= divider_;
@@ -411,27 +436,36 @@ void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	h = (py2_ - py1_) * divider_; // floorf((float) Track::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
 
 	// Center track
-	offsetX = (width - w) / 2;
-	offsetY = (height - h) / 2;
+	offsetX = px1_ - (x1_ * TILESIZE);
+	offsetX *= divider_;
+	offsetX -= (width - w) / 2;
+
+	offsetY = py1_ - (y1_ * TILESIZE);
+	offsetY *= divider_;
+	offsetY -= (height - h) / 2;
 
 	// Image over
-	trackbuf_->specmod().x = x + offsetX;
-	trackbuf_->specmod().y = y + offsetY;
+	trackbuf_->specmod().x = x - offsetX;
+	trackbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*frame, *trackbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw track
 	// ...
 
 	// Draw picto
-	drawPicto(*frame, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", 0.3);
-	drawPicto(*frame, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", 0.3);
+	if (marker_size > 0) {
+		drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+		drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
-	drawPicto(*frame, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", 0.3);
+		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+	}
 }
 
 
-bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider) {
+bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size) {
 	bool result;
+
+	double divider;
 
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
@@ -440,6 +474,9 @@ bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const ch
 
 	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
 	img->read_image(type, buf.localpixels());
+
+	// Compute divider
+	divider = (double) size / (double) spec.height;
 
 	// Resize picto
 	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));
