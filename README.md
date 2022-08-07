@@ -129,9 +129,10 @@ $ ./gpx2video -m GOPR1860.MP4 --offset 9000 ...
 To build gpx2video, please install all dependancies (on Debian):
 
 ```bash
-apt-get install libevent-dev libssl-dev libcurl4-gnutls-dev \
-    libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev libswresample-dev libswscale-dev \
-    libopenimageio-dev libgeographic-dev libcairo2-dev
+apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
+    libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev \
+    libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
+    libcairo2-dev libopenexr-dev
 ```
 
 Then build in using cmake tools:
@@ -324,7 +325,7 @@ several map widgets.
 
 You can specify map source from a list. Warning, all maps aren't free.
 
-gpx2video downloads each tile with the zoom level in your `~/.gpx2video/cach` path. 
+gpx2video downloads each tile with the zoom level in your `~/.gpx2video/cache` path. 
 Then build the map.
 
 Finally, gpx2video renders a mapbox in applying the zoom factor.
