@@ -426,6 +426,9 @@ bool GPX::setFrom(std::string from) {
 
 	memset(&time, 0, sizeof(time));
 
+	if (from.empty())
+		goto skip;
+
 	if (::strptime(from.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
 		log_error("Parse GPX begin date failure");
 		return false;
@@ -436,6 +439,7 @@ bool GPX::setFrom(std::string from) {
 	// Convert race start time in UTC time
 	from_ = timelocal(&time);
 
+skip:
 	return true;
 }
 
@@ -444,6 +448,9 @@ bool GPX::setTo(std::string to) {
 	struct tm time;
 
 	memset(&time, 0, sizeof(time));
+
+	if (to.empty())
+		goto skip;
 
 	if (::strptime(to.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
 		log_error("Parse GPX end date failure");
@@ -455,6 +462,7 @@ bool GPX::setTo(std::string to) {
 	// Convert race start time in UTC time
 	to_ = timelocal(&time);
 
+skip:
 	return true;
 }
 
