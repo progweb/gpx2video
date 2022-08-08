@@ -289,8 +289,26 @@ void GPXData::update(enum TelemetrySettings::Filter filter) {
 }
 
 
+/**
+ * Garmin Connect format:
+ *   <extensions>
+ *     <ns3:TrackPointExtension>
+ *       <ns3:atemp>30.0</ns3:atemp>
+ *       <ns3:hr>120</ns3:hr>
+ *       <ns3:cad>85</ns3:cad>
+ *     </ns3:TrackPointExtension>
+ *   </extensions>
+ *
+ * RideWithGPS format:
+ *   <extensions>
+ *     <gpxdata:hr>120</gpxdata:hr>
+ *     <gpxdata:cadence>85</gpxdata:cadence>
+ *   </extensions>
+ */
 void GPXData::read(gpx::WPT *wpt) {
 	struct point pt;
+
+	std::string name;
 
 	convert(&pt, wpt);
 
@@ -304,12 +322,17 @@ void GPXData::read(gpx::WPT *wpt) {
 	// Extensions
 	gpx::Node *extensions = wpt->extensions().getElements().front();
 
+	name = extensions->getName();
+
+	if (name.find("TrackPointExtension") == std::string::npos)
+		extensions = &wpt->extensions();
+
 	if (extensions) {
 		for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
 			iter != extensions->getElements().end(); ++iter) {
 			gpx::Node *node = (*iter);
 
-			std::string name = node->getName();
+			name = node->getName();
 
 			if (name.find("atemp") != std::string::npos)
 				temperature_ = std::stod(node->getValue());

@@ -100,7 +100,7 @@ bool Telemetry::start(void) {
 	}
 
 	// Header
-	out_ << "# Timestamp, Time, Partial duration, Total duration, Data, Lat, Lon, Ele, Distance, Speed, MaxSpeed, Average" << std::endl;
+	out_ << "# Timestamp, Time, Partial duration, Total duration, Data, Lat, Lon, Ele, Distance, Speed, MaxSpeed, Average, Cadence, Heartrate" << std::endl;
 
 	// Read GPX from start
 	timecode_ms_ = 0;
@@ -141,6 +141,8 @@ bool Telemetry::run(void) {
 	out_ << ", " << data_.speed(); 
 	out_ << ", " << data_.maxspeed(); 
 	out_ << ", " << data_.avgspeed(); 
+	out_ << ", " << data_.cadence(); 
+	out_ << ", " << data_.heartrate(); 
 	out_ << std::endl;
 
 	timecode_ms_ += 1000;
