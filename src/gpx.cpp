@@ -513,12 +513,12 @@ void GPX::setStartTime(char *start_time) {
 }
 
 
-int GPX::timeOffset(void) const {
+int64_t GPX::timeOffset(void) const {
 	return offset_;
 }
 
 
-void GPX::setTimeOffset(const int& offset) {
+void GPX::setTimeOffset(const int64_t& offset) {
 	offset_ = offset;
 }
 
@@ -557,7 +557,7 @@ enum GPX::Data GPX::retrieveFirst(GPXData &data) {
 	result = retrieveFirst_i(data);
 
 	if (from_ != 0) {
-		int64_t timecode_ms = (((int64_t) from_ - start_time_) * 1000) - offset_;
+		int64_t timecode_ms = (((int64_t) from_ - start_time_) * 1000); // - offset_;
 		result = retrieveNext(data, timecode_ms);
 
 		data.init();
@@ -585,7 +585,7 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 			result = GPX::DataMeasured;
 		}
 		else {
-			if ((from_ != 0) && (timestamp < from_)) {
+			if ((from_ != 0) && (timestamp < (from_ + (offset_ / 1000)))) {
 				data.disableCompute();
 				data.unvalid();
 
@@ -634,7 +634,7 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 			}
 		}
 
-		if ((from_ == 0) || (from_ < data.time(GPXData::PositionCurrent)))
+		if ((from_ == 0) || ((from_ + (offset_ / 1000)) < data.time(GPXData::PositionCurrent)))
 			data.enableCompute();
 	} while (data.time(GPXData::PositionCurrent) < timestamp);
 
@@ -710,9 +710,10 @@ enum GPX::Data GPX::retrieveLast(GPXData &data) {
 					wpt = (*iter_pts_);
 
 					data.read(wpt);
+					data.update();
 
 					if (to_ != 0) {
-						if (data.time(GPXData::PositionCurrent) < to_)
+						if (data.time(GPXData::PositionCurrent) <= (to_ + (offset_ / 1000)))
 							return GPX::DataMeasured;
 						else
 							continue;

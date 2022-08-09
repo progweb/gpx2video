@@ -190,8 +190,8 @@ public:
 	void setStartTime(time_t start_time);
 	void setStartTime(struct tm *start_time);
 
-	int timeOffset(void) const;
-	void setTimeOffset(const int& offset);
+	int64_t timeOffset(void) const;
+	void setTimeOffset(const int64_t& offset);
 
 //	void compute(GPXData &data) {
 //		data.enableCompute();
@@ -223,7 +223,7 @@ private:
 	std::list<gpx::WPT*>::iterator iter_pts_;
 	std::list<gpx::TRKSeg*>::iterator iter_seg_;
 
-	int offset_;
+	int64_t offset_;
 
 	time_t from_;
 	time_t to_;
