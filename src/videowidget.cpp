@@ -9,27 +9,43 @@
 #include "videowidget.h"
 
 
+VideoWidget::Position VideoWidget::string2position(std::string &s) {
+	VideoWidget::Position position;
+
+	if (s.empty() || (s == "none"))
+		position = VideoWidget::PositionNone;
+	else if (s == "left")
+		position = VideoWidget::PositionLeft;
+	else if (s == "right")
+		position = VideoWidget::PositionRight;
+	else if (s == "bottom")
+		position = VideoWidget::PositionBottom;
+	else if (s == "top")
+		position = VideoWidget::PositionTop;
+	else if ((s == "bottom-left") || (s == "left-bottom"))
+		position = VideoWidget::PositionBottomLeft;
+	else if ((s == "bottom-right") || (s == "right-bottom"))
+		position = VideoWidget::PositionBottomRight;
+	else if ((s == "top-left") || (s == "left-top"))
+		position = VideoWidget::PositionTopLeft;
+	else if ((s == "top-right") || (s == "right-top"))
+		position = VideoWidget::PositionTopRight;
+	else
+		position = VideoWidget::PositionUnknown;
+
+	return position;
+}
+
+
 VideoWidget::Align VideoWidget::string2align(std::string &s) {
 	VideoWidget::Align align;
 
 	if (s.empty() || (s == "none"))
 		align = VideoWidget::AlignNone;
-	else if (s == "left")
-		align = VideoWidget::AlignLeft;
-	else if (s == "right")
-		align = VideoWidget::AlignRight;
-	else if (s == "bottom")
-		align = VideoWidget::AlignBottom;
-	else if (s == "top")
-		align = VideoWidget::AlignTop;
-	else if (s == "bottom-left")
-		align = VideoWidget::AlignBottomLeft;
-	else if (s == "bottom-right")
-		align = VideoWidget::AlignBottomRight;
-	else if (s == "top-left")
-		align = VideoWidget::AlignTopLeft;
-	else if (s == "top-right")
-		align = VideoWidget::AlignTopRight;
+	else if (s == "horizontal")
+		align = VideoWidget::AlignHorizontal;
+	else if (s == "vertical")
+		align = VideoWidget::AlignVertical;
 	else
 		align = VideoWidget::AlignUnknown;
 

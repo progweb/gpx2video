@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="780" height="120" align="top" display="false">
+	<widget x="250" y="450" width="780" height="120" position="top" display="false">
 		<type>position</type>
 		<name>POSITION</name>
 		<margin>20</margin>
@@ -8,14 +8,15 @@
 		<text-shadow>3</text-shadow>
 		<background-color>#00000066</background-color>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="left">
+
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical">
 		<type>grade</type>
 		<name>PENTE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="left">
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
@@ -24,7 +25,7 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="left">
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
@@ -32,14 +33,14 @@
 		<unit>m</unit>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="right">
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
 		<type>time</type>
 		<name>HEURE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="right">
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
@@ -47,14 +48,14 @@
 		<format>%d-%m-%Y</format>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="right">
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
 		<type>duration</type>
 		<name>DUREE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="right">
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
 		<type>temperature</type>
 		<name>TEMPERATURE</name>
 		<margin>20</margin>
@@ -62,21 +63,21 @@
 		<unit>C</unit>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="left">
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="580" height="120" align="left" display="false">
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical" display="false">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="bottom">
+	<widget x="250" y="450" width="580" height="120" position="bottom" align="horizontal">
 		<type>distance</type>
 		<name>DISTANCE</name>
 		<margin>20</margin>
@@ -84,7 +85,7 @@
 		<unit>km</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="bottom">
+	<widget x="250" y="450" width="580" height="120" position="bottom" align="horizontal">
 		<type>avgspeed</type>
 		<name>MOYENNE</name>
 		<margin>20</margin>
@@ -92,7 +93,7 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="580" height="120" align="bottom">
+	<widget x="250" y="450" width="580" height="120" position="bottom" align="horizontal">
 		<type>maxspeed</type>
 		<name>VITESSE MAX.</name>
 		<margin>20</margin>
@@ -100,26 +101,26 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget width="200" height="200" align="top-left" display="true">
+	<widget width="200" height="200" position="top-left" display="true">
 		<type>image</type>
 		<margin>5</margin>
 		<zoom>fit</zoom>
 		<source>./assets/linux.png</source>
 	</widget>
 
-	<track x="500" y="350" width="1800" height="350" align="top" display="false">
+	<track x="500" y="350" width="1800" height="350" position="top" align="horizontal" display="false">
 		<border>1</border>
 		<border-color>#000000ff</border-color>
 		<background-color>#00000033</background-color>
 	</track>
 
-	<map x="800" y="300" align="none" display="false">
+	<map x="800" y="300" position="none" display="false">
 		<source>1</source>
 		<zoom>11</zoom>
 		<factor>1.2</factor>
 	</map>
 
-	<map width="800" height="500" align="top-right" display="true">
+	<map width="800" height="500" position="top-right" display="true">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>

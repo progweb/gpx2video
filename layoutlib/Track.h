@@ -79,6 +79,13 @@ namespace layout
 	Boolean  &display() { return _display; }
 
     ///
+    /// Get position
+    ///
+    /// @return the position attribute
+    ///
+    String  &position() { return _position; }
+
+    ///
     /// Get align
     ///
     /// @return the align attribute
@@ -176,6 +183,7 @@ namespace layout
     // Members
     Unsigned     _source;
 	Boolean      _display;	
+    String       _position;
     String       _align;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;

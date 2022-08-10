@@ -35,6 +35,7 @@ namespace layout
     _name(this, "name", Node::ELEMENT, true),
     _type(this, "type",   Node::ELEMENT, true),
 	_display(this, "display", Node::ATTRIBUTE, false),
+    _position(this, "position",   Node::ATTRIBUTE, false),
     _align(this, "align",   Node::ATTRIBUTE, false),
     _unit(this, "unit",   Node::ELEMENT, false),
     _zoom(this, "zoom",   Node::ELEMENT, false),
@@ -60,6 +61,7 @@ namespace layout
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
     getInterfaces().push_back(&_display);
+    getInterfaces().push_back(&_position);
     getInterfaces().push_back(&_align);
     getInterfaces().push_back(&_unit);
     getInterfaces().push_back(&_zoom);

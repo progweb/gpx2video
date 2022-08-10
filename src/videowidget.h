@@ -17,16 +17,31 @@
 
 class VideoWidget : public GPX2Video::Task {
 public:
+	enum Position {
+		PositionNone = 0,
+		PositionLeft,
+		PositionRight,
+		PositionBottom,
+		PositionTop,
+		PositionBottomLeft,
+		PositionBottomRight,
+		PositionTopLeft,
+		PositionTopRight,
+		PositionUnknown
+	};
+
 	enum Align {
 		AlignNone = 0,
-		AlignLeft,
-		AlignRight,
-		AlignBottom,
-		AlignTop,
-		AlignBottomLeft,
-		AlignBottomRight,
-		AlignTopLeft,
-		AlignTopRight,
+		AlignHorizontal,
+		AlignVertical,
+//		AlignLeft,
+//		AlignRight,
+//		AlignBottom,
+//		AlignTop,
+//		AlignBottomLeft,
+//		AlignBottomRight,
+//		AlignTopLeft,
+//		AlignTopRight,
 		AlignUnknown
 	};
 
@@ -61,6 +76,14 @@ public:
 
 	virtual ~VideoWidget() {
 		log_call();
+	}
+
+	Position& position(void) {
+		return position_;
+	}
+
+	virtual void setPosition(Position position) {
+		position_ = position;
 	}
 
 	Align& align(void) {
@@ -243,6 +266,7 @@ public:
 	virtual void prepare(OIIO::ImageBuf *buf) = 0;
 	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
 
+	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
 	static Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
@@ -256,6 +280,7 @@ protected:
 		, name_(name) {
 		log_call();
 
+		setPosition(PositionNone);
 		setAlign(AlignNone);
 		setPosition(0, 0);
 		setSize(64, 64);
@@ -280,6 +305,7 @@ protected:
 	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
 
 	GPX2Video &app_;
+	Position position_;
 	Align align_;
 	Unit unit_;
 	Zoom zoom_;

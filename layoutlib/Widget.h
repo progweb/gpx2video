@@ -86,6 +86,13 @@ namespace layout
 	Boolean  &display() { return _display; }
 
     ///
+    /// Get position
+    ///
+    /// @return the position attribute
+    ///
+    String  &position() { return _position; }
+
+    ///
     /// Get align
     ///
     /// @return the align attribute
@@ -240,6 +247,7 @@ namespace layout
     String       _name;
     String       _type;
 	Boolean      _display;
+    String       _position;
     String       _align;
     String       _unit;
     String       _zoom;

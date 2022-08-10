@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="500" height="80" align="top">
+	<widget x="250" y="450" width="500" height="80" position="top">
 		<type>position</type>
 		<name>POSITION</name>
 		<margin>20</margin>
@@ -8,14 +8,15 @@
 		<text-shadow>3</text-shadow>
 		<background-color>#00000066</background-color>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="left">
+
+	<widget x="250" y="450" width="400" height="80" position="left" align="vertical">
 		<type>grade</type>
 		<name>PENTE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="left">
+	<widget x="250" y="450" width="400" height="80" position="left" align="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
@@ -24,7 +25,7 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="left">
+	<widget x="250" y="450" width="400" height="80" position="left" align="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
@@ -32,14 +33,14 @@
 		<unit>m</unit>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="400" height="80" align="right">
+	<widget x="250" y="450" width="400" height="80" position="right" align="vertical">
 		<type>time</type>
 		<name>HEURE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="400" height="80" align="right">
+	<widget x="250" y="450" width="400" height="80" position="right" align="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
@@ -47,28 +48,28 @@
 		<format>%d-%m-%Y</format>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="400" height="80" align="right">
+	<widget x="250" y="450" width="400" height="80" position="right" align="vertical">
 		<type>duration</type>
 		<name>DUREE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="400" height="80" align="left">
+	<widget x="250" y="450" width="400" height="80" position="left" align="vertical">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>
-	<widget x="250" y="450" width="400" height="80" align="left">
+	<widget x="250" y="450" width="400" height="80" position="left" align="vertical">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="bottom">
+	<widget x="250" y="450" width="400" height="80" position="bottom" align="horizontal">
 		<type>distance</type>
 		<name>DISTANCE</name>
 		<margin>20</margin>
@@ -76,7 +77,7 @@
 		<unit>km</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="bottom">
+	<widget x="250" y="450" width="400" height="80" position="bottom" align="horizontal">
 		<type>avgspeed</type>
 		<name>MOYENNE</name>
 		<margin>20</margin>
@@ -84,7 +85,7 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="250" y="450" width="400" height="80" align="bottom">
+	<widget x="250" y="450" width="400" height="80" position="bottom" align="horizontal">
 		<type>maxspeed</type>
 		<name>VITESSE MAX.</name>
 		<margin>20</margin>
@@ -92,7 +93,7 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>	
-	<widget x="250" y="450" width="400" height="80" align="bottom">
+	<widget x="250" y="450" width="400" height="80" position="bottom" align="horizontal">
 		<type>temperature</type>
 		<name>TEMPERATURE</name>
 		<margin>20</margin>
@@ -100,7 +101,7 @@
 		<unit>celsius</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget x="700" y="300" width="400" height="400" align="none" display="false">
+	<widget x="700" y="300" width="400" height="400" position="none" display="false">
 		<type>gpx</type>
 		<margin>20</margin>
 		<padding>5</padding>
@@ -111,13 +112,13 @@
 	</widget>		
 
 
-	<track x="500" y="350" width="320" height="400" align="none">
+	<track x="500" y="350" width="320" height="400" position="none">
 		<border>6</border>
 		<border-color>#000000ff</border-color>
 		<background-color>#00000066</background-color>
 	</track>
 
-	<map x="850" y="350" align="none" display="true">
+	<map x="850" y="350" position="none" display="true">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
@@ -125,7 +126,7 @@
 		<border-color>#000000ff</border-color>
 	</map>
 
-	<map align="top-right" display="false">
+	<map position="top-right" display="false">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
