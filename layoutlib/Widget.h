@@ -225,6 +225,13 @@ namespace layout
     ///
     String  &backgroundColor() { return _bgcolor; }
 
+    ///
+    /// Get nbr lap
+    ///
+    /// @return the nbr lap attribute
+    ///
+    Unsigned  &nbrLap() { return _nbr_lap; }
+
     // Methods
 
     private:
@@ -251,6 +258,7 @@ namespace layout
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;
+	Unsigned     _nbr_lap;
     
     // Disable copy constructors
     Widget(const Widget &);

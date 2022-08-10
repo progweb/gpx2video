@@ -54,7 +54,8 @@ namespace layout
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
-	_bgcolor(this, "background-color", Node::ELEMENT, false)
+	_bgcolor(this, "background-color", Node::ELEMENT, false),
+	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
@@ -79,6 +80,7 @@ namespace layout
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
+    getInterfaces().push_back(&_nbr_lap);
 
 	_display.setValue("true");
 

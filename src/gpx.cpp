@@ -57,7 +57,9 @@ GPXData::GPXData()
 	, maxspeed_(0)
 	, avgspeed_(0)
 	, grade_(0) 
-	, cadence_(0) {
+	, cadence_(0)
+	, lap_(1)
+	, in_lap_(false) {
 
 	nbr_predictions_ = 0;
 
@@ -171,6 +173,25 @@ bool GPXData::compute(void) {
 
 	has_value_ = true;
 
+	// Determine current lap
+	lat1 = cur_pt_.lat;
+	lon1 = cur_pt_.lon;
+	lat2 = start_pt_.lat;
+	lon2 = start_pt_.lon;
+//	GeographicLib::Math::real d;
+
+//	GeographicLib::Geodesic gsic(6378388, 1/297.0);
+	gsic.Inverse(lat1, lon1, lat2, lon2,
+		d);
+	
+	if (in_lap_ && (d < 8)) {
+		lap_++;
+		in_lap_ = false;
+	}
+	else if (!in_lap_ && (d > 15)) {
+		in_lap_ = true;
+	}
+
 	return true;
 }
 
@@ -178,6 +199,8 @@ bool GPXData::compute(void) {
 void GPXData::init(void) {
 	memcpy(&cur_pt_, &next_pt_, sizeof(cur_pt_));
 	memcpy(&prev_pt_, &cur_pt_, sizeof(prev_pt_));
+
+	memcpy(&start_pt_, &cur_pt_, sizeof(prev_pt_));
 
 	reset();
 }
@@ -197,6 +220,9 @@ void GPXData::reset(void) {
 	temperature_ = 0.0;
 	heartrate_ = 0;
 	cadence_ = 0;
+
+	lap_ = 1;
+	in_lap_ = false;
 }
 
 
@@ -322,24 +348,26 @@ void GPXData::read(gpx::WPT *wpt) {
 	// Extensions
 	gpx::Node *extensions = wpt->extensions().getElements().front();
 
-	name = extensions->getName();
-
-	if (name.find("TrackPointExtension") == std::string::npos)
-		extensions = &wpt->extensions();
-
 	if (extensions) {
-		for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
-			iter != extensions->getElements().end(); ++iter) {
-			gpx::Node *node = (*iter);
+		name = extensions->getName();
 
-			name = node->getName();
+		if (name.find("TrackPointExtension") == std::string::npos)
+			extensions = &wpt->extensions();
 
-			if (name.find("atemp") != std::string::npos)
-				temperature_ = std::stod(node->getValue());
-			else if (name.find("cad") != std::string::npos)
-				cadence_ = std::stoi(node->getValue());
-			else if (name.find("hr") != std::string::npos)
-				heartrate_ = std::stoi(node->getValue());
+		if (extensions) {
+			for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
+				iter != extensions->getElements().end(); ++iter) {
+				gpx::Node *node = (*iter);
+
+				name = node->getName();
+
+				if (name.find("atemp") != std::string::npos)
+					temperature_ = std::stod(node->getValue());
+				else if (name.find("cad") != std::string::npos)
+					cadence_ = std::stoi(node->getValue());
+				else if (name.find("hr") != std::string::npos)
+					heartrate_ = std::stoi(node->getValue());
+			}
 		}
 	}
 
@@ -402,9 +430,6 @@ GPX * GPX::open(const std::string &filename, enum TelemetrySettings::Filter filt
 	gpx->retrieveFirst(data);
 
 	gpx->start_activity_ = data.time();
-
-//	// Initialize
-//	gpx->from_ = data.time(GPXData::PositionCurrent);
 
 failure:
 	return gpx;
@@ -554,8 +579,10 @@ enum GPX::Data GPX::retrieveFirst_i(GPXData &data) {
 enum GPX::Data GPX::retrieveFirst(GPXData &data) {
 	enum GPX::Data result;
 
+	// Read first waypoint
 	result = retrieveFirst_i(data);
 
+	// Search start waypoint
 	if (from_ != 0) {
 		int64_t timecode_ms = (((int64_t) from_ - start_time_) * 1000); // - offset_;
 		result = retrieveNext(data, timecode_ms);

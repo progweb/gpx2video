@@ -24,9 +24,11 @@ public:
 	};
 
 	enum Position {
+		PositionStart,		// First waypoint
 		PositionCurrent,	// Interpolated position in the GPX stream
 		PositionPrevious,	// Last read position in the GPX stream
-		PositionNext		// Next read position in the GPX stream
+		PositionNext,		// Next read position in the GPX stream
+		PositionStop		// Last waypoint
 	};
 
 	GPXData();
@@ -64,6 +66,8 @@ public:
 			return cur_pt_.time;
 		if (p == PositionPrevious)
 			return prev_pt_.time;
+		if (p == PositionStart)
+			return start_pt_.time;
 
 		return next_pt_.time;
 	}
@@ -73,6 +77,8 @@ public:
 			return cur_pt_;
 		if (p == PositionPrevious)
 			return prev_pt_;
+		if (p == PositionStart)
+			return start_pt_;
 
 		return next_pt_;
 	}
@@ -106,6 +112,8 @@ public:
 			return cur_pt_.ele;
 		if (p == PositionPrevious)
 			return prev_pt_.ele;
+		if (p == PositionStart)
+			return start_pt_.ele;
 
 		return next_pt_.ele;
 	}
@@ -138,6 +146,10 @@ public:
 		return heartrate_;
 	}
 
+	const int& lap(void) const {
+		return lap_;
+	}
+
 	static void convert(struct point *pt, gpx::WPT *wpt);
 
 protected:
@@ -148,6 +160,7 @@ protected:
 	struct point cur_pt_;
 	struct point prev_pt_;
 	struct point next_pt_;
+	struct point start_pt_;
 
 	int nbr_predictions_;
 	KalmanFilter filter_;
@@ -164,6 +177,9 @@ protected:
 	double temperature_;
 	int heartrate_;
 	int cadence_;
+
+	int lap_;
+	bool in_lap_;
 };
 
 

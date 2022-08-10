@@ -21,6 +21,7 @@
 #include "widgets/elevation.h"
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
+#include "widgets/lap.h"
 #include "widgets/position.h"
 #include "widgets/image.h"
 #include "widgets/speed.h"
@@ -462,6 +463,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = HeartRateWidget::create(app_);
 	else if (s == "temperature")
 		widget = TemperatureWidget::create(app_);
+	else if (s == "lap") {
+		LapWidget *lap = LapWidget::create(app_);
+		lap->setTargetLap(w->nbrLap());
+		widget = lap;
+	}
 	else {
 		log_error("Widget loading error, '%s' type unknown", s.c_str());
 		goto error;

@@ -294,6 +294,7 @@ Here all widget element settings:
   - heartrate
   - temperature
   - image
+  - lap
 
 **display** values are: true or false. It permits to render or not the widget.
 The **display** default value is true.
@@ -319,6 +320,7 @@ You can set **border** size and color, the background color and text color too. 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. At last, you can define
 several map widgets.
 
+Lap widget accepts **nbr-lap** element setting. Value is the lap target number.
 
 
 ## Maps
