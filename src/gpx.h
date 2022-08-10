@@ -31,6 +31,16 @@ public:
 		PositionStop		// Last waypoint
 	};
 
+	enum Type {
+		TypeNone = 0,
+		TypeFix = 1,
+		TypeElevation = (1 << 1),
+		TypeCadence = (1 << 2),
+		TypeHeartrate = (1 << 3),
+		TypeTemperature = (1 << 4),
+		TypeAll = (1 << 5) -1
+	};
+
 	GPXData();
 	virtual ~GPXData();
 
@@ -49,8 +59,16 @@ public:
 		enable_ = false;
 	}
 
-	bool hasValue(void) const {
-		return has_value_;
+	bool hasValue(Type type = TypeAll) const {
+		return ((has_value_ & type) == type);
+	}
+
+	void setValue(Type type) {
+		has_value_ = type;
+	}
+
+	void addValue(Type type) {
+		has_value_ |= type;
 	}
 
 	bool compute(void);
@@ -154,7 +172,7 @@ public:
 
 protected:
 	bool enable_;
-	bool has_value_;
+	int has_value_;
 
 	int nbr_points_;
 	struct point cur_pt_;

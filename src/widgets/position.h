@@ -42,7 +42,7 @@ public:
 		char s[128];
 		struct GPXData::point pt = data.position();
 
-		if (data.hasValue())
+		if (data.hasValue(GPXData::TypeFix))
 			sprintf(s, "%.4f, %.4f", pt.lat, pt.lon);
 		else
 			sprintf(s, "--, --");

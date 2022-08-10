@@ -46,7 +46,7 @@ void show(gpx::Node &node, unsigned width)
 
 GPXData::GPXData() 
 	: enable_(false)
-	, has_value_(false)
+	, has_value_(GPXData::TypeNone)
 	, nbr_points_(0)
 	, line_(0)
 	, valid_(false)
@@ -171,7 +171,7 @@ bool GPXData::compute(void) {
 
 	grade_ = 100 * dz / dc;
 
-	has_value_ = true;
+//	has_value_ = true;
 
 	// Determine current lap
 	lat1 = cur_pt_.lat;
@@ -336,11 +336,18 @@ void GPXData::read(gpx::WPT *wpt) {
 
 	std::string name;
 
+	setValue(GPXData::TypeNone);
+
 	convert(&pt, wpt);
 
 	// Skip point if not valid
 	if (!pt.valid)
 		return;
+
+	// lat & lon & ele ok
+	// TODO: do better
+	addValue(GPXData::TypeFix);
+	addValue(GPXData::TypeElevation);
 
 	// Line
 	line_ = wpt->line();
@@ -361,12 +368,18 @@ void GPXData::read(gpx::WPT *wpt) {
 
 				name = node->getName();
 
-				if (name.find("atemp") != std::string::npos)
+				if (name.find("atemp") != std::string::npos) {
 					temperature_ = std::stod(node->getValue());
-				else if (name.find("cad") != std::string::npos)
+					addValue(GPXData::TypeTemperature);
+				}
+				else if (name.find("cad") != std::string::npos) {
 					cadence_ = std::stoi(node->getValue());
-				else if (name.find("hr") != std::string::npos)
+					addValue(GPXData::TypeCadence);
+				}
+				else if (name.find("hr") != std::string::npos) {
 					heartrate_ = std::stoi(node->getValue());
+					addValue(GPXData::TypeHeartrate);
+				}
 			}
 		}
 	}
@@ -375,6 +388,7 @@ void GPXData::read(gpx::WPT *wpt) {
 	memcpy(&next_pt_, &pt, sizeof(next_pt_));
 
 	valid_ = true;
+
 }
 
 

@@ -47,7 +47,7 @@ public:
 		char s[128];
 		int lap = data.lap();
 
-		if (data.hasValue())
+		if (data.hasValue(GPXData::TypeFix))
 			sprintf(s, "%d/%d", lap, nbr_target_lap_);
 		else
 			sprintf(s, "--/--");
