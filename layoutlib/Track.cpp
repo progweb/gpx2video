@@ -34,6 +34,7 @@ namespace layout
     Node(parent, name, type, mandatory),
     _source(this, "source",   Node::ELEMENT, true),
 	_display(this, "display", Node::ATTRIBUTE, false),
+    _position(this, "position",   Node::ATTRIBUTE, false),
     _align(this, "align",   Node::ATTRIBUTE, false),
     _x(this, "x", Node::ATTRIBUTE, false),
     _y(this, "y", Node::ATTRIBUTE, false),
@@ -50,6 +51,7 @@ namespace layout
   {
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);
+    getInterfaces().push_back(&_position);
     getInterfaces().push_back(&_align);
     getInterfaces().push_back(&_x);
     getInterfaces().push_back(&_y);

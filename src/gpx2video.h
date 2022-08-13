@@ -66,7 +66,7 @@ public:
 			return output_file_;
 		}
 
-		const int& offset(void) const {
+		const int64_t& offset(void) const {
 			return offset_;
 		}
 
@@ -108,7 +108,7 @@ public:
 		std::string layout_file_;
 		std::string output_file_;
 
-		int offset_;
+		int64_t offset_;
 
 		double map_factor_;
 		int map_zoom_;

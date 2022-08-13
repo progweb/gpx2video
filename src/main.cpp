@@ -154,10 +154,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
-	int offset = 0;
 	int verbose = 0;
 	int map_zoom = 12;
 	int max_duration_ms = 0; // By default process whole media
+
+	int64_t offset = 0;
 
 	double map_factor = 1.0;
 
@@ -197,7 +198,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		case 0:
 			s = gpx2video::options[index].name;
 			if (s && !strcmp(s, "offset")) {
-				offset = atoi(optarg);
+				offset = atoll(optarg);
 			}
 			else if (s && !strcmp(s, "trim")) {
 				// TODO

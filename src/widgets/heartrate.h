@@ -41,7 +41,7 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		if (data.hasValue())
+		if (data.hasValue(GPXData::TypeHeartrate))
 			sprintf(s, "%d bpm", data.heartrate());
 		else
 			sprintf(s, "-- bpm");

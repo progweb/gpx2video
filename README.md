@@ -228,36 +228,36 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="600" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" position="left" align="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<unit>kph</unit>
 	</widget>		
-	<widget x="250" y="450" width="600" height="120" align="left">
+	<widget x="250" y="450" width="600" height="120" position="left" align="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<unit>m</unit>
 	</widget>
-	<widget x="250" y="450" width="600" height="120" align="right">
+	<widget x="250" y="450" width="600" height="120" position="right" align="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<format>%d-%m-%Y</format>
 	</widget>
-	<widget x="250" y="450" width="600" height="120" align="left" display="false">
+	<widget x="250" y="450" width="600" height="120" position="left" align="vertical" display="false">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 	</widget>		
-	<track x="800" y="300" width="640" height="480" align="none" display="false">
+	<track x="800" y="300" width="640" height="480" position="none" display="false">
 	</track>
-	<map x="800" y="300" width="640" height="480" align="none">
+	<map x="800" y="300" width="640" height="480" position="none">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>
@@ -268,7 +268,7 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 Here all widget element settings:
 
 ```xml
-<widget x="250" y="450" width="600" height="120" align="left" display="true">
+<widget x="250" y="450" width="600" height="120" position="left" align="vertical" display="true">
 	<type>speed</type>
 	<name>VITESSE</name>
 	<margin>20</margin>
@@ -294,12 +294,16 @@ Here all widget element settings:
   - heartrate
   - temperature
   - image
+  - lap
 
 **display** values are: true or false. It permits to render or not the widget.
 The **display** default value is true.
 
-**align** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
-If **align** attribute is defined, gpx2video ignores and computes **x** and **y** values.
+**position** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
+If **position** attribute is defined, gpx2video ignores and computes **x** and **y** values.
+
+**align** values are: horizontal or vertical.
+If **position** isn't defined, align value isn't used.
 
 **unit** values are: 
   - mph, kph, 
@@ -319,6 +323,7 @@ You can set **border** size and color, the background color and text color too. 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. At last, you can define
 several map widgets.
 
+Lap widget accepts **nbr-lap** element setting. Value is the lap target number.
 
 
 ## Maps
@@ -348,7 +353,7 @@ $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-fact
 Map settings: 
 
 ```xml
-<map x="250" y="450" width="600" height="120" align="left" display="true">
+<map x="250" y="450" width="600" height="120" position="left" display="true">
 	<source>1</source>
 	<zoom>11</zoom>
 	<factor>1.2</factor>
@@ -372,7 +377,7 @@ You can also display only the track without the map background in using track wi
 Track settings: 
 
 ```xml
-<track x="250" y="450" width="600" height="120" align="left" display="true">
+<track x="250" y="450" width="600" height="120" position="left" display="true">
 	<marker>60</marker>
 	<border>5</border>
 	<border-color>#000000b0</border-color>

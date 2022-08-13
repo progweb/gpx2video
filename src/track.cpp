@@ -358,6 +358,7 @@ bool Track::load(void) {
 		// GPX limits
 		gpx->setFrom(app_.settings().gpxFrom());
 		gpx->setTo(app_.settings().gpxTo());
+		gpx->setTimeOffset(app_.settings().offset());
 
 		// Draw path
 		path(*trackbuf_, gpx, divider_);

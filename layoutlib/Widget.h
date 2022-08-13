@@ -86,6 +86,13 @@ namespace layout
 	Boolean  &display() { return _display; }
 
     ///
+    /// Get position
+    ///
+    /// @return the position attribute
+    ///
+    String  &position() { return _position; }
+
+    ///
     /// Get align
     ///
     /// @return the align attribute
@@ -225,6 +232,13 @@ namespace layout
     ///
     String  &backgroundColor() { return _bgcolor; }
 
+    ///
+    /// Get nbr lap
+    ///
+    /// @return the nbr lap attribute
+    ///
+    Unsigned  &nbrLap() { return _nbr_lap; }
+
     // Methods
 
     private:
@@ -233,6 +247,7 @@ namespace layout
     String       _name;
     String       _type;
 	Boolean      _display;
+    String       _position;
     String       _align;
     String       _unit;
     String       _zoom;
@@ -251,6 +266,7 @@ namespace layout
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;
+	Unsigned     _nbr_lap;
     
     // Disable copy constructors
     Widget(const Widget &);

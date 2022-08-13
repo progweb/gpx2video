@@ -24,9 +24,21 @@ public:
 	};
 
 	enum Position {
+		PositionStart,		// First waypoint
 		PositionCurrent,	// Interpolated position in the GPX stream
 		PositionPrevious,	// Last read position in the GPX stream
-		PositionNext		// Next read position in the GPX stream
+		PositionNext,		// Next read position in the GPX stream
+		PositionStop		// Last waypoint
+	};
+
+	enum Type {
+		TypeNone = 0,
+		TypeFix = 1,
+		TypeElevation = (1 << 1),
+		TypeCadence = (1 << 2),
+		TypeHeartrate = (1 << 3),
+		TypeTemperature = (1 << 4),
+		TypeAll = (1 << 5) -1
 	};
 
 	GPXData();
@@ -47,8 +59,16 @@ public:
 		enable_ = false;
 	}
 
-	bool hasValue(void) const {
-		return has_value_;
+	bool hasValue(Type type = TypeAll) const {
+		return ((has_value_ & type) == type);
+	}
+
+	void setValue(Type type) {
+		has_value_ = type;
+	}
+
+	void addValue(Type type) {
+		has_value_ |= type;
 	}
 
 	bool compute(void);
@@ -64,6 +84,8 @@ public:
 			return cur_pt_.time;
 		if (p == PositionPrevious)
 			return prev_pt_.time;
+		if (p == PositionStart)
+			return start_pt_.time;
 
 		return next_pt_.time;
 	}
@@ -73,6 +95,8 @@ public:
 			return cur_pt_;
 		if (p == PositionPrevious)
 			return prev_pt_;
+		if (p == PositionStart)
+			return start_pt_;
 
 		return next_pt_;
 	}
@@ -106,6 +130,8 @@ public:
 			return cur_pt_.ele;
 		if (p == PositionPrevious)
 			return prev_pt_.ele;
+		if (p == PositionStart)
+			return start_pt_.ele;
 
 		return next_pt_.ele;
 	}
@@ -138,16 +164,21 @@ public:
 		return heartrate_;
 	}
 
+	const int& lap(void) const {
+		return lap_;
+	}
+
 	static void convert(struct point *pt, gpx::WPT *wpt);
 
 protected:
 	bool enable_;
-	bool has_value_;
+	int has_value_;
 
 	int nbr_points_;
 	struct point cur_pt_;
 	struct point prev_pt_;
 	struct point next_pt_;
+	struct point start_pt_;
 
 	int nbr_predictions_;
 	KalmanFilter filter_;
@@ -164,6 +195,9 @@ protected:
 	double temperature_;
 	int heartrate_;
 	int cadence_;
+
+	int lap_;
+	bool in_lap_;
 };
 
 
@@ -190,8 +224,8 @@ public:
 	void setStartTime(time_t start_time);
 	void setStartTime(struct tm *start_time);
 
-	int timeOffset(void) const;
-	void setTimeOffset(const int& offset);
+	int64_t timeOffset(void) const;
+	void setTimeOffset(const int64_t& offset);
 
 //	void compute(GPXData &data) {
 //		data.enableCompute();
@@ -223,7 +257,7 @@ private:
 	std::list<gpx::WPT*>::iterator iter_pts_;
 	std::list<gpx::TRKSeg*>::iterator iter_seg_;
 
-	int offset_;
+	int64_t offset_;
 
 	time_t from_;
 	time_t to_;
