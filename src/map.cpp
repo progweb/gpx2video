@@ -434,7 +434,7 @@ void Map::limits(void) {
 	log_call();
 
 	// Use padding (to see markers)
-	padding = this->border() + 50;
+	padding = this->border() + settings().markerSize(); 
 
 	// width x height of track
 	w = floorf((float) px2_ - px1_);
@@ -671,8 +671,10 @@ bool Map::load(void) {
 
 
 void Map::prepare(OIIO::ImageBuf *buf) {
-	this->createBox(&buf_, this->width(), this->height());
-	this->drawBorder(buf_);
+	if (buf_ == NULL) {
+		this->createBox(&buf_, this->width(), this->height());
+		this->drawBorder(buf_);
+	}
 
 	// Load map
 	if (this->load() == false)

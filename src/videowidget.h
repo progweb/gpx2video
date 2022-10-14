@@ -34,14 +34,6 @@ public:
 		AlignNone = 0,
 		AlignHorizontal,
 		AlignVertical,
-//		AlignLeft,
-//		AlignRight,
-//		AlignBottom,
-//		AlignTop,
-//		AlignBottomLeft,
-//		AlignBottomRight,
-//		AlignTopLeft,
-//		AlignTopRight,
 		AlignUnknown
 	};
 
@@ -53,12 +45,21 @@ public:
 		MarginTop
 	};
 
+	enum Padding {
+		PaddingAll,
+		PaddingLeft,
+		PaddingRight,
+		PaddingBottom,
+		PaddingTop
+	};
+
 	enum Unit {
 		UnitNone,
 		UnitMPH,
 		UnitKPH,
 		UnitKm,
 		UnitMeter,
+		UnitFoot,
 		UnitMiles,
 		UnitCelsius,
 		UnitFarenheit,
@@ -76,6 +77,21 @@ public:
 
 	virtual ~VideoWidget() {
 		log_call();
+	}
+
+	uint64_t& atBeginTime(void) {
+		return at_begin_time_;
+	}
+
+	uint64_t& atEndTime(void) {
+		return at_end_time_;
+	}
+
+	virtual void setAtTime(const uint64_t begintime, const uint64_t endtime) {
+		at_begin_time_ = begintime;
+
+		if (begintime != endtime)
+			at_end_time_ = endtime;
 	}
 
 	Position& position(void) {
@@ -195,12 +211,47 @@ public:
 		}
 	}
 
-	const int& padding(void) const {
-		return padding_;
+	const int& padding(enum Padding side) const {
+		switch (side) {
+		case PaddingLeft:
+			return padding_left_;
+		case PaddingRight:
+			return padding_right_;
+		case PaddingTop:
+			return padding_top_;
+		case PaddingBottom:
+			return padding_bottom_;
+		default:
+			return null_;
+		}
 	}
 
-	virtual void setPadding(int padding) {
-		padding_ = padding;
+	virtual void setPadding(enum Padding side, int padding) {
+		if (padding < 0)
+			return;
+
+		switch (side) {
+		case PaddingAll:
+			padding_left_ = padding;
+			padding_right_ = padding;
+			padding_top_ = padding;
+			padding_bottom_ = padding;
+			break;
+		case PaddingLeft:
+			padding_left_ = padding;
+			break;
+		case PaddingRight:
+			padding_right_ = padding;
+			break;
+		case PaddingTop:
+			padding_top_ = padding;
+			break;
+		case PaddingBottom:
+			padding_bottom_ = padding;
+			break;
+		default:
+			break;
+		}
 	}
 
 	const std::string& name(void) const {
@@ -213,6 +264,25 @@ public:
 
 	virtual void setLabel(std::string label) {
 		label_ = label;
+	}
+
+	const std::string& font(void) const {
+		return font_;
+	}
+
+	virtual void setFont(std::string font) {
+		if (font.empty())
+			return;
+
+		font_ = font;
+	}
+
+	const std::string& text(void) const {
+		return text_;
+	}
+
+	virtual void setText(std::string text) {
+		text_ = text;
 	}
 
 	const float * textColor(void) const {
@@ -282,10 +352,12 @@ protected:
 
 		setPosition(PositionNone);
 		setAlign(AlignNone);
+		setAtTime(0, 0);
 		setPosition(0, 0);
 		setSize(64, 64);
 		setMargin(MarginAll, 10);
-		setPadding(0);
+		setPadding(PaddingAll, 0);
+		setFont("./assets/fonts/Helvetica.ttf");
 		setLabel(name);
 		setTextShadow(0);
 		setUnit(VideoWidget::UnitNone);
@@ -314,6 +386,9 @@ protected:
 
 	const int null_ = 0;
 
+	uint64_t at_begin_time_;
+	uint64_t at_end_time_;
+
 	int x_;
 	int y_;
 	int width_;
@@ -323,6 +398,14 @@ protected:
 	int margin_left_;
 	int margin_right_;
 	int padding_;
+	int padding_top_;
+	int padding_bottom_;
+	int padding_left_;
+	int padding_right_;
+
+	std::string font_;
+
+	std::string text_;
 
 	std::string label_;
 	int txtshadow_;

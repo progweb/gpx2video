@@ -219,7 +219,7 @@ void Track::init(bool zoomfit) {
 		double divider;
 
 		// Use padding (to see markers)
-		padding = this->border() + 50;
+		padding = this->border() + settings().markerSize();
 
 		width -= 2 * padding;
 		height -= 2 * padding;
@@ -393,9 +393,11 @@ bool Track::load(void) {
 
 
 void Track::prepare(OIIO::ImageBuf *buf) {
-	this->createBox(&buf_, this->width(), this->height());
-	this->drawBorder(buf_);
-	this->drawBackground(buf_);
+	if (buf_ == NULL) {
+		this->createBox(&buf_, this->width(), this->height());
+		this->drawBorder(buf_);
+		this->drawBackground(buf_);
+	}
 
 	if (this->load() == false)
 		log_warn("Track renderer failure");

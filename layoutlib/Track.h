@@ -93,6 +93,20 @@ namespace layout
     String  &align() { return _align; }
 
     ///
+    /// Get at
+    ///
+    /// @return the at attribute
+    ///
+    Unsigned  &at() { return _at; }
+
+    ///
+    /// Get duration
+    ///
+    /// @return the duration attribute
+    ///
+    Unsigned  &duration() { return _duration; }
+
+    ///
     /// Get x
     ///
     /// @return the x attribute
@@ -185,6 +199,7 @@ namespace layout
 	Boolean      _display;	
     String       _position;
     String       _align;
+    Unsigned     _at, _duration;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;

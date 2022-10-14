@@ -25,11 +25,12 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
-		this->createBox(&buf_, this->width(), this->height());
-		this->drawBorder(buf_);
-		this->drawBackground(buf_);
-//		this->drawLabel(buf_, 0, 0, label().c_str());
-//		this->drawValue(buf_, 0, 0, "22 km");
+		if (buf_ == NULL) {
+			this->createBox(&buf_, this->width(), this->height());
+			this->drawBorder(buf_);
+			this->drawBackground(buf_);
+//			this->drawLabel(buf_, 0, 0, label().c_str());
+		}
 
 		// Image over
 		buf_->specmod().x = this->x();
@@ -45,9 +46,11 @@ public:
 		int h;
 		int offset;
 
-		int space;
+		int space_x, space_y;
 		int border = this->border();
-		int padding = this->padding();
+		int padding_x = this->padding(VideoWidget::PaddingLeft);
+		int padding_yt = this->padding(VideoWidget::PaddingTop);
+		int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
 		// width x height
 //		w = this->height() - 2 * border;
@@ -59,44 +62,45 @@ public:
 		// |  Text    px
 		// |  ....    ..
 		// +-------------
-		//        h = n * px + 2 * padding
 		//          (with n nbr of lines)
-		int px = (h  - (2 * padding)) / 6;
+		//        h = n * px + padding_top + padding_bottom
+		int px = (h - padding_yt - padding_yb) / 6;
 		int pt = 3 * px / 4;
 
 		struct GPXData::point position = data.position(GPXData::PositionPrevious);
 
-		space = padding + border;
+		space_x = padding_x + border;
+		space_y = padding_yt + border;
 
 		// Append dynamic info
 		offset = 0;
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, "GPX WPT");
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, "GPX WPT");
 
 		// time
 		offset += px;
 		gmtime_r(&data.time(GPXData::PositionPrevious), &time);
 		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, s);
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// latitude
 		offset += px;
 		sprintf(s, "lat: %.4f", position.lat);
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, s);
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// longitude
 		offset += px;
 		sprintf(s, "lon: %.4f", position.lon);
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, s);
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// elevation
 		offset += px;
 		sprintf(s, "ele: %.4f", data.elevation(GPXData::PositionPrevious));
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, s);
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// line
 		offset += px;
 		sprintf(s, "line: %d", data.line());
-		this->drawText(buf, this->x() + space, this->y() + space + offset, pt, s);
+		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
 	}
 
 private:

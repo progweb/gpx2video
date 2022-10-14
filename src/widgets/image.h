@@ -25,10 +25,12 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
-		this->createBox(&buf_, this->width(), this->height());
-		this->drawBorder(buf_);
-		this->drawBackground(buf_);
-		this->drawImage(buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
+		if (buf_ == NULL) {
+			this->createBox(&buf_, this->width(), this->height());
+			this->drawBorder(buf_);
+			this->drawBackground(buf_);
+			this->drawImage(buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
+		}
 
 		// Image over
 		buf_->specmod().x = this->x();

@@ -66,6 +66,8 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitKm;
 	else if (s == "m")
 		unit = VideoWidget::UnitMeter;
+	else if (s == "ft")
+		unit = VideoWidget::UnitFoot;
 	else if (s == "miles")
 		unit = VideoWidget::UnitMiles;
 	else if ((s == "C") || (s == "celsius"))
@@ -109,6 +111,8 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 		return "km";
 	case VideoWidget::UnitMeter:
 		return "m";
+	case VideoWidget::UnitFoot:
+		return "ft";
 	case VideoWidget::UnitMiles:
 		return "miles";
 	case VideoWidget::UnitCelsius:
@@ -272,25 +276,21 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label) {
 	bool result;
 
-	int padding = this->padding();
-
-	// Add text (1 pt = 1.333 px)
-
 	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
 
 	memcpy(color, this->textColor(), sizeof(color));
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
-		x + padding, 
-		y + padding, 
+		x, 
+		y, 
 		label, 
-		pt, "./assets/fonts/Helvetica.ttf", color, 
+		pt, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
 		OIIO::ImageBufAlgo::TextAlignY::Top, 
 		this->textShadow());
 
 	if (result == false)
-		fprintf(stderr, "render label text error\n");
+		fprintf(stderr, "render text error\n");
 }
 
 
@@ -300,7 +300,9 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 	int h;
 
 	int border = this->border();
-	int padding = this->padding();
+	int padding_x = this->padding(VideoWidget::PaddingLeft);
+	int padding_yt = this->padding(VideoWidget::PaddingTop);
+	int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
 	// Apply border
 	x += border;
@@ -314,8 +316,8 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 	// |  Label    px
 	// |  Value    2 * px
 	// +-------------
-	//        h = px + 2 * px + 2 * padding
-	int px = h / 2 - padding;
+	//        h = px + 2 * px + padding_top + padding_bottom
+	int px = (h - padding_yt - padding_yb) / 2;
 	int pt = 3 * px / 4;
 
 	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
@@ -323,10 +325,10 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 	memcpy(color, this->textColor(), sizeof(color));
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
-		x + padding, 
-		y + padding, 
+		x + padding_x, 
+		y + padding_yt, 
 		label, 
-		pt, "./assets/fonts/Helvetica.ttf", color, 
+		pt, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
 		OIIO::ImageBufAlgo::TextAlignY::Top, 
 		this->textShadow());
@@ -342,7 +344,9 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	int h;
 
 	int border = this->border();
-	int padding = this->padding();
+	int padding_x = this->padding(VideoWidget::PaddingLeft);
+	int padding_yt = this->padding(VideoWidget::PaddingTop);
+	int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
 	// Apply border
 	x += border;
@@ -356,8 +360,8 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	// |  Label    px
 	// |  Value    2 * px
 	// +-------------
-	//        h = px + 2 * px + 2 * padding
-	int px = h / 2 - padding;
+	//        h = px + 2 * px + padding_top + padding_bottom
+	int px = (h - padding_yt - padding_yb) / 2;
 	int pt = 3 * px / 4;
 
 	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
@@ -365,10 +369,10 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	memcpy(color, this->textColor(), sizeof(color));
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
-		x + padding, 
-		y + h - padding, 
+		x + padding_x, 
+		y + h - padding_yb, 
 		value, 
-		2 * pt, "./assets/fonts/Helvetica.ttf", color, 
+		2 * pt, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
 		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
 		this->textShadow());

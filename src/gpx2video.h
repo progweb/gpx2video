@@ -27,6 +27,7 @@ public:
 			std::string layout_file="",
 			std::string output_file="",
 			int offset=0,
+			double time_factor=1.0,
 			double map_factor=1.0,
 			int map_zoom=8, 
 			int max_duration_ms=0,
@@ -40,6 +41,7 @@ public:
 			, layout_file_(layout_file)
 			, output_file_(output_file)
 			, offset_(offset)
+			, time_factor_(time_factor)
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
@@ -68,6 +70,10 @@ public:
 
 		const int64_t& offset(void) const {
 			return offset_;
+		}
+
+		const double& timeFactor(void) const {
+			return time_factor_;
 		}
 
 		const MapSettings::Source& mapsource(void) const {
@@ -109,6 +115,8 @@ public:
 		std::string output_file_;
 
 		int64_t offset_;
+
+		double time_factor_;
 
 		double map_factor_;
 		int map_zoom_;

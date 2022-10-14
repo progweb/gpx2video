@@ -34,6 +34,7 @@ static const struct option options[] = {
 	{ "layout",           required_argument, 0, 'l' },
 	{ "output",           required_argument, 0, 'o' },
 	{ "offset",           required_argument, 0, 0 },
+	{ "time-factor",      required_argument, 0, 0 },
 	{ "telemetry",        required_argument, 0, 't' },
 	{ "map-source",       required_argument, 0, 0 },
 	{ "map-factor",       required_argument, 0, 0 },
@@ -64,6 +65,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, kalman)" << std::endl;
 	std::cout << "\t-    --offset           : Add a time offset (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --time-factor      : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source       : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom         : Map zoom" << std::endl;
@@ -160,6 +162,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	int64_t offset = 0;
 
+	double time_factor = 1.0;
+
 	double map_factor = 1.0;
 
 	const char *s;
@@ -199,6 +203,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			s = gpx2video::options[index].name;
 			if (s && !strcmp(s, "offset")) {
 				offset = atoll(optarg);
+			}
+			else if (s && !strcmp(s, "time-factor")) {
+				time_factor = strtod(optarg, NULL);
 			}
 			else if (s && !strcmp(s, "trim")) {
 				// TODO
@@ -382,6 +389,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		layoutfile,
 		outputfile,
 		offset,
+		time_factor,
 		map_factor,
 		map_zoom,
 		max_duration_ms,

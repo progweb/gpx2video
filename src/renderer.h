@@ -35,7 +35,7 @@ public:
 	bool run(void);
 	bool stop(void);
 
-	void draw(FramePtr frame, const GPXData &data);
+	void draw(FramePtr frame, const uint64_t timecode_ms, const GPXData &data);
 
 private:
 	GPX2Video &app_;

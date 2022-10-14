@@ -27,6 +27,7 @@
 #include "widgets/speed.h"
 #include "widgets/maxspeed.h"
 #include "widgets/avgspeed.h"
+#include "widgets/text.h"
 #include "widgets/time.h"
 #include "widgets/temperature.h"
 #include "renderer.h"
@@ -151,6 +152,8 @@ bool Renderer::load(void) {
 //	layout::ReportCerr report;
 	layout::Parser parser(NULL); //&report);
 
+	std::list<layout::Node *> nodes;
+
 	std::list<layout::Map *> maps;
 	std::list<layout::Track *> tracks;
 	std::list<layout::Widget *> widgets;
@@ -180,58 +183,23 @@ bool Renderer::load(void) {
 
 	std::cout << "Parsing '" << filename << "' layout file" << std::endl;
 
-	// Widgets
-	widgets = root->widgets().list();
+	// For each layout elements
+	nodes = root->getElements();
 
-	for (std::list<layout::Widget *>::iterator node = widgets.begin(); node != widgets.end(); ++node) {
-		layout::Widget *widget = (*node);
-         
-		if (widget == nullptr)
- 			continue;
-	
-		// Display
-		if ((bool) widget->display() == false) {
-			log_info("Skip widget '%s'", (const char *) widget->type());
-			continue;
-		}
+	for (std::list<layout::Node *>::iterator item = nodes.begin(); item != nodes.end(); ++item) {
+		layout::Node *node = (*item);
 
-		loadWidget(widget);
-	}
-
-	// Tracks
-	tracks = root->tracks().list();
-
-	for (std::list<layout::Track *>::iterator node = tracks.begin(); node != tracks.end(); ++node) {
-		layout::Track *track = (*node);
-         
-		if (track == nullptr)
+		if (node == nullptr)
  			continue;
 
-		// Display
-		if ((bool) track->display() == false) {
-			log_info("Skip track widget");
-			continue;
-		}
+		const std::string name = node->getName();
 
-		loadTrack(track);
-	}
-
-	// Maps
-	maps = root->maps().list();
-
-	for (std::list<layout::Map *>::iterator node = maps.begin(); node != maps.end(); ++node) {
-		layout::Map *map = (*node);
-         
-		if (map == nullptr)
- 			continue;
-
-		// Display
-		if ((bool) map->display() == false) {
-			log_info("Skip map widget");
-			continue;
-		}
-
-		loadMap(map);
+		if (name == "widget")
+			loadWidget((layout::Widget *) node);
+		else if (name == "map")
+			loadMap((layout::Map *) node);
+		else if (name == "track")
+			loadTrack((layout::Track *) node);
 	}
 
 done:
@@ -256,6 +224,12 @@ bool Renderer::loadMap(layout::Map *m) {
 	VideoWidget::Position position = VideoWidget::PositionNone;
 
 	log_call();
+
+	// Display
+	if ((bool) m->display() == false) {
+		log_info("Skip map widget");
+		return true;
+	}
 
 	// Map source
 	mapsource = m->source();
@@ -332,6 +306,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setPosition(position);
 	map->setAlign(align);
 	map->setPosition(x, y);
+	map->setAtTime(m->at(), m->at() + m->duration());
 	map->setSize(mapSettings.width(), mapSettings.height());
 	map->setMargin(VideoWidget::MarginAll, m->margin());
 	map->setMargin(VideoWidget::MarginLeft, m->marginLeft());
@@ -360,6 +335,12 @@ bool Renderer::loadTrack(layout::Track *t) {
 	VideoWidget::Position position = VideoWidget::PositionNone;
 
 	log_call();
+
+	// Display
+	if ((bool) t->display() == false) {
+		log_info("Skip track widget");
+		return true;
+	}
 
 	// Open GPX file
 	GPX *gpx = GPX::open(app_.settings().gpxfile());
@@ -417,6 +398,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	track->setPosition(position);
 	track->setAlign(align);
 	track->setPosition(x, y);
+	track->setAtTime(t->at(), t->at() + t->duration());
 	track->setSize(trackSettings.width(), trackSettings.height());
 	track->setMargin(VideoWidget::MarginAll, t->margin());
 	track->setMargin(VideoWidget::MarginLeft, t->marginLeft());
@@ -447,6 +429,12 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Position position = VideoWidget::PositionNone;
 
+	// Display
+	if ((bool) w->display() == false) {
+		log_info("Skip widget '%s'", (const char *) w->type());
+		goto skip;
+	}
+
 	// Type
 	s = (const char *) w->type();
 
@@ -457,6 +445,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = DateWidget::create(app_);
 	else if (s == "time") 
 		widget = TimeWidget::create(app_);
+	else if (s == "text") 
+		widget = TextWidget::create(app_);
 	else if (s == "distance") 
 		widget = DistanceWidget::create(app_);
 	else if (s == "duration") 
@@ -529,6 +519,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setPosition(position);
 	widget->setAlign(align);
 	widget->setPosition(w->x(), w->y());
+	widget->setAtTime(w->at(), w->at() + w->duration());
 	widget->setFormat((const char *) w->format());
 	widget->setSize(w->width(), w->height());
 	widget->setMargin(VideoWidget::MarginAll, w->margin());
@@ -536,8 +527,14 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setMargin(VideoWidget::MarginRight, w->marginRight());
 	widget->setMargin(VideoWidget::MarginTop, w->marginTop());
 	widget->setMargin(VideoWidget::MarginBottom, w->marginBottom());
-	widget->setPadding(w->padding());
+	widget->setPadding(VideoWidget::PaddingAll, w->padding());
+	widget->setPadding(VideoWidget::PaddingLeft, w->paddingLeft());
+	widget->setPadding(VideoWidget::PaddingRight, w->paddingRight());
+	widget->setPadding(VideoWidget::PaddingTop, w->paddingTop());
+	widget->setPadding(VideoWidget::PaddingBottom, w->paddingBottom());
+	widget->setFont((const char *) w->font());
 	widget->setLabel((const char *) w->name());
+	widget->setText((const char *) w->text());
 	widget->setTextColor((const char *) w->textColor());
 	widget->setTextShadow(w->textShadow());
 	widget->setBorder(w->border());
@@ -553,6 +550,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	this->append(widget);
 
+skip:
 	return true;
 
 error:
@@ -1066,8 +1064,15 @@ bool Renderer::start(void) {
 		video_stream->nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
 
 	// Prepare each widget, map...
-	for (VideoWidget *widget : widgets_)
+	for (VideoWidget *widget : widgets_) {
+		uint64_t begin = widget->atBeginTime();
+		uint64_t end = widget->atEndTime();
+
+		if ((begin != 0) || (end != 0))
+			continue;
+
 		widget->prepare(overlay_);
+	}
 
 	return true;
 }
@@ -1081,10 +1086,14 @@ bool Renderer::run(void) {
 	int64_t timecode;
 	int64_t timecode_ms;
 
+	double time_factor;
+
 	AVRational real_time;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 //	AudioStreamPtr audio_stream = container_->getAudioStream();
+
+	time_factor = app_.settings().timeFactor();
 
 	start_time = container_->startTime() + container_->timeOffset();
 
@@ -1108,14 +1117,14 @@ bool Renderer::run(void) {
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
 	// Compute video time
-	app_.setTime(start_time + (timecode_ms / 1000));
+	app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
 
 	if (gpx_) {
 		// Read GPX data
-		gpx_->retrieveNext(data_, timecode_ms);
+		gpx_->retrieveNext(data_, time_factor * timecode_ms);
 
 		// Draw
-		this->draw(frame, data_);
+		this->draw(frame, timecode_ms, data_);
 	}
 
 	// Max rendering duration
@@ -1211,15 +1220,28 @@ bool Renderer::stop(void) {
 }
 
 
-void Renderer::draw(FramePtr frame, const GPXData &data) {
+void Renderer::draw(FramePtr frame, const uint64_t timecode_ms, const GPXData &data) {
 	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
 	// Draw overlay
 	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
 
 	// Draw each widget, map...
-	for (VideoWidget *widget : widgets_)
+	for (VideoWidget *widget : widgets_) {
+		uint64_t begin = widget->atBeginTime();
+		uint64_t end = widget->atEndTime();
+
+		if ((begin != 0) && (timecode_ms < begin))
+			continue;
+
+		if ((end != 0) && (end < timecode_ms))
+			continue;
+
+		if ((begin != 0) || (end != 0))
+			widget->prepare(&frame_buffer);
+
 		widget->render(&frame_buffer, data);
+	}
 
 	frame->fromImageBuf(frame_buffer);
 }

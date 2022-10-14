@@ -41,6 +41,8 @@ namespace layout
     _zoom(this, "zoom",   Node::ELEMENT, false),
     _format(this, "format",   Node::ELEMENT, false),
     _source(this, "source",   Node::ELEMENT, false),
+	_at(this, "at", Node::ATTRIBUTE, false),
+	_duration(this, "duration", Node::ATTRIBUTE, false),
     _x(this, "x", Node::ATTRIBUTE, false),
     _y(this, "y", Node::ATTRIBUTE, false),
     _width(this, "width", Node::ATTRIBUTE, false),
@@ -51,6 +53,12 @@ namespace layout
     _margin_top(this, "margin-top", Node::ELEMENT, false),
     _margin_bottom(this, "margin-bottom", Node::ELEMENT, false),
     _padding(this, "padding", Node::ELEMENT, false),
+    _padding_left(this, "padding-left", Node::ELEMENT, false),
+    _padding_right(this, "padding-right", Node::ELEMENT, false),
+    _padding_top(this, "padding-top", Node::ELEMENT, false),
+    _padding_bottom(this, "padding-bottom", Node::ELEMENT, false),
+	_font(this, "font", Node::ELEMENT, false),
+	_text(this, "text", Node::ELEMENT, false),
 	_txtcolor(this, "text-color", Node::ELEMENT, false),
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
@@ -67,6 +75,8 @@ namespace layout
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_format);
     getInterfaces().push_back(&_source);
+    getInterfaces().push_back(&_at);
+    getInterfaces().push_back(&_duration);
     getInterfaces().push_back(&_x);
     getInterfaces().push_back(&_y);
     getInterfaces().push_back(&_width);
@@ -77,6 +87,12 @@ namespace layout
     getInterfaces().push_back(&_margin_top);
     getInterfaces().push_back(&_margin_bottom);
     getInterfaces().push_back(&_padding);
+    getInterfaces().push_back(&_padding_left);
+    getInterfaces().push_back(&_padding_right);
+    getInterfaces().push_back(&_padding_top);
+    getInterfaces().push_back(&_padding_bottom);
+    getInterfaces().push_back(&_font);
+    getInterfaces().push_back(&_text);
     getInterfaces().push_back(&_txtcolor);
     getInterfaces().push_back(&_txtshadow);
     getInterfaces().push_back(&_border);
@@ -90,6 +106,11 @@ namespace layout
 	_margin_right.setValue("-1");
 	_margin_top.setValue("-1");
 	_margin_bottom.setValue("-1");
+
+	_padding_left.setValue("-1");
+	_padding_right.setValue("-1");
+	_padding_top.setValue("-1");
+	_padding_bottom.setValue("-1");
   }
 
   Widget::~Widget()

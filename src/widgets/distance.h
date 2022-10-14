@@ -27,12 +27,13 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
-		this->createBox(&buf_, this->width(), this->height());
-		this->drawBorder(buf_);
-		this->drawBackground(buf_);
-		this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_distance.png", VideoWidget::ZoomFit);
-//		this->drawLabel(buf_, 0, 0, label().c_str());
-//		this->drawValue(buf_, 0, 0, "22 km");
+		if (buf_ == NULL) {
+			this->createBox(&buf_, this->width(), this->height());
+			this->drawBorder(buf_);
+			this->drawBackground(buf_);
+			this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_distance.png", VideoWidget::ZoomFit);
+//			this->drawLabel(buf_, 0, 0, label().c_str());
+		}
 
 		// Image over
 		buf_->specmod().x = this->x();
@@ -48,6 +49,9 @@ public:
 			distance /= 1000.0;
 		}
 		else if (unit() == VideoWidget::UnitMeter) {
+		}
+		else if (unit() == VideoWidget::UnitFoot) {
+			distance *= 3.28084;
 		}
 		else {
 			distance /= 1000.0;
@@ -70,8 +74,8 @@ public:
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
 
 		// Append dynamic info
-		this->drawLabel(buf, this->x() + this->height() + this->padding(), this->y(), label().c_str());
-		this->drawValue(buf, this->x() + this->height() + this->padding(), this->y(), s);
+		this->drawLabel(buf, this->x() + this->height() + this->padding(VideoWidget::PaddingLeft), this->y(), label().c_str());
+		this->drawValue(buf, this->x() + this->height() + this->padding(VideoWidget::PaddingLeft), this->y(), s);
 	}
 
 private:

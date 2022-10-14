@@ -128,6 +128,20 @@ namespace layout
     String  &source() { return _source; }
 
     ///
+    /// Get at
+    ///
+    /// @return the at attribute
+    ///
+    Unsigned  &at() { return _at; }
+
+    ///
+    /// Get duration
+    ///
+    /// @return the duration attribute
+    ///
+    Unsigned  &duration() { return _duration; }
+
+    ///
     /// Get x
     ///
     /// @return the x attribute
@@ -198,6 +212,48 @@ namespace layout
     Unsigned  &padding() { return _padding; }
 
     ///
+    /// Get paddingLeft
+    ///
+    /// @return the padding left attribute
+    ///
+    Decimal  &paddingLeft() { return _padding_left; }
+
+    ///
+    /// Get paddingRight
+    ///
+    /// @return the padding right attribute
+    ///
+    Decimal  &paddingRight() { return _padding_right; }
+
+    ///
+    /// Get paddingTop
+    ///
+    /// @return the padding top attribute
+    ///
+    Decimal  &paddingTop() { return _padding_top; }
+
+    ///
+    /// Get paddingBottom
+    ///
+    /// @return the padding bottom attribute
+    ///
+    Decimal  &paddingBottom() { return _padding_bottom; }
+
+    ///
+    /// Get font
+    ///
+    /// @return the font element
+    ///
+    String  &font() { return _font; }
+
+    ///
+    /// Get text color
+    ///
+    /// @return the text color element
+    ///
+    String  &text() { return _text; }
+
+    ///
     /// Get text color
     ///
     /// @return the text color element
@@ -253,6 +309,7 @@ namespace layout
     String       _zoom;
     String       _format;
 	String       _source;
+    Unsigned     _at, _duration;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
 	Unsigned     _margin;
@@ -261,6 +318,12 @@ namespace layout
 	Decimal      _margin_top;
 	Decimal      _margin_bottom;
 	Unsigned     _padding;
+	Decimal      _padding_left;
+	Decimal      _padding_right;
+	Decimal      _padding_top;
+	Decimal      _padding_bottom;
+	String       _font;
+	String       _text;
 	String       _txtcolor;
 	Unsigned     _txtshadow;
 	Unsigned     _border;

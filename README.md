@@ -7,6 +7,7 @@ GPX2Video can convert the data recorded by your GoPro (GPS, accelerometer, camer
 or reads an input GPX file. Visualize data or maps on your videos.
 
 Finally, gpx2video should work with any camera and you are able to customize your gauges and much more.
+gpx2vidoe supports the timelapse / timewrap video too.
 
 gpx2video is **only a test tool and isn't yet a final release!**
 
@@ -222,9 +223,9 @@ FRAME: 1 - PTS: 1800 - TIMESTAMP: 20 ms - TIME: 2021-12-08 10:38:35
 
 ### How change gauges ?
 
-Gauges size and position can be set from the layout.xml file. (see: samples/layout-1920x1080.xml)
+Gauges size and position and more can be set from the layout.xml file. (see: samples/layout-1920x1080.xml)
 
-You can edit `layout.xml` file to enable/disable gauge or edit label and position:
+You can edit `layout.xml` file to enable/disable gauge or edit label and position or any settings:
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
@@ -265,17 +266,18 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 </layout>
 ```
 
-Here all widget element settings:
+
+#### Widget common settings
+
+Here all widget common element settings:
 
 ```xml
-<widget x="250" y="450" width="600" height="120" position="left" align="vertical" display="true">
+<widget x="250" y="450" width="600" height="120" position="left" align="vertical" at="1000" duration="9000" display="true">
 	<type>speed</type>
 	<name>VITESSE</name>
 	<margin>20</margin>
 	<padding>5</padding>
-	<unit>kph</unit>
-	<zoom>stretch</zoom>
-	<source>fichier.jpg</source>
+	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
 	<text-color>#00ff00ff</text-color>
 	<text-shadow>3</text-shadow>
 	<border>5</border>
@@ -283,6 +285,26 @@ Here all widget element settings:
 	<background-color>#0000004c</background-color>
 </widget>		
 ```
+
+Node attributes are:
+  - **x** / **y**: to set the widget position.
+  - **width** / **height**: to set the widget size.
+  - **position**: to compute the widget position.
+  - **align**: to set the align direction.
+  - **at** / **duration**: to display widget at a specific time (in ms) during a specific duration (in ms).
+  - **display**: to render or not the widget.
+
+Node elements are:
+  - **type**: to set the widget type (speed, grade, distance...).
+  - **name**: to set the widget label.
+  - **font**: to set the text font.
+  - **margin**: to set the space around the widget (**margin-left**, **margin-right**, **margin-top** and **margin-bottom** are supported too).
+  - **padding**: to set the space inside the widget (**padding-left**, **padding-right**, **padding-top** and **padding-bottom** are supported too).
+  - **border**: to set the border width.
+  - **border-color**: to set the border color in #RGBA.
+  - **background-color**: to set the background color in #RGBA.
+  - **text-color**: to set the text color in #RGBA.
+  - **text-shadow**: text shadow thickness.
 
 **type** gauges supported are:
   - speed, maxspeed, avgspeed
@@ -295,35 +317,113 @@ Here all widget element settings:
   - temperature
   - image
   - lap
+  - text
 
-**display** values are: true or false. It permits to render or not the widget.
-The **display** default value is true.
-
-**position** values are: none, left, right, top, bottom, top-left, top-right, bottom-left and bottom-right. 
-If **position** attribute is defined, gpx2video ignores and computes **x** and **y** values.
+**position** values are: none, left, right, top, bottom, bottom-left, bottom-right, top-left, top-right.
+If **position** element is set, gpx2video ignores and computes **x** and **y** values.
 
 **align** values are: horizontal or vertical.
 If **position** isn't defined, align value isn't used.
 
-**unit** values are: 
-  - mph, kph, 
-  - km, m or miles.
-  - C, celsius or F, fahrenheit
-
-**zoom** values are: none, fit, fill, crop and stretch. This parameter is used only by the image widget.
-
-*Note: Widget date accepts format element too.*
-
-You can set **border** size and color, the background color and text color too. Color is hex value as html "#RRGGBBAA".
+**display** values are: true or false. It permits to render or not the widget.
+The **display** default value is true.
 
 ![legend](./assets/legend.png)
 
 **padding** value sets the space around the text. Whereas, **margin** value defines the space around the widget.
 
-Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. At last, you can define
-several map widgets.
 
-Lap widget accepts **nbr-lap** element setting. Value is the lap target number.
+#### speed, maxspeed and avgspeed widgets
+
+```xml
+<widget>
+	<type>speed</type>
+	<unit>kph</unit>
+</widget>		
+```
+
+**unit** values are: mph or kph.
+
+
+#### distance widget
+
+```xml
+<widget>
+	<type>distance</type>
+	<unit>km</unit>
+</widget>		
+```
+
+**unit** values are: m, km, ft or miles.
+
+
+#### elevation widget
+
+```xml
+<widget>
+	<type>elevation</type>
+	<unit>m</unit>
+</widget>		
+```
+
+**unit** values are: m or ft.
+
+
+#### date widget
+
+```xml
+<widget>
+	<type>date</type>
+	<format>%Y-%m-%d</format>
+</widget>		
+```
+
+
+#### temperature widget
+
+```xml
+<widget>
+	<type>temperature</type>
+	<unit>C</unit>
+</widget>		
+```
+
+**unit** values are: C, celsius or F, fahrenheit.
+
+
+#### lap widget
+
+```xml
+<widget>
+	<type>lap</type>
+	<nbr-lap>10</nbr-lap>
+</widget>		
+```
+
+**nbr-lap** value is the lap target number.
+
+
+#### image widget
+
+```xml
+<widget>
+	<type>image</type>
+	<zoom>stretch</zoom>
+	<source>fichier.jpg</source>
+</widget>		
+```
+
+**zoom** values are: none, fit, fill, crop and stretch. This parameter is used only by the image widget.
+
+
+#### text widget
+
+```xml
+<widget>
+	<type>text</type>
+	<text>Rendered with GPX2Video application</text>
+</widget>		
+```
 
 
 ## Maps
@@ -368,6 +468,10 @@ Map settings:
 **factor** value applies a zoom factor as render.
 **marker** marker size in pixels.
 
+Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. 
+At last, you can define several map widgets.
+
+*Map widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 
 
 ## Tracks
@@ -384,6 +488,8 @@ Track settings:
 	<background-color>#0000004c</background-color>
 </widget>		
 ```
+
+*Track widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 
 
 ## Extract tools
@@ -409,7 +515,6 @@ $ ./gpx2video -m GH010434.MP4 -o track.gpx -f 3 extract
 In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.
 
 
-
 ## Telemetry tools
 
 You can convert, filter and interpolate GPX data.
@@ -424,7 +529,6 @@ Since gpx2video interpolates data each 1s in using different filters: linear, ka
 *Note: The result isn't yet satisfactory* 
 
 
-
 ## ToDo
 
   - Render gauge:
@@ -433,7 +537,6 @@ Since gpx2video interpolates data each 1s in using different filters: linear, ka
     - svg: add icon svg support
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
-  - Widget text
   - Gallery photo import
   - User interface integration
   - GPS interpolate data between two waypoints.
