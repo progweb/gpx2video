@@ -167,81 +167,93 @@ Extractor * GPX2Video::buildExtractor(void) {
 
 
 void GPX2Video::sighandler(int sfd, short kind, void *data) {
-	pid_t pid;
-
-	int status;
-
-	ssize_t s;
-	struct signalfd_siginfo fdsi;
-
 	GPX2Video *app = (GPX2Video *) data;
-
-	(void) kind;
 
 	log_call();
 
-	s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
+	(void) sfd;
+	(void) kind;
 
-	if (s != sizeof(struct signalfd_siginfo)) {
-		log_error("Read signal message failure");
-		goto sighandler_error;
-	}
-
-	switch (fdsi.ssi_signo) {
-	case SIGCHLD:
-		log_debug("SIGCHLD signal received");
-
-		for (;;) {
-			pid = waitpid((pid_t)(-1), &status, WNOHANG | WUNTRACED | WCONTINUED);
-
-			if (pid <= 0)
-				goto sighandler_error;
-
-			log_warn("Received SIGCHLD from PID: %d", pid);
-
-			if (WIFEXITED(status))
-				log_info("Completed and returned %d", WEXITSTATUS(status));
-			else if (WIFSIGNALED(status))
-				log_info("Killed due to the signal %d", WTERMSIG(status));
-			else if (WIFSTOPPED(status))
-				log_info("Stopped by %d and returned %d", WSTOPSIG(status), WEXITSTATUS(status));
-			else if (WIFCONTINUED(status)) {
-				log_debug("Child continue");
-				continue;
-			}
-		}
-
-		break;
-
-	case SIGINT:
-		app->abort();
-		break;
-
-	case SIGPIPE:
-		log_error("SIGPIPE signal received (fd: %d)", fdsi.ssi_fd);
-		break;
-
-	case SIGTERM:
-		log_error("SIGTERM %d", fdsi.ssi_pid);
-		app->abort();
-		break;
-
-	case SIGQUIT:
-		log_error("SIGQUIT %d", fdsi.ssi_pid);
-		app->abort();
-		break;
-
-	default:
-		log_error("UNDEFINED");
-		break;
-	}
-
-	return;
-
-sighandler_error:
-	app->loopexit();
-	return;
+	app->abort();
 }
+
+
+//void GPX2Video::sighandler(int sfd, short kind, void *data) {
+//	pid_t pid;
+//
+//	int status;
+//
+//	ssize_t s;
+//	struct signalfd_siginfo fdsi;
+//
+//	GPX2Video *app = (GPX2Video *) data;
+//
+//	(void) kind;
+//
+//	log_call();
+//
+//	s = read(sfd, &fdsi, sizeof(struct signalfd_siginfo));
+//
+//	if (s != sizeof(struct signalfd_siginfo)) {
+//		log_error("Read signal message failure");
+//		goto sighandler_error;
+//	}
+//
+//	switch (fdsi.ssi_signo) {
+//	case SIGCHLD:
+//		log_debug("SIGCHLD signal received");
+//
+//		for (;;) {
+//			pid = waitpid((pid_t)(-1), &status, WNOHANG | WUNTRACED | WCONTINUED);
+//
+//			if (pid <= 0)
+//				goto sighandler_error;
+//
+//			log_warn("Received SIGCHLD from PID: %d", pid);
+//
+//			if (WIFEXITED(status))
+//				log_info("Completed and returned %d", WEXITSTATUS(status));
+//			else if (WIFSIGNALED(status))
+//				log_info("Killed due to the signal %d", WTERMSIG(status));
+//			else if (WIFSTOPPED(status))
+//				log_info("Stopped by %d and returned %d", WSTOPSIG(status), WEXITSTATUS(status));
+//			else if (WIFCONTINUED(status)) {
+//				log_debug("Child continue");
+//				continue;
+//			}
+//		}
+//
+//		break;
+//
+//	case SIGINT:
+//		app->abort();
+//		break;
+//
+//	case SIGPIPE:
+//		log_error("SIGPIPE signal received (fd: %d)", fdsi.ssi_fd);
+//		break;
+//
+//	case SIGTERM:
+//		log_error("SIGTERM %d", fdsi.ssi_pid);
+//		app->abort();
+//		break;
+//
+//	case SIGQUIT:
+//		log_error("SIGQUIT %d", fdsi.ssi_pid);
+//		app->abort();
+//		break;
+//
+//	default:
+//		log_error("UNDEFINED");
+//		break;
+//	}
+//
+//	return;
+//
+//sighandler_error:
+//	app->loopexit();
+//	return;
+//}
 
 
 void GPX2Video::pipehandler(int sfd, short kind, void *data) {
@@ -268,34 +280,38 @@ void GPX2Video::init(void) {
 	int error;
 
 	int fds[2];
-	int sfd = -1;
-
-	sigset_t mask;
+//	int sfd = -1;
+//
+//	sigset_t mask;
 
 	log_call();
 
-	// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
-	sigemptyset(&mask);
-	sigaddset(&mask, SIGHUP);
-	sigaddset(&mask, SIGINT);
-	sigaddset(&mask, SIGPIPE);
-	sigaddset(&mask, SIGTERM);
-	sigaddset(&mask, SIGQUIT);
-	sigaddset(&mask, SIGCHLD);
+//	// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
+//	sigemptyset(&mask);
+//	sigaddset(&mask, SIGHUP);
+//	sigaddset(&mask, SIGINT);
+//	sigaddset(&mask, SIGPIPE);
+//	sigaddset(&mask, SIGTERM);
+//	sigaddset(&mask, SIGQUIT);
+//	sigaddset(&mask, SIGCHLD);
+//
+//	if (pthread_sigmask(SIG_BLOCK, &mask, NULL) == -1) {
+//		log_error("sigprocmask failure");
+//		return;
+//	}
+//
+//	sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
+//
+//	if (sfd == -1) {
+//		log_error("signalfd failure");
+//		return;
+//	}
+//
+//	ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
+//	event_add(ev_signal_, NULL);
 
-	if (sigprocmask(SIG_BLOCK, &mask, NULL) == -1) {
-		log_error("sigprocmask failure");
-		return;
-	}
-
-	sfd = signalfd(-1, &mask, SFD_NONBLOCK | SFD_CLOEXEC);
-
-	if (sfd == -1) {
-		log_error("signalfd failure");
-		return;
-	}
-
-	ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
+	// SIGINT management
+	ev_signal_ = evsignal_new(evbase_, SIGINT, sighandler, this);
 	event_add(ev_signal_, NULL);
 
 	// Create pipe to schedule tasks
