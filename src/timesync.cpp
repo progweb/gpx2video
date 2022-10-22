@@ -152,7 +152,6 @@ bool TimeSync::run(void) {
 
 	if (result < 0)
 		goto done;
-//	}
 
 	schedule();
 

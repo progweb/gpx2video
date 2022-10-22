@@ -23,6 +23,7 @@ public:
 	void setFilename(const std::string &filename);
 
 	time_t startTime(void) const;
+	void setStartTime(const time_t &start_time);
 	void setStartTime(const std::string &start_time);
 
 	int timeOffset(void) const;

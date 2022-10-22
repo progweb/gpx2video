@@ -113,10 +113,55 @@ MediaContainer * GPX2Video::media(void) {
 	std::string mediafile = settings().mediafile();
 	
 	// Probe input media
-	if (container_ == NULL)
+	if (container_ == NULL) {
 		container_ = Decoder::probe(mediafile);
 
+		if (container_->startTime() == 0)
+			this->setDefaultStartTime();
+	}
+
 	return container_;
+}
+
+
+int GPX2Video::setDefaultStartTime(void) {
+	char s[128];
+
+	struct tm time;
+
+	GPXData data;
+
+	log_call();
+
+	// Open GPX file
+	GPX *gpx = GPX::open(settings().gpxfile());
+
+	if (gpx == NULL) {
+		log_warn("Can't read GPS data, set default start time failure");
+		return -1;
+	}
+
+	// GPX limits
+	gpx->setFrom(settings().gpxFrom());
+	gpx->setTo(settings().gpxTo());
+
+	// Start time activity
+	gpx->retrieveFirst(data);
+	
+	// Use first point as start time
+	container_->setStartTime(data.time());
+
+	// Dump result
+	localtime_r(&data.time(), &time);
+
+	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
+
+	log_notice("Use default creation time: %s", s);
+
+	// Free
+	delete gpx;
+	
+	return 0;
 }
 
 
@@ -143,6 +188,9 @@ Map * GPX2Video::buildMap(void) {
 	// Create map bounding box
 	GPXData::point p1, p2;
 	gpx->getBoundingBox(&p1, &p2);
+
+	// Free
+	delete gpx;
 
 	MapSettings mapSettings;
 	mapSettings.setSource(settings().mapsource());

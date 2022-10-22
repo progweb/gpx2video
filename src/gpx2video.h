@@ -214,6 +214,7 @@ public:
 	}
 
 	MediaContainer * media(void);
+	int setDefaultStartTime(void);
 	Map * buildMap(void);
 	Extractor * buildExtractor(void);
 

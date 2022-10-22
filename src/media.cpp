@@ -29,6 +29,11 @@ time_t MediaContainer::startTime(void) const {
 }
 
 
+void MediaContainer::setStartTime(const time_t &start_time) {
+	start_time_ = start_time;
+}
+
+
 /**
  * GoPro creation_time metadata format:
  *   2021-10-03T19:12:01.000000Z
