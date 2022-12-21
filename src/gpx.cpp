@@ -159,12 +159,13 @@ bool GPXData::compute(void) {
 	// duration_ in second
 	duration_ += dt;
 	distance_ += dc;
-	if (dt > 0)
+	if (dt > 0) {
 		speed = (3600.0 * dc) / (1000.0 * dt);
-	if (abs((int) (speed - speed_)) < 50)
-		speed_ = speed;
-	if (speed_ > maxspeed_)
-		maxspeed_ = speed_;
+		if (abs((int) (speed - speed_)) < 50)
+			speed_ = speed;
+		if (speed_ > maxspeed_)
+			maxspeed_ = speed_;
+	}
 	avgspeed_ = (3600.0 * distance_) / (1000.0 * duration_);
 
 //	dc = sqrt(dx*dx + dy*dy);
@@ -388,7 +389,6 @@ void GPXData::read(gpx::WPT *wpt) {
 	memcpy(&next_pt_, &pt, sizeof(next_pt_));
 
 	valid_ = true;
-
 }
 
 

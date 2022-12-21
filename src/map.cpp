@@ -324,9 +324,9 @@ void Map::setSize(int width, int height) {
 std::string Map::buildURI(int zoom, int x, int y) {
 	char s[16];
 
-	int max_zoom = settings().getMaxZoom(settings().source());
+	int max_zoom = MapSettings::getMaxZoom(settings().source());
 
-	std::string uri = settings().getRepoURI(settings().source());
+	std::string uri = MapSettings::getRepoURI(settings().source());
 
 	log_call();
 
