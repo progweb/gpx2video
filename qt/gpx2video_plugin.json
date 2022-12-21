@@ -1,0 +1,9 @@
+{
+    "Keys": ["gpx2video"],
+    "Provider": "GPX2Video",
+	"Version": 100,
+    "Experimental": false,
+    "Features": [
+        "OnlineMappingFeature"
+    ]
+}
