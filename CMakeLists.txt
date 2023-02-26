@@ -104,7 +104,7 @@ set(GPX2VIDEO_HEADERS
 set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/evcurl.c
-	src/evcurl.cpp
+	src/evcurl++.cpp
 	src/kalman.c
 	src/gpx.cpp
 	src/oiioutils.cpp

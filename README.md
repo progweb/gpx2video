@@ -158,7 +158,7 @@ gpx2video is a command line tool.
   - To extract GoPro GPMD data from media stream:
 
 ```bash
-$ ./gpx2video -v -m GOPR1860.MP4 -o output.gpx -f 2 extract
+$ ./gpx2video -v -m GOPR1860.MP4 -o output.gpx -f 3 extract
 gpx2video v0.0.0
 creation_time = 2020-12-13T09:56:27.000000Z
 Failed to find decoder for stream #2

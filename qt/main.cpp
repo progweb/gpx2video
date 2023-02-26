@@ -1,8 +1,9 @@
-#include <QObject>
-#include <QApplication>
-#include <QQmlApplicationEngine>
-#include <QQmlContext>
+#include <QtCore/QObject>
 #include <QtCore/QCommandLineParser>
+#include <QtQml/QQmlApplicationEngine>
+#include <QtQml/QQmlContext>
+#include <QtWidgets/QApplication>
+#include <QtWidgets/QComboBox>
 #include <QtLocation/QGeoServiceProvider>
 #include <QDebug>
 
@@ -63,6 +64,10 @@ int main(int argc, char *argv[], char *envp[]) {
 				QCoreApplication::exit(-1);
 		}, Qt::QueuedConnection);
 	engine.load(url);
+
+//	QComboBox *cb = engine.rootContext()->findChild<QComboBox *>(QString("cb"));
+//	QObject::connect(&myObj,      SIGNAL(finishedGatheringDataForItem(QString)),
+//                 contentView, SLOT(updateViewWithItem(QString)));
 
 	return app.exec();
 }
