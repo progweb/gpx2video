@@ -321,7 +321,7 @@ Node elements are:
   - **text-shadow**: text shadow thickness.
 
 **type** gauges supported are:
-  - speed, maxspeed, avgspeed
+  - speed, maxspeed, avgspeed, avgridespeed
   - grade, elevation
   - date, time, duration
   - position
@@ -347,7 +347,7 @@ The **display** default value is true.
 **padding** value sets the space around the text. Whereas, **margin** value defines the space around the widget.
 
 
-#### speed, maxspeed and avgspeed widgets
+#### speed, maxspeed, avgspeed and avgridespeed widgets
 
 ```xml
 <widget>

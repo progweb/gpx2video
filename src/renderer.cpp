@@ -27,6 +27,7 @@
 #include "widgets/speed.h"
 #include "widgets/maxspeed.h"
 #include "widgets/avgspeed.h"
+#include "widgets/avgridespeed.h"
 #include "widgets/text.h"
 #include "widgets/time.h"
 #include "widgets/temperature.h"
@@ -389,6 +390,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = MaxSpeedWidget::create(app_);
 	else if (s == "avgspeed") 
 		widget = AvgSpeedWidget::create(app_);
+	else if (s == "avgridespeed") 
+		widget = AvgRideSpeedWidget::create(app_);
 	else if (s == "grade") 
 		widget = GradeWidget::create(app_);
 	else if (s == "image")
