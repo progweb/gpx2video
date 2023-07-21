@@ -297,6 +297,8 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setDivider(m->factor());
 	mapSettings.setMarkerSize(marker_size);
 	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+	mapSettings.setPathThick((double) m->pathThick());
+	mapSettings.setPathBorder((double) m->pathBorder());
 
 	Map *map = Map::create(app_, mapSettings);
 
@@ -391,6 +393,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
 	trackSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+	trackSettings.setPathThick((double) t->pathThick());
+	trackSettings.setPathBorder((double) t->pathBorder());
 
 	Track *track = Track::create(app_, trackSettings);
 

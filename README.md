@@ -461,12 +461,16 @@ Map settings:
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
+	<path-thick>3.0</path-thick>
+	<path-border>1.4</path-border>
 </map>		
 ```
 
 **zoom** value sets the map details.
 **factor** value applies a zoom factor as render.
 **marker** marker size in pixels.
+**path-thick** path thick.
+**path-border** border size of path.
 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. 
 At last, you can define several map widgets.
@@ -486,11 +490,15 @@ Track settings:
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
+	<path-thick>3.0</path-thick>
+	<path-border>1.4</path-border>
 </widget>		
 ```
 
 *Track widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 
+**path-thick** path thick.
+**path-border** border size of path.
 
 ## Extract tools
 

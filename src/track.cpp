@@ -33,6 +33,9 @@ TrackSettings::TrackSettings() {
 	height_ = 240;
 	zoom_ = 12;
 	marker_size_ = 60;
+
+	path_thick_ = 3.0;
+	path_border_ = 1.4;
 }
 
 
@@ -68,6 +71,26 @@ const int& TrackSettings::markerSize(void) const {
 
 void TrackSettings::setMarkerSize(const int &size) {
 	marker_size_ = size;
+}
+
+
+const double& TrackSettings::pathThick(void) const {
+	return path_thick_;
+}
+
+
+void TrackSettings::setPathThick(const double &thick) {
+	path_thick_ = thick;
+}
+
+
+const double& TrackSettings::pathBorder(void) const {
+	return path_border_;
+}
+
+
+void TrackSettings::setPathBorder(const double &border) {
+	path_border_ = border;
 }
 
 
@@ -254,6 +277,8 @@ void Track::init(bool zoomfit) {
 void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	int zoom;
 	int stride;
+	double path_thick;
+	double path_border;
 	unsigned char *data;
 
 	int x = 0, y = 0;
@@ -263,6 +288,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	log_call();
 
 	zoom = settings().zoom();
+	path_thick = settings().pathThick();
+	path_border = settings().pathBorder();
 
 	// Cairo buffer
 	OIIO::ImageBuf buf(outbuf.spec());
@@ -274,27 +301,29 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	cairo_t *cairo = cairo_create(surface);
 
 	// Path border
-	cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
-	cairo_set_line_width(cairo, 4.4); //40.96);
-	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
+	if (path_border > 0) {
+		cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
+		cairo_set_line_width(cairo, path_border + path_thick); //4.4); //40.96);
+		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
-	// Draw each WPT
-	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
-		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		// Draw each WPT
+		for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
+			x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
+			y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
-		x *= divider;
-		y *= divider;
+			x *= divider;
+			y *= divider;
 
-		cairo_line_to(cairo, x, y);
+			cairo_line_to(cairo, x, y);
+		}
+
+		// Cairo draw
+		cairo_stroke(cairo);
 	}
-
-	// Cairo draw
-	cairo_stroke(cairo);
 
 	// Path color
 	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
-	cairo_set_line_width(cairo, 3.0); //40.96);
+	cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT

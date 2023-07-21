@@ -19,6 +19,12 @@ public:
 	const int& markerSize(void) const;
 	void setMarkerSize(const int &size);
 
+	const double& pathThick(void) const;
+	void setPathThick(const double &thick);
+
+	const double& pathBorder(void) const;
+	void setPathBorder(const double &border);
+
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
@@ -26,6 +32,9 @@ protected:
 	int zoom_;
 
 	int marker_size_;
+
+	double path_thick_;
+	double path_border_;
 
 private:
 	int width_, height_;

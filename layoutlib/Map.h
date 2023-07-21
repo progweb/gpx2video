@@ -204,6 +204,20 @@ namespace layout
     ///
     String  &borderColor() { return _bordercolor; }
 
+    ///
+    /// Get path thick
+    ///
+    /// @return the path thick element
+    ///
+    Decimal  &pathThick() { return _path_thick; }
+
+    ///
+    /// Get path border
+    ///
+    /// @return the path border element
+    ///
+    Decimal  &pathBorder() { return _path_border; }
+
     // Methods
 
     private:
@@ -226,6 +240,8 @@ namespace layout
 	Unsigned     _marker;
 	Unsigned     _border;
 	String       _bordercolor;
+	Decimal      _path_thick;
+	Decimal      _path_border;
     
     // Disable copy constructors
     Map(const Map &);
