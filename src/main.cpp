@@ -354,6 +354,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			gpxfile_required = true;
 			mediafile_required = true;
 			outputfile_required = true;
+
 		}
 		else {
 			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;

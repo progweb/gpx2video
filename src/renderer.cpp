@@ -50,9 +50,14 @@ Renderer::~Renderer() {
 void Renderer::init(void) {
 	time_t start_time;
 
+	TelemetrySettings::Filter telemetry_filter = app_.settings().telemetryFilter();
+
 	log_call();
 
-	gpx_ = GPX::open(app_.settings().gpxfile(), app_.settings().telemetryFilter());
+	if (telemetry_filter == TelemetrySettings::FilterNone)
+		telemetry_filter = TelemetrySettings::FilterSample;
+
+	gpx_ = GPX::open(app_.settings().gpxfile(), telemetry_filter);
 
 	// Media
 	container_ = app_.media();
