@@ -124,6 +124,8 @@ set(GPX2VIDEO_SOURCES
 	src/videoparams.cpp
 	src/videowidget.cpp
 	src/renderer.cpp
+	src/imagerenderer.cpp
+	src/videorenderer.cpp
 	src/timesync.cpp
 	src/main.cpp
 	src/utils.cpp

@@ -100,6 +100,9 @@ is in local time. But this date isn't synchronized with the GPS source.
 
 If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to determine the offset time to use.
 
+If the `creation_time` field and 'GoPro MET' stream can't be found, gpx2video assumes that the video starts in the
+same time that the GPX stream.
+
 "sync" command permits to test the sychronization process:
 
 ```bash
@@ -169,6 +172,17 @@ Extract GPMD data...
 PACKET: 0 - PTS: 0 - TIMESTAMP: 0 ms - TIME: 1970-01-01 00:00:00
 PACKET: 1 - PTS: 1001 - TIMESTAMP: 1001 ms - TIME: 1970-01-01 00:00:01
 ```
+
+  - To render image per image with telemetry data:
+
+```bash
+$ mkdir png
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml -o png/image-XXXXXX.png image
+gpx2video v0.0.0
+...
+```
+
+One image per second will be generated. 'XXXXXX' will be replaced by the frame number
 
   - To render a video stream with telemetry data:
 
@@ -414,6 +428,7 @@ The **display** default value is true.
 ```
 
 **zoom** values are: none, fit, fill, crop and stretch. This parameter is used only by the image widget.
+**source** is optional.
 
 
 #### text widget

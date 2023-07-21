@@ -198,6 +198,9 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 	int width, height;
 	int max_width, max_height;
 
+	if ((name == NULL) || (name[0] == '\0'))
+		return;
+
 	// Open image
 	auto img = OIIO::ImageInput::open(name);
 	const OIIO::ImageSpec& spec = img->spec();

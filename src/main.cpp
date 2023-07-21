@@ -13,10 +13,11 @@ extern "C" {
 #include "log.h"
 #include "map.h"
 #include "cache.h"
-#include "renderer.h"
 #include "timesync.h"
 #include "extractor.h"
 #include "telemetry.h"
+#include "imagerenderer.h"
+#include "videorenderer.h"
 #include "gpx2video.h"
 
 
@@ -85,6 +86,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t map    : Build map from gpx data" << std::endl;
 	std::cout << "\t track  : Build map with track from gpx data" << std::endl;
 	std::cout << "\t compute: Compute telemetry data from gpx data" << std::endl;
+	std::cout << "\t image  : Process alpha image each second" << std::endl;
 	std::cout << "\t video  : Process video" << std::endl;
 
 	return;
@@ -339,6 +341,13 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			
 			gpxfile_required = true;
 		}
+		else if (!strcmp(argv[0], "image")) {
+			setCommand(GPX2Video::CommandImage);
+			
+			gpxfile_required = true;
+			mediafile_required = true;
+			outputfile_required = true;
+		}
 		else if (!strcmp(argv[0], "video")) {
 			setCommand(GPX2Video::CommandVideo);
 			
@@ -542,6 +551,20 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(telemetry);
 		break;
 
+	case GPX2Video::CommandImage:
+		// Create cache directories
+		cache = Cache::create(app);
+		app.append(cache);
+
+		// Create gpx2video timesync task
+		timesync = TimeSync::create(app);
+		app.append(timesync);
+
+		// Create gpx2video image renderer task
+		renderer = ImageRenderer::create(app);
+		app.append(renderer);
+		break;
+
 	case GPX2Video::CommandVideo:
 		// Create cache directories
 		cache = Cache::create(app);
@@ -551,8 +574,8 @@ int main(int argc, char *argv[], char *envp[]) {
 		timesync = TimeSync::create(app);
 		app.append(timesync);
 
-		// Create gpx2video renderer task
-		renderer = Renderer::create(app);
+		// Create gpx2video video renderer task
+		renderer = VideoRenderer::create(app);
 		app.append(renderer);
 		break;
 

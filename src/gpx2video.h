@@ -181,6 +181,7 @@ public:
 		CommandMap,		// Download & build map
 		CommandTrack,	// Download, build map & draw track
 		CommandCompute, // Compute telemetry data from gpx
+		CommandImage,	// Render alpha image with telemetry overlay
 		CommandVideo,	// Render video with telemtry overlay
 
 		CommandCount
