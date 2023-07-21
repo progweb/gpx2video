@@ -51,7 +51,7 @@ public:
 			speed *= 0.6213711922;
 		}
 
-		if (data.hasValue(GPXData::TypeFix))
+		if (data.hasValue(GPXData::DataFix))
 			sprintf(s, "%.0f %s", speed, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());

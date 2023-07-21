@@ -21,6 +21,8 @@ public:
 	bool run(void);
 	bool stop(void);
 
+	enum GPX::Data get(GPXData &data, int64_t timecode_ms);
+
 private:
 	GPX *gpx_;
 

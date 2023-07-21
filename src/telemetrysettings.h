@@ -10,9 +10,10 @@ public:
 	enum Filter {
 		FilterNone = 0,
 
-		FilterKalman,
+		FilterSample,
 		FilterLinear,
 		FilterInterpolate,
+		FilterKalman,
 
 		FilterCount
 	};

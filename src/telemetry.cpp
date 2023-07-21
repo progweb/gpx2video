@@ -1,5 +1,6 @@
 #include <string>
 #include <iomanip>
+#include <cmath>
 
 #include "log.h"
 #include "telemetry.h"
@@ -30,12 +31,14 @@ const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Fi
 	switch (filter) {
 	case FilterNone:
 		return "None";
-	case FilterKalman:
-		return "Apply Kalman filter on GPX data (lat., lon. and ele.)";
+	case FilterSample:
+		return "Get sample each second from telemetry data";
 	case FilterLinear:
-		return "Apply a simple linear filter on GPX data";
+		return "Apply a simple linear filter on telemtry data";
 	case FilterInterpolate:
-		return "Interpolate GPX data filter";
+		return "Interpolate telemetry data filter";
+	case FilterKalman:
+		return "Apply Kalman filter on telemetry data (lat., lon. and ele.)";
 	case FilterCount:
 	default:
 		return "";
@@ -82,7 +85,7 @@ bool Telemetry::start(void) {
 
 	log_call();
 
-	// GPX limits
+	// Telemetry limits
 	gpx_->setFrom(app_.settings().gpxFrom());
 	gpx_->setTo(app_.settings().gpxTo());
 
@@ -100,9 +103,9 @@ bool Telemetry::start(void) {
 	}
 
 	// Header
-	out_ << "# Timestamp, Time, Partial duration, Total duration, Data, Lat, Lon, Ele, Distance, Speed, MaxSpeed, Average, Cadence, Heartrate, Lap" << std::endl;
+	out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Lap" << std::endl;
 
-	// Read GPX from start
+	// Read telemetry data from start
 	timecode_ms_ = 0;
 
 done:
@@ -111,17 +114,19 @@ done:
 
 
 bool Telemetry::run(void) {
-	// Read GPX data each 1 second
+	// Read telemetry data each 1 second
 	struct tm tm;
 
 	char time[128];
 
 	enum GPX::Data type;
 
+	log_call();
+
 	if (app_.settings().telemetryFilter() == TelemetrySettings::FilterNone) 
 		timecode_ms_ = -1;
 
-	if ((type = gpx_->retrieveNext(data_, timecode_ms_)) == GPX::DataEof) {
+	if ((type = this->get(data_, timecode_ms_)) == GPX::DataEof) {
 		goto done;
 	}
 
@@ -131,16 +136,19 @@ bool Telemetry::run(void) {
 	out_ << std::setprecision(8);
 	out_ << data_.time();
 	out_ << ", \"" << time << "\"";
-	out_ << ", " << data_.duration();
-	out_ << ", " << data_.elapsedTime();
-	out_ << ", " << ((type == GPX::DataPredicted) ? "P" : "M");
+	out_ << ", " << round(data_.elapsedTime());
+	out_ << ", " << round(data_.duration());
+	out_ << ", " << round(data_.rideTime());
+	out_ << ", " << data_.type2string();
 	out_ << ", " << data_.position().lat;
 	out_ << ", " << data_.position().lon;
 	out_ << ", " << data_.position().ele;
+	out_ << ", " << data_.grade(); 
 	out_ << ", " << data_.distance(); 
 	out_ << ", " << data_.speed(); 
 	out_ << ", " << data_.maxspeed(); 
 	out_ << ", " << data_.avgspeed(); 
+	out_ << ", " << data_.avgridespeed(); 
 	out_ << ", " << data_.cadence(); 
 	out_ << ", " << data_.heartrate(); 
 	out_ << ", " << data_.lap(); 
@@ -164,5 +172,14 @@ bool Telemetry::stop(void) {
 		out_.close();
 
 	return true;
+}
+
+
+enum GPX::Data Telemetry::get(GPXData &data, int64_t timecode_ms) {
+	enum GPX::Data type;
+
+	type = gpx_->retrieveNext(data, timecode_ms);
+
+	return type;
 }
 

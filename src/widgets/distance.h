@@ -58,7 +58,7 @@ public:
 			distance *= 0.6213711922;
 		}
 
-		if (data.hasValue(GPXData::TypeFix)) {
+		if (data.hasValue(GPXData::DataFix)) {
 			const char *format;
 
 			if (distance < 10)

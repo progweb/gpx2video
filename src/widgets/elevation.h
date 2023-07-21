@@ -51,7 +51,7 @@ public:
 			elevation *= 3.28084;
 		}
 
-		if (data.hasValue(GPXData::TypeElevation))
+		if (data.hasValue(GPXData::DataElevation))
 			sprintf(s, "%.0f %s", elevation, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());

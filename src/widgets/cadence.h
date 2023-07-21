@@ -42,7 +42,7 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		if (data.hasValue(GPXData::TypeCadence))
+		if (data.hasValue(GPXData::DataCadence))
 			sprintf(s, "%d tr/min", data.cadence());
 		else
 			sprintf(s, "-- tr/min");

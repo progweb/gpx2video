@@ -51,7 +51,7 @@ public:
 			temperature = (temperature * 9/5) + 32;
 		}
 
-		if (data.hasValue(GPXData::TypeTemperature))
+		if (data.hasValue(GPXData::DataTemperature))
 			sprintf(s, "%.0f %s", temperature, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());

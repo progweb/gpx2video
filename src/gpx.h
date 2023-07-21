@@ -12,7 +12,6 @@
 #include "telemetrysettings.h"
 
 
-
 class GPXData {
 public:
 	struct point {
@@ -20,7 +19,15 @@ public:
 		double lat, lon;
 		double x, y;
 		double ele;
-		time_t time;
+//		time_t time;
+		int64_t ts;
+	};
+
+	enum Type {
+		TypeUnknown,
+		TypeMeasured,
+		TypePredicted,
+		TypeUnchanged,
 	};
 
 	enum Position {
@@ -31,14 +38,20 @@ public:
 		PositionStop		// Last waypoint
 	};
 
-	enum Type {
-		TypeNone = 0,
-		TypeFix = 1,
-		TypeElevation = (1 << 1),
-		TypeCadence = (1 << 2),
-		TypeHeartrate = (1 << 3),
-		TypeTemperature = (1 << 4),
-		TypeAll = (1 << 5) -1
+	enum Data {
+		DataNone = 0,
+		DataFix = 1,
+		DataElevation = (1 << 1),
+		DataCadence = (1 << 2),
+		DataHeartrate = (1 << 3),
+		DataTemperature = (1 << 4),
+		DataAll = (1 << 5) -1
+	};
+
+	enum Time {
+		TimeElapsed = 0,	// Max elapsed time (whole GPX data)
+		TimeTotal = 1,		// Total time from start point to end point
+		TimeRide = 2,		// Ride time from start point to end point
 	};
 
 	GPXData();
@@ -46,8 +59,8 @@ public:
 
 	void init(void);
 	void reset(void);
-	void predict(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
-	void update(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
+	bool predict(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
+	bool update(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 
 	void read(gpx::WPT *wpt);
 
@@ -59,19 +72,21 @@ public:
 		enable_ = false;
 	}
 
-	bool hasValue(Type type = TypeAll) const {
+	bool hasValue(Data type = DataAll) const {
 		return ((has_value_ & type) == type);
 	}
 
-	void setValue(Type type) {
+	void setValue(Data type) {
 		has_value_ = type;
 	}
 
-	void addValue(Type type) {
+	void addValue(Data type) {
 		has_value_ |= type;
 	}
 
 	bool compute(void);
+
+	bool smooth(GPXData &prev, GPXData &next);
 
 	void dump(void);
 
@@ -79,23 +94,42 @@ public:
 		return line_;
 	}
 
-	const time_t& time(Position p = PositionCurrent) const {
-		if (p == PositionCurrent)
-			return cur_pt_.time;
-		if (p == PositionPrevious)
-			return prev_pt_.time;
-		if (p == PositionStart)
-			return start_pt_.time;
+	const Type& type(void) const {
+		return type_;
+	}
 
-		return next_pt_.time;
+	const char * type2string(void) const {
+		const char *types[] = {
+			"U", // Unknown
+			"M", // Measured
+			"P", // Predict
+			"C", // Unchanged
+		};
+
+		return types[type_];
+	}
+
+	const time_t& time(Position p = PositionCurrent) const {
+		static time_t result;
+
+		if (p == PositionCurrent)
+			result = cur_pt_.ts / 1000;
+		else if (p == PositionPrevious)
+			result = prev_pt_.ts / 1000;
+		else if (p == PositionStart)
+			result = start_pt_.ts / 1000;
+		else
+			result = next_pt_.ts / 1000;
+
+		return result;
 	}
 
 	const struct point& position(Position p = PositionCurrent) const {
 		if (p == PositionCurrent)
 			return cur_pt_;
-		if (p == PositionPrevious)
+		else if (p == PositionPrevious)
 			return prev_pt_;
-		if (p == PositionStart)
+		else if (p == PositionStart)
 			return start_pt_;
 
 		return next_pt_;
@@ -109,13 +143,17 @@ public:
 		return valid_;
 	}
 
-	const int& elapsedTime(void) const {
+	const double& rideTime(void) const {
+		return ridetime_;
+	}
+
+	const double& elapsedTime(void) const {
 		return elapsedtime_;
 	}
 
-	void setElapsedTime(const int &time) {
-		elapsedtime_ = time;
-	}
+//	void setElapsedTime(const int &time) {
+//		elapsedtime_ = time;
+//	}
 
 	const double& duration(void) const {
 		return duration_;
@@ -128,9 +166,9 @@ public:
 	const double& elevation(Position p = PositionCurrent) const {
 		if (p == PositionCurrent)
 			return cur_pt_.ele;
-		if (p == PositionPrevious)
+		else if (p == PositionPrevious)
 			return prev_pt_.ele;
-		if (p == PositionStart)
+		else if (p == PositionStart)
 			return start_pt_.ele;
 
 		return next_pt_.ele;
@@ -150,6 +188,10 @@ public:
 
 	const double& avgspeed(void) const {
 		return avgspeed_;
+	}
+
+	const double& avgridespeed(void) const {
+		return avgridespeed_;
 	}
 
 	const double& temperature(void) const {
@@ -175,22 +217,26 @@ protected:
 	int has_value_;
 
 	int nbr_points_;
-	struct point cur_pt_;
-	struct point prev_pt_;
-	struct point next_pt_;
-	struct point start_pt_;
+	struct point cur_pt_;	// Interpolated position in the GPX stream
+	struct point prev_pt_;	// Previous interpolated position in the GPX stream
+	struct point last_pt_;	// Last read position in the GPX stream
+	struct point next_pt_;	// Next read position in the GPX stream
+	struct point start_pt_;	// Start read position in the GPX stream
 
 	int nbr_predictions_;
 	KalmanFilter filter_;
 
 	int line_;
 	bool valid_;
-	int elapsedtime_;
+	Type type_;
+	double ridetime_;
+	double elapsedtime_;
 	double duration_;
 	double distance_;
 	double speed_;
 	double maxspeed_;
 	double avgspeed_;
+	double avgridespeed_;
 	double grade_;
 	double temperature_;
 	int heartrate_;
@@ -205,9 +251,7 @@ class GPX {
 public:
 	enum Data {
 		DataUnknown,
-		DataMeasured,
-		DataPredicted,
-		DataUnchanged,
+		DataAgain,
 		DataEof
 	};
 
@@ -244,6 +288,7 @@ protected:
 	bool parse(void);
 
 	enum Data retrieveFirst_i(GPXData &data);
+	enum Data retrieveNext_i(GPXData &data, int64_t timestamp=-1);
 
 private:
 	GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter filter);
@@ -265,6 +310,8 @@ private:
 	time_t start_activity_;
 
 	enum TelemetrySettings::Filter filter_;
+
+	std::vector<GPXData> data_list_;
 };
 
 #endif

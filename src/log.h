@@ -35,13 +35,13 @@ extern int gpx2video_log_debug_enabled;
     fprintf(stderr, LOG_PREFIX format "\n", ## __VA_ARGS__)
 
 #define log_notice(format, ...) \
-    fprintf(stdout, LOG_PREFIX format "\n", ## __VA_ARGS__)
+    fprintf(stderr, LOG_PREFIX format "\n", ## __VA_ARGS__)
 
 #define log_warn(format, ...) \
-    fprintf(stdout, LOG_PREFIX "WARNING: " format "\n", ## __VA_ARGS__)
+    fprintf(stderr, LOG_PREFIX "WARNING: " format "\n", ## __VA_ARGS__)
 
 #define log_error(format, ...) \
-    fprintf(stdout, LOG_PREFIX "ERROR: " format "\n", ## __VA_ARGS__)
+    fprintf(stderr, LOG_PREFIX "ERROR: " format "\n", ## __VA_ARGS__)
 
 #else // LOG_MODE_PRINTF
 

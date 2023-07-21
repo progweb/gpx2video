@@ -63,7 +63,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- d, --duration         : Duration (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --trim             : Left trim crop (in ms) (not required)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
-	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, kalman)" << std::endl;
+	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --offset           : Add a time offset (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --time-factor      : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;

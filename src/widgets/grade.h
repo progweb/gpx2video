@@ -42,7 +42,7 @@ public:
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
 		char s[128];
 
-		if (data.hasValue(GPXData::TypeElevation))
+		if (data.hasValue(GPXData::DataElevation))
 			sprintf(s, "%.0f%%", data.grade());
 		else
 			sprintf(s, "--%%");

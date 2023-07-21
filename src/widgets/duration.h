@@ -59,7 +59,7 @@ public:
 			hours = duration / 60;
 		}
 
-		if (data.hasValue(GPXData::TypeFix))
+		if (data.hasValue(GPXData::DataFix))
 			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
 		else
 			sprintf(s, "--:--:--");
