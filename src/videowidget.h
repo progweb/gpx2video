@@ -347,6 +347,8 @@ protected:
 	VideoWidget(GPX2Video &app, std::string name)  
 		: GPX2Video::Task(app)
 		, app_(app) 
+		, at_begin_time_(0)
+		, at_end_time_(0)
 		, name_(name) {
 		log_call();
 
