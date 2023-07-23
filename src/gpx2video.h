@@ -26,6 +26,7 @@ public:
 			std::string media_file="", 
 			std::string layout_file="",
 			std::string output_file="",
+			int rate=0,
 			int offset=0,
 			double time_factor=1.0,
 			double map_factor=1.0,
@@ -40,6 +41,7 @@ public:
 			, media_file_(media_file)
 			, layout_file_(layout_file)
 			, output_file_(output_file)
+			, rate_(rate)
 			, offset_(offset)
 			, time_factor_(time_factor)
 			, map_factor_(map_factor)
@@ -66,6 +68,10 @@ public:
 
 		const std::string& outputfile(void) const {
 			return output_file_;
+		}
+
+		const int& rate(void) const {
+			return rate_;
 		}
 
 		const int64_t& offset(void) const {
@@ -114,6 +120,7 @@ public:
 		std::string layout_file_;
 		std::string output_file_;
 
+		int rate_;
 		int64_t offset_;
 
 		double time_factor_;

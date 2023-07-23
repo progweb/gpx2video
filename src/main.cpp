@@ -35,6 +35,7 @@ static const struct option options[] = {
 	{ "layout",           required_argument, 0, 'l' },
 	{ "output",           required_argument, 0, 'o' },
 	{ "offset",           required_argument, 0, 0 },
+	{ "rate",             required_argument, 0, 'r' },
 	{ "time-factor",      required_argument, 0, 0 },
 	{ "telemetry",        required_argument, 0, 't' },
 	{ "map-source",       required_argument, 0, 0 },
@@ -65,6 +66,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --trim             : Left trim crop (in ms) (not required)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, sample, linear...)" << std::endl;
+	std::cout << "\t- r, --rate             : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --offset           : Add a time offset (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --time-factor      : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;
@@ -158,6 +160,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
+	int rate = 0; // By default, no change
 	int verbose = 0;
 	int map_zoom = 12;
 	int max_duration_ms = 0; // By default process whole media
@@ -195,7 +198,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	for (;;) {
 		index = 0;
-		option = getopt_long(argc, argv, "hqvd:m:g:o:f:t:s:z:l:", gpx2video::options, &index);
+		option = getopt_long(argc, argv, "hqvd:m:g:o:f:t:r:s:z:l:", gpx2video::options, &index);
 
 		if (option == -1) 
 			break;
@@ -253,6 +256,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			break;
 		case 'f':
 			extract_format = (ExtractorSettings::Format) atoi(optarg);
+			break;
+		case 'r':
+			rate = atoi(optarg);
 			break;
 		case 't':
 			telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
@@ -398,6 +404,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		mediafile,
 		layoutfile,
 		outputfile,
+		rate,
 		offset,
 		time_factor,
 		map_factor,

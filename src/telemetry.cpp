@@ -115,6 +115,8 @@ done:
 
 bool Telemetry::run(void) {
 	// Read telemetry data each 1 second
+	int rate;
+
 	struct tm tm;
 
 	char time[128];
@@ -122,6 +124,8 @@ bool Telemetry::run(void) {
 	enum GPX::Data type;
 
 	log_call();
+
+	rate = app_.settings().rate();
 
 	if (app_.settings().telemetryFilter() == TelemetrySettings::FilterNone) 
 		timecode_ms_ = -1;
@@ -154,7 +158,10 @@ bool Telemetry::run(void) {
 	out_ << ", " << data_.lap(); 
 	out_ << std::endl;
 
-	timecode_ms_ += 1000;
+	if (rate > 0)
+		timecode_ms_ += 1000 / rate;
+	else
+		timecode_ms_ += 1000;
 
 	schedule();
 

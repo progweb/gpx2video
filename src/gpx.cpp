@@ -265,6 +265,13 @@ void GPXData::reset(void) {
 }
 
 
+bool GPXData::unchanged(void) {
+	type_ = GPXData::TypeUnchanged;
+
+	return true;
+}
+
+
 bool GPXData::predict(enum TelemetrySettings::Filter filter) {
 	struct Utm_val utm;
 
@@ -761,9 +768,10 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 			}
 			else if (timestamp <= data.time(GPXData::PositionCurrent)) {
 //			log_info("Unchanged");
+				data.unchanged();
 			}
 			else if (timestamp < data.time(GPXData::PositionNext)) {
-//			log_info("predic");
+//			log_info("predict");
 				data.predict(filter_);
 			}
 			else if (timestamp == data.time(GPXData::PositionNext)) {
@@ -824,14 +832,33 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 		if (type != GPX::DataEof)
 			data_list_.push_back(next);
 	}
+//	else if ((timecode_ms % 1000) > 0)  {
+//		data.unchanged();
+//
+//		return GPX::DataAgain;
+//	}
 	else {
-		data = data_list_.back();
-
-		next = data;
+		next = data_list_.back();
 
 		type = this->retrieveNext_i(next, timecode_ms + 1000);
-		if (type != GPX::DataEof)
+		if ((type != GPX::DataEof) && (next.type() != GPXData::TypeUnchanged)) {
+			data = data_list_.back();
+
 			data_list_.push_back(next);
+		}
+		else {
+			data.unchanged();
+
+			return GPX::DataAgain;
+		}
+
+//		data = data_list_.back();
+//
+//		next = data;
+//
+//		type = this->retrieveNext_i(next, timecode_ms + 1000);
+//		if (type != GPX::DataEof)
+//			data_list_.push_back(next);
 	}
 
 	// Compute
@@ -847,7 +874,7 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 
 		result.smooth(prev, next);
 	}
-	else{
+	else {
 		result = data_list_[0];
 	}
 

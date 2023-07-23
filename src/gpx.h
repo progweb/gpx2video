@@ -59,6 +59,7 @@ public:
 
 	void init(void);
 	void reset(void);
+	bool unchanged(void);
 	bool predict(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 	bool update(enum TelemetrySettings::Filter filter=TelemetrySettings::FilterNone);
 
