@@ -27,11 +27,14 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
+		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
+
 		if (buf_ == NULL) {
 			this->createBox(&buf_, this->width(), this->height());
 			this->drawBorder(buf_);
 			this->drawBackground(buf_);
-			this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_temperature.png", VideoWidget::ZoomFit);
+			if (with_picto)
+				this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_temperature.png", VideoWidget::ZoomFit);
 		}
 
 		// Image over
@@ -41,9 +44,13 @@ public:
 	}
 
 	void render(OIIO::ImageBuf *buf, const GPXData &data) {
+		int x, y;
+
 		char s[128];
 
 		double temperature = data.temperature();
+
+		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
 		if (unit() == VideoWidget::UnitCelsius) {
 		}
@@ -57,8 +64,12 @@ public:
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
 
 		// Append dynamic info
-		this->drawLabel(buf, this->x() + this->height() + this->padding(VideoWidget::PaddingLeft), this->y(), label().c_str());
-		this->drawValue(buf, this->x() + this->height() + this->padding(VideoWidget::PaddingLeft), this->y(), s);
+		x = this->x() + this->padding(VideoWidget::PaddingLeft);
+		x += (with_picto) ? this->height() : 0;
+		y = this->y();
+
+		this->drawLabel(buf, x, y, label().c_str());
+		this->drawValue(buf, x, y, s);
 	}
 
 private:

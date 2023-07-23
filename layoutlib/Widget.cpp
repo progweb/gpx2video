@@ -64,7 +64,11 @@ namespace layout
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
-	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false)
+	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false),
+	_with_label(this, "with-label", Node::ELEMENT, false),
+	_with_value(this, "with-value", Node::ELEMENT, false),
+	_with_picto(this, "with-picto", Node::ELEMENT, false),
+	_with_unit(this, "with-unit", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
@@ -99,6 +103,10 @@ namespace layout
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
     getInterfaces().push_back(&_nbr_lap);
+    getInterfaces().push_back(&_with_label);
+    getInterfaces().push_back(&_with_value);
+    getInterfaces().push_back(&_with_picto);
+    getInterfaces().push_back(&_with_unit);
 
 	_display.setValue("true");
 
@@ -111,6 +119,11 @@ namespace layout
 	_padding_right.setValue("-1");
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
+
+	_with_label.setValue("true");
+	_with_value.setValue("true");
+	_with_picto.setValue("true");
+	_with_unit.setValue("true");
   }
 
   Widget::~Widget()

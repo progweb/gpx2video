@@ -297,6 +297,10 @@ Here all widget common element settings:
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
+    <with-label>true</with-label>
+    <with-value>true</with-value>
+    <with-picto>true</with-picto>
+    <with-unit>true</with-unit>
 </widget>		
 ```
 
@@ -319,6 +323,7 @@ Node elements are:
   - **background-color**: to set the background color in #RGBA.
   - **text-color**: to set the text color in #RGBA.
   - **text-shadow**: text shadow thickness.
+  - **with-xxxx**: to show or not the field (default is true).
 
 **type** gauges supported are:
   - speed, maxspeed, avgspeed, avgridespeed

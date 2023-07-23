@@ -291,9 +291,37 @@ namespace layout
     ///
     /// Get nbr lap
     ///
-    /// @return the nbr lap attribute
+    /// @return the nbr lap element
     ///
     Unsigned  &nbrLap() { return _nbr_lap; }
+
+	/// 
+	/// Get label flag
+	///
+	/// @return the label flag element
+	///
+	Boolean  &withLabel() { return _with_label; }
+
+	/// 
+	/// Get value flag
+	///
+	/// @return the value flag element
+	///
+	Boolean  &withValue() { return _with_value; }
+
+	/// 
+	/// Get picto flag
+	///
+	/// @return the picto flag element
+	///
+	Boolean  &withPicto() { return _with_picto; }
+
+	/// 
+	/// Get unit flag
+	///
+	/// @return the unit flag element
+	///
+	Boolean  &withUnit() { return _with_unit; }
 
     // Methods
 
@@ -330,6 +358,11 @@ namespace layout
 	String       _bordercolor;
 	String       _bgcolor;
 	Unsigned     _nbr_lap;
+
+	Boolean      _with_label;
+	Boolean      _with_value;
+	Boolean      _with_picto;
+	Boolean      _with_unit;
     
     // Disable copy constructors
     Widget(const Widget &);

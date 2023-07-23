@@ -75,6 +75,15 @@ public:
 		ZoomUnknown
 	};
 
+	enum Flag {
+		FlagNone = 0,
+		FlagLabel = (1 << 0),
+		FlagValue = (1 << 1),
+		FlagPicto = (1 << 2),
+		FlagUnit = (1 << 3),
+		FlagUnknown = (1 << 4),
+	};
+
 	virtual ~VideoWidget() {
 		log_call();
 	}
@@ -325,6 +334,18 @@ public:
 		return hex2color(bgcolor_, color);
 	}
 
+	virtual void setFlags(int flags) {
+		flags_ = flags;
+	}
+
+	virtual void addFlag(VideoWidget::Flag flag) {
+		flags_ |= flag;
+	}
+
+	virtual bool hasFlag(VideoWidget::Flag flag) {
+		return ((flags_ & flag) != 0);
+	}
+
 	virtual bool run(void) {
 		log_call();
 
@@ -367,6 +388,7 @@ protected:
 		setBorder(0);
 		setBorderColor("#00000000");
 		setBackgroundColor("#00000000");
+		setFlags(VideoWidget::FlagLabel | VideoWidget::FlagValue | VideoWidget::FlagPicto | VideoWidget::FlagUnit);
 	}
 
 	void createBox(OIIO::ImageBuf **buf, int width, int height);
@@ -416,6 +438,8 @@ protected:
 	int border_;
 	float bordercolor_[4];
 	float bgcolor_[4];
+
+	int flags_;
 
 private:
 	std::string name_;

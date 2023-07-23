@@ -300,12 +300,17 @@ void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char
 void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label) {
 	bool result;
 
+	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
+
 	int h;
 
 	int border = this->border();
 	int padding_x = this->padding(VideoWidget::PaddingLeft);
 	int padding_yt = this->padding(VideoWidget::PaddingTop);
 	int padding_yb = this->padding(VideoWidget::PaddingBottom);
+
+	if (!with_label)
+		return;
 
 	// Apply border
 	x += border;
@@ -344,12 +349,18 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value) {
 	bool result;
 
+	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
+	bool with_value = this->hasFlag(VideoWidget::FlagValue);
+
 	int h;
 
 	int border = this->border();
 	int padding_x = this->padding(VideoWidget::PaddingLeft);
 	int padding_yt = this->padding(VideoWidget::PaddingTop);
 	int padding_yb = this->padding(VideoWidget::PaddingBottom);
+
+	if (!with_value)
+		return;
 
 	// Apply border
 	x += border;
@@ -373,11 +384,12 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 
 	result = OIIO::ImageBufAlgo::render_text(*buf, 
 		x + padding_x, 
-		y + h - padding_yb, 
+		(with_label) ? y + h - padding_yb : y + (h / 2),
 		value, 
-		2 * pt, this->font(), color, 
+		(with_label) ? 2 * pt : 3 *pt,
+		this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
-		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
+		(with_label) ? OIIO::ImageBufAlgo::TextAlignY::Baseline : OIIO::ImageBufAlgo::TextAlignY::Center, 
 		this->textShadow());
 
 	if (result == false)

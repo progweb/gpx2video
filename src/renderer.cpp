@@ -359,6 +359,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget *widget = NULL;
 
+	int flags = VideoWidget::FlagNone;
+
 	VideoWidget::Unit unit = VideoWidget::UnitNone;
 	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
@@ -453,6 +455,16 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	log_info("Load widget '%s'", (const char *) w->type());
 
+	// Flags
+	if (w->withLabel())
+		flags |= VideoWidget::FlagLabel;
+	if (w->withValue())
+		flags |= VideoWidget::FlagValue;
+	if (w->withPicto())
+		flags |= VideoWidget::FlagPicto;
+	if (w->withUnit())
+		flags |= VideoWidget::FlagUnit;
+
 	// Widget settings
 	widget->setPosition(position);
 	widget->setAlign(align);
@@ -482,6 +494,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget->setUnit(unit);
 	widget->setZoom(zoom);
 	widget->setSource((const char *) w->source());
+	widget->setFlags(flags);
 
 	// Append
 	app_.append(widget);
