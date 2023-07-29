@@ -25,15 +25,21 @@ public:
 	}
 
 	void prepare(OIIO::ImageBuf *buf) {
+		int x, y;
+
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
 		if (buf_ == NULL) {
+			x = this->padding(VideoWidget::PaddingLeft);
+			x += (with_picto) ? this->height() : 0;
+			y = 0;
+
 			this->createBox(&buf_, this->width(), this->height());
 			this->drawBorder(buf_);
 			this->drawBackground(buf_);
 			if (with_picto)
 				this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_position.png", VideoWidget::ZoomFit);
-//			this->drawLabel(buf_, 0, 0, label().c_str());
+			this->drawLabel(buf_, x, y, label().c_str());
 		}
 
 		// Image over
@@ -60,7 +66,7 @@ public:
 		x += (with_picto) ? this->height() : 0;
 		y = this->y();
 
-		this->drawLabel(buf, x, y, label().c_str());
+		//this->drawLabel(buf, x, y, label().c_str());
 		this->drawValue(buf, x, y, s);
 	}
 

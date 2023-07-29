@@ -998,8 +998,6 @@ void Renderer::computeWidgetsPosition(void) {
 
 
 void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, const GPXData &data) {
-//	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
-
 	// Draw overlay
 	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
 
@@ -1019,8 +1017,6 @@ void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, co
 
 		widget->render(&frame_buffer, data);
 	}
-
-//	frame->fromImageBuf(frame_buffer);
 }
 
 

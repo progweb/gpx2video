@@ -5,8 +5,10 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "oiio.h"
 #include "oiioutils.h"
 #include "videowidget.h"
+
 
 
 VideoWidget::Position VideoWidget::string2position(std::string &s) {
@@ -283,7 +285,7 @@ void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char
 
 	memcpy(color, this->textColor(), sizeof(color));
 
-	result = OIIO::ImageBufAlgo::render_text(*buf, 
+	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
 		x, 
 		y, 
 		label, 
@@ -332,7 +334,7 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 
 	memcpy(color, this->textColor(), sizeof(color));
 
-	result = OIIO::ImageBufAlgo::render_text(*buf, 
+	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
 		x + padding_x, 
 		y + padding_yt, 
 		label, 
@@ -382,7 +384,7 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 
 	memcpy(color, this->textColor(), sizeof(color));
 
-	result = OIIO::ImageBufAlgo::render_text(*buf, 
+	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
 		x + padding_x, 
 		(with_label) ? y + h - padding_yb : y + (h / 2),
 		value, 
