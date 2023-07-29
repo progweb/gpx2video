@@ -1,3 +1,6 @@
+#include <string>
+#include <codecvt>
+#include <locale>
 #include <algorithm>
 #include <cmath>
 #include <limits>
@@ -37,7 +40,7 @@ static const char* default_font_name[] = { "DroidSans", "cour", "Courier New",
 
 // Helper: given unicode and a font face, compute its size
 static ROI
-text_size_from_unicode(std::vector<uint32_t>& utext, FT_Face face)
+text_size_from_unicode(std::u32string& utext, FT_Face face)
 {
     ROI size;
     size.xbegin = size.ybegin = std::numeric_limits<int>::max();
@@ -199,6 +202,8 @@ render_text_shadow(ImageBuf& R, int x, int y, string_view text,
 	// Thread safety
 	lock_guard ft_lock(ft_mutex);
 
+	std::wstring_convert<std::codecvt_utf8<char32_t>, char32_t> conv_utf8_utf32;
+
 	std::string font;
 	bool ok = resolve_font(font_, font);
     if (!ok) {
@@ -243,13 +248,10 @@ render_text_shadow(ImageBuf& R, int x, int y, string_view text,
 		alpha_channel = -1;
 
     // Convert the UTF to 32 bit unicode
-    std::vector<uint32_t> utext;
-    utext.reserve(
-        text.size());  //Possible overcommit, but most text will be ascii
-    Strutil::utf8_to_unicode(text, utext);
+	std::u32string u32string = conv_utf8_utf32.from_bytes(text);
 
     // Compute the size that the text will render as, into an ROI
-    ROI textroi     = text_size_from_unicode(utext, face);
+    ROI textroi     = text_size_from_unicode(u32string, face);
     textroi.zbegin  = 0;
     textroi.zend    = 1;
     textroi.chbegin = 0;
@@ -278,7 +280,7 @@ render_text_shadow(ImageBuf& R, int x, int y, string_view text,
     ImageBufAlgo::zero(textimg);
 
     // Glyph by glyph, fill in our txtimg buffer
-    for (auto ch : utext) {
+    for (auto ch : u32string) {
         int error = FT_Load_Char(face, ch, FT_LOAD_RENDER);
         if (error)
             continue;  // ignore errors
