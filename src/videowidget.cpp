@@ -386,12 +386,12 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 
 	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
 		x + padding_x, 
-		(with_label) ? y + h - padding_yb : y + (h / 2),
+		(with_label) ? y + h - padding_yb : y + ((h - padding_yb) / 2)  + ((4 * pt) / 3),
 		value, 
-		(with_label) ? 2 * pt : 3 *pt,
+		(with_label) ? 2 * pt : 3 * pt,
 		this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
-		(with_label) ? OIIO::ImageBufAlgo::TextAlignY::Baseline : OIIO::ImageBufAlgo::TextAlignY::Center, 
+		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
 		this->textShadow());
 
 	if (result == false)
