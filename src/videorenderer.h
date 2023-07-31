@@ -24,6 +24,8 @@ protected:
 
 	int64_t frame_time_ = 0;
 
+	time_t started_at_;
+
 	VideoRenderer(GPX2Video &app); //, Map *map);
 
 	void init(void);

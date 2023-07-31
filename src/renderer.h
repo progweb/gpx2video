@@ -44,8 +44,6 @@ protected:
 
 	OIIO::ImageBuf *overlay_;
 
-	time_t started_at_;
-
 	Renderer(GPX2Video &app); //, Map *map);
 
 	void init(void);

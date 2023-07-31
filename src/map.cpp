@@ -307,9 +307,6 @@ Map * Map::create(GPX2Video &app, const MapSettings &settings) {
 
 	map = new Map(app, settings, app.evbase());
 
-	map->init();
-	map->limits();
-
 	return map;
 }
 
@@ -437,8 +434,8 @@ void Map::limits(void) {
 	padding = this->border() + settings().markerSize(); 
 
 	// width x height of track
-	w = floorf((float) px2_ - px1_);
-	h = floorf((float) py2_ - py1_);
+	w = ceilf((float) px2_ - px1_);
+	h = ceilf((float) py2_ - py1_);
 
 	w *= divider_;
 	h *= divider_;

@@ -10,7 +10,8 @@
 
 
 VideoRenderer::VideoRenderer(GPX2Video &app)
-	: Renderer(app) {
+	: Renderer(app)
+	, started_at_(0) {
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
 	encoder_ = NULL;
@@ -266,11 +267,14 @@ bool VideoRenderer::stop(void) {
 	// Sum-up
 	working = now - started_at_;
 
-	printf("%ld frames %dx%d to %dx%d proceed in %02d:%02d:%02d\n",
-		frame_time_,
-		video_stream->width(), video_stream->height(),
-		encoder_->settings().videoParams().width(), encoder_->settings().videoParams().height(),
-		(working / 3600), (working / 60) % 60, (working) % 60);
+	if (started_at_ > 0) 
+		printf("%ld frames %dx%d to %dx%d proceed in %02d:%02d:%02d\n",
+			frame_time_,
+			video_stream->width(), video_stream->height(),
+			encoder_->settings().videoParams().width(), encoder_->settings().videoParams().height(),
+			(working / 3600), (working / 60) % 60, (working) % 60);
+	else
+		printf("None frame proceed\n");
 
 	encoder_->close();
 	if (decoder_audio_)

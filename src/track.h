@@ -31,6 +31,15 @@ public:
 
 	void setSize(int width, int height);
 
+	bool run(void) {
+		log_call();
+
+		init();
+		complete();
+
+		return true;
+	}
+
 	static int lat2pixel(int zoom, float lat);
 	static int lon2pixel(int zoom, float lon);
 

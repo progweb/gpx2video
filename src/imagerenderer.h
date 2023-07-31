@@ -20,6 +20,8 @@ protected:
 	char duration_[16];
 	unsigned int duration_ms_;
 
+	time_t started_at_;
+
 	ImageRenderer(GPX2Video &app); //, Map *map);
 
 	void init(void);

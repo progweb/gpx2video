@@ -152,8 +152,6 @@ Track * Track::create(GPX2Video &app, const TrackSettings &settings) {
 
 	track = new Track(app, settings, app.evbase());
 
-	track->init();
-
 	return track;
 }
 
@@ -232,24 +230,24 @@ void Track::init(bool zoomfit) {
 	py2_ = Track::lat2pixel(zoom, lat2);
 
 	// lat/lon to tile index
-	x1_ = floorf((float) px1_ / (float) TILESIZE);
+	x1_ = floor((float) px1_ / (float) TILESIZE);
 	y1_ = floorf((float) py1_ / (float) TILESIZE);
 
-	x2_ = floorf((float) px2_ / (float) TILESIZE) + 1;
-	y2_ = floorf((float) py2_ / (float) TILESIZE) + 1;
+	x2_ = ceilf((float) px2_ / (float) TILESIZE);
+	y2_ = ceilf((float) py2_ / (float) TILESIZE);
+
+	// Use padding (to see markers)
+	padding = this->border() + settings().markerSize();
+
+	width -= 2 * padding;
+	height -= 2 * padding;
 
 	if (zoomfit) {
 		double divider;
 
-		// Use padding (to see markers)
-		padding = this->border() + settings().markerSize();
-
-		width -= 2 * padding;
-		height -= 2 * padding;
-
 		// Compute divider to match with the size of widget
-		w = floorf((float) px2_ - px1_);
-		h = floorf((float) py2_ - py1_);
+		w = ceilf((float) px2_ - px1_);
+		h = ceilf((float) py2_ - py1_);
 
 		if (((float) width / w) > ((float) height / h))
 			divider = (float) height / h;
@@ -259,6 +257,19 @@ void Track::init(bool zoomfit) {
 		// Save computed divider value
 		divider_ = divider;
 	}
+
+	// Append tile so as padding is enough
+	while (((px1_ - (x1_ * TILESIZE)) * divider_) < padding)
+		x1_ -= 1;
+
+	while (((py1_ - (y1_ * TILESIZE)) * divider_) < padding)
+		y1_ -= 1;
+
+	while ((((x2_ * TILESIZE) - px2_) * divider_) < padding)
+		x2_ += 1;
+
+	while ((((y2_ * TILESIZE) - py2_) * divider_) < padding)
+		y2_ += 1;
 
 	// Append tile so as width tiles sum is enough
 	while (((x2_ - x1_) * TILESIZE * divider_) < (2 * width)) {

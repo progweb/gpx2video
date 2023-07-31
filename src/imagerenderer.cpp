@@ -11,7 +11,9 @@
 
 
 ImageRenderer::ImageRenderer(GPX2Video &app)
-	: Renderer(app) {
+	: Renderer(app)
+	, timecode_(0)
+	, started_at_(0) {
 }
 
 
@@ -253,10 +255,13 @@ bool ImageRenderer::stop(void) {
 	// Sum-up
 	working = now - started_at_;
 
-	printf("%ld frames %dx%d proceed in %02d:%02d:%02d\n",
-		timecode_,
-		video_stream->width(), video_stream->height(),
-		(working / 3600), (working / 60) % 60, (working) % 60);
+	if (started_at_ > 0) 
+		printf("%ld frames %dx%d proceed in %02d:%02d:%02d\n",
+			timecode_,
+			video_stream->width(), video_stream->height(),
+			(working / 3600), (working / 60) % 60, (working) % 60);
+	else
+		printf("None frame proceed\n");
 
 	if (overlay_)
 		delete overlay_;

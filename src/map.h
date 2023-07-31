@@ -70,6 +70,8 @@ public:
 	bool run(void) {
 		log_call();
 
+		init();
+		limits();
 		download();
 		
 		return true;
