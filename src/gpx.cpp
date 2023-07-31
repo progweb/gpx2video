@@ -517,6 +517,7 @@ void GPXData::read(gpx::WPT *wpt) {
 GPX::GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter filter) 
 	: stream_(stream)
 	, root_(root)
+	, eof_(false)
 	, trk_(NULL)
 	, offset_(0) 
 	, from_(0)
@@ -715,6 +716,8 @@ enum GPX::Data GPX::retrieveFirst_i(GPXData &data) {
 enum GPX::Data GPX::retrieveFirst(GPXData &data) {
 	enum GPX::Data result;
 
+	eof_ = false;
+
 	// Read first waypoint
 	result = retrieveFirst_i(data);
 
@@ -846,7 +849,7 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 
 			data_list_.push_back(next);
 		}
-		else {
+		else if (type != GPX::DataEof) {
 			data.unchanged();
 
 			return GPX::DataAgain;
@@ -891,6 +894,9 @@ enum GPX::Data GPX::retrieveData(GPXData &data) {
 	std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
+	if (eof_)
+		goto done;
+
 	// Next point
 	iter_pts_++;
 
@@ -916,6 +922,8 @@ enum GPX::Data GPX::retrieveData(GPXData &data) {
 	return GPX::DataAgain;
 
 done:
+	eof_ = true;
+
 	data = GPXData();
 
 	return GPX::DataEof;
@@ -960,6 +968,8 @@ enum GPX::Data GPX::retrieveLast(GPXData &data) {
 			}
 		} while (iter_seg_ != trksegs.begin());
 	}
+
+	eof_ = true;
 
 	return GPX::DataEof;
 }

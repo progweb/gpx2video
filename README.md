@@ -297,10 +297,10 @@ Here all widget common element settings:
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
-    <with-label>true</with-label>
-    <with-value>true</with-value>
-    <with-picto>true</with-picto>
-    <with-unit>true</with-unit>
+	<with-label>true</with-label>
+	<with-value>true</with-value>
+	<with-picto>true</with-picto>
+	<with-unit>true</with-unit>
 </widget>		
 ```
 

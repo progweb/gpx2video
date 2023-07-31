@@ -298,6 +298,8 @@ private:
 
 	gpx::GPX *root_;
 
+	bool eof_;
+
 	gpx::TRK *trk_;
 
 	std::list<gpx::WPT*>::iterator iter_pts_;

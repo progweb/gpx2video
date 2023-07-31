@@ -76,7 +76,10 @@ void VideoRenderer::init(void) {
 
 	// Compute duration
 	duration_ms_ = video_stream->duration() * av_q2d(video_stream->timeBase()) * 1000;
-	duration_ms_ = MAX(duration_ms_, app_.settings().maxDuration());
+
+	// If maxDuration set by the user
+	if (app_.settings().maxDuration() > 0) 
+		duration_ms_ = MIN(duration_ms_, app_.settings().maxDuration());
 
 	snprintf(duration_, sizeof(duration_), "%02d:%02d:%02d.%03d", 
 		(unsigned int) (duration_ms_ / 3600000), (unsigned int) ((duration_ms_ / 60000) % 60), (unsigned int) ((duration_ms_ / 1000) % 60), (unsigned int) (duration_ms_ % 1000));

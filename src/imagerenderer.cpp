@@ -38,7 +38,20 @@ void ImageRenderer::init(void) {
 
 	// Compute duration
 	duration_ms_ = video_stream->duration() * av_q2d(video_stream->timeBase()) * 1000;
-	duration_ms_ = MAX(duration_ms_, app_.settings().maxDuration());
+
+	// Hack - if maxDuration == -1, render whole gpx
+	if (app_.settings().maxDuration() == (unsigned int) -1) {
+		gpx_->retrieveLast(data_);
+
+		duration_ms_ = data_.time(GPXData::PositionCurrent) * 1000;
+
+		gpx_->retrieveFirst(data_);
+
+		duration_ms_ -= data_.time(GPXData::PositionCurrent) * 1000;
+	}
+	// If maxDuration set by the user
+	else if (app_.settings().maxDuration() > 0) 
+		duration_ms_ = MIN(duration_ms_, app_.settings().maxDuration());
 
 	snprintf(duration_, sizeof(duration_), "%02d:%02d:%02d.%03d", 
 		(unsigned int) (duration_ms_ / 3600000), (unsigned int) ((duration_ms_ / 60000) % 60), (unsigned int) ((duration_ms_ / 1000) % 60), (unsigned int) (duration_ms_ % 1000));
@@ -101,6 +114,8 @@ bool ImageRenderer::run(void) {
 
 	double time_factor;
 
+	enum GPX::Data type;
+
 	std::string filename = app_.settings().outputfile();
 
 	// Create image buffer
@@ -153,7 +168,10 @@ bool ImageRenderer::run(void) {
 		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 
 		// Read GPX data
-		gpx_->retrieveNext(data_, time_factor * timecode_ms);
+		type = gpx_->retrieveNext(data_, time_factor * timecode_ms);
+
+		if (type == GPX::DataEof)
+			goto done;
 
 		// Draw
 		this->draw(image_buffer, timecode_ms, data_);
@@ -168,11 +186,11 @@ bool ImageRenderer::run(void) {
 	}
 
 error:
-	// Max rendering duration
-	if (app_.settings().maxDuration() > 0) {
-		if (timecode_ms >= app_.settings().maxDuration())
-			goto done;
-	}
+//	// Max rendering duration
+//	if (app_.settings().maxDuration() > 0) {
+//		if (timecode_ms >= app_.settings().maxDuration())
+//			goto done;
+//	}
 
 	// Dump frame info
 	{
