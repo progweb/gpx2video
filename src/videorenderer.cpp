@@ -61,8 +61,9 @@ void VideoRenderer::init(void) {
 	EncoderSettings settings;
 	settings.setFilename(app_.settings().outputfile());
 	settings.setVideoParams(video_params, AV_CODEC_ID_H264);
-	settings.setVideoBitrate(4 * 1000 * 1000 * 8);
-	settings.setVideoMaxBitrate(2 * 1000 * 1000 * 16);
+	settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
+	settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
+	settings.setVideoMaxBitrate(app_.settings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32
 	settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
 
 	if (audio_stream) {

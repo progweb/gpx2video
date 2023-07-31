@@ -125,7 +125,7 @@ bool Telemetry::run(void) {
 
 	log_call();
 
-	rate = app_.settings().rate();
+	rate = app_.settings().telemetryRate();
 
 	if (app_.settings().telemetryFilter() == TelemetrySettings::FilterNone) 
 		timecode_ms_ = -1;

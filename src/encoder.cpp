@@ -6,6 +6,7 @@
 EncoderSettings::EncoderSettings() :
 	video_enabled_(false),
 	video_bit_rate_(0),
+	video_min_bit_rate_(0),
 	video_max_bit_rate_(0),
 	video_buffer_size_(0),
 	audio_enabled_(false) {
@@ -55,13 +56,38 @@ bool EncoderSettings::isVideoEnabled(void) const {
 }
 
 
+const int64_t& EncoderSettings::videoBitrate(void) const {
+	return video_bit_rate_;
+}
+
+
 void EncoderSettings::setVideoBitrate(const int64_t rate) {
 	video_bit_rate_ = rate;
 }
 
 
+const int64_t& EncoderSettings::videoMinBitrate(void) const {
+	return video_min_bit_rate_;
+}
+
+
+void EncoderSettings::setVideoMinBitrate(const int64_t rate) {
+	video_min_bit_rate_ = rate;
+}
+
+
+const int64_t& EncoderSettings::videoMaxBitrate(void) const {
+	return video_max_bit_rate_;
+}
+
+
 void EncoderSettings::setVideoMaxBitrate(const int64_t rate) {
 	video_max_bit_rate_ = rate;
+}
+
+
+const int64_t& EncoderSettings::videoBufferSize(void) const {
+	return video_buffer_size_;
 }
 
 
@@ -301,10 +327,10 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->time_base = settings().videoParams().timeBase();
 
 		// Custom options
-		codec_context->bit_rate = 4 * 1000 * 1000 * 8;
-//		codec_context->rc_min_rate = 8 * 1000 * 1000;
-		codec_context->rc_max_rate = 2 * 1000 * 1000 * 16;
-		codec_context->rc_buffer_size = 4 * 1000 * 1000 / 2;
+		codec_context->bit_rate = settings().videoBitrate(); //4 * 1000 * 1000 * 8;
+		codec_context->rc_min_rate = settings().videoMinBitrate(); // 0 // 8 * 1000 * 1000;
+		codec_context->rc_max_rate = settings().videoMaxBitrate(); //2 * 1000 * 1000 * 16;
+		codec_context->rc_buffer_size = settings().videoBufferSize(); //4 * 1000 * 1000 / 2;
 
 // codec/ffmpeg/ffmpegencoder.cpp:503
 //				enc_ctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;

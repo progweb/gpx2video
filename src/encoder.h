@@ -31,8 +31,17 @@ public:
 	void setAudioParams(const AudioParams &audio_params, AVCodecID codec_id);
 
 	bool isVideoEnabled(void) const;
+
+	const int64_t& videoBitrate(void) const;
 	void setVideoBitrate(const int64_t rate);
+
+	const int64_t& videoMinBitrate(void) const;
+	void setVideoMinBitrate(const int64_t rate);
+
+	const int64_t& videoMaxBitrate(void) const;
 	void setVideoMaxBitrate(const int64_t rate);
+
+	const int64_t& videoBufferSize(void) const;
 	void setVideoBufferSize(const int64_t size);
 
 	bool isAudioEnabled(void) const;
@@ -45,6 +54,7 @@ private:
 	VideoParams video_params_;
 	AVCodecID video_codec_id_;
 	int64_t video_bit_rate_;
+	int64_t video_min_bit_rate_;
 	int64_t video_max_bit_rate_;
 	int64_t video_buffer_size_;
 

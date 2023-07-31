@@ -197,6 +197,8 @@ Map * GPX2Video::buildMap(void) {
 	mapSettings.setZoom(settings().mapzoom());
 	mapSettings.setDivider(settings().mapfactor());
 	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+	mapSettings.setPathThick(settings().paththick());
+	mapSettings.setPathBorder(settings().pathborder());
 
 	Map *map = Map::create(*this, mapSettings);
 

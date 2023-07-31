@@ -24,29 +24,33 @@ extern "C" {
 namespace gpx2video {
 
 static const struct option options[] = {
-	{ "help",             no_argument,       0, 'h' },
-	{ "verbose",          no_argument,       0, 'v' },
-	{ "quiet",            no_argument,       0, 'q' },
-	{ "format",           required_argument, 0, 'f' },
-	{ "duration",         required_argument, 0, 'd' },
-	{ "trim",             required_argument, 0, 0 },
-	{ "media",            required_argument, 0, 'm' },
-	{ "gpx",              required_argument, 0, 'g' },
-	{ "layout",           required_argument, 0, 'l' },
-	{ "output",           required_argument, 0, 'o' },
-	{ "offset",           required_argument, 0, 0 },
-	{ "rate",             required_argument, 0, 'r' },
-	{ "time-factor",      required_argument, 0, 0 },
-	{ "telemetry",        required_argument, 0, 't' },
-	{ "map-source",       required_argument, 0, 0 },
-	{ "map-factor",       required_argument, 0, 0 },
-	{ "map-zoom",         required_argument, 0, 0 },
-	{ "map-list",         no_argument,       0, 0 },
-	{ "gpx-from",         required_argument, 0, 0 },
-	{ "gpx-to",           required_argument, 0, 0 },
-	{ "extract-format",   no_argument,       0, 0 },
-	{ "telemetry-filter", no_argument,       0, 0 },
-	{ 0,                  0,                 0, 0 }
+	{ "help",               no_argument,       0, 'h' },
+	{ "verbose",            no_argument,       0, 'v' },
+	{ "quiet",              no_argument,       0, 'q' },
+	{ "format",             required_argument, 0, 'f' },
+	{ "duration",           required_argument, 0, 'd' },
+	{ "trim",               required_argument, 0, 0 },
+	{ "media",              required_argument, 0, 'm' },
+	{ "gpx",                required_argument, 0, 'g' },
+	{ "layout",             required_argument, 0, 'l' },
+	{ "output",             required_argument, 0, 'o' },
+	{ "offset",             required_argument, 0, 0 },
+	{ "rate",               required_argument, 0, 'r' },
+	{ "time-factor",        required_argument, 0, 0 },
+	{ "telemetry",          required_argument, 0, 't' },
+	{ "map-source",         required_argument, 0, 0 },
+	{ "map-factor",         required_argument, 0, 0 },
+	{ "map-zoom",           required_argument, 0, 0 },
+	{ "map-list",           no_argument,       0, 0 },
+	{ "gpx-from",           required_argument, 0, 0 },
+	{ "gpx-to",             required_argument, 0, 0 },
+	{ "extract-format",     no_argument,       0, 0 },
+	{ "telemetry-filter",   no_argument,       0, 0 },
+	{ "telemetry-rate",     required_argument, 0, 0 },
+	{ "video-bitrate",      required_argument, 0, 0 },
+	{ "video-min-bitrate",  required_argument, 0, 0 },
+	{ "video-max-bitrate",  required_argument, 0, 0 },
+	{ 0,                    0,                 0, 0 }
 };
 
 static void print_usage(const std::string &name) {
@@ -66,6 +70,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --trim             : Left trim crop (in ms) (not required)" << std::endl;
 	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, sample, linear...)" << std::endl;
+	std::cout << "\t-    --telemetry-rate   : Telemetry rate (refresh each second) (default: 1))" << std::endl;
 	std::cout << "\t- r, --rate             : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --offset           : Add a time offset (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --time-factor      : Time factor - To read video timelapse (default: 1.0)" << std::endl;
@@ -73,6 +78,8 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --map-source       : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom         : Map zoom" << std::endl;
 	std::cout << "\t-    --map-list         : Dump supported map list" << std::endl;
+	std::cout << "\t-    --path-thick       : Path thick (default: 3.0)" << std::endl;
+	std::cout << "\t-    --path-border      : Path border (default: 1.4)" << std::endl;
 	std::cout << "\t- v, --verbose          : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet            : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
@@ -160,7 +167,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
-	int rate = 0; // By default, no change
+	int rate = 0; // Video fps - by default, no change
 	int verbose = 0;
 	int map_zoom = 12;
 	int max_duration_ms = 0; // By default process whole media
@@ -170,6 +177,16 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	double time_factor = 1.0;
 
 	double map_factor = 1.0;
+
+	double path_thick = 3.0;
+	double path_border = 1.4;
+
+	int telemetry_rate = 0; // By default, no change
+
+	// Video encoder settings
+	int64_t video_bit_rate = 2 * 1000 * 1000 * 8;		// 16MB
+	int64_t video_min_bit_rate = 0;						// 0
+	int64_t video_max_bit_rate = 2 * 1000 * 1000 * 16;	// 32MB
 
 	const char *s;
 
@@ -230,6 +247,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "map-source")) {
 				map_source = (MapSettings::Source) atoi(optarg);
 			}
+			else if (s && !strcmp(s, "path-thick")) {
+				path_thick = strtod(optarg, NULL);
+			}
+			else if (s && !strcmp(s, "path-border")) {
+				path_border = strtod(optarg, NULL);
+			}
 			else if (s && !strcmp(s, "gpx-from")) {
 				gpx_from = std::string(optarg);
 			}
@@ -243,6 +266,18 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				setCommand(GPX2Video::CommandFilter);
 				return 0;
+			}
+			else if (s && !strcmp(s, "telemetry-rate")) {
+				telemetry_rate = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "video-bitrate")) {
+				video_bit_rate = atoll(optarg);
+			}
+			else if (s && !strcmp(s, "video-min-bitrate")) {
+				video_min_bit_rate = atoll(optarg);
+			}
+			else if (s && !strcmp(s, "video-max-bitrate")) {
+				video_max_bit_rate = atoll(optarg);
 			}
 			else {
 				std::cout << "option " << s;
@@ -411,10 +446,16 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_zoom,
 		max_duration_ms,
 		map_source,
+		path_thick,
+		path_border,
 		gpx_from,
 		gpx_to,
 		extract_format,
-		telemetry_filter)
+		telemetry_filter,
+		telemetry_rate,
+		video_bit_rate,
+		video_min_bit_rate,
+		video_max_bit_rate)
 	);
 
 	return 0;

@@ -33,10 +33,16 @@ public:
 			int map_zoom=8, 
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
+			double path_thick=3.0,
+			double path_border=1.4,
 			std::string gpx_from="",
 			std::string gpx_to="",
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
-			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone)
+			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
+			int telemetry_rate=0,
+			int64_t video_bit_rate=0,
+			int64_t video_min_bit_rate=0,
+			int64_t video_max_bit_rate=0)
 			: gpx_file_(gpx_file)
 			, media_file_(media_file)
 			, layout_file_(layout_file)
@@ -48,10 +54,16 @@ public:
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
 			, map_source_(map_source)
+			, path_thick_(path_thick)
+			, path_border_(path_border)
 			, gpx_from_(gpx_from)
 			, gpx_to_(gpx_to)
 	   		, extract_format_(extract_format) 
-			, telemetry_filter_(telemetry_filter) {
+			, telemetry_filter_(telemetry_filter) 
+			, telemetry_rate_(telemetry_rate)
+			, video_bit_rate_(video_bit_rate)
+			, video_min_bit_rate_(video_min_bit_rate)
+			, video_max_bit_rate_(video_max_bit_rate) {
 		}
 
 		const std::string& gpxfile(void) const {
@@ -86,12 +98,24 @@ public:
 			return map_source_;
 		}
 
+		const double& paththick(void) const {
+			return path_thick_;
+		}
+
+		const double& pathborder(void) const {
+			return path_border_;
+		}
+
 		const ExtractorSettings::Format& extractFormat(void) const {
 			return extract_format_;
 		}
 
 		const TelemetrySettings::Filter& telemetryFilter(void) const {
 			return telemetry_filter_;
+		}
+
+		const int& telemetryRate(void) const {
+			return telemetry_rate_;
 		}
 
 		const double& mapfactor(void) const {
@@ -114,6 +138,18 @@ public:
 			return gpx_to_;
 		}
 
+		const int64_t& videoBitrate(void) const {
+			return video_bit_rate_;
+		}
+
+		const int64_t& videoMinBitrate(void) const {
+			return video_min_bit_rate_;
+		}
+
+		const int64_t& videoMaxBitrate(void) const {
+			return video_max_bit_rate_;
+		}
+
 	private:
 		std::string gpx_file_;
 		std::string media_file_;
@@ -130,11 +166,19 @@ public:
 		unsigned int max_duration_ms_;
 		MapSettings::Source map_source_;
 
+		double path_thick_;
+		double path_border_;
+
 		std::string gpx_from_;
 		std::string gpx_to_;
 
 		ExtractorSettings::Format extract_format_;
 		TelemetrySettings::Filter telemetry_filter_;
+		int telemetry_rate_;
+
+		int64_t video_bit_rate_;
+		int64_t video_min_bit_rate_;
+		int64_t video_max_bit_rate_;
 	};
 
 	class Task {
