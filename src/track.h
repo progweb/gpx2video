@@ -47,11 +47,12 @@ public:
 	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
 
 	// Render track
-	void prepare(OIIO::ImageBuf *buf);
-	void render(OIIO::ImageBuf *frame, const GPXData &data);
+	OIIO::ImageBuf * prepare(void);
+	OIIO::ImageBuf * render(const GPXData &data);
 
 protected:
-	OIIO::ImageBuf *buf_;
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
 
 	Track(GPX2Video &app, const TrackSettings &settings, struct event_base *evbase);
 

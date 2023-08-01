@@ -10,8 +10,11 @@ public:
 	virtual ~GPXWidget() {
 		log_call();
 
-		if (buf_)
-			delete buf_;
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
 	}
 
 	static GPXWidget * create(GPX2Video &app) {
@@ -24,21 +27,22 @@ public:
 		return widget;
 	}
 
-	void prepare(OIIO::ImageBuf *buf) {
-		if (buf_ == NULL) {
-			this->createBox(&buf_, this->width(), this->height());
-			this->drawBorder(buf_);
-			this->drawBackground(buf_);
-//			this->drawLabel(buf_, 0, 0, label().c_str());
+	OIIO::ImageBuf * prepare(void) {
+		if (bg_buf_ == NULL) {
+			this->createBox(&bg_buf_, this->width(), this->height());
+			this->drawBorder(bg_buf_);
+			this->drawBackground(bg_buf_);
+//			this->drawLabel(bg_buf_, 0, 0, label().c_str());
 		}
 
-		// Image over
-		buf_->specmod().x = this->x();
-		buf_->specmod().y = this->y();
-		OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
+		return bg_buf_;
+//		// Image over
+//		bg_buf_->specmod().x = this->x();
+//		bg_buf_->specmod().y = this->y();
+//		OIIO::ImageBufAlgo::over(*buf, *bg_buf_, *buf, OIIO::ROI());
 	}
 
-	void render(OIIO::ImageBuf *buf, const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data) {
 		char s[128];
 
 		struct tm time;
@@ -69,46 +73,62 @@ public:
 
 		struct GPXData::point position = data.position(GPXData::PositionPrevious);
 
+		// Refresh dynamic info
+		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+			goto skip;
+
+		// Format data
 		space_x = padding_x + border;
 		space_y = padding_yt + border;
 
-		// Append dynamic info
+		// Refresh dynamic info
+		if (fg_buf_ != NULL)
+			delete fg_buf_;
+
+		this->createBox(&fg_buf_, this->width(), this->height());
+
+		// title
 		offset = 0;
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, "GPX WPT");
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, "GPX WPT");
 
 		// time
 		offset += px;
 		gmtime_r(&data.time(GPXData::PositionPrevious), &time);
 		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// latitude
 		offset += px;
 		sprintf(s, "lat: %.4f", position.lat);
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// longitude
 		offset += px;
 		sprintf(s, "lon: %.4f", position.lon);
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// elevation
 		offset += px;
 		sprintf(s, "ele: %.4f", data.elevation(GPXData::PositionPrevious));
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
 		// line
 		offset += px;
 		sprintf(s, "line: %d", data.line());
-		this->drawText(buf, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+
+skip:
+		return fg_buf_;
 	}
 
 private:
-	OIIO::ImageBuf *buf_;
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
 
 	GPXWidget(GPX2Video &app, std::string name)
 		: VideoWidget(app, name)
-   		, buf_(NULL) {
+   		, bg_buf_(NULL)
+   		, fg_buf_(NULL) {
 	}
 };
 

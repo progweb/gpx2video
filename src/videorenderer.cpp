@@ -130,13 +130,27 @@ bool VideoRenderer::start(void) {
 
 	// Prepare each widget, map...
 	for (VideoWidget *widget : widgets_) {
+		OIIO::ImageBuf *buf = NULL;
+
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
+
+		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
+				widget->y(), widget->y() + widget->height());
 
 		if ((begin != 0) || (end != 0))
 			continue;
 
-		widget->prepare(overlay_);
+		// Render static widget
+		buf = widget->prepare();
+
+		if (buf == NULL)
+			continue;
+
+		// Image over
+		buf->specmod().x = widget->x();
+		buf->specmod().y = widget->y();
+		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, roi);
 	}
 
 	return true;

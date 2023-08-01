@@ -10,8 +10,11 @@ public:
 	virtual ~CadenceWidget() {
 		log_call();
 
-		if (buf_)
-			delete buf_;
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
 	}
 
 	static CadenceWidget * create(GPX2Video &app) {
@@ -24,57 +27,68 @@ public:
 		return widget;
 	}
 
-	void prepare(OIIO::ImageBuf *buf) {
+	OIIO::ImageBuf * prepare(void) {
 		int x, y;
 
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
-		if (buf_ == NULL) {
+		if (bg_buf_ == NULL) {
 			x = this->padding(VideoWidget::PaddingLeft);
 			x += (with_picto) ? this->height() : 0;
 			y = 0;
 
-			this->createBox(&buf_, this->width(), this->height());
-			this->drawBorder(buf_);
-			this->drawBackground(buf_);
+			this->createBox(&bg_buf_, this->width(), this->height());
+			this->drawBorder(bg_buf_);
+			this->drawBackground(bg_buf_);
 			if (with_picto)
-				this->drawImage(buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_cadence.png", VideoWidget::ZoomFit);
-			this->drawLabel(buf_, x, y, label().c_str());
+				this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_cadence.png", VideoWidget::ZoomFit);
+			this->drawLabel(bg_buf_, x, y, label().c_str());
 		}
 
-		// Image over
-		buf_->specmod().x = this->x();
-		buf_->specmod().y = this->y();
-		OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
+		return bg_buf_;
 	}
 
-	void render(OIIO::ImageBuf *buf, const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data) {
 		int x, y;
 
 		char s[128];
 
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
+		// Refresh dynamic info
+		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+			goto skip;
+
+		// Format data
 		if (data.hasValue(GPXData::DataCadence))
 			sprintf(s, "%d tr/min", data.cadence());
 		else
 			sprintf(s, "-- tr/min");
 
-		// Append dynamic info
-		x = this->x() + this->padding(VideoWidget::PaddingLeft);
+		// Compute text position
+		x = this->padding(VideoWidget::PaddingLeft);
 		x += (with_picto) ? this->height() : 0;
-		y = this->y();
+		y = 0;
 
-		//this->drawLabel(buf, x, y, label().c_str());
-		this->drawValue(buf, x, y, s);
+		// Refresh dynamic info
+		if (fg_buf_ != NULL)
+			delete fg_buf_;
+
+		this->createBox(&fg_buf_, this->width(), this->height());
+		this->drawValue(fg_buf_, x, y, s);
+
+skip:
+		return fg_buf_;
 	}
 
 private:
-	OIIO::ImageBuf *buf_;
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
 
 	CadenceWidget(GPX2Video &app, std::string name)
 		: VideoWidget(app, name) 
-		, buf_(NULL) {
+   		, bg_buf_(NULL)
+   		, fg_buf_(NULL) {
 	}
 };
 

@@ -10,8 +10,8 @@ public:
 	virtual ~ImageWidget() {
 		log_call();
 
-		if (buf_)
-			delete buf_;
+		if (bg_buf_)
+			delete bg_buf_;
 	}
 
 	static ImageWidget * create(GPX2Video &app) {
@@ -24,31 +24,29 @@ public:
 		return widget;
 	}
 
-	void prepare(OIIO::ImageBuf *buf) {
-		if (buf_ == NULL) {
-			this->createBox(&buf_, this->width(), this->height());
-			this->drawBorder(buf_);
-			this->drawBackground(buf_);
-			this->drawImage(buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
+	OIIO::ImageBuf * prepare(void) {
+		if (bg_buf_ == NULL) {
+			this->createBox(&bg_buf_, this->width(), this->height());
+			this->drawBorder(bg_buf_);
+			this->drawBackground(bg_buf_);
+			this->drawImage(bg_buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
 		}
 
-		// Image over
-		buf_->specmod().x = this->x();
-		buf_->specmod().y = this->y();
-		OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
+		return bg_buf_;
 	}
 
-	void render(OIIO::ImageBuf *buf, const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data) {
 		(void) data;
-		(void) buf;
+
+		return NULL;
 	}
 
 private:
-	OIIO::ImageBuf *buf_;
+	OIIO::ImageBuf *bg_buf_;
 
 	ImageWidget(GPX2Video &app, std::string name)
 		: VideoWidget(app, name) 
-		, buf_(NULL) {
+		, bg_buf_(NULL) {
 	}
 };
 

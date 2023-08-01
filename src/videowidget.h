@@ -354,8 +354,8 @@ public:
 		return true;
 	}
 
-	virtual void prepare(OIIO::ImageBuf *buf) = 0;
-	virtual void render(OIIO::ImageBuf *buf, const GPXData &data) = 0;
+	virtual OIIO::ImageBuf * prepare(void) = 0;
+	virtual OIIO::ImageBuf * render(const GPXData &data) = 0;
 
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);

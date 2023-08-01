@@ -270,7 +270,8 @@ Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
 	, nbr_downloads_(0) {
 	log_call();
 
-	buf_ = NULL;
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 	mapbuf_ = NULL;
 
 	evcurl_ = EVCurl::init(evbase);
@@ -286,8 +287,10 @@ Map::~Map() {
 
 	if (mapbuf_ != NULL)
 		delete mapbuf_;
-	if (buf_)
-		delete buf_;
+	if (bg_buf_)
+		delete bg_buf_;
+	if (fg_buf_)
+		delete fg_buf_;
 
 	delete evcurl_;
 }
@@ -667,26 +670,23 @@ bool Map::load(void) {
 }
 
 
-void Map::prepare(OIIO::ImageBuf *buf) {
-	if (buf_ == NULL) {
-		this->createBox(&buf_, this->width(), this->height());
-		this->drawBorder(buf_);
+OIIO::ImageBuf * Map::prepare(void) {
+	if (bg_buf_ == NULL) {
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
 	}
 
 	// Load map
 	if (this->load() == false)
 		log_warn("Map renderer failure");
 
-	// Image over
-	buf_->specmod().x = this->x();
-	buf_->specmod().y = this->y();
-	OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
+	return bg_buf_;
 }
 
 
-void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
-	int x = this->x();
-	int y = this->y();
+OIIO::ImageBuf * Map::render(const GPXData &data) {
+	int x = 0; //this->x();
+	int y = 0; //this->y();
 	int width = settings().width();
 	int height = settings().height();
 
@@ -702,8 +702,12 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	// Check map & track buffers
 	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
 		log_warn("Map renderer failure");
-		return;
+		return NULL;
 	}
+
+	// Refresh dynamic info
+	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+		goto skip;
 
 	// Map size
 	x += border;
@@ -730,27 +734,36 @@ void Map::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	if (offsetY > lim_y2_)
 		offsetY = lim_y2_;
 
+	// Image buffer
+	if (fg_buf_ != NULL)
+		delete fg_buf_;
+
+	this->createBox(&fg_buf_, this->width(), this->height());
+
 	// Map image over
 	mapbuf_->specmod().x = x - offsetX;
 	mapbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*frame, *mapbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
+	OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Track image over
 	trackbuf_->specmod().x = x - offsetX;
 	trackbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*frame, *trackbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
+	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw track
 	// ...
 
 	// Draw picto
 	if (marker_size > 0) {
-		drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
-		drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+		drawPicto(*fg_buf_, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+		drawPicto(*fg_buf_, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
 		if (data.valid())
-			drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+			drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
+
+skip:
+	return fg_buf_;
 }
 
 

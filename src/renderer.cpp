@@ -1003,8 +1003,13 @@ void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, co
 
 	// Draw each widget, map...
 	for (VideoWidget *widget : widgets_) {
+		OIIO::ImageBuf *buf = NULL;
+
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
+
+		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
+				widget->y(), widget->y() + widget->height());
 
 		if ((begin != 0) && (timecode_ms < begin))
 			continue;
@@ -1012,10 +1017,21 @@ void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, co
 		if ((end != 0) && (end < timecode_ms))
 			continue;
 
-		if ((begin != 0) || (end != 0))
-			widget->prepare(&frame_buffer);
+//		if ((begin != 0) || (end != 0))
+//			widget->prepare(&frame_buffer);
 
-		widget->render(&frame_buffer, data);
+//		widget->render(&frame_buffer, data);
+
+		// Render dynamic widget
+		buf = widget->render(data);
+
+		if (buf == NULL)
+			continue;
+
+		// Image over
+		buf->specmod().x = widget->x();
+		buf->specmod().y = widget->y();
+		OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, roi);
 	}
 }
 

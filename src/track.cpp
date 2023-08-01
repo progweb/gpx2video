@@ -121,7 +121,8 @@ Track::Track(GPX2Video &app, const TrackSettings &settings, struct event_base *e
 
 	VideoWidget::setSize(settings_.width(), settings_.height());
 
-	buf_ = NULL;
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 	trackbuf_ = NULL;
 
 	divider_ = 1.0;
@@ -133,8 +134,10 @@ Track::~Track() {
 
 	if (trackbuf_ != NULL)
 		delete trackbuf_;
-	if (buf_)
-		delete buf_;
+	if (bg_buf_)
+		delete bg_buf_;
+	if (fg_buf_)
+		delete fg_buf_;
 }
 
 
@@ -432,26 +435,23 @@ bool Track::load(void) {
 }
 
 
-void Track::prepare(OIIO::ImageBuf *buf) {
-	if (buf_ == NULL) {
-		this->createBox(&buf_, this->width(), this->height());
-		this->drawBorder(buf_);
-		this->drawBackground(buf_);
+OIIO::ImageBuf * Track::prepare(void) {
+	if (bg_buf_ == NULL) {
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
+		this->drawBackground(bg_buf_);
 	}
 
 	if (this->load() == false)
 		log_warn("Track renderer failure");
 
-	// Image over
-	buf_->specmod().x = this->x();
-	buf_->specmod().y = this->y();
-	OIIO::ImageBufAlgo::over(*buf, *buf_, *buf, OIIO::ROI());
+	return bg_buf_;
 }
 
 
-void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
-	int x = this->x();
-	int y = this->y();
+OIIO::ImageBuf * Track::render(const GPXData &data) {
+	int x = 0; //this->x();
+	int y = 0; //this->y();
 	int w, width = settings().width();
 	int h, height = settings().height();
 
@@ -464,8 +464,12 @@ void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	// Check track buffer
 	if (trackbuf_ == NULL) {
 		log_warn("Track renderer failure");
-		return;
+		return NULL;
 	}
+
+	// Refresh dynamic info
+	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+		goto skip;
 
 	// Current position
 	posX = floorf((float) Track::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
@@ -487,21 +491,30 @@ void Track::render(OIIO::ImageBuf *frame, const GPXData &data) {
 	offsetY *= divider_;
 	offsetY -= (height - h) / 2;
 
+	// Image buffer
+	if (fg_buf_ != NULL)
+		delete fg_buf_;
+
+	this->createBox(&fg_buf_, this->width(), this->height());
+
 	// Image over
 	trackbuf_->specmod().x = x - offsetX;
 	trackbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*frame, *trackbuf_, *frame, OIIO::ROI(x, x + width, y, y + height));
+	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw track
 	// ...
 
 	// Draw picto
 	if (marker_size > 0) {
-		drawPicto(*frame, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
-		drawPicto(*frame, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+		drawPicto(*fg_buf_, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+		drawPicto(*fg_buf_, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
-		drawPicto(*frame, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+		drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
+
+skip:
+	return fg_buf_;
 }
 
 

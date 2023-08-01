@@ -81,8 +81,8 @@ public:
 	void draw(void);
 
 	// Render map
-	void prepare(OIIO::ImageBuf *buf);
-	void render(OIIO::ImageBuf *frame, const GPXData &data);
+	OIIO::ImageBuf * prepare(void);
+	OIIO::ImageBuf * render(const GPXData &data);
 
 	static void downloadProgress(Tile &tile, double dltotal, double dlnow);
 	static void downloadComplete(Tile &tile);
@@ -102,7 +102,8 @@ protected:
 	void build(void);
 
 private:
-	OIIO::ImageBuf *buf_;
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
 
 	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
 
