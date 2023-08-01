@@ -6,6 +6,8 @@
 //#define __USE_XOPEN  // For strptime
 #include <time.h>
 
+#include "unistd.h"
+
 #include "utmconvert/utmconvert.h"
 #include <GeographicLib/Geodesic.hpp>
 
@@ -688,6 +690,8 @@ enum GPX::Data GPX::retrieveFirst_i(GPXData &data) {
 	gpx::WPT *wpt;
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
+	log_call();
+
 	data = GPXData();
 
 	iter_seg_ = trksegs.begin();
@@ -716,6 +720,8 @@ enum GPX::Data GPX::retrieveFirst_i(GPXData &data) {
 enum GPX::Data GPX::retrieveFirst(GPXData &data) {
 	enum GPX::Data result;
 
+	log_call();
+
 	eof_ = false;
 
 	// Read first waypoint
@@ -742,6 +748,12 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 
 	int64_t timestamp = start_time_ + ((offset_ + timecode_ms) / 1000);
 
+	log_call();
+
+	log_debug("retrieve next timestamp: %ld (filter: %d)", timestamp, filter_);
+	log_debug(" curr time: %ld", data.time(GPXData::PositionCurrent));
+	log_debug(" next time: %ld", data.time(GPXData::PositionNext));
+
 	do {
 		if (timecode_ms == -1) {
 			data.update(filter_);
@@ -754,6 +766,7 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 		}
 		else {
 			if ((from_ != 0) && (timestamp < (from_ + (offset_ / 1000)))) {
+//			log_info("from");
 				data.disableCompute();
 				data.unvalid();
 
@@ -762,6 +775,7 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 				break;
 			}
 			else if ((to_ != 0) && (timestamp > (to_ + (offset_ / 1000)))) {
+//			log_info("to");
 				data.disableCompute();
 				data.unvalid();
 
@@ -775,7 +789,14 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 			}
 			else if (timestamp < data.time(GPXData::PositionNext)) {
 //			log_info("predict");
-				data.predict(filter_);
+				if (filter_ == TelemetrySettings::FilterNone) {
+					data.update(filter_);
+			
+					if (this->retrieveData(data) == GPX::DataEof)
+						goto eof;
+				}
+				else
+					data.predict(filter_);
 			}
 			else if (timestamp == data.time(GPXData::PositionNext)) {
 //			log_info("update");
@@ -785,8 +806,8 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 					goto eof;
 			}
 			else if (timestamp > data.time(GPXData::PositionNext)) {
-//			log_info("next");
 				time_t next_time = data.time(GPXData::PositionCurrent) + 1;
+//			log_info("next");
 
 				if (next_time >= data.time(GPXData::PositionNext)) {
 					data.update(filter_);
@@ -795,7 +816,14 @@ enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 						goto eof;
 				}
 				else {
-					data.predict(filter_);
+					if (filter_ == TelemetrySettings::FilterNone) {
+						data.update(filter_);
+				
+						if (this->retrieveData(data) == GPX::DataEof)
+							goto eof;
+					}
+					else
+						data.predict(filter_);
 				}
 			}
 		}
@@ -819,6 +847,8 @@ enum GPX::Data GPX::retrieveNext(GPXData &data, int64_t timecode_ms) {
 
 	GPXData next, prev;
 	GPXData result;
+
+	log_call();
 
 	if (timecode_ms == -1)
 		return this->retrieveNext_i(data, timecode_ms);
@@ -894,6 +924,8 @@ enum GPX::Data GPX::retrieveData(GPXData &data) {
 	std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
+	log_call();
+
 	if (eof_)
 		goto done;
 
@@ -933,6 +965,8 @@ done:
 enum GPX::Data GPX::retrieveLast(GPXData &data) {
 	gpx::WPT *wpt;
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	log_call();
 
 	data = GPXData();
 
@@ -979,6 +1013,8 @@ bool GPX::getBoundingBox(GPXData::point *p1, GPXData::point *p2) {
 	GPXData::point p;
 
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	log_call();
 
 	p1->valid = false;
 	p2->valid = false;
@@ -1032,6 +1068,8 @@ double GPX::getMaxSpeed(void) {
 	double last_speed = 0.0;
 
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
+
+	log_call();
 
 	for (std::list<gpx::TRKSeg*>::iterator iter2 = trksegs.begin(); iter2 != trksegs.end(); ++iter2) {
 		gpx::TRKSeg *seg = (*iter2);
