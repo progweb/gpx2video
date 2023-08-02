@@ -148,6 +148,70 @@ bool VideoWidget::hex2color(float color[4], std::string hex) {
 }
 
 
+void VideoWidget::initialize(void) {
+	int height;
+
+	int px;
+	int x1, y1, x2, y2;
+	int text_width, text_height;
+
+	int border = this->border();
+	int padding_yt = this->padding(VideoWidget::PaddingTop);
+	int padding_yb = this->padding(VideoWidget::PaddingBottom);
+
+	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
+
+	const char *text = "0123456789/";
+
+	// Compute font size (1 pt = 1.333 px) for "label" text
+	// +-------------------+  /  no label:
+	// |  Label    px      |  /  +-------------------+
+	// |  Value    2 * px  |  /  |  Value     px     |
+	// +-------------------+  /  +-------------------+
+	//        h = px + 2 * px + padding_top + padding_bottom
+	if (!label().empty()) {
+		px = this->height() - 2 * border - padding_yt - this->textLineSpace() - padding_yb;
+		px = px / 3;
+		// pt = 3 * px / 4;
+
+		for (height=px;; px += 1) {
+			this->textSize(label().c_str(), px,
+					x1, y1, x2, y2,
+					text_width, text_height);
+
+			if (text_height > height)
+				break;
+
+			label_px_ = px;
+			label_size_ = text_height;
+		}
+	}
+
+	// Compute font size (1 pt = 1.333 px) for "value" text
+	// +-------------------+  /  no label:
+	// |  Label    px      |  /  +-------------------+
+	// |  Value    2 * px  |  /  |  Value     px     |
+	// +-------------------+  /  +-------------------+
+	//        h = px + 2 * px + padding_top + padding_bottom
+	px = this->height() - 2 * border - padding_yt - padding_yb;
+	px = with_label ? 2 * (px - this->textLineSpace()) / 3 : px;
+	// pt = 3 * px / 4;
+
+	for (height=px;; px += 1) {
+		this->textSize(text, px,
+				x1, y1, x2, y2,
+				text_width, text_height);
+
+		if (text_height > height)
+			break;
+
+		value_px_ = px;
+		value_size_ = text_height;
+		value_offset_ = y1;
+	}
+}
+
+
 void VideoWidget::createBox(OIIO::ImageBuf **buf, int width, int height) {
 	// Create an image buffer with static render
 	*buf = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8));
@@ -291,7 +355,7 @@ void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char
 		label, 
 		pt, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
-		OIIO::ImageBufAlgo::TextAlignY::Top, 
+		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
 		this->textShadow());
 
 	if (result == false)
@@ -302,45 +366,44 @@ void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char
 void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label) {
 	bool result;
 
-	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
-
-	int h;
+	int x1, y1, x2, y2;
+	int text_width, text_height;
 
 	int border = this->border();
 	int padding_x = this->padding(VideoWidget::PaddingLeft);
 	int padding_yt = this->padding(VideoWidget::PaddingTop);
-	int padding_yb = this->padding(VideoWidget::PaddingBottom);
+//	int padding_yb = this->padding(VideoWidget::PaddingBottom);
+
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
+
+	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
 
 	if (!with_label)
 		return;
 
-	// Apply border
-	x += border;
-	y += border;
+	// Compute text size
+	this->textSize(label, label_px_,
+			x1, y1, x2, y2,
+			text_width, text_height);
 
-	// width x height
-	h = this->height() - 2 * border;
-
-	// Add label (1 pt = 1.333 px)
-	// +-------------
-	// |  Label    px
-	// |  Value    2 * px
-	// +-------------
-	//        h = px + 2 * px + padding_top + padding_bottom
-	int px = (h - padding_yt - padding_yb) / 2;
-	int pt = 3 * px / 4;
-
-	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-
+	// Text color
 	memcpy(color, this->textColor(), sizeof(color));
 
+	// Text offset
+	x -= x1 - this->textShadow();
+	y -= y1 - this->textShadow();
+
+	// Text position
+	x += border + padding_x;
+	y += border + padding_yt;
+
 	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-		x + padding_x, 
-		y + padding_yt, 
+		x, 
+		y, 
 		label, 
-		pt, this->font(), color, 
+		label_px_, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
-		OIIO::ImageBufAlgo::TextAlignY::Top, 
+		OIIO::ImageBufAlgo::TextAlignY::Baseline,
 		this->textShadow());
 
 	if (result == false)
@@ -351,45 +414,46 @@ void VideoWidget::drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label
 void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value) {
 	bool result;
 
-	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
-	bool with_value = this->hasFlag(VideoWidget::FlagValue);
-
-	int h;
+	int x1, y1, x2, y2;
+	int text_width, text_height;
 
 	int border = this->border();
 	int padding_x = this->padding(VideoWidget::PaddingLeft);
 	int padding_yt = this->padding(VideoWidget::PaddingTop);
 	int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
+	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
+
+	bool with_label = this->hasFlag(VideoWidget::FlagLabel);
+	bool with_value = this->hasFlag(VideoWidget::FlagValue);
+
 	if (!with_value)
 		return;
 
-	// Apply border
-	x += border;
-	y += border;
+	// Compute text size
+	this->textSize(value, value_px_,
+			x1, y1, x2, y2,
+			text_width, text_height);
 
-	// width x height
-	h = this->height() - 2 * border;
-
-	// Add label (1 pt = 1.333 px)
-	// +-------------
-	// |  Label    px
-	// |  Value    2 * px
-	// +-------------
-	//        h = px + 2 * px + padding_top + padding_bottom
-	int px = (h - padding_yt - padding_yb) / 2;
-	int pt = 3 * px / 4;
-
-	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-
+	// Text color
 	memcpy(color, this->textColor(), sizeof(color));
 
+	// Text offset
+	x += this->textShadow();
+	y -= value_offset_ - this->textShadow();
+
+	// Text position
+	x += border + padding_x;
+	if (with_label)
+		y += this->height() - border - this->textShadow() - padding_yb - value_size_;
+	else
+		y += border + padding_yt; //(this->height() - text_size_) / 2;
+
 	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-		x + padding_x, 
-		(with_label) ? y + h - padding_yb : y + ((h - padding_yb) / 2)  + ((4 * pt) / 3),
+		x, 
+		y, 
 		value, 
-		(with_label) ? 2 * pt : 3 * pt,
-		this->font(), color, 
+		value_px_, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
 		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
 		this->textShadow());
@@ -397,4 +461,21 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value
 	if (result == false)
 		fprintf(stderr, "render value text error\n");
 }
+
+
+void VideoWidget::textSize(std::string text, int fontsize, 
+	int &x1, int &y1, int &x2, int &y2,
+	int &width, int &height) {
+
+	OIIO::ROI roi = OIIO::ImageBufAlgo::text_size(text, fontsize, this->font());
+
+	x1 = roi.xbegin;
+	x2 = roi.xend;
+	y1 = roi.ybegin;
+	y2 = roi.yend;
+
+	width = roi.width();
+	height = roi.height();
+}
+
 

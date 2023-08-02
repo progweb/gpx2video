@@ -294,6 +294,7 @@ Here all widget common element settings:
 	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
 	<text-color>#00ff00ff</text-color>
 	<text-shadow>3</text-shadow>
+	<text-linespace>2</text-linespace>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -323,6 +324,7 @@ Node elements are:
   - **background-color**: to set the background color in #RGBA.
   - **text-color**: to set the text color in #RGBA.
   - **text-shadow**: text shadow thickness.
+  - **text-linespace**: line space between label and value.
   - **with-xxxx**: to show or not the field (default is true).
 
 **type** gauges supported are:

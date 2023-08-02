@@ -487,6 +487,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setText((const char *) w->text());
 	widget->setTextColor((const char *) w->textColor());
 	widget->setTextShadow(w->textShadow());
+	widget->setTextLineSpace(w->textLineSpace());
 	widget->setBorder(w->border());
 	widget->setBorderColor((const char *) w->borderColor());
 	widget->setBackgroundColor((const char *) w->backgroundColor());
@@ -533,6 +534,12 @@ void Renderer::computeWidgetsPosition(void) {
 	int marginleft, marginright;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
+
+	// Initialize widget
+	//-----------------------------------------------------------
+	for (VideoWidget *widget : widgets_) {
+		widget->initialize();
+	}
 
 	// TopLeft
 	//-----------------------------------------------------------

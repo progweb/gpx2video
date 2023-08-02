@@ -310,6 +310,14 @@ public:
 		txtshadow_ = shadow_;
 	}
 
+	int textLineSpace(void) const {
+		return txtlinespace_;
+	}
+
+	virtual void setTextLineSpace(int linespace_) {
+		txtlinespace_ = linespace_;
+	}
+
 	int border(void) const {
 		return border_;
 	}
@@ -354,7 +362,8 @@ public:
 		return true;
 	}
 
-	virtual OIIO::ImageBuf * prepare(void) = 0;
+	virtual void initialize(void);
+	virtual OIIO::ImageBuf * prepare(void) = 0; 
 	virtual OIIO::ImageBuf * render(const GPXData &data) = 0;
 
 	static Position string2position(std::string &s);
@@ -370,6 +379,11 @@ protected:
 		, app_(app) 
 		, at_begin_time_(0)
 		, at_end_time_(0)
+		, label_px_(0)
+   		, label_size_(0)
+		, value_px_(0)
+   		, value_size_(0)
+		, value_offset_(0)
 		, name_(name) {
 		log_call();
 
@@ -400,6 +414,10 @@ protected:
 	void drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label);
 	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
 
+	void textSize(std::string text, int fontsize, 
+		int &x1, int &y1, int &x2, int &y2,
+		int &width, int &height);
+
 	GPX2Video &app_;
 	Position position_;
 	Align align_;
@@ -429,10 +447,16 @@ protected:
 
 	std::string font_;
 
+	int label_px_;
+	int label_size_;
+	int value_px_;
+	int value_size_;
+	int value_offset_;
 	std::string text_;
 
 	std::string label_;
 	int txtshadow_;
+	int txtlinespace_;
 	float txtcolor_[4];
 
 	int border_;

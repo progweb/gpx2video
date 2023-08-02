@@ -268,6 +268,13 @@ namespace layout
     Unsigned  &textShadow() { return _txtshadow; }
 
     ///
+    /// Get text line space
+    ///
+    /// @return the text linespace attribute
+    ///
+    Unsigned  &textLineSpace() { return _txtlinespace; }
+
+    ///
     /// Get border
     ///
     /// @return the border attribute
@@ -354,6 +361,7 @@ namespace layout
 	String       _text;
 	String       _txtcolor;
 	Unsigned     _txtshadow;
+	Unsigned     _txtlinespace;
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;

@@ -61,6 +61,7 @@ namespace layout
 	_text(this, "text", Node::ELEMENT, false),
 	_txtcolor(this, "text-color", Node::ELEMENT, false),
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
+	_txtlinespace(this, "text-linespace", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
@@ -99,6 +100,7 @@ namespace layout
     getInterfaces().push_back(&_text);
     getInterfaces().push_back(&_txtcolor);
     getInterfaces().push_back(&_txtshadow);
+    getInterfaces().push_back(&_txtlinespace);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
@@ -120,6 +122,7 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
+	_txtlinespace.setValue("2");
 	_with_label.setValue("true");
 	_with_value.setValue("true");
 	_with_picto.setValue("true");

@@ -26,36 +26,48 @@ public:
 	}
 
 	OIIO::ImageBuf * prepare(void) {
-		int h;
+		int x, y;
 
-		int space_x, space_y;
+		int px;
+		int x1, y1, x2, y2;
+		int text_width, text_height;
+
 		int border = this->border();
-		int padding_x = this->padding(VideoWidget::PaddingLeft);
+//		int padding_x = this->padding(VideoWidget::PaddingLeft);
 		int padding_yt = this->padding(VideoWidget::PaddingTop);
 		int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
-		// width x height
-		h = this->height() - 2 * border;
+		if (bg_buf_ != NULL)
+			goto skip;
 
-		// Add text (1 pt = 1.333 px)
+		// Compute font size (1 pt = 1.333 px)
 		// +-------------
 		// |  Text    px
 		// +-------------
 		//        h = px + padding_top + padding_bottom
-		int px = h - padding_yt - padding_yb;
-		int pt = 3 * px / 4;
+		px = this->height() - 2 * border - padding_yt - padding_yb;
+		// pt = 3 * px / 4;
 
-		space_x = padding_x + border;
-		space_y = padding_yt + border;
+		// Create overlay buffer
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
+		this->drawBackground(bg_buf_);
 
-		if (bg_buf_ == NULL) {
-			this->createBox(&bg_buf_, this->width(), this->height());
-			this->drawBorder(bg_buf_);
-			this->drawBackground(bg_buf_);
+		this->textSize(this->text().c_str(), px,
+				x1, y1, x2, y2,
+				text_width, text_height);
 
-			this->drawText(bg_buf_, space_x, space_y, pt, this->text().c_str());
-		}
+		// Text offset
+		x = -x1;
+		y = -y1;
 
+		// Text position
+		x += border + (this->width() - text_width) / 2;
+		y += border + (this->height() - text_height) / 2;
+
+		this->drawText(bg_buf_, x, y, px, this->text().c_str());
+
+skip:
 		return bg_buf_;
 	}
 

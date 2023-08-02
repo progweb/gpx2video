@@ -34,19 +34,22 @@ public:
 
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
-		if (bg_buf_ == NULL) {
-			x = this->padding(VideoWidget::PaddingLeft);
-			x += (with_picto) ? this->height() : 0;
-			y = 0;
+		if (bg_buf_ != NULL)
+			goto skip;
 
-			this->createBox(&bg_buf_, this->width(), this->height());
-			this->drawBorder(bg_buf_);
-			this->drawBackground(bg_buf_);
-			if (with_picto)
-				this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_date.png", VideoWidget::ZoomFit);
-			this->drawLabel(bg_buf_, x, y, label().c_str());
-		}
+		x = this->padding(VideoWidget::PaddingLeft);
+		x += (with_picto) ? this->height() : 0;
+		y = 0;
 
+		// Create overlay buffer
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
+		this->drawBackground(bg_buf_);
+		if (with_picto)
+			this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_date.png", VideoWidget::ZoomFit);
+		this->drawLabel(bg_buf_, x, y, label().c_str());
+
+skip:
 		return bg_buf_;
 	}
 
