@@ -302,20 +302,28 @@ public:
 		return hex2color(txtcolor_, color);
 	}
 
+	double textRatio(void) const {
+		return txtratio_;
+	}
+
+	virtual void setTextRatio(double ratio) {
+		txtratio_ = ratio;
+	}
+
 	int textShadow(void) const {
 		return txtshadow_;
 	}
 
-	virtual void setTextShadow(int shadow_) {
-		txtshadow_ = shadow_;
+	virtual void setTextShadow(int shadow) {
+		txtshadow_ = shadow;
 	}
 
 	int textLineSpace(void) const {
 		return txtlinespace_;
 	}
 
-	virtual void setTextLineSpace(int linespace_) {
-		txtlinespace_ = linespace_;
+	virtual void setTextLineSpace(int linespace) {
+		txtlinespace_ = linespace;
 	}
 
 	int border(void) const {
@@ -455,6 +463,7 @@ protected:
 	std::string text_;
 
 	std::string label_;
+	double txtratio_;
 	int txtshadow_;
 	int txtlinespace_;
 	float txtcolor_[4];

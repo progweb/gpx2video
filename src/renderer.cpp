@@ -486,6 +486,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setLabel((const char *) w->name());
 	widget->setText((const char *) w->text());
 	widget->setTextColor((const char *) w->textColor());
+	widget->setTextRatio((double) w->textRatio());
 	widget->setTextShadow(w->textShadow());
 	widget->setTextLineSpace(w->textLineSpace());
 	widget->setBorder(w->border());

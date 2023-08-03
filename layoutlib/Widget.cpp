@@ -60,6 +60,7 @@ namespace layout
 	_font(this, "font", Node::ELEMENT, false),
 	_text(this, "text", Node::ELEMENT, false),
 	_txtcolor(this, "text-color", Node::ELEMENT, false),
+	_txtratio(this, "text-ratio", Node::ELEMENT, false),
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
 	_txtlinespace(this, "text-linespace", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
@@ -99,6 +100,7 @@ namespace layout
     getInterfaces().push_back(&_font);
     getInterfaces().push_back(&_text);
     getInterfaces().push_back(&_txtcolor);
+    getInterfaces().push_back(&_txtratio);
     getInterfaces().push_back(&_txtshadow);
     getInterfaces().push_back(&_txtlinespace);
     getInterfaces().push_back(&_border);

@@ -261,6 +261,13 @@ namespace layout
     String  &textColor() { return _txtcolor; }
 
     ///
+    /// Get text ratio
+    ///
+    /// @return the text ratio attribute
+    ///
+    Decimal  &textRatio() { return _txtratio; }
+
+    ///
     /// Get text shadow
     ///
     /// @return the text shadow attribute
@@ -360,6 +367,7 @@ namespace layout
 	String       _font;
 	String       _text;
 	String       _txtcolor;
+	Decimal      _txtratio;
 	Unsigned     _txtshadow;
 	Unsigned     _txtlinespace;
 	Unsigned     _border;

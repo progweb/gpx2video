@@ -293,6 +293,7 @@ Here all widget common element settings:
 	<padding>5</padding>
 	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
 	<text-color>#00ff00ff</text-color>
+    <text-ratio>3.0</text-ratio>
 	<text-shadow>3</text-shadow>
 	<text-linespace>2</text-linespace>
 	<border>5</border>
@@ -323,6 +324,7 @@ Node elements are:
   - **border-color**: to set the border color in #RGBA.
   - **background-color**: to set the background color in #RGBA.
   - **text-color**: to set the text color in #RGBA.
+  - **text-ratio**: define the label and value size ratio.
   - **text-shadow**: text shadow thickness.
   - **text-linespace**: line space between label and value.
   - **with-xxxx**: to show or not the field (default is true).

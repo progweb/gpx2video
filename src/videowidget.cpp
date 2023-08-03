@@ -155,6 +155,8 @@ void VideoWidget::initialize(void) {
 	int x1, y1, x2, y2;
 	int text_width, text_height;
 
+	double ratio = this->textRatio();
+
 	int border = this->border();
 	int padding_yt = this->padding(VideoWidget::PaddingTop);
 	int padding_yb = this->padding(VideoWidget::PaddingBottom);
@@ -164,14 +166,14 @@ void VideoWidget::initialize(void) {
 	const char *text = "0123456789/";
 
 	// Compute font size (1 pt = 1.333 px) for "label" text
-	// +-------------------+  /  no label:
-	// |  Label    px      |  /  +-------------------+
-	// |  Value    2 * px  |  /  |  Value     px     |
-	// +-------------------+  /  +-------------------+
-	//        h = px + 2 * px + padding_top + padding_bottom
+	// +-----------------------+  /  no label:
+	// |  Label    px          |  /  +-------------------+
+	// |  Value    ratio * px  |  /  |  Value     px     |
+	// +-----------------------+  /  +-------------------+
+	//        h = px + ratio * px + padding_top + padding_bottom
 	if (!label().empty()) {
 		px = this->height() - 2 * border - padding_yt - this->textLineSpace() - padding_yb;
-		px = px / 3;
+		px = (int) round((double) px / (1.0 + ratio));
 		// pt = 3 * px / 4;
 
 		for (height=px;; px += 1) {
@@ -194,7 +196,7 @@ void VideoWidget::initialize(void) {
 	// +-------------------+  /  +-------------------+
 	//        h = px + 2 * px + padding_top + padding_bottom
 	px = this->height() - 2 * border - padding_yt - padding_yb;
-	px = with_label ? 2 * (px - this->textLineSpace()) / 3 : px;
+	px = with_label ? (int) round((double) ratio * (px - this->textLineSpace()) / (1.0 + ratio) : px;
 	// pt = 3 * px / 4;
 
 	for (height=px;; px += 1) {
