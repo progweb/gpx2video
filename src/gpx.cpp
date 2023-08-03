@@ -156,9 +156,6 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 
 
 bool GPXData::compute(void) {
-	if (!enable_)
-		return true;
-
 //	double dx = (cur_pt_.x - prev_pt_.x);
 //	double dy = (cur_pt_.y - prev_pt_.y);
 	double dz = (cur_pt_.ele - prev_pt_.ele);
@@ -184,45 +181,53 @@ bool GPXData::compute(void) {
 //	double dt = difftime(cur_pt_.time, prev_pt_.time);
 	double dt = cur_pt_.ts - prev_pt_.ts;
 
-	// distance_ in meter
-	// duration_ in second
-	duration_ += (dt / 1000.0);
-	distance_ += dc;
+//	dc = sqrt(dx*dx + dy*dy);
+
+	// grade elevation
+	if (round(dc) != 0)
+		grade_ = 100.0 * dz / dc;
+
+	// speed & maxspeed
 	if (dt > 0) {
 		speed = (3600.0 * dc) / (1.0 * dt);
 		if (abs((int) (speed - speed_)) < 50)
 			speed_ = speed;
-		if (speed_ > maxspeed_)
+		if (enable_ && (speed_ > maxspeed_))
 			maxspeed_ = speed_;
 	}
-	if (duration_ > 0)
-		avgspeed_ = (3600.0 * distance_) / (1000.0 * duration_);
-	if (ridetime_ > 0)
-		avgridespeed_ = (3600.0 * distance_) / (1000.0 * ridetime_);
 
-//	dc = sqrt(dx*dx + dy*dy);
-
-	if (round(dc) != 0)
-		grade_ = 100.0 * dz / dc;
-
-//	has_value_ = true;
-
-	// Determine current lap
-	lat1 = cur_pt_.lat;
-	lon1 = cur_pt_.lon;
-	lat2 = start_pt_.lat;
-	lon2 = start_pt_.lon;
-//	GeographicLib::Math::real d;
-
-//	GeographicLib::Geodesic gsic(6378388, 1/297.0);
-	gsic.Inverse(lat1, lon1, lat2, lon2, d);
+	if (enable_) {
+		// duration_ in second
+		duration_ += (dt / 1000.0);
 	
-	if (in_lap_ && (d < 8)) {
-		lap_++;
-		in_lap_ = false;
-	}
-	else if (!in_lap_ && (d > 15)) {
-		in_lap_ = true;
+		// distance_ in meter
+		distance_ += dc;
+
+		// average speed
+		if (duration_ > 0)
+			avgspeed_ = (3600.0 * distance_) / (1000.0 * duration_);
+
+		// average ride speed
+		if (ridetime_ > 0)
+			avgridespeed_ = (3600.0 * distance_) / (1000.0 * ridetime_);
+
+		// Determine current lap
+		lat1 = cur_pt_.lat;
+		lon1 = cur_pt_.lon;
+		lat2 = start_pt_.lat;
+		lon2 = start_pt_.lon;
+//		GeographicLib::Math::real d;
+
+//		GeographicLib::Geodesic gsic(6378388, 1/297.0);
+		gsic.Inverse(lat1, lon1, lat2, lon2, d);
+	
+		if (in_lap_ && (d < 8)) {
+			lap_++;
+			in_lap_ = false;
+		}
+		else if (!in_lap_ && (d > 15)) {
+			in_lap_ = true;
+		}
 	}
 
 	return true;
