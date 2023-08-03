@@ -119,6 +119,9 @@ void GPXData::convert(struct GPXData::point *pt, gpx::WPT *wpt) {
 	// Try format: "2020-07-28T07:04:43Z"
 	else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
 		pt->ts = timegm(&time) * 1000;
+	// Try format: "2020-07-28T07:04:43+0200"
+	else if (strptime(s, "%Y-%m-%dT%H:%M:%S+", &time) != NULL)
+		pt->ts = timegm(&time) * 1000;
 	else
 		pt->valid = false;
 
