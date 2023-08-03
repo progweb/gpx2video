@@ -116,6 +116,9 @@ public:
 	const int& nbChannels(void) const;
 	void setNbChannels(const int &nb_channels);
 
+	const int& orientation(void) const;
+	void setOrientation(const double &theta);
+
 	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
 
 private:
@@ -129,6 +132,7 @@ private:
 	AVPixelFormat pixel_format_;
 	AVRational pixel_aspect_ratio_;
 	int nb_channels_;
+	int orientation_;
 };
 
 #endif

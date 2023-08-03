@@ -450,7 +450,7 @@ OIIO::ImageBuf * Track::prepare(void) {
 }
 
 
-OIIO::ImageBuf * Track::render(const GPXData &data) {
+OIIO::ImageBuf * Track::render(const GPXData &data, bool &is_update) {
 	int x = 0; //this->x();
 	int y = 0; //this->y();
 	int w, width = settings().width();
@@ -469,8 +469,10 @@ OIIO::ImageBuf * Track::render(const GPXData &data) {
 	}
 
 	// Refresh dynamic info
-	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		is_update = false;
 		goto skip;
+	}
 
 	// Current position
 	posX = floorf((float) Track::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
@@ -514,6 +516,7 @@ OIIO::ImageBuf * Track::render(const GPXData &data) {
 		drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
 
+	is_update = true;
 skip:
 	return fg_buf_;
 }

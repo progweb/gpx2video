@@ -40,7 +40,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
 		char s[128];
 
 		struct tm time;
@@ -72,8 +72,10 @@ skip:
 		struct GPXData::point position = data.position(GPXData::PositionPrevious);
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+			is_update = true;
 			goto skip;
+		}
 
 		// Format data
 		space_x = padding_x + border;
@@ -115,6 +117,7 @@ skip:
 		sprintf(s, "line: %d", data.line());
 		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
 
+		is_update = true;
 skip:
 		return fg_buf_;
 	}

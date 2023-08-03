@@ -44,7 +44,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
 		char s[128];
 
 		struct tm time;
@@ -52,8 +52,10 @@ skip:
 		(void) data;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+			is_update = false;
 			goto skip;
+		}
 
 		// Format data
 		// Don't use gps time, but camera time!
@@ -69,6 +71,7 @@ skip:
 		this->createBox(&fg_buf_, this->width(), this->height());
 		this->drawValue(fg_buf_, s);
 
+		is_update = true;
 skip:
 		return fg_buf_;
 	}

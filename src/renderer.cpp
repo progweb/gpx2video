@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 
+#include <OpenImageIO/fmath.h>
 #include <OpenImageIO/imageio.h>
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
@@ -39,6 +40,7 @@ Renderer::Renderer(GPX2Video &app)
 	, app_(app) {
 	container_ = NULL;
 
+	orientation_ = 0;
 	overlay_ = NULL;
 }
 
@@ -559,6 +561,8 @@ void Renderer::computeWidgetsPosition(void) {
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
+	log_call();
+
 	// Initialize widget
 	//-----------------------------------------------------------
 	for (VideoWidget *widget : widgets_) {
@@ -615,7 +619,7 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionTopRight)
 			continue;
 
-		x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
 		y = widget->margin(VideoWidget::MarginTop);
 
 		if (widget->align() == VideoWidget::AlignHorizontal)
@@ -654,7 +658,7 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		x = widget->margin(VideoWidget::MarginLeft);
-		y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
 
 		if (widget->align() == VideoWidget::AlignHorizontal)
 			x += offset_x;
@@ -691,8 +695,8 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionBottomRight)
 			continue;
 
-		x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
-		y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
 
 		if (widget->align() == VideoWidget::AlignHorizontal)
 			x -= offset_x;
@@ -752,7 +756,7 @@ void Renderer::computeWidgetsPosition(void) {
 	}
 
 	// Compute position for each widget
-	space = video_stream->height() - (height + margintop + marginbottom);
+	space = layout_height_ - (height + margintop + marginbottom);
 	space = MAX(0, space);
 
 	// Set position (for 'left' align)
@@ -827,7 +831,7 @@ void Renderer::computeWidgetsPosition(void) {
 	}
 
 	// Compute position for each widget
-	space = video_stream->height() - (height + margintop + marginbottom);
+	space = layout_height_ - (height + margintop + marginbottom);
 	space = MAX(0, space);
 
 	// Set position (for 'right' align)
@@ -841,7 +845,7 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionRight)
 			continue;
 
-		x = video_stream->width() - widget->margin(VideoWidget::MarginRight) - widget->width();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
 		y = margintop + offset + widget->margin(VideoWidget::MarginTop);
 
 		if (widget->align() == VideoWidget::AlignHorizontal)
@@ -902,7 +906,7 @@ void Renderer::computeWidgetsPosition(void) {
 	}
 
 	// Compute position for each widget
-	space = video_stream->width() - (width + marginleft + marginright);
+	space = layout_width_ - (width + marginleft + marginright);
 	space = MAX(0, space);
 
 	// Set position (for 'top' align)
@@ -977,7 +981,7 @@ void Renderer::computeWidgetsPosition(void) {
 	}
 
 	// Compute position for each widget
-	space = video_stream->width() - (width + marginleft + marginright);
+	space = layout_width_ - (width + marginleft + marginright);
 	space = MAX(0, space);
 
 	// Set position (for 'bottom' align)
@@ -992,7 +996,7 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		x = marginleft + offset + widget->margin(VideoWidget::MarginLeft);
-		y = video_stream->height() - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
 
 		if (widget->align() == VideoWidget::AlignHorizontal)
 			x += offset_x;
@@ -1016,19 +1020,42 @@ void Renderer::computeWidgetsPosition(void) {
 
 		is_first = false;
 	}
+
+	// At last, apply layout rotation
+	for (VideoWidget *widget : widgets_) {
+		switch (orientation_) {
+		case 180:
+		case -180:
+			x = layout_width_ - widget->x() - widget->width();
+			y = layout_height_ - widget->y() - widget->height();
+			break;
+
+		case 90:
+		case -270:
+			x = widget->y();
+			y = layout_width_ - widget->x() - widget->width();
+			break;
+
+		case -90:
+		case 270:
+			x = layout_height_ - widget->y() - widget->height();
+			y = widget->x();
+			break;
+
+		default:
+			x = widget->x();
+			y = widget->y();
+			break;
+		}
+
+		widget->setPosition(x, y);
+	}
 }
 
 
-//void Renderer::draw(FramePtr frame, const uint64_t timecode_ms, const GPXData &data) {
-//	OIIO::ImageBuf frame_buffer = frame->toImageBuf();
-//
-//	this->draw(frame_buffer, timecode_ms, data);
-//
-//	frame->fromImageBuf(frame_buffer);
-//}
-
-
 void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, const GPXData &data) {
+	bool is_update = false;
+
 	// Draw overlay
 	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
 
@@ -1039,8 +1066,8 @@ void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, co
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
 
-		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
-				widget->y(), widget->y() + widget->height());
+//		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
+//				widget->y(), widget->y() + widget->height());
 
 		if ((begin != 0) && (timecode_ms < begin))
 			continue;
@@ -1048,21 +1075,53 @@ void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, co
 		if ((end != 0) && (end < timecode_ms))
 			continue;
 
-//		if ((begin != 0) || (end != 0))
-//			widget->prepare(&frame_buffer);
+		if ((begin != 0) || (end != 0)) {
+			buf = widget->prepare();
 
-//		widget->render(&frame_buffer, data);
+			if (buf != NULL) {
+				buf->specmod().x = widget->x();
+				buf->specmod().y = widget->y();
+				OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
+			}
+		}
 
 		// Render dynamic widget
-		buf = widget->render(data);
+		buf = widget->render(data, is_update);
 
 		if (buf == NULL)
 			continue;
 
+		// Rotate
+		if (is_update)
+			this->rotate(buf);
+
 		// Image over
 		buf->specmod().x = widget->x();
 		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, roi);
+		OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
+	}
+}
+
+
+void Renderer::rotate(OIIO::ImageBuf *buf) {
+	switch (orientation_) {
+	case 180:
+	case -180:
+		OIIO::ImageBufAlgo::rotate180(*buf, *buf);
+		break;
+
+	case 90:
+	case -270:
+		OIIO::ImageBufAlgo::rotate270(*buf, *buf);
+		break;
+
+	case -90:
+	case 270:
+		OIIO::ImageBufAlgo::rotate90(*buf, *buf);
+		break;
+
+	default:
+		break;
 	}
 }
 

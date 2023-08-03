@@ -87,6 +87,8 @@ private:
 
 	bool initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecContext **codec_context_ptr, AVCodecID codec_id);
 
+	void setRotation(double theta);
+
 	bool writeAVFrame(AVFrame *frame, AVCodecContext *codec_ctx, AVStream *stream);
 
 	EncoderSettings settings_;

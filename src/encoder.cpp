@@ -154,6 +154,15 @@ bool Encoder::open(void) {
 		// Decoder use a compatible AVPixelFormat
 		AVPixelFormat ideal_pix_fmt = FFmpegUtils::getCompatiblePixelFormat(settings_.videoParams().pixelFormat());
 
+		// Apply rotation
+		this->setRotation(settings_.videoParams().orientation());
+
+//		if (theta < -180)
+//			theta += 360;
+//		else if (theta >= 180.0)
+//			theta -= 360;
+//		theta = -theta;
+
 //		// This is the format we will expect frames received in Write() to be in
 //		VideoParams::Format native_pix_fmt = settings_.videoParams().format();
 //
@@ -381,6 +390,18 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 	*codec_context_ptr = codec_context;
 
 	return true;
+}
+
+
+void Encoder::setRotation(double theta) {
+	if (theta == 0)
+		return;
+
+	uint8_t *displaymatrix = av_stream_new_side_data(video_stream_, AV_PKT_DATA_DISPLAYMATRIX, sizeof(int32_t) * 9);
+
+	av_display_rotation_set((int32_t*) displaymatrix, theta);
+
+	av_dict_set(&video_stream_->metadata, "rotate", NULL, 0);
 }
 
 

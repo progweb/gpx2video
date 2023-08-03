@@ -684,7 +684,7 @@ OIIO::ImageBuf * Map::prepare(void) {
 }
 
 
-OIIO::ImageBuf * Map::render(const GPXData &data) {
+OIIO::ImageBuf * Map::render(const GPXData &data, bool &is_update) {
 	int x = 0; //this->x();
 	int y = 0; //this->y();
 	int width = settings().width();
@@ -706,8 +706,10 @@ OIIO::ImageBuf * Map::render(const GPXData &data) {
 	}
 
 	// Refresh dynamic info
-	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		is_update = false;
 		goto skip;
+	}
 
 	// Map size
 	x += border;
@@ -761,7 +763,8 @@ OIIO::ImageBuf * Map::render(const GPXData &data) {
 		if (data.valid())
 			drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
-
+	
+	is_update = true;
 skip:
 	return fg_buf_;
 }

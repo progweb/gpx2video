@@ -55,6 +55,7 @@ void VideoRenderer::init(void) {
 		av_inv_q(video_stream->frameRate()),
 		video_stream->format(),
 		video_stream->nbChannels(),
+		video_stream->orientation(),
 		video_stream->pixelAspectRatio(),
 		video_stream->interlacing());
 	video_params.setPixelFormat(video_stream->pixelFormat());
@@ -74,6 +75,25 @@ void VideoRenderer::init(void) {
 
 		settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
 		settings.setAudioBitrate(44 * 1000);
+	}
+
+	// Orientation from output
+	orientation_ = video_params.orientation();
+
+	// Compute layout size
+	switch (orientation_) {
+	case -90:
+	case 90:
+	case -270:
+	case 270:
+		layout_width_ = video_stream->height();
+		layout_height_ = video_stream->width();
+		break;
+
+	default:
+		layout_width_ = video_stream->width();
+		layout_height_ = video_stream->height();
+		break;
 	}
 
 	// Compute duration
@@ -135,9 +155,6 @@ bool VideoRenderer::start(void) {
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
 
-		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
-				widget->y(), widget->y() + widget->height());
-
 		if ((begin != 0) || (end != 0))
 			continue;
 
@@ -147,10 +164,13 @@ bool VideoRenderer::start(void) {
 		if (buf == NULL)
 			continue;
 
+		// Rotate
+		this->rotate(buf);
+
 		// Image over
 		buf->specmod().x = widget->x();
 		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, roi);
+		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, buf->roi());
 	}
 
 	return true;

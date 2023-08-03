@@ -32,10 +32,12 @@ public:
 	VideoParams();
 	VideoParams(int width, int height,
 			Format format, int nb_channels,
+			int orientation,
 			const AVRational &pixel_aspect_ratio,
 			Interlacing interlacing);
 	VideoParams(int width, int height, const AVRational &time_base,
 			Format format, int nb_channels,
+			int orientation,
 			const AVRational &pixel_aspect_ratio,
 			Interlacing interlacing);
 	virtual ~VideoParams();
@@ -51,6 +53,8 @@ public:
 	const Format& format(void) const;
 
 	const int& nbChannels(void) const;
+
+	const int& orientation(void) const;
 
 	const AVPixelFormat& pixelFormat(void) const;
 	void setPixelFormat(const AVPixelFormat &format);
@@ -90,6 +94,7 @@ private:
 	AVRational frame_rate_;
 	Format format_;
 	int nb_channels_;
+	int orientation_;
 	AVPixelFormat pixel_format_;
 	AVRational pixel_aspect_ratio_;
 	Interlacing interlacing_;

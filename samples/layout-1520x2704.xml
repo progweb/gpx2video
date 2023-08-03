@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout>
+	<widget x="250" y="450" width="780" height="120" position="top" display="false">
+		<type>position</type>
+		<name>POSITION</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+		<background-color>#00000066</background-color>
+	</widget>		
+
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical" display="true">
+		<type>grade</type>
+		<name>PENTE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical" display="true">
+		<type>speed</type>
+		<name>VITESSE</name>
+		<margin>20</margin>
+		<padding>10</padding>
+		<padding>5</padding>
+		<unit>kph</unit>
+		<text-shadow>3</text-shadow>
+	</widget>		
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical" display="true">
+		<type>elevation</type>
+		<name>ALTITUDE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<unit>m</unit>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="580" height="120" position="left" align="vertical" display="true">
+		<type>cadence</type>
+		<name>CADENCE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
+		<type>time</type>
+		<name>HEURE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
+		<type>date</type>
+		<name>DATE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<format>%d-%m-%Y</format>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
+		<type>duration</type>
+		<name>DUREE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<text-shadow>3</text-shadow>
+	</widget>
+	<widget x="250" y="450" width="580" height="120" position="right" align="vertical">
+		<type>temperature</type>
+		<name>TEMPERATURE</name>
+		<margin>20</margin>
+		<padding>5</padding>
+		<unit>C</unit>
+		<text-shadow>3</text-shadow>
+	</widget>
+
+	<track x="500" y="350" width="1800" height="350" position="top" align="horizontal" display="true">
+		<border>1</border>
+		<border-color>#000000ff</border-color>
+		<background-color>#00000033</background-color>
+	</track>
+
+	<map width="800" height="500" position="bottom" display="true">
+		<source>1</source>
+		<zoom>12</zoom>
+		<factor>2.0</factor>
+		<margin>20</margin>
+		<border>6</border>
+		<border-color>#000000ff</border-color>
+	</map>
+</layout>

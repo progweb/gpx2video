@@ -12,9 +12,11 @@ VideoParams::VideoParams() :
 
 VideoParams::VideoParams(int width, int height,
 	Format format, int nb_channels, 
+	int orientation,
 	const AVRational &pixel_aspect_ratio,
 	Interlacing interlacing) 
 	: width_(width), height_(height)
+	, orientation_(orientation)
 	, format_(format), nb_channels_(nb_channels)
 	, pixel_aspect_ratio_(pixel_aspect_ratio)
 	, interlacing_(interlacing) {
@@ -23,9 +25,11 @@ VideoParams::VideoParams(int width, int height,
 
 VideoParams::VideoParams(int width, int height, const AVRational &time_base,
 	Format format, int nb_channels, 
+	int orientation,
 	const AVRational &pixel_aspect_ratio,
 	Interlacing interlacing) 
 	: width_(width), height_(height), time_base_(time_base)
+	, orientation_(orientation)
 	, format_(format), nb_channels_(nb_channels)
 	, pixel_aspect_ratio_(pixel_aspect_ratio)
 	, interlacing_(interlacing) {
@@ -68,6 +72,11 @@ const VideoParams::Format& VideoParams::format(void) const {
 
 const int& VideoParams::nbChannels(void) const {
 	return nb_channels_;
+}
+
+
+const int& VideoParams::orientation(void) const {
+	return orientation_;
 }
 
 

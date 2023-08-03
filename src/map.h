@@ -82,7 +82,7 @@ public:
 
 	// Render map
 	OIIO::ImageBuf * prepare(void);
-	OIIO::ImageBuf * render(const GPXData &data);
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
 
 	static void downloadProgress(Tile &tile, double dltotal, double dlnow);
 	static void downloadComplete(Tile &tile);

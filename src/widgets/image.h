@@ -37,8 +37,10 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
 		(void) data;
+
+		is_update = false;
 
 		return NULL;
 	}

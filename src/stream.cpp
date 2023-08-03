@@ -212,6 +212,15 @@ void VideoStream::setNbChannels(const int &nb_channels) {
 }
 
 
+const int& VideoStream::orientation(void) const {
+	return orientation_;
+}
+
+void VideoStream::setOrientation(const double &theta) {
+	orientation_ = (int) theta;
+}
+
+
 int64_t VideoStream::getTimeInTimeBaseUnits(const AVRational& time) const {
 	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
 }

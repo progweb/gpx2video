@@ -42,6 +42,10 @@ protected:
 
 	std::list<VideoWidget *> widgets_;
 
+	int orientation_;
+	int layout_width_;
+	int layout_height_;
+
 	OIIO::ImageBuf *overlay_;
 
 	Renderer(GPX2Video &app); //, Map *map);
@@ -53,6 +57,7 @@ protected:
 	bool loadWidget(layout::Widget *w);
 	void computeWidgetsPosition(void);
 
+	void rotate(OIIO::ImageBuf *buf);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
 };
 

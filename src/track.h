@@ -48,7 +48,7 @@ public:
 
 	// Render track
 	OIIO::ImageBuf * prepare(void);
-	OIIO::ImageBuf * render(const GPXData &data);
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
 
 protected:
 	OIIO::ImageBuf *bg_buf_;

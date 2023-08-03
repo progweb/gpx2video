@@ -38,6 +38,25 @@ void ImageRenderer::init(void) {
 	// Retrieve video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
+	// No orientation
+	orientation_ = 0;
+
+	// Compute layout size
+	switch (video_stream->orientation()) {
+	case -90:
+	case 90:
+	case -270:
+	case 270:
+		layout_width_ = video_stream->height();
+		layout_height_ = video_stream->width();
+		break;
+
+	default:
+		layout_width_ = video_stream->width();
+		layout_height_ = video_stream->height();
+		break;
+	}
+
 	// Compute duration
 	duration_ms_ = video_stream->duration() * av_q2d(video_stream->timeBase()) * 1000;
 
@@ -87,8 +106,8 @@ bool ImageRenderer::start(void) {
 	timecode_ = 0;
 
 	// Create overlay buffer
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(video_stream->width(), video_stream->height(), 
-		video_stream->nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
+	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(layout_width_, layout_height_,
+		4, OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
 
 	// Prepare each widget, map...
 	for (VideoWidget *widget : widgets_) {
@@ -96,9 +115,6 @@ bool ImageRenderer::start(void) {
 
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
-
-		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
-				widget->y(), widget->y() + widget->height());
 
 		if ((begin != 0) || (end != 0))
 			continue;
@@ -111,7 +127,7 @@ bool ImageRenderer::start(void) {
 		// Image over
 		buf->specmod().x = widget->x();
 		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, roi);
+		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, buf->roi());
 	}
 
 	return true;

@@ -5,9 +5,12 @@
 #include <vector>
 
 extern "C" {
+#include <libavutil/eval.h>
+#include <libavutil/display.h>
 #include <libavutil/channel_layout.h>
 #include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
+
 }
 
 #include "audioparams.h"

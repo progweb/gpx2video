@@ -42,6 +42,8 @@ protected:
 	bool open(const std::string &filename, const int &index);
 
 private:
+	double getRotation(AVStream* stream);
+
 	static uint64_t validateChannelLayout(AVStream* stream);
 	static VideoParams::Format getNativePixelFormat(AVPixelFormat pix_fmt);
 	static int getNativeNbChannels(AVPixelFormat pix_fmt);

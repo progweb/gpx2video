@@ -82,6 +82,8 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 			&& ((avstream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
 				|| (avstream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO))) {
 			if (avstream->codecpar->codec_type == AVMEDIA_TYPE_VIDEO) {
+				double theta = 0;
+
 				AVRational frame_rate;
 				AVRational pixel_aspect_ratio;
 				VideoParams::Interlacing interlacing = VideoParams::InterlaceNone;
@@ -104,6 +106,8 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 								interlacing = VideoParams::InterlacedBottomFirst;
 						}
 
+						theta = instance.getRotation(avstream);
+
 						pixel_aspect_ratio = av_guess_sample_aspect_ratio(fmt_ctx, avstream, frame);
 
 						frame_rate = av_guess_frame_rate(fmt_ctx, avstream, frame);
@@ -118,6 +122,15 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 					av_packet_free(&packet);
 				}
 
+    			// Warning, value isn't the same result as FFprobe.
+				av_log(NULL, AV_LOG_INFO, "rotate = %0.2f\n", "rotate", theta);
+
+//				theta = -theta;
+//				if (theta < -180)
+//					theta += 360;
+//				else if (theta >= 180.0)
+//					theta -= 360;
+
 				AVPixelFormat compatible_pix_fmt = FFmpegUtils::getCompatiblePixelFormat(static_cast<AVPixelFormat>(avstream->codecpar->format));
 
 				VideoStreamPtr video_stream = std::make_shared<VideoStream>();
@@ -131,6 +144,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 				video_stream->setPixelFormat(static_cast<AVPixelFormat>(avstream->codecpar->format));
 				video_stream->setPixelAspectRatio(pixel_aspect_ratio);
 				video_stream->setNbChannels(getNativeNbChannels(compatible_pix_fmt));
+				video_stream->setOrientation(theta);
 
 				stream = video_stream;
 			}
@@ -449,6 +463,7 @@ FramePtr Decoder::retrieveVideo(AVRational timecode) {
 	frame->setVideoParams(VideoParams(vs->width(), vs->height(),
 		native_pix_fmt_,
 		native_nb_channels_,
+		std::static_pointer_cast<VideoStream>(stream())->orientation(),
 		std::static_pointer_cast<VideoStream>(stream())->pixelAspectRatio(),
 		std::static_pointer_cast<VideoStream>(stream())->interlacing()));
 	// TODO : do better !!!
@@ -510,6 +525,38 @@ uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 	av_packet_free(&packet);
 
 	return data;
+}
+
+
+double Decoder::getRotation(AVStream* stream) {
+	double theta = 0;
+
+	uint8_t *displaymatrix;
+
+	AVDictionaryEntry *entry;
+
+	log_call();
+
+	entry = av_dict_get(stream->metadata, "rotate", NULL, 0);
+
+	displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, NULL);
+
+	if (entry && (*entry->value) && strcmp(entry->value, "0")) {
+		char *tail;
+
+		theta = av_strtod(entry->value, &tail);
+
+		if (*tail)
+			theta = 0;
+	}
+
+	if (displaymatrix && !theta) {
+		theta = -av_display_rotation_get((int32_t*) displaymatrix);
+	}
+
+	theta -= 360 * floor(theta/360 + 0.9/360);
+
+	return theta;
 }
 
 

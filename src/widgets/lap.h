@@ -49,13 +49,15 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data) {
+	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
 		char s[128];
 		int lap = data.lap();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged))
+		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+			is_update = false;
 			goto skip;
+		}
 
 		// Format data
 		if (data.hasValue(GPXData::DataFix))
@@ -70,6 +72,7 @@ skip:
 		this->createBox(&fg_buf_, this->width(), this->height());
 		this->drawValue(fg_buf_, s);
 
+		is_update = true;
 skip:
 		return fg_buf_;
 	}
