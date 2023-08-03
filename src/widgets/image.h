@@ -25,13 +25,15 @@ public:
 	}
 
 	OIIO::ImageBuf * prepare(void) {
-		if (bg_buf_ == NULL) {
-			this->createBox(&bg_buf_, this->width(), this->height());
-			this->drawBorder(bg_buf_);
-			this->drawBackground(bg_buf_);
-			this->drawImage(bg_buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
-		}
+		if (bg_buf_ != NULL)
+			goto skip;
 
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
+		this->drawBackground(bg_buf_);
+		this->drawImage(bg_buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
+
+skip:
 		return bg_buf_;
 	}
 

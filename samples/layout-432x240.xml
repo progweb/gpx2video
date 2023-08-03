@@ -12,46 +12,60 @@
 		<type>grade</type>
 		<name>PENTE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
 		<unit>kph</unit>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
 		<unit>m</unit>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 	</widget>
-	<widget x="25" y="45" width="110" height="30" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
 		<type>time</type>
 		<name>HEURE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>4</padding>
+		<text-linespace>2</text-linespace>
+		<with-label>false</with-label>
 	</widget>
-	<widget x="25" y="45" width="110" height="30" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>4</padding>
 		<format>%d-%m-%Y</format>
+		<text-linespace>2</text-linespace>
+		<with-label>false</with-label>
 	</widget>
-	<widget x="25" y="45" width="110" height="30" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
 		<type>duration</type>
 		<name>DUREE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>4</padding>
+		<text-linespace>2</text-linespace>
+		<with-label>false</with-label>
 	</widget>
 	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 	</widget>
 	<!--
 	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
@@ -65,21 +79,27 @@
 		<type>distance</type>
 		<name>DISTANCE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 		<unit>km</unit>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" position="bottom" align="horizontal">
 		<type>avgspeed</type>
 		<name>MOYENNE</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 		<unit>kph</unit>
 	</widget>		
 	<widget x="25" y="45" width="110" height="30" position="bottom" align="horizontal">
 		<type>maxspeed</type>
 		<name>VITESSE MAX.</name>
 		<margin>5</margin>
-		<padding>5</padding>
+		<padding>2</padding>
+		<padding-left>5</padding-left>
+		<text-linespace>2</text-linespace>
 		<unit>kph</unit>
 	</widget>		
 	<map x="300" y="300" position="none" display="false">

@@ -367,6 +367,9 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Position position = VideoWidget::PositionNone;
 
+	VideoWidget::TextAlign label_align = VideoWidget::TextAlignLeft;
+	VideoWidget::TextAlign value_align = VideoWidget::TextAlignLeft;
+
 	// Display
 	if ((bool) w->display() == false) {
 		log_info("Skip widget '%s'", (const char *) w->type());
@@ -455,6 +458,24 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	log_info("Load widget '%s'", (const char *) w->type());
 
+	// Text alignment for label
+	s = (const char *) w->labelAlign();
+	label_align = VideoWidget::string2textAlign(s);
+
+	if (label_align == VideoWidget::TextAlignUnknown) {
+		log_error("Widget loading error, label align value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Text alignment for value
+	s = (const char *) w->valueAlign();
+	value_align = VideoWidget::string2textAlign(s);
+
+	if (value_align == VideoWidget::TextAlignUnknown) {
+		log_error("Widget loading error, value align value '%s' unknown", s.c_str());
+		goto error;
+	}
+
 	// Flags
 	if (w->withLabel())
 		flags |= VideoWidget::FlagLabel;
@@ -489,6 +510,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setTextRatio((double) w->textRatio());
 	widget->setTextShadow(w->textShadow());
 	widget->setTextLineSpace(w->textLineSpace());
+	widget->setLabelAlign(label_align);
+	widget->setValueAlign(value_align);
 	widget->setBorder(w->border());
 	widget->setBorderColor((const char *) w->borderColor());
 	widget->setBackgroundColor((const char *) w->backgroundColor());

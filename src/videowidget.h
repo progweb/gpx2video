@@ -84,6 +84,13 @@ public:
 		FlagUnknown = (1 << 4),
 	};
 
+	enum TextAlign {
+		TextAlignLeft,
+		TextAlignCenter,
+		TextAlignRight,
+		TextAlignUnknown
+	};
+
 	virtual ~VideoWidget() {
 		log_call();
 	}
@@ -307,6 +314,9 @@ public:
 	}
 
 	virtual void setTextRatio(double ratio) {
+		if (ratio == 0.0)
+			return;
+
 		txtratio_ = ratio;
 	}
 
@@ -323,7 +333,26 @@ public:
 	}
 
 	virtual void setTextLineSpace(int linespace) {
+		if (linespace < 0)
+			return;
+
 		txtlinespace_ = linespace;
+	}
+
+	enum TextAlign labelAlign(void) const {
+		return label_align_;
+	}
+
+	virtual void setLabelAlign(TextAlign align) {
+		label_align_ = align;
+	}
+
+	enum TextAlign valueAlign(void) const {
+		return value_align_;
+	}
+
+	virtual void setValueAlign(TextAlign align) {
+		value_align_ = align;
 	}
 
 	int border(void) const {
@@ -376,6 +405,7 @@ public:
 
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
+	static TextAlign string2textAlign(std::string &s);
 	static Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
 	static std::string unit2string(Unit unit);
@@ -392,6 +422,7 @@ protected:
 		, value_px_(0)
    		, value_size_(0)
 		, value_offset_(0)
+		, txtratio_(0.0)
 		, name_(name) {
 		log_call();
 
@@ -404,9 +435,13 @@ protected:
 		setPadding(PaddingAll, 0);
 		setFont("./assets/fonts/Helvetica.ttf");
 		setLabel(name);
+		setTextRatio(5.0);
 		setTextShadow(0);
+		setTextLineSpace(10);
 		setUnit(VideoWidget::UnitNone);
 		setTextColor("#ffffffff");
+		setLabelAlign(VideoWidget::TextAlignLeft);
+		setValueAlign(VideoWidget::TextAlignLeft);
 		setBorder(0);
 		setBorderColor("#00000000");
 		setBackgroundColor("#00000000");
@@ -419,8 +454,8 @@ protected:
 	void drawBackground(OIIO::ImageBuf *buf);
 	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, Zoom zoom);
 	void drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label);
-	void drawLabel(OIIO::ImageBuf *buf, int x, int y, const char *label);
-	void drawValue(OIIO::ImageBuf *buf, int x, int y, const char *value);
+	void drawLabel(OIIO::ImageBuf *buf, const char *label);
+	void drawValue(OIIO::ImageBuf *buf, const char *value);
 
 	void textSize(std::string text, int fontsize, 
 		int &x1, int &y1, int &x2, int &y2,
@@ -467,6 +502,9 @@ protected:
 	int txtshadow_;
 	int txtlinespace_;
 	float txtcolor_[4];
+
+	enum TextAlign label_align_;
+	enum TextAlign value_align_;
 
 	int border_;
 	float bordercolor_[4];

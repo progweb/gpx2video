@@ -293,9 +293,11 @@ Here all widget common element settings:
 	<padding>5</padding>
 	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
 	<text-color>#00ff00ff</text-color>
-    <text-ratio>3.0</text-ratio>
+	<text-ratio>2.0</text-ratio>
 	<text-shadow>3</text-shadow>
 	<text-linespace>2</text-linespace>
+	<label-align>left</label-align>
+	<value-align>right</value-align>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -327,6 +329,8 @@ Node elements are:
   - **text-ratio**: define the label and value size ratio.
   - **text-shadow**: text shadow thickness.
   - **text-linespace**: line space between label and value.
+  - **label-align**: to set text alignement (left, center, right)
+  - **value-align**: to set value alignement (left, center, right)
   - **with-xxxx**: to show or not the field (default is true).
 
 **type** gauges supported are:

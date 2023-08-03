@@ -63,6 +63,8 @@ namespace layout
 	_txtratio(this, "text-ratio", Node::ELEMENT, false),
 	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
 	_txtlinespace(this, "text-linespace", Node::ELEMENT, false),
+	_label_align(this, "label-align", Node::ELEMENT, false),
+	_value_align(this, "value-align", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
@@ -103,6 +105,8 @@ namespace layout
     getInterfaces().push_back(&_txtratio);
     getInterfaces().push_back(&_txtshadow);
     getInterfaces().push_back(&_txtlinespace);
+    getInterfaces().push_back(&_label_align);
+    getInterfaces().push_back(&_value_align);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
@@ -124,7 +128,9 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
-	_txtlinespace.setValue("2");
+	_txtratio.setValue("2.0");
+	_txtlinespace.setValue("-1");
+
 	_with_label.setValue("true");
 	_with_value.setValue("true");
 	_with_picto.setValue("true");

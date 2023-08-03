@@ -119,6 +119,7 @@ Track::Track(GPX2Video &app, const TrackSettings &settings, struct event_base *e
 	, evbase_(evbase) {
 	log_call();
 
+	VideoWidget::setFlags(VideoWidget::FlagNone);
 	VideoWidget::setSize(settings_.width(), settings_.height());
 
 	bg_buf_ = NULL;

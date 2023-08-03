@@ -282,6 +282,20 @@ namespace layout
     Unsigned  &textLineSpace() { return _txtlinespace; }
 
     ///
+    /// Get label align
+    ///
+    /// @return the label align element
+    ///
+    String  &labelAlign() { return _label_align; }
+
+    ///
+    /// Get value align
+    ///
+    /// @return the value align element
+    ///
+    String  &valueAlign() { return _value_align; }
+
+    ///
     /// Get border
     ///
     /// @return the border attribute
@@ -370,6 +384,8 @@ namespace layout
 	Decimal      _txtratio;
 	Unsigned     _txtshadow;
 	Unsigned     _txtlinespace;
+	String       _label_align;
+	String       _value_align;
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;

@@ -61,6 +61,9 @@ Extractor::Extractor(GPX2Video &app, const ExtractorSettings &settings)
 	, app_(app) 
 	, settings_(settings) {
 	container_ = NULL;
+
+	fmt_ctx_ = NULL;
+	avstream_ = NULL;
 }
 
 

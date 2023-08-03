@@ -28,18 +28,16 @@ public:
 	}
 
 	OIIO::ImageBuf * prepare(void) {
-		if (bg_buf_ == NULL) {
-			this->createBox(&bg_buf_, this->width(), this->height());
-			this->drawBorder(bg_buf_);
-			this->drawBackground(bg_buf_);
-//			this->drawLabel(bg_buf_, 0, 0, label().c_str());
-		}
+		if (bg_buf_ != NULL)
+			goto skip;
 
+		this->createBox(&bg_buf_, this->width(), this->height());
+		this->drawBorder(bg_buf_);
+		this->drawBackground(bg_buf_);
+//		this->drawLabel(bg_buf_, label().c_str());
+
+skip:
 		return bg_buf_;
-//		// Image over
-//		bg_buf_->specmod().x = this->x();
-//		bg_buf_->specmod().y = this->y();
-//		OIIO::ImageBufAlgo::over(*buf, *bg_buf_, *buf, OIIO::ROI());
 	}
 
 	OIIO::ImageBuf * render(const GPXData &data) {
