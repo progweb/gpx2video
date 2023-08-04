@@ -29,9 +29,6 @@ public:
 
 	void append(VideoWidget *widget);
 
-//	void draw(FramePtr frame, const uint64_t timecode_ms, const GPXData &data);
-	void draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, const GPXData &data);
-
 protected:
 	GPX2Video &app_;
 
@@ -42,7 +39,6 @@ protected:
 
 	std::list<VideoWidget *> widgets_;
 
-	int orientation_;
 	int layout_width_;
 	int layout_height_;
 
@@ -57,7 +53,8 @@ protected:
 	bool loadWidget(layout::Widget *w);
 	void computeWidgetsPosition(void);
 
-	void rotate(OIIO::ImageBuf *buf);
+	void rotate(OIIO::ImageBuf *buf, int orientation);
+	void resize(OIIO::ImageBuf *buf, int width, int height);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
 };
 

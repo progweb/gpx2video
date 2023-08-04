@@ -436,16 +436,22 @@ bool Track::load(void) {
 }
 
 
-OIIO::ImageBuf * Track::prepare(void) {
-	if (bg_buf_ == NULL) {
-		this->createBox(&bg_buf_, this->width(), this->height());
-		this->drawBorder(bg_buf_);
-		this->drawBackground(bg_buf_);
+OIIO::ImageBuf * Track::prepare(bool &is_update) {
+	if (bg_buf_ != NULL) {
+		is_update = false;
+		goto skip;
 	}
+
+	this->createBox(&bg_buf_, this->width(), this->height());
+	this->drawBorder(bg_buf_);
+	this->drawBackground(bg_buf_);
 
 	if (this->load() == false)
 		log_warn("Track renderer failure");
 
+	is_update = true;
+
+skip:
 	return bg_buf_;
 }
 

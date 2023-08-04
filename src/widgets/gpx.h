@@ -27,15 +27,18 @@ public:
 		return widget;
 	}
 
-	OIIO::ImageBuf * prepare(void) {
-		if (bg_buf_ != NULL)
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		if (bg_buf_ != NULL) {
+			is_update = false;
 			goto skip;
+		}
 
 		this->createBox(&bg_buf_, this->width(), this->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
 //		this->drawLabel(bg_buf_, label().c_str());
-
+	
+		is_update = true;
 skip:
 		return bg_buf_;
 	}

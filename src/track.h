@@ -47,7 +47,7 @@ public:
 	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
 
 	// Render track
-	OIIO::ImageBuf * prepare(void);
+	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
 
 protected:

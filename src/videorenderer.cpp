@@ -77,21 +77,20 @@ void VideoRenderer::init(void) {
 		settings.setAudioBitrate(44 * 1000);
 	}
 
-	// Orientation from output
-	orientation_ = video_params.orientation();
-
-	// Compute layout size
-	switch (orientation_) {
+	// Compute layout size from width & height and DAR
+	//   DAR = width / height * SAR
+	//   SAR = video_stream->pixelAspectRatio()
+	switch (video_params.orientation()) {
 	case -90:
 	case 90:
 	case -270:
 	case 270:
 		layout_width_ = video_stream->height();
-		layout_height_ = video_stream->width();
+		layout_height_ = round((double) video_stream->width() * av_q2d(video_stream->pixelAspectRatio()));
 		break;
 
 	default:
-		layout_width_ = video_stream->width();
+		layout_width_ = round((double) video_stream->width() * av_q2d(video_stream->pixelAspectRatio()));
 		layout_height_ = video_stream->height();
 		break;
 	}
@@ -122,16 +121,70 @@ void VideoRenderer::init(void) {
 }
 
 
+void VideoRenderer::computeWidgetsPosition(void) {
+	int x, y;
+
+	int orientation = encoder_->settings().videoParams().orientation();
+
+	double sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
+
+	log_call();
+
+	Renderer::computeWidgetsPosition();
+
+	// At last, apply layout rotation
+	for (VideoWidget *widget : widgets_) {
+		switch (orientation) {
+		case 180:
+		case -180:
+			x = layout_width_ - widget->x() - widget->width();
+			y = layout_height_ - widget->y() - widget->height();
+			break;
+
+		case 90:
+		case -270:
+			x = widget->y();
+			y = layout_width_ - widget->x() - widget->width();
+			break;
+
+		case -90:
+		case 270:
+			x = layout_height_ - widget->y() - widget->height();
+			y = widget->x();
+			break;
+
+		default:
+			x = widget->x();
+			y = widget->y();
+			break;
+		} 
+
+		x = round((double) x / sar);
+
+		widget->setPosition(x, y);
+	}
+}
+
+
 bool VideoRenderer::start(void) {
+	bool is_update = false;
+
 	time_t now = time(NULL);
 
 	time_t start_time;
+
+	double sar;
+	int orientation;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	log_call();
 
 	log_notice("Rendering...");
+
+	// SAR & orientation video
+	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
+	orientation = encoder_->settings().videoParams().orientation();
 
 	// Compute start time
 	start_time = container_->startTime() + container_->timeOffset();
@@ -159,13 +212,14 @@ bool VideoRenderer::start(void) {
 			continue;
 
 		// Render static widget
-		buf = widget->prepare();
+		buf = widget->prepare(is_update);
 
 		if (buf == NULL)
 			continue;
 
-		// Rotate
-		this->rotate(buf);
+		// Rotate & rescale
+		this->resize(buf, round((double) widget->width() / sar), widget->height());
+		this->rotate(buf, orientation);
 
 		// Image over
 		buf->specmod().x = widget->x();
@@ -180,14 +234,19 @@ bool VideoRenderer::start(void) {
 bool VideoRenderer::run(void) {
 	FramePtr frame;
 
+	double sar;
+	int orientation;
+
 	time_t start_time;
 
 	int64_t timecode;
-	int64_t timecode_ms;
+	uint64_t timecode_ms;
 
 	double time_factor;
 
 	AVRational real_time;
+
+	bool is_update = false;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 //	AudioStreamPtr audio_stream = container_->getAudioStream();
@@ -197,6 +256,10 @@ bool VideoRenderer::run(void) {
 	start_time = container_->startTime() + container_->timeOffset();
 
 	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
+
+	// SAR & orientation video
+	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
+	orientation = encoder_->settings().videoParams().orientation();
 
 	// Read audio data
 	if (decoder_audio_) {
@@ -224,8 +287,56 @@ bool VideoRenderer::run(void) {
 		// Read GPX data
 		gpx_->retrieveNext(data_, time_factor * timecode_ms);
 
-		// Draw
-		this->draw(frame_buffer, timecode_ms, data_);
+		// Draw overlay
+		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
+
+		// Draw each widget, map...
+		for (VideoWidget *widget : widgets_) {
+			OIIO::ImageBuf *buf = NULL;
+
+			uint64_t begin = widget->atBeginTime();
+			uint64_t end = widget->atEndTime();
+
+			if ((begin != 0) && (timecode_ms < begin))
+				continue;
+
+			if ((end != 0) && (end < timecode_ms))
+				continue;
+
+			if ((begin != 0) || (end != 0)) {
+				buf = widget->prepare(is_update);
+
+				if (buf != NULL) {
+					// Rotate & resize
+					if (is_update) {
+						this->resize(buf, round((double) widget->width() / sar), widget->height());
+						this->rotate(buf, orientation);
+					}
+
+					// Image over
+					buf->specmod().x = widget->x();
+					buf->specmod().y = widget->y();
+					OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
+				}
+			}
+
+			// Render dynamic widget
+			buf = widget->render(data_, is_update);
+
+			if (buf == NULL)
+				continue;
+
+			// Rotate & resize
+			if (is_update) {
+				this->resize(buf, round((double) widget->width() / sar), widget->height());
+				this->rotate(buf, orientation);
+			}
+
+			// Image over
+			buf->specmod().x = widget->x();
+			buf->specmod().y = widget->y();
+			OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
+		}
 
 		frame->fromImageBuf(frame_buffer);
 	}

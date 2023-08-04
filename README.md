@@ -18,6 +18,8 @@ gpx2video is **only a test tool and isn't yet a final release!**
 
 ## Features
 
+gpx2video should work with any video. Orientation, SAR & DAR video parameters are supported.
+
 gpx2video can read and extract from your gpx input file:
   - time, 
   - position, 

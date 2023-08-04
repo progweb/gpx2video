@@ -39,20 +39,20 @@ void ImageRenderer::init(void) {
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	// No orientation
-	orientation_ = 0;
-
-	// Compute layout size
+	// Compute layout size from width & height and DAR
+	//   DAR = width / height * SAR
+	//   SAR = video_stream->pixelAspectRatio()
 	switch (video_stream->orientation()) {
 	case -90:
 	case 90:
 	case -270:
 	case 270:
 		layout_width_ = video_stream->height();
-		layout_height_ = video_stream->width();
+		layout_height_ = round((double) video_stream->width() * av_q2d(video_stream->pixelAspectRatio()));
 		break;
 
 	default:
-		layout_width_ = video_stream->width();
+		layout_width_ = round((double) video_stream->width() * av_q2d(video_stream->pixelAspectRatio()));
 		layout_height_ = video_stream->height();
 		break;
 	}
@@ -81,6 +81,8 @@ void ImageRenderer::init(void) {
 
 
 bool ImageRenderer::start(void) {
+	bool is_update = false;
+
 	time_t now = time(NULL);
 
 	time_t start_time;
@@ -119,7 +121,7 @@ bool ImageRenderer::start(void) {
 		if ((begin != 0) || (end != 0))
 			continue;
 
-		buf = widget->prepare();
+		buf = widget->prepare(is_update);
 
 		if (buf == NULL)
 			continue;
@@ -141,11 +143,13 @@ bool ImageRenderer::run(void) {
 
 	time_t start_time;
 
-	int64_t timecode_ms;
+	uint64_t timecode_ms;
 
 	double time_factor;
 
 	enum GPX::Data type;
+
+	bool is_update = false;
 
 	std::string filename = app_.settings().outputfile();
 
@@ -204,9 +208,46 @@ bool ImageRenderer::run(void) {
 		if (type == GPX::DataEof)
 			goto done;
 
-		// Draw
-		this->draw(image_buffer, timecode_ms, data_);
+		// Draw overlay
+		OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());
 
+		// Draw each widget, map...
+		for (VideoWidget *widget : widgets_) {
+			OIIO::ImageBuf *buf = NULL;
+
+			uint64_t begin = widget->atBeginTime();
+			uint64_t end = widget->atEndTime();
+
+			if ((begin != 0) && (timecode_ms < begin))
+				continue;
+
+			if ((end != 0) && (end < timecode_ms))
+				continue;
+
+			if ((begin != 0) || (end != 0)) {
+				buf = widget->prepare(is_update);
+
+				if (buf != NULL) {
+					// Image over
+					buf->specmod().x = widget->x();
+					buf->specmod().y = widget->y();
+					OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
+				}
+			}
+
+			// Render dynamic widget
+			buf = widget->render(data_, is_update);
+
+			if (buf == NULL)
+				continue;
+
+			// Image over
+			buf->specmod().x = widget->x();
+			buf->specmod().y = widget->y();
+			OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
+		}
+
+		// Write image file
 		if (out->open(filename, image_buffer.spec()) == false) {
 			log_error("Draw track failure, can't open '%s' file", filename.c_str());
 			goto error;

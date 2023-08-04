@@ -670,16 +670,22 @@ bool Map::load(void) {
 }
 
 
-OIIO::ImageBuf * Map::prepare(void) {
-	if (bg_buf_ == NULL) {
-		this->createBox(&bg_buf_, this->width(), this->height());
-		this->drawBorder(bg_buf_);
+OIIO::ImageBuf * Map::prepare(bool &is_update) {
+	if (bg_buf_ != NULL) {
+		is_update = false;
+		goto skip;
 	}
+
+	this->createBox(&bg_buf_, this->width(), this->height());
+	this->drawBorder(bg_buf_);
 
 	// Load map
 	if (this->load() == false)
 		log_warn("Map renderer failure");
 
+	is_update = true;
+
+skip:
 	return bg_buf_;
 }
 

@@ -40,7 +40,6 @@ Renderer::Renderer(GPX2Video &app)
 	, app_(app) {
 	container_ = NULL;
 
-	orientation_ = 0;
 	overlay_ = NULL;
 }
 
@@ -1020,91 +1019,11 @@ void Renderer::computeWidgetsPosition(void) {
 
 		is_first = false;
 	}
-
-	// At last, apply layout rotation
-	for (VideoWidget *widget : widgets_) {
-		switch (orientation_) {
-		case 180:
-		case -180:
-			x = layout_width_ - widget->x() - widget->width();
-			y = layout_height_ - widget->y() - widget->height();
-			break;
-
-		case 90:
-		case -270:
-			x = widget->y();
-			y = layout_width_ - widget->x() - widget->width();
-			break;
-
-		case -90:
-		case 270:
-			x = layout_height_ - widget->y() - widget->height();
-			y = widget->x();
-			break;
-
-		default:
-			x = widget->x();
-			y = widget->y();
-			break;
-		}
-
-		widget->setPosition(x, y);
-	}
 }
 
 
-void Renderer::draw(OIIO::ImageBuf &frame_buffer, const uint64_t timecode_ms, const GPXData &data) {
-	bool is_update = false;
-
-	// Draw overlay
-	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
-
-	// Draw each widget, map...
-	for (VideoWidget *widget : widgets_) {
-		OIIO::ImageBuf *buf = NULL;
-
-		uint64_t begin = widget->atBeginTime();
-		uint64_t end = widget->atEndTime();
-
-//		OIIO::ROI roi = OIIO::ROI(widget->x(), widget->x() + widget->width(), 
-//				widget->y(), widget->y() + widget->height());
-
-		if ((begin != 0) && (timecode_ms < begin))
-			continue;
-
-		if ((end != 0) && (end < timecode_ms))
-			continue;
-
-		if ((begin != 0) || (end != 0)) {
-			buf = widget->prepare();
-
-			if (buf != NULL) {
-				buf->specmod().x = widget->x();
-				buf->specmod().y = widget->y();
-				OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
-			}
-		}
-
-		// Render dynamic widget
-		buf = widget->render(data, is_update);
-
-		if (buf == NULL)
-			continue;
-
-		// Rotate
-		if (is_update)
-			this->rotate(buf);
-
-		// Image over
-		buf->specmod().x = widget->x();
-		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
-	}
-}
-
-
-void Renderer::rotate(OIIO::ImageBuf *buf) {
-	switch (orientation_) {
+void Renderer::rotate(OIIO::ImageBuf *buf, int orientation) {
+	switch (orientation) {
 	case 180:
 	case -180:
 		OIIO::ImageBufAlgo::rotate180(*buf, *buf);
@@ -1123,6 +1042,21 @@ void Renderer::rotate(OIIO::ImageBuf *buf) {
 	default:
 		break;
 	}
+}
+
+
+void Renderer::resize(OIIO::ImageBuf *buf, int width, int height) {
+	const OIIO::ImageSpec& spec = buf->spec();
+	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+
+	// If no change, skip
+	if ((width == spec.width) && (height == spec.height))
+		return;
+
+	OIIO::ImageBuf out(OIIO::ImageSpec(width, height, spec.nchannels, type));
+	OIIO::ImageBufAlgo::resize(out, *buf);
+
+	*buf = out;
 }
 
 

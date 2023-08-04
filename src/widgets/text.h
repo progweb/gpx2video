@@ -25,7 +25,7 @@ public:
 		return widget;
 	}
 
-	OIIO::ImageBuf * prepare(void) {
+	OIIO::ImageBuf * prepare(bool &is_update) {
 		int x, y;
 
 		int px;
@@ -67,6 +67,7 @@ public:
 
 		this->drawText(bg_buf_, x, y, px, this->text().c_str());
 
+		is_update = true;
 skip:
 		return bg_buf_;
 	}

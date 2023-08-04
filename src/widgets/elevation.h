@@ -29,11 +29,13 @@ public:
 		return widget;
 	}
 
-	OIIO::ImageBuf * prepare(void) {
+	OIIO::ImageBuf * prepare(bool &is_update) {
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
-		if (bg_buf_ != NULL)
+		if (bg_buf_ != NULL) {
+			is_update = false;
 			goto skip;
+		}
 
 		this->createBox(&bg_buf_, this->width(), this->height());
 		this->drawBorder(bg_buf_);
@@ -42,6 +44,7 @@ public:
 			this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_elevation.png", VideoWidget::ZoomFit);
 		this->drawLabel(bg_buf_, label().c_str());
 
+		is_update = true;
 skip:
 		return bg_buf_;
 	}
