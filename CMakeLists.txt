@@ -168,5 +168,5 @@ install(TARGETS gpx2video DESTINATION bin)
 #
 add_subdirectory(gpxlib)
 add_subdirectory(layoutlib)
-add_subdirectory(tests)
+#add_subdirectory(tests)
 

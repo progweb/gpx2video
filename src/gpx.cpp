@@ -184,7 +184,7 @@ bool GPXData::compute(void) {
 //	dc = sqrt(dx*dx + dy*dy);
 
 	// grade elevation
-	if (round(dc) != 0)
+	if (floor(dc) > 0) 
 		grade_ = 100.0 * dz / dc;
 
 	// speed & maxspeed
