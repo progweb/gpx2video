@@ -244,6 +244,7 @@ bool VideoRenderer::run(void) {
 
 	double time_factor;
 
+	int duration;
 	AVRational real_time;
 
 	bool is_update = false;
@@ -255,7 +256,7 @@ bool VideoRenderer::run(void) {
 
 	start_time = container_->startTime() + container_->timeOffset();
 
-	real_time = av_mul_q(av_make_q(frame_time_, 1), encoder_->settings().videoParams().timeBase());
+	real_time = av_div_q(av_make_q(1000 * frame_time_, 1), encoder_->settings().videoParams().frameRate());
 
 	// SAR & orientation video
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
@@ -263,10 +264,15 @@ bool VideoRenderer::run(void) {
 
 	// Read audio data
 	if (decoder_audio_) {
-		frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time);
+		duration = round(av_q2d(av_div_q(av_make_q(1000 * (frame_time_ + 1), 1), encoder_->settings().videoParams().frameRate())));
+		duration -= round(av_q2d(real_time));
 
-		if (frame != NULL)
-			encoder_->writeAudio(frame, real_time);
+		do {
+			frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time, duration);
+
+			if (frame != NULL)
+				encoder_->writeAudio(frame, real_time);
+		} while (frame != NULL);
 	}
 
 	// Read video data

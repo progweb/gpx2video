@@ -33,6 +33,7 @@ VideoParams::VideoParams(int width, int height, const AVRational &time_base,
 	, format_(format), nb_channels_(nb_channels)
 	, pixel_aspect_ratio_(pixel_aspect_ratio)
 	, interlacing_(interlacing) {
+	frame_rate_ = av_div_q(av_make_q(1, 1), time_base_);
 }
 
 
@@ -64,6 +65,10 @@ const AVRational& VideoParams::frameRate(void) const {
 	return frame_rate_;
 }
 
+
+void VideoParams::setFrameRate(const AVRational &frame_rate) {
+	frame_rate_ = frame_rate;
+}
 
 const VideoParams::Format& VideoParams::format(void) const {
 	return format_;

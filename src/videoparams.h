@@ -49,6 +49,7 @@ public:
 	void setTimeBase(const AVRational &time_base);
 
 	const AVRational& frameRate(void) const;
+	void setFrameRate(const AVRational& frame_rate);
 
 	const Format& format(void) const;
 

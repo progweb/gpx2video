@@ -12,6 +12,7 @@ Decoder::Decoder()
 	: fmt_ctx_(NULL)
 	, codec_ctx_(NULL)
 	, sws_ctx_(NULL) {
+	pts_ = 0;
 }
 
 
@@ -353,15 +354,17 @@ void Decoder::close(void) {
 }
 
 
-FramePtr Decoder::retrieveAudio(const AudioParams &params, AVRational timecode) {
+FramePtr Decoder::retrieveAudio(const AudioParams &params, AVRational timecode, int duration) {
 	uint8_t *data;
 
 	AudioStreamPtr as = std::static_pointer_cast<AudioStream>(stream());
 
 	int64_t target_ts = as->getTimeInTimeBaseUnits(timecode);
 
+	duration = as->getTimeInTimeBaseUnits(av_make_q(duration, 1));
+
 	// Retrieve frame data
-	if ((data = retrieveAudioFrameData(params, target_ts)) == NULL)
+	if ((data = retrieveAudioFrameData(params, target_ts, duration)) == NULL)
 		return NULL;
 
 	// Return the frame
@@ -376,7 +379,7 @@ FramePtr Decoder::retrieveAudio(const AudioParams &params, AVRational timecode) 
 }
 
 
-uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts) {
+uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts, const int& duration) {
 	int result;
 
 	uint8_t *data = NULL;
@@ -388,6 +391,10 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 	(void) target_ts;
 
 //	printf("RETRIEVE: %ld\n", target_ts);
+
+	// Check if PTS is in the range [target_ts:target_ts + duration]
+	if ((1000 * pts_) > (target_ts + duration))
+		return NULL;
 
 	// Handle NULL channel layout
 	uint64_t channel_layout = validateChannelLayout(avstream_);
@@ -437,7 +444,13 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 
 //	swr_free(&resampler);
 
-//	printf("  PTS: %ld\n", pts_);
+//	printf("  PTS: %ld / TS: %ld ms / DURATION: %d\n", 
+//		pts_, 
+//		(uint64_t) ((pts_ * 1000) * av_q2d(stream_->timeBase())), 
+//		duration);
+////	printf("  STREAM DURATION: %ld / TS: %ld\n", 
+////		avstream_->duration, 
+////		target_ts);
 
 //	av_frame_free(&frame);
 	av_packet_free(&packet);

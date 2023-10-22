@@ -28,8 +28,8 @@ public:
 	int getFrame(AVPacket *packet, AVFrame *frame);
 	void close(void);
 
-	FramePtr retrieveAudio(const AudioParams &params, AVRational timecode);
-	uint8_t * retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts);
+	FramePtr retrieveAudio(const AudioParams &params, AVRational timecode, int duration);
+	uint8_t * retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts, const int& duration);
 
 	FramePtr retrieveVideo(AVRational timecode);
 	uint8_t * retrieveVideoFrameData(const int64_t& target_ts);
