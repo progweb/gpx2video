@@ -169,7 +169,7 @@ done:
 
 bool TimeSync::stop(void) {
 	if (ok_) {
-		log_notice("Video stream synchronized with success (offset: %d ms)", offset_);
+		log_notice("Video stream synchronized with success (offset: %d s)", offset_);
 	
 		// Apply offset
 		container_->setTimeOffset(offset_);

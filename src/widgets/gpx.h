@@ -51,9 +51,7 @@ skip:
 		int h;
 		int offset;
 
-		int space_x, space_y;
 		int border = this->border();
-		int padding_x = this->padding(VideoWidget::PaddingLeft);
 		int padding_yt = this->padding(VideoWidget::PaddingTop);
 		int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
@@ -70,7 +68,6 @@ skip:
 		//          (with n nbr of lines)
 		//        h = n * px + padding_top + padding_bottom
 		int px = (h - padding_yt - padding_yb) / 6;
-		int pt = 3 * px / 4;
 
 		struct GPXData::point position = data.position(GPXData::PositionPrevious);
 
@@ -80,10 +77,6 @@ skip:
 			goto skip;
 		}
 
-		// Format data
-		space_x = padding_x + border;
-		space_y = padding_yt + border;
-
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
@@ -92,33 +85,33 @@ skip:
 
 		// title
 		offset = 0;
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, "GPX WPT");
+		this->drawText(fg_buf_, 0, offset, px, "GPX WPT");
 
 		// time
 		offset += px;
 		gmtime_r(&data.time(GPXData::PositionPrevious), &time);
 		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// latitude
 		offset += px;
 		sprintf(s, "lat: %.4f", position.lat);
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// longitude
 		offset += px;
 		sprintf(s, "lon: %.4f", position.lon);
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// elevation
 		offset += px;
 		sprintf(s, "ele: %.4f", data.elevation(GPXData::PositionPrevious));
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// line
 		offset += px;
 		sprintf(s, "line: %d", data.line());
-		this->drawText(fg_buf_, this->x() + space_x, this->y() + space_y + offset, pt, s);
+		this->drawText(fg_buf_, 0, offset, px, s);
 
 		is_update = true;
 skip:

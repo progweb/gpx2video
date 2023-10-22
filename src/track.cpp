@@ -300,6 +300,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 
 	GPXData wpt;
 
+	enum GPX::Data result;
+
 	log_call();
 
 	zoom = settings().zoom();
@@ -322,7 +324,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		// Draw each WPT
-		for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
+		//for (result = gpx->retrieveFirst(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
+		for (result = gpx->retrieveFrom(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
 			x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
 			y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
@@ -342,7 +345,8 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT
-	for (gpx->retrieveFirst(wpt); wpt.valid(); gpx->retrieveNext(wpt)) {
+	//for (result = gpx->retrieveFirst(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
+	for (result = gpx->retrieveFrom(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
 		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
 		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
 
@@ -353,7 +357,7 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	}
 
 	// Cairo draw
-	cairo_stroke (cairo);
+	cairo_stroke(cairo);
 
 	data = cairo_image_surface_get_data(surface);
 	stride = cairo_image_surface_get_stride(surface);
@@ -408,7 +412,7 @@ bool Track::load(void) {
 		path(*trackbuf_, gpx, divider_);
 
 		// Compute begin
-		gpx->retrieveFirst(wpt);
+		gpx->retrieveFrom(wpt);
 
 		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
 		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);

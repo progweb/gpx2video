@@ -89,7 +89,7 @@ public:
 
 	bool smooth(GPXData &prev, GPXData &next);
 
-	void dump(void);
+	void dump(bool debug=false);
 
 	int line(void) const {
 		return line_;
@@ -281,9 +281,11 @@ public:
 	double getMaxSpeed(void);
 
 	enum Data retrieveFirst(GPXData &data);
+	enum Data retrieveFrom(GPXData &data);
 	enum Data retrieveNext(GPXData &data, int64_t timestamp=-1);
 	enum Data retrieveData(GPXData &data);
 	enum Data retrieveLast(GPXData &data);
+
 
 protected:
 	bool parse(void);

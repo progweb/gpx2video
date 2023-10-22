@@ -363,18 +363,43 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 }
 
 
-void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label) {
+void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int px, const char *label) {
 	bool result;
+
+	int x1, y1, x2, y2;
+	int text_width, text_height;
+
+	int border = this->border();
+	int padding_xl = this->padding(VideoWidget::PaddingLeft);
+//	int padding_xr = this->padding(VideoWidget::PaddingRight);
+	int padding_yt = this->padding(VideoWidget::PaddingTop);
+//	int padding_yb = this->padding(VideoWidget::PaddingBottom);
 
 	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
 
+	// Compute text size
+	this->textSize(label, px,
+			x1, y1, x2, y2,
+			text_width, text_height);
+
+	// Text color
 	memcpy(color, this->textColor(), sizeof(color));
+
+	// Text offset
+	x += -x1;
+	y += -y1 + this->textShadow();
+
+	// Text position
+	x += padding_xl;
+	x += border + this->textShadow();
+
+	y += border + padding_yt;
 
 	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
 		x, 
 		y, 
 		label, 
-		pt, this->font(), color, 
+		px, this->font(), color, 
 		OIIO::ImageBufAlgo::TextAlignX::Left, 
 		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
 		this->textShadow());
