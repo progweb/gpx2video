@@ -780,6 +780,8 @@ void Map::downloadProgress(Map::Tile &tile, double dltotal, double dlnow) {
 	char buf[64];
 	const char *label = "Download tile";
 
+	time_t now = time(NULL);
+
 	Map& map = tile.map();
 
 	int percent = (dltotal > 0) ? (int) (dlnow * 100 / dltotal) : 0;
@@ -791,9 +793,12 @@ void Map::downloadProgress(Map::Tile &tile, double dltotal, double dlnow) {
 	if (percent == 100) 
 		printf("\r  %s %d / %d [%s] DONE      ",          
 				label, map.nbr_downloads_, (unsigned int) map.tiles_.size(), buf);
-	else
+	else if (tile.last_update_ <= now + 1) {
 		printf("\r  %s %d / %d [%s] %3d %%",
 				label, map.nbr_downloads_, (unsigned int) map.tiles_.size(), buf, percent);
+
+		tile.last_update_ = now;
+	}
 }
 
 
@@ -828,6 +833,8 @@ Map::Tile::Tile(Map &map, int zoom, int x, int y)
 	, y_(y) {
 	fp_ = NULL;
 	evtaskh_ = NULL;
+
+	last_update_ = 0;
 
 	uri_ = map_.buildURI(zoom_, x_, y_);
 	path_ = map_.buildPath(zoom_, x_, y_);

@@ -27,6 +27,8 @@ class Map : public Track {
 public:
 	class Tile {
 	public:
+		time_t last_update_;
+
 		Tile(Map &map, int zoom, int x, int y);
 		virtual ~Tile();
 
