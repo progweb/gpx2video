@@ -51,7 +51,6 @@ void VideoRenderer::init(void) {
 
 	// Audio & Video encoder settings
 	VideoParams video_params(video_stream->width(), video_stream->height(),
-		// av_make_q(1,  50), 
 		av_inv_q(video_stream->frameRate()),
 		video_stream->format(),
 		video_stream->nbChannels(),
@@ -62,7 +61,7 @@ void VideoRenderer::init(void) {
 
 	EncoderSettings settings;
 	settings.setFilename(app_.settings().outputfile());
-	settings.setVideoParams(video_params, AV_CODEC_ID_H264);
+	settings.setVideoParams(video_params, app_.settings().videoCodec()); // AV_CODEC_ID_H264 / AV_CODEC_ID_HEVC
 	settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
 	settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
 	settings.setVideoMaxBitrate(app_.settings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32

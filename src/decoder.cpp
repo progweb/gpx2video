@@ -354,6 +354,11 @@ void Decoder::close(void) {
 }
 
 
+const AVCodecID& Decoder::codec(void) const {
+	return avstream_->codecpar->codec_id;
+}
+
+
 FramePtr Decoder::retrieveAudio(const AudioParams &params, AVRational timecode, int duration) {
 	uint8_t *data;
 

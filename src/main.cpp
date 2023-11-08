@@ -47,6 +47,7 @@ static const struct option options[] = {
 	{ "extract-format",     no_argument,       0, 0 },
 	{ "telemetry-filter",   no_argument,       0, 0 },
 	{ "telemetry-rate",     required_argument, 0, 0 },
+	{ "video-codec",        required_argument, 0, 0 },
 	{ "video-bitrate",      required_argument, 0, 0 },
 	{ "video-min-bitrate",  required_argument, 0, 0 },
 	{ "video-max-bitrate",  required_argument, 0, 0 },
@@ -184,6 +185,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int telemetry_rate = 0; // By default, no change
 
 	// Video encoder settings
+	AVCodecID video_codec = AV_CODEC_ID_H264;
 	int64_t video_bit_rate = 2 * 1000 * 1000 * 8;		// 16MB
 	int64_t video_min_bit_rate = 0;						// 0
 	int64_t video_max_bit_rate = 2 * 1000 * 1000 * 16;	// 32MB
@@ -269,6 +271,18 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-rate")) {
 				telemetry_rate = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "video-codec")) {
+				if (!strcasecmp(optarg, "h264") || !strcasecmp(optarg, "x264")) {
+					video_codec = AV_CODEC_ID_H264;
+				}
+				else if (!strcasecmp(optarg, "h265") || !strcasecmp(optarg, "hevc")) {
+					video_codec = AV_CODEC_ID_HEVC;
+				}
+				else {
+					std::cout << "Video codec not supported!" << std::endl;
+					return -1;
+				}
 			}
 			else if (s && !strcmp(s, "video-bitrate")) {
 				video_bit_rate = atoll(optarg);
@@ -453,6 +467,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		extract_format,
 		telemetry_filter,
 		telemetry_rate,
+		video_codec,
 		video_bit_rate,
 		video_min_bit_rate,
 		video_max_bit_rate)

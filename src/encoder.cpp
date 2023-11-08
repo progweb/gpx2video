@@ -56,6 +56,11 @@ bool EncoderSettings::isVideoEnabled(void) const {
 }
 
 
+const AVCodecID& EncoderSettings::videoCodec(void) const {
+	return video_codec_id_;
+}
+
+
 const int64_t& EncoderSettings::videoBitrate(void) const {
 	return video_bit_rate_;
 }
@@ -98,6 +103,11 @@ void EncoderSettings::setVideoBufferSize(const int64_t size) {
 
 bool EncoderSettings::isAudioEnabled(void) const {
 	return audio_enabled_;
+}
+
+
+const AVCodecID& EncoderSettings::audioCodec(void) const {
+	return audio_codec_id_;
 }
 
 
@@ -148,7 +158,7 @@ bool Encoder::open(void) {
 
 	// Initialize video stream
 	if (settings().isVideoEnabled()) {
-		if (!this->initializeStream(AVMEDIA_TYPE_VIDEO, &video_stream_, &video_codec_, AV_CODEC_ID_H264))
+		if (!this->initializeStream(AVMEDIA_TYPE_VIDEO, &video_stream_, &video_codec_, settings_.videoCodec()))
 			return false;
 
 		// Decoder use a compatible AVPixelFormat
@@ -197,7 +207,7 @@ bool Encoder::open(void) {
 
 	// Initialize audio stream
 	if (settings().isAudioEnabled()) {
-		if (!this->initializeStream(AVMEDIA_TYPE_AUDIO, &audio_stream_, &audio_codec_, AV_CODEC_ID_AAC))
+		if (!this->initializeStream(AVMEDIA_TYPE_AUDIO, &audio_stream_, &audio_codec_, settings_.audioCodec()))
 			return false;
 	}
 
@@ -346,7 +356,16 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 
 //				av_opt_set(enc_ctx->priv_data, "crf", "27", AV_OPT_SEARCH_CHILDREN);
 //				av_opt_set(enc_ctx->priv_data, "crf", "31", AV_OPT_SEARCH_CHILDREN);
-//				av_opt_set(enc_ctx->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+
+		if ((codec_id == AV_CODEC_ID_H264) || (codec_id == AV_CODEC_ID_HEVC)) {
+			if (codec_id == AV_CODEC_ID_H264)
+				av_opt_set(codec_context->priv_data, "crf", "27", AV_OPT_SEARCH_CHILDREN);
+			if (codec_id == AV_CODEC_ID_HEVC)
+				av_opt_set(codec_context->priv_data, "crf", "31", AV_OPT_SEARCH_CHILDREN);
+
+			// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
+			av_opt_set(codec_context->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+		}
 		break;
 
 	case AVMEDIA_TYPE_AUDIO:
