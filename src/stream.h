@@ -111,6 +111,7 @@ public:
 	void setPixelFormat(const AVPixelFormat &format);
 
 	const AVRational& pixelAspectRatio(void) const;
+	void fixPixelAspectRatio(void);
 	void setPixelAspectRatio(const AVRational &ratio);
 
 	const int& nbChannels(void) const;

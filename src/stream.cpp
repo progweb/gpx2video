@@ -197,8 +197,16 @@ const AVRational& VideoStream::pixelAspectRatio(void) const {
 }
 
 
+void VideoStream::fixPixelAspectRatio(void) {
+	if (pixel_aspect_ratio_.num == 0)
+		pixel_aspect_ratio_ = av_make_q(1, 1);	
+}
+
+
 void VideoStream::setPixelAspectRatio(const AVRational &ratio) {
 	pixel_aspect_ratio_ = ratio;
+
+	fixPixelAspectRatio();
 }
 
 

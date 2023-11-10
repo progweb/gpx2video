@@ -61,6 +61,7 @@ public:
 	void setPixelFormat(const AVPixelFormat &format);
 
 	const AVRational& pixelAspectRatio(void) const;
+	void fixPixelAspectRatio(void);
 
 	const Interlacing& interlacing(void) const;
 

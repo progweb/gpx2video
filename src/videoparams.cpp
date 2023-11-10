@@ -20,6 +20,7 @@ VideoParams::VideoParams(int width, int height,
 	, format_(format), nb_channels_(nb_channels)
 	, pixel_aspect_ratio_(pixel_aspect_ratio)
 	, interlacing_(interlacing) {
+	fixPixelAspectRatio();
 }
 
 
@@ -33,6 +34,8 @@ VideoParams::VideoParams(int width, int height, const AVRational &time_base,
 	, format_(format), nb_channels_(nb_channels)
 	, pixel_aspect_ratio_(pixel_aspect_ratio)
 	, interlacing_(interlacing) {
+	fixPixelAspectRatio();
+
 	frame_rate_ = av_div_q(av_make_q(1, 1), time_base_);
 }
 
@@ -95,10 +98,15 @@ void VideoParams::setPixelFormat(const AVPixelFormat &format) {
 }
 
 
+void VideoParams::fixPixelAspectRatio(void) {
+	if (pixel_aspect_ratio_.num == 0)
+		pixel_aspect_ratio_ = av_make_q(1, 1);	
+}
+
+
 const AVRational& VideoParams::pixelAspectRatio(void) const {
 	return pixel_aspect_ratio_;
 }
-
 
 
 const VideoParams::Interlacing& VideoParams::interlacing(void) const {
