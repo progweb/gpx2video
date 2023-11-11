@@ -89,3 +89,22 @@ AVPixelFormat FFmpegUtils::getFFmpegPixelFormat(const VideoParams::Format &forma
 	return AV_PIX_FMT_NONE;
 }
 
+AVPixelFormat FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(const AVPixelFormat &pix_fmt) {
+	switch (pix_fmt) {
+	case AV_PIX_FMT_YUVJ420P:
+		return AV_PIX_FMT_YUV420P;
+	case AV_PIX_FMT_YUVJ411P:
+		return AV_PIX_FMT_YUV411P;
+	case AV_PIX_FMT_YUVJ422P:
+		return AV_PIX_FMT_YUV422P;
+	case AV_PIX_FMT_YUVJ444P:
+		return AV_PIX_FMT_YUV444P;
+	case AV_PIX_FMT_YUVJ440P:
+		return AV_PIX_FMT_YUV440P;
+	default:
+		break;
+	}
+
+	return pix_fmt;
+}
+

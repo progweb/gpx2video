@@ -41,6 +41,7 @@ public:
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			int telemetry_rate=0,
 			AVCodecID video_codec=AV_CODEC_ID_H264,
+			int32_t video_crf=-1,
 			int64_t video_bit_rate=0,
 			int64_t video_min_bit_rate=0,
 			int64_t video_max_bit_rate=0)
@@ -63,6 +64,7 @@ public:
 			, telemetry_filter_(telemetry_filter) 
 			, telemetry_rate_(telemetry_rate)
 			, video_codec_(video_codec)
+			, video_crf_(video_crf)
 			, video_bit_rate_(video_bit_rate)
 			, video_min_bit_rate_(video_min_bit_rate)
 			, video_max_bit_rate_(video_max_bit_rate) {
@@ -144,6 +146,10 @@ public:
 			return video_codec_;
 		}
 
+		const int32_t& videoCRF(void) const {
+			return video_crf_;
+		}
+
 		const int64_t& videoBitrate(void) const {
 			return video_bit_rate_;
 		}
@@ -183,6 +189,7 @@ public:
 		int telemetry_rate_;
 
 		AVCodecID video_codec_;
+		int32_t video_crf_;
 		int64_t video_bit_rate_;
 		int64_t video_min_bit_rate_;
 		int64_t video_max_bit_rate_;

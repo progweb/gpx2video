@@ -35,6 +35,9 @@ public:
 
 	const AVCodecID& videoCodec(void) const;
 
+	const int32_t& videoCRF(void) const;
+	void setVideoCRF(const int32_t crf);
+
 	const int64_t& videoBitrate(void) const;
 	void setVideoBitrate(const int64_t rate);
 
@@ -60,6 +63,7 @@ private:
 	bool video_enabled_;
 	VideoParams video_params_;
 	AVCodecID video_codec_id_;
+	int32_t video_crf_;
 	int64_t video_bit_rate_;
 	int64_t video_min_bit_rate_;
 	int64_t video_max_bit_rate_;

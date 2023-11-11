@@ -25,6 +25,8 @@ public:
 	static AVPixelFormat getCompatiblePixelFormat(const AVPixelFormat &pix_fmt);
 	static VideoParams::Format getCompatiblePixelFormat(const VideoParams::Format &format);
 	static AVPixelFormat getFFmpegPixelFormat(const VideoParams::Format &format, int nb_channels);
+
+	static AVPixelFormat overrideFFmpegDeprecatedPixelFormat(const AVPixelFormat &pix_fmt);
 };
 
 #endif
