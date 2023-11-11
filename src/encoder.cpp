@@ -5,6 +5,7 @@
 
 EncoderSettings::EncoderSettings() :
 	video_enabled_(false),
+	video_preset_("medium"),
 	video_crf_(-1),
 	video_bit_rate_(0),
 	video_min_bit_rate_(0),
@@ -59,6 +60,16 @@ bool EncoderSettings::isVideoEnabled(void) const {
 
 const AVCodecID& EncoderSettings::videoCodec(void) const {
 	return video_codec_id_;
+}
+
+
+const std::string& EncoderSettings::videoPreset(void) const {
+	return video_preset_;
+}
+
+
+void EncoderSettings::setVideoPreset(const std::string preset) {
+	video_preset_ = preset;
 }
 
 
@@ -363,6 +374,11 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 
 		// Custom options
 		if ((codec_id == AV_CODEC_ID_H264) || (codec_id == AV_CODEC_ID_HEVC)) {
+			// Preset
+			if (!settings().videoPreset().empty()) {
+				av_opt_set(codec_context->priv_data, "preset", settings().videoPreset().c_str(), AV_OPT_SEARCH_CHILDREN);
+			}
+
 			if (settings().videoCRF() != -1) {
 				// Disable crf as target bitrate compression method is used
 				av_opt_set(codec_context->priv_data, "crf", "-1", AV_OPT_SEARCH_CHILDREN);

@@ -35,6 +35,9 @@ public:
 
 	const AVCodecID& videoCodec(void) const;
 
+	const std::string& videoPreset(void) const;
+	void setVideoPreset(const std::string preset);
+
 	const int32_t& videoCRF(void) const;
 	void setVideoCRF(const int32_t crf);
 
@@ -63,6 +66,7 @@ private:
 	bool video_enabled_;
 	VideoParams video_params_;
 	AVCodecID video_codec_id_;
+	std::string video_preset_;
 	int32_t video_crf_;
 	int64_t video_bit_rate_;
 	int64_t video_min_bit_rate_;

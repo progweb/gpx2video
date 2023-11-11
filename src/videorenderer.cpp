@@ -62,6 +62,7 @@ void VideoRenderer::init(void) {
 	EncoderSettings settings;
 	settings.setFilename(app_.settings().outputfile());
 	settings.setVideoParams(video_params, app_.settings().videoCodec()); // AV_CODEC_ID_H264 / AV_CODEC_ID_HEVC
+	settings.setVideoPreset(app_.settings().videoPreset()); // ultrafast, fast, medium...
 	settings.setVideoCRF(app_.settings().videoCRF()); // -1: bitrate settings
 	settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
 	settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
