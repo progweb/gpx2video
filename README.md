@@ -567,6 +567,38 @@ Since gpx2video interpolates data each 1s in using different filters: linear, ka
 *Note: The result isn't yet satisfactory* 
 
 
+## Video encoder settings (in progress)
+
+You can set few encoder settings:
+
+```bash
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
+    --video-codec=h264 --video-preset=ultrafast --video-crf=31 -o output.mp4 video
+```
+
+To use target bitrate compression method:
+
+```bash
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
+    --video-codec=h264 --video-preset=ultrafast --video-crf=-1 -o output.mp4 video
+```
+
+**video-options** supported are:
+  - codec: h264 (default) and hevc
+  - preset: ultrafast, superfast, veryfast, faster, fast, medium (default), slow and veryslow
+  - crf: constant rate factor values range from 0 to 51 (default: 27 for h264 & 31 for hevc)
+  - bitrate: value (default: 16000000)
+  - min-bitrate: value (default: 0)
+  - max-bitrate: value (default: 32000000)
+
+*To use target bitrate, set crf to '-1' to disable constant compression method.*
+
+```bash
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
+    --video-codec=hevc --video-preset=slow --video-crf=-1 \
+    --video-bitrate=16000000 --video-max-bitrate=32000000 -o output.mp4 video
+```
+
 ## ToDo
 
   - Render gauge:
