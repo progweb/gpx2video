@@ -46,7 +46,7 @@ public:
 
 	protected:
 		static int downloadDebug(CURL *curl, curl_infotype type, char *ptr, size_t size, void *userdata);
-		static int downloadProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow);
+		static int downloadProgress(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow);
 		static size_t downloadWrite(char *ptr, size_t size, size_t nmemb, void *userdata);
 		static void downloadComplete(EVCurlTask *evtaskh, CURLcode result, void *userdata);
 
@@ -86,7 +86,7 @@ public:
 	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
 
-	static void downloadProgress(Tile &tile, double dltotal, double dlnow);
+	static void downloadProgress(Tile &tile, curl_off_t dltotal, curl_off_t dlnow);
 	static void downloadComplete(Tile &tile);
 
 protected:

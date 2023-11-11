@@ -776,7 +776,7 @@ skip:
 }
 
 
-void Map::downloadProgress(Map::Tile &tile, double dltotal, double dlnow) {
+void Map::downloadProgress(Map::Tile &tile, curl_off_t dltotal, curl_off_t dlnow) {
 	char buf[64];
 	const char *label = "Download tile";
 
@@ -877,7 +877,7 @@ int Map::Tile::downloadDebug(CURL *curl, curl_infotype type, char *ptr, size_t s
 }
 
 
-int Map::Tile::downloadProgress(void *clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
+int Map::Tile::downloadProgress(void *clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
 	Map::Tile *tile = (Map::Tile *) clientp;
 
 	(void) ultotal;
@@ -965,8 +965,8 @@ bool Map::Tile::download(void) {
 //	evtaskh_->setOption(CURLOPT_DEBUGDATA, this);
 
 	evtaskh_->setOption(CURLOPT_NOPROGRESS, 0L);
-	evtaskh_->setOption(CURLOPT_PROGRESSFUNCTION, downloadProgress);
-	evtaskh_->setOption(CURLOPT_PROGRESSDATA, this);
+	evtaskh_->setOption(CURLOPT_XFERINFOFUNCTION, downloadProgress);
+	evtaskh_->setOption(CURLOPT_XFERINFODATA, this);
 	
 	evtaskh_->setOption(CURLOPT_WRITEFUNCTION, downloadWrite);
 	evtaskh_->setOption(CURLOPT_WRITEDATA, this);
