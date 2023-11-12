@@ -378,6 +378,9 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 //		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
+		if ((codec == ExportCodec::CodecQSVH264) || (codec == ExportCodec::CodecQSVHEVC))
+			codec_context->pix_fmt = AV_PIX_FMT_NV12;
+
 // codec/ffmpeg/ffmpegencoder.cpp:503
 //				enc_ctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;
 

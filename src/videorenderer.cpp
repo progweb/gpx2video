@@ -110,6 +110,14 @@ bool VideoRenderer::init(void) {
 			settings.setVideoOption("preset", app_.settings().videoPreset());
 		break;
 
+	case ExportCodec::CodecQSVH264:
+	case ExportCodec::CodecQSVHEVC:
+		// Preset: ultrafast, fast, medium...
+		if (!app_.settings().videoPreset().empty())
+			settings.setVideoOption("preset", app_.settings().videoPreset());
+
+		break;
+
 	default:
 		break;
 	}
