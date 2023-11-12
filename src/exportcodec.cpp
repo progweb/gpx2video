@@ -9,10 +9,14 @@ std::string ExportCodec::getCodecName(Codec codec) {
 		return "H.264";
 	case ExportCodec::CodecNVEncH264:
 		return "NVidia H.264";
+	case ExportCodec::CodecQSVH264:
+		return "Intel QSV H.264";
 	case ExportCodec::CodecHEVC:
 		return "HEVC";
 	case ExportCodec::CodecNVEncHEVC:
 		return "NVidia HEVC";
+	case ExportCodec::CodecQSVHEVC:
+		return "Intel QSV HEVC";
 	
 	case ExportCodec::CodecAAC:
 		return "AAC";

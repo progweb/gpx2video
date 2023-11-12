@@ -295,6 +295,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				else if (!strcasecmp(optarg, "h265_nvenc") || !strcasecmp(optarg, "hevc_nvenc")) {
 					video_codec = ExportCodec::CodecNVEncHEVC;
 				}
+				else if (!strcasecmp(optarg, "h264_qsv") || !strcasecmp(optarg, "x264_qsv")) {
+					video_codec = ExportCodec::CodecQSVH264;
+				}
+				else if (!strcasecmp(optarg, "h265_qsv") || !strcasecmp(optarg, "hevc_qsv")) {
+					video_codec = ExportCodec::CodecQSVHEVC;
+				}
 				else {
 					std::cout << "Video codec not supported!" << std::endl;
 					return -1;

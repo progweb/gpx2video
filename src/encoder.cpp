@@ -356,6 +356,8 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->height = settings().videoParams().height();
 		codec_context->sample_aspect_ratio = settings().videoParams().pixelAspectRatio();
 		codec_context->pix_fmt = FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(settings().videoParams().pixelFormat());
+//TODO!!!
+		codec_context->pix_fmt = AV_PIX_FMT_NV12;
 //		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
