@@ -187,7 +187,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int telemetry_rate = 0; // By default, no change
 
 	// Video encoder settings
-	AVCodecID video_codec = AV_CODEC_ID_H264;
+	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
 	int32_t video_crf = -2; // Valid value are -1 and positive value
 	std::string video_preset = "medium";
 	int64_t video_bit_rate = 2 * 1000 * 1000 * 8;		// 16MB
@@ -278,13 +278,13 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "video-codec")) {
 				if (!strcasecmp(optarg, "h264") || !strcasecmp(optarg, "x264")) {
-					video_codec = AV_CODEC_ID_H264;
+					video_codec = ExportCodec::CodecH264;
 
 					if (video_crf == -2) // Undefined
 						video_crf = 27;
 				}
 				else if (!strcasecmp(optarg, "h265") || !strcasecmp(optarg, "hevc")) {
-					video_codec = AV_CODEC_ID_HEVC;
+					video_codec = ExportCodec::CodecHEVC;
 
 					if (video_crf == -2) // Undefined
 						video_crf = 31;

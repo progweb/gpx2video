@@ -59,22 +59,41 @@ void VideoRenderer::init(void) {
 		video_stream->interlacing());
 	video_params.setPixelFormat(video_stream->pixelFormat());
 
+	// Codec
+	ExportCodec::Codec video_codec = app_.settings().videoCodec();
+
+	// Encoder settings
 	EncoderSettings settings;
 	settings.setFilename(app_.settings().outputfile());
-	settings.setVideoParams(video_params, app_.settings().videoCodec()); // AV_CODEC_ID_H264 / AV_CODEC_ID_HEVC
-	settings.setVideoPreset(app_.settings().videoPreset()); // ultrafast, fast, medium...
-	settings.setVideoCRF(app_.settings().videoCRF()); // -1: bitrate settings
-	settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
-	settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
-	settings.setVideoMaxBitrate(app_.settings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32
-	settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
+	settings.setVideoParams(video_params, video_codec);
+
+	if ((video_codec == ExportCodec::CodecH264) || (video_codec == ExportCodec::CodecHEVC)) {
+		if (app_.settings().videoCRF() != -1) {
+			// Set crf value
+			settings.setVideoOption("crf", std::to_string(app_.settings().videoCRF()));
+		}
+		else {
+			// Disable crf as target bitrate compression method is used
+			settings.setVideoOption("crf", "-1");
+
+			// Set target bitrate
+			settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
+			settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
+			settings.setVideoMaxBitrate(app_.settings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32
+			settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
+		}
+
+		// Preset: ultrafast, fast, medium...
+		if (!app_.settings().videoPreset().empty())
+			settings.setVideoOption("preset", app_.settings().videoPreset());
+	}
 
 	if (audio_stream) {
 		AudioParams audio_params(audio_stream->sampleRate(),
 			audio_stream->channelLayout(),
 			audio_stream->format());
 
-		settings.setAudioParams(audio_params, AV_CODEC_ID_AAC);
+		settings.setAudioParams(audio_params, ExportCodec::CodecAAC);
 		settings.setAudioBitrate(44 * 1000);
 	}
 

@@ -115,6 +115,7 @@ set(GPX2VIDEO_SOURCES
 	src/ffmpegutils.cpp
 	src/decoder.cpp
 	src/encoder.cpp
+	src/exportcodec.cpp
 	src/frame.cpp
 	src/extractor.cpp
 	src/telemetry.cpp

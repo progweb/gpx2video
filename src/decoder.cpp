@@ -124,7 +124,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 				}
 
     			// Warning, value isn't the same result as FFprobe.
-				av_log(NULL, AV_LOG_INFO, "rotate = %0.2f\n", "rotate", theta);
+				av_log(NULL, AV_LOG_INFO, "%s = %0.2f\n", "rotate", theta);
 
 //				theta = -theta;
 //				if (theta < -180)

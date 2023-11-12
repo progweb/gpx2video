@@ -1,8 +1,26 @@
 #include "ffmpegutils.h"
 
 
-AVSampleFormat FFmpegUtils::getFFmpegSampleFormat(const AudioParams::Format &format)
-{
+const AVCodec * FFmpegUtils::getEncoder(ExportCodec::Codec codec) {
+	switch (codec) {
+	case ExportCodec::CodecH264:
+		return avcodec_find_encoder_by_name("libx264");
+	case ExportCodec::CodecHEVC:
+		return avcodec_find_encoder(AV_CODEC_ID_HEVC);
+	
+	case ExportCodec::CodecAAC:
+		return avcodec_find_encoder(AV_CODEC_ID_AAC);
+
+	case ExportCodec::CodecCount:
+	default:
+		break;
+	}
+
+	return NULL;
+}
+
+
+AVSampleFormat FFmpegUtils::getFFmpegSampleFormat(const AudioParams::Format &format) {
 	switch (format) {
 	case AudioParams::FormatUnsigned8:
 		return AV_SAMPLE_FMT_U8;

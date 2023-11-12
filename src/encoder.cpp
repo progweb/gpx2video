@@ -5,8 +5,6 @@
 
 EncoderSettings::EncoderSettings() :
 	video_enabled_(false),
-	video_preset_("medium"),
-	video_crf_(-1),
 	video_bit_rate_(0),
 	video_min_bit_rate_(0),
 	video_max_bit_rate_(0),
@@ -34,10 +32,10 @@ const VideoParams& EncoderSettings::videoParams(void) const {
 }
 
 
-void EncoderSettings::setVideoParams(const VideoParams &video_params, AVCodecID codec_id) {
+void EncoderSettings::setVideoParams(const VideoParams &video_params, ExportCodec::Codec codec) {
 	video_enabled_ = true;
 	video_params_ = video_params;
-	video_codec_id_ = codec_id;
+	video_codec_ = codec;
 }
 
 
@@ -46,10 +44,10 @@ const AudioParams& EncoderSettings::audioParams(void) const {
 }
 
 
-void EncoderSettings::setAudioParams(const AudioParams &audio_params, AVCodecID codec_id) {
+void EncoderSettings::setAudioParams(const AudioParams &audio_params, ExportCodec::Codec codec) {
 	audio_enabled_ = true;
 	audio_params_ = audio_params;
-	audio_codec_id_ = codec_id;
+	audio_codec_ = codec;
 }
 
 
@@ -58,28 +56,18 @@ bool EncoderSettings::isVideoEnabled(void) const {
 }
 
 
-const AVCodecID& EncoderSettings::videoCodec(void) const {
-	return video_codec_id_;
+const ExportCodec::Codec& EncoderSettings::videoCodec(void) const {
+	return video_codec_;
 }
 
 
-const std::string& EncoderSettings::videoPreset(void) const {
-	return video_preset_;
+const std::list<EncoderSettings::Option>& EncoderSettings::videoOptions(void) const {
+	return video_options_;
 }
 
 
-void EncoderSettings::setVideoPreset(const std::string preset) {
-	video_preset_ = preset;
-}
-
-
-const int32_t& EncoderSettings::videoCRF(void) const {
-	return video_crf_;
-}
-
-
-void EncoderSettings::setVideoCRF(const int32_t crf) {
-	video_crf_ = crf;
+void EncoderSettings::setVideoOption(std::string name, std::string value) {
+	video_options_.push_back(EncoderSettings::Option(name, value));
 }
 
 
@@ -128,8 +116,8 @@ bool EncoderSettings::isAudioEnabled(void) const {
 }
 
 
-const AVCodecID& EncoderSettings::audioCodec(void) const {
-	return audio_codec_id_;
+const ExportCodec::Codec& EncoderSettings::audioCodec(void) const {
+	return audio_codec_;
 }
 
 
@@ -330,18 +318,19 @@ void Encoder::flush(AVCodecContext *codec_ctx, AVStream *stream) {
 }
 
 
-bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecContext **codec_context_ptr, AVCodecID codec_id) {
+bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecContext **codec_context_ptr, const ExportCodec::Codec &codec) {
 	int result;
 
 	AVStream *stream;
 	AVCodecContext *codec_context;
 
 	// Find encoder with this name
-	const AVCodec *codec = avcodec_find_encoder(codec_id);
-	//const AVCodec *codec = avcodec_find_encoder_by_name("h264_nvenc");
+	const AVCodec *encoder = FFmpegUtils::getEncoder(codec);
 
-	if (!codec) {
-		av_log(NULL, AV_LOG_FATAL, "Failed to find codec\n");
+	log_call();
+
+	if (!encoder) {
+		av_log(NULL, AV_LOG_FATAL, "Failed to find encoder for codec '%s'\n", ExportCodec::getCodecName(codec).c_str());
 		return false;
 	}
 
@@ -352,7 +341,7 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		return false;
 	}
 
-	codec_context = avcodec_alloc_context3(codec);
+	codec_context = avcodec_alloc_context3(encoder);
 	if (!codec_context) {
 		av_log(NULL, AV_LOG_FATAL, "Failed to allocate the encoder context\n");
 		return false;
@@ -368,33 +357,31 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 //		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
+// nvenc
+//		codec_context->dct_algo = FF_DCT_FASTINT;
+
 
 // codec/ffmpeg/ffmpegencoder.cpp:503
 //				enc_ctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;
 
-		// Custom options
-		if ((codec_id == AV_CODEC_ID_H264) || (codec_id == AV_CODEC_ID_HEVC)) {
-			// Preset
-			if (!settings().videoPreset().empty()) {
-				av_opt_set(codec_context->priv_data, "preset", settings().videoPreset().c_str(), AV_OPT_SEARCH_CHILDREN);
-			}
-
-			if (settings().videoCRF() != -1) {
-				// Disable crf as target bitrate compression method is used
-				av_opt_set(codec_context->priv_data, "crf", "-1", AV_OPT_SEARCH_CHILDREN);
-
-				codec_context->bit_rate = settings().videoBitrate(); //4 * 1000 * 1000 * 8;
-				codec_context->rc_min_rate = settings().videoMinBitrate(); // 0 // 8 * 1000 * 1000;
-				codec_context->rc_max_rate = settings().videoMaxBitrate(); //2 * 1000 * 1000 * 16;
-				codec_context->rc_buffer_size = settings().videoBufferSize(); //4 * 1000 * 1000 / 2;
-			}
-			else {
-				// Set crf value
-				av_opt_set(codec_context->priv_data, "crf", std::to_string(settings().videoCRF()).c_str(), AV_OPT_SEARCH_CHILDREN);
-			}
-
-			// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
+		// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
+		if (codec == ExportCodec::CodecH264)
 			av_opt_set(codec_context->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+
+		// Custom options
+		if (settings().videoBitrate() > 0)
+			codec_context->bit_rate = settings().videoBitrate(); //4 * 1000 * 1000 * 8;
+		if (settings().videoMinBitrate() > 0)
+			codec_context->rc_min_rate = settings().videoMinBitrate(); // 0 // 8 * 1000 * 1000;
+		if (settings().videoMaxBitrate() > 0)
+			codec_context->rc_max_rate = settings().videoMaxBitrate(); //2 * 1000 * 1000 * 16;
+		if (settings().videoBufferSize() > 0)
+			codec_context->rc_buffer_size = settings().videoBufferSize(); //4 * 1000 * 1000 / 2;
+
+		for (EncoderSettings::Option opt : settings().videoOptions()) {
+			log_info("Set video encoder option: '%s' = '%s'", opt.name().c_str(), opt.value().c_str());
+
+			av_opt_set(codec_context->priv_data, opt.name().c_str(), opt.value().c_str(), AV_OPT_SEARCH_CHILDREN);
 		}
 		break;
 
@@ -403,7 +390,7 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->channel_layout = settings().audioParams().channelLayout();
 		codec_context->channels = av_get_channel_layout_nb_channels(codec_context->channel_layout);
 		// take first format from list of supported formats
-		codec_context->sample_fmt = codec->sample_fmts[0];
+		codec_context->sample_fmt = encoder->sample_fmts[0];
 		codec_context->time_base = (AVRational) {1, codec_context->sample_rate};
 		break;
 
@@ -416,7 +403,7 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
 
 	// Try to open encoder (third parameter can be used to pass settings to encoder)
-	result = avcodec_open2(codec_context, codec, NULL);
+	result = avcodec_open2(codec_context, encoder, NULL);
 
 	if (result < 0) {
 		av_log(NULL, AV_LOG_ERROR, "Failed to open encoder\n");

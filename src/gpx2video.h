@@ -10,6 +10,7 @@
 
 #include "log.h"
 #include "media.h"
+#include "exportcodec.h"
 #include "mapsettings.h"
 #include "extractorsettings.h"
 #include "telemetrysettings.h"
@@ -40,7 +41,7 @@ public:
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			int telemetry_rate=0,
-			AVCodecID video_codec=AV_CODEC_ID_H264,
+			ExportCodec::Codec video_codec=ExportCodec::CodecH264,
 			std::string video_preset="medium",
 			int32_t video_crf=-1,
 			int64_t video_bit_rate=0,
@@ -144,7 +145,7 @@ public:
 			return gpx_to_;
 		}
 
-		const AVCodecID& videoCodec(void) const {
+		const ExportCodec::Codec& videoCodec(void) const {
 			return video_codec_;
 		}
 
@@ -194,7 +195,7 @@ public:
 		TelemetrySettings::Filter telemetry_filter_;
 		int telemetry_rate_;
 
-		AVCodecID video_codec_;
+		ExportCodec::Codec video_codec_;
 		std::string video_preset_;
 		int32_t video_crf_;
 		int64_t video_bit_rate_;

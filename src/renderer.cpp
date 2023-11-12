@@ -93,6 +93,8 @@ bool Renderer::load(void) {
 
 	std::string filename = app_.settings().layoutfile();
 
+	log_call();
+
 	if (filename.empty()) {
 		log_warn("None layout file");
 		goto done;

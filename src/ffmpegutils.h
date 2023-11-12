@@ -14,12 +14,15 @@ extern "C" {
 
 }
 
+#include "exportcodec.h"
 #include "audioparams.h"
 #include "videoparams.h"
 
 
 class FFmpegUtils {
 public:
+	static const AVCodec * getEncoder(ExportCodec::Codec c);
+
 	static AVSampleFormat getFFmpegSampleFormat(const AudioParams::Format &format);
 
 	static AVPixelFormat getCompatiblePixelFormat(const AVPixelFormat &pix_fmt);

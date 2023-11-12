@@ -4,6 +4,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <list>
 
 extern "C" {
 #include <libavcodec/avcodec.h>
@@ -11,6 +12,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+#include "exportcodec.h"
 #include "audioparams.h"
 #include "videoparams.h"
 #include "frame.h"
@@ -18,6 +20,26 @@ extern "C" {
 
 class EncoderSettings {
 public:
+	class Option {
+	public:
+		Option(std::string name, std::string value) 
+			: name_(name)
+			, value_(value) {
+		}
+
+		const std::string& name(void) const {
+			return name_;
+		}
+
+		const std::string& value(void) const {
+			return value_;
+		}
+
+	private:
+		std::string name_;
+		std::string value_;
+	};
+
 	EncoderSettings();
 	virtual ~EncoderSettings();
 
@@ -25,21 +47,18 @@ public:
 	void setFilename(const std::string &filename);
 
 	const VideoParams& videoParams(void) const;
-	void setVideoParams(const VideoParams &video_params, AVCodecID codec_id);
+	void setVideoParams(const VideoParams &video_params, ExportCodec::Codec codec);
 
 	const AudioParams& audioParams(void) const;
-	void setAudioParams(const AudioParams &audio_params, AVCodecID codec_id);
+	void setAudioParams(const AudioParams &audio_params, ExportCodec::Codec codec);
 
 	// Video
 	bool isVideoEnabled(void) const;
 
-	const AVCodecID& videoCodec(void) const;
+	const ExportCodec::Codec& videoCodec(void) const;
 
-	const std::string& videoPreset(void) const;
-	void setVideoPreset(const std::string preset);
-
-	const int32_t& videoCRF(void) const;
-	void setVideoCRF(const int32_t crf);
+	const std::list<Option>& videoOptions(void) const;
+	void setVideoOption(std::string name, std::string value);
 
 	const int64_t& videoBitrate(void) const;
 	void setVideoBitrate(const int64_t rate);
@@ -56,7 +75,7 @@ public:
 	// Audio
 	bool isAudioEnabled(void) const;
 
-	const AVCodecID& audioCodec(void) const;
+	const ExportCodec::Codec& audioCodec(void) const;
 
 	void setAudioBitrate(const int64_t rate);
 
@@ -65,9 +84,8 @@ private:
 
 	bool video_enabled_;
 	VideoParams video_params_;
-	AVCodecID video_codec_id_;
-	std::string video_preset_;
-	int32_t video_crf_;
+	ExportCodec::Codec video_codec_;
+	std::list<Option> video_options_;
 	int64_t video_bit_rate_;
 	int64_t video_min_bit_rate_;
 	int64_t video_max_bit_rate_;
@@ -75,7 +93,7 @@ private:
 
 	bool audio_enabled_;
 	AudioParams audio_params_;
-	AVCodecID audio_codec_id_;
+	ExportCodec::Codec audio_codec_;
 	int64_t audio_bit_rate_;
 };
 
@@ -100,7 +118,7 @@ private:
 	void flush(void);
 	void flush(AVCodecContext *codec_ctx, AVStream *stream);
 
-	bool initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecContext **codec_context_ptr, AVCodecID codec_id);
+	bool initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecContext **codec_context_ptr, const ExportCodec::Codec &codec);
 
 	void setRotation(double theta);
 
