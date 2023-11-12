@@ -140,6 +140,8 @@ private:
 	SwsContext *alpha_sws_ctx_;
 	SwsContext *noalpha_sws_ctx_;
 	VideoParams::Format video_conversion_fmt_;
+
+	AVBufferRef *hw_device_ctx_;
 };
 
 #endif

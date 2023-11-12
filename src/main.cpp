@@ -295,6 +295,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				else if (!strcasecmp(optarg, "h265_nvenc") || !strcasecmp(optarg, "hevc_nvenc")) {
 					video_codec = ExportCodec::CodecNVEncHEVC;
 				}
+				else if (!strcasecmp(optarg, "h264_vaapi") || !strcasecmp(optarg, "x264_vaapi")) {
+					video_codec = ExportCodec::CodecVAAPIH264;
+				}
 				else if (!strcasecmp(optarg, "h264_qsv") || !strcasecmp(optarg, "x264_qsv")) {
 					video_codec = ExportCodec::CodecQSVH264;
 				}
@@ -389,7 +392,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	optind = 0;
 
 	// Debug
-	gpx2video_log_debug_enable((verbose > 1));
+	setLogLevel((verbose > 1) ? AV_LOG_DEBUG : AV_LOG_INFO);
+	gpx2video_log_debug_enable((verbose > 2));
 
 	// Check command
 	if (argc == 1) {

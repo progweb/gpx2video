@@ -18,6 +18,7 @@ public:
 		// Video codecs
 		CodecH264,
 		CodecNVEncH264,
+		CodecVAAPIH264,
 		CodecQSVH264,
 		CodecHEVC,
 		CodecNVEncHEVC,

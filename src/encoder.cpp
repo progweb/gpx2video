@@ -133,7 +133,8 @@ Encoder::Encoder(const EncoderSettings &settings) :
 	video_stream_(NULL),
 	video_codec_(NULL),
 	audio_stream_(NULL),
-	audio_codec_(NULL) {
+	audio_codec_(NULL),
+	hw_device_ctx_(NULL) {
 	log_call();
 }
 
@@ -210,7 +211,11 @@ bool Encoder::open(void) {
 		sws_ctx_ = sws_getContext(settings_.videoParams().width(), settings_.videoParams().height(), 
 			ideal_pix_fmt,
 			settings_.videoParams().width(), settings_.videoParams().height(), 
+#ifdef __HW_VAAPI__
+			AV_PIX_FMT_NV12,
+#else
 			(AVPixelFormat) video_codec_->pix_fmt,
+#endif
 			0, NULL, NULL, NULL);
 
 	}
@@ -336,6 +341,17 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		return false;
 	}
 
+	// BEGIN: HW
+#ifdef __HW_VAAPI__
+	if (type == AVMEDIA_TYPE_VIDEO) {
+		const char *drm_node = "/dev/dri/renderD128";
+
+		av_hwdevice_ctx_create(&hw_device_ctx_, AV_HWDEVICE_TYPE_VAAPI, drm_node, NULL, 0);
+	}
+#endif
+	// END: HW
+
+	// Create stream
 	stream = avformat_new_stream(fmt_ctx_, NULL);
 
 	if (!stream) {
@@ -356,8 +372,9 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->height = settings().videoParams().height();
 		codec_context->sample_aspect_ratio = settings().videoParams().pixelAspectRatio();
 		codec_context->pix_fmt = FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(settings().videoParams().pixelFormat());
-//TODO!!!
-		codec_context->pix_fmt = AV_PIX_FMT_NV12;
+#ifdef __HW_VAAPI__
+		codec_context->pix_fmt = AV_PIX_FMT_VAAPI;
+#endif
 //		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
@@ -404,6 +421,31 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 	// At last
 	if (fmt_ctx_->oformat->flags & AVFMT_GLOBALHEADER)
 		codec_context->flags |= AV_CODEC_FLAG_GLOBAL_HEADER;
+
+
+	// BEGIN: HW
+#ifdef __HW_VAAPI__
+	if (type == AVMEDIA_TYPE_VIDEO) {
+		AVBufferRef *hw_frames_ref;
+		AVHWFramesContext *frames_ctx;
+
+		hw_frames_ref = av_hwframe_ctx_alloc(hw_device_ctx_);
+
+		frames_ctx = (AVHWFramesContext *) (hw_frames_ref->data);
+		frames_ctx->format    = AV_PIX_FMT_VAAPI;
+		frames_ctx->sw_format = AV_PIX_FMT_NV12;
+		frames_ctx->width     = settings().videoParams().width();
+		frames_ctx->height    = settings().videoParams().height();
+		frames_ctx->initial_pool_size = 20;
+
+		av_hwframe_ctx_init(hw_frames_ref);
+
+		codec_context->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+
+		av_buffer_unref(&hw_frames_ref);
+	}
+#endif
+	// END: HW
 
 	// Try to open encoder (third parameter can be used to pass settings to encoder)
 	result = avcodec_open2(codec_context, encoder, NULL);
@@ -475,6 +517,10 @@ bool Encoder::writeFrame(FramePtr frame, AVRational time) {
 	encoded_frame->width = frame->videoParams().width();
 	encoded_frame->height = frame->videoParams().height();
 	encoded_frame->format = video_codec_->pix_fmt;
+#ifdef __HW_VAAPI__
+	// TODO format = AV_PIX_FMT_NV12 as video_codec_->pix_fmt = AV_PIX_FMT_VAAPI
+	encoded_frame->format = AV_PIX_FMT_NV12;
+#endif
 
 //	// TODO / FIXME !!!
 //	encoded_frame->linesize[0] = 2752;
@@ -530,6 +576,22 @@ bool Encoder::writeFrame(FramePtr frame, AVRational time) {
 	encoded_frame->pts = (uint64_t) round(av_q2d(time) / av_q2d(video_codec_->time_base));
 //	encoded_frame->pts = (uint64_t) round(av_q2d(time));
 
+
+	// BEGIN: HW
+#ifdef __HW_VAAPI__
+	AVFrame *hw_frame;
+
+	hw_frame = av_frame_alloc();
+	av_hwframe_get_buffer(video_codec_->hw_frames_ctx, hw_frame, 0);
+	av_hwframe_transfer_data(hw_frame, encoded_frame, 0);
+	av_frame_free(&encoded_frame);
+
+	encoded_frame = hw_frame;
+#endif
+	// END: HW
+
+
+	// Write to encoder
 	success = writeAVFrame(encoded_frame, video_codec_, video_stream_);
 
 fail:
