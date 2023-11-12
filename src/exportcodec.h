@@ -17,7 +17,9 @@ public:
 	enum Codec {
 		// Video codecs
 		CodecH264,
+		CodecNVEncH264,
 		CodecHEVC,
+		CodecNVEncHEVC,
 
 		// Audio codecs
 		CodecAAC,

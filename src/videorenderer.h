@@ -28,7 +28,7 @@ protected:
 
 	VideoRenderer(GPX2Video &app); //, Map *map);
 
-	void init(void);
+	bool init(void);
 	void computeWidgetsPosition(void);
 };
 

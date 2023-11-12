@@ -5,8 +5,12 @@ const AVCodec * FFmpegUtils::getEncoder(ExportCodec::Codec codec) {
 	switch (codec) {
 	case ExportCodec::CodecH264:
 		return avcodec_find_encoder_by_name("libx264");
+	case ExportCodec::CodecNVEncH264:
+		return avcodec_find_encoder_by_name("h264_nvenc");
 	case ExportCodec::CodecHEVC:
 		return avcodec_find_encoder(AV_CODEC_ID_HEVC);
+	case ExportCodec::CodecNVEncHEVC:
+		return avcodec_find_encoder_by_name("hevc_nvenc");
 	
 	case ExportCodec::CodecAAC:
 		return avcodec_find_encoder(AV_CODEC_ID_AAC);

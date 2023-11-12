@@ -34,15 +34,22 @@ VideoRenderer::~VideoRenderer() {
 VideoRenderer * VideoRenderer::create(GPX2Video &app) {
 	VideoRenderer *renderer = new VideoRenderer(app);
 
-	renderer->init();
+	if (renderer->init() == false)
+		goto abort;
+
 	renderer->load();
 	renderer->computeWidgetsPosition();
 
 	return renderer;
+
+abort:
+	delete renderer;
+
+	return NULL;
 }
 
 
-void VideoRenderer::init(void) {
+bool VideoRenderer::init(void) {
 	Renderer::init();
 
 	// Retrieve audio & video streams
@@ -67,7 +74,9 @@ void VideoRenderer::init(void) {
 	settings.setFilename(app_.settings().outputfile());
 	settings.setVideoParams(video_params, video_codec);
 
-	if ((video_codec == ExportCodec::CodecH264) || (video_codec == ExportCodec::CodecHEVC)) {
+	switch (video_codec) {
+	case ExportCodec::CodecH264:
+	case ExportCodec::CodecHEVC:
 		if (app_.settings().videoCRF() != -1) {
 			// Set crf value
 			settings.setVideoOption("crf", std::to_string(app_.settings().videoCRF()));
@@ -86,6 +95,23 @@ void VideoRenderer::init(void) {
 		// Preset: ultrafast, fast, medium...
 		if (!app_.settings().videoPreset().empty())
 			settings.setVideoOption("preset", app_.settings().videoPreset());
+
+		break;
+
+	case ExportCodec::CodecNVEncH264:
+	case ExportCodec::CodecNVEncHEVC:
+		settings.setVideoOption("rc", "vbr");
+		settings.setVideoOption("cq", "19");
+		settings.setVideoOption("profile", "main");
+		settings.setVideoOption("level", "auto");
+
+		// Preset: ultrafast, fast, medium...
+		if (!app_.settings().videoPreset().empty())
+			settings.setVideoOption("preset", app_.settings().videoPreset());
+		break;
+
+	default:
+		break;
 	}
 
 	if (audio_stream) {
@@ -137,7 +163,7 @@ void VideoRenderer::init(void) {
 
 	// Open & encode output video
 	encoder_ = Encoder::create(settings);
-	encoder_->open();
+	return encoder_->open();
 }
 
 

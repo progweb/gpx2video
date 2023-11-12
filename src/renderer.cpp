@@ -48,7 +48,7 @@ Renderer::~Renderer() {
 }
 
 
-void Renderer::init(void) {
+bool Renderer::init(void) {
 	time_t start_time;
 
 	TelemetrySettings::Filter telemetry_filter = app_.settings().telemetryFilter();
@@ -75,6 +75,8 @@ void Renderer::init(void) {
 		gpx_->setTimeOffset(app_.settings().offset());
 		gpx_->retrieveFirst(data_);
 	}
+
+	return true;
 }
 
 

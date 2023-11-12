@@ -24,7 +24,7 @@ protected:
 
 	ImageRenderer(GPX2Video &app); //, Map *map);
 
-	void init(void);
+	bool init(void);
 };
 
 #endif

@@ -32,7 +32,7 @@ ImageRenderer * ImageRenderer::create(GPX2Video &app) {
 }
 
 
-void ImageRenderer::init(void) {
+bool ImageRenderer::init(void) {
 	Renderer::init();
 
 	// Retrieve video streams
@@ -77,6 +77,8 @@ void ImageRenderer::init(void) {
 	snprintf(duration_, sizeof(duration_), "%02d:%02d:%02d.%03d", 
 		(unsigned int) (duration_ms_ / 3600000), (unsigned int) ((duration_ms_ / 60000) % 60), (unsigned int) ((duration_ms_ / 1000) % 60), (unsigned int) (duration_ms_ % 1000));
 	duration_[sizeof(duration_) - 1] = '\0';
+
+	return true;
 }
 
 

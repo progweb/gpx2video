@@ -584,7 +584,7 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
 ```
 
 **video-options** supported are:
-  - codec: h264 (default) and hevc
+  - codec: h264 (default), h264_nvenc, hevc or hevc_nvenc
   - preset: ultrafast, superfast, veryfast, faster, fast, medium (default), slow and veryslow
   - crf: constant rate factor values range from 0 to 51 (default: 27 for h264 & 31 for hevc)
   - bitrate: value (default: 16000000)

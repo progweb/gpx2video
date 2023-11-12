@@ -289,6 +289,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 					if (video_crf == -2) // Undefined
 						video_crf = 31;
 				}
+				else if (!strcasecmp(optarg, "h264_nvenc") || !strcasecmp(optarg, "x264_nvenc")) {
+					video_codec = ExportCodec::CodecNVEncH264;
+				}
+				else if (!strcasecmp(optarg, "h265_nvenc") || !strcasecmp(optarg, "hevc_nvenc")) {
+					video_codec = ExportCodec::CodecNVEncHEVC;
+				}
 				else {
 					std::cout << "Video codec not supported!" << std::endl;
 					return -1;
@@ -643,7 +649,10 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(timesync);
 
 		// Create gpx2video image renderer task
-		renderer = ImageRenderer::create(app);
+		if ((renderer = ImageRenderer::create(app)) == NULL) {
+			log_error("Image renderer initialization failure!");
+			goto exit;
+		}
 		app.append(renderer);
 		break;
 
@@ -657,7 +666,10 @@ int main(int argc, char *argv[], char *envp[]) {
 		app.append(timesync);
 
 		// Create gpx2video video renderer task
-		renderer = VideoRenderer::create(app);
+		if ((renderer = VideoRenderer::create(app)) == NULL) {
+			log_error("Video renderer initialization failure!");
+			goto exit;
+		}
 		app.append(renderer);
 		break;
 

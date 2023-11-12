@@ -324,10 +324,12 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 	AVStream *stream;
 	AVCodecContext *codec_context;
 
+	log_call();
+
+	log_info("Initialize stream encoder in using '%s' codec", ExportCodec::getCodecName(codec).c_str());
+
 	// Find encoder with this name
 	const AVCodec *encoder = FFmpegUtils::getEncoder(codec);
-
-	log_call();
 
 	if (!encoder) {
 		av_log(NULL, AV_LOG_FATAL, "Failed to find encoder for codec '%s'\n", ExportCodec::getCodecName(codec).c_str());
@@ -357,16 +359,15 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 //		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
-// nvenc
-//		codec_context->dct_algo = FF_DCT_FASTINT;
-
-
 // codec/ffmpeg/ffmpegencoder.cpp:503
 //				enc_ctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;
 
 		// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
 		if (codec == ExportCodec::CodecH264)
 			av_opt_set(codec_context->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+
+		if (codec == ExportCodec::CodecNVEncH264)
+			codec_context->dct_algo = FF_DCT_FASTINT;
 
 		// Custom options
 		if (settings().videoBitrate() > 0)

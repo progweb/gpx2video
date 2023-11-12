@@ -46,7 +46,7 @@ protected:
 
 	Renderer(GPX2Video &app); //, Map *map);
 
-	void init(void);
+	bool init(void);
 	bool load(void);
 	bool loadMap(layout::Map *m);
 	bool loadTrack(layout::Track *t);
