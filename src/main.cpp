@@ -479,6 +479,10 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	setProgressInfo((verbose > 0));
 
+	// CRF defined by user ?
+	if (video_crf == -2) // Undefined
+		video_crf = -1; // Disable
+
 	// Save app settings
 	setSettings(GPX2Video::Settings(
 		gpxfile,
