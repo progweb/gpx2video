@@ -6,6 +6,7 @@
 #include <OpenImageIO/imagebufalgo.h>
 
 #include "oiioutils.h"
+#include "ffmpegutils.h"
 #include "videorenderer.h"
 
 
@@ -52,6 +53,9 @@ abort:
 bool VideoRenderer::init(void) {
 	Renderer::init();
 
+	// Codec
+	ExportCodec::Codec video_codec = app_.settings().videoCodec();
+
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
 	AudioStreamPtr audio_stream = container_->getAudioStream();
@@ -64,15 +68,27 @@ bool VideoRenderer::init(void) {
 		video_stream->orientation(),
 		video_stream->pixelAspectRatio(),
 		video_stream->interlacing());
-	video_params.setPixelFormat(video_stream->pixelFormat());
 
-	// Codec
-	ExportCodec::Codec video_codec = app_.settings().videoCodec();
+	// By default, use pixel format from input video execpt if deprecated
+	video_params.setPixelFormat(FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(video_stream->pixelFormat()));
+
+	// Use pixel format supported by encoder
+	switch (video_codec) {
+	case ExportCodec::CodecVAAPIH264:
+	case ExportCodec::CodecQSVH264:
+	case ExportCodec::CodecQSVHEVC:
+		video_params.setPixelFormat(AV_PIX_FMT_NV12);
+		break;
+
+	default:
+		break;
+	}
 
 	// Encoder settings
 	EncoderSettings settings;
 	settings.setFilename(app_.settings().outputfile());
 	settings.setVideoParams(video_params, video_codec);
+	settings.setVideoHardwareDevice(app_.settings().videoHardwareDevice());
 
 	switch (video_codec) {
 	case ExportCodec::CodecH264:

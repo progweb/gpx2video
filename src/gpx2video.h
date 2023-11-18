@@ -42,6 +42,7 @@ public:
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			int telemetry_rate=0,
 			ExportCodec::Codec video_codec=ExportCodec::CodecH264,
+			std::string video_hw_device="",
 			std::string video_preset="medium",
 			int32_t video_crf=-1,
 			int64_t video_bit_rate=0,
@@ -66,6 +67,7 @@ public:
 			, telemetry_filter_(telemetry_filter) 
 			, telemetry_rate_(telemetry_rate)
 			, video_codec_(video_codec)
+			, video_hw_device_(video_hw_device)
 			, video_preset_(video_preset)
 			, video_crf_(video_crf)
 			, video_bit_rate_(video_bit_rate)
@@ -149,6 +151,10 @@ public:
 			return video_codec_;
 		}
 
+		const std::string& videoHardwareDevice(void) const {
+			return video_hw_device_;
+		}
+
 		const std::string& videoPreset(void) const {
 			return video_preset_;
 		}
@@ -196,6 +202,7 @@ public:
 		int telemetry_rate_;
 
 		ExportCodec::Codec video_codec_;
+		std::string video_hw_device_;
 		std::string video_preset_;
 		int32_t video_crf_;
 		int64_t video_bit_rate_;

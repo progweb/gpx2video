@@ -1,9 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <filesystem>
 
 #include <string.h>
 #include <getopt.h>
+#include <sys/stat.h>
 
 extern "C" {
 #include <event2/event.h>
@@ -47,7 +49,8 @@ static const struct option options[] = {
 	{ "extract-format",     no_argument,       0, 0 },
 	{ "telemetry-filter",   no_argument,       0, 0 },
 	{ "telemetry-rate",     required_argument, 0, 0 },
-	{ "video-codec",        required_argument, 0, 0 },
+	{ "video-codec",        optional_argument, 0, 0 },
+	{ "video-hwdevice",     optional_argument, 0, 0 },
 	{ "video-preset",       required_argument, 0, 0 },
 	{ "video-crf",          required_argument, 0, 0 },
 	{ "video-bitrate",      required_argument, 0, 0 },
@@ -63,33 +66,42 @@ static void print_usage(const std::string &name) {
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
-	std::cout << "\t- m, --media=file       : Input media file name" << std::endl;
-	std::cout << "\t- g, --gpx=file         : GPX file name" << std::endl;
-	std::cout << "\t-    --gpx-from         : Set GPX begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-to           : Set GPX end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t- l, --layout=file      : Layout file name" << std::endl;
-	std::cout << "\t- o, --output=file      : Output file name" << std::endl;
-	std::cout << "\t- d, --duration         : Duration (in ms) (not required)" << std::endl;
-	std::cout << "\t-    --trim             : Left trim crop (in ms) (not required)" << std::endl;
-	std::cout << "\t- f, --format=name      : Extract format (dump, gpx)" << std::endl;
-	std::cout << "\t- t, --telemetry=filter : Filter GPX values (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate   : Telemetry rate (refresh each second) (default: 1))" << std::endl;
-	std::cout << "\t- r, --rate             : Frame per second (not implemented" << std::endl;
-	std::cout << "\t-    --offset           : Add a time offset (in ms) (not required)" << std::endl;
-	std::cout << "\t-    --time-factor      : Time factor - To read video timelapse (default: 1.0)" << std::endl;
-	std::cout << "\t-    --map-factor       : Map factor (default: 1.0)" << std::endl;
-	std::cout << "\t-    --map-source       : Map source" << std::endl;
-	std::cout << "\t-    --map-zoom         : Map zoom" << std::endl;
-	std::cout << "\t-    --map-list         : Dump supported map list" << std::endl;
-	std::cout << "\t-    --path-thick       : Path thick (default: 3.0)" << std::endl;
-	std::cout << "\t-    --path-border      : Path border (default: 1.4)" << std::endl;
-	std::cout << "\t- v, --verbose          : Show trace" << std::endl;
-	std::cout << "\t- q, --quiet            : Quiet mode" << std::endl;
-	std::cout << "\t- h, --help             : Show this help screen" << std::endl;
+	std::cout << "\t- m, --media=file        : Input media file name" << std::endl;
+	std::cout << "\t- g, --gpx=file          : GPX file name" << std::endl;
+	std::cout << "\t-    --gpx-from          : Set GPX begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-to            : Set GPX end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t- l, --layout=file       : Layout file name" << std::endl;
+	std::cout << "\t- o, --output=file       : Output file name" << std::endl;
+	std::cout << "\t- d, --duration          : Duration (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --trim              : Left trim crop (in ms) (not required)" << std::endl;
+	std::cout << "\t- f, --format=name       : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t- t, --telemetry=filter  : Filter GPX values (none, sample, linear...)" << std::endl;
+	std::cout << "\t-    --telemetry-rate    : Telemetry rate (refresh each second) (default: 1))" << std::endl;
+//	std::cout << "\t- r, --rate              : Frame per second (not implemented" << std::endl;
+	std::cout << "\t-    --offset            : Add a time offset (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --time-factor       : Time factor - To read video timelapse (default: 1.0)" << std::endl;
+	std::cout << "\t-    --map-factor        : Map factor (default: 1.0)" << std::endl;
+	std::cout << "\t-    --map-source        : Map source" << std::endl;
+	std::cout << "\t-    --map-zoom          : Map zoom" << std::endl;
+	std::cout << "\t-    --map-list          : Dump supported map list" << std::endl;
+	std::cout << "\t-    --path-thick        : Path thick (default: 3.0)" << std::endl;
+	std::cout << "\t-    --path-border       : Path border (default: 1.4)" << std::endl;
+	std::cout << "\t- v, --verbose           : Show trace" << std::endl;
+	std::cout << "\t- q, --quiet             : Quiet mode" << std::endl;
+	std::cout << "\t- h, --help              : Show this help screen" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
-	std::cout << "\t-    --extract-format   : Dump extract format supported" << std::endl;
-	std::cout << "\t-    --telemetry-filter : Dump telemetry filter supported" << std::endl;
+	std::cout << "\t-    --extract-format    : Dump extract format supported" << std::endl;
+	std::cout << "\t-    --telemetry-filter  : Dump telemetry filter supported" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Encoder options:" << std::endl;
+	std::cout << "\t-    --video-codec       : Video encoder codec name" << std::endl;
+	std::cout << "\t-    --video-hwdevice    : Video encoder hardware device" << std::endl;
+	std::cout << "\t-    --video-preset      : Video encoder preset settings" << std::endl;
+	std::cout << "\t-    --video-crf         : Video encoder constant rate factor" << std::endl;
+	std::cout << "\t-    --video-bitrate     : Video encoder bitrate" << std::endl;
+	std::cout << "\t-    --video-min-bitrate : Video encoder min bitrate" << std::endl;
+	std::cout << "\t-    --video-max-bitrate : Video encoder max bitrate" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
 	std::cout << "\t extract: Extract GPS sensor data from media stream" << std::endl;
@@ -189,6 +201,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
 	int32_t video_crf = -2; // Valid value are -1 and positive value
+	std::string video_hw_device = "";
 	std::string video_preset = "medium";
 	int64_t video_bit_rate = 2 * 1000 * 1000 * 8;		// 16MB
 	int64_t video_min_bit_rate = 0;						// 0
@@ -277,7 +290,27 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				telemetry_rate = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "video-codec")) {
-				if (!strcasecmp(optarg, "h264") || !strcasecmp(optarg, "x264")) {
+				if (optarg == NULL) {
+					std::cout << std::endl;
+					std::cout << "Video codecs list:" << std::endl;
+					std::cout << "\t- h264" << std::endl;
+					std::cout << "\t- hevc" << std::endl;
+					std::cout << std::endl;
+					std::cout << "NVidia video codecs list:" << std::endl;
+					std::cout << "\t- h264_nvenc" << std::endl;
+					std::cout << "\t- hevc_nvenc" << std::endl;
+					std::cout << std::endl;
+					std::cout << "Intel Quick Sync Video codecs list:" << std::endl;
+					std::cout << "\t- h264_qsv" << std::endl;
+					std::cout << "\t- hevc_qsv" << std::endl;
+					std::cout << std::endl;
+					std::cout << "VAAPI video codecs list:" << std::endl;
+					std::cout << "\t- h264_vaapi" << std::endl;
+					std::cout << std::endl;
+					std::cout << "VAAPI video codec required video-hwdevice option." << std::endl;
+					return -2;
+				}
+				else if (!strcasecmp(optarg, "h264") || !strcasecmp(optarg, "x264")) {
 					video_codec = ExportCodec::CodecH264;
 
 					if (video_crf == -2) // Undefined
@@ -307,6 +340,29 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				else {
 					std::cout << "Video codec not supported!" << std::endl;
 					return -1;
+				}
+			}
+			else if (s && !strcmp(s, "video-hwdevice")) {
+				if (optarg == NULL) {
+					std::string path = "/dev/dri";
+
+					std::cout << std::endl;
+					std::cout << "Video hardware device list:" << std::endl;
+
+					for (const auto& entry : std::filesystem::directory_iterator(path)) {
+						struct stat sb;
+						std::string name = entry.path().string();
+
+						if ((::stat(name.c_str(), &sb) != 0) || !(sb.st_mode & S_IFCHR))
+							continue;
+
+						std::cout << "\t- " << name << std::endl;
+					}
+
+					return -2;
+				}
+				else {
+					video_hw_device = std::string(optarg);
 				}
 			}
 			else if (s && !strcmp(s, "video-preset")) {
@@ -457,23 +513,33 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	}
 
 	// Check required options
+	if ((video_codec == ExportCodec::CodecVAAPIH264) && (video_hw_device == "")) {
+		std::cout << name << ": option '--video-hwdevice' is required with VAAPI video codec" << std::endl;
+		std::cout << std::endl;
+		return -1;
+	}
+
 	if (mediafile_required && mediafile.empty()) {
 		std::cout << name << ": option '--media' is required" << std::endl;
+		std::cout << std::endl;
 		return -1;
 	}
 
 	if (gpxfile_required && gpxfile.empty()) {
 		std::cout << name << ": option '--gpx' is required" << std::endl;
+		std::cout << std::endl;
 		return -1;
 	}
 
 	if (layoutfile_required && layoutfile.empty()) {
 		std::cout << name << ": option '--layout' is required" << std::endl;
+		std::cout << std::endl;
 		return -1;
 	}
 
 	if (outputfile_required && outputfile.empty()) {
 		std::cout << name << ": option '--output' is required" << std::endl;
+		std::cout << std::endl;
 		return -1;
 	}
 
@@ -504,6 +570,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		telemetry_filter,
 		telemetry_rate,
 		video_codec,
+		video_hw_device,
 		video_preset,
 		video_crf,
 		video_bit_rate,
@@ -546,7 +613,8 @@ int main(int argc, char *argv[], char *envp[]) {
 	// Parse args
 	result = app.parseCommandLine(argc, argv);
 	if (result < 0) {
-		gpx2video::print_usage(name);
+		if (result == -1)
+			gpx2video::print_usage(name);
 		goto exit;
 	}
 

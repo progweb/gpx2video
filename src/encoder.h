@@ -57,6 +57,9 @@ public:
 
 	const ExportCodec::Codec& videoCodec(void) const;
 
+	const std::string& videoHardwareDevice(void) const;
+	void setVideoHardwareDevice(std::string hw_device);
+
 	const std::list<Option>& videoOptions(void) const;
 	void setVideoOption(std::string name, std::string value);
 
@@ -83,6 +86,7 @@ private:
 	std::string filename_;
 
 	bool video_enabled_;
+	std::string video_hw_device_;
 	VideoParams video_params_;
 	ExportCodec::Codec video_codec_;
 	std::list<Option> video_options_;
