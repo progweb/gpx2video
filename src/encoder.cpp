@@ -378,7 +378,7 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		codec_context->height = settings().videoParams().height();
 		codec_context->sample_aspect_ratio = settings().videoParams().pixelAspectRatio();
 		codec_context->pix_fmt = settings().videoParams().pixelFormat();
-//		codec_context->framerate = settings().videoParams().frameRate();
+		codec_context->framerate = settings().videoParams().frameRate();
 		codec_context->time_base = settings().videoParams().timeBase();
 
 		if (codec == ExportCodec::CodecVAAPIH264)
@@ -470,6 +470,10 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 	// FIXME ???
 	stream->time_base = codec_context->time_base;
 //	stream->codecpar->codec_tag = 0;
+
+	if (type == AVMEDIA_TYPE_VIDEO) {
+		stream->avg_frame_rate = codec_context->framerate;
+	}
 
 	*stream_ptr = stream;
 	*codec_context_ptr = codec_context;

@@ -105,6 +105,8 @@ If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to de
 If the `creation_time` field and 'GoPro MET' stream can't be found, gpx2video assumes that the video starts in the
 same time that the GPX stream.
 
+At last, you can overwrite `creation_time` value in using --start-time option.
+
 "sync" command permits to test the sychronization process:
 
 ```bash
@@ -129,6 +131,9 @@ At last, but not least, you can add an user offset (in ms).
 $ ./gpx2video -m GOPR1860.MP4 --offset 9000 ...
 ```
 
+```bash
+$ ./gpx2video -m GOPR1860.MP4 --start-time "2021-12-08T09:56:26" --offset 300 ...
+```
 
 ## Build
 

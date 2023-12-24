@@ -79,6 +79,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --telemetry-rate    : Telemetry rate (refresh each second) (default: 1))" << std::endl;
 //	std::cout << "\t- r, --rate              : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --offset            : Add a time offset (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --start-time        : Overwrite or set creation_time field" << std::endl;
 	std::cout << "\t-    --time-factor       : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-factor        : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source        : Map source" << std::endl;
@@ -188,6 +189,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int max_duration_ms = 0; // By default process whole media
 
 	int64_t offset = 0;
+	std::string start_time;
 
 	double time_factor = 1.0;
 
@@ -244,6 +246,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			s = gpx2video::options[index].name;
 			if (s && !strcmp(s, "offset")) {
 				offset = atoll(optarg);
+			}
+			else if (s && !strcmp(s, "start-time")) {
+				start_time = std::string(optarg);
 			}
 			else if (s && !strcmp(s, "time-factor")) {
 				time_factor = strtod(optarg, NULL);
@@ -557,6 +562,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		outputfile,
 		rate,
 		offset,
+		start_time,
 		time_factor,
 		map_factor,
 		map_zoom,

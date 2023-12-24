@@ -69,6 +69,9 @@ bool VideoRenderer::init(void) {
 		video_stream->pixelAspectRatio(),
 		video_stream->interlacing());
 
+	// Set video output framerate (fps)
+	//video_params.setFrameRate(av_make_q(30, 1));
+
 	// By default, use pixel format from input video execpt if deprecated
 	video_params.setPixelFormat(FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(video_stream->pixelFormat()));
 

@@ -111,13 +111,23 @@ void GPX2Video::setSettings(const GPX2Video::Settings &settings) {
 
 MediaContainer * GPX2Video::media(void) {
 	std::string mediafile = settings().mediafile();
+
+	std::string start_time = settings().startTime();
 	
 	// Probe input media
 	if (container_ == NULL) {
 		container_ = Decoder::probe(mediafile);
 
-		if (container_->startTime() == 0)
+		if (!start_time.empty()) {
+			log_notice("Overwrite video create time with: %s", start_time.c_str());
+
+			container_->setStartTime(start_time);
+		}
+		else if (container_->startTime() == 0) {
+			log_info("Creation time not found, you can set manually value in using '--start-time' option");
+
 			this->setDefaultStartTime();
+		}
 	}
 
 	return container_;

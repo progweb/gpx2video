@@ -49,9 +49,12 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 
 	// creation_time = 2020-12-13T09:56:27.000000Z
 	memset(&time, 0, sizeof(time));
-	strptime(s, "%Y-%m-%dT%H:%M:%S.", &time);
-
-	time.tm_isdst = -1;
+	if (::strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
+		time.tm_isdst = -1;
+	else if (::strptime(s, "%Y-%m-%dT%H:%M:%S", &time) != NULL)
+		time.tm_isdst = -1;
+	else
+		return;
 
 	// Convert GoPro time in UTC time
 	start_time_ = timelocal(&time);

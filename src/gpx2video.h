@@ -29,6 +29,7 @@ public:
 			std::string output_file="",
 			int rate=0,
 			int offset=0,
+			std::string start_time="",
 			double time_factor=1.0,
 			double map_factor=1.0,
 			int map_zoom=8, 
@@ -54,6 +55,7 @@ public:
 			, output_file_(output_file)
 			, rate_(rate)
 			, offset_(offset)
+			, start_time_(start_time)
 			, time_factor_(time_factor)
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
@@ -97,6 +99,10 @@ public:
 
 		const int64_t& offset(void) const {
 			return offset_;
+		}
+
+		const std::string& startTime(void) const {
+			return start_time_;
 		}
 
 		const double& timeFactor(void) const {
@@ -183,6 +189,7 @@ public:
 
 		int rate_;
 		int64_t offset_;
+		std::string start_time_;
 
 		double time_factor_;
 
