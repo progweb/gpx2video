@@ -192,7 +192,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int64_t offset = 0;
 	std::string start_time;
 
-	double time_factor = 1.0;
+	bool time_factor_auto = false;
+	double time_factor_value = 1.0;
 
 	double map_factor = 1.0;
 
@@ -252,7 +253,14 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				start_time = std::string(optarg);
 			}
 			else if (s && !strcmp(s, "time-factor")) {
-				time_factor = strtod(optarg, NULL);
+				if (!strcmp(optarg, "auto")) {
+					time_factor_auto = true;
+					time_factor_value = 1.0;
+				}
+				else {
+					time_factor_auto = false;
+					time_factor_value = strtod(optarg, NULL);
+				}
 			}
 			else if (s && !strcmp(s, "trim")) {
 				// TODO
@@ -564,7 +572,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		rate,
 		offset,
 		start_time,
-		time_factor,
+		time_factor_auto,
+		time_factor_value,
 		map_factor,
 		map_zoom,
 		max_duration_ms,

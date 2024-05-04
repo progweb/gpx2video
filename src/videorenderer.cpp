@@ -350,6 +350,9 @@ bool VideoRenderer::run(void) {
 	// Read GPMF data
 	if (decoder_gpmf_) {
 		decoder_gpmf_->retrieveData(gpmf_data_, real_time);
+
+		if (app_.settings().isTimeFactorAuto())
+			time_factor = gpmf_data_.timelapse;
 	}
 	
 	// Read audio data
@@ -455,8 +458,8 @@ bool VideoRenderer::run(void) {
 		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
 		if (app_.progressInfo()) {
-			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-				frame_time_, timecode, timecode_ms, s);
+			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s (x %.01f)\n", 
+				frame_time_, timecode, timecode_ms, s, time_factor);
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

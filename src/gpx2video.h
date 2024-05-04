@@ -30,7 +30,8 @@ public:
 			int rate=0,
 			int offset=0,
 			std::string start_time="",
-			double time_factor=1.0,
+			bool time_factor_auto=false,
+			double time_factor_value=1.0,
 			double map_factor=1.0,
 			int map_zoom=8, 
 			int max_duration_ms=0,
@@ -56,7 +57,8 @@ public:
 			, rate_(rate)
 			, offset_(offset)
 			, start_time_(start_time)
-			, time_factor_(time_factor)
+			, time_factor_auto_(time_factor_auto)
+			, time_factor_value_(time_factor_value)
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
 			, max_duration_ms_(max_duration_ms)
@@ -105,8 +107,12 @@ public:
 			return start_time_;
 		}
 
+		const bool& isTimeFactorAuto(void) const {
+			return time_factor_auto_;
+		}
+
 		const double& timeFactor(void) const {
-			return time_factor_;
+			return time_factor_value_;
 		}
 
 		const MapSettings::Source& mapsource(void) const {
@@ -191,7 +197,8 @@ public:
 		int64_t offset_;
 		std::string start_time_;
 
-		double time_factor_;
+		bool time_factor_auto_;
+		double time_factor_value_;
 
 		double map_factor_;
 		int map_zoom_;

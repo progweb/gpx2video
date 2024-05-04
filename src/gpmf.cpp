@@ -113,6 +113,7 @@ bool GPMFDecoder::retrieveData(GPMFData &data, AVRational timecode) {
  
 	int64_t target_ts = stream_->getTimeInTimeBaseUnits(timecode);
 
+	// Retrieve packet data
 	packet = retrievePacketData(target_ts);
 
 	if (packet == NULL)
@@ -147,13 +148,13 @@ AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts) {
 
 	AVPacket *packet = NULL;
 
-	// Check if new packet is required
+	// Check if PTS is in the range [target_ts:target_ts + duration]
 	if ((1000 * pts_) > target_ts)
 		return NULL;
 
 	packet = av_packet_alloc();
 
-	while (true ) {
+	while (true) {
 		// Read raw data
 		result = getPacket(packet);
 
@@ -170,7 +171,7 @@ AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts) {
 //		data = (uint8_t *) frame;
 
 		n_++;
-		pts_ = packet->pts;
+		pts_ = packet->pts + packet->duration;
 
 		break;
 	}
