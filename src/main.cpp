@@ -38,6 +38,7 @@ static const struct option options[] = {
 	{ "output",             required_argument, 0, 'o' },
 	{ "offset",             required_argument, 0, 0 },
 	{ "rate",               required_argument, 0, 'r' },
+	{ "start-time",         required_argument, 0, 0 },
 	{ "time-factor",        required_argument, 0, 0 },
 	{ "telemetry",          required_argument, 0, 't' },
 	{ "map-source",         required_argument, 0, 0 },
