@@ -11,6 +11,7 @@ extern "C" {
 }
 
 #include "log.h"
+#include "utils.h"
 #include "extractor.h"
 
 
@@ -201,6 +202,9 @@ bool Extractor::run(void) {
 		out_.write(reinterpret_cast<char*>(packet->data), packet->size); //reinterpret_cast<char*>(&myuint), sizeof(myuint));
 	}
 	else {
+		// Append MP4 stream info
+		out_ << "PACKET: " << n_ << " - PTS: " << timecode << " TIMESTAMP: " << timecode_ms << " ms" << std::endl;
+
 		// Parsing stream packet
 		parse(gpmd, packet->data, packet->size, out_); //(settings().format() == ExtractorSettings::FormatDump));
 
@@ -351,6 +355,7 @@ int Extractor::getPacket(AVPacket *packet) {
 
 void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::ofstream &out) {
 	int i, j, k;
+	int nstream = 0;
 	int inputtypesize;
 
 	size_t n;
@@ -375,23 +380,36 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 
 		data->header.count = bswap_16(data->header.count);
 
-		if (dump) {
-			snprintf(string, sizeof(string), "%c%c%c%c %c 0x%X %u %u", 
-					data->header.label[0], data->header.label[1], data->header.label[2], data->header.label[3], 
-					data->header.type, data->header.type,
-					data->header.size, data->header.count);
-			out << string << std::endl;
-		}
-
 		inputtypesize = 4;
 		len = data->header.count * data->header.size;
 
 		key = MAKEKEY(data->header);
 
+		if (key == STR2FOURCC("STRM")) {
+			if (nstream > 1) {
+				IndentingOStreambuf indent(out, 4 * (nstream - 1));
+
+				out << "]" << std::endl;
+			}
+
+			nstream = 1;
+		}
+
+		// Indent ?
+		IndentingOStreambuf indent(out, 4 * nstream);
+
+		if (dump) {
+			snprintf(string, sizeof(string), "%c%c%c%c %s %c 0x%X %u %u", 
+					data->header.label[0], data->header.label[1], data->header.label[2], data->header.label[3], 
+					(key == STR2FOURCC("STRM")) ? "[" : "",
+					data->header.type, data->header.type,
+					data->header.size, data->header.count);
+			out << string << std::endl;
+		}
+
 		// Parse data
 		switch (data->header.type) {
 		case 0x00:
-			continue;
 			break;
 
 		case Extractor::GPMF_TYPE_STRING_ASCII: // 0x63
@@ -505,7 +523,9 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 
 		// Save data
-		if (key == STR2FOURCC("DVNM")) {
+		if (key == STR2FOURCC("STRM"))
+			nstream++;
+		else if (key == STR2FOURCC("DVNM")) {
 			gpmd.device_name = string;
 		}
 		else if (key == STR2FOURCC("GPSF")) {
@@ -526,18 +546,30 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 		else if (key == STR2FOURCC("GPS5")) {
 			for (i=0, k=0; i<data->header.count; i++) {
-				gpmd.lat = (double) data->value.s32[k] / (double) scal[0];
-				gpmd.lon = (double) data->value.s32[k+1] / (double) scal[1];
-				gpmd.ele = (double) data->value.s32[k+2] / (double) scal[2];
+				// GPS point freq: 18 Hz
+				// 1st point match on the GPSU value
+				if (k == 0) {
+					gpmd.lat = (double) data->value.s32[k] / (double) scal[0];
+					gpmd.lon = (double) data->value.s32[k+1] / (double) scal[1];
+					gpmd.ele = (double) data->value.s32[k+2] / (double) scal[2];
+				}
 
 				k += data->header.size / inputtypesize;
 			}
 		}
 
-		n += len;
-		remain = len % 4;
-		if (remain > 0)
-			n += 4 - remain;
+		if (data->header.type != 0x00) { 
+			n += len;
+			remain = len % 4;
+			if (remain > 0)
+				n += 4 - remain;
+		}
+	}
+
+	if (nstream > 1) {
+		IndentingOStreambuf indent(out, 4 * (nstream - 1));
+
+		out << "]" << std::endl;
 	}
 }
 

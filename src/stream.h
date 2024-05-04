@@ -47,6 +47,8 @@ public:
 	const int64_t& duration(void) const;
 	void setDuration(const int64_t &duration);
 
+	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
+
 private:
 	int index_;
 	std::string name_;
@@ -76,7 +78,7 @@ public:
 	const uint64_t& channelLayout(void) const;
 	void setChannelLayout(const uint64_t &channel_layout);
 
-	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
+//	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
 
 private:
 	int sample_rate_;
@@ -120,7 +122,7 @@ public:
 	const int& orientation(void) const;
 	void setOrientation(const double &theta);
 
-	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
+//	int64_t getTimeInTimeBaseUnits(const AVRational& time) const;
 
 private:
 	int width_;

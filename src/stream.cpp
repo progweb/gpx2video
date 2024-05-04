@@ -69,6 +69,11 @@ void Stream::setDuration(const int64_t &duration) {
 }
 
 
+int64_t Stream::getTimeInTimeBaseUnits(const AVRational& time) const {
+	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
+}
+
+
 AudioStream::AudioStream() {
 	setType(AVMEDIA_TYPE_AUDIO);
 }
@@ -118,9 +123,9 @@ void AudioStream::setChannelLayout(const uint64_t &channel_layout) {
 }
 
 
-int64_t AudioStream::getTimeInTimeBaseUnits(const AVRational& time) const {
-	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
-}
+//int64_t AudioStream::getTimeInTimeBaseUnits(const AVRational& time) const {
+//	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
+//}
 
 
 VideoStream::VideoStream() {
@@ -229,7 +234,7 @@ void VideoStream::setOrientation(const double &theta) {
 }
 
 
-int64_t VideoStream::getTimeInTimeBaseUnits(const AVRational& time) const {
-	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
-}
+//int64_t VideoStream::getTimeInTimeBaseUnits(const AVRational& time) const {
+//	return (int64_t) round(av_q2d(time) * av_q2d(av_inv_q(timeBase())));
+//}
 

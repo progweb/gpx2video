@@ -1,6 +1,7 @@
 #ifndef __GPX2VIDEO__VIDEORENDERER_H__
 #define __GPX2VIDEO__VIDEORENDERER_H__
 
+#include "gpmf.h"
 #include "renderer.h"
 
 
@@ -17,6 +18,7 @@ public:
 protected:
 	Decoder *decoder_audio_;
 	Decoder *decoder_video_;
+	GPMFDecoder *decoder_gpmf_;
 	Encoder *encoder_;
 
 	char duration_[16];
@@ -25,6 +27,8 @@ protected:
 	int64_t frame_time_ = 0;
 
 	time_t started_at_;
+
+	GPMFData gpmf_data_;
 
 	VideoRenderer(GPX2Video &app); //, Map *map);
 

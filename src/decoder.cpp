@@ -389,17 +389,19 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 
 	uint8_t *data = NULL;
 
-	AVPacket *packet = av_packet_alloc();
-	AVFrame *frame = av_frame_alloc();
+	AVPacket *packet = NULL;
+	AVFrame *frame = NULL;
 
 	(void) params;
-	(void) target_ts;
 
 //	printf("RETRIEVE: %ld\n", target_ts);
 
 	// Check if PTS is in the range [target_ts:target_ts + duration]
 	if ((1000 * pts_) > (target_ts + duration))
 		return NULL;
+
+	packet = av_packet_alloc();
+	frame = av_frame_alloc();
 
 	// Handle NULL channel layout
 	uint64_t channel_layout = validateChannelLayout(avstream_);
@@ -439,7 +441,7 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 //		size_t size = params.samplesToBytes(nb_samples);
 //		data = (uint8_t *) malloc(size * sizeof(uint8_t));
 
-		// Store data (TOOD...)
+		// Store data
 		data = (uint8_t *) frame;
 
 		pts_ = frame->pts;

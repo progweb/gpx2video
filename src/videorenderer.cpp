@@ -15,6 +15,7 @@ VideoRenderer::VideoRenderer(GPX2Video &app)
 	, started_at_(0) {
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
+	decoder_gpmf_ = NULL;
 	encoder_ = NULL;
 
 	frame_time_ = 0;
@@ -29,6 +30,8 @@ VideoRenderer::~VideoRenderer() {
 		delete decoder_audio_;
 	if (decoder_video_)
 		delete decoder_video_;
+	if (decoder_gpmf_)
+		delete decoder_gpmf_;
 }
 
 
@@ -59,6 +62,9 @@ bool VideoRenderer::init(void) {
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
 	AudioStreamPtr audio_stream = container_->getAudioStream();
+
+	// Retrieve GoPro MET stream
+	StreamPtr gpmf_stream = container_->getDataStream("GoPro MET");
 
 	// Audio & Video encoder settings
 	VideoParams video_params(video_stream->width(), video_stream->height(),
@@ -186,6 +192,12 @@ bool VideoRenderer::init(void) {
 	if (audio_stream) {
 		decoder_audio_ = Decoder::create();
 		decoder_audio_->open(audio_stream);
+	}
+
+	// Open & decoder gpmf stream
+	if (gpmf_stream) {
+		decoder_gpmf_ = GPMFDecoder::create();
+		decoder_gpmf_->open(gpmf_stream);
 	}
 
 	// Open & encode output video
@@ -335,6 +347,11 @@ bool VideoRenderer::run(void) {
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
 	orientation = encoder_->settings().videoParams().orientation();
 
+	// Read GPMF data
+	if (decoder_gpmf_) {
+		decoder_gpmf_->retrieveData(gpmf_data_, real_time);
+	}
+	
 	// Read audio data
 	if (decoder_audio_) {
 		duration = round(av_q2d(av_div_q(av_make_q(1000 * (frame_time_ + 1), 1), encoder_->settings().videoParams().frameRate())));
@@ -455,6 +472,10 @@ bool VideoRenderer::run(void) {
 			fflush(stdout);
 		}
 	}
+
+	// Dump GPMF data
+	if (decoder_gpmf_)
+		gpmf_data_.dump();
 
 	// Dump GPX data
 	if (gpx_ && app_.progressInfo())
