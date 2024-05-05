@@ -87,7 +87,7 @@ bool ImageRenderer::start(void) {
 
 	time_t now = time(NULL);
 
-	time_t start_time;
+//	time_t start_time;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
@@ -95,14 +95,14 @@ bool ImageRenderer::start(void) {
 
 	log_notice("Rendering...");
 
-	// Compute start time
-	start_time = container_->startTime() + container_->timeOffset();
-
-	// Update start time in GPX stream (start_time can change after sync step)
-	if (gpx_) {
-		gpx_->setStartTime(start_time);
-//		data_.init();
-	}
+//	// Compute start time
+//	start_time = container_->startTime() + container_->timeOffset();
+//
+//	// Update start time in GPX stream (start_time can change after sync step)
+//	if (gpx_) {
+//		gpx_->setStartTime(start_time);
+////		data_.init();
+//	}
 
 	started_at_ = now;
 
@@ -205,7 +205,7 @@ bool ImageRenderer::run(void) {
 		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 
 		// Read GPX data
-		type = gpx_->retrieveNext(data_, time_factor * timecode_ms);
+		type = gpx_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
 
 		if (type == GPX::DataEof)
 			goto done;

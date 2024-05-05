@@ -23,6 +23,7 @@ protected:
 
 	char duration_[16];
 	unsigned int duration_ms_;
+	unsigned int real_duration_ms_;
 
 	int64_t frame_time_ = 0;
 

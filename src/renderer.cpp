@@ -49,7 +49,7 @@ Renderer::~Renderer() {
 
 
 bool Renderer::init(void) {
-	time_t start_time;
+//	time_t start_time;
 
 	TelemetrySettings::Filter telemetry_filter = app_.settings().telemetryFilter();
 
@@ -63,15 +63,17 @@ bool Renderer::init(void) {
 	// Media
 	container_ = app_.media();
 
-	// Set start time in GPX stream
-	start_time = container_->startTime() + container_->timeOffset();
+//	// Set start time in GPX stream
+//	start_time = container_->startTime() + container_->timeOffset();
+
+	// GPX initialization
 	if (gpx_) {
 		// GPX limits
 		gpx_->setFrom(app_.settings().gpxFrom());
 		gpx_->setTo(app_.settings().gpxTo());
 
 		// GPX time fixing
-		gpx_->setStartTime(start_time);
+//		gpx_->setStartTime(start_time);
 		gpx_->setTimeOffset(app_.settings().offset());
 		gpx_->retrieveFirst(data_);
 	}

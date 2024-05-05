@@ -19,7 +19,7 @@ public:
 
 		timestamp = 0;
 
-		timelapse = 1;
+		timelapse = 1.0;
 
 		fix = 0;
 		date = "";
@@ -28,7 +28,7 @@ public:
 	}
 
 	void dump() {
-		printf("  [%ld] GPMF Timestamp: %ld ms - Timelapse factor: %d\n",
+		printf("  [%ld] GPMF Timestamp: %ld ms - Timelapse factor: %.01f\n",
 				id,
 				timestamp / 1000, 
 				timelapse);
@@ -42,7 +42,7 @@ public:
 
 	uint64_t timestamp;
 
-	int timelapse;
+	double timelapse;
 
 	uint32_t fix;
 	int utc_ms;
@@ -118,7 +118,7 @@ public:
 	void close(void);
 
 	bool retrieveData(GPMFData &data, AVRational timecode);
-	AVPacket * retrievePacketData(const int64_t& target_ts);
+	AVPacket * retrievePacketData(const int64_t& target_ts, bool& eof);
 	bool parseData(GPMFData &data, uint8_t *buffer, size_t size);
 
 protected:
@@ -139,6 +139,8 @@ private:
 
 	uint64_t n_;
 	int64_t pts_;
+
+	GPMFData next_data_;
 };
 
 #endif

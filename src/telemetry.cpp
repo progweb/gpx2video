@@ -91,7 +91,7 @@ bool Telemetry::start(void) {
 
 	// Start time activity
 	gpx_->retrieveFirst(data_);
-	gpx_->setStartTime(data_.time());
+//	gpx_->setStartTime(data_.time());
 
 	// Open output stream
     out_ = std::ofstream(filename);
@@ -106,7 +106,8 @@ bool Telemetry::start(void) {
 	out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Lap" << std::endl;
 
 	// Read telemetry data from start
-	timecode_ms_ = 0;
+//	timecode_ms_ = 0;
+	timecode_ms_ = data_.time() * 1000;
 
 done:
 	return result;

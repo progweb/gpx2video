@@ -20,6 +20,7 @@ VideoRenderer::VideoRenderer(GPX2Video &app)
 
 	frame_time_ = 0;
 	duration_ms_ = 0;
+	real_duration_ms_ = 0;
 }
 
 
@@ -256,7 +257,7 @@ bool VideoRenderer::start(void) {
 
 	time_t now = time(NULL);
 
-	time_t start_time;
+//	time_t start_time;
 
 	double sar;
 	int orientation;
@@ -271,14 +272,16 @@ bool VideoRenderer::start(void) {
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
 	orientation = encoder_->settings().videoParams().orientation();
 
-	// Compute start time
-	start_time = container_->startTime() + container_->timeOffset();
-
-	// Update start time in GPX stream (start_time can change after sync step)
-	if (gpx_) {
-		gpx_->setStartTime(start_time);
-//		data_.init();
-	}
+//	// Compute start time
+//	start_time = container_->startTime() + container_->timeOffset();
+//
+//	app_.setTime(start_time);
+//
+//	// Update start time in GPX stream (start_time can change after sync step)
+//	if (gpx_) {
+//		gpx_->setStartTime(start_time);
+////		data_.init();
+//	}
 
 	started_at_ = now;
 
@@ -330,7 +333,9 @@ bool VideoRenderer::run(void) {
 	double time_factor;
 
 	int duration;
-	AVRational real_time;
+	unsigned int real_duration_ms;
+
+	AVRational video_time;
 
 	bool is_update = false;
 
@@ -341,7 +346,7 @@ bool VideoRenderer::run(void) {
 
 	start_time = container_->startTime() + container_->timeOffset();
 
-	real_time = av_div_q(av_make_q(1000 * frame_time_, 1), encoder_->settings().videoParams().frameRate());
+	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), encoder_->settings().videoParams().frameRate());
 
 	// SAR & orientation video
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
@@ -349,7 +354,7 @@ bool VideoRenderer::run(void) {
 
 	// Read GPMF data
 	if (decoder_gpmf_) {
-		decoder_gpmf_->retrieveData(gpmf_data_, real_time);
+		decoder_gpmf_->retrieveData(gpmf_data_, video_time);
 
 		if (app_.settings().isTimeFactorAuto())
 			time_factor = gpmf_data_.timelapse;
@@ -358,18 +363,18 @@ bool VideoRenderer::run(void) {
 	// Read audio data
 	if (decoder_audio_) {
 		duration = round(av_q2d(av_div_q(av_make_q(1000 * (frame_time_ + 1), 1), encoder_->settings().videoParams().frameRate())));
-		duration -= round(av_q2d(real_time));
+		duration -= round(av_q2d(video_time));
 
 		do {
-			frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), real_time, duration);
+			frame = decoder_audio_->retrieveAudio(encoder_->settings().audioParams(), video_time, duration);
 
 			if (frame != NULL)
-				encoder_->writeAudio(frame, real_time);
+				encoder_->writeAudio(frame, video_time);
 		} while (frame != NULL);
 	}
 
 	// Read video data
-	frame = decoder_video_->retrieveVideo(real_time);
+	frame = decoder_video_->retrieveVideo(video_time);
 
 	if (frame == NULL)
 		goto done;
@@ -377,14 +382,16 @@ bool VideoRenderer::run(void) {
 	timecode = frame->timestamp();
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
-	// Compute video time
-	app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
+	// Update video real time 
+	//app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
+	app_.setTime(start_time + real_duration_ms_ / 1000);
 
 	if (gpx_) {
 		OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
 		// Read GPX data
-		gpx_->retrieveNext(data_, time_factor * timecode_ms);
+//		gpx_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
+		gpx_->retrieveNext(data_, (start_time * 1000) + real_duration_ms_);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
@@ -476,6 +483,10 @@ bool VideoRenderer::run(void) {
 		}
 	}
 
+	// Compute real time by step, since time_factor is variable
+	real_duration_ms = round(av_q2d(av_div_q(av_make_q(1000, 1), encoder_->settings().videoParams().frameRate())));
+	real_duration_ms_ += time_factor * real_duration_ms;
+
 	// Dump GPMF data
 	if (decoder_gpmf_)
 		gpmf_data_.dump();
@@ -484,11 +495,12 @@ bool VideoRenderer::run(void) {
 	if (gpx_ && app_.progressInfo())
 		data_.dump();
 
-	real_time = av_mul_q(av_make_q(timecode, 1), video_stream->timeBase());
+	video_time = av_mul_q(av_make_q(timecode, 1), video_stream->timeBase());
 
-	encoder_->writeFrame(frame, real_time);
+	encoder_->writeFrame(frame, video_time);
 
 	frame_time_++;
+
 
 	schedule();
 

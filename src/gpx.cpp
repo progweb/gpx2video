@@ -537,7 +537,7 @@ GPX::GPX(std::ifstream &stream, gpx::GPX *root, enum TelemetrySettings::Filter f
 	, offset_(0) 
 	, from_(0)
 	, to_(0)
-	, start_time_(0)
+//	, start_time_(0)
 	, start_activity_(0)
 	, filter_(filter) {
 }
@@ -666,27 +666,27 @@ skip:
 }
 
 
-void GPX::setStartTime(time_t start_time) {
-	start_time_ = start_time;
-}
-
-
-void GPX::setStartTime(struct tm *start_time) {
-	time_t t = timegm(start_time);
-
-	setStartTime(t);
-}
-
-
-void GPX::setStartTime(char *start_time) {
-	struct tm time;
-
-	memset(&time, 0, sizeof(time));
-
-	strptime(start_time, "%Y:%m:%d %H:%M:%S.", &time);
-
-	setStartTime(&time);
-}
+//void GPX::setStartTime(time_t start_time) {
+//	start_time_ = start_time;
+//}
+//
+//
+//void GPX::setStartTime(struct tm *start_time) {
+//	time_t t = timegm(start_time);
+//
+//	setStartTime(t);
+//}
+//
+//
+//void GPX::setStartTime(char *start_time) {
+//	struct tm time;
+//
+//	memset(&time, 0, sizeof(time));
+//
+//	strptime(start_time, "%Y:%m:%d %H:%M:%S.", &time);
+//
+//	setStartTime(&time);
+//}
 
 
 int64_t GPX::timeOffset(void) const {
@@ -726,8 +726,8 @@ enum GPX::Data GPX::retrieveFirst_i(GPXData &data) {
 			data.read(wpt); // Init previous & current point with first point
 			data.init();	// Init counter
 
-			if (start_time_ == 0)
-				setStartTime(data.time());			
+//			if (start_time_ == 0)
+//				setStartTime(data.time());			
 
 			return GPX::DataAgain;
 		}
@@ -773,7 +773,8 @@ enum GPX::Data GPX::retrieveFrom(GPXData &data) {
 	result = retrieveFirst(data);
 
 	if (from_ != 0) {
-		timecode_ms = (((int64_t) from_ - start_time_) * 1000); // - offset_;
+//		timecode_ms = (((int64_t) from_ - start_time_) * 1000); // - offset_;
+		timecode_ms = (((int64_t) from_) * 1000); // - offset_;
 
 		result = retrieveNext(data, timecode_ms);
 
@@ -787,7 +788,8 @@ enum GPX::Data GPX::retrieveFrom(GPXData &data) {
 enum GPX::Data GPX::retrieveNext_i(GPXData &data, int64_t timecode_ms) {
 	enum GPX::Data result = GPX::DataAgain;
 
-	int64_t timestamp = start_time_ + ((offset_ + timecode_ms) / 1000);
+//	int64_t timestamp = start_time_ + ((offset_ + timecode_ms) / 1000);
+	int64_t timestamp = (offset_ + timecode_ms) / 1000;
 
 	log_call();
 

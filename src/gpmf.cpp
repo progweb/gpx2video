@@ -59,6 +59,11 @@ bool GPMFDecoder::open(const std::string &filename, const int &index) {
 	// Get reference to correct AVStream
 	avstream_ = fmt_ctx_->streams[index];
 
+	// Get first packet
+	AVRational null = av_make_q(0, 1);
+
+	retrieveData(next_data_, null);
+
 	return true;
 }
 
@@ -104,6 +109,8 @@ void GPMFDecoder::close(void) {
 
 
 bool GPMFDecoder::retrieveData(GPMFData &data, AVRational timecode) {
+	bool eof;
+
 	GPMFData last;
 
 	uint64_t difftime;
@@ -114,41 +121,50 @@ bool GPMFDecoder::retrieveData(GPMFData &data, AVRational timecode) {
 	int64_t target_ts = stream_->getTimeInTimeBaseUnits(timecode);
 
 	// Retrieve packet data
-	packet = retrievePacketData(target_ts);
+	packet = retrievePacketData(target_ts, eof);
 
-	if (packet == NULL)
+	if (!eof && (packet == NULL))
 		return false;
 
-	// Save GPMF data
-	last = data;
+	// Return previous data
+	data = next_data_;
 
-	// Parse GPMF data
-	parseData(data, packet->data, packet->size);
+	if (packet == NULL)
+		goto done;
+
+	// Parse GPMF next data
+	parseData(next_data_, packet->data, packet->size);
 
 	// Add packet info
-	data.id = n_;
-	data.pts = packet->pts;
-	data.timecode = packet->pts * av_q2d(avstream_->time_base) * 1000;
+	next_data_.id = n_;
+	next_data_.pts = packet->pts;
+	next_data_.timecode = packet->pts * av_q2d(avstream_->time_base) * 1000;
 
-	difftime = data.timecode - last.timecode;
-	timeelapsed = data.timestamp - last.timestamp;
+	difftime = next_data_.timecode - data.timecode;
+	timeelapsed = next_data_.timestamp - data.timestamp;
 
 	// Compute timelapse value
-	data.timelapse = (difftime != 0) ? timeelapsed / (1000 * difftime) : 1;
-	
+	data.timelapse = (difftime != 0) ? (double) timeelapsed / (1000.0 * difftime) : 1.0;
+
+	// Assume the time factor is constant (will be computed the next call)
+	next_data_.timelapse = data.timelapse;
+
 	// We don't needd the packet anymore, so free it
 	av_packet_unref(packet);
 
+done:
 	return true;
 }
 
 
-AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts) {
+AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts, bool &eof) {
 	int result;
 
 	AVPacket *packet = NULL;
 
-	// Check if PTS is in the range [target_ts:target_ts + duration]
+	eof = false;
+
+	// Check PTS
 	if ((1000 * pts_) > target_ts)
 		return NULL;
 
@@ -164,6 +180,7 @@ AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts) {
 		}
 
 		if (result == AVERROR_EOF) {
+			eof = true;
 			goto abort;
 		}
 
@@ -171,7 +188,7 @@ AVPacket * GPMFDecoder::retrievePacketData(const int64_t& target_ts) {
 //		data = (uint8_t *) frame;
 
 		n_++;
-		pts_ = packet->pts + packet->duration;
+		pts_ = packet->pts;
 
 		break;
 	}
