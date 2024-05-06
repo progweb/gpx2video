@@ -28,7 +28,7 @@ private:
 
 	GPXData data_;
 
-	int timecode_ms_;
+	int64_t timecode_ms_;
 
 	std::ofstream out_;
 

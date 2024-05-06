@@ -488,7 +488,7 @@ bool VideoRenderer::run(void) {
 	real_duration_ms_ += time_factor * real_duration_ms;
 
 	// Dump GPMF data
-	if (decoder_gpmf_)
+	if (decoder_gpmf_ && app_.progressInfo())
 		gpmf_data_.dump();
 
 	// Dump GPX data
