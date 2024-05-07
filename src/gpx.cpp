@@ -956,6 +956,8 @@ enum GPX::Data GPX::retrieveData(GPXData &data) {
 	gpx::WPT *wpt;
 	gpx::TRKSeg *trkseg = (*iter_seg_);
 
+	time_t t;
+
 	std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
 	std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
 
@@ -964,27 +966,36 @@ enum GPX::Data GPX::retrieveData(GPXData &data) {
 	if (eof_)
 		goto done;
 
+	// Get current time
+	t = data.time(GPXData::PositionNext);
+
 	// Next point
-	iter_pts_++;
+	for (;;) {
+		iter_pts_++;
 
-	if (iter_pts_ == trkpts.end()) {
-		iter_seg_++;
+		if (iter_pts_ == trkpts.end()) {
+			iter_seg_++;
 
-		if (iter_seg_ == trksegs.end())
+			if (iter_seg_ == trksegs.end())
+				goto done;
+
+			trkseg = (*iter_seg_);
+
+			trkpts = trkseg->trkpts().list();
+			iter_pts_ = trkpts.begin();
+		}
+
+		if (iter_pts_ == trkpts.end())
 			goto done;
 
-		trkseg = (*iter_seg_);
+		wpt = (*iter_pts_);
 
-		trkpts = trkseg->trkpts().list();
-		iter_pts_ = trkpts.begin();
+		data.read(wpt);
+
+		// Skip WPT if no change time
+		if (t != data.time(GPXData::PositionNext))
+			break;
 	}
-
-	if (iter_pts_ == trkpts.end())
-		goto done;
-
-	wpt = (*iter_pts_);
-
-	data.read(wpt);
 
 	return GPX::DataAgain;
 
