@@ -4,7 +4,6 @@ FROM ${BASE_IMAGE}
 RUN apt-get update \
     && apt-get --yes --force-yes dist-upgrade \
     && apt-get install --yes --force-yes --no-install-recommends \
-        vim \
         procps \
         \
         build-essential \
@@ -22,7 +21,7 @@ RUN apt-get update \
         libswscale-dev \
         libopenexr-dev \
         libopenimageio-dev \
-        libgeographic-dev \
+        libgeographiclib-dev \
         libcairo2-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean all

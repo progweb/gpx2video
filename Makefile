@@ -36,7 +36,7 @@ build:
 	mkdir -p build
 	docker run --rm -it -v $(PWD):/app -w /app gpx2video:latest /bin/bash -c "cd build \
 		&& cmake .. \
-		&& make -j"
+		&& $(MAKE) -j"
 
 clean:
 	rm -rf ./build
