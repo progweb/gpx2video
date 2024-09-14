@@ -11,11 +11,11 @@
 #include <OpenImageIO/imagebuf.h>
 
 #include "log.h"
-#include "gpx.h"
-#include "gpx2video.h"
+#include "telemetrymedia.h"
+#include "application.h"
 
 
-class VideoWidget : public GPX2Video::Task {
+class VideoWidget : public GPXApplication::Task {
 public:
 	enum Position {
 		PositionNone = 0,
@@ -401,7 +401,7 @@ public:
 
 	virtual void initialize(void);
 	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0; 
-	virtual OIIO::ImageBuf * render(const GPXData &data, bool &is_update) = 0;
+	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
@@ -412,8 +412,8 @@ public:
 	static bool hex2color(float color[4], std::string html);
 
 protected:
-	VideoWidget(GPX2Video &app, std::string name)  
-		: GPX2Video::Task(app)
+	VideoWidget(GPXApplication &app, std::string name)  
+		: GPXApplication::Task(app)
 		, app_(app) 
 		, at_begin_time_(0)
 		, at_end_time_(0)
@@ -461,7 +461,7 @@ protected:
 		int &x1, int &y1, int &x2, int &y2,
 		int &width, int &height);
 
-	GPX2Video &app_;
+	GPXApplication &app_;
 	Position position_;
 	Align align_;
 	Unit unit_;

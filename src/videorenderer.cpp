@@ -10,8 +10,9 @@
 #include "videorenderer.h"
 
 
-VideoRenderer::VideoRenderer(GPX2Video &app)
-	: Renderer(app)
+VideoRenderer::VideoRenderer(GPXApplication &app, 
+		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
+	: Renderer(app, renderer_settings, telemetry_settings)
 	, started_at_(0) {
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
@@ -36,10 +37,12 @@ VideoRenderer::~VideoRenderer() {
 }
 
 
-VideoRenderer * VideoRenderer::create(GPX2Video &app) {
-	VideoRenderer *renderer = new VideoRenderer(app);
+VideoRenderer * VideoRenderer::create(GPXApplication &app, 
+		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings,
+		MediaContainer *container) {
+	VideoRenderer *renderer = new VideoRenderer(app, renderer_settings, telemetry_settings);
 
-	if (renderer->init() == false)
+	if (renderer->init(container) == false)
 		goto abort;
 
 	renderer->load();
@@ -54,11 +57,11 @@ abort:
 }
 
 
-bool VideoRenderer::init(void) {
-	Renderer::init();
+bool VideoRenderer::init(MediaContainer *container) {
+	Renderer::init(container);
 
 	// Codec
-	ExportCodec::Codec video_codec = app_.settings().videoCodec();
+	ExportCodec::Codec video_codec = rendererSettings().videoCodec();
 
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
@@ -95,52 +98,52 @@ bool VideoRenderer::init(void) {
 	}
 
 	// Encoder settings
-	EncoderSettings settings;
-	settings.setFilename(app_.settings().outputfile());
-	settings.setVideoParams(video_params, video_codec);
-	settings.setVideoHardwareDevice(app_.settings().videoHardwareDevice());
+	EncoderSettings encoderSettings;
+	encoderSettings.setFilename(app_.settings().outputfile());
+	encoderSettings.setVideoParams(video_params, video_codec);
+	encoderSettings.setVideoHardwareDevice(rendererSettings().videoHardwareDevice());
 
 	switch (video_codec) {
 	case ExportCodec::CodecH264:
 	case ExportCodec::CodecHEVC:
-		if (app_.settings().videoCRF() != -1) {
+		if (rendererSettings().videoCRF() != -1) {
 			// Set crf value
-			settings.setVideoOption("crf", std::to_string(app_.settings().videoCRF()));
+			encoderSettings.setVideoOption("crf", std::to_string(rendererSettings().videoCRF()));
 		}
 		else {
 			// Disable crf as target bitrate compression method is used
-			settings.setVideoOption("crf", "-1");
+			encoderSettings.setVideoOption("crf", "-1");
 
 			// Set target bitrate
-			settings.setVideoBitrate(app_.settings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
-			settings.setVideoMinBitrate(app_.settings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
-			settings.setVideoMaxBitrate(app_.settings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32
-			settings.setVideoBufferSize(4 * 1000 * 1000 / 2);
+			encoderSettings.setVideoBitrate(rendererSettings().videoBitrate()); // 2 * 1000 * 1000 * 8 // 16
+			encoderSettings.setVideoMinBitrate(rendererSettings().videoMinBitrate()); // 0 // 8 * 1000 * 1000
+			encoderSettings.setVideoMaxBitrate(rendererSettings().videoMaxBitrate()); // 2 * 1000 * 1000 * 16 // 32
+			encoderSettings.setVideoBufferSize(4 * 1000 * 1000 / 2);
 		}
 
 		// Preset: ultrafast, fast, medium...
-		if (!app_.settings().videoPreset().empty())
-			settings.setVideoOption("preset", app_.settings().videoPreset());
+		if (!rendererSettings().videoPreset().empty())
+			encoderSettings.setVideoOption("preset", rendererSettings().videoPreset());
 
 		break;
 
 	case ExportCodec::CodecNVEncH264:
 	case ExportCodec::CodecNVEncHEVC:
-		settings.setVideoOption("rc", "vbr");
-		settings.setVideoOption("cq", "19");
-		settings.setVideoOption("profile", "main");
-		settings.setVideoOption("level", "auto");
+		encoderSettings.setVideoOption("rc", "vbr");
+		encoderSettings.setVideoOption("cq", "19");
+		encoderSettings.setVideoOption("profile", "main");
+		encoderSettings.setVideoOption("level", "auto");
 
 		// Preset: ultrafast, fast, medium...
-		if (!app_.settings().videoPreset().empty())
-			settings.setVideoOption("preset", app_.settings().videoPreset());
+		if (!rendererSettings().videoPreset().empty())
+			encoderSettings.setVideoOption("preset", rendererSettings().videoPreset());
 		break;
 
 	case ExportCodec::CodecQSVH264:
 	case ExportCodec::CodecQSVHEVC:
 		// Preset: ultrafast, fast, medium...
-		if (!app_.settings().videoPreset().empty())
-			settings.setVideoOption("preset", app_.settings().videoPreset());
+		if (!rendererSettings().videoPreset().empty())
+			encoderSettings.setVideoOption("preset", rendererSettings().videoPreset());
 
 		break;
 
@@ -153,8 +156,8 @@ bool VideoRenderer::init(void) {
 			audio_stream->channelLayout(),
 			audio_stream->format());
 
-		settings.setAudioParams(audio_params, ExportCodec::CodecAAC);
-		settings.setAudioBitrate(44 * 1000);
+		encoderSettings.setAudioParams(audio_params, ExportCodec::CodecAAC);
+		encoderSettings.setAudioBitrate(44 * 1000);
 	}
 
 	// Compute layout size from width & height and DAR
@@ -202,7 +205,7 @@ bool VideoRenderer::init(void) {
 	}
 
 	// Open & encode output video
-	encoder_ = Encoder::create(settings);
+	encoder_ = Encoder::create(encoderSettings);
 	return encoder_->open();
 }
 
@@ -342,7 +345,7 @@ bool VideoRenderer::run(void) {
 	VideoStreamPtr video_stream = container_->getVideoStream();
 //	AudioStreamPtr audio_stream = container_->getAudioStream();
 
-	time_factor = app_.settings().timeFactor();
+	time_factor = rendererSettings().timeFactor();
 
 	start_time = container_->startTime() + container_->timeOffset();
 
@@ -356,7 +359,7 @@ bool VideoRenderer::run(void) {
 	if (decoder_gpmf_) {
 		decoder_gpmf_->retrieveData(gpmf_data_, video_time);
 
-		if (app_.settings().isTimeFactorAuto())
+		if (rendererSettings().isTimeFactorAuto())
 			time_factor = gpmf_data_.timelapse;
 	}
 	
@@ -383,15 +386,14 @@ bool VideoRenderer::run(void) {
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
 	// Update video real time 
-	//app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
 	app_.setTime(start_time + real_duration_ms_ / 1000);
 
-	if (gpx_) {
+	if (source_) {
 		OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
 		// Read GPX data
-//		gpx_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
-		gpx_->retrieveNext(data_, (start_time * 1000) + real_duration_ms_);
+//		source_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
+		source_->retrieveNext(data_, (start_time * 1000) + real_duration_ms_);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
@@ -491,8 +493,8 @@ bool VideoRenderer::run(void) {
 	if (decoder_gpmf_ && app_.progressInfo())
 		gpmf_data_.dump();
 
-	// Dump GPX data
-	if (gpx_ && app_.progressInfo())
+	// Dump telemetry data
+	if (source_ && app_.progressInfo())
 		data_.dump();
 
 	video_time = av_mul_q(av_make_q(timecode, 1), video_stream->timeBase());

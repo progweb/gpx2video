@@ -3,7 +3,7 @@
 #include "cache.h"
 
 
-Cache::Cache(GPX2Video &app) 
+Cache::Cache(GPXApplication &app) 
 	: Task(app) 
 	, app_(app) {
 }
@@ -13,7 +13,7 @@ Cache::~Cache() {
 }
 
 
-Cache * Cache::create(GPX2Video &app) {
+Cache * Cache::create(GPXApplication &app) {
 	Cache *cache = new Cache(app);
 
 	cache->init();
@@ -36,7 +36,7 @@ bool Cache::run(void) {
 
 	log_notice("Cache initialization...");
 
-	if (app_.command() != GPX2Video::CommandClear)
+	if (app_.command() != GPXApplication::CommandClear)
 		goto done;
 
 	rmpath(path_);

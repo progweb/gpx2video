@@ -12,7 +12,7 @@ extern "C" {
 
 
 
-TimeSync::TimeSync(GPX2Video &app, const ExtractorSettings &settings) 
+TimeSync::TimeSync(GPXApplication &app, const ExtractorSettings &settings) 
 	: Extractor(app, settings) {
 }
 
@@ -21,13 +21,13 @@ TimeSync::~TimeSync() {
 }
 
 
-TimeSync * TimeSync::create(GPX2Video &app) {
+TimeSync * TimeSync::create(GPXApplication &app, MediaContainer *container) {
 	ExtractorSettings extractorSettings;
 	extractorSettings.setFormat(ExtractorSettings::FormatNone);
 
 	TimeSync *timesync = new TimeSync(app, extractorSettings);
 
-	timesync->init();
+	timesync->init(container);
 
 	return timesync;
 }

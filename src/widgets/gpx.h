@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static GPXWidget * create(GPX2Video &app) {
+	static GPXWidget * create(GPXApplication &app) {
 		GPXWidget *widget;
 
 		log_call();
@@ -43,7 +43,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		struct tm time;
@@ -69,10 +69,8 @@ skip:
 		//        h = n * px + padding_top + padding_bottom
 		int px = (h - padding_yt - padding_yb) / 6;
 
-		struct GPXData::point position = data.position(GPXData::PositionPrevious);
-
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = true;
 			goto skip;
 		}
@@ -89,23 +87,23 @@ skip:
 
 		// time
 		offset += px;
-		gmtime_r(&data.time(GPXData::PositionPrevious), &time);
+		gmtime_r(&data.time(), &time);
 		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
 		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// latitude
 		offset += px;
-		sprintf(s, "lat: %.4f", position.lat);
+		sprintf(s, "lat: %.4f", data.latitude());
 		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// longitude
 		offset += px;
-		sprintf(s, "lon: %.4f", position.lon);
+		sprintf(s, "lon: %.4f", data.longitude());
 		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// elevation
 		offset += px;
-		sprintf(s, "ele: %.4f", data.elevation(GPXData::PositionPrevious));
+		sprintf(s, "ele: %.4f", data.elevation());
 		this->drawText(fg_buf_, 0, offset, px, s);
 
 		// line
@@ -122,7 +120,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	GPXWidget(GPX2Video &app, std::string name)
+	GPXWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

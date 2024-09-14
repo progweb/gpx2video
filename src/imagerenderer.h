@@ -8,7 +8,9 @@ class ImageRenderer : public Renderer {
 public:
 	virtual ~ImageRenderer();
 
-	static ImageRenderer * create(GPX2Video &app); //, Map *map=NULL);
+	static ImageRenderer * create(GPXApplication &app, 
+			RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings,
+			MediaContainer *container); //, Map *map=NULL);
 
 	bool start(void);
 	bool run(void);
@@ -22,9 +24,10 @@ protected:
 
 	time_t started_at_;
 
-	ImageRenderer(GPX2Video &app); //, Map *map);
+	ImageRenderer(GPXApplication &app, 
+			RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings); //, Map *map);
 
-	bool init(void);
+	bool init(MediaContainer *container);
 };
 
 #endif

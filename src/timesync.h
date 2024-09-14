@@ -6,14 +6,14 @@
 
 #include "media.h"
 #include "decoder.h"
-#include "gpx2video.h"
+#include "application.h"
 #include "extractorsettings.h"
 #include "extractor.h"
 
 
 class TimeSync : public Extractor {
 public:
-	static TimeSync * create(GPX2Video &app);
+	static TimeSync * create(GPXApplication &app, MediaContainer *container);
 
 	virtual ~TimeSync();
 
@@ -22,7 +22,7 @@ public:
 	bool stop(void);
 
 private:
-	TimeSync(GPX2Video &app, const ExtractorSettings &settings);
+	TimeSync(GPXApplication &app, const ExtractorSettings &settings);
 
 	bool ok_;
 

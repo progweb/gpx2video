@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static TemperatureWidget * create(GPX2Video &app) {
+	static TemperatureWidget * create(GPXApplication &app) {
 		TemperatureWidget *widget;
 
 		log_call();
@@ -49,13 +49,13 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		double temperature = data.temperature();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
@@ -67,7 +67,7 @@ skip:
 			temperature = (temperature * 9/5) + 32;
 		}
 
-		if (data.hasValue(GPXData::DataTemperature))
+		if (data.hasValue(TelemetryData::DataTemperature))
 			sprintf(s, "%.0f %s", temperature, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
@@ -88,7 +88,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	TemperatureWidget(GPX2Video &app, std::string name)
+	TemperatureWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

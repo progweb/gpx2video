@@ -10,8 +10,9 @@
 #include "imagerenderer.h"
 
 
-ImageRenderer::ImageRenderer(GPX2Video &app)
-	: Renderer(app)
+ImageRenderer::ImageRenderer(GPXApplication &app, 
+		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
+	: Renderer(app, renderer_settings, telemetry_settings)
 	, timecode_(0)
 	, started_at_(0) {
 }
@@ -21,10 +22,12 @@ ImageRenderer::~ImageRenderer() {
 }
 
 
-ImageRenderer * ImageRenderer::create(GPX2Video &app) {
-	ImageRenderer *renderer = new ImageRenderer(app);
+ImageRenderer * ImageRenderer::create(GPXApplication &app, 
+		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings,
+		MediaContainer *container) {
+	ImageRenderer *renderer = new ImageRenderer(app, renderer_settings, telemetry_settings);
 
-	renderer->init();
+	renderer->init(container);
 	renderer->load();
 	renderer->computeWidgetsPosition();
 
@@ -32,8 +35,8 @@ ImageRenderer * ImageRenderer::create(GPX2Video &app) {
 }
 
 
-bool ImageRenderer::init(void) {
-	Renderer::init();
+bool ImageRenderer::init(MediaContainer *container) {
+	Renderer::init(container);
 
 	// Retrieve video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
@@ -62,13 +65,13 @@ bool ImageRenderer::init(void) {
 
 	// Hack - if maxDuration == -1, render whole gpx
 	if (app_.settings().maxDuration() == (unsigned int) -1) {
-		gpx_->retrieveLast(data_);
+		source_->retrieveLast(data_);
 
-		duration_ms_ = data_.time(GPXData::PositionCurrent) * 1000;
+		duration_ms_ = data_.time() * 1000;
 
-		gpx_->retrieveFirst(data_);
+		source_->retrieveFirst(data_);
 
-		duration_ms_ -= data_.time(GPXData::PositionCurrent) * 1000;
+		duration_ms_ -= data_.time() * 1000;
 	}
 	// If maxDuration set by the user
 	else if (app_.settings().maxDuration() > 0) 
@@ -149,7 +152,7 @@ bool ImageRenderer::run(void) {
 
 	double time_factor;
 
-	enum GPX::Data type;
+	enum TelemetrySource::Data type;
 
 	bool is_update = false;
 
@@ -159,7 +162,7 @@ bool ImageRenderer::run(void) {
 	OIIO::ImageBuf image_buffer(overlay_->spec()); 
 
 	// Compute start time
-	time_factor = app_.settings().timeFactor();
+	time_factor = rendererSettings().timeFactor();
 
 	start_time = container_->startTime() + container_->timeOffset();
 
@@ -200,14 +203,14 @@ bool ImageRenderer::run(void) {
 	// Compute video time
 	app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
 
-	if (gpx_) {
+	if (source_) {
 		// Save image
 		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 
 		// Read GPX data
-		type = gpx_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
+		type = source_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
 
-		if (type == GPX::DataEof)
+		if (type == TelemetrySource::DataEof)
 			goto done;
 
 		// Draw overlay
@@ -296,8 +299,8 @@ error:
 		}
 	}
 
-	// Dump GPX data
-	if (gpx_ && app_.progressInfo())
+	// Dump telemetry data
+	if (source_ && app_.progressInfo())
 		data_.dump();
 
 	timecode_++;

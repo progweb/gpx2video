@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static DateWidget * create(GPX2Video &app) {
+	static DateWidget * create(GPXApplication &app) {
 		DateWidget *widget;
 
 		log_call();
@@ -50,7 +50,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		struct tm time;
@@ -58,7 +58,7 @@ skip:
 		(void) data;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
@@ -86,7 +86,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	DateWidget(GPX2Video &app, std::string name)
+	DateWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

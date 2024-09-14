@@ -19,9 +19,9 @@
 #include "utils.h"
 #include "log.h"
 #include "evcurl.h"
-#include "gpx.h"
 #include "oiioutils.h"
 #include "videoparams.h"
+#include "telemetrymedia.h"
 #include "map.h"
 
 
@@ -264,7 +264,7 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 
-Map::Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase)
+Map::Map(GPXApplication &app, const MapSettings &settings, struct event_base *evbase)
 	: Track(app, settings, evbase)
 	, settings_(settings)
 	, nbr_downloads_(0) {
@@ -303,7 +303,7 @@ const MapSettings& Map::settings() const {
 }
 
 
-Map * Map::create(GPX2Video &app, const MapSettings &settings) {
+Map * Map::create(GPXApplication &app, const MapSettings &settings) {
 	Map *map;
 
 	log_call();
@@ -513,7 +513,7 @@ void Map::build(void) {
 	log_notice("Build map...");
 
 	// Filename is output if user builds map/track
-	if (app_.command() == GPX2Video::CommandMap) {
+	if (app_.command() == GPXApplication::CommandMap) {
 		filename_ = app_.settings().outputfile();
 	}
 	else {
@@ -578,7 +578,7 @@ void Map::build(void) {
 	out->close();
 
 	// User requests track draw
-	if (app_.command() == GPX2Video::CommandTrack)
+	if (app_.command() == GPXApplication::CommandTrack)
 		draw();
 
 error:
@@ -595,7 +595,7 @@ void Map::draw(void) {
 	log_call();
 
 	// Filename is output if user builds map/track
-	if (app_.command() == GPX2Video::CommandTrack) {
+	if (app_.command() == GPXApplication::CommandTrack) {
 		filename = app_.settings().outputfile();
 	}
 
@@ -641,9 +641,7 @@ bool Map::load(void) {
 
 	double divider = divider_; //settings().divider();
 
-	std::string filename = app_.settings().gpxfile();
-
-	GPXData wpt;
+	std::string filename = app_.settings().inputfile();
 
 	log_call();
 
@@ -690,7 +688,7 @@ skip:
 }
 
 
-OIIO::ImageBuf * Map::render(const GPXData &data, bool &is_update) {
+OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int x = 0; //this->x();
 	int y = 0; //this->y();
 	int width = settings().width();
@@ -712,7 +710,7 @@ OIIO::ImageBuf * Map::render(const GPXData &data, bool &is_update) {
 	}
 
 	// Refresh dynamic info
-	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+	if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 		is_update = false;
 		goto skip;
 	}
@@ -724,8 +722,8 @@ OIIO::ImageBuf * Map::render(const GPXData &data, bool &is_update) {
 	height -= 2 * border;
 
 	// Center map on current position
-	posX = floorf((float) Map::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-	posY = floorf((float) Map::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+	posX = floorf((float) Map::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
+	posY = floorf((float) Map::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
 
 	posX *= divider;
 	posY *= divider;
@@ -766,7 +764,7 @@ OIIO::ImageBuf * Map::render(const GPXData &data, bool &is_update) {
 		drawPicto(*fg_buf_, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
 		drawPicto(*fg_buf_, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
-		if (data.valid())
+		if (data.hasValue(TelemetryData::DataFix))
 			drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
 	

@@ -16,7 +16,7 @@ endif()
 # CONFIGURATION
 #
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g -ggdb -fPIC -rdynamic")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -ggdb -fPIC -fpermissive -rdynamic")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -g -ggdb -fPIC -fpermissive -rdynamic")
 
 add_definitions(-Wall -Wextra -D_GNU_SOURCE)
 
@@ -109,7 +109,6 @@ set(GPX2VIDEO_SOURCES
 	src/evcurl.c
 	src/evcurl++.cpp
 	src/kalman.c
-	src/gpx.cpp
 	src/oiio.cpp
 	src/oiioutils.cpp
 	src/ffmpegutils.cpp
@@ -120,7 +119,9 @@ set(GPX2VIDEO_SOURCES
 	src/gpmf.cpp
 	src/extractor.cpp
 	src/telemetry.cpp
-	src/gpx2video.cpp
+	src/telemetrymedia.cpp
+	src/application.cpp
+	tools/gpx2video.cpp
 	src/map.cpp
 	src/track.cpp
 	src/cache.cpp
@@ -133,7 +134,6 @@ set(GPX2VIDEO_SOURCES
 	src/imagerenderer.cpp
 	src/videorenderer.cpp
 	src/timesync.cpp
-	src/main.cpp
 	src/utils.cpp
 
  	utmconvert/utmconvert.cpp
@@ -155,20 +155,16 @@ set(GPX2VIDEO_SOURCES
 #
 
 #
-# BINARIES
-# 
-add_executable(gpx2video ${GPX2VIDEO_SOURCES})
-target_link_libraries(gpx2video gpxlib layoutlib ${LIBEVENT_LIBRARIES} ${LIBCURL_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBGEOGRAPHIC_LIBRARIES} ${LIBCAIRO_LIBRARIES} ${LIBFREETYPE_LIBRARIES} ssl crypto)
-
+# LIBRARIES
 #
-# INSTALL
-#
-install(TARGETS gpx2video DESTINATION bin)
+add_library(gpxcore ${GPX2VIDEO_SOURCES})
+target_link_libraries(gpxcore gpxlib layoutlib ${LIBEVENT_LIBRARIES} ${LIBCURL_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBGEOGRAPHIC_LIBRARIES} ${LIBCAIRO_LIBRARIES} ${LIBFREETYPE_LIBRARIES} ssl crypto)
 
 #
 # SUB DIRECTORIES
 #
 add_subdirectory(gpxlib)
 add_subdirectory(layoutlib)
+add_subdirectory(tools)
 #add_subdirectory(tests)
 

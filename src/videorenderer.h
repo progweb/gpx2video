@@ -9,7 +9,9 @@ class VideoRenderer : public Renderer {
 public:
 	virtual ~VideoRenderer();
 
-	static VideoRenderer * create(GPX2Video &app); //, Map *map=NULL);
+	static VideoRenderer * create(GPXApplication &app, 
+			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings, 
+			MediaContainer *container); //, Map *map=NULL);
 
 	bool start(void);
 	bool run(void);
@@ -31,9 +33,10 @@ protected:
 
 	GPMFData gpmf_data_;
 
-	VideoRenderer(GPX2Video &app); //, Map *map);
+	VideoRenderer(GPXApplication &app, 
+			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings); //, Map *map);
 
-	bool init(void);
+	bool init(MediaContainer *container);
 	void computeWidgetsPosition(void);
 };
 

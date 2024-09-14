@@ -58,7 +58,7 @@ const std::string ExtractorSettings::getFriendlyName(const ExtractorSettings::Fo
 // Extractor API
 //---------------
 
-Extractor::Extractor(GPX2Video &app, const ExtractorSettings &settings) 
+Extractor::Extractor(GPXApplication &app, const ExtractorSettings &settings) 
 	: Task(app) 
 	, app_(app) 
 	, settings_(settings) {
@@ -80,20 +80,20 @@ const ExtractorSettings& Extractor::settings() const {
 }
 
 
-Extractor * Extractor::create(GPX2Video &app, const ExtractorSettings &settings) {
+Extractor * Extractor::create(GPXApplication &app, const ExtractorSettings &settings,
+		MediaContainer *container) {
 	Extractor *extractor = new Extractor(app, settings);
 
-	extractor->init();
+	extractor->init(container);
 
 	return extractor;
 }
 
 
-void Extractor::init(void) {
+void Extractor::init(MediaContainer *container) {
 	log_call();
 
-	// Media
-	container_ = app_.media();
+	container_ = container;
 }
 
 
@@ -203,7 +203,8 @@ bool Extractor::run(void) {
 	}
 	else {
 		// Append MP4 stream info
-		out_ << "PACKET: " << n_ << " - PTS: " << timecode << " TIMESTAMP: " << timecode_ms << " ms" << std::endl;
+		if (settings().format() == ExtractorSettings::FormatDump)
+			out_ << "PACKET: " << n_ << " - PTS: " << timecode << " TIMESTAMP: " << timecode_ms << " ms" << std::endl;
 
 		// Parsing stream packet
 		parse(gpmd, packet->data, packet->size, out_); //(settings().format() == ExtractorSettings::FormatDump));
@@ -388,8 +389,9 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		if (key == STR2FOURCC("STRM")) {
 			if (nstream > 1) {
 				IndentingOStreambuf indent(out, 4 * (nstream - 1));
-
-				out << "]" << std::endl;
+ 
+				if (dump)
+					out << "]" << std::endl;
 			}
 
 			nstream = 1;
@@ -569,7 +571,8 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 	if (nstream > 1) {
 		IndentingOStreambuf indent(out, 4 * (nstream - 1));
 
-		out << "]" << std::endl;
+		if (dump)
+			out << "]" << std::endl;
 	}
 }
 

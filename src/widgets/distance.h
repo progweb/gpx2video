@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static DistanceWidget * create(GPX2Video &app) {
+	static DistanceWidget * create(GPXApplication &app) {
 		DistanceWidget *widget;
 
 		log_call();
@@ -49,12 +49,12 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 		double distance = data.distance();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
@@ -73,7 +73,7 @@ skip:
 			distance *= 0.6213711922;
 		}
 
-		if (data.hasValue(GPXData::DataFix)) {
+		if (data.hasValue(TelemetryData::DataFix)) {
 			const char *format;
 
 			if (distance < 10)
@@ -104,7 +104,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	DistanceWidget(GPX2Video &app, std::string name)
+	DistanceWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

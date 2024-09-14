@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static PositionWidget * create(GPX2Video &app) {
+	static PositionWidget * create(GPXApplication &app) {
 		PositionWidget *widget;
 
 		log_call();
@@ -47,19 +47,18 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
-		struct GPXData::point pt = data.position();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
 
 		// Format data
-		if (data.hasValue(GPXData::DataFix))
-			sprintf(s, "%.4f, %.4f", pt.lat, pt.lon);
+		if (data.hasValue(TelemetryData::DataFix))
+			sprintf(s, "%.4f, %.4f", data.latitude(), data.longitude());
 		else
 			sprintf(s, "--, --");
 
@@ -79,7 +78,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	PositionWidget(GPX2Video &app, std::string name)
+	PositionWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

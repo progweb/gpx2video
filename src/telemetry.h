@@ -6,36 +6,43 @@
 #include <string>
 #include <vector>
 
-#include "gpx.h"
-#include "gpx2video.h"
+#include "application.h"
 #include "telemetrysettings.h"
+#include "telemetrymedia.h"
 
 
-class Telemetry : public GPX2Video::Task {
+class Telemetry : public GPXApplication::Task {
 public:
 	virtual ~Telemetry();
 
-	static Telemetry * create(GPX2Video &app);
+	static Telemetry * create(GPXApplication &app, TelemetrySettings &settings);
+
+	const TelemetrySettings& settings(void) {
+		return settings_;
+	}
 
 	bool start(void);
 	bool run(void);
 	bool stop(void);
 
-	enum GPX::Data get(GPXData &data, int64_t timecode_ms);
+	enum TelemetrySource::Data get(TelemetryData &data, int64_t timecode_ms);
 
-private:
-	GPX *gpx_;
+protected:
+	GPXApplication &app_;
 
-	GPXData data_;
+	TelemetrySettings &settings_;
+
+	TelemetrySettings::Format output_format_;
+
+	TelemetrySource *source_;
+
+	TelemetryData data_;
 
 	int64_t timecode_ms_;
 
 	std::ofstream out_;
 
-protected:
-	GPX2Video &app_;
-
-	Telemetry(GPX2Video &app);
+	Telemetry(GPXApplication &app, TelemetrySettings &settings);
 
 	void init(void);
 };

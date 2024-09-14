@@ -16,11 +16,11 @@
 
 #include "log.h"
 #include "evcurl.h"
-#include "gpx.h"
 #include "track.h"
 #include "mapsettings.h"
 #include "videowidget.h"
-#include "gpx2video.h"
+#include "telemetrymedia.h"
+#include "application.h"
 
 
 class Map : public Track {
@@ -63,7 +63,7 @@ public:
 
 	virtual ~Map();
 
-	static Map * create(GPX2Video &app, const MapSettings& settings);
+	static Map * create(GPXApplication &app, const MapSettings& settings);
 
 	const MapSettings& settings() const;
 
@@ -84,7 +84,7 @@ public:
 
 	// Render map
 	OIIO::ImageBuf * prepare(bool &is_update);
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
 
 	static void downloadProgress(Tile &tile, curl_off_t dltotal, curl_off_t dlnow);
 	static void downloadComplete(Tile &tile);
@@ -107,7 +107,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Map(GPX2Video &app, const MapSettings &settings, struct event_base *evbase);
+	Map(GPXApplication &app, const MapSettings &settings, struct event_base *evbase);
 
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);

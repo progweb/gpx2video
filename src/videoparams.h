@@ -94,9 +94,9 @@ private:
 
 	AVRational time_base_;
 	AVRational frame_rate_;
+	int orientation_;
 	Format format_;
 	int nb_channels_;
-	int orientation_;
 	AVPixelFormat pixel_format_;
 	AVRational pixel_aspect_ratio_;
 	Interlacing interlacing_;

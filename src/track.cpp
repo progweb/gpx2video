@@ -18,9 +18,9 @@
 
 #include "utils.h"
 #include "log.h"
-#include "gpx.h"
 #include "oiioutils.h"
 #include "videoparams.h"
+#include "telemetrymedia.h"
 #include "track.h"
 
 
@@ -112,7 +112,7 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 }
 
 
-Track::Track(GPX2Video &app, const TrackSettings &settings, struct event_base *evbase)
+Track::Track(GPXApplication &app, const TrackSettings &settings, struct event_base *evbase)
 	: VideoWidget(app, "map")
 	, app_(app)
 	, settings_(settings)
@@ -149,7 +149,7 @@ const TrackSettings& Track::settings() const {
 }
 
 
-Track * Track::create(GPX2Video &app, const TrackSettings &settings) {
+Track * Track::create(GPXApplication &app, const TrackSettings &settings) {
 	Track *track;
 
 	log_call();
@@ -289,7 +289,7 @@ void Track::init(bool zoomfit) {
 }
 
 
-void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
+void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider) {
 	int zoom;
 	int stride;
 	double path_thick;
@@ -298,9 +298,9 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 
 	int x = 0, y = 0;
 
-	GPXData wpt;
+	TelemetryData wpt;
 
-	enum GPX::Data result;
+	enum TelemetrySource::Data result;
 
 	log_call();
 
@@ -324,10 +324,9 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		// Draw each WPT
-		//for (result = gpx->retrieveFirst(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
-		for (result = gpx->retrieveFrom(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
-			x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-			y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		for (result = source->retrieveFrom(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
 			x *= divider;
 			y *= divider;
@@ -345,10 +344,9 @@ void Track::path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider) {
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT
-	//for (result = gpx->retrieveFirst(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
-	for (result = gpx->retrieveFrom(wpt); result != GPX::DataEof; result = gpx->retrieveNext(wpt)) {
-		x = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+	for (result = source->retrieveFrom(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
 		x *= divider;
 		y *= divider;
@@ -387,9 +385,9 @@ bool Track::load(void) {
 
 	int zoom = settings().zoom();
 
-	std::string filename = app_.settings().gpxfile();
+	std::string filename = app_.settings().inputfile();
 
-	GPXData wpt;
+	TelemetryData wpt;
 
 	log_call();
 
@@ -400,41 +398,41 @@ bool Track::load(void) {
 	// Create track buffer
 	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
-	GPX *gpx = GPX::open(filename);
+	TelemetrySource *source = TelemetryMedia::open(filename);
 
-	if (gpx != NULL) {
-		// GPX limits
-		gpx->setFrom(app_.settings().gpxFrom());
-		gpx->setTo(app_.settings().gpxTo());
+	if (source != NULL) {
+		// Telemetry data limits
+		source->setFrom(app_.settings().from());
+		source->setTo(app_.settings().to());
 		//gpx->setTimeOffset(app_.settings().offset());
 
 		// Draw path
-		path(*trackbuf_, gpx, divider_);
+		path(*trackbuf_, source, divider_);
 
 		// Compute begin
-		gpx->retrieveFrom(wpt);
+		source->retrieveFrom(wpt);
 
-		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
 		x_start_ *= divider_;
 		y_start_ *= divider_;
 
 		// Compute end
-		gpx->retrieveLast(wpt);
+		source->retrieveLast(wpt);
 
-		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.position().lon)) - (x1_ * TILESIZE);
-		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.position().lat)) - (y1_ * TILESIZE);
+		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
 		x_end_ *= divider_;
 		y_end_ *= divider_;
 	}
 	else {
-		log_warn("Can't open '%s' GPX data file", filename.c_str());
+		log_warn("Can't open '%s' telemetry data file", filename.c_str());
 	}
 
-	if (gpx != NULL)
-		delete gpx;
+	if (source != NULL)
+		delete source;
 
 	return (trackbuf_ != NULL);
 }
@@ -460,7 +458,7 @@ skip:
 }
 
 
-OIIO::ImageBuf * Track::render(const GPXData &data, bool &is_update) {
+OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int x = 0; //this->x();
 	int y = 0; //this->y();
 	int w, width = settings().width();
@@ -479,14 +477,14 @@ OIIO::ImageBuf * Track::render(const GPXData &data, bool &is_update) {
 	}
 
 	// Refresh dynamic info
-	if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+	if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 		is_update = false;
 		goto skip;
 	}
 
 	// Current position
-	posX = floorf((float) Track::lon2pixel(zoom, data.position().lon)) - (x1_ * TILESIZE);
-	posY = floorf((float) Track::lat2pixel(zoom, data.position().lat)) - (y1_ * TILESIZE);
+	posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
+	posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
 
 	posX *= divider_;
 	posY *= divider_;

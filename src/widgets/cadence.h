@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static CadenceWidget * create(GPX2Video &app) {
+	static CadenceWidget * create(GPXApplication &app) {
 		CadenceWidget *widget;
 
 		log_call();
@@ -47,17 +47,17 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
 
 		// Format data
-		if (data.hasValue(GPXData::DataCadence))
+		if (data.hasValue(TelemetryData::DataCadence))
 			sprintf(s, "%d tr/min", data.cadence());
 		else
 			sprintf(s, "-- tr/min");
@@ -78,7 +78,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	CadenceWidget(GPX2Video &app, std::string name)
+	CadenceWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

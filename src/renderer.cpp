@@ -35,9 +35,12 @@
 #include "renderer.h"
 
 
-Renderer::Renderer(GPX2Video &app)
+Renderer::Renderer(GPXApplication &app, 
+		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
 	: Task(app) 
-	, app_(app) {
+	, app_(app)
+	, renderer_settings_(renderer_settings) 
+	, telemetry_settings_(telemetry_settings) {
 	container_ = NULL;
 
 	overlay_ = NULL;
@@ -48,34 +51,34 @@ Renderer::~Renderer() {
 }
 
 
-bool Renderer::init(void) {
+bool Renderer::init(MediaContainer *container) {
 //	time_t start_time;
 
-	TelemetrySettings::Filter telemetry_filter = app_.settings().telemetryFilter();
+	TelemetrySettings::Method telemetry_method = telemetrySettings().telemetryMethod();
 
 	log_call();
 
-	if (telemetry_filter == TelemetrySettings::FilterNone)
-		telemetry_filter = TelemetrySettings::FilterSample;
+	if (telemetry_method == TelemetrySettings::MethodNone)
+		telemetry_method = TelemetrySettings::MethodSample;
 
-	gpx_ = GPX::open(app_.settings().gpxfile(), telemetry_filter);
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetry_method);
 
 	// Media
-	container_ = app_.media();
+	container_ = container;
 
 //	// Set start time in GPX stream
 //	start_time = container_->startTime() + container_->timeOffset();
 
-	// GPX initialization
-	if (gpx_) {
-		// GPX limits
-		gpx_->setFrom(app_.settings().gpxFrom());
-		gpx_->setTo(app_.settings().gpxTo());
+	// Telemetry data initialization
+	if (source_) {
+		// Telemetry data limits
+		source_->setFrom(app_.settings().from());
+		source_->setTo(app_.settings().to());
 
-		// GPX time fixing
-//		gpx_->setStartTime(start_time);
-		gpx_->setTimeOffset(app_.settings().offset());
-		gpx_->retrieveFirst(data_);
+		// Telemetry data time fixing
+//		source_->setStartTime(start_time);
+		source_->setTimeOffset(app_.settings().offset());
+		source_->retrieveFirst(data_);
 	}
 
 	return true;
@@ -95,7 +98,7 @@ bool Renderer::load(void) {
 	std::list<layout::Track *> tracks;
 	std::list<layout::Widget *> widgets;
 
-	std::string filename = app_.settings().layoutfile();
+	std::string filename = rendererSettings().layoutfile();
 
 	log_call();
 
@@ -178,22 +181,23 @@ bool Renderer::loadMap(layout::Map *m) {
 		return false;
 	}
 
-	// Open GPX file
-	GPX *gpx = GPX::open(app_.settings().gpxfile());
+	// Open telemetry data file
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile());
 
-	if (gpx == NULL) {
-		log_warn("Can't read GPS data, skip map widget");
+	if (source == NULL) {
+		log_warn("Can't read telemetry data, skip map widget");
 		return false;
 	}
 
-	// GPX limits
-	gpx->setFrom(app_.settings().gpxFrom());
-	gpx->setTo(app_.settings().gpxTo());
+	// Telemetry data limits
+	source->setFrom(app_.settings().from());
+	source->setTo(app_.settings().to());
 
 	// Media
-	MediaContainer *container = app_.media();
+//	MediaContainer *container = app_.media();
+//	TODO FIX check no break....
 
-	VideoStreamPtr video_stream = container->getVideoStream();
+	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	// Default size
 	//   2704x1520 => 800x500
@@ -211,8 +215,8 @@ bool Renderer::loadMap(layout::Map *m) {
 	marker_size = (m->marker() > 0) ? m->marker() : 60 * video_stream->height() / 1520.0;
 
 	// Create map bounding box
-	GPXData::point p1, p2;
-	gpx->getBoundingBox(&p1, &p2);
+	TelemetryData p1, p2;
+	source->getBoundingBox(&p1, &p2);
 
 	// Alignment
 	s = (const char *) m->align();
@@ -235,7 +239,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setDivider(m->factor());
 	mapSettings.setMarkerSize(marker_size);
-	mapSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 
@@ -283,22 +287,23 @@ bool Renderer::loadTrack(layout::Track *t) {
 		return true;
 	}
 
-	// Open GPX file
-	GPX *gpx = GPX::open(app_.settings().gpxfile());
+	// Open telemetry data file
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile());
 
-	if (gpx == NULL) {
-		log_warn("Can't read GPS data, skip map widget");
+	if (source == NULL) {
+		log_warn("Can't read telemetry data, skip map widget");
 		return false;
 	}
 
-	// GPX limits
-	gpx->setFrom(app_.settings().gpxFrom());
-	gpx->setTo(app_.settings().gpxTo());
+	// Telemetry data limits
+	source->setFrom(app_.settings().from());
+	source->setTo(app_.settings().to());
 
 	// Media
-	MediaContainer *container = app_.media();
+//	TODO FIX check no break....
+//	MediaContainer *container = app_.media();
 
-	VideoStreamPtr video_stream = container->getVideoStream();
+	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	// Default size
 	//   2704x1520 => 800x500
@@ -311,8 +316,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 	y = (t->y() > 0) ? t->y() : video_stream->height() - height - t->margin();
 
 	// Create map bounding box
-	GPXData::point p1, p2;
-	gpx->getBoundingBox(&p1, &p2);
+	TelemetryData p1, p2;
+	source->getBoundingBox(&p1, &p2);
 
 	// Alignment
 	s = (const char *) t->align();
@@ -331,7 +336,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	// Track settings
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
-	trackSettings.setBoundingBox(p1.lat, p1.lon, p2.lat, p2.lon);
+	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 

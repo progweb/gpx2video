@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static LapWidget * create(GPX2Video &app) {
+	static LapWidget * create(GPXApplication &app) {
 		LapWidget *widget;
 
 		log_call();
@@ -52,18 +52,18 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 		int lap = data.lap();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
 
 		// Format data
-		if (data.hasValue(GPXData::DataFix))
+		if (data.hasValue(TelemetryData::DataFix))
 			sprintf(s, "%d/%d", lap, nbr_target_lap_);
 		else
 			sprintf(s, "--/--");
@@ -86,7 +86,7 @@ private:
 
 	int nbr_target_lap_;
 
-	LapWidget(GPX2Video &app, std::string name)
+	LapWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
    		, bg_buf_(NULL)
    		, fg_buf_(NULL)

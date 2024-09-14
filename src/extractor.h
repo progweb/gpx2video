@@ -8,11 +8,11 @@
 
 #include "media.h"
 #include "decoder.h"
-#include "gpx2video.h"
+#include "application.h"
 #include "extractorsettings.h"
 
 
-class Extractor : public GPX2Video::Task {
+class Extractor : public GPXApplication::Task {
 public:
 	enum gpmd_type {
 		GPMF_TYPE_STRING_ASCII = 'c',       // single byte 'c' style character string
@@ -91,7 +91,8 @@ public:
 
 	virtual ~Extractor();
 
-	static Extractor * create(GPX2Video &app, const ExtractorSettings &settings);
+	static Extractor * create(GPXApplication &app, const ExtractorSettings &settings,
+			MediaContainer *container);
 
 	const ExtractorSettings& settings() const;
 
@@ -107,7 +108,7 @@ public:
 	void parse(GPMD &gpmd, uint8_t *buffer, size_t size, std::ofstream &out);
 
 protected:
-	GPX2Video &app_;
+	GPXApplication &app_;
 	ExtractorSettings settings_;
 
 	MediaContainer *container_;
@@ -116,9 +117,9 @@ protected:
 
 	AVStream *avstream_;
 
-	Extractor(GPX2Video &app, const ExtractorSettings &settings);
+	Extractor(GPXApplication &app, const ExtractorSettings &settings);
 
-	void init(void);
+	void init(MediaContainer *container);
 
 private:
 	int n_;

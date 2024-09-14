@@ -3,14 +3,14 @@
 
 #include <string>
 
-#include "gpx2video.h"
+#include "application.h"
 
 
-class Cache : public GPX2Video::Task {
+class Cache : public GPXApplication::Task {
 public:
 	virtual ~Cache();
 
-	static Cache * create(GPX2Video &app);
+	static Cache * create(GPXApplication &app);
 
 	const std::string& path(void) const {
 		return path_;
@@ -19,9 +19,9 @@ public:
 	bool run(void);
 
 private:
-	GPX2Video &app_;
+	GPXApplication &app_;
 
-	Cache(GPX2Video &app);
+	Cache(GPXApplication &app);
 
 	void init(void);
 

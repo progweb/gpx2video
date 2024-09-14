@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static HeartRateWidget * create(GPX2Video &app) {
+	static HeartRateWidget * create(GPXApplication &app) {
 		HeartRateWidget *widget;
 
 		log_call();
@@ -47,17 +47,17 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
 
 		// Format data
-		if (data.hasValue(GPXData::DataHeartrate))
+		if (data.hasValue(TelemetryData::DataHeartrate))
 			sprintf(s, "%d bpm", data.heartrate());
 		else
 			sprintf(s, "-- bpm");
@@ -78,7 +78,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	HeartRateWidget(GPX2Video &app, std::string name)
+	HeartRateWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

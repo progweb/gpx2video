@@ -15,17 +15,17 @@
 #include <OpenImageIO/imagebufalgo.h>
 
 #include "log.h"
-#include "gpx.h"
 #include "tracksettings.h"
 #include "videowidget.h"
-#include "gpx2video.h"
+#include "telemetrymedia.h"
+#include "application.h"
 
 
 class Track : public VideoWidget {
 public:
 	virtual ~Track();
 
-	static Track * create(GPX2Video &app, const TrackSettings& settings);
+	static Track * create(GPXApplication &app, const TrackSettings& settings);
 
 	const TrackSettings& settings() const;
 
@@ -44,24 +44,24 @@ public:
 	static int lon2pixel(int zoom, float lon);
 
 	// Draw track path
-	void path(OIIO::ImageBuf &outbuf, GPX *gpx, double divider=1.0);
+	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider=1.0);
 
 	// Render track
 	OIIO::ImageBuf * prepare(bool &is_update);
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update);
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
 
 protected:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Track(GPX2Video &app, const TrackSettings &settings, struct event_base *evbase);
+	Track(GPXApplication &app, const TrackSettings &settings, struct event_base *evbase);
 
 	void init(bool zoomfit=true);
 	bool load(void);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
-	GPX2Video &app_;
+	GPXApplication &app_;
 	TrackSettings settings_;
 
 	struct event_base *evbase_;

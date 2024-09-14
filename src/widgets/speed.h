@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static SpeedWidget * create(GPX2Video &app) {
+	static SpeedWidget * create(GPXApplication &app) {
 		SpeedWidget *widget;
 
 		log_call();
@@ -49,12 +49,12 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 		double speed = data.speed();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
@@ -66,7 +66,7 @@ skip:
 			speed *= 0.6213711922;
 		}
 
-		if (data.hasValue(GPXData::DataFix))
+		if (data.hasValue(TelemetryData::DataFix))
 			sprintf(s, "%.0f %s", speed, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
@@ -87,7 +87,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	SpeedWidget(GPX2Video &app, std::string name)
+	SpeedWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

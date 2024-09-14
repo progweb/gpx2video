@@ -15,7 +15,7 @@ public:
 			delete bg_buf_;
 	}
 
-	static TextWidget * create(GPX2Video &app) {
+	static TextWidget * create(GPXApplication &app) {
 		TextWidget *widget;
 
 		log_call();
@@ -72,7 +72,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		(void) data;
 
 		is_update = false;
@@ -84,7 +84,7 @@ skip:
 private:
 	OIIO::ImageBuf *bg_buf_;
 
-	TextWidget(GPX2Video &app, std::string name)
+	TextWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL) {
 	}

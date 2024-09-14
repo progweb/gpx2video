@@ -17,7 +17,7 @@ public:
 			delete fg_buf_;
 	}
 
-	static DurationWidget * create(GPX2Video &app) {
+	static DurationWidget * create(GPXApplication &app) {
 		DurationWidget *widget;
 
 		log_call();
@@ -47,7 +47,7 @@ skip:
 		return bg_buf_;
 	}
 
-	OIIO::ImageBuf * render(const GPXData &data, bool &is_update) {
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
 		int hours = 0;
@@ -57,7 +57,7 @@ skip:
 		int duration;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == GPXData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
 			is_update = false;
 			goto skip;
 		}
@@ -72,7 +72,7 @@ skip:
 			hours = duration / 60;
 		}
 
-		if (data.hasValue(GPXData::DataFix))
+		if (data.hasValue(TelemetryData::DataFix))
 			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
 		else
 			sprintf(s, "--:--:--");
@@ -93,7 +93,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	DurationWidget(GPX2Video &app, std::string name)
+	DurationWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

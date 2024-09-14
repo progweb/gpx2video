@@ -7,27 +7,48 @@
 
 class TelemetrySettings {
 public:
-	enum Filter {
-		FilterNone = 0,
+	enum Format {
+		FormatNone = 0,
 
-		FilterSample,
-		FilterLinear,
-		FilterInterpolate,
-		FilterKalman,
+		FormatAuto,
+		FormatCSV,
+		FormatGPX,
 
-		FilterCount
+		FormatCount,
 	};
 
-	TelemetrySettings();
+	enum Method {
+		MethodNone = 0,
+
+		MethodSample,
+		MethodLinear,
+		MethodInterpolate,
+		MethodKalman,
+
+		MethodCount
+	};
+
+	TelemetrySettings(
+			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
+			int rate=0,
+			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
+	);
 	virtual ~TelemetrySettings();
 
-	const Filter& filter(void) const;
-	void setFilter(const Filter &filter);
+	const Format& telemetryFormat(void) const;
 
-	static const std::string getFriendlyName(const Filter &filter);
+	const Method& telemetryMethod(void) const;
+
+	const int& telemetryRate(void) const;
+
+	static const std::string getFriendlyName(const Method &method);
 
 private:
-	enum Filter filter_;
+	enum Format telemetry_format_;
+
+	enum Method telemetry_method_;
+
+	int telemetry_rate_;
 };
 
 
