@@ -17,7 +17,8 @@ class GPXTools : public GPXApplication {
 public:
 	class Settings : public GPXApplication::Settings, public TelemetrySettings {
 	public:
-		Settings(std::string gpx_file="", 
+		Settings(
+			std::string gpx_file="", 
 			std::string output_file="",
 			std::string from="",
 			std::string to="",

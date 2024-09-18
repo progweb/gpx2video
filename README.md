@@ -563,7 +563,7 @@ In future release, gpx2video should be able to use more data from this stream as
 You can convert, filter and interpolate GPX data.
 
 ```bash
-$ ./gpx2video -g ACTIVITY.gpx -o data.csv --telemetry=0 compute
+$ ./gpx2video -g ACTIVITY.gpx -o data.csv --telemetry-method=0 compute
 ```
 
 This tool permits to convert GPX to CSV and/or apply a filter on the GPS data (lat. and lon. values).

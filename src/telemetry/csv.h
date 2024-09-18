@@ -16,6 +16,8 @@ public:
 		: TelemetrySource(filename) {
 		line_ = 0;
 
+		sep_ = ',';
+
 		// Column index
 		index_timestamp_ = -1;
 		index_total_duration_ = -1;
@@ -61,18 +63,23 @@ failure:
 
 		line_ = 0;
 
+		sep_ = ',';
+
 		// Read & parse header
 		readAndParseHeader();
 	}
 
 	enum TelemetrySource::Data read(TelemetrySource::Point &point) {
+		std::string line;
+
 		std::vector<std::string> columns;
 
 		enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 		log_call();
 
-		type = readLine(columns);
+		type = readLine(line);
+		parseLine(columns, line);
 
 		if (type == TelemetrySource::DataEof)
 			goto eof;
@@ -84,13 +91,17 @@ eof:
 	}
 
 	bool readAndParseHeader() {
+		std::string line;
+
 		std::vector<std::string> columns;
 
 		enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 		log_call();
 
-		type = readLine(columns);
+		type = readLine(line);
+		parseFormat(line);
+		parseLine(columns, line);
 
 		if (type == TelemetrySource::DataEof)
 			goto eof;
@@ -145,59 +156,84 @@ eof:
 		return false;
 	}
 
-	enum TelemetrySource::Data readLine(std::vector<std::string> &columns) {
-		std::string line, column;
+	enum TelemetrySource::Data readLine(std::string &line) {
+		log_call();
+
+		if (!std::getline(stream_, line))
+			return TelemetrySource::DataEof;
+
+		return TelemetrySource::DataAgain;
+	}
+
+	bool parseFormat(std::string line) {
+		auto pos = line.find(";");
+
+		// ';' as column separator
+		if (pos < line.length()) {
+			sep_ = ';';
+			return true;
+		}
+
+		// ',' as column separator
+		pos = line.find(",");
+
+		if (pos < line.length()) {
+			sep_ = ',';
+			return true;
+		}
+
+		return false;
+	}
+
+	bool parseLine(std::vector<std::string> &columns, std::string line) {
+		std::string column;
+
+		bool loop = true;
+		bool withQ = false;
+		std::string part{""};
+
+		std::stringstream ss(line);
 
 		log_call();
 
-		if (std::getline(stream_, line)) {
-			std::stringstream        ss(line);
+		line_++;
 
-			bool loop = true;
-			bool                     withQ = false;
-			std::string              part{""};
+		while ((loop == true) && !ss.eof()) {
+			while (std::getline(ss, column, sep_)) {
+				for (; column.length() > 0;) {
+					auto pos = column.find("\"");
 
-			line_++;
+					// " found
+					if (pos < column.length()) {
+						part += column.substr(0, pos);
 
-			while ((loop == true) && !ss.eof()) {
-				while (std::getline(ss, column, ',')) {
-					for (; column.length() > 0;) {
-						auto pos = column.find("\"");
+						column = column.substr(pos + 1, column.length());
 
-						// " found
-						if (pos < column.length()) {
-							part += column.substr(0, pos);
-
-							column = column.substr(pos + 1, column.length());
-
-							if (withQ && (column[0] == '"')) {
-								part += '"';
-								column = column.substr(1, column.length());
-							}
-							else 
-								withQ = !withQ;
+						if (withQ && (column[0] == '"')) {
+							part += '"';
+							column = column.substr(1, column.length());
 						}
+						else 
+							withQ = !withQ;
+					}
 
-						if (!withQ) {
-							column = trim(part + column);
-							columns.emplace_back(std::move(column));
-							part = "";
-							loop = false;
-						} 
-						else if (column.find("\"") < column.length()) {
-						}
-						else {
-							part += column + ",";
-							column = "";
-						}
+					if (!withQ) {
+						column = trim(part + column);
+						columns.emplace_back(std::move(column));
+						part = "";
+						loop = false;
+					} 
+					else if (column.find("\"") < column.length()) {
+					}
+					else {
+						part += column + ",";
+						column = "";
 					}
 				}
 			}
 		}
-		else
-			return TelemetrySource::DataEof;
 
-		return TelemetrySource::DataAgain;
+		return true;
 	}
 
 	void writePoint(std::vector<std::string> &columns, TelemetrySource::Point &point) {
@@ -208,16 +244,18 @@ eof:
 		// 15: Cadence, 16: Heartrate, 17: Lap
 		point.setLine(line_);
 
-		point.setType(columns[index_data_]);
+		if (index_data_ != -1)
+			point.setType(columns[index_data_]);
 
-		point.setPosition(
-			strtoul(columns[index_timestamp_].c_str(), NULL, 0) * 1000,
-			strtod(columns[index_latitude_].c_str(), NULL),
-			strtod(columns[index_longitude_].c_str(), NULL)
-		);
+		if ((index_timestamp_ != -1) && (index_latitude_ != -1) && (index_longitude_ != -1))
+			point.setPosition(
+				strtoul(columns[index_timestamp_].c_str(), NULL, 0) * 1000,
+				strtod(columns[index_latitude_].c_str(), NULL),
+				strtod(columns[index_longitude_].c_str(), NULL)
+			);
 
 		if (index_elevation_ != -1)
-			point.setElevation(strtod(columns[index_elevation_].c_str(), NULL));
+			point.setElevation(str2double(columns[index_elevation_]));
 
 		if (index_total_duration_ != -1)
 			point.setDuration(strtod(columns[index_total_duration_].c_str(), NULL));
@@ -259,6 +297,8 @@ eof:
 private:
 	uint32_t line_;
 
+	char sep_;
+
 	int index_timestamp_;
 	int index_total_duration_;
 	int index_partial_duration_;
@@ -294,6 +334,15 @@ private:
 		str.erase(position + 1);
 
 		return str;
+	}
+
+	double str2double(std::string str) {
+		auto pos = str.find(",");
+
+		if (pos < str.length())
+			str.replace(pos, 1, ".");
+
+		return strtod(str.c_str(), NULL);
 	}
 };
 

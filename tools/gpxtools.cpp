@@ -143,7 +143,6 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-method")) {
 				method = (TelemetrySettings::Method) atoi(optarg);
-				return 0;
 			}
 			else if (s && !strcmp(s, "telemetry-rate")) {
 				rate = atoi(optarg);
@@ -225,6 +224,8 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		outputfile,
 		from,
 		to,
+		0,
+		0,
 		method,
 		rate)
 	);
