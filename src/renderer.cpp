@@ -58,6 +58,9 @@ bool Renderer::init(MediaContainer *container) {
 
 	log_call();
 
+	if (container == NULL)
+		return false;
+
 	if (telemetry_method == TelemetrySettings::MethodNone)
 		telemetry_method = TelemetrySettings::MethodSample;
 

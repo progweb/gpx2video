@@ -58,7 +58,8 @@ abort:
 
 
 bool VideoRenderer::init(MediaContainer *container) {
-	Renderer::init(container);
+	if (!Renderer::init(container))
+		return false;
 
 	// Codec
 	ExportCodec::Codec video_codec = rendererSettings().videoCodec();

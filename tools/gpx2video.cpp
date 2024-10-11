@@ -232,7 +232,10 @@ MediaContainer * GPX2Video::media(void) {
 	if (container_ == NULL) {
 		container_ = Decoder::probe(mediafile);
 
-		if (!start_time.empty()) {
+		if (container_ == NULL) {
+			log_error("Media '%s' file read error", mediafile.c_str());
+		}
+		else if (!start_time.empty()) {
 			log_notice("Overwrite video create time with: %s", start_time.c_str());
 
 			container_->setStartTime(start_time);

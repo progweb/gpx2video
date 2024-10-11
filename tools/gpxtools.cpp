@@ -36,6 +36,7 @@ static const struct option options[] = {
 	{ 0,                       0,                 0, 0 }
 };
 
+
 static void print_usage(const std::string &name) {
 	log_call();
 

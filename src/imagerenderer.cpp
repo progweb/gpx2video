@@ -27,16 +27,24 @@ ImageRenderer * ImageRenderer::create(GPXApplication &app,
 		MediaContainer *container) {
 	ImageRenderer *renderer = new ImageRenderer(app, renderer_settings, telemetry_settings);
 
-	renderer->init(container);
+	if (renderer->init(container) == false)
+		goto abort;
+
 	renderer->load();
 	renderer->computeWidgetsPosition();
 
 	return renderer;
+
+abort:
+	delete renderer;
+
+	return NULL;
 }
 
 
 bool ImageRenderer::init(MediaContainer *container) {
-	Renderer::init(container);
+	if (!Renderer::init(container))
+		return false;
 
 	// Retrieve video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();

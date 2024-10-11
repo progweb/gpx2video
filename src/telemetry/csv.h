@@ -249,7 +249,7 @@ eof:
 
 		if ((index_timestamp_ != -1) && (index_latitude_ != -1) && (index_longitude_ != -1))
 			point.setPosition(
-				strtoul(columns[index_timestamp_].c_str(), NULL, 0) * 1000,
+				strtoul(columns[index_timestamp_].c_str(), NULL, 0),
 				strtod(columns[index_latitude_].c_str(), NULL),
 				strtod(columns[index_longitude_].c_str(), NULL)
 			);

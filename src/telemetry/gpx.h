@@ -15,6 +15,11 @@
 
 class GPX : public TelemetrySource {
 public:
+	enum Version {
+		V1_0,
+		V1_1,
+	};
+
 	GPX(const std::string &filename)
 		: TelemetrySource(filename)
 		, root_(NULL)
@@ -135,27 +140,35 @@ eof:
 
 		char buf[128];
 		const char *s;
+		const char *str;
 
 		struct tm time;
 
 		std::string name;
 
 		// Convert time - GPX file contains UTC time
-		s = wpt->time().getValue().c_str();
+		str = wpt->time().getValue().c_str();
 
-		// Try format: "2020:12:13 08:55:48.215"
+		// Try format: "2020:12:13 08:55:48"
+		// Try format: "2020:12:13 08:55:48.123"
+		// Try format: "2020:12:13 08:55:48.123456"
+		// Try format: "2020:12:13 08:55:48.123456+0200"
 		memset(&time, 0, sizeof(time));
-		if (strptime(s, "%Y:%m:%d %H:%M:%S.", &time) != NULL)
+		if ((s = strptime(str, "%Y:%m:%d %H:%M:%S", &time)) != NULL)
 			ts = timegm(&time) * 1000;
-		// Try format: "2020-07-28T07:04:43.000Z"
-		else if (strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
-			ts = timegm(&time) * 1000;
+		// Try format: "2020-07-28T07:04:43"
 		// Try format: "2020-07-28T07:04:43Z"
-		else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
+		// Try format: "2020-07-28T07:04:43.123"
+		// Try format: "2020-07-28T07:04:43.123456"
+		// Try format: "2020-07-28T07:04:43.123456+0200"
+		else if ((s = strptime(str, "%Y-%m-%dT%H:%M:%S", &time)) != NULL)
 			ts = timegm(&time) * 1000;
-		// Try format: "2020-07-28T07:04:43+0200"
-		else if (strptime(s, "%Y-%m-%dT%H:%M:%S+", &time) != NULL)
-			ts = timegm(&time) * 1000;
+//		// Try format: "2020-07-28T07:04:43Z"
+//		else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
+//			ts = timegm(&time) * 1000;
+//		// Try format: "2020-07-28T07:04:43+0200"
+//		else if (strptime(s, "%Y-%m-%dT%H:%M:%S+", &time) != NULL)
+//			ts = timegm(&time) * 1000;
 		else
 			ok = false;
 
@@ -172,6 +185,44 @@ eof:
 					ms[3] = '\0';
 
 					ts += atoi(ms);
+				}
+			}
+		}
+
+		// Parse +0200 / -0200 / +02:00 / -02:00
+		if (ok) {
+			char *tz;
+			char *pos;
+			int offset;
+
+			::strcpy(buf, s);
+
+			if ((pos = ::strchr(buf, ':')) != NULL) {
+				strcpy(pos, pos + 1);
+			}
+
+			if ((tz = ::strchr(buf, '+')) != NULL) {
+				tz += 1; // skip '+' char
+
+				if (strlen(tz) >= 4) {
+					tz[4] = '\0';
+
+					offset = atoi(tz);
+
+					ts += (offset / 100) * 60 * 60 * 1000; // hour offset
+					ts += (offset % 100) * 60 * 1000; // min offset
+				}
+			}
+			else if ((tz = ::strchr(buf, '-')) != NULL) {
+				tz += 1; // skip '-' char
+
+				if (strlen(tz) >= 4) {
+					tz[4] = '\0';
+
+					offset = atoi(tz);
+
+					ts -= (offset / 100) * 60 * 60 * 1000; // hour offset
+					ts -= (offset % 100) * 60 * 1000; // min offset
 				}
 			}
 		}

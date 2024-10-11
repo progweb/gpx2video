@@ -109,7 +109,8 @@ void TelemetryData::dump(bool debug) {
 
 
 TelemetrySource::TelemetrySource(const std::string &filename) 
-	: enable_(false)
+	: eof_(false)
+	, enable_(false)
 	, offset_(0) 
 	, from_(0)
 	, to_(0) {
@@ -238,7 +239,7 @@ void TelemetrySource::compute(TelemetryData &data) {
 	//   cur:    k - 1;
 	k = points_.size() - 1;
 
-	if (k > 1)
+	if (!eof_ && (k > 1))
 		k -= 1;
 
 	if (data.ts_ != 0) {
@@ -361,7 +362,7 @@ void TelemetrySource::update(TelemetryData &data) {
 	log_call();
 
 	if (points_.empty())
-		return;
+		goto skip;
 
 	size = points_.size();
 
@@ -376,6 +377,9 @@ void TelemetrySource::update(TelemetryData &data) {
 	}
 	else
 		data = points_.front();
+
+skip:
+	return;
 }
 
 
@@ -555,6 +559,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 
 	reset();
 
+	eof_ = false;
+
 	points_.clear();
 
 	data = TelemetryData();
@@ -580,10 +586,17 @@ enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
 
 	type = read(point);
 
-	if (type == TelemetrySource::DataEof)
+	if (type != TelemetrySource::DataEof)
+		push(point);
+	else if (eof_) {
+		type = TelemetrySource::DataEof;
 		goto eof;
+	}
+	else {
+		eof_ = true;
+		type = TelemetrySource::DataAgain;
+	}
 
-	push(point);
 	update(data);
 
 eof:

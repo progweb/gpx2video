@@ -150,7 +150,8 @@ public:
 	}
 
 	bool hasValue(Data type = DataAll) const {
-		return ((has_value_ & type) == type);
+//		return ((has_value_ & type) == type);
+		return ((has_value_ & type) != 0);
 	}
 
 	void reset(bool all = false);
@@ -435,6 +436,7 @@ protected:
 
 	unsigned long nbr_points_max_;
 
+	bool eof_;
 	bool enable_;
 
 	int64_t offset_;

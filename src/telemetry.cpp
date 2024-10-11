@@ -6,6 +6,7 @@
 
 #include "log.h"
 #include "telemetry.h"
+#include "telemetry/gpx.h"
 
 
 // Telemetry settings
@@ -112,6 +113,9 @@ void Telemetry::init(void) {
 bool Telemetry::start(void) {
 	bool result = true;
 
+	bool gpx_extension = false;
+	enum GPX::Version gpx_version = GPX::V1_1;
+
 	std::string filename = app_.settings().outputfile();
 
 	log_call();
@@ -132,22 +136,38 @@ bool Telemetry::start(void) {
 		goto done;
 	}
 
+
 	// Header
 	switch (output_format_) {
 	case TelemetrySettings::FormatGPX:
+		gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
+
 		out_ << "<?xml version=\"1.0\" encoding=\"utf-8\"?>" << std::endl;
-		out_ << "<gpx version=\"1.0\"" << std::endl;
+		if (gpx_version == GPX::V1_1)
+			out_ << "<gpx version=\"1.1\"" << std::endl;
+		else
+			out_ << "<gpx version=\"1.0\"" << std::endl;
 		out_ << "  creator=\"gpx2video\"" << std::endl;
 		out_ << "  xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"" << std::endl;
-		out_ << "  xmlns=\"http://www.topografix.com/GPX/1/0\"" << std::endl;
-		out_ << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" << std::endl;
+		if (gpx_extension) {
+			out_ << "  xmlns:ns2=\"http://www.garmin.com/xmlschemas/GpxExtensions/v3\"" << std::endl;
+			out_ << "  xmlns:ns3=\"http://www.garmin.com/xmlschemas/TrackPointExtension/v1\"" << std::endl;
+		}
+		if (gpx_version == GPX::V1_1) {
+			out_ << "  xmlns=\"http://www.topografix.com/GPX/1/1\"" << std::endl;
+			out_ << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/11.xsd\">" << std::endl;
+		}
+		else {
+			out_ << "  xmlns=\"http://www.topografix.com/GPX/1/0\"" << std::endl;
+			out_ << "  xsi:schemaLocation=\"http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd\">" << std::endl;
+		}
 		out_ << "  <trk>" << std::endl;
 		out_ << "    <number>1</number>" << std::endl;
 		out_ << "    <trkseg>" << std::endl;
 		break;
 
 	case TelemetrySettings::FormatCSV:
-		out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Lap" << std::endl;
+		out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Temperature, Lap" << std::endl;
 		break;
 
 	default:
@@ -171,6 +191,8 @@ bool Telemetry::run(void) {
 	char buf[92];
 	char time[128];
 
+	bool gpx_extension = false;
+
 	enum TelemetrySource::Data type;
 
 	log_call();
@@ -186,11 +208,25 @@ bool Telemetry::run(void) {
 
 		snprintf(time, sizeof(time), "%s.%03dZ", buf, (int) (data_.timestamp() % 1000));
 
+		gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
+
 		out_ << std::setprecision(9);
 		out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
 		if (data_.hasValue(TelemetryData::DataElevation))
 			out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
 		out_ << "        <time>" << time << "</time>" << std::endl;
+		if (gpx_extension) {
+			out_ << "        <extensions>" << std::endl;
+			out_ << "          <ns3:TrackPointExtension>" << std::endl;
+			if (data_.hasValue(TelemetryData::DataCadence))
+				out_ << "            <ns3:cad>" << data_.cadence() << "</ns3:cad>" << std::endl;
+			if (data_.hasValue(TelemetryData::DataHeartrate))
+				out_ << "            <ns3:hr>" << data_.heartrate() << "</ns3:hr>" << std::endl;
+			if (data_.hasValue(TelemetryData::DataTemperature))
+				out_ << "            <ns3:atemp>" << data_.temperature() << "</ns3:atemp>" << std::endl;
+			out_ << "          </ns3:TrackPointExtension>" << std::endl;
+			out_ << "        </extensions>" << std::endl;
+		}
 		out_ << "      </trkpt>" << std::endl;
 		break;
 
@@ -199,7 +235,7 @@ bool Telemetry::run(void) {
 		strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", &tm);
 
 		out_ << std::setprecision(8);
-		out_ << data_.time();
+		out_ << data_.timestamp();
 		out_ << ", \"" << time << "\"";
 		out_ << ", " << round(data_.elapsedTime());
 		out_ << ", " << round(data_.duration());
@@ -216,6 +252,7 @@ bool Telemetry::run(void) {
 		out_ << ", " << data_.avgridespeed(); 
 		out_ << ", " << data_.cadence(); 
 		out_ << ", " << data_.heartrate(); 
+		out_ << ", " << data_.temperature(); 
 		out_ << ", " << data_.lap(); 
 		out_ << std::endl;
 		break;
@@ -224,13 +261,14 @@ bool Telemetry::run(void) {
 		break;
 	};
 
-	if (rate > 0)
-		timecode_ms_ += 1000 / rate;
-	else
-		timecode_ms_ += 1000;
-
 	// Next point
-	if (settings().telemetryMethod() == TelemetrySettings::MethodNone) 
+	if (settings().telemetryMethod() != TelemetrySettings::MethodNone) {
+		if (rate > 0)
+			timecode_ms_ += 1000 / rate;
+		else
+			timecode_ms_ += 1000;
+	}
+	else
 		timecode_ms_ = -1;
 
 	if ((type = this->get(data_, timecode_ms_)) == TelemetrySource::DataEof) {
