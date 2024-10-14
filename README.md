@@ -137,7 +137,26 @@ $ ./gpx2video -m GOPR1860.MP4 --start-time "2021-12-08T09:56:26" --offset 300 ..
 
 ## Build
 
-To build gpx2video, please install all dependancies (on Debian):
+### build in docker
+
+By default docker will use debian:11.10-slim as base image, but you can change it with BASE_IMAGE variable.
+```bash
+make build-docker
+make build
+
+```
+Copy video files to data folder then you can start docker and try it out
+
+```bash
+mkdir -p data
+make run
+
+# run gpx2video
+./gpx2video -v -m /app/data/SOME_VID.mp4 -g /app/data/SOME_GPX.gpx -l /app/data/layout.xml -o /app/data/output.mp4
+```
+
+### build on host
+To build gpx2video, please install all dependencies (on Debian):
 
 ```bash
 apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
