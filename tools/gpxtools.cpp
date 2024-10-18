@@ -19,6 +19,7 @@ extern "C" {
 #include "log.h"
 #include "version.h"
 #include "telemetry.h"
+#include "test.h"
 #include "gpxtools.h"
 
 
@@ -203,6 +204,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		else if (!strcmp(argv[0], "compute")) {
 			setCommand(GPXTools::CommandCompute);
 		}
+		else if (!strcmp(argv[0], "test")) {
+			setCommand(GPXTools::CommandTest);
+		}
 		else {
 			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;
 			return -1;
@@ -238,6 +242,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 int main(int argc, char *argv[], char *envp[]) {
 	int result;
 
+	Test *test = NULL;
 	Telemetry *telemetry = NULL;
 
 	struct event_base *evbase;
@@ -290,6 +295,13 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetry = Telemetry::create(app, settings);
 			app.append(telemetry);
+		}
+		break;
+
+	case GPXTools::CommandTest: {
+			// Test
+			test = Test::create(app);
+			app.append(test);
 		}
 		break;
 

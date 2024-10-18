@@ -145,6 +145,8 @@ void TelemetrySource::setMethod(enum TelemetrySettings::Method method) {
 bool TelemetrySource::setFrom(std::string from) {
 	struct tm time;
 
+	TelemetryData data;
+
 	log_call();
 
 	memset(&time, 0, sizeof(time));
@@ -161,6 +163,9 @@ bool TelemetrySource::setFrom(std::string from) {
 
 	// Convert race start time in UTC time
 	from_ = timelocal(&time) * 1000;
+
+	// Init start position
+	retrieveFrom(data);
 
 skip:
 	return true;
@@ -335,12 +340,12 @@ void TelemetrySource::compute(TelemetryData &data) {
 			lon2 = start_.lon_;
 
 			gsic.Inverse(lat1, lon1, lat2, lon2, d);
-	
-			if (prevPoint.in_lap_ && (d < 8)) {
+
+			if (prevPoint.in_lap_ && (d < 20)) {
 				curPoint.setLap(prevPoint.lap_ + 1); // lap_++;
 				curPoint.in_lap_ = false;
 			}
-			else if (!prevPoint.in_lap_ && (d > 15)) {
+			else if (!prevPoint.in_lap_ && (d > 30)) {
 				curPoint.in_lap_ = true;
 			}
 		}
@@ -566,7 +571,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 	data = TelemetryData();
 	type = retrieveData(data);
 
-	start_ = data;
+	if (from_ == 0)
+		start_ = data;
 
 	data = TelemetryData();
 	type = retrieveData(data);
@@ -730,7 +736,7 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, enum Telemet
 
 	// Init
 	source->setMethod(method);
-	source->retrieveFirst(data);
+	source->retrieveFrom(data);
 
 	return source;
 }

@@ -51,7 +51,7 @@ static const struct option options[] = {
 	{ "map-list",              no_argument,       0, 0 },
 	{ "gpx-from",              required_argument, 0, 0 },
 	{ "gpx-to",                required_argument, 0, 0 },
-	{ "extract-format",        required_argument, 0, 'f' },
+	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
@@ -81,7 +81,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- o, --output=file             : Output file name" << std::endl;
 	std::cout << "\t- d, --duration                : Duration (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --trim                    : Left trim crop (in ms) (not required)" << std::endl;
-	std::cout << "\t- f, --extract-format=name     : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each second) (default: 1))" << std::endl;
 //	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;

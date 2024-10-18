@@ -132,6 +132,7 @@ public:
 		CommandCompute, // Compute telemetry data from gpx, csv...
 		CommandImage,	// Render alpha image with telemetry overlay
 		CommandVideo,	// Render video with telemtry overlay
+		CommandTest, 	// Test tool
 
 		CommandCount
 	};

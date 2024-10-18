@@ -133,27 +133,28 @@ eof:
 		return TelemetrySource::DataAgain;
 	}
 
-	void writePoint(gpx::WPT *wpt, TelemetrySource::Point &point) {
+	/**
+	 * Parse datetime string to timestamp (in ms)
+	 */
+	static bool parseDatetime(const char *str, uint64_t *timestamp) {
 		bool ok = true;
 
 		uint64_t ts = 0;
 
-		char buf[128];
-		const char *s;
-		const char *str;
-
 		struct tm time;
 
-		std::string name;
+		char buf[128];
+		const char *s;
 
-		// Convert time - GPX file contains UTC time
-		str = wpt->time().getValue().c_str();
+		log_call();
+
+		// reset
+		memset(&time, 0, sizeof(time));
 
 		// Try format: "2020:12:13 08:55:48"
 		// Try format: "2020:12:13 08:55:48.123"
 		// Try format: "2020:12:13 08:55:48.123456"
 		// Try format: "2020:12:13 08:55:48.123456+0200"
-		memset(&time, 0, sizeof(time));
 		if ((s = strptime(str, "%Y:%m:%d %H:%M:%S", &time)) != NULL)
 			ts = timegm(&time) * 1000;
 		// Try format: "2020-07-28T07:04:43"
@@ -163,12 +164,6 @@ eof:
 		// Try format: "2020-07-28T07:04:43.123456+0200"
 		else if ((s = strptime(str, "%Y-%m-%dT%H:%M:%S", &time)) != NULL)
 			ts = timegm(&time) * 1000;
-//		// Try format: "2020-07-28T07:04:43Z"
-//		else if (strptime(s, "%Y-%m-%dT%H:%M:%SZ", &time) != NULL)
-//			ts = timegm(&time) * 1000;
-//		// Try format: "2020-07-28T07:04:43+0200"
-//		else if (strptime(s, "%Y-%m-%dT%H:%M:%S+", &time) != NULL)
-//			ts = timegm(&time) * 1000;
 		else
 			ok = false;
 
@@ -176,7 +171,8 @@ eof:
 		if (ok) {
 			char *ms;
 
-			strcpy(buf, s);
+			strncpy(buf, s, sizeof(buf));
+			buf[sizeof(buf) - 1] = '\0';
 
 			if ((ms = ::strchr(buf, '.')) != NULL) {
 				ms += 1; // skip '.' char
@@ -209,8 +205,8 @@ eof:
 
 					offset = atoi(tz);
 
-					ts += (offset / 100) * 60 * 60 * 1000; // hour offset
-					ts += (offset % 100) * 60 * 1000; // min offset
+					ts -= (offset / 100) * 60 * 60 * 1000; // hour offset
+					ts -= (offset % 100) * 60 * 1000; // min offset
 				}
 			}
 			else if ((tz = ::strchr(buf, '-')) != NULL) {
@@ -221,11 +217,32 @@ eof:
 
 					offset = atoi(tz);
 
-					ts -= (offset / 100) * 60 * 60 * 1000; // hour offset
-					ts -= (offset % 100) * 60 * 1000; // min offset
+					ts += (offset / 100) * 60 * 60 * 1000; // hour offset
+					ts += (offset % 100) * 60 * 1000; // min offset
 				}
 			}
 		}
+
+		if (ok && (timestamp != NULL))
+			*timestamp = ts;
+
+		return ok;
+	}
+
+	void writePoint(gpx::WPT *wpt, TelemetrySource::Point &point) {
+		bool ok = true;
+
+		uint64_t ts = 0;
+
+		const char *str;
+
+		std::string name;
+
+		// Convert time - GPX file contains UTC time
+		str = wpt->time().getValue().c_str();
+
+		// Parse datetime string
+		parseDatetime(str, &ts);
 
 		// Line
 		point.setLine(wpt->line());
