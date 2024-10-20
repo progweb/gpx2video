@@ -167,7 +167,7 @@ bool Telemetry::start(void) {
 		break;
 
 	case TelemetrySettings::FormatCSV:
-		out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Temperature, Lap" << std::endl;
+		out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Temperature, Power, Lap" << std::endl;
 		break;
 
 	default:
@@ -253,6 +253,7 @@ bool Telemetry::run(void) {
 		out_ << ", " << data_.cadence(); 
 		out_ << ", " << data_.heartrate(); 
 		out_ << ", " << data_.temperature(); 
+		out_ << ", " << data_.power(); 
 		out_ << ", " << data_.lap(); 
 		out_ << std::endl;
 		break;

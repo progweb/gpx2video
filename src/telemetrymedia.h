@@ -37,18 +37,19 @@ public:
 		DataCadence = (1 << 2),
 		DataHeartrate = (1 << 3),
 		DataTemperature = (1 << 4),
+		DataPower = (1 << 5),
 
-		DataDuration = (1 << 5),
-		DataDistance = (1 << 6),
-		DataGrade = (1 << 7),
-		DataSpeed = (1 << 8),
-		DataMaxSpeed = (1 << 8),
-		DataRideTime = (1 << 10),
-		DataElapsedTime = (1 << 11),
-		DataAverageSpeed = (1 << 12),
-		DataAverageRideSpeed = (1 << 13),
+		DataDuration = (1 << 6),
+		DataDistance = (1 << 7),
+		DataGrade = (1 << 8),
+		DataSpeed = (1 << 9),
+		DataMaxSpeed = (1 << 10),
+		DataRideTime = (1 << 11),
+		DataElapsedTime = (1 << 12),
+		DataAverageSpeed = (1 << 13),
+		DataAverageRideSpeed = (1 << 14),
 
-		DataAll = (1 << 14) -1
+		DataAll = (1 << 15) -1
 	};
 
 	TelemetryData();
@@ -107,6 +108,10 @@ public:
 
 	const double& temperature(void) const {
 		return temperature_;
+	}
+
+	const int& power(void) const {
+		return power_;
 	}
 
 	const double &duration(void) const {
@@ -170,6 +175,7 @@ protected:
 	double temperature_;
 	int heartrate_;
 	int cadence_;
+	int power_;
 
 	double distance_;
 	double duration_;
@@ -257,6 +263,12 @@ public:
 			temperature_ = temperature;
 
 			addValue(Data::DataTemperature);
+		}
+
+		void setPower(int power) {
+			power_ = power;
+
+			addValue(Data::DataPower);
 		}
 
 		void setDuration(double duration) {

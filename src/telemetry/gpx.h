@@ -4,8 +4,10 @@
 #include <string.h>
 //#define __USE_XOPEN  // For strptime
 #include <time.h>
+#include <unistd.h>
 
-#include "unistd.h"
+#include <string>
+#include <algorithm>
 
 #include "gpxlib/Parser.h"
 #include "gpxlib/ReportCerr.h"
@@ -238,6 +240,9 @@ eof:
 
 		std::string name;
 
+		gpx::Node *extensions = NULL;
+		gpx::Node *trackPointExtensions = NULL;
+
 		// Convert time - GPX file contains UTC time
 		str = wpt->time().getValue().c_str();
 
@@ -259,28 +264,37 @@ eof:
 		point.setElevation((double) wpt->ele());
 
 		// Extensions
-		gpx::Node *extensions = wpt->extensions().getElements().front();
-
+		extensions = &wpt->extensions();
 		if (extensions) {
-			name = extensions->getName();
+			for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
+				iter != extensions->getElements().end(); ++iter) {
+				gpx::Node *node = (*iter);
 
-			if (name.find("TrackPointExtension") == std::string::npos)
-				extensions = &wpt->extensions();
+				name = node->getName();
 
-			if (extensions) {
-				for (std::list<gpx::Node*>::const_iterator iter = extensions->getElements().begin(); 
-					iter != extensions->getElements().end(); ++iter) {
-					gpx::Node *node = (*iter);
+				if ((name.find("power") != std::string::npos)
+						|| (name.find("Power") != std::string::npos))
+					point.setPower(std::stoi(node->getValue()));
+			
+				if (name.find("TrackPointExtension") != std::string::npos)
+					trackPointExtensions = node;
+			}
+		}
 
-					name = node->getName();
+		// TrackPointExtensions
+		if (trackPointExtensions) {
+			for (std::list<gpx::Node*>::const_iterator iter = trackPointExtensions->getElements().begin(); 
+				iter != trackPointExtensions->getElements().end(); ++iter) {
+				gpx::Node *node = (*iter);
 
-					if (name.find("atemp") != std::string::npos)
-						point.setTemperature(std::stod(node->getValue()));
-					else if (name.find("cad") != std::string::npos)
-						point.setCadence(std::stoi(node->getValue()));
-					else if (name.find("hr") != std::string::npos)
-						point.setHeartrate(std::stoi(node->getValue()));
-				}
+				name = node->getName();
+
+				if (name.find("atemp") != std::string::npos)
+					point.setTemperature(std::stod(node->getValue()));
+				else if (name.find("cad") != std::string::npos)
+					point.setCadence(std::stoi(node->getValue()));
+				else if (name.find("hr") != std::string::npos)
+					point.setHeartrate(std::stoi(node->getValue()));
 			}
 		}
 	}

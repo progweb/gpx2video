@@ -40,6 +40,7 @@ public:
 		index_cadence_ = -1;
 		index_heartrate_ = -1;
 		index_temperature_ = -1;
+		index_power_ = -1;
 		index_lap_ = -1;
 
 		if (!stream_.is_open()) {
@@ -110,7 +111,7 @@ eof:
 		// Data, 
 		// Lat, Lon, Ele, 
 		// Grade, Distance, Speed, MaxSpeed, Average, Ride Average, 
-		// Cadence, Heartrate, Lap
+		// Cadence, Heartrate, Power, Lap
 		for (size_t i=0; i<columns.size(); i++) {
 			if (columns[i] == "Timestamp")
 				index_timestamp_ = i;
@@ -146,6 +147,8 @@ eof:
 				index_heartrate_ = i;
 			else if (columns[i] == "Temperature")
 				index_temperature_ = i;
+			else if (columns[i] == "Power")
+				index_power_ = i;
 			else if (columns[i] == "Lap")
 				index_lap_ = i;
 		}
@@ -241,7 +244,7 @@ eof:
 		// 5: Data, 
 		// 6: Lat, 7: Lon, 8: Ele, 
 		// 9:Grade, 10: Distance, 11: Speed, 12: MaxSpeed, 13: Average, 14: Ride Average, 
-		// 15: Cadence, 16: Heartrate, 17: Lap
+		// 15: Cadence, 16: Heartrate, 17: Power, 18: Lap
 		point.setLine(line_);
 
 		if (index_data_ != -1)
@@ -290,6 +293,9 @@ eof:
 		if (index_temperature_ != -1)
 			point.setTemperature(std::stoi(columns[index_temperature_]));
 
+		if (index_power_ != -1)
+			point.setPower(std::stoi(columns[index_power_]));
+
 		if (index_lap_ != -1)
 			point.setLap(std::stoi(columns[index_lap_]));
 	}
@@ -320,6 +326,7 @@ private:
 	int index_cadence_;
 	int index_heartrate_;
 	int index_temperature_;
+	int index_power_;
 	int index_lap_;
 
 	std::string trim(std::string str) {

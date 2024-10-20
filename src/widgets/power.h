@@ -1,13 +1,13 @@
-#ifndef __GPX2VIDEO__WIDGETS__CADENCE_H__
-#define __GPX2VIDEO__WIDGETS__CADENCE_H__
+#ifndef __GPX2VIDEO__WIDGETS__POWER_H__
+#define __GPX2VIDEO__WIDGETS__POWER_H__
 
 #include "log.h"
 #include "videowidget.h"
 
 
-class CadenceWidget : public VideoWidget {
+class PowerWidget : public VideoWidget {
 public:
-	virtual ~CadenceWidget() {
+	virtual ~PowerWidget() {
 		log_call();
 
 		if (bg_buf_)
@@ -17,12 +17,12 @@ public:
 			delete fg_buf_;
 	}
 
-	static CadenceWidget * create(GPXApplication &app) {
-		CadenceWidget *widget;
+	static PowerWidget * create(GPXApplication &app) {
+		PowerWidget *widget;
 
 		log_call();
 
-		widget = new CadenceWidget(app, "cadence");
+		widget = new PowerWidget(app, "power");
 
 		return widget;
 	}
@@ -57,10 +57,10 @@ skip:
 		}
 
 		// Format data
-		if (data.hasValue(TelemetryData::DataCadence))
-			sprintf(s, "%d tr/min", data.cadence());
+		if (data.hasValue(TelemetryData::DataPower))
+			sprintf(s, "%d Watt", data.power());
 		else
-			sprintf(s, "-- tr/min");
+			sprintf(s, "-- Watt");
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
@@ -78,7 +78,7 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	CadenceWidget(GPXApplication &app, std::string name)
+	PowerWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {

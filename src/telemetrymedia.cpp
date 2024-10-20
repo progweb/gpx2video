@@ -60,6 +60,7 @@ void TelemetryData::reset(bool all) {
 		cadence_ = 0;
 		heartrate_ = 0;
 		temperature_ = 0;
+		power_ = 0;
 
 		grade_ = 0.0;
 		speed_ = 0.0;
@@ -454,6 +455,9 @@ void TelemetrySource::predict(TelemetryData &data) {
 		if (prevPoint.hasValue(TelemetryData::DataTemperature) && nextPoint.hasValue(TelemetryData::DataTemperature))
 			point.setTemperature(data.temperature_ + (timestamp - prevPoint.ts_) * (nextPoint.temperature_ - prevPoint.temperature_) / (nextPoint.ts_ - prevPoint.ts_));
 
+		if (prevPoint.hasValue(TelemetryData::DataPower) && nextPoint.hasValue(TelemetryData::DataPower))
+			point.setPower(data.power_ + (timestamp - prevPoint.ts_) * (nextPoint.power_ - prevPoint.power_) / (nextPoint.ts_ - prevPoint.ts_));
+
 		break;
 
 	case TelemetrySettings::MethodLinear:
@@ -481,6 +485,9 @@ void TelemetrySource::predict(TelemetryData &data) {
 
 		if (prevPoint.hasValue(TelemetryData::DataTemperature) && curPoint.hasValue(TelemetryData::DataTemperature))
 			point.setTemperature(data.temperature_ + (curPoint.temperature_ - prevPoint.temperature_));
+
+		if (prevPoint.hasValue(TelemetryData::DataPower) && curPoint.hasValue(TelemetryData::DataPower))
+			point.setPower(data.power_ + (curPoint.power_ - prevPoint.power_));
 
 		break;
 
