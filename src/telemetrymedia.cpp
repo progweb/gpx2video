@@ -476,6 +476,7 @@ void TelemetrySource::update(TelemetryData &data) {
 
 		// Filter
 		filter();
+
 		// Then compute
 		compute(data);
 	}
@@ -665,12 +666,18 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 
 
 enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
+	size_t size;
+
 	TelemetrySource::Point point;
+	TelemetrySource::Point previous;
 
 	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 	log_call();
 
+	size = points_.size();
+
+	// Next point
 	point.setType(TelemetryData::TypeMeasured);
 
 	type = read(point);
@@ -678,14 +685,23 @@ enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
 	if ((end_ != 0) && (point.timestamp() > (end_ + offset_))) {
 		// Simulate end of gpx data stream
 		type = TelemetrySource::DataEof;
-		goto eof;
+		goto done;
+	}
+
+	// Point valid ?
+	if (size > 0) {
+		previous = points_[size - 1];
+
+		// With garmin devices, some points are same whereas timestamp is different!
+		if ((previous.raw_lat_ == point.raw_lat_) && (previous.raw_lon_ == point.raw_lon_))
+			goto done;
 	}
 
 	if (type != TelemetrySource::DataEof)
 		push(point);
 	else if (eof_) {
 		type = TelemetrySource::DataEof;
-		goto eof;
+		goto done;
 	}
 	else {
 		eof_ = true;
@@ -694,7 +710,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
 
 	update(data);
 
-eof:
+done:
 	return type;
 }
 
