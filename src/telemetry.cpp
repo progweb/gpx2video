@@ -16,13 +16,31 @@ TelemetrySettings::TelemetrySettings(
 		TelemetrySettings::Method method,
 		int rate,
 		TelemetrySettings::Format format)
-		: telemetry_format_(format)
+		: telemetry_begin_("")
+		, telemetry_end_("")
+		, telemetry_format_(format)
 		, telemetry_method_(method)
 		, telemetry_rate_(rate) {
 }
 
 
 TelemetrySettings::~TelemetrySettings() {
+}
+
+
+void TelemetrySettings::setDataRange(const std::string &begin, const std::string &end) {
+	telemetry_begin_ = begin;
+	telemetry_end_ = end;
+}
+
+
+const std::string& TelemetrySettings::telemetryBegin(void) const {
+	return telemetry_begin_;
+}
+
+
+const std::string& TelemetrySettings::telemetryEnd(void) const {
+	return telemetry_end_;
 }
 
 
@@ -61,6 +79,12 @@ const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Me
 	return "";
 }
 
+
+void TelemetrySettings::dump(void) const {
+	std::cout << "Telemetry settings: " << std::endl;
+	std::cout << "  begin data range: " << telemetry_begin_ << std::endl;
+	std::cout << "  end data range: " << telemetry_end_ << std::endl;
+}
 
 
 // Telemetry API
@@ -120,7 +144,16 @@ bool Telemetry::start(void) {
 
 	log_call();
 
-	// Telemetry limits
+	// Input valid
+	if (!source_) {
+		result = false;
+		goto done;
+	}
+
+	// Telemetry data range
+	source_->setDataRange(settings().telemetryBegin(), settings().telemetryEnd());
+
+	// Telemetry compute range
 	source_->setFrom(app_.settings().from());
 	source_->setTo(app_.settings().to());
 
@@ -135,7 +168,6 @@ bool Telemetry::start(void) {
 		result = false;
 		goto done;
 	}
-
 
 	// Header
 	switch (output_format_) {
@@ -264,8 +296,8 @@ bool Telemetry::run(void) {
 
 	// Next point
 	if (settings().telemetryMethod() != TelemetrySettings::MethodNone) {
-		if (rate > 0)
-			timecode_ms_ += 1000 / rate;
+		if (rate != 0)
+			timecode_ms_ += rate; // 1000 / rate;
 		else
 			timecode_ms_ += 1000;
 	}

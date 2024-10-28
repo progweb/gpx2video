@@ -404,6 +404,8 @@ public:
 
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
 
+	bool setDataRange(std::string begin, std::string end);
+
 	bool setFrom(std::string from);
 	bool setTo(std::string to);
 
@@ -439,6 +441,8 @@ private:
 		enable_ = false;
 	}
 
+	enum Data retrieveFirst_i(TelemetryData &data);
+
 protected:
 	std::ifstream stream_;
 
@@ -453,8 +457,8 @@ protected:
 
 	int64_t offset_;
 
-	uint64_t from_;
-	uint64_t to_;
+	uint64_t begin_, end_;
+	uint64_t from_, to_;
 
 	enum TelemetrySettings::Method method_;
 

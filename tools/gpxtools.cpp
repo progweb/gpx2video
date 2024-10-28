@@ -31,6 +31,10 @@ static const struct option options[] = {
 	{ "quiet",                 no_argument,       0, 'q' },
 	{ "input",                 required_argument, 0, 'i' },
 	{ "output",                required_argument, 0, 'o' },
+	{ "begin",                 required_argument, 0, 0 },
+	{ "end",                   required_argument, 0, 0 },
+	{ "from",                  required_argument, 0, 0 },
+	{ "to",                    required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 'r' },
@@ -41,16 +45,18 @@ static const struct option options[] = {
 static void print_usage(const std::string &name) {
 	log_call();
 
-	std::cout << "Usage: " << name << "%s [-v] -i input-file -o output-file command" << std::endl;
+	std::cout << "Usage: " << name << " [-v] -i input-file -o output-file command" << std::endl;
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- i, --input=file              : Input telemetry file name" << std::endl;
 	std::cout << "\t- o, --output=file             : Output telemetry file name" << std::endl;
-	std::cout << "\t-    --from                    : Set begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --to                      : Set end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --begin                   : Set begin time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --end                     : Set end time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --from                    : Set begin time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --to                      : Set end time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each second) (default: 1000))" << std::endl;
+	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
 	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet                   : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help                    : Show this help screen" << std::endl;
@@ -118,9 +124,10 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	std::string inputfile;
 	std::string outputfile;
 
-	std::string to;
-	std::string from;
+	std::string begin, end; // Telemetry range export data
+	std::string to, from; 	// Telmetry range compute
 
+	TelemetrySettings::Format format = TelemetrySettings::FormatAuto;
 	TelemetrySettings::Method method = TelemetrySettings::MethodNone;
 
 	const std::string name(argv[0]);
@@ -137,7 +144,13 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		switch (option) {
 		case 0:
 			s = gpxtools::options[index].name;
-			if (s && !strcmp(s, "from")) {
+			if (s && !strcmp(s, "begin")) {
+				begin = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "end")) {
+				end = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "from")) {
 				from = std::string(optarg);
 			}
 			else if (s && !strcmp(s, "to")) {
@@ -179,6 +192,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			outputfile = std::string(optarg);
 			break;
+		case 'r':
+			rate = atoi(optarg);
+			break;
 		default:
 			return -1;
 			break;
@@ -217,22 +233,22 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	}
 
 	// Override some settings
-	if (command() == GPXTools::CommandConvert) {
-		from = "";
-		to = "";
+	if (command() == GPXTools::CommandConvert)
 		method = TelemetrySettings::MethodNone;
-	}
-	
+
 	// Save app settings
 	setSettings(GPXTools::Settings(
 		inputfile,
 		outputfile,
+		begin,
+		end,
 		from,
 		to,
 		0,
 		0,
 		method,
-		rate)
+		rate,
+		format)
 	);
 
 	return 0;
@@ -244,6 +260,8 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	Test *test = NULL;
 	Telemetry *telemetry = NULL;
+
+	TelemetrySettings settings;
 
 	struct event_base *evbase;
 
@@ -277,10 +295,16 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPXTools::CommandConvert: {
 			// Telemetry settings
-			TelemetrySettings settings(
+			settings = TelemetrySettings(
 					app.settings().telemetryMethod(),
-					app.settings().telemetryRate());
+					app.settings().telemetryRate(),
+					app.settings().telemetryFormat());
 
+			settings.setDataRange(
+					app.settings().telemetryBegin(),
+					app.settings().telemetryEnd());
+
+			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);
 			app.append(telemetry);
 		}
@@ -288,11 +312,16 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPXTools::CommandCompute: {
 			// Telemetry settings
-			TelemetrySettings settings(
+			settings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
-					TelemetrySettings::FormatCSV);
+					app.settings().telemetryFormat());
 
+			settings.setDataRange(
+					app.settings().telemetryBegin(),
+					app.settings().telemetryEnd());
+
+			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);
 			app.append(telemetry);
 		}

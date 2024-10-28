@@ -390,11 +390,13 @@ bool VideoRenderer::run(void) {
 	app_.setTime(start_time + real_duration_ms_ / 1000);
 
 	if (source_) {
+		uint64_t timestamp = (start_time * 1000) + real_duration_ms_;
+
 		OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 
 		// Read GPX data
-//		source_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
-		source_->retrieveNext(data_, (start_time * 1000) + real_duration_ms_);
+		timestamp -= (timestamp % telemetrySettings().telemetryRate());
+		source_->retrieveNext(data_, timestamp);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());

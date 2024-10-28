@@ -69,7 +69,7 @@ static const struct option options[] = {
 static void print_usage(const std::string &name) {
 	log_call();
 
-	std::cout << "Usage: " << name << "%s [-v] -m=media -g=gpx -o=output command" << std::endl;
+	std::cout << "Usage: " << name << " [-v] -m=media -g=gpx -o=output command" << std::endl;
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
@@ -83,7 +83,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --trim                    : Left trim crop (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each second) (default: 1))" << std::endl;
+	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 1000))" << std::endl;
 //	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --offset                  : Add a time offset (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --start-time              : Overwrite or set creation_time field" << std::endl;
@@ -361,7 +361,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	double path_thick = 3.0;
 	double path_border = 1.4;
 
-	int telemetry_rate = 0; // By default, no change
+	int telemetry_rate = 1000; // By default, update each 1 second
 
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
@@ -718,6 +718,14 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		return -1;
 	}
 
+	if ((command() == GPX2Video::CommandImage) || (command() == GPX2Video::CommandVideo)) {
+		if ((telemetry_method != TelemetrySettings::MethodNone) && (telemetry_rate == 0)) {
+			std::cout << "Invalid telemetry rate value!" << std::endl;
+			std::cout << std::endl;
+			return -1;
+		}
+	}
+
 	setProgressInfo((verbose > 0));
 
 	// CRF defined by user ?
@@ -768,6 +776,9 @@ int main(int argc, char *argv[], char *envp[]) {
 	TimeSync *timesync = NULL;
 	Extractor *extractor = NULL;
 	Telemetry *telemetry = NULL;
+
+	TelemetrySettings telemetrySettings;
+	RendererSettings rendererSettings;
 
 	struct event_base *evbase;
 
@@ -895,26 +906,26 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPX2Video::CommandCompute: {
 			// Telemetry settings
-			TelemetrySettings settings(
+			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					TelemetrySettings::FormatCSV);
 
-			telemetry = Telemetry::create(app, settings);
+			telemetry = Telemetry::create(app, telemetrySettings);
 			app.append(telemetry);
 		}
 		break;
 
 	case GPX2Video::CommandImage: {
 			// Renderer settings
-			RendererSettings rendererSettings(
+			rendererSettings = RendererSettings(
 					app.settings().mediafile(),
 					app.settings().layoutfile(),
 					app.settings().isTimeFactorAuto(),
 					app.settings().timeFactor());
 
 			// Telemetry settings
-			TelemetrySettings telemetrySettings(
+			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 
@@ -937,7 +948,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPX2Video::CommandVideo: {
 			// Renderer settings
-			RendererSettings rendererSettings(
+			rendererSettings = RendererSettings(
 					app.settings().mediafile(),
 					app.settings().layoutfile(),
 					app.settings().isTimeFactorAuto(),
@@ -951,7 +962,7 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().videoMaxBitrate());
 
 			// Telemetry settings
-			TelemetrySettings telemetrySettings(
+			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 

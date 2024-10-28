@@ -35,6 +35,11 @@ public:
 	);
 	virtual ~TelemetrySettings();
 
+	void setDataRange(const std::string &begin, const std::string &end);
+
+	const std::string& telemetryBegin(void) const;
+	const std::string& telemetryEnd(void) const;
+
 	const Format& telemetryFormat(void) const;
 
 	const Method& telemetryMethod(void) const;
@@ -43,7 +48,12 @@ public:
 
 	static const std::string getFriendlyName(const Method &method);
 
+	void dump(void) const;
+
 private:
+	std::string telemetry_begin_;
+	std::string telemetry_end_;
+
 	enum Format telemetry_format_;
 
 	enum Method telemetry_method_;

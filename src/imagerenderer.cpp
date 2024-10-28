@@ -212,11 +212,14 @@ bool ImageRenderer::run(void) {
 	app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
 
 	if (source_) {
+		uint64_t timestamp = (start_time * 1000) + (time_factor * timecode_ms);
+
 		// Save image
 		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
 
 		// Read GPX data
-		type = source_->retrieveNext(data_, (start_time * 1000) + (time_factor * timecode_ms));
+		timestamp -= (timestamp % telemetrySettings().telemetryRate());
+		type = source_->retrieveNext(data_, timestamp);
 
 		if (type == TelemetrySource::DataEof)
 			goto done;

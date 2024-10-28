@@ -558,7 +558,7 @@ $ ./gpx2video -m GH010434.MP4 -o track.gpx -f 3 extract
 In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.
 
 
-## Telemetry tools
+## Telemetry settings
 
 You can convert, filter and interpolate GPX data.
 
@@ -567,10 +567,36 @@ $ ./gpx2video -g ACTIVITY.gpx -o data.csv --telemetry-method=0 compute
 ```
 
 This tool permits to convert GPX to CSV and/or apply a filter on the GPS data (lat. and lon. values).
-Since gpx2video interpolates data each 1s in using different filters: linear, kalman or interpolation.
+Since gpx2video interpolates data in using different filters: linear, kalman or interpolation.
+
+By default, telemetry is updated each 1000 ms. You can overwrite this value :
+
+```bash
+$ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
+    --telemetry-method=3 --telemtry-rate=500 -o output.mp4 video
+```
 
 *Note: The result isn't yet satisfactory* 
 
+
+## Telemetry tools
+
+gpxtools can be used to filter, convert or compute GPX data.
+
+```bash
+$ ./gpxtools -i ACTIVITY.gpx --telemetry-method=0 -o data.csv convert
+$ ./gpxtools -i ACTIVITY.gpx --telemetry-method=0 -o data.csv compute
+```
+
+You can extract a part of your GPX data in using "--begin" and "--end" option.
+gpxtools can change samples rate too.
+
+```bash
+$ ./gpxtools -i ACTIVITY.gpx \
+    --begin "2024-10-28 09:00:00" --end "2024-10-28 10:00:00" \
+    --telemetry-method=3 --telemetry-rate=3000 \
+    -o data.gpx
+```
 
 ## Video encoder settings (in progress)
 

@@ -20,12 +20,15 @@ public:
 		Settings(
 			std::string gpx_file="", 
 			std::string output_file="",
+			std::string begin="",
+			std::string end="",
 			std::string from="",
 			std::string to="",
 			int offset=0,
 			int max_duration_ms=0,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
-			int telemetry_rate=0)
+			int telemetry_rate=0,
+			TelemetrySettings::Format telemtry_format=TelemetrySettings::FormatAuto)
 			: GPXApplication::Settings(
 					gpx_file, output_file,
 					from, to, 
@@ -33,7 +36,16 @@ public:
 					max_duration_ms)
 			, TelemetrySettings(
 					telemetry_method, 
-					telemetry_rate) {
+					telemetry_rate,
+					telemtry_format) {
+			setDataRange(begin, end);
+		}
+
+		void dump(void) const {
+			std::cout << "GPXTools settings: " << std::endl;
+
+			GPXApplication::Settings::dump();
+			TelemetrySettings::dump();
 		}
 	};
 

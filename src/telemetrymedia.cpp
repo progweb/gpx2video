@@ -113,6 +113,8 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 	: eof_(false)
 	, enable_(false)
 	, offset_(0) 
+	, begin_(0)
+	, end_(0)
 	, from_(0)
 	, to_(0) {
 	log_call();
@@ -140,6 +142,43 @@ void TelemetrySource::setMethod(enum TelemetrySettings::Method method) {
 	log_call();
 
 	method_ = method;
+}
+
+
+bool TelemetrySource::setDataRange(std::string begin, std::string end) {
+	struct tm time;
+
+	log_call();
+
+	if (!begin.empty()) {
+		memset(&time, 0, sizeof(time));
+
+		if (::strptime(begin.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
+			log_error("Parse begin date range failure");
+			return false;
+		}
+
+		time.tm_isdst = -1;
+
+		// Convert begin range time in UTC time
+		begin_ = timelocal(&time) * 1000;
+	}
+
+	if (!end.empty()) {
+		memset(&time, 0, sizeof(time));
+
+		if (::strptime(end.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
+			log_error("Parse end date range failure");
+			return false;
+		}
+
+		time.tm_isdst = -1;
+
+		// Convert end range time in UTC time
+		end_ = timelocal(&time) * 1000;
+	}
+
+	return true;
 }
 
 
@@ -564,7 +603,42 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 }
 
 
-enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
+enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
+	TelemetrySource::Point point;
+
+	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
+
+	log_call();
+
+	point.setType(TelemetryData::TypeMeasured);
+
+	type = read(point);
+
+	if ((end_ != 0) && (point.timestamp() > (end_ + offset_))) {
+		// Simulate end of gpx data stream
+		type = TelemetrySource::DataEof;
+		goto eof;
+	}
+
+	if (type != TelemetrySource::DataEof)
+		push(point);
+	else if (eof_) {
+		type = TelemetrySource::DataEof;
+		goto eof;
+	}
+	else {
+		eof_ = true;
+		type = TelemetrySource::DataAgain;
+	}
+
+	update(data);
+
+eof:
+	return type;
+}
+
+
+enum TelemetrySource::Data TelemetrySource::retrieveFirst_i(TelemetryData &data) {
 	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 	log_call();
@@ -588,32 +662,18 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 }
 
 
-enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
-	TelemetrySource::Point point;
+enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
+	enum TelemetrySource::Data result;
 
-	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
+	result = retrieveFirst_i(data);
 
-	log_call();
+	if (begin_ != 0) {
+		result = retrieveNext(data, begin_ - offset_);
 
-	point.setType(TelemetryData::TypeMeasured);
-
-	type = read(point);
-
-	if (type != TelemetrySource::DataEof)
-		push(point);
-	else if (eof_) {
-		type = TelemetrySource::DataEof;
-		goto eof;
-	}
-	else {
-		eof_ = true;
-		type = TelemetrySource::DataAgain;
+		data.reset();
 	}
 
-	update(data);
-
-eof:
-	return type;
+	return result;
 }
 
 
@@ -641,11 +701,11 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 
 	log_call();
 
-	// Fix timestamp
+	// Apply timestamp offset
 	if (timestamp != (uint64_t) -1) {
 		timestamp += offset_;
-		timestamp = timestamp / 1000;
-		timestamp = timestamp * 1000;
+//		timestamp = timestamp / 1000;
+//		timestamp = timestamp * 1000;
 	}
 
 	// Last point
@@ -740,10 +800,14 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, enum Telemet
 	else if (ext == ".csv") {
 		source = new CSV(filename);
 	}
+	else
+		std::cout << "Can't determine '" << filename << "' input file format!" << std::endl;
 
 	// Init
-	source->setMethod(method);
-	source->retrieveFrom(data);
+	if (source != NULL) {
+		source->setMethod(method);
+		source->retrieveFrom(data);
+	}
 
 	return source;
 }

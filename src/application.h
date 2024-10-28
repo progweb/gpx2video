@@ -56,6 +56,12 @@ public:
 			return max_duration_ms_;
 		}
 
+		void dump(void) const {
+			std::cout << "Application settings:" << std::endl;
+			std::cout << "  input file: " << input_file_ << std::endl;	
+			std::cout << "  output file: " << output_file_ << std::endl;	
+		}
+
 //		const TelemetrySettings::Method& telemetryMethod(void) const {
 //			return telemetry_method_;
 //		}
