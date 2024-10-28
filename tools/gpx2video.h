@@ -43,6 +43,7 @@ public:
 			std::string from="",
 			std::string to="",
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
+			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
 			ExportCodec::Codec video_codec=ExportCodec::CodecH264,
@@ -79,6 +80,7 @@ public:
 			, path_thick_(path_thick)
 			, path_border_(path_border)
 	   		, extract_format_(extract_format) {
+			TelemetrySettings::setFilter(telemetry_filter);
 		}
 
 		const std::string& gpxfile(void) const {

@@ -53,6 +53,7 @@ static const struct option options[] = {
 	{ "gpx-to",                required_argument, 0, 0 },
 	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
+	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 0 },
@@ -386,6 +387,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	ExtractorSettings::Format extract_format = ExtractorSettings::FormatDump;
 
+	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterNone;
 	TelemetrySettings::Method telemetry_method = TelemetrySettings::MethodInterpolate;
 
 	bool gpxfile_required = false;
@@ -459,6 +461,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "extract-format-list")) {
 				setCommand(GPX2Video::CommandFormat);
 				return 0;
+			}
+			else if (s && !strcmp(s, "telemetry-filter")) {
+				telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-method")) {
 				telemetry_method = (TelemetrySettings::Method) atoi(optarg);
@@ -752,6 +757,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		gpx_from,
 		gpx_to,
 		extract_format,
+		telemetry_filter,
 		telemetry_method,
 		telemetry_rate,
 		video_codec,
@@ -911,6 +917,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryRate(),
 					TelemetrySettings::FormatCSV);
 
+			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
 			telemetry = Telemetry::create(app, telemetrySettings);
 			app.append(telemetry);
 		}
@@ -928,6 +936,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
+
+			telemetrySettings.setFilter(app.settings().telemetryFilter());
 
 			// Create cache directories
 			cache = Cache::create(app);
@@ -965,6 +975,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
+
+			telemetrySettings.setFilter(app.settings().telemetryFilter());
 
 			// Create cache directories
 			cache = Cache::create(app);

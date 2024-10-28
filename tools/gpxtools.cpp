@@ -35,6 +35,7 @@ static const struct option options[] = {
 	{ "end",                   required_argument, 0, 0 },
 	{ "from",                  required_argument, 0, 0 },
 	{ "to",                    required_argument, 0, 0 },
+	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 'r' },
@@ -128,6 +129,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	std::string to, from; 	// Telmetry range compute
 
 	TelemetrySettings::Format format = TelemetrySettings::FormatAuto;
+	TelemetrySettings::Filter filter = TelemetrySettings::FilterNone;
 	TelemetrySettings::Method method = TelemetrySettings::MethodNone;
 
 	const std::string name(argv[0]);
@@ -155,6 +157,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "to")) {
 				to = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-filter")) {
+				filter = (TelemetrySettings::Filter) atoi(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-method")) {
 				method = (TelemetrySettings::Method) atoi(optarg);
@@ -246,6 +251,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		to,
 		0,
 		0,
+		filter,
 		method,
 		rate,
 		format)
@@ -303,6 +309,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings.setDataRange(
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
+			settings.setFilter(TelemetrySettings::FilterNone);
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);
@@ -320,6 +327,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings.setDataRange(
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
+			settings.setFilter(app.settings().telemetryFilter());
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);

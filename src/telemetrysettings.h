@@ -17,6 +17,14 @@ public:
 		FormatCount,
 	};
 
+	enum Filter {
+		FilterNone = 0,
+
+		FilterTest,
+
+		FilterCount
+	};
+
 	enum Method {
 		MethodNone = 0,
 
@@ -37,11 +45,14 @@ public:
 
 	void setDataRange(const std::string &begin, const std::string &end);
 
+	void setFilter(enum Filter filter);
+
 	const std::string& telemetryBegin(void) const;
 	const std::string& telemetryEnd(void) const;
 
 	const Format& telemetryFormat(void) const;
 
+	const Filter& telemetryFilter(void) const;
 	const Method& telemetryMethod(void) const;
 
 	const int& telemetryRate(void) const;
@@ -56,6 +67,7 @@ private:
 
 	enum Format telemetry_format_;
 
+	enum Filter telemetry_filter_;
 	enum Method telemetry_method_;
 
 	int telemetry_rate_;

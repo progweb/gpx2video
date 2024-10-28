@@ -19,6 +19,7 @@ TelemetrySettings::TelemetrySettings(
 		: telemetry_begin_("")
 		, telemetry_end_("")
 		, telemetry_format_(format)
+		, telemetry_filter_(TelemetrySettings::FilterNone)
 		, telemetry_method_(method)
 		, telemetry_rate_(rate) {
 }
@@ -34,6 +35,11 @@ void TelemetrySettings::setDataRange(const std::string &begin, const std::string
 }
 
 
+void TelemetrySettings::setFilter(enum TelemetrySettings::Filter filter) {
+	telemetry_filter_ = filter;
+}
+
+
 const std::string& TelemetrySettings::telemetryBegin(void) const {
 	return telemetry_begin_;
 }
@@ -46,6 +52,11 @@ const std::string& TelemetrySettings::telemetryEnd(void) const {
 
 const TelemetrySettings::Format& TelemetrySettings::telemetryFormat(void) const {
 	return telemetry_format_;
+}
+
+
+const TelemetrySettings::Filter& TelemetrySettings::telemetryFilter(void) const {
+	return telemetry_filter_;
 }
 
 
@@ -152,6 +163,9 @@ bool Telemetry::start(void) {
 
 	// Telemetry data range
 	source_->setDataRange(settings().telemetryBegin(), settings().telemetryEnd());
+
+	// Telemetry data filter
+	source_->setFilter(settings().telemetryFilter());
 
 	// Telemetry compute range
 	source_->setFrom(app_.settings().from());

@@ -26,6 +26,7 @@ public:
 			std::string to="",
 			int offset=0,
 			int max_duration_ms=0,
+			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
 			TelemetrySettings::Format telemtry_format=TelemetrySettings::FormatAuto)
@@ -38,7 +39,8 @@ public:
 					telemetry_method, 
 					telemetry_rate,
 					telemtry_format) {
-			setDataRange(begin, end);
+			TelemetrySettings::setFilter(telemetry_filter);
+			TelemetrySettings::setDataRange(begin, end);
 		}
 
 		void dump(void) const {

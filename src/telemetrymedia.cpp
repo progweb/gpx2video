@@ -138,6 +138,13 @@ void TelemetrySource::setNumberOfPoints(const unsigned long number) {
 }
 
 
+void TelemetrySource::setFilter(enum TelemetrySettings::Filter filter) {
+	log_call();
+
+	filter_ = filter;
+}
+
+
 void TelemetrySource::setMethod(enum TelemetrySettings::Method method) {
 	log_call();
 
@@ -252,6 +259,55 @@ void TelemetrySource::push(TelemetrySource::Point &point) {
 
 	while (points_.size() > nbr_points_max_)
 		points_.pop_front();
+}
+
+
+void TelemetrySource::filter(void) {
+	size_t i;
+	size_t size;
+
+	double lat, lon;
+
+	TelemetrySource::Point pt, pt1, pt2;
+
+	if (points_.empty())
+		goto skip;
+
+	size = points_.size();
+
+	switch (filter_) {
+	case 1:
+		if (size > 2) {
+			double a = 6;
+			double a2 = a * a;
+			double z = 0.7;
+			double z2 = z * z;
+
+			double k1 = a + a2/(2*z2);
+			double k2 = a2/(4*z2);
+
+			i = size - 1;
+
+			pt = points_.at(i);
+			pt1 = points_.at(i - 1);
+			pt2 = points_.at(i - 2);
+
+			lat = (pt.latitude() + (pt1.latitude() * k1) - (pt2.latitude() * k2)) / (1 + a + k2);
+			lon = (pt.longitude() + (pt1.longitude() * k1) - (pt2.longitude() * k2)) / (1 + a + k2);
+
+			pt.setPosition(lat, lon);
+
+			points_[i] = pt;
+		}
+		break;
+
+	default:
+		// No filter
+		break;
+	}
+
+skip:
+	return;
 }
 
 
@@ -418,6 +474,9 @@ void TelemetrySource::update(TelemetryData &data) {
 			::update_velocity2d(kalman_, point.latitude(), point.longitude(), 1.0);
 		}
 
+		// Filter
+		filter();
+		// Then compute
 		compute(data);
 	}
 	else
@@ -557,6 +616,8 @@ void TelemetrySource::predict(TelemetryData &data) {
 		auto pos = points_.end();
 		points_.insert(std::prev(pos, 1), point);
 
+		// Filter
+		filter();
 		// Then compute
 		compute(data);
 	}
@@ -663,6 +724,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst_i(TelemetryData &data)
 
 
 enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
+	TelemetrySource::Point point;
+
 	enum TelemetrySource::Data result;
 
 	result = retrieveFirst_i(data);
@@ -671,6 +734,15 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 		result = retrieveNext(data, begin_ - offset_);
 
 		data.reset();
+
+		while (points_.size() > 2)
+			points_.pop_front();
+
+		for (size_t i=0; i<points_.size(); i++) {
+			point = points_[i];
+			point.reset();
+			points_[i] = point;
+		}
 	}
 
 	return result;
@@ -785,7 +857,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveLast(TelemetryData &data) {
 
 
 
-TelemetrySource * TelemetryMedia::open(const std::string &filename, enum TelemetrySettings::Method method) {
+TelemetrySource * TelemetryMedia::open(const std::string &filename, TelemetrySettings::Method method) {
 	TelemetryData data;
 
 	TelemetrySource *source = NULL;

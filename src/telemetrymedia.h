@@ -171,6 +171,7 @@ protected:
 
 	uint64_t ts_;
 	double lat_, lon_;
+	double raw_lat_, raw_lon_;
 	double ele_;
 	double temperature_;
 	int heartrate_;
@@ -235,10 +236,17 @@ public:
 
 		void setPosition(uint64_t ts, double lat, double lon) {
 			ts_ = ts;
-			lat_ = lat;
-			lon_ = lon;
+			raw_lat_ = lat;
+			raw_lon_ = lon;
+
+			setPosition(lat, lon);
 
 			setValue(Data::DataFix);
+		}
+
+		void setPosition(double lat, double lon) {
+			lat_ = lat;
+			lon_ = lon;
 		}
 
 		void setElevation(double ele) {
@@ -402,6 +410,7 @@ public:
 
 	void setNumberOfPoints(const unsigned long number);
 
+	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
 
 	bool setDataRange(std::string begin, std::string end);
@@ -428,6 +437,7 @@ public:
 	virtual enum Data read(Point &point) = 0;
 
 private:
+	void filter(void);
 	void push(Point &pt);
 	void compute(TelemetryData &data);
 	void update(TelemetryData &data);
@@ -460,6 +470,7 @@ protected:
 	uint64_t begin_, end_;
 	uint64_t from_, to_;
 
+	enum TelemetrySettings::Filter filter_;
 	enum TelemetrySettings::Method method_;
 
 	KalmanFilter kalman_;

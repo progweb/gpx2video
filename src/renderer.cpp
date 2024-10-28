@@ -75,6 +75,9 @@ bool Renderer::init(MediaContainer *container) {
 
 	// Telemetry data initialization
 	if (source_) {
+		// Telemetry filter
+		source_->setFilter(telemetrySettings().telemetryFilter());
+
 		// Telemetry data limits
 		source_->setFrom(app_.settings().from());
 		source_->setTo(app_.settings().to());
