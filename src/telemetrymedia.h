@@ -155,7 +155,6 @@ public:
 	}
 
 	bool hasValue(Data type = DataAll) const {
-//		return ((has_value_ & type) == type);
 		return ((has_value_ & type) != 0);
 	}
 
@@ -405,10 +404,117 @@ public:
 		}
 	};
 
+	class PointPool {
+	public:
+		PointPool()
+			: nbr_points_max_(0)
+			, index_(-1) {
+		}
+
+		virtual ~PointPool() {
+		}
+
+		void setNumberOfPoints(const unsigned long number) {
+			nbr_points_max_ = number;
+		}
+
+		bool empty(void) {
+			return (size() == 0);
+		}
+
+		size_t count(void) {
+			return points_.size();
+		}
+
+		size_t size(void) {
+			size_t size = points_.size();
+
+			if (index_ > 0)
+				size -= index_;
+
+			return size;
+		}
+
+		size_t backlog(void) {
+			return index_;
+		}
+
+		void seek(int offset) {
+			index_ += offset;
+		}
+
+		void clear(void) {
+			index_ = -1;
+
+			points_.clear();
+		}
+
+		void insert(Point &point) {
+			auto pos = points_.begin();
+			points_.insert(std::next(pos, index_ + 1), point);
+		}
+
+		void push(Point &point) {
+			points_.emplace_back(point);
+
+			if (nbr_points_max_ > 0) {
+				while (points_.size() > nbr_points_max_) {
+					index_--;
+					points_.pop_front();
+				}
+			}
+
+			if (index_ < 0)
+				index_ = -1;
+		}
+
+		Point& last(void) {
+			return points_.back();
+		}
+
+		void reset(void) {
+			TelemetrySource::Point point;
+
+			index_ = 0;
+
+			while (points_.size() > 2)
+				points_.pop_front();
+
+			for (size_t i=0; i<points_.size(); i++) {
+				point = points_[i];
+				point.reset();
+				points_[i] = point;
+			}
+		}
+
+		void dump(void) {
+			std::cout << "Pool info:" << std::endl;
+			std::cout << "  index: " << index_ << std::endl;
+			std::cout << "  size/count: " << size() << "/" << count() << std::endl;
+		}
+
+		Point& operator [](int index) {
+			return points_.at(index_ + index);
+		}
+
+		Point operator [](int index) const {
+			return points_.at(index_ + index);
+		}
+
+	private:
+		size_t nbr_points_max_;
+
+		int index_;
+
+		std::deque<Point> points_;
+	};
+
 	TelemetrySource(const std::string &filename);
 	virtual ~TelemetrySource();
 
 	void setNumberOfPoints(const unsigned long number);
+
+	void skipBadPoint(bool check);
 
 	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
@@ -439,9 +545,11 @@ public:
 private:
 	void filter(void);
 	void push(Point &pt);
+	void insert(Point &pt);
 	void compute(TelemetryData &data);
 	void update(TelemetryData &data);
-	void predict(TelemetryData &data);
+	void predict(TelemetryData &data, uint64_t timestamp);
+	void smooth(TelemetryData &data);
 
 	void enableCompute(void) {
 		enable_ = true;
@@ -458,13 +566,13 @@ protected:
 
 	TelemetryData start_;
 
-	std::deque<Point> points_;
-
-	unsigned long nbr_points_max_;
+	PointPool pool_;
 
 	bool eof_;
 	bool enable_;
+	bool check_;
 
+	int rate_;
 	int64_t offset_;
 
 	uint64_t begin_, end_;

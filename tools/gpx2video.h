@@ -43,6 +43,7 @@ public:
 			std::string from="",
 			std::string to="",
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
+			bool telemetry_check=false,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
@@ -59,6 +60,7 @@ public:
 					offset,
 					max_duration_ms)
 			, TelemetrySettings(
+					telemetry_check,
 					telemetry_method, 
 					telemetry_rate)
 			, RendererSettings(

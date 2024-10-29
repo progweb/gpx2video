@@ -64,6 +64,8 @@ void TelemetryData::reset(bool all) {
 
 		grade_ = 0.0;
 		speed_ = 0.0;
+	
+		has_value_ = TelemetryData::DataNone;
 	}
 
 	distance_ = 0.0;
@@ -76,8 +78,6 @@ void TelemetryData::reset(bool all) {
 
 	lap_ = 1;
 	in_lap_ = false;
-
-	has_value_ = TelemetryData::DataNone;
 }
 
 
@@ -119,9 +119,12 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 	, to_(0) {
 	log_call();
 
-	setNumberOfPoints(100);
+	pool_.setNumberOfPoints(100);
 
     stream_ = std::ifstream(filename);
+
+	check_ = false;
+	method_ = TelemetrySettings::MethodNone;
 
 	kalman_ = alloc_filter_velocity2d(10.0);
 }
@@ -134,7 +137,14 @@ TelemetrySource::~TelemetrySource() {
 void TelemetrySource::setNumberOfPoints(const unsigned long number) {
 	log_call();
 
-	nbr_points_max_ = number;
+	pool_.setNumberOfPoints(number);
+}
+
+
+void TelemetrySource::skipBadPoint(bool check) {
+	log_call();
+
+	check_ = check;
 }
 
 
@@ -254,30 +264,37 @@ void TelemetrySource::setTimeOffset(const int64_t& offset) {
 }
 
 
-void TelemetrySource::push(TelemetrySource::Point &point) {
-	points_.emplace_back(point);
+void TelemetrySource::insert(TelemetrySource::Point &point) {
+	// Insert point
+	pool_.insert(point);
 
-	while (points_.size() > nbr_points_max_)
-		points_.pop_front();
+	// Move to inserted point
+	pool_.seek(1);
+}
+
+
+void TelemetrySource::push(TelemetrySource::Point &point) {
+	// Append point
+	pool_.push(point);
+
+	// Move to next point
+	pool_.seek(1);
 }
 
 
 void TelemetrySource::filter(void) {
-	size_t i;
-	size_t size;
+	int n, count;
 
 	double lat, lon;
 
 	TelemetrySource::Point pt, pt1, pt2;
 
-	if (points_.empty())
-		goto skip;
+	log_call();
 
-	size = points_.size();
-
+	// Filter method
 	switch (filter_) {
 	case 1:
-		if (size > 2) {
+		if ((pool_.backlog() > 1) && (pool_.size() > 0)) {
 			double a = 6;
 			double a2 = a * a;
 			double z = 0.7;
@@ -286,19 +303,62 @@ void TelemetrySource::filter(void) {
 			double k1 = a + a2/(2*z2);
 			double k2 = a2/(4*z2);
 
-			i = size - 1;
-
-			pt = points_.at(i);
-			pt1 = points_.at(i - 1);
-			pt2 = points_.at(i - 2);
+			pt = pool_[0];
+			pt1 = pool_[-1];
+			pt2 = pool_[-2];
 
 			lat = (pt.latitude() + (pt1.latitude() * k1) - (pt2.latitude() * k2)) / (1 + a + k2);
 			lon = (pt.longitude() + (pt1.longitude() * k1) - (pt2.longitude() * k2)) / (1 + a + k2);
 
 			pt.setPosition(lat, lon);
 
-			points_[i] = pt;
+			pool_[0] = pt;
 		}
+		break;
+
+	case 2:
+		if ((pool_.backlog() > 0) && (pool_.size() > 1)) {
+			pt1 = pool_[-1];
+			pt = pool_[0];
+			pt2 = pool_[1];
+
+			lat = (pt2.latitude() + pt1.latitude() + pt.latitude()) / 3.0;
+			lon = (pt2.longitude() + pt1.longitude() + pt.longitude()) / 3.0;
+
+			pt.setPosition(lat, lon);
+
+			pool_[0] = pt;
+		}
+		break;
+
+	case 3:
+		// Basic exponentiel smoothing
+		// s(t) = a * x(t) + (1 - a) * s(t - 1)
+		if ((pool_.backlog() > 0) && (pool_.size() > 0)) {
+			double a = 0.9;
+
+			count = 1;
+
+			for (n=0; n<count; n++) {
+				pt = pool_[0];
+				pt1 = pool_[-1];
+
+				lat = a * pt.latitude() + (1 - a) * pt1.latitude();
+				lon = a * pt.longitude() + (1 - a) * pt1.longitude();
+
+				pt.setPosition(lat, lon);
+
+				pool_[0] = pt;
+			}
+		}
+		break;
+
+	case 4:
+		// Double exponentiel smoothing
+		// s(0) = x(0)
+		// b(0) = x(1) - x(0)
+		// s(t) = a * x(t) + (1 - a) * [s(t - 1) + b(t - 1)]
+		// b(t) = B * (s(t) - s(t - 1) + (1 - B) * b(t - 1)
 		break;
 
 	default:
@@ -306,14 +366,16 @@ void TelemetrySource::filter(void) {
 		break;
 	}
 
-skip:
 	return;
 }
 
 
-void TelemetrySource::compute(TelemetryData &data) {
-	size_t k;
+void TelemetrySource::smooth(TelemetryData &data) {
+	(void) data;
+}
 
+
+void TelemetrySource::compute(TelemetryData &data) {
 	double dc, dt, dz;
 
 	double duration = 0;
@@ -333,19 +395,9 @@ void TelemetrySource::compute(TelemetryData &data) {
 
 	log_call();
 
-	// + .... | Pprev | Pcur | Pnext
-	// +      |       | Pn-1 |   Pn
-	// +-----------------------------
-	//   next:   k
-	//   cur:    k - 1;
-	k = points_.size() - 1;
-
-	if (!eof_ && (k > 1))
-		k -= 1;
-
 	if (data.ts_ != 0) {
-		curPoint = points_.at(k);
-		prevPoint = points_.at(k - 1);
+		curPoint = pool_[0];
+		prevPoint = pool_[-1];
 
 		// Copy computed data from previous point (except if already imported)
 		curPoint.restore(prevPoint);
@@ -446,11 +498,10 @@ void TelemetrySource::compute(TelemetryData &data) {
 			}
 		}
 
-		points_[k] = curPoint;
+		pool_[0] = curPoint;
 	}
 	else {
-		curPoint = points_.at(k - 1);
-		points_[k - 1] = curPoint;
+		curPoint = pool_[0];
 	}
 
 	data = curPoint;
@@ -458,40 +509,39 @@ void TelemetrySource::compute(TelemetryData &data) {
 
 
 void TelemetrySource::update(TelemetryData &data) {
-	size_t size;
-
 	log_call();
 
-	if (points_.empty())
+	if (pool_.empty())
 		goto skip;
 
-	size = points_.size();
-
-	if (size > 1) {
+	if (pool_.backlog() > 0) {
+		// Update filter
 		if (method_ == TelemetrySettings::MethodKalman) {
-			TelemetryData point = points_.back();
+			TelemetryData point = pool_[0];
 
 			::update_velocity2d(kalman_, point.latitude(), point.longitude(), 1.0);
 		}
 
 		// Filter
 		filter();
-
 		// Then compute
 		compute(data);
+		// Smooth
+		smooth(data);
 	}
-	else
-		data = points_.front();
+	else {
+		data = pool_[0];
+	}
 
 skip:
 	return;
 }
 
 
-void TelemetrySource::predict(TelemetryData &data) {
+void TelemetrySource::predict(TelemetryData &data, uint64_t timestamp) {
 	size_t size;
 
-	uint64_t timestamp;
+	uint64_t offset;
 
 	TelemetrySource::Point point;
 
@@ -501,20 +551,18 @@ void TelemetrySource::predict(TelemetryData &data) {
 
 	log_call();
 
-	if (points_.empty())
+	if (pool_.empty())
 		return;
 
-	size = points_.size();
+	size = pool_.size();
 
 	if (size <= 1) {
 		log_error("Predict failure, not enough point!");
 		return;
 	}
 
-	// Compute timestamp for the new predict point
-	timestamp = data.ts_ / 1000;
-	timestamp = timestamp * 1000;
-	timestamp += 1000;
+	// Compute timestamp offset for the new predict point
+	offset = timestamp - data.ts_;
 
 	if ((method == TelemetrySettings::MethodLinear) && (size == 2))
 		method = TelemetrySettings::MethodInterpolate;
@@ -524,8 +572,8 @@ void TelemetrySource::predict(TelemetryData &data) {
 	case TelemetrySettings::MethodInterpolate:
 		double lat, lon;
 
-		prevPoint = points_.at(size - 2);
-		nextPoint = points_.at(size - 1);
+		prevPoint = pool_[0];
+		nextPoint = pool_[1];
 
 		// Create a new point
 		point.setType(TelemetryData::TypePredicted);
@@ -560,8 +608,8 @@ void TelemetrySource::predict(TelemetryData &data) {
 		break;
 
 	case TelemetrySettings::MethodLinear:
-		prevPoint = points_.at(size - 3);
-		curPoint = points_.at(size - 2);
+		prevPoint = pool_[-1];
+		curPoint = pool_[0];
 
 		// Create a new point
 		point.setType(TelemetryData::TypePredicted);
@@ -592,7 +640,7 @@ void TelemetrySource::predict(TelemetryData &data) {
 
 	case TelemetrySettings::MethodSample:
 		// Create a new point (just copy previous & update timestamp)
-		point = points_.at(size - 2);
+		point = pool_[0];
 
 		point.setType(TelemetryData::TypePredicted);
 
@@ -603,24 +651,27 @@ void TelemetrySource::predict(TelemetryData &data) {
 	default:
 		data.type_ = TelemetryData::TypeUnchanged;
 
-		data.ts_ += 1000;
+		data.ts_ = timestamp;
 		if (enable_) {
-			data.elapsedtime_ += 1000;
+			data.elapsedtime_ += offset;
 			if (data.speed_ >= 4.0)
-				data.ridetime_ += 1000;
+				data.ridetime_ += offset;
 		}
 		break;
 	}
 
 	// Insert new point
 	if (method_ != TelemetrySettings::MethodNone) {
-		auto pos = points_.end();
-		points_.insert(std::prev(pos, 1), point);
+		// Insert new point
+		insert(point);
 
 		// Filter
 		filter();
 		// Then compute
 		compute(data);
+		// Smooth
+		smooth(data);
+
 	}
 }
 
@@ -675,37 +726,40 @@ enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
 
 	log_call();
 
-	size = points_.size();
+	size = pool_.count();
 
 	// Next point
 	point.setType(TelemetryData::TypeMeasured);
 
 	type = read(point);
 
-	if ((end_ != 0) && (point.timestamp() > (end_ + offset_))) {
-		// Simulate end of gpx data stream
-		type = TelemetrySource::DataEof;
-		goto done;
-	}
+	if (type != TelemetrySource::DataEof) {
+		// Point in range ?
+		if ((end_ != 0) && (point.timestamp() > (end_ + offset_))) {
+			// Simulate end of gpx data stream
+			type = TelemetrySource::DataEof;
+		}
+		// Point valid ?
+		else if (check_ && (size > 0)) {
+			previous = pool_.last();
 
-	// Point valid ?
-	if (size > 0) {
-		previous = points_[size - 1];
-
-		// With garmin devices, some points are same whereas timestamp is different!
-		if ((previous.raw_lat_ == point.raw_lat_) && (previous.raw_lon_ == point.raw_lon_))
-			goto done;
+			// With garmin devices, some points are same whereas timestamp is different!
+			if ((previous.raw_lat_ == point.raw_lat_) && (previous.raw_lon_ == point.raw_lon_))
+				goto done;
+		}
 	}
 
 	if (type != TelemetrySource::DataEof)
 		push(point);
-	else if (eof_) {
+	else if (eof_) { // && pool_.empty()) {
 		type = TelemetrySource::DataEof;
 		goto done;
 	}
 	else {
 		eof_ = true;
 		type = TelemetrySource::DataAgain;
+
+		pool_.seek(1);
 	}
 
 	update(data);
@@ -716,6 +770,8 @@ done:
 
 
 enum TelemetrySource::Data TelemetrySource::retrieveFirst_i(TelemetryData &data) {
+	TelemetryData dummy = TelemetryData();
+
 	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 	log_call();
@@ -724,7 +780,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst_i(TelemetryData &data)
 
 	eof_ = false;
 
-	points_.clear();
+	// Pool initialization
+	pool_.clear();
 
 	data = TelemetryData();
 	type = retrieveData(data);
@@ -732,16 +789,16 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst_i(TelemetryData &data)
 	if (from_ == 0)
 		start_ = data;
 
-	data = TelemetryData();
-	type = retrieveData(data);
+	type = retrieveData(dummy);
+
+	// Pool pointer initialization
+	pool_.reset();
 
 	return type;
 }
 
 
 enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
-	TelemetrySource::Point point;
-
 	enum TelemetrySource::Data result;
 
 	result = retrieveFirst_i(data);
@@ -751,14 +808,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 
 		data.reset();
 
-		while (points_.size() > 2)
-			points_.pop_front();
-
-		for (size_t i=0; i<points_.size(); i++) {
-			point = points_[i];
-			point.reset();
-			points_[i] = point;
-		}
+		pool_.reset();
 	}
 
 	return result;
@@ -790,14 +840,14 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 	log_call();
 
 	// Apply timestamp offset
-	if (timestamp != (uint64_t) -1) {
+	if (timestamp != (uint64_t) -1)
 		timestamp += offset_;
-//		timestamp = timestamp / 1000;
-//		timestamp = timestamp * 1000;
-	}
 
 	// Last point
-	nextPoint = points_.back();
+	if (pool_.size() > 1)
+		nextPoint = pool_[1];
+
+//	printf(" <ts %lu> ", timestamp);
 
 	// Read next points if need
 	do {
@@ -820,8 +870,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 				data.type_ = TelemetryData::TypeUnchanged;
 			}
 			else if (timestamp < nextPoint.timestamp()) {
-//				printf(" <predict> ");
-				predict(data);
+//				printf(" <predict %lu %lu> ", timestamp, nextPoint.timestamp());
+				predict(data, timestamp);
 			}
 			else {
 //				printf(" <next> ");
@@ -829,13 +879,16 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 				if (this->retrieveData(data) == TelemetrySource::DataEof)
 					goto eof;
 	
-				nextPoint = points_.back();
+				if (pool_.size() > 1)
+					nextPoint = pool_[1];
 			}
 		}
 
 		if ((from_ == 0) || (from_ < data.timestamp()))
 			enableCompute();
 	} while ((timestamp != (uint64_t) -1) && (data.timestamp() < timestamp));
+
+//	printf("\n");
 
 	return type;
 

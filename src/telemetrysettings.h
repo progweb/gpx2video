@@ -37,6 +37,7 @@ public:
 	};
 
 	TelemetrySettings(
+			bool check=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
 			int rate=0,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
@@ -52,6 +53,7 @@ public:
 
 	const Format& telemetryFormat(void) const;
 
+	const bool& telemetryCheck(void) const;
 	const Filter& telemetryFilter(void) const;
 	const Method& telemetryMethod(void) const;
 
@@ -67,6 +69,7 @@ private:
 
 	enum Format telemetry_format_;
 
+	bool telemetry_check_;
 	enum Filter telemetry_filter_;
 	enum Method telemetry_method_;
 

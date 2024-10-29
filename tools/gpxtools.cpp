@@ -35,6 +35,7 @@ static const struct option options[] = {
 	{ "end",                   required_argument, 0, 0 },
 	{ "from",                  required_argument, 0, 0 },
 	{ "to",                    required_argument, 0, 0 },
+	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
@@ -56,6 +57,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --end                     : Set end time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --from                    : Set begin time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --to                      : Set end time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
 	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
@@ -117,6 +119,8 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
 
+	bool check = false;
+
 	int rate = 0; // By default, no change
 	int verbose = 0;
 
@@ -157,6 +161,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "to")) {
 				to = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-check")) {
+				check = (std::string(optarg) == "true");
 			}
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				filter = (TelemetrySettings::Filter) atoi(optarg);
@@ -238,8 +245,10 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	}
 
 	// Override some settings
-	if (command() == GPXTools::CommandConvert)
+	if (command() == GPXTools::CommandConvert) {
+		check = false;
 		method = TelemetrySettings::MethodNone;
+	}
 
 	// Save app settings
 	setSettings(GPXTools::Settings(
@@ -251,6 +260,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		to,
 		0,
 		0,
+		check,
 		filter,
 		method,
 		rate,
@@ -302,6 +312,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPXTools::CommandConvert: {
 			// Telemetry settings
 			settings = TelemetrySettings(
+					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					app.settings().telemetryFormat());
@@ -320,6 +331,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPXTools::CommandCompute: {
 			// Telemetry settings
 			settings = TelemetrySettings(
+					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					app.settings().telemetryFormat());

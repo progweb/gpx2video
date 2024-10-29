@@ -26,6 +26,7 @@ public:
 			std::string to="",
 			int offset=0,
 			int max_duration_ms=0,
+			bool telemetry_check=false,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
@@ -36,6 +37,7 @@ public:
 					offset,
 					max_duration_ms)
 			, TelemetrySettings(
+					telemetry_check,
 					telemetry_method, 
 					telemetry_rate,
 					telemtry_format) {

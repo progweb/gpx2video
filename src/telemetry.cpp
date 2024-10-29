@@ -13,12 +13,14 @@
 //--------------------
 
 TelemetrySettings::TelemetrySettings(
+		bool check,
 		TelemetrySettings::Method method,
 		int rate,
 		TelemetrySettings::Format format)
 		: telemetry_begin_("")
 		, telemetry_end_("")
 		, telemetry_format_(format)
+		, telemetry_check_(check)
 		, telemetry_filter_(TelemetrySettings::FilterNone)
 		, telemetry_method_(method)
 		, telemetry_rate_(rate) {
@@ -54,6 +56,10 @@ const TelemetrySettings::Format& TelemetrySettings::telemetryFormat(void) const 
 	return telemetry_format_;
 }
 
+
+const bool& TelemetrySettings::telemetryCheck(void) const {
+	return telemetry_check_;
+}
 
 const TelemetrySettings::Filter& TelemetrySettings::telemetryFilter(void) const {
 	return telemetry_filter_;
@@ -93,6 +99,7 @@ const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Me
 
 void TelemetrySettings::dump(void) const {
 	std::cout << "Telemetry settings: " << std::endl;
+	std::cout << "  skip bad point: " << (telemetry_check_ ? "true" : "false") << std::endl;
 	std::cout << "  begin data range: " << telemetry_begin_ << std::endl;
 	std::cout << "  end data range: " << telemetry_end_ << std::endl;
 }
@@ -165,6 +172,7 @@ bool Telemetry::start(void) {
 	source_->setDataRange(settings().telemetryBegin(), settings().telemetryEnd());
 
 	// Telemetry data filter
+	source_->skipBadPoint(settings().telemetryCheck());
 	source_->setFilter(settings().telemetryFilter());
 
 	// Telemetry compute range
@@ -311,7 +319,7 @@ bool Telemetry::run(void) {
 	// Next point
 	if (settings().telemetryMethod() != TelemetrySettings::MethodNone) {
 		if (rate != 0)
-			timecode_ms_ += rate; // 1000 / rate;
+			timecode_ms_ += rate;
 		else
 			timecode_ms_ += 1000;
 	}

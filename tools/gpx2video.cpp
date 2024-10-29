@@ -53,6 +53,7 @@ static const struct option options[] = {
 	{ "gpx-to",                required_argument, 0, 0 },
 	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
+	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
@@ -83,6 +84,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- d, --duration                : Duration (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --trim                    : Left trim crop (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 1000))" << std::endl;
 //	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;
@@ -387,6 +389,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	ExtractorSettings::Format extract_format = ExtractorSettings::FormatDump;
 
+	bool telemetry_check = false;
 	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterNone;
 	TelemetrySettings::Method telemetry_method = TelemetrySettings::MethodInterpolate;
 
@@ -461,6 +464,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "extract-format-list")) {
 				setCommand(GPX2Video::CommandFormat);
 				return 0;
+			}
+			else if (s && !strcmp(s, "telemetry-check")) {
+				telemetry_check = (std::string(optarg) == "true");
 			}
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
@@ -757,6 +763,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		gpx_from,
 		gpx_to,
 		extract_format,
+		telemetry_check,
 		telemetry_filter,
 		telemetry_method,
 		telemetry_rate,
@@ -913,6 +920,7 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPX2Video::CommandCompute: {
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					TelemetrySettings::FormatCSV);
@@ -934,6 +942,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 
@@ -973,6 +982,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 

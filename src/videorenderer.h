@@ -28,6 +28,7 @@ protected:
 	unsigned int real_duration_ms_;
 
 	int64_t frame_time_ = 0;
+	uint64_t last_timecode_ms_ = 0;
 
 	time_t started_at_;
 

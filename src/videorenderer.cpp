@@ -22,6 +22,7 @@ VideoRenderer::VideoRenderer(GPXApplication &app,
 	frame_time_ = 0;
 	duration_ms_ = 0;
 	real_duration_ms_ = 0;
+	last_timecode_ms_ = 0;
 }
 
 
@@ -288,6 +289,7 @@ bool VideoRenderer::start(void) {
 //	}
 
 	started_at_ = now;
+	last_timecode_ms_ = 0;
 
 	// Create overlay buffer
 	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(video_stream->width(), video_stream->height(), 
@@ -489,7 +491,7 @@ bool VideoRenderer::run(void) {
 	}
 
 	// Compute real time by step, since time_factor is variable
-	real_duration_ms = round(av_q2d(av_div_q(av_make_q(1000, 1), encoder_->settings().videoParams().frameRate())));
+	real_duration_ms = timecode_ms - last_timecode_ms_;
 	real_duration_ms_ += time_factor * real_duration_ms;
 
 	// Dump GPMF data
@@ -504,8 +506,10 @@ bool VideoRenderer::run(void) {
 
 	encoder_->writeFrame(frame, video_time);
 
+	// Next frame
 	frame_time_++;
 
+	last_timecode_ms_ = timecode_ms;
 
 	schedule();
 
