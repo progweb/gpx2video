@@ -93,6 +93,7 @@ include_directories(
 	${Qt5Core_INCLUDE_DIR}
 	${Qt5Gui_INCLUDE_DIR}
 	${Qt5Widgets_INCLUDE_DIR}
+    ${FFMPEG_INCLUDE_DIRS}
 )
 
 #
@@ -169,3 +170,6 @@ add_subdirectory(layoutlib)
 add_subdirectory(tools)
 #add_subdirectory(tests)
 
+
+# build must include assets
+file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/tools/)
