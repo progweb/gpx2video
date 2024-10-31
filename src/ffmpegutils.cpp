@@ -136,3 +136,41 @@ AVPixelFormat FFmpegUtils::overrideFFmpegDeprecatedPixelFormat(const AVPixelForm
 	return pix_fmt;
 }
 
+
+uint8_t *FFmpegUtils::newSideData(AVStream* stream, enum AVPacketSideDataType type, size_t size) {
+#ifdef HAVE_FFMPEG_API_SIDE_DATA
+	const AVPacketSideData *sd = NULL;
+
+	AVCodecParameters *codecpar = stream->codecpar;
+
+	sd = av_packet_side_data_new(&codecpar->coded_side_data, &codecpar->nb_coded_side_data,
+			type, size, 0);
+
+	return sd->data;
+#else
+	return av_stream_new_side_data(stream, type, size);
+#endif
+}
+
+
+uint8_t *FFmpegUtils::getSideData(AVStream* stream, enum AVPacketSideDataType type) {
+#ifdef HAVE_FFMPEG_API_SIDE_DATA
+	const AVPacketSideData *sd = NULL;
+
+	AVCodecParameters *codecpar = stream->codecpar;
+
+	sd = av_packet_side_data_get(codecpar->coded_side_data, codecpar->nb_coded_side_data, type);
+
+	if (sd)
+		return sd->data;
+
+	return NULL;
+#else
+	uint8_t *data;
+
+	data = av_stream_get_side_data(stream, type, NULL);
+
+	return data;
+#endif
+}
+

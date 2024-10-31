@@ -1,9 +1,10 @@
+#include "ffmpegutils.h"
 #include "audioparams.h"
 
 
 AudioParams::AudioParams() 
 	: sample_rate_(0)
-	, format_(AudioParams::FormatInvalid) 
+	, format_(AudioParams::FormatInvalid)
 	, channel_layout_(0) {
 }
 
@@ -37,7 +38,15 @@ const uint64_t& AudioParams::channelLayout(void) const {
 
 
 int AudioParams::channelCount() const { 
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+	AVChannelLayout channel_layout = {};
+
+	av_channel_layout_from_mask(&channel_layout, channelLayout());
+
+	return channel_layout.nb_channels;
+#else
 	return av_get_channel_layout_nb_channels(channelLayout());
+#endif
 }   
 
 

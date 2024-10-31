@@ -413,8 +413,12 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 
 	case AVMEDIA_TYPE_AUDIO:
 		codec_context->sample_rate = settings().audioParams().sampleRate();
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+		av_channel_layout_from_mask(&codec_context->ch_layout, settings().audioParams().channelLayout());
+#else
 		codec_context->channel_layout = settings().audioParams().channelLayout();
 		codec_context->channels = av_get_channel_layout_nb_channels(codec_context->channel_layout);
+#endif
 		// take first format from list of supported formats
 		codec_context->sample_fmt = encoder->sample_fmts[0];
 		codec_context->time_base = (AVRational) {1, codec_context->sample_rate};
@@ -483,10 +487,12 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 
 
 void Encoder::setRotation(double theta) {
+	uint8_t *displaymatrix;
+
 	if (theta == 0)
 		return;
 
-	uint8_t *displaymatrix = av_stream_new_side_data(video_stream_, AV_PKT_DATA_DISPLAYMATRIX, sizeof(int32_t) * 9);
+	displaymatrix = FFmpegUtils::newSideData(video_stream_, AV_PKT_DATA_DISPLAYMATRIX, sizeof(int32_t) * 9);
 
 	av_display_rotation_set((int32_t*) displaymatrix, theta);
 
@@ -535,12 +541,20 @@ bool Encoder::writeFrame(FramePtr frame, AVRational time) {
 //printf("format = %d\n", encoded_frame->format);
 	// Set interlacing
 	if (frame->videoParams().interlacing() != VideoParams::InterlaceNone) {
+#ifdef HAVE_FFMPEG_FLAGS_FRAME
+		encoded_frame->flags |= AV_FRAME_FLAG_INTERLACED;
+#else
 		encoded_frame->interlaced_frame = 1;
+#endif
 
 		if (frame->videoParams().interlacing() == VideoParams::InterlacedTopFirst)
+#ifdef HAVE_FFMPEG_FLAGS_FRAME
+			encoded_frame->flags |= AV_FRAME_FLAG_TOP_FIELD_FIRST;
+#else
 			encoded_frame->top_field_first = 1;
 		else
 			encoded_frame->top_field_first = 0;
+#endif
 	}
 
 	// Create encoded buffer

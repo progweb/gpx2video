@@ -1,6 +1,6 @@
-project(GPX2VIDEO)
+cmake_minimum_required(VERSION 3.5)
 
-cmake_minimum_required(VERSION 2.9)
+project(GPX2VIDEO)
 
 include(GNUInstallDirs)
 include(CheckFunctionExists)
@@ -89,6 +89,7 @@ include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 	${CMAKE_CURRENT_BINARY_DIR}
+	${FFMPEG_INCLUDE_DIRS}
 	${OIIO_INCLUDE_DIRS}
 	${Qt5Core_INCLUDE_DIR}
 	${Qt5Gui_INCLUDE_DIR}

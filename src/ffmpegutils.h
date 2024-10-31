@@ -19,6 +19,13 @@ extern "C" {
 #include "videoparams.h"
 
 
+#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(59, 24, 100)
+#define HAVE_FFMPEG_CH_LAYOUT
+#define HAVE_FFMPEG_FLAGS_FRAME
+#define HAVE_FFMPEG_API_SIDE_DATA
+#endif
+
+
 class FFmpegUtils {
 public:
 	static const AVCodec * getEncoder(ExportCodec::Codec c);
@@ -30,6 +37,9 @@ public:
 	static AVPixelFormat getFFmpegPixelFormat(const VideoParams::Format &format, int nb_channels);
 
 	static AVPixelFormat overrideFFmpegDeprecatedPixelFormat(const AVPixelFormat &pix_fmt);
+
+	static uint8_t *newSideData(AVStream* stream, enum AVPacketSideDataType type, size_t size);
+	static uint8_t *getSideData(AVStream* stream, enum AVPacketSideDataType type);
 };
 
 #endif

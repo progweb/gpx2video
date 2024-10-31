@@ -100,8 +100,13 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 					// Read fist frame and retrieve some metadata
 					if (instance.getFrame(packet, frame) >= 0) {
 						// Check if video is interlaced and what field dominance it has if so
+#ifdef HAVE_FFMPEG_FLAGS_FRAME
+						if ((frame->flags & AV_FRAME_FLAG_INTERLACED) != 0) {
+							if ((frame->flags & AV_FRAME_FLAG_TOP_FIELD_FIRST) != 0)
+#else
 						if (frame->interlaced_frame) {
 							if (frame->top_field_first)
+#endif
 								interlacing = VideoParams::InterlacedTopFirst;
 							else
 								interlacing = VideoParams::InterlacedBottomFirst;
@@ -152,12 +157,21 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 			else if (avstream->codecpar->codec_type == AVMEDIA_TYPE_AUDIO) {
 				AudioStreamPtr audio_stream = std::make_shared<AudioStream>();
 
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+				AVChannelLayout channel_layout = avstream->codecpar->ch_layout;
+				if (!av_channel_layout_check(&channel_layout))
+					av_channel_layout_default(&channel_layout, channel_layout.nb_channels);
+
+				audio_stream->setChannelLayout(channel_layout.u.mask);
+				audio_stream->setNbChannels(avstream->codecpar->ch_layout.nb_channels);
+#else
 				uint64_t channel_layout = avstream->codecpar->channel_layout;
 				if (!channel_layout)
 					channel_layout = static_cast<uint64_t>(av_get_default_channel_layout(avstream->codecpar->channels));
 
 				audio_stream->setChannelLayout(channel_layout);
 				audio_stream->setNbChannels(avstream->codecpar->channels);
+#endif
 				audio_stream->setSampleRate(avstream->codecpar->sample_rate);
 
 				stream = audio_stream;
@@ -559,7 +573,7 @@ double Decoder::getRotation(AVStream* stream) {
 
 	entry = av_dict_get(stream->metadata, "rotate", NULL, 0);
 
-	displaymatrix = av_stream_get_side_data(stream, AV_PKT_DATA_DISPLAYMATRIX, NULL);
+	displaymatrix = FFmpegUtils::getSideData(stream, AV_PKT_DATA_DISPLAYMATRIX);
 
 	if (entry && (*entry->value) && strcmp(entry->value, "0")) {
 		char *tail;
@@ -581,10 +595,19 @@ double Decoder::getRotation(AVStream* stream) {
 
 
 uint64_t Decoder::validateChannelLayout(AVStream* stream) {
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+	AVChannelLayout channel_layout = stream->codecpar->ch_layout;
+
+	if (!av_channel_layout_check(&channel_layout))
+		av_channel_layout_default(&channel_layout, channel_layout.nb_channels);
+
+	return channel_layout.u.mask;
+#else
 	if (stream->codecpar->channel_layout)
 		return stream->codecpar->channel_layout;
 
 	return av_get_default_channel_layout(stream->codecpar->channels);
+#endif
 } 
 
 

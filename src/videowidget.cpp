@@ -295,7 +295,7 @@ void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name,
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
 
 	OIIO::ImageBuf *inbuf = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-	ok = img->read_image(type, inbuf->localpixels());
+	ok = img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, inbuf->localpixels());
 
 	if (!ok)
 		log_warn("Read '%s' image (%dx%d) failure!", name, spec.width, spec.height);

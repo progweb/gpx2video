@@ -535,17 +535,12 @@ void Map::build(void) {
 	width = (x2_ - x1_) * TILESIZE;
 	height = (y2_ - y1_) * TILESIZE;
 
+	// Create image buffer
+	OIIO::ImageSpec outspec(width, height, 4);
+	OIIO::ImageBuf image_buffer(outspec); 
+
 	// Create map
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
-	OIIO::ImageSpec outspec(width, height, 4);
-
-	outspec.tile_width = TILESIZE;
-	outspec.tile_height = TILESIZE;
-
-	if (out->open(filename_, outspec) == false) {
-		log_error("Build map failure, can't open '%s' file", filename_.c_str());
-		goto error;
-	}
 
 	// Collapse echo tile
 	for (Tile *tile : tiles_) {
@@ -564,7 +559,7 @@ void Map::build(void) {
 
 		// Create tile buffer
 		OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
-		img->read_image(type, buf.localpixels());
+		img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
 
 		// Add alpha channel
 		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
@@ -573,10 +568,19 @@ void Map::build(void) {
 
 		OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
 
-		// Image over
-		out->write_tile((tile->x() - x1_) * TILESIZE, (tile->y() - y1_) * TILESIZE, 0, type, outbuf.localpixels());
+		// Write tile
+		outbuf.specmod().x = (tile->x() - x1_) * TILESIZE;
+		outbuf.specmod().y = (tile->y() - y1_) * TILESIZE;
+		OIIO::ImageBufAlgo::over(image_buffer, outbuf, image_buffer, outbuf.roi());
 	}
 
+	// Write map file
+	if (out->open(filename_, image_buffer.spec()) == false) {
+		log_error("Build map failure, can't open '%s' file", filename_.c_str());
+		goto error;
+	}
+
+	out->write_image(image_buffer.spec().format, image_buffer.localpixels());
 	out->close();
 
 	// User requests track draw
@@ -660,7 +664,7 @@ bool Map::load(void) {
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
 
 	OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-	img->read_image(type, buf.localpixels());
+	img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
 
 	// Resize map
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);

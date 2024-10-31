@@ -10,7 +10,7 @@ run: build
 		-v $(PWD)/assets:/app/build/assets \
 		--workdir=/app/build \
 		--name=gpx2video \
-		gpx2video:latest \
+		gpx2video:debian-latest \
 		/bin/bash
 
 run-dev:

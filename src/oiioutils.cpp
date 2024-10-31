@@ -14,6 +14,9 @@ VideoParams::Format OIIOUtils::getFormatFromOIIOBaseType(OIIO::TypeDesc::BASETYP
 	case OIIO::TypeDesc::INT64:
 	case OIIO::TypeDesc::UINT64:
 	case OIIO::TypeDesc::STRING:
+#if OIIO_VERSION >= OIIO_MAKE_VERSION(2,5,0)
+	case OIIO::TypeDesc::USTRINGHASH:
+#endif
 	case OIIO::TypeDesc::PTR:
 	case OIIO::TypeDesc::LASTBASE:
 	case OIIO::TypeDesc::DOUBLE:

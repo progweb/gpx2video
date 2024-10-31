@@ -1,6 +1,7 @@
 #ifndef __GPX2VIDEO__TELEMETRYMEDIA_H__
 #define __GPX2VIDEO__TELEMETRYMEDIA_H__
 
+#include <cstdint>
 #include <fstream>
 #include <iostream>
 #include <string>

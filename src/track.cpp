@@ -541,7 +541,7 @@ bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const ch
 	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
 
 	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
-	img->read_image(type, buf.localpixels());
+	img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
 
 	// Compute divider
 	divider = (double) size / (double) spec.height;
