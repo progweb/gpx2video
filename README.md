@@ -137,12 +137,12 @@ $ ./gpx2video -m GOPR1860.MP4 --start-time "2021-12-08T09:56:26" --offset 300 ..
 
 ## Build
 
-### build in docker
+### Build in docker
 
 By default docker will use debian:11.10-slim as base image, but you can change it with BASE_IMAGE variable.
 ```bash
 make build-docker
-make build
+make build-gpx2video
 
 ```
 Copy video files to data folder then you can start docker and try it out
@@ -173,7 +173,6 @@ $ mkdir gpx2video/build
 $ cd gpx2video/build
 $ cmake ..
 $ make
-$ ln -s ../assets assets
 $ ./gpx2video -h
 ```
 

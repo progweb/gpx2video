@@ -21,7 +21,7 @@ RUN apt-get update \
         libswscale-dev \
         libopenexr-dev \
         libopenimageio-dev \
-        libgeographiclib-dev \
+        libgeographic.*-dev \
         libcairo2-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean all

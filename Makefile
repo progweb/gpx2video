@@ -1,42 +1,91 @@
-BASE_IMAGE ?=debian:11.10-slim
-DATA_DIR ?=$(PWD)/data
+BASE_IMAGE?=debian:11.10-slim
+BUILD_DIR=build
 
-all: bullseye ubuntu
 
-run: build
-	docker run --rm -it \
-		-v $(DATA_DIR):/app/data \
-		-v $(PWD)/build:/app/build \
-		-v $(PWD)/assets:/app/build/assets \
-		--workdir=/app/build \
-		--name=gpx2video \
-		gpx2video:debian-latest \
-		/bin/bash
+# 11: bullseye
+config-debian-bullseye:
+	$(eval BASE_IMAGE=debian:bullseye)
+	$(eval BUILD_DIR=build-debian-bullseye)
 
-run-dev:
-	docker run --rm -it \
-		-v $(PWD):/app \
-		--workdir=/app \
-		--name=gpx2video \
-		gpx2video:latest \
-		/bin/bash
+# 12: bookworm
+config-debian-bookworm:
+	$(eval BASE_IMAGE=debian:bookworm)
+	$(eval BUILD_DIR=build-debian-bookworm)
 
-bullseye: BASE_IMAGE=debian:bullseye
-bullseye: build-docker
+# 22.04: jammy
+config-ubuntu-jammy: 
+	$(eval BASE_IMAGE=ubuntu:22.04)
+	$(eval BUILD_DIR=build-ubuntu-jammy)
 
-ubuntu: BASE_IMAGE=ubuntu:22.04
-ubuntu: build-docker
+# 24.04: noble
+config-ubuntu-noble:
+	$(eval BASE_IMAGE=ubuntu:24.04)
+	$(eval BUILD_DIR=build-ubuntu-noble)
+
+
+all: debian ubuntu
+
+
+run: build-gpx2video run-gpx2video
+
+
+# Debian
+debian: debian-bullseye debian-bookworm 
+	
+debian-bullseye: config-debian-bullseye build-docker build-gpx2video
+debian-bookworm: config-debian-bullseye build-docker build-gpx2video
+
+
+# Ubuntu
+ubuntu: ubuntu-jammy ubuntu-noble
+
+ubuntu-jammy: config-ubuntu-jammy build-docker build-gpx2video
+ubuntu-noble: config-ubuntu-noble build-docker build-gpx2video
+
+
+# Build
+build-debian-bullseye: config-debian-bullseye build-gpx2video
+build-debian-bookworm: config-debian-bullseye build-gpx2video
+build-ubuntu-jammy: config-ubuntu-jammy build-gpx2video
+build-ubuntu-noble: config-ubuntu-noble build-gpx2video
+
+
+# Exec
+run-debian-bullseye: config-debian-bullseye run-gpx2video
+run-debian-bookworm: config-debian-bullseye run-gpx2video
+run-ubuntu-jammy: config-ubuntu-jammy run-gpx2video
+run-ubuntu-noble: config-ubuntu-noble run-gpx2video
+
 
 build-docker:
 	docker build --build-arg BASE_IMAGE=$(BASE_IMAGE) \
-		-t gpx2video:latest \
+		-t "gpx2video-$(BASE_IMAGE)" \
 		-f docker/Dockerfile .
 
-build:
-	mkdir -p build
-	docker run --rm -it -v $(PWD):/app -w /app gpx2video:latest /bin/bash -c "cd build \
-		&& cmake .. \
+
+build-gpx2video:
+	mkdir -p $(BUILD_DIR)
+	docker run --rm -it \
+		-v $(PWD)/$(BUILD_DIR):/app/build \
+		-v $(PWD):/app \
+		--workdir=/app/build \
+		gpx2video-$(BASE_IMAGE) \
+		/bin/bash -c \
+		"cmake .. \
 		&& $(MAKE) -j"
 
+
+run-gpx2video:
+	mkdir -p $(BUILD_DIR)
+	docker run --rm -it \
+		-v $(PWD)/$(BUILD_DIR):/app/build \
+		-v $(PWD)/assets:/app/build/assets \
+		--workdir=/app/build \
+		--name=gpx2video \
+		gpx2video-$(BASE_IMAGE) \
+		/bin/bash
+
+
 clean:
-	rm -rf ./build
+	rm -rf ./$(BUILD_DIR)
+
