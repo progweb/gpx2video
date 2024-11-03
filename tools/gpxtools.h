@@ -20,29 +20,31 @@ public:
 		Settings(
 			std::string gpx_file="", 
 			std::string output_file="",
+			int max_duration_ms=0,
 			std::string begin="",
 			std::string end="",
 			std::string from="",
 			std::string to="",
-			int offset=0,
-			int max_duration_ms=0,
+			int telemetry_offset=0,
 			bool telemetry_check=false,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
-			TelemetrySettings::Format telemtry_format=TelemetrySettings::FormatAuto)
+			int telemetry_smooth_points=0,
+			TelemetrySettings::Format telemetry_format=TelemetrySettings::FormatAuto)
 			: GPXApplication::Settings(
 					gpx_file, output_file,
-					from, to, 
-					offset,
 					max_duration_ms)
 			, TelemetrySettings(
+					telemetry_offset,
 					telemetry_check,
 					telemetry_method, 
 					telemetry_rate,
-					telemtry_format) {
+					telemetry_smooth_points,
+					telemetry_format) {
 			TelemetrySettings::setFilter(telemetry_filter);
 			TelemetrySettings::setDataRange(begin, end);
+			TelemetrySettings::setComputeRange(from, to);
 		}
 
 		void dump(void) const {

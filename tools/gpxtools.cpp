@@ -35,11 +35,13 @@ static const struct option options[] = {
 	{ "end",                   required_argument, 0, 0 },
 	{ "from",                  required_argument, 0, 0 },
 	{ "to",                    required_argument, 0, 0 },
+	{ "telemetry-offset",      required_argument, 0, 0 },
 	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 'r' },
+	{ "telemetry-smooth",      required_argument, 0, 0 },
 	{ 0,                       0,                 0, 0 }
 };
 
@@ -57,9 +59,11 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --end                     : Set end time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --from                    : Set begin time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --to                      : Set end time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
 	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default 'disable': 0))" << std::endl;
 	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
 	std::cout << "\t- q, --quiet                   : Quiet mode" << std::endl;
 	std::cout << "\t- h, --help                    : Show this help screen" << std::endl;
@@ -122,7 +126,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	bool check = false;
 
 	int rate = 0; // By default, no change
-	int verbose = 0;
+	int offset = 0; // By default, no offset
+	int verbose = 0; // By default, not verbose
+	int smooth_points = 0; // By default, no smooth
 
 	const char *s;
 
@@ -162,6 +168,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "to")) {
 				to = std::string(optarg);
 			}
+			else if (s && !strcmp(s, "telemetry-offset")) {
+				offset = atoi(optarg);
+			}
 			else if (s && !strcmp(s, "telemetry-check")) {
 				check = (std::string(optarg) == "true");
 			}
@@ -173,6 +182,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-rate")) {
 				rate = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-smooth")) {
+				smooth_points = atoi(optarg);
 			}
 			else {
 				std::cout << "option " << s;
@@ -246,24 +258,33 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 
 	// Override some settings
 	if (command() == GPXTools::CommandConvert) {
-		check = false;
-		method = TelemetrySettings::MethodNone;
+		from = "";
+		to = "";
+		offset = 0; // Don't change timestamp
+		check = false; // Keep each point
+		filter = TelemetrySettings::FilterNone;	// Don't filter data
+		method = TelemetrySettings::MethodNone; // None interpolation
+		smooth_points = 0; // Don't smooth data
 	}
+
+	if (outputfile.empty())
+		format = TelemetrySettings::FormatDump;
 
 	// Save app settings
 	setSettings(GPXTools::Settings(
 		inputfile,
 		outputfile,
+		0, // max duration not used
 		begin,
 		end,
 		from,
 		to,
-		0,
-		0,
+		offset,
 		check,
 		filter,
 		method,
 		rate,
+		smooth_points,
 		format)
 	);
 
@@ -312,9 +333,11 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPXTools::CommandConvert: {
 			// Telemetry settings
 			settings = TelemetrySettings(
+					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
+					app.settings().telemetrySmoothPoints(),
 					app.settings().telemetryFormat());
 
 			settings.setDataRange(
@@ -331,14 +354,19 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPXTools::CommandCompute: {
 			// Telemetry settings
 			settings = TelemetrySettings(
+					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
+					app.settings().telemetrySmoothPoints(),
 					app.settings().telemetryFormat());
 
 			settings.setDataRange(
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
+			settings.setComputeRange(
+					app.settings().telemetryFrom(),
+					app.settings().telemetryTo());
 			settings.setFilter(app.settings().telemetryFilter());
 
 			// Create gpxtools telemetry task

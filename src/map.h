@@ -63,7 +63,7 @@ public:
 
 	virtual ~Map();
 
-	static Map * create(GPXApplication &app, const MapSettings& settings);
+	static Map * create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings& map_settings);
 
 	const MapSettings& settings() const;
 
@@ -107,13 +107,13 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Map(GPXApplication &app, const MapSettings &settings, struct event_base *evbase);
+	Map(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings &map_settings, struct event_base *evbase);
 
 	std::string buildURI(int zoom, int x, int y);
 	std::string buildPath(int zoom, int x, int y);
 	std::string buildFilename(int zoom, int x, int y);
 
-	MapSettings settings_;
+	MapSettings map_settings_;
 
 	EVCurl *evcurl_;
 

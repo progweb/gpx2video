@@ -7,11 +7,9 @@
 #include <string>
 #include <deque>
 
+#include "log.h"
 #include "kalman.h"
 #include "telemetrysettings.h"
-
-
-std::string timestamp2string(uint64_t value);
 
 
 class TelemetryData;
@@ -26,8 +24,10 @@ public:
 	enum Type {
 		TypeUnknown,
 		TypeMeasured,
+		TypeFixed,
 		TypePredicted,
 		TypeUnchanged,
+		TypeError,
 	};
 
 	enum Data {
@@ -40,15 +40,16 @@ public:
 		DataTemperature = (1 << 4),
 		DataPower = (1 << 5),
 
-		DataDuration = (1 << 6),
+		DataDuration = (1 << 6),          // activity duration between from & to
 		DataDistance = (1 << 7),
 		DataGrade = (1 << 8),
 		DataSpeed = (1 << 9),
 		DataMaxSpeed = (1 << 10),
-		DataRideTime = (1 << 11),
-		DataElapsedTime = (1 << 12),
-		DataAverageSpeed = (1 << 13),
-		DataAverageRideSpeed = (1 << 14),
+		DataAcceleration = (1 << 11),
+		DataRideTime = (1 << 12),         // duration in moving between from & to
+		DataElapsedTime = (1 << 13),      // activity duration between begin & end 
+		DataAverageSpeed = (1 << 14),     // average computed for duration time
+		DataAverageRideSpeed = (1 << 15), // average computed for ride time
 
 		DataAll = (1 << 15) -1
 	};
@@ -68,9 +69,14 @@ public:
 		const char *types[] = {
 			"U", // Unknown
 			"M", // Measured
+			"F", // Fix
 			"P", // Predict
 			"C", // Unchanged
+			"E", // Error
 		};
+
+		if (type_ > ARRAY_SIZE(types))
+			return "";
 
 		return types[type_];
 	}
@@ -135,6 +141,10 @@ public:
 		return maxspeed_;
 	}
 
+	const double& acceleration(void) const {
+		return acceleration_;
+	}
+
 	const double& rideTime(void) const {
 		return ridetime_;
 	}
@@ -155,15 +165,25 @@ public:
 		return lap_;
 	}
 
+	bool isPause(void) const {
+		return is_pause_;
+	}
+
 	bool hasValue(Data type = DataAll) const {
 		return ((has_value_ & type) != 0);
 	}
 
 	void reset(bool all = false);
-	void dump(bool debug = false);
+
+	void dump(void);
+
+	static void writeHeader(void);
+	void writeData(size_t index) const;
 
 protected:
 	int has_value_;
+
+	bool is_pause_;
 
 	uint32_t line_;
 
@@ -183,6 +203,7 @@ protected:
 	double grade_;
 	double speed_;
 	double maxspeed_;
+	double acceleration_;
 	double ridetime_;
 	double elapsedtime_;
 	double avgspeed_;
@@ -228,10 +249,22 @@ public:
 				type_ = TypeUnknown;
 			else if (type == "M")
 				type_ = TypeMeasured;
+			else if (type == "F") 
+				type_ = TypeFixed;
 			else if (type == "P") 
 				type_ = TypePredicted;
 			else if (type == "C")
 				type_ = TypeUnchanged;
+			else
+				type_ = TypeError;
+		}
+
+		void setPause(bool pause) {
+			is_pause_ = pause;
+		}
+
+		void setTimestamp(uint64_t ts) {
+			ts_ = ts;
 		}
 
 		void setPosition(uint64_t ts, double lat, double lon) {
@@ -309,6 +342,12 @@ public:
 			addValue(Data::DataMaxSpeed);
 		}
 
+		void setAcceleration(double acceleration) {
+			acceleration_ = acceleration;
+
+			addValue(Data::DataAcceleration);
+		}
+
 		void setRideTime(double ridetime) {
 			ridetime_ = ridetime;
 
@@ -373,6 +412,11 @@ public:
 				mask |= DataMaxSpeed;
 			}
 
+			if (!hasValue(TelemetryData::DataAcceleration)) {
+				speed_ = point.acceleration_;
+				mask |= DataAcceleration;
+			}
+
 			if (!hasValue(TelemetryData::DataDuration)) {
 				duration_ = point.duration_;
 				mask |= DataDuration;
@@ -416,11 +460,14 @@ public:
 		}
 
 		void setNumberOfPoints(const unsigned long number) {
-			nbr_points_max_ = number;
+			log_warn("PointPool::setNumberOfPoints not yet supported");
+
+			(void) number;
+//			nbr_points_max_ = number;
 		}
 
 		bool empty(void) {
-			return (size() == 0);
+			return (index_ == (int) points_.size());
 		}
 
 		size_t count(void) {
@@ -428,12 +475,11 @@ public:
 		}
 
 		size_t size(void) {
-			size_t size = points_.size();
+			ssize_t size = points_.size();
 
-			if (index_ > 0)
-				size -= index_;
+			size -= index_ + 1;
 
-			return size;
+			return MAX(0, size);
 		}
 
 		size_t backlog(void) {
@@ -469,29 +515,76 @@ public:
 				index_ = -1;
 		}
 
+		void remove(void) {
+			auto pos = points_.begin();
+			points_.erase(std::next(pos, index_), std::next(pos, index_ + 1));
+		}
+
+		void reset(void) {
+			seek(-backlog());
+		}
+
+		void dump(bool content=false) {
+			TelemetrySource::Point point;
+
+			std::cout << "Pool info:" << std::endl;
+			std::cout << "  index: " << index_ << std::endl;
+			std::cout << "  backlog + size / count: " << backlog() << " + " << size() << " / " << count() << std::endl;
+
+			if (!content)
+				return;
+
+			TelemetryData::writeHeader();
+
+			for (size_t i=0; i<=size(); i++) {
+				point = points_[i];
+
+				point.writeData(i);
+			}
+		}
+
+		Point& first(void) {
+			return points_.front();
+		}
+
 		Point& last(void) {
 			return points_.back();
 		}
 
-		void reset(void) {
-			TelemetrySource::Point point;
+		Point& previous(size_t index = 0) {
+			size_t n = 0;
 
-			index_ = 0;
+			for (int i=1; (size_t) i<=backlog(); i++) {
+				if (points_[index_ - i].type() == TelemetryData::TypeError)
+					continue;
 
-			while (points_.size() > 2)
-				points_.pop_front();
+				if (index > n++)
+					continue;
 
-			for (size_t i=0; i<points_.size(); i++) {
-				point = points_[i];
-				point.reset();
-				points_[i] = point;
+				return points_[index_ - i];
 			}
+
+			return default_;
 		}
 
-		void dump(void) {
-			std::cout << "Pool info:" << std::endl;
-			std::cout << "  index: " << index_ << std::endl;
-			std::cout << "  size/count: " << size() << "/" << count() << std::endl;
+		Point& current() {
+			return points_[index_];
+		}
+
+		Point& next(size_t index=0) {
+			size_t n = 0;
+
+			for (size_t i=index_ + 1; i<points_.size(); i++) {
+				if (points_[i].type() == TelemetryData::TypeError)
+					continue;
+
+				if (index > n++)
+					continue;
+
+				return points_[i];
+			}
+
+			return default_;
 		}
 
 		Point& operator [](int index) {
@@ -508,6 +601,8 @@ public:
 		int index_;
 
 		std::deque<Point> points_;
+
+		Point default_;
 	};
 
 	TelemetrySource(const std::string &filename);
@@ -520,10 +615,10 @@ public:
 	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
 
-	bool setDataRange(std::string begin, std::string end);
+	void setSmoothPoints(int number);
 
-	bool setFrom(std::string from);
-	bool setTo(std::string to);
+	bool setDataRange(std::string begin, std::string end);
+	bool setComputeRange(std::string from, std::string to);
 
 	void setStartTime(char *start_time);
 	void setStartTime(time_t start_time);
@@ -534,33 +629,35 @@ public:
 
 	bool getBoundingBox(TelemetryData *p1, TelemetryData *p2);
 
+	enum Data loadData(void);
+
 	enum Data retrieveFirst(TelemetryData &data);
 	enum Data retrieveFrom(TelemetryData &data);
 	enum Data retrieveNext(TelemetryData &data, uint64_t timestamp=-1);
 	enum Data retrieveData(TelemetryData &data);
 	enum Data retrieveLast(TelemetryData &data);
 
-	virtual void reset() = 0;
+	void dump(bool content);
+
+	virtual std::string name(void) = 0;
+	virtual void reset(void) = 0;
 	virtual enum Data read(Point &point) = 0;
 
 private:
-	void filter(void);
 	void push(Point &pt);
 	void insert(Point &pt);
-	void compute(TelemetryData &data);
-	void update(TelemetryData &data);
-	void predict(TelemetryData &data, uint64_t timestamp);
-	void smooth(TelemetryData &data);
 
-	void enableCompute(void) {
-		enable_ = true;
-	}
+	void clear(void);
+	bool load(void);
+	void filter(void);
+	void compute_i(TelemetryData &data, bool force=false);
+	void compute(void);
+	void smooth(void);
+	void fix(void);
+	void trim(void);
 
-	void disableCompute(void) {
-		enable_ = false;
-	}
-
-	enum Data retrieveFirst_i(TelemetryData &data);
+	void updateData(TelemetryData &data);
+	void predictData(TelemetryData &data, uint64_t timestamp);
 
 protected:
 	std::ifstream stream_;
@@ -570,7 +667,6 @@ protected:
 	PointPool pool_;
 
 	bool eof_;
-	bool enable_;
 	bool check_;
 
 	int rate_;
@@ -582,13 +678,15 @@ protected:
 	enum TelemetrySettings::Filter filter_;
 	enum TelemetrySettings::Method method_;
 
+	int smooth_points_;
+
 	KalmanFilter kalman_;
 };
 
 
 class TelemetryMedia {
 public:
-	static TelemetrySource * open(const std::string &filename, enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
+	static TelemetrySource * open(const std::string &filename, const TelemetrySettings &settings);
 
 	//void dump(void);
 };

@@ -12,6 +12,7 @@ extern "C" {
 
 #include "log.h"
 #include "utils.h"
+#include "datetime.h"
 #include "extractor.h"
 
 
@@ -145,15 +146,11 @@ done:
 
 
 bool Extractor::run(void) {
-	char s[92];
-	char buf[128];
-
 	int result;
 
 	int start_time = 0;
 
-	time_t camera_t;
-	struct tm camera_time;
+	time_t camera_time;
 
 	int64_t timecode, timecode_ms;
 
@@ -186,16 +183,12 @@ bool Extractor::run(void) {
 	timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
 
 	// Camera time
-	camera_t = start_time + (timecode_ms / 1000);
-
-	gmtime_r(&camera_t, &camera_time);
-
-	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
+	camera_time = start_time + (timecode_ms / 1000);
 
 	// Dump
 	if (app_.progressInfo()) {
 		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-			n_, timecode, timecode_ms, s);
+			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true).c_str());
 	}
 
 	if (settings().format() == ExtractorSettings::FormatRAW) {
@@ -215,13 +208,10 @@ bool Extractor::run(void) {
 		// </trkpt>
 		if (settings().format() == ExtractorSettings::FormatGPX) {
 			if (gpmd.fix > 0) {
-				strftime(s, sizeof(s), "%Y-%m-%dT%H:%M:%S", &gpmd.utc_time);
-				snprintf(buf, sizeof(buf), "%s.%03dZ", s, gpmd.utc_ms);
-
 				out_ << std::setprecision(9);
 				out_ << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
 				out_ << "        <ele>" << gpmd.ele << "</ele>" << std::endl;
-				out_ << "        <time>" << buf << "</time>" << std::endl;
+				out_ << "        <time>" << ::timestamp2iso(gpmd.timestamp) << "</time>" << std::endl;
 				out_ << "      </trkpt>" << std::endl;
 			}
 		}
@@ -486,6 +476,9 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 			break;
 
 		case Extractor::GPMF_TYPE_UTC_DATE_TIME: { // 0x55 16 bytes
+				int utc_ms;
+				struct tm utc_time;
+
 				char *bytes = data->value.string;
 
 				// 2020-12-13T09:56:27.000000Z
@@ -502,12 +495,15 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 					);
 
 				// GPS time - format = 2021-12-08 08:55:46.039
-				memset(&gpmd.utc_time, 0, sizeof(gpmd.utc_time));
-				strptime(string, "%Y-%m-%d %H:%M:%S.", &gpmd.utc_time);
-				gpmd.utc_ms = (bytes[13] - '0') * 100 + (bytes[14] - '0') * 10 + (bytes[15] - '0');
+				memset(&utc_time, 0, sizeof(utc_time));
+				strptime(string, "%Y-%m-%d %H:%M:%S.", &utc_time);
+				utc_ms = (bytes[13] - '0') * 100 + (bytes[14] - '0') * 10 + (bytes[15] - '0');
 
 				if (dump)
 					out << "  value: " << string << std::endl;
+
+				gpmd.timestamp = timegm(&utc_time) * 1000;
+				gpmd.timestamp += utc_ms;
 			}
 			break;
 

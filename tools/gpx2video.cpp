@@ -16,6 +16,7 @@ extern "C" {
 #include "version.h"
 #include "utils.h"
 #include "evcurl.h"
+#include "datetime.h"
 #include "cache.h"
 #include "map.h"
 #include "track.h"
@@ -41,7 +42,6 @@ static const struct option options[] = {
 	{ "gpx",                   required_argument, 0, 'g' },
 	{ "layout",                required_argument, 0, 'l' },
 	{ "output",                required_argument, 0, 'o' },
-	{ "offset",                required_argument, 0, 0 },
 	{ "rate",                  required_argument, 0, 'r' },
 	{ "start-time",            required_argument, 0, 0 },
 	{ "time-factor",           required_argument, 0, 0 },
@@ -53,11 +53,13 @@ static const struct option options[] = {
 	{ "gpx-to",                required_argument, 0, 0 },
 	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
+	{ "telemetry-offset",      required_argument, 0, 0 },
 	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 0 },
+	{ "telemetry-smooth",      required_argument, 0, 0 },
 	{ "video-codec",           optional_argument, 0, 0 },
 	{ "video-hwdevice",        optional_argument, 0, 0 },
 	{ "video-preset",          required_argument, 0, 0 },
@@ -77,20 +79,23 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- m, --media=file              : Input media file name" << std::endl;
 	std::cout << "\t- g, --gpx=file                : GPX file name" << std::endl;
-	std::cout << "\t-    --gpx-from                : Set GPX begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-to                  : Set GPX end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-begin               : Set GPX data begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-end                 : Set GPX data end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-from                : Set GPX compute from (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-to                  : Set GPX compute to (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t- l, --layout=file             : Layout file name" << std::endl;
 	std::cout << "\t- o, --output=file             : Output file name" << std::endl;
 	std::cout << "\t- d, --duration                : Duration (in ms) (not required)" << std::endl;
 	std::cout << "\t-    --trim                    : Left trim crop (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --start-time              : Overwrite or set creation_time field" << std::endl;
+	std::cout << "\t-    --time-factor             : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
 	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 1000))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default 'disable': 0))" << std::endl;
 //	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;
-	std::cout << "\t-    --offset                  : Add a time offset (in ms) (not required)" << std::endl;
-	std::cout << "\t-    --start-time              : Overwrite or set creation_time field" << std::endl;
-	std::cout << "\t-    --time-factor             : Time factor - To read video timelapse (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-factor              : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source              : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom                : Map zoom" << std::endl;
@@ -255,25 +260,21 @@ MediaContainer * GPX2Video::media(void) {
 
 
 int GPX2Video::setDefaultStartTime(void) {
-	char s[128];
-
-	struct tm time;
-
 	TelemetryData data;
 
 	log_call();
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile());
+	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings());
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, set default start time failure");
 		return -1;
 	}
 
-	// Telemetry data limits
-	source->setFrom(settings().from());
-	source->setTo(settings().to());
+//	// Telemetry data limits
+//	source->setFrom(settings().from());
+//	source->setTo(settings().to());
 
 	// Start time activity
 	source->retrieveFirst(data);
@@ -282,11 +283,7 @@ int GPX2Video::setDefaultStartTime(void) {
 	container_->setStartTime(data.time());
 
 	// Dump result
-	localtime_r(&data.time(), &time);
-
-	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
-
-	log_notice("Use default creation time: %s", s);
+	log_notice("Use default creation time: %s", ::timestamp2string(data.time() * 1000).c_str());
 
 	// Free
 	delete source;
@@ -302,16 +299,16 @@ Map * GPX2Video::buildMap(void) {
 	log_call();
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile());
+	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings());
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, none telemetry file found");
 		return NULL;
 	}
 
-	// Telemetry data limits
-	source->setFrom(settings().from());
-	source->setTo(settings().to());
+//	// Telemetry data limits
+//	source->setFrom(settings().from());
+//	source->setTo(settings().to());
 
 	// Create map bounding box
 	TelemetryData p1, p2;
@@ -328,7 +325,7 @@ Map * GPX2Video::buildMap(void) {
 	mapSettings.setPathThick(settings().paththick());
 	mapSettings.setPathBorder(settings().pathborder());
 
-	Map *map = Map::create(*this, mapSettings);
+	Map *map = Map::create(*this, settings(), mapSettings);
 
 	return map;
 }
@@ -353,7 +350,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int map_zoom = 12;
 	int max_duration_ms = 0; // By default process whole media
 
-	int64_t offset = 0;
 	std::string start_time;
 
 	bool time_factor_auto = false;
@@ -365,6 +361,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	double path_border = 1.4;
 
 	int telemetry_rate = 1000; // By default, update each 1 second
+	int telemetry_smooth_points = 0;
 
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
@@ -384,11 +381,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	std::string layoutfile;
 	std::string outputfile;
 
-	std::string gpx_to;
-	std::string gpx_from;
+	std::string gpx_begin, gpx_end;
+	std::string gpx_from, gpx_to;
 
 	ExtractorSettings::Format extract_format = ExtractorSettings::FormatDump;
 
+	int64_t telemetry_offset = 0;
 	bool telemetry_check = false;
 	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterNone;
 	TelemetrySettings::Method telemetry_method = TelemetrySettings::MethodInterpolate;
@@ -412,10 +410,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		switch (option) {
 		case 0:
 			s = gpx2video::options[index].name;
-			if (s && !strcmp(s, "offset")) {
-				offset = atoll(optarg);
-			}
-			else if (s && !strcmp(s, "start-time")) {
+			if (s && !strcmp(s, "start-time")) {
 				start_time = std::string(optarg);
 			}
 			else if (s && !strcmp(s, "time-factor")) {
@@ -452,6 +447,12 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "path-border")) {
 				path_border = strtod(optarg, NULL);
 			}
+			else if (s && !strcmp(s, "gpx-begin")) {
+				gpx_begin = std::string(optarg);
+			}
+			else if (s && !strcmp(s, "gpx-end")) {
+				gpx_end = std::string(optarg);
+			}
 			else if (s && !strcmp(s, "gpx-from")) {
 				gpx_from = std::string(optarg);
 			}
@@ -464,6 +465,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "extract-format-list")) {
 				setCommand(GPX2Video::CommandFormat);
 				return 0;
+			}
+			else if (s && !strcmp(s, "telemetry-offset")) {
+				telemetry_offset = atoll(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-check")) {
 				telemetry_check = (std::string(optarg) == "true");
@@ -480,6 +484,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-rate")) {
 				telemetry_rate = atoi(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-smooth")) {
+				telemetry_smooth_points = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "video-codec")) {
 				if (optarg == NULL) {
@@ -750,7 +757,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		layoutfile,
 		outputfile,
 		rate,
-		offset,
 		start_time,
 		time_factor_auto,
 		time_factor_value,
@@ -760,13 +766,17 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_source,
 		path_thick,
 		path_border,
+		gpx_begin,
+		gpx_end,
 		gpx_from,
 		gpx_to,
 		extract_format,
+		telemetry_offset,
 		telemetry_check,
 		telemetry_filter,
 		telemetry_method,
 		telemetry_rate,
+		telemetry_smooth_points,
 		video_codec,
 		video_hw_device,
 		video_preset,
@@ -920,11 +930,18 @@ int main(int argc, char *argv[], char *envp[]) {
 	case GPX2Video::CommandCompute: {
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					TelemetrySettings::FormatCSV);
 
+			telemetrySettings.setDataRange(
+					app.settings().telemetryBegin(),
+					app.settings().telemetryEnd());
+			telemetrySettings.setComputeRange(
+					app.settings().telemetryFrom(),
+					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
 
 			telemetry = Telemetry::create(app, telemetrySettings);
@@ -942,10 +959,17 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 
+			telemetrySettings.setDataRange(
+					app.settings().telemetryBegin(),
+					app.settings().telemetryEnd());
+			telemetrySettings.setComputeRange(
+					app.settings().telemetryFrom(),
+					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
 
 			// Create cache directories
@@ -953,8 +977,10 @@ int main(int argc, char *argv[], char *envp[]) {
 			app.append(cache);
 
 			// Create gpx2video timesync task
-			timesync = TimeSync::create(app, app.media());
-			app.append(timesync);
+			if (app.settings().startTime().empty()) {
+				timesync = TimeSync::create(app, app.media());
+				app.append(timesync);
+			}
 
 			// Create gpx2video image renderer task
 			if ((renderer = ImageRenderer::create(app, rendererSettings, telemetrySettings, app.media())) == NULL) {
@@ -982,10 +1008,17 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			// Telemetry settings
 			telemetrySettings = TelemetrySettings(
+					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 
+			telemetrySettings.setDataRange(
+					app.settings().telemetryBegin(),
+					app.settings().telemetryEnd());
+			telemetrySettings.setComputeRange(
+					app.settings().telemetryFrom(),
+					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
 
 			// Create cache directories
@@ -993,8 +1026,10 @@ int main(int argc, char *argv[], char *envp[]) {
 			app.append(cache);
 
 			// Create gpx2video timesync task
-			timesync = TimeSync::create(app, app.media());
-			app.append(timesync);
+			if (app.settings().startTime().empty()) {
+				timesync = TimeSync::create(app, app.media());
+				app.append(timesync);
+			}
 
 			// Create gpx2video video renderer task
 			if ((renderer = VideoRenderer::create(app, rendererSettings, telemetrySettings, app.media())) == NULL) {

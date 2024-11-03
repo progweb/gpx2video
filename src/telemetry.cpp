@@ -5,6 +5,7 @@
 #include <filesystem>
 
 #include "log.h"
+#include "datetime.h"
 #include "telemetry.h"
 #include "telemetry/gpx.h"
 
@@ -13,17 +14,23 @@
 //--------------------
 
 TelemetrySettings::TelemetrySettings(
+		int64_t offset,
 		bool check,
 		TelemetrySettings::Method method,
 		int rate,
+		int smooth_points,
 		TelemetrySettings::Format format)
-		: telemetry_begin_("")
+		: telemetry_offset_(offset)
+		, telemetry_begin_("")
 		, telemetry_end_("")
+		, telemetry_from_("")
+		, telemetry_to_("")
 		, telemetry_format_(format)
 		, telemetry_check_(check)
 		, telemetry_filter_(TelemetrySettings::FilterNone)
 		, telemetry_method_(method)
-		, telemetry_rate_(rate) {
+		, telemetry_rate_(rate) 
+		, telemetry_smooth_points_(smooth_points) {
 }
 
 
@@ -37,8 +44,19 @@ void TelemetrySettings::setDataRange(const std::string &begin, const std::string
 }
 
 
+void TelemetrySettings::setComputeRange(const std::string &from, const std::string &to) {
+	telemetry_from_ = from;
+	telemetry_to_ = to;
+}
+
+
 void TelemetrySettings::setFilter(enum TelemetrySettings::Filter filter) {
 	telemetry_filter_ = filter;
+}
+
+
+const int64_t& TelemetrySettings::telemetryOffset(void) const {
+	return telemetry_offset_;
 }
 
 
@@ -49,6 +67,16 @@ const std::string& TelemetrySettings::telemetryBegin(void) const {
 
 const std::string& TelemetrySettings::telemetryEnd(void) const {
 	return telemetry_end_;
+}
+
+
+const std::string& TelemetrySettings::telemetryFrom(void) const {
+	return telemetry_from_;
+}
+
+
+const std::string& TelemetrySettings::telemetryTo(void) const {
+	return telemetry_to_;
 }
 
 
@@ -76,6 +104,11 @@ const int& TelemetrySettings::telemetryRate(void) const {
 }
 
 
+const int& TelemetrySettings::telemetrySmoothPoints(void) const {
+	return telemetry_smooth_points_;
+}
+
+
 const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Method &method) {
 	switch (method) {
 	case MethodNone:
@@ -98,10 +131,13 @@ const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Me
 
 
 void TelemetrySettings::dump(void) const {
-	std::cout << "Telemetry settings: " << std::endl;
-	std::cout << "  skip bad point: " << (telemetry_check_ ? "true" : "false") << std::endl;
-	std::cout << "  begin data range: " << telemetry_begin_ << std::endl;
-	std::cout << "  end data range: " << telemetry_end_ << std::endl;
+	std::cout << "Telemetry settings:" << std::endl;
+	std::cout << "  offset:             " << telemetry_offset_ << std::endl;
+	std::cout << "  skip bad point:     " << (telemetry_check_ ? "true" : "false") << std::endl;
+	std::cout << "  begin data range:   " << telemetry_begin_ << std::endl;
+	std::cout << "  end data range:     " << telemetry_end_ << std::endl;
+	std::cout << "  from compute range: " << telemetry_from_ << std::endl;
+	std::cout << "  to compute range:   " << telemetry_from_ << std::endl;
 }
 
 
@@ -131,7 +167,7 @@ Telemetry * Telemetry::create(GPXApplication &app, TelemetrySettings &settings) 
 void Telemetry::init(void) {
 	log_call();
 
-	source_ = TelemetryMedia::open(app_.settings().inputfile(), settings().telemetryMethod());
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), settings());
 
 	output_format_ = settings().telemetryFormat();
 
@@ -168,27 +204,18 @@ bool Telemetry::start(void) {
 		goto done;
 	}
 
-	// Telemetry data range
-	source_->setDataRange(settings().telemetryBegin(), settings().telemetryEnd());
-
-	// Telemetry data filter
-	source_->skipBadPoint(settings().telemetryCheck());
-	source_->setFilter(settings().telemetryFilter());
-
-	// Telemetry compute range
-	source_->setFrom(app_.settings().from());
-	source_->setTo(app_.settings().to());
-
 	// Start time activity
 	source_->retrieveFirst(data_);
 
 	// Open output stream
-    out_ = std::ofstream(filename);
-       
-	if (!out_.is_open()) {
-		log_error("Open '%s' failure", filename.c_str());
-		result = false;
-		goto done;
+	if (!filename.empty()) {
+		out_ = std::ofstream(filename);
+		   
+		if (!out_.is_open()) {
+			log_error("Open '%s' failure", filename.c_str());
+			result = false;
+			goto done;
+		}
 	}
 
 	// Header
@@ -224,6 +251,10 @@ bool Telemetry::start(void) {
 		out_ << "Timestamp, Time, Total duration, Partial duration, RideTime, Data, Lat, Lon, Ele, Grade, Distance, Speed, MaxSpeed, Average, Ride Average, Cadence, Heartrate, Temperature, Power, Lap" << std::endl;
 		break;
 
+	case TelemetrySettings::FormatDump:
+		source_->dump(true);
+		break;
+
 	default:
 		break;
 	}
@@ -240,11 +271,6 @@ bool Telemetry::run(void) {
 	// Read telemetry data each 1 second
 	int rate;
 
-	struct tm tm;
-
-	char buf[92];
-	char time[128];
-
 	bool gpx_extension = false;
 
 	enum TelemetrySource::Data type;
@@ -257,18 +283,13 @@ bool Telemetry::run(void) {
 
 	switch (output_format_) {
 	case TelemetrySettings::FormatGPX:
-		gmtime_r(&data_.time(), &tm);
-		strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm);
-
-		snprintf(time, sizeof(time), "%s.%03dZ", buf, (int) (data_.timestamp() % 1000));
-
 		gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
 
-		out_ << std::setprecision(9);
+		out_ << std::setprecision(15);
 		out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
 		if (data_.hasValue(TelemetryData::DataElevation))
 			out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
-		out_ << "        <time>" << time << "</time>" << std::endl;
+		out_ << "        <time>" << ::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
 		if (gpx_extension) {
 			out_ << "        <extensions>" << std::endl;
 			out_ << "          <ns3:TrackPointExtension>" << std::endl;
@@ -285,12 +306,9 @@ bool Telemetry::run(void) {
 		break;
 
 	case TelemetrySettings::FormatCSV:
-		localtime_r(&data_.time(), &tm);
-		strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", &tm);
-
 		out_ << std::setprecision(8);
 		out_ << data_.timestamp();
-		out_ << ", \"" << time << "\"";
+		out_ << ", \"" << ::timestamp2string(data_.timestamp()) << "\"";
 		out_ << ", " << round(data_.elapsedTime());
 		out_ << ", " << round(data_.duration());
 		out_ << ", " << round(data_.rideTime());
@@ -312,6 +330,7 @@ bool Telemetry::run(void) {
 		out_ << std::endl;
 		break;
 
+	case TelemetrySettings::FormatDump:
 	default:
 		break;
 	};
@@ -350,6 +369,7 @@ bool Telemetry::stop(void) {
 		break;
 
 	case TelemetrySettings::FormatCSV:
+	case TelemetrySettings::FormatDump:
 	default:
 		break;
 	}

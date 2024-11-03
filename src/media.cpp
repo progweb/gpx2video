@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 
+#include "log.h"
 #include "media.h"
 
 
@@ -55,7 +56,7 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 		time.tm_isdst = -1;
 	else
 		return;
-
+log_notice("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
 	// Convert GoPro time in UTC time
 	start_time_ = timelocal(&time);
 }

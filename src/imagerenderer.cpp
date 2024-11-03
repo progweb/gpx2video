@@ -5,7 +5,9 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "log.h"
 #include "macros.h"
+#include "datetime.h"
 #include "oiioutils.h"
 #include "imagerenderer.h"
 
@@ -98,22 +100,11 @@ bool ImageRenderer::start(void) {
 
 	time_t now = time(NULL);
 
-//	time_t start_time;
-
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	log_call();
 
 	log_notice("Rendering...");
-
-//	// Compute start time
-//	start_time = container_->startTime() + container_->timeOffset();
-//
-//	// Update start time in GPX stream (start_time can change after sync step)
-//	if (gpx_) {
-//		gpx_->setStartTime(start_time);
-////		data_.init();
-//	}
 
 	started_at_ = now;
 
@@ -282,18 +273,11 @@ error:
 
 	// Dump frame info
 	{
-		char s[128];
-		struct tm time;
-
 		time_t now = ::time(NULL);
-
-		localtime_r(&app_.time(), &time);
-
-		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-				timecode_, timecode_ms, s);
+				timecode_, timecode_ms, ::timestamp2string(app_.time() * 1000).c_str());
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

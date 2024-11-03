@@ -30,7 +30,6 @@ public:
 			std::string layout_file="",
 			std::string output_file="",
 			int rate=0,
-			int offset=0,
 			std::string start_time="",
 			bool time_factor_auto=false,
 			double time_factor_value=1.0,
@@ -40,13 +39,17 @@ public:
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
 			double path_thick=3.0,
 			double path_border=1.4,
+			std::string begin="",
+			std::string end="",
 			std::string from="",
 			std::string to="",
 			ExtractorSettings::Format extract_format=ExtractorSettings::FormatDump,
+			int telemetry_offset=0,
 			bool telemetry_check=false,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
+			int telemetry_smooth_points=0,
 			ExportCodec::Codec video_codec=ExportCodec::CodecH264,
 			std::string video_hw_device="",
 			std::string video_preset="medium",
@@ -56,13 +59,13 @@ public:
 			int64_t video_max_bit_rate=0)
 			: GPXApplication::Settings(
 					gpx_file, output_file,
-					from, to, 
-					offset,
 					max_duration_ms)
 			, TelemetrySettings(
+					telemetry_offset,
 					telemetry_check,
 					telemetry_method, 
-					telemetry_rate)
+					telemetry_rate,
+					telemetry_smooth_points)
 			, RendererSettings(
 					media_file, layout_file,
 					time_factor_auto,
@@ -83,6 +86,8 @@ public:
 			, path_border_(path_border)
 	   		, extract_format_(extract_format) {
 			TelemetrySettings::setFilter(telemetry_filter);
+			TelemetrySettings::setDataRange(begin, end);
+			TelemetrySettings::setComputeRange(from, to);
 		}
 
 		const std::string& gpxfile(void) const {

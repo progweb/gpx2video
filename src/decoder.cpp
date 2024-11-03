@@ -131,12 +131,6 @@ MediaContainer * Decoder::probe(const std::string &filename) {
     			// Warning, value isn't the same result as FFprobe.
 				av_log(NULL, AV_LOG_INFO, "%s = %0.2f\n", "rotate", theta);
 
-//				theta = -theta;
-//				if (theta < -180)
-//					theta += 360;
-//				else if (theta >= 180.0)
-//					theta -= 360;
-
 				AVPixelFormat compatible_pix_fmt = FFmpegUtils::getCompatiblePixelFormat(static_cast<AVPixelFormat>(avstream->codecpar->format));
 
 				VideoStreamPtr video_stream = std::make_shared<VideoStream>();

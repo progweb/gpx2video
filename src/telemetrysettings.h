@@ -13,6 +13,7 @@ public:
 		FormatAuto,
 		FormatCSV,
 		FormatGPX,
+		FormatDump,
 
 		FormatCount,
 	};
@@ -37,19 +38,27 @@ public:
 	};
 
 	TelemetrySettings(
+			int64_t offset=0,
 			bool check=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
 			int rate=0,
+			int smooth_points=0,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
 	);
 	virtual ~TelemetrySettings();
 
 	void setDataRange(const std::string &begin, const std::string &end);
+	void setComputeRange(const std::string &from, const std::string &to);
 
 	void setFilter(enum Filter filter);
 
+	const int64_t& telemetryOffset(void) const;
+
 	const std::string& telemetryBegin(void) const;
 	const std::string& telemetryEnd(void) const;
+
+	const std::string& telemetryFrom(void) const;
+	const std::string& telemetryTo(void) const;
 
 	const Format& telemetryFormat(void) const;
 
@@ -58,14 +67,20 @@ public:
 	const Method& telemetryMethod(void) const;
 
 	const int& telemetryRate(void) const;
+	const int& telemetrySmoothPoints(void) const;
 
 	static const std::string getFriendlyName(const Method &method);
 
 	void dump(void) const;
 
 private:
+	int64_t telemetry_offset_;
+
 	std::string telemetry_begin_;
 	std::string telemetry_end_;
+
+	std::string telemetry_from_;
+	std::string telemetry_to_;
 
 	enum Format telemetry_format_;
 
@@ -74,6 +89,7 @@ private:
 	enum Method telemetry_method_;
 
 	int telemetry_rate_;
+	int telemetry_smooth_points_;
 };
 
 

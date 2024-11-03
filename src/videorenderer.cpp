@@ -5,6 +5,8 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "log.h"
+#include "datetime.h"
 #include "oiioutils.h"
 #include "ffmpegutils.h"
 #include "videorenderer.h"
@@ -262,8 +264,6 @@ bool VideoRenderer::start(void) {
 
 	time_t now = time(NULL);
 
-//	time_t start_time;
-
 	double sar;
 	int orientation;
 
@@ -276,17 +276,6 @@ bool VideoRenderer::start(void) {
 	// SAR & orientation video
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
 	orientation = encoder_->settings().videoParams().orientation();
-
-//	// Compute start time
-//	start_time = container_->startTime() + container_->timeOffset();
-//
-//	app_.setTime(start_time);
-//
-//	// Update start time in GPX stream (start_time can change after sync step)
-//	if (gpx_) {
-//		gpx_->setStartTime(start_time);
-////		data_.init();
-//	}
 
 	started_at_ = now;
 	last_timecode_ms_ = 0;
@@ -462,18 +451,11 @@ bool VideoRenderer::run(void) {
 
 	// Dump frame info
 	{
-		char s[128];
-		struct tm time;
-
 		time_t now = ::time(NULL);
-
-		localtime_r(&app_.time(), &time);
-
-		strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &time);
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s (x %.01f)\n", 
-				frame_time_, timecode, timecode_ms, s, time_factor);
+				frame_time_, timecode, timecode_ms, ::timestamp2string(app_.time()).c_str(), time_factor);
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

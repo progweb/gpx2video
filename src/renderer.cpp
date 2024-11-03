@@ -55,17 +55,17 @@ Renderer::~Renderer() {
 bool Renderer::init(MediaContainer *container) {
 //	time_t start_time;
 
-	TelemetrySettings::Method telemetry_method = telemetrySettings().telemetryMethod();
+//	TelemetrySettings::Method telemetry_method = telemetrySettings().telemetryMethod();
 
 	log_call();
 
 	if (container == NULL)
 		return false;
 
-	if (telemetry_method == TelemetrySettings::MethodNone)
-		telemetry_method = TelemetrySettings::MethodSample;
+//	if (telemetry_method == TelemetrySettings::MethodNone)
+//		telemetry_method = TelemetrySettings::MethodSample;
 
-	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetry_method);
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
 
 	// Media
 	container_ = container;
@@ -75,17 +75,9 @@ bool Renderer::init(MediaContainer *container) {
 
 	// Telemetry data initialization
 	if (source_) {
-		// Telemetry filter
-		source_->skipBadPoint(telemetrySettings().telemetryCheck());
-		source_->setFilter(telemetrySettings().telemetryFilter());
-
-		// Telemetry data limits
-		source_->setFrom(app_.settings().from());
-		source_->setTo(app_.settings().to());
-
 		// Telemetry data time fixing
 //		source_->setStartTime(start_time);
-		source_->setTimeOffset(app_.settings().offset());
+//		source_->setTimeOffset(app_.settings().offset());
 		source_->retrieveFirst(data_);
 	}
 
@@ -190,16 +182,16 @@ bool Renderer::loadMap(layout::Map *m) {
 	}
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile());
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, skip map widget");
 		return false;
 	}
 
-	// Telemetry data limits
-	source->setFrom(app_.settings().from());
-	source->setTo(app_.settings().to());
+//	// Telemetry data limits
+//	source->setFrom(app_.settings().from());
+//	source->setTo(app_.settings().to());
 
 	// Media
 //	MediaContainer *container = app_.media();
@@ -251,7 +243,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 
-	Map *map = Map::create(app_, mapSettings);
+	Map *map = Map::create(app_, telemetrySettings(), mapSettings);
 
 	log_info("Load map widget");
 
@@ -296,16 +288,16 @@ bool Renderer::loadTrack(layout::Track *t) {
 	}
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile());
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, skip map widget");
 		return false;
 	}
 
-	// Telemetry data limits
-	source->setFrom(app_.settings().from());
-	source->setTo(app_.settings().to());
+//	// Telemetry data limits
+//	source->setFrom(app_.settings().from());
+//	source->setTo(app_.settings().to());
 
 	// Media
 //	TODO FIX check no break....
@@ -348,7 +340,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 
-	Track *track = Track::create(app_, trackSettings);
+	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 
 	// Widget settings
 	track->setPosition(position);

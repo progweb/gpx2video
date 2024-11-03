@@ -93,6 +93,8 @@ bool Test::testParseDatetime(const char *string) {
 bool Test::run(void) {
 	log_call();
 
+	std::cout << "## Time parsing test" << std::endl;
+
 	testParseDatetime("2020:12:13 08:55:48Z");
 	testParseDatetime("2020:12:13 08:55:48 +0200");
 	testParseDatetime("2020:07:21 08:55:48Z");

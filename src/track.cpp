@@ -112,15 +112,16 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 }
 
 
-Track::Track(GPXApplication &app, const TrackSettings &settings, struct event_base *evbase)
+Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, struct event_base *evbase)
 	: VideoWidget(app, "map")
 	, app_(app)
-	, settings_(settings)
+	, track_settings_(track_settings)
+	, telemetry_settings_(telemetry_settings)
 	, evbase_(evbase) {
 	log_call();
 
 	VideoWidget::setFlags(VideoWidget::FlagNone);
-	VideoWidget::setSize(settings_.width(), settings_.height());
+	VideoWidget::setSize(settings().width(), settings().height());
 
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
@@ -145,16 +146,16 @@ Track::~Track() {
 const TrackSettings& Track::settings() const {
 	log_call();
 
-	return settings_;
+	return track_settings_;
 }
 
 
-Track * Track::create(GPXApplication &app, const TrackSettings &settings) {
+Track * Track::create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings) {
 	Track *track;
 
 	log_call();
 
-	track = new Track(app, settings, app.evbase());
+	track = new Track(app, telemetry_settings, track_settings, app.evbase());
 
 	return track;
 }
@@ -163,7 +164,7 @@ Track * Track::create(GPXApplication &app, const TrackSettings &settings) {
 void Track::setSize(int width, int height) {
 	VideoWidget::setSize(width, height); 
 
-	settings_.setSize(width, height);
+	track_settings_.setSize(width, height);
 }
 
 
@@ -398,12 +399,12 @@ bool Track::load(void) {
 	// Create track buffer
 	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
-	TelemetrySource *source = TelemetryMedia::open(filename);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_);
 
 	if (source != NULL) {
-		// Telemetry data limits
-		source->setFrom(app_.settings().from());
-		source->setTo(app_.settings().to());
+//		// Telemetry data limits
+//		source->setFrom(app_.settings().from());
+//		source->setTo(app_.settings().to());
 		//gpx->setTimeOffset(app_.settings().offset());
 
 		// Draw path

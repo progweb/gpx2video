@@ -8,6 +8,7 @@ extern "C" {
 }
 
 #include "log.h"
+#include "datetime.h"
 #include "timesync.h"
 
 
@@ -66,8 +67,6 @@ done:
 
 
 bool TimeSync::run(void) {
-	char s[128];
-
 	int result;
 
 	int offset = 0;
@@ -76,8 +75,7 @@ bool TimeSync::run(void) {
 	time_t gps_t;
 	struct tm gps_time;
 
-	time_t camera_t;
-	struct tm camera_time;
+	time_t camera_time;
 
 	const char *str;
 
@@ -113,11 +111,7 @@ bool TimeSync::run(void) {
 	parse(gpmd, packet->data, packet->size, out_);
 
 	// Camera time
-	camera_t = start_time + (timecode_ms / 1000);
-
-	gmtime_r(&camera_t, &camera_time);
-
-	strftime(s, sizeof(s), "%Y-%m-%d %H:%M:%S", &camera_time);
+	camera_time = start_time + (timecode_ms / 1000);
 
 	// GPS time - format = 2021-12-08 08:55:46.039
 	str = gpmd.date.c_str();
@@ -128,12 +122,12 @@ bool TimeSync::run(void) {
 	gps_t = timegm(&gps_time);
 
 	// Offset in seconds
-	offset = gps_t - camera_t;
+	offset = gps_t - camera_time;
 
 	// Dump
 	if (app_.progressInfo()) {
 		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s - GPS FIX: %d - GPS TIME: %s - OFFSET: %d\n", 
-			n_, timecode, timecode_ms, s, gpmd.fix, gpmd.date.c_str(), offset);
+			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true).c_str(), gpmd.fix, gpmd.date.c_str(), offset);
 	}
 
 	n_++;
@@ -168,11 +162,19 @@ done:
 
 
 bool TimeSync::stop(void) {
+	uint64_t timestamp;
+
 	if (ok_) {
 		log_notice("Video stream synchronized with success (offset: %d s)", offset_);
-	
+
 		// Apply offset
 		container_->setTimeOffset(offset_);
+
+		// Compute start time
+		timestamp = container_->startTime() + container_->timeOffset();
+		timestamp *= 1000;
+
+		log_info("Video start time: %s", ::timestamp2string(timestamp).c_str());
 	}
 
 	close();

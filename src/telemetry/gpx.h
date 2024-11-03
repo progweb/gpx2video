@@ -52,7 +52,11 @@ failure:
 	virtual ~GPX() {
 	}
 
-	void reset() {
+	std::string name(void) {
+		return std::string("GPX");
+	}
+
+	void reset(void) {
 		std::list<gpx::TRK*> &trks = root_->trks().list();
 
 		log_call();
@@ -193,12 +197,15 @@ eof:
 			char *pos;
 			int offset;
 
+			// buf can contains ".123456+02:00"
 			::strcpy(buf, s);
 
+			// remove ':'
 			if ((pos = ::strchr(buf, ':')) != NULL) {
 				strcpy(pos, pos + 1);
 			}
 
+			// search '+'
 			if ((tz = ::strchr(buf, '+')) != NULL) {
 				tz += 1; // skip '+' char
 
@@ -211,6 +218,7 @@ eof:
 					ts -= (offset % 100) * 60 * 1000; // min offset
 				}
 			}
+			// search '-'
 			else if ((tz = ::strchr(buf, '-')) != NULL) {
 				tz += 1; // skip '-' char
 

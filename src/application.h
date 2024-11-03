@@ -16,20 +16,10 @@ public:
 	public:
 		Settings(std::string input_file="", 
 			std::string output_file="",
-			std::string from="",
-			std::string to="",
-			int offset=0,
 			int max_duration_ms=0)
-//			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
-//			int telemetry_rate=0)
 			: input_file_(input_file)
 			, output_file_(output_file)
-			, from_(from)
-			, to_(to)
-			, offset_(offset)
 			, max_duration_ms_(max_duration_ms) {
-//			, telemetry_method_(telemetry_method) 
-//			, telemetry_rate_(telemetry_rate) {
 		}
 
 		const std::string& inputfile(void) const {
@@ -38,18 +28,6 @@ public:
 		
 		const std::string& outputfile(void) const {
 			return output_file_;
-		}
-
-		const std::string& from(void) const {
-			return from_;
-		}
-
-		const std::string& to(void) const {
-			return to_;
-		}
-
-		const int64_t& offset(void) const {
-			return offset_;
 		}
 
 		const unsigned int& maxDuration(void) const {
@@ -62,26 +40,11 @@ public:
 			std::cout << "  output file: " << output_file_ << std::endl;	
 		}
 
-//		const TelemetrySettings::Method& telemetryMethod(void) const {
-//			return telemetry_method_;
-//		}
-//
-//		const int& telemetryRate(void) const {
-//			return telemetry_rate_;
-//		}
-
 	protected:
 		std::string input_file_;
 		std::string output_file_;
 
-		std::string from_;
-		std::string to_;
-
-		int64_t offset_;
 		unsigned int max_duration_ms_;
-
-//		TelemetrySettings::Method telemetry_method_;
-//		int telemetry_rate_;
 	};
 
 	class Task {

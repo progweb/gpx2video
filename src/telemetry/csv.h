@@ -55,7 +55,11 @@ failure:
 	virtual ~CSV() {
 	}
 	
-	void reset() {
+	std::string name(void) {
+		return std::string("CSV");
+	}
+
+	void reset(void) {
 		std::string line;
 
 		log_call();

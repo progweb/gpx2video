@@ -25,7 +25,7 @@ class Track : public VideoWidget {
 public:
 	virtual ~Track();
 
-	static Track * create(GPXApplication &app, const TrackSettings& settings);
+	static Track * create(GPXApplication &app, const TelemetrySettings& telemetry_settings, const TrackSettings& track_settings);
 
 	const TrackSettings& settings() const;
 
@@ -54,7 +54,7 @@ protected:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Track(GPXApplication &app, const TrackSettings &settings, struct event_base *evbase);
+	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, struct event_base *evbase);
 
 	void init(bool zoomfit=true);
 	bool load(void);
@@ -62,7 +62,8 @@ protected:
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
 	GPXApplication &app_;
-	TrackSettings settings_;
+	TrackSettings track_settings_;
+	TelemetrySettings telemetry_settings_;
 
 	struct event_base *evbase_;
 

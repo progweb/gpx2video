@@ -109,6 +109,7 @@ set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/evcurl.c
 	src/evcurl++.cpp
+	src/datetime.cpp
 	src/kalman.c
 	src/oiio.cpp
 	src/oiioutils.cpp

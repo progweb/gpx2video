@@ -100,12 +100,14 @@ Input #0, mov,mp4,m4a,3gp,3g2,mj2, from 'GH010337.MP4':
 gpx2video uses the `creation_time` field to synchronize your video with your GPX file. Warning, `creation_time`
 is in local time. But this date isn't synchronized with the GPS source.
 
-If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to determine the offset time to use.
+If gpx2video finds the 'GoPro MET' stream, it searches packet with GPS fix to determine the offset time to use. In
+this case, the `creation_time` value is computed form 'GoPro MET' stream.
 
 If the `creation_time` field and 'GoPro MET' stream can't be found, gpx2video assumes that the video starts in the
 same time that the GPX stream.
 
-At last, you can overwrite `creation_time` value in using --start-time option.
+At last, you can overwrite `creation_time` value in using --start-time option. As this option is used, gpx2video 
+doesn't 
 
 "sync" command permits to test the sychronization process:
 
@@ -122,7 +124,8 @@ PACKET: 21 - PTS: 21000 - TIMESTAMP: 21000 ms - TIME: 2022-01-16 10:05:24 - GPS 
 PACKET: 22 - PTS: 22000 - TIMESTAMP: 22000 ms - TIME: 2022-01-16 10:05:25 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:01.949 - OFFSET: -204
 PACKET: 23 - PTS: 23000 - TIMESTAMP: 23000 ms - TIME: 2022-01-16 10:05:26 - GPS FIX: 0 - GPS TIME: 2022-01-16 10:02:02.939 - OFFSET: -204
 PACKET: 24 - PTS: 24000 - TIMESTAMP: 24000 ms - TIME: 2022-01-16 10:05:27 - GPS FIX: 2 - GPS TIME: 2022-01-16 10:02:03.929 - OFFSET: -204
-Video stream synchronized with success
+Video stream synchronized with success (offset: -204 s)
+Video start time is: 2022-01-16 10:01:38.960
 ```
 
 At last, but not least, you can add an user offset (in ms).
@@ -578,14 +581,15 @@ In future release, gpx2video should be able to use more data from this stream as
 
 ## Telemetry settings
 
-You can convert, filter and interpolate GPX data.
+Telemetry data are computed from GPX (other format are supported too). As telemetry data file is loaded, 
+you can apply different filters. You can export the results to test:
 
 ```bash
-$ ./gpx2video -g ACTIVITY.gpx -o data.csv --telemetry-method=0 compute
+$ ./gpx2video -g ACTIVITY.gpx -o data.csv compute
 ```
 
 This tool permits to convert GPX to CSV and/or apply a filter on the GPS data (lat. and lon. values).
-Since gpx2video interpolates data in using different filters: linear, kalman or interpolation.
+gpx2video interpolates data in using different methods: linear, kalman or interpolation.
 
 By default, telemetry is updated each 1000 ms. You can overwrite this value :
 
@@ -594,7 +598,7 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
     --telemetry-method=3 --telemtry-rate=500 -o output.mp4 video
 ```
 
-*Note: The result isn't yet satisfactory* 
+gpx2video accepts the same options that gpxtools.
 
 
 ## Telemetry tools
@@ -606,15 +610,35 @@ $ ./gpxtools -i ACTIVITY.gpx --telemetry-method=0 -o data.csv convert
 $ ./gpxtools -i ACTIVITY.gpx --telemetry-method=0 -o data.csv compute
 ```
 
-You can extract a part of your GPX data in using "--begin" and "--end" option.
+You can extract a part of your GPX data in using **--begin** and **--end** option.
 gpxtools can change samples rate too.
 
 ```bash
 $ ./gpxtools -i ACTIVITY.gpx \
     --begin "2024-10-28 09:00:00" --end "2024-10-28 10:00:00" \
     --telemetry-method=3 --telemetry-rate=3000 \
-    -o data.gpx
+    -o data.gpx compute
 ```
+
+As you use **compute** command, other settings permit to smooth data:
+
+```bash
+$ ./gpxtools -i ACTIVITY.gpx \
+    --telemetry-check=true \
+	--telemetry-filter=1 \
+	--telemetry-smooth=2 \
+	--telemetry-method=3 --telemtry-rate=500 \
+	-o data.gpx compute
+```
+
+**--telemetry-check** drops invalid points, before compute.
+
+**--telemetry-filter** filter and update all incoherent points, then compute telemetry data.
+
+**--telemetry-smooth** to smooth telemetry data results on several points. 
+
+**--from** and **--to** permits to define a datetime range where compute telemetry data. It can be used
+as you want compute data only on a segment. Outside this segment, only few data are computed.
 
 ## Video encoder settings (in progress)
 
@@ -651,6 +675,7 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
     --video-codec=hevc --video-preset=slow --video-crf=-1 \
     --video-bitrate=16000000 --video-max-bitrate=32000000 -o output.mp4 video
 ```
+
 
 ## ToDo
 
