@@ -260,7 +260,7 @@ bool Telemetry::start(void) {
 	}
 
 	// Read telemetry data from start
-	timecode_ms_ = data_.time() * 1000;
+	timecode_ms_ = data_.timestamp();
 
 done:
 	return result;

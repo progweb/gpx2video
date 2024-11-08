@@ -6,8 +6,10 @@
 #include <string>
 
 
-std::string timestamp2iso(uint64_t value);
-std::string timestamp2string(uint64_t value, bool utc=false);
+std::string timestamp2iso(uint64_t timestamp);
+std::string timestamp2string(uint64_t timestamp, bool utc=false);
+
+uint64_t string2timestamp(std::string str);
 
 #endif
 

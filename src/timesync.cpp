@@ -70,14 +70,11 @@ bool TimeSync::run(void) {
 	int result;
 
 	int offset = 0;
-	int start_time = 0;
+	uint64_t start_time = 0;
 
-	time_t gps_t;
-	struct tm gps_time;
+	uint64_t gps_t;
 
-	time_t camera_time;
-
-	const char *str;
+	uint64_t camera_time;
 
 	int64_t timecode, timecode_ms;
 
@@ -111,17 +108,12 @@ bool TimeSync::run(void) {
 	parse(gpmd, packet->data, packet->size, out_);
 
 	// Camera time
-	camera_time = start_time + (timecode_ms / 1000);
+	camera_time = start_time + timecode_ms;
 
 	// GPS time - format = 2021-12-08 08:55:46.039
-	str = gpmd.date.c_str();
+	gps_t = ::string2timestamp(gpmd.date);
 
-	memset(&gps_time, 0, sizeof(gps_time));
-	strptime(str, "%Y-%m-%d %H:%M:%S.", &gps_time);
-
-	gps_t = timegm(&gps_time);
-
-	// Offset in seconds
+	// Offset in ms
 	offset = gps_t - camera_time;
 
 	// Dump
@@ -165,14 +157,13 @@ bool TimeSync::stop(void) {
 	uint64_t timestamp;
 
 	if (ok_) {
-		log_notice("Video stream synchronized with success (offset: %d s)", offset_);
+		log_notice("Video stream synchronized with success (offset: %d ms)", offset_);
 
 		// Apply offset
 		container_->setTimeOffset(offset_);
 
 		// Compute start time
 		timestamp = container_->startTime() + container_->timeOffset();
-		timestamp *= 1000;
 
 		log_info("Video start time: %s", ::timestamp2string(timestamp).c_str());
 	}

@@ -28,7 +28,7 @@ protected:
 
 private:
 	void printTimestamp(uint64_t timestamp);
-	bool testParseDatetime(const char *string);
+	void testParseDatetime(const char *string);
 };
 
 #endif

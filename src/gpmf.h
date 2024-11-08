@@ -45,8 +45,8 @@ public:
 	double timelapse;
 
 	uint32_t fix;
-	int utc_ms;
-	struct tm utc_time;
+//	int utc_ms;
+//	struct tm utc_time;
 	std::string date;
 
 	double lat;

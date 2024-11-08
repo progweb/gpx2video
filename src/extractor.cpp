@@ -148,9 +148,9 @@ done:
 bool Extractor::run(void) {
 	int result;
 
-	int start_time = 0;
+	uint64_t start_time = 0;
 
-	time_t camera_time;
+	uint64_t camera_time;
 
 	int64_t timecode, timecode_ms;
 
@@ -183,7 +183,7 @@ bool Extractor::run(void) {
 	timecode_ms = timecode * av_q2d(avstream_->time_base) * 1000;
 
 	// Camera time
-	camera_time = start_time + (timecode_ms / 1000);
+	camera_time = start_time + timecode_ms;
 
 	// Dump
 	if (app_.progressInfo()) {
@@ -211,7 +211,7 @@ bool Extractor::run(void) {
 				out_ << std::setprecision(9);
 				out_ << "      <trkpt lat=\"" << gpmd.lat << "\" lon=\"" << gpmd.lon << "\">" << std::endl;
 				out_ << "        <ele>" << gpmd.ele << "</ele>" << std::endl;
-				out_ << "        <time>" << ::timestamp2iso(gpmd.timestamp) << "</time>" << std::endl;
+				out_ << "        <time>" << gpmd.date << "</time>" << std::endl;
 				out_ << "      </trkpt>" << std::endl;
 			}
 		}
@@ -476,15 +476,12 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 			break;
 
 		case Extractor::GPMF_TYPE_UTC_DATE_TIME: { // 0x55 16 bytes
-				int utc_ms;
-				struct tm utc_time;
-
 				char *bytes = data->value.string;
 
 				// 2020-12-13T09:56:27.000000Z
 				// buffer contains: 201213085548.215
-				// so format to : YY:MM:DD HH:MM:SS.
-				sprintf(string, "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c.%c%c%c",
+				// so format to : YY:MM:DD HH:MM:SS.mmmZ
+				sprintf(string, "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c.%c%c%cZ",
 						bytes[0], bytes[1], // YY
 						bytes[2], bytes[3], // MM 
 						bytes[4], bytes[5], // DD
@@ -494,16 +491,8 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 						bytes[13], bytes[14], bytes[15] // MS
 					);
 
-				// GPS time - format = 2021-12-08 08:55:46.039
-				memset(&utc_time, 0, sizeof(utc_time));
-				strptime(string, "%Y-%m-%d %H:%M:%S.", &utc_time);
-				utc_ms = (bytes[13] - '0') * 100 + (bytes[14] - '0') * 10 + (bytes[15] - '0');
-
 				if (dump)
 					out << "  value: " << string << std::endl;
-
-				gpmd.timestamp = timegm(&utc_time) * 1000;
-				gpmd.timestamp += utc_ms;
 			}
 			break;
 

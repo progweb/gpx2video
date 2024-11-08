@@ -3,6 +3,7 @@
 
 #include "log.h"
 #include "media.h"
+#include "datetime.h"
 
 
 MediaContainer::MediaContainer() 
@@ -25,12 +26,12 @@ void MediaContainer::setFilename(const std::string &filename) {
 }
 
 
-time_t MediaContainer::startTime(void) const {
+uint64_t MediaContainer::startTime(void) const {
 	return start_time_;
 }
 
 
-void MediaContainer::setStartTime(const time_t &start_time) {
+void MediaContainer::setStartTime(const uint64_t &start_time) {
 	start_time_ = start_time;
 }
 
@@ -41,24 +42,7 @@ void MediaContainer::setStartTime(const time_t &start_time) {
  * creation_time is in local time
  */
 void MediaContainer::setStartTime(const std::string &start_time) {
-	struct tm time;
-
-	const char *s = start_time.c_str();
-
-	if ((s == NULL) || !strcmp(s, ""))
-		return;
-
-	// creation_time = 2020-12-13T09:56:27.000000Z
-	memset(&time, 0, sizeof(time));
-	if (::strptime(s, "%Y-%m-%dT%H:%M:%S.", &time) != NULL)
-		time.tm_isdst = -1;
-	else if (::strptime(s, "%Y-%m-%dT%H:%M:%S", &time) != NULL)
-		time.tm_isdst = -1;
-	else
-		return;
-log_notice("SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
-	// Convert GoPro time in UTC time
-	start_time_ = timelocal(&time);
+	start_time_ = ::string2timestamp(start_time);
 }
 
 

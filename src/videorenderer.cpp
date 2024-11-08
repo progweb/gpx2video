@@ -320,7 +320,7 @@ bool VideoRenderer::run(void) {
 	double sar;
 	int orientation;
 
-	time_t start_time;
+	uint64_t start_time;
 
 	int64_t timecode;
 	uint64_t timecode_ms;
@@ -378,10 +378,10 @@ bool VideoRenderer::run(void) {
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
 	// Update video real time 
-	app_.setTime(start_time + real_duration_ms_ / 1000);
+	app_.setTime(start_time + real_duration_ms_);
 
 	if (source_) {
-		uint64_t timestamp = (start_time * 1000) + real_duration_ms_;
+		uint64_t timestamp = start_time + real_duration_ms_;
 
 		OIIO::ImageBuf frame_buffer = frame->toImageBuf();
 

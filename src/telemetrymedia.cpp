@@ -160,36 +160,22 @@ void TelemetrySource::setSmoothPoints(int number) {
 
 
 bool TelemetrySource::setDataRange(std::string begin, std::string end) {
-	struct tm time;
-
 	log_call();
 
 	if (!begin.empty()) {
-		memset(&time, 0, sizeof(time));
-
-		if (::strptime(begin.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
+		// Convert begin range time to timestamp
+		if ((begin_ = ::string2timestamp(begin)) == 0) {
 			log_error("Parse 'begin' date range failure");
 			return false;
 		}
-
-		time.tm_isdst = -1;
-
-		// Convert begin range time in UTC time
-		begin_ = timelocal(&time) * 1000;
 	}
 
 	if (!end.empty()) {
-		memset(&time, 0, sizeof(time));
-
-		if (::strptime(end.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
+		// Convert end range time to timestamp
+		if ((end_ = ::string2timestamp(end)) == 0) {
 			log_error("Parse 'end' date range failure");
 			return false;
 		}
-
-		time.tm_isdst = -1;
-
-		// Convert end range time in UTC time
-		end_ = timelocal(&time) * 1000;
 	}
 
 	return true;
@@ -197,36 +183,22 @@ bool TelemetrySource::setDataRange(std::string begin, std::string end) {
 
 
 bool TelemetrySource::setComputeRange(std::string from, std::string to) {
-	struct tm time;
-
 	log_call();
 
 	if (!from.empty()) {
-		memset(&time, 0, sizeof(time));
-
-		if (::strptime(from.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
-			log_error("Parse 'from' compute range failure");
+		// Convert race start time to timestamp
+		if ((from_ = ::string2timestamp(from)) == 0) {
+			log_error("Parse 'from' date range failure");
 			return false;
 		}
-
-		time.tm_isdst = -1;
-
-		// Convert race start time in UTC time
-		from_ = timelocal(&time) * 1000;
 	}
 
 	if (!to.empty()) {
-		memset(&time, 0, sizeof(time));
-
-		if (::strptime(to.c_str(), "%Y-%m-%d %H:%M:%S", &time) == NULL) {
-			log_error("Parse 'to' compute range failure");
+		// Convert race start time to timestamp
+		if ((to_ = ::string2timestamp(to)) == 0) {
+			log_error("Parse 'to' date range failure");
 			return false;
 		}
-
-		time.tm_isdst = -1;
-
-		// Convert race start time in UTC time
-		from_ = timelocal(&time) * 1000;
 	}
 
 	return true;

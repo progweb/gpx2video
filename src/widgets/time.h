@@ -50,6 +50,7 @@ skip:
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
+		time_t t;
 		struct tm time;
 
 		(void) data;
@@ -63,7 +64,8 @@ skip:
 		// Format data
 		// Don't use gps time, but camera time!
 		// Indeed, with garmin devices, gpx time has an offset.
-		localtime_r(&app_.time(), &time);
+		t = app_.time() / 1000;
+		localtime_r(&t, &time);
 
 		strftime(s, sizeof(s), "%H:%M:%S", &time);
 

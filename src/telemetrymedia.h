@@ -81,14 +81,6 @@ public:
 		return types[type_];
 	}
 
-	const time_t& time(void) const {
-		static time_t result;
-
-		result = ts_ / 1000;
-
-		return result;
-	}
-
 	const uint64_t& timestamp(void) const {
 		return ts_;
 	}
@@ -619,10 +611,6 @@ public:
 
 	bool setDataRange(std::string begin, std::string end);
 	bool setComputeRange(std::string from, std::string to);
-
-	void setStartTime(char *start_time);
-	void setStartTime(time_t start_time);
-	void setStartTime(struct tm *start_time);
 
 	int64_t timeOffset(void) const;
 	void setTimeOffset(const int64_t& offset);

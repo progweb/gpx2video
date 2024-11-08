@@ -53,31 +53,19 @@ Renderer::~Renderer() {
 
 
 bool Renderer::init(MediaContainer *container) {
-//	time_t start_time;
-
-//	TelemetrySettings::Method telemetry_method = telemetrySettings().telemetryMethod();
-
 	log_call();
 
 	if (container == NULL)
 		return false;
-
-//	if (telemetry_method == TelemetrySettings::MethodNone)
-//		telemetry_method = TelemetrySettings::MethodSample;
 
 	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
 
 	// Media
 	container_ = container;
 
-//	// Set start time in GPX stream
-//	start_time = container_->startTime() + container_->timeOffset();
-
 	// Telemetry data initialization
 	if (source_) {
 		// Telemetry data time fixing
-//		source_->setStartTime(start_time);
-//		source_->setTimeOffset(app_.settings().offset());
 		source_->retrieveFirst(data_);
 	}
 

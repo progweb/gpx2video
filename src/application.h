@@ -1,8 +1,9 @@
 #ifndef __GPX2VIDEO__APPLICATION_H__
 #define __GPX2VIDEO__APPLICATION_H__
 
-#include <cstdlib>
 #include <list>
+#include <cstdlib>
+#include <cstdint>
 
 #include <unistd.h>
 
@@ -115,11 +116,11 @@ public:
 	bool progressInfo(void);
 	void setProgressInfo(bool enable);
 
-	const time_t& time(void) {
+	const uint64_t& time(void) {
 		return time_;
 	}
 
-	void setTime(const time_t &time) {
+	void setTime(const uint64_t &time) {
 		time_ = time;
 	}
 
@@ -239,7 +240,7 @@ private:
 
 	std::list<Task *> tasks_;
 
-	time_t time_;
+	uint64_t time_;
 };
 
 

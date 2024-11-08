@@ -22,8 +22,8 @@ public:
 	const std::string& filename(void) const;
 	void setFilename(const std::string &filename);
 
-	time_t startTime(void) const;
-	void setStartTime(const time_t &start_time);
+	uint64_t startTime(void) const;
+	void setStartTime(const uint64_t &start_time);
 	void setStartTime(const std::string &start_time);
 
 	int timeOffset(void) const;
@@ -39,7 +39,7 @@ public:
 
 private:
 	int offset_;
-	time_t start_time_;
+	uint64_t start_time_;
 	std::string filename_;
 
 	std::vector<StreamPtr> streams_;

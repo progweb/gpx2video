@@ -46,6 +46,7 @@ skip:
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
 
+		time_t t;
 		struct tm time;
 
 		int h;
@@ -87,7 +88,8 @@ skip:
 
 		// time
 		offset += px;
-		gmtime_r(&data.time(), &time);
+		t = data.timestamp() / 1000;
+		gmtime_r(&t, &time);
 		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
 		this->drawText(fg_buf_, 0, offset, px, s);
 

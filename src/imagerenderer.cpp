@@ -77,11 +77,11 @@ bool ImageRenderer::init(MediaContainer *container) {
 	if (app_.settings().maxDuration() == (unsigned int) -1) {
 		source_->retrieveLast(data_);
 
-		duration_ms_ = data_.time() * 1000;
+		duration_ms_ = data_.timestamp();
 
 		source_->retrieveFirst(data_);
 
-		duration_ms_ -= data_.time() * 1000;
+		duration_ms_ -= data_.timestamp();
 	}
 	// If maxDuration set by the user
 	else if (app_.settings().maxDuration() > 0) 
@@ -145,7 +145,7 @@ bool ImageRenderer::run(void) {
 	int pos = -1;
 	size_t len = 0;
 
-	time_t start_time;
+	uint64_t start_time;
 
 	uint64_t timecode_ms;
 
@@ -200,10 +200,10 @@ bool ImageRenderer::run(void) {
 	}
 
 	// Compute video time
-	app_.setTime(start_time + ((time_factor * timecode_ms) / 1000));
+	app_.setTime(start_time + (time_factor * timecode_ms));
 
 	if (source_) {
-		uint64_t timestamp = (start_time * 1000) + (time_factor * timecode_ms);
+		uint64_t timestamp = start_time + (time_factor * timecode_ms);
 
 		// Save image
 		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -277,7 +277,7 @@ error:
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-				timecode_, timecode_ms, ::timestamp2string(app_.time() * 1000).c_str());
+				timecode_, timecode_ms, ::timestamp2string(app_.time()).c_str());
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

@@ -7,6 +7,7 @@
 
 #include "log.h"
 #include "gpmf.h"
+#include "datetime.h"
 
 
 GPMFDecoder::GPMFDecoder()
@@ -290,8 +291,8 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 
 				// 2020-12-13T09:56:27.000000Z
 				// buffer contains: 201213085548.215
-				// so format to : YY:MM:DD HH:MM:SS.
-				sprintf(string, "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c.%c%c%c",
+				// so format to : YY:MM:DD HH:MM:SS.mmmZ
+				sprintf(string, "20%c%c-%c%c-%c%c %c%c:%c%c:%c%c.%c%c%cZ",
 						bytes[0], bytes[1], // YY
 						bytes[2], bytes[3], // MM 
 						bytes[4], bytes[5], // DD
@@ -300,11 +301,6 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 						bytes[10], bytes[11], // SS
 						bytes[13], bytes[14], bytes[15] // MS
 					);
-
-				// GPS time - format = 2021-12-08 08:55:46.039
-				memset(&gpmd.utc_time, 0, sizeof(gpmd.utc_time));
-				strptime(string, "%Y-%m-%d %H:%M:%S.", &gpmd.utc_time);
-				gpmd.utc_ms = (bytes[13] - '0') * 100 + (bytes[14] - '0') * 10 + (bytes[15] - '0');
 			}
 			break;
 
