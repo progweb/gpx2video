@@ -63,6 +63,8 @@ public:
 		UnitMiles,
 		UnitCelsius,
 		UnitFarenheit,
+		UnitG,
+		UnitMeterPS2,
 		UnitUnknown
 	};
 

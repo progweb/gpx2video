@@ -92,6 +92,10 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitCelsius;
 	else if ((s == "F") || (s == "farenheit"))
 		unit = VideoWidget::UnitFarenheit;
+	else if ((s == "g") || (s == "G"))
+		unit = VideoWidget::UnitG;
+	else if (s == "mps2")
+		unit = VideoWidget::UnitMeterPS2;
 	else
 		unit = VideoWidget::UnitUnknown;
 
@@ -137,6 +141,10 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 		return "C";
 	case VideoWidget::UnitFarenheit:
 		return "F";
+	case VideoWidget::UnitG:
+		return "g";
+	case VideoWidget::UnitMeterPS2:
+		return "m/s²";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:

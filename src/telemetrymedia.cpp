@@ -90,7 +90,7 @@ void TelemetryData::writeData(size_t index) const {
 		line_,
 		type2string(),
 		::timestamp2string(ts_).c_str(),
-		distance_/1000.0, (int) round(duration_), speed_, acceleration_,
+		distance_/1000.0, (int) round(duration_), speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
 		ele_, grade_);  
@@ -340,12 +340,12 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 
 		// Speed & maxspeed & ridetime
 		if (dt > 0) {
-			// Compute speed
+			// Compute speed (km/h)
 			if (force || !curPoint.hasValue(TelemetryData::DataSpeed))
 				speed = (3600.0 * dc) / (1.0 * dt);
 
-			// Compute acceleration
-			curPoint.setAcceleration((speed - prevPoint.speed_) / dt);
+			// Compute acceleration (m/s²)
+			curPoint.setAcceleration(1000 * (speed - prevPoint.speed_) / dt);
 
 			if (enable) {
 				if (force || !curPoint.hasValue(TelemetryData::DataMaxSpeed)) {
