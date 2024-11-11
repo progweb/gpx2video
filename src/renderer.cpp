@@ -64,11 +64,11 @@ bool Renderer::init(MediaContainer *container) {
 	// Media
 	container_ = container;
 
-	// Telemetry data initialization
-	if (source_) {
-		// Telemetry data time fixing
-		source_->retrieveFirst(data_);
-	}
+//	// Telemetry data initialization
+//	if (source_) {
+//		// Telemetry data time fixing
+//		source_->retrieveFirst(data_);
+//	}
 
 	return true;
 }

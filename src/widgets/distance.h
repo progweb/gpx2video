@@ -73,7 +73,7 @@ skip:
 			distance *= 0.6213711922;
 		}
 
-		if (data.hasValue(TelemetryData::DataFix)) {
+		if (data.hasValue(TelemetryData::DataDistance)) {
 			const char *format;
 
 			if (distance < 10)

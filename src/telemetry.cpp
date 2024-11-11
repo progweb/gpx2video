@@ -252,7 +252,9 @@ bool Telemetry::start(void) {
 		break;
 
 	case TelemetrySettings::FormatDump:
-		source_->dump(true);
+		index_ = 0;
+		source_->dump(false);
+		data_.writeHeader();
 		break;
 
 	default:
@@ -278,8 +280,6 @@ bool Telemetry::run(void) {
 	log_call();
 
 	rate = settings().telemetryRate();
-
-	// Dump point
 
 	switch (output_format_) {
 	case TelemetrySettings::FormatGPX:
@@ -331,6 +331,9 @@ bool Telemetry::run(void) {
 		break;
 
 	case TelemetrySettings::FormatDump:
+		data_.writeData(index_++);
+		break;
+
 	default:
 		break;
 	};

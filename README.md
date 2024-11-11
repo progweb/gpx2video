@@ -370,6 +370,7 @@ Node elements are:
   - cadence
   - heartrate
   - temperature
+  - gforce
   - image
   - lap
   - text
@@ -444,6 +445,18 @@ The **display** default value is true.
 ```
 
 **unit** values are: C, celsius or F, fahrenheit.
+
+
+#### g-force widget
+
+```xml
+<widget>
+	<type>gforce</type>
+	<unit>g</unit>
+</widget>		
+```
+
+**unit** values are: g or mps2.
 
 
 #### lap widget

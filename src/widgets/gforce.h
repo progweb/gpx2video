@@ -68,7 +68,7 @@ skip:
 		if (unit() == VideoWidget::UnitG)
 			gforce /= 9.81;
 
-		if (data.hasValue(TelemetryData::DataFix))
+		if (data.hasValue(TelemetryData::DataAcceleration))
 			sprintf(s, "%.2f %s", gforce, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());

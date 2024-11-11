@@ -72,7 +72,7 @@ skip:
 			hours = duration / 60;
 		}
 
-		if (data.hasValue(TelemetryData::DataFix))
+		if (data.hasValue(TelemetryData::DataDuration))
 			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
 		else
 			sprintf(s, "--:--:--");

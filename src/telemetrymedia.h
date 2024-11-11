@@ -157,6 +157,10 @@ public:
 		return lap_;
 	}
 
+	bool inRange(void) const {
+		return in_range_;
+	}
+
 	bool isPause(void) const {
 		return is_pause_;
 	}
@@ -175,6 +179,7 @@ public:
 protected:
 	int has_value_;
 
+	bool in_range_;
 	bool is_pause_;
 
 	uint32_t line_;
@@ -249,6 +254,10 @@ public:
 				type_ = TypeUnchanged;
 			else
 				type_ = TypeError;
+		}
+
+		void setComputed(bool computed) {
+			in_range_ = computed;
 		}
 
 		void setPause(bool pause) {
@@ -376,7 +385,11 @@ public:
 			has_value_ |= type;
 		}
 
-		void restore(Point point) {
+		void clearValue(int type) {
+			has_value_ = has_value_ & ~type;
+		}
+
+		void restore(Point point, bool flags=false) {
 			int mask = DataNone;
 
 			// Restore previous data & flags:
@@ -384,60 +397,92 @@ public:
 			//  duration, ridetime, elaspedtime,
 			//  avgspeed, avgridespeed
 			//  lap, in_lap
-			if (!hasValue(TelemetryData::DataDistance)) {
-				distance_ = point.distance_;
-				mask |= DataDistance;
+			if (!hasValue(TelemetryData::DataFix)) {
+				lat_ = point.lat_;
+				lon_ = point.lon_;
+				mask |= (point.has_value_ & DataFix);
+			}
+
+			if (!hasValue(TelemetryData::DataElevation)) {
+				ele_ = point.ele_;
+				mask |= (point.has_value_ & DataElevation);
+			}
+
+			if (!hasValue(TelemetryData::DataCadence)) {
+				cadence_ = point.cadence_;
+				mask |= (point.has_value_ & DataCadence);
+			}
+
+			if (!hasValue(TelemetryData::DataHeartrate)) {
+				heartrate_ = point.heartrate_;
+				mask |= (point.has_value_ & DataHeartrate);
+			}
+
+			if (!hasValue(TelemetryData::DataTemperature)) {
+				temperature_ = point.temperature_;
+				mask |= (point.has_value_ & DataTemperature);
+			}
+
+			if (!hasValue(TelemetryData::DataPower)) {
+				power_ = point.power_;
+				mask |= (point.has_value_ & DataPower);
 			}
 
 			if (!hasValue(TelemetryData::DataGrade)) {
 				grade_ = point.grade_;
-				mask |= DataGrade;
+				mask |= (point.has_value_ & DataGrade);
+			}
+
+			if (!hasValue(TelemetryData::DataDistance)) {
+				distance_ = point.distance_;
+				mask |= (point.has_value_ & DataDistance);
 			}
 
 			if (!hasValue(TelemetryData::DataSpeed)) {
 				speed_ = point.speed_;
-				mask |= DataSpeed;
+				mask |= (point.has_value_ & DataSpeed);
 			}
 
 			if (!hasValue(TelemetryData::DataMaxSpeed)) {
 				maxspeed_ = point.maxspeed_;
-				mask |= DataMaxSpeed;
+				mask |= (point.has_value_ & DataMaxSpeed);
 			}
 
 			if (!hasValue(TelemetryData::DataAcceleration)) {
 				speed_ = point.acceleration_;
-				mask |= DataAcceleration;
+				mask |= (point.has_value_ & DataAcceleration);
 			}
 
 			if (!hasValue(TelemetryData::DataDuration)) {
 				duration_ = point.duration_;
-				mask |= DataDuration;
+				mask |= (point.has_value_ & DataDuration);
 			}
 
 			if (!hasValue(TelemetryData::DataRideTime)) {
 				ridetime_ = point.ridetime_;
-				mask |= DataRideTime;
+				mask |= (point.has_value_ & DataRideTime);
 			}
 
 			if (!hasValue(TelemetryData::DataElapsedTime)) {
 				elapsedtime_ = point.elapsedtime_;
-				mask |= DataElapsedTime;
+				mask |= (point.has_value_ & DataElapsedTime);
 			}
 
 			if (!hasValue(TelemetryData::DataAverageSpeed)) {
 				avgspeed_ = point.avgspeed_;
-				mask |= DataAverageSpeed;
+				mask |= (point.has_value_ & DataAverageSpeed);
 			}
 
 			if (!hasValue(TelemetryData::DataAverageRideSpeed)) {
 				avgridespeed_ = point.avgridespeed_;
-				mask |= DataAverageRideSpeed;
+				mask |= (point.has_value_ & DataAverageRideSpeed);
 			}
 
 			lap_ = point.lap_;
 			in_lap_ = point.in_lap_;
 
-//			setValue(has_value_ | (point.has_value_ & mask));
+			if (flags)
+				setValue(has_value_ | (point.has_value_ & mask));
 		}
 	};
 
@@ -475,11 +520,18 @@ public:
 		}
 
 		size_t backlog(void) {
+			return (index_ > 0) ? index_ : 0;
+		}
+
+		int tell(void) {
 			return index_;
 		}
 
 		void seek(int offset) {
 			index_ += offset;
+
+			if (index_ < 0)
+				index_ = -1;
 		}
 
 		void clear(void) {
@@ -513,7 +565,7 @@ public:
 		}
 
 		void reset(void) {
-			seek(-backlog());
+			seek(-backlog() - 1);
 		}
 
 		void dump(bool content=false) {
@@ -528,7 +580,7 @@ public:
 
 			TelemetryData::writeHeader();
 
-			for (size_t i=0; i<=size(); i++) {
+			for (size_t i=0; i<points_.size(); i++) {
 				point = points_[i];
 
 				point.writeData(i);
@@ -646,6 +698,7 @@ private:
 
 	void updateData(TelemetryData &data);
 	void predictData(TelemetryData &data, uint64_t timestamp);
+	void cleanData(TelemetryData &data, uint64_t timestamp);
 
 protected:
 	std::ifstream stream_;

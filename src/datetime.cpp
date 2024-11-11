@@ -71,6 +71,13 @@ uint64_t string2timestamp(std::string str) {
 	// Try format: "2020:12:13 08:55:48.123456+0200"
 	if ((s = strptime(str.c_str(), "%Y:%m:%d %H:%M:%S", &time)) != NULL)
 		;
+	// Try format: "2020-07-28 07:04:43"
+	// Try format: "2020-07-28 07:04:43Z"
+	// Try format: "2020-07-28 07:04:43.123"
+	// Try format: "2020-07-28 07:04:43.123456"
+	// Try format: "2020-07-28 07:04:43.123456+0200"
+	else if ((s = strptime(str.c_str(), "%Y-%m-%d %H:%M:%S", &time)) != NULL)
+		;
 	// Try format: "2020-07-28T07:04:43"
 	// Try format: "2020-07-28T07:04:43Z"
 	// Try format: "2020-07-28T07:04:43.123"

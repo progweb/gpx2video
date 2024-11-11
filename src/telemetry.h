@@ -38,6 +38,8 @@ protected:
 
 	TelemetryData data_;
 
+	int index_;
+
 	int64_t timecode_ms_;
 
 	std::ofstream out_;

@@ -57,7 +57,7 @@ skip:
 		}
 
 		// Format data
-		if (data.hasValue(TelemetryData::DataElevation))
+		if (data.hasValue(TelemetryData::DataGrade))
 			sprintf(s, "%.0f%%", data.grade());
 		else
 			sprintf(s, "--%%");

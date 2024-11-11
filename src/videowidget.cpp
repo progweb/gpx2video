@@ -138,7 +138,7 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 	case VideoWidget::UnitMiles:
 		return "miles";
 	case VideoWidget::UnitCelsius:
-		return "C";
+		return "°C";
 	case VideoWidget::UnitFarenheit:
 		return "F";
 	case VideoWidget::UnitG:

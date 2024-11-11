@@ -114,11 +114,11 @@ bool TimeSync::run(void) {
 	gps_t = ::string2timestamp(gpmd.date);
 
 	// Offset in ms
-	offset = gps_t - camera_time;
+	offset = (int64_t) (gps_t - camera_time);
 
 	// Dump
 	if (app_.progressInfo()) {
-		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s - GPS FIX: %d - GPS TIME: %s - OFFSET: %d\n", 
+		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %sZ - GPS FIX: %d - GPS TIME: %s - OFFSET: %d\n", 
 			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true).c_str(), gpmd.fix, gpmd.date.c_str(), offset);
 	}
 

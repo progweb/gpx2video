@@ -30,6 +30,8 @@ public:
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
+		last_time_ = 0;
+
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
@@ -55,8 +57,11 @@ skip:
 
 		(void) data;
 
+		// Compute time
+		t = app_.time() / 1000;
+
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
+		if ((fg_buf_ != NULL) && (t == last_time_)) {
 			is_update = false;
 			goto skip;
 		}
@@ -64,7 +69,6 @@ skip:
 		// Format data
 		// Don't use gps time, but camera time!
 		// Indeed, with garmin devices, gpx time has an offset.
-		t = app_.time() / 1000;
 		localtime_r(&t, &time);
 
 		strftime(s, sizeof(s), "%H:%M:%S", &time);
@@ -77,11 +81,15 @@ skip:
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
+		last_time_ = t;
+
 skip:
 		return fg_buf_;
 	}
 
 private:
+	time_t last_time_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -89,6 +97,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		last_time_ = 0;
 	}
 };
 
