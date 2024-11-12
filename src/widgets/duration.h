@@ -63,7 +63,7 @@ skip:
 		}
 
 		// Format data
-		duration = data.elapsedTime();
+		duration = data.duration();
 
 		if (duration > 0) {
 			seconds = duration % 60;
