@@ -55,10 +55,10 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- i, --input=file              : Input telemetry file name" << std::endl;
 	std::cout << "\t- o, --output=file             : Output telemetry file name" << std::endl;
-	std::cout << "\t-    --begin                   : Set begin time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --end                     : Set end time data range (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --from                    : Set begin time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --to                      : Set end time compute (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --begin                   : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --end                     : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --from                    : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --to                      : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
 	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;

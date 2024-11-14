@@ -49,10 +49,12 @@ static const struct option options[] = {
 	{ "map-factor",            required_argument, 0, 0 },
 	{ "map-zoom",              required_argument, 0, 0 },
 	{ "map-list",              no_argument,       0, 0 },
-	{ "gpx-from",              required_argument, 0, 0 },
-	{ "gpx-to",                required_argument, 0, 0 },
 	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
+	{ "gpx-begin",             required_argument, 0, 0 },
+	{ "gpx-end",               required_argument, 0, 0 },
+	{ "gpx-from",              required_argument, 0, 0 },
+	{ "gpx-to",                required_argument, 0, 0 },
 	{ "telemetry-offset",      required_argument, 0, 0 },
 	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
@@ -79,10 +81,10 @@ static void print_usage(const std::string &name) {
 	std::cout << "Options:" << std::endl;
 	std::cout << "\t- m, --media=file              : Input media file name" << std::endl;
 	std::cout << "\t- g, --gpx=file                : GPX file name" << std::endl;
-	std::cout << "\t-    --gpx-begin               : Set GPX data begin (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-end                 : Set GPX data end (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-from                : Set GPX compute from (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-to                  : Set GPX compute to (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-begin               : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-end                 : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-from                : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-to                  : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t- l, --layout=file             : Layout file name" << std::endl;
 	std::cout << "\t- o, --output=file             : Output file name" << std::endl;
 	std::cout << "\t- d, --duration                : Duration (in ms) (not required)" << std::endl;
@@ -934,6 +936,7 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
+					app.settings().telemetrySmoothPoints(),
 					TelemetrySettings::FormatCSV);
 
 			telemetrySettings.setDataRange(
@@ -962,7 +965,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
-					app.settings().telemetryRate());
+					app.settings().telemetryRate(),
+					app.settings().telemetrySmoothPoints());
 
 			telemetrySettings.setDataRange(
 					app.settings().telemetryBegin(),
@@ -1011,7 +1015,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
-					app.settings().telemetryRate());
+					app.settings().telemetryRate(),
+					app.settings().telemetrySmoothPoints());
 
 			telemetrySettings.setDataRange(
 					app.settings().telemetryBegin(),

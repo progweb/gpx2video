@@ -262,6 +262,8 @@ void VideoRenderer::computeWidgetsPosition(void) {
 bool VideoRenderer::start(void) {
 	bool is_update = false;
 
+	uint64_t start_time;
+
 	time_t now = time(NULL);
 
 	double sar;
@@ -272,6 +274,10 @@ bool VideoRenderer::start(void) {
 	log_call();
 
 	log_notice("Rendering...");
+
+	start_time = container_->startTime() + container_->timeOffset();
+
+	log_info("Video: start at '%s'", ::timestamp2string(start_time).c_str());
 
 	// SAR & orientation video
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());

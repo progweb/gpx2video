@@ -151,8 +151,6 @@ bool ImageRenderer::run(void) {
 
 	double time_factor;
 
-	enum TelemetrySource::Data type;
-
 	bool is_update = false;
 
 	std::string filename = app_.settings().outputfile();
@@ -165,8 +163,8 @@ bool ImageRenderer::run(void) {
 
 	start_time = container_->startTime() + container_->timeOffset();
 
-	// Render image each 1 second
-	timecode_ms = timecode_ * 1000;
+	// Render image each 'x' ms (by default each second)
+	timecode_ms = timecode_ * telemetrySettings().telemetryRate();
 
 	if (timecode_ms >= duration_ms_)
 		goto done;
@@ -210,10 +208,7 @@ bool ImageRenderer::run(void) {
 
 		// Read GPX data
 		timestamp -= (timestamp % telemetrySettings().telemetryRate());
-		type = source_->retrieveNext(data_, timestamp);
-
-		if (type == TelemetrySource::DataEof)
-			goto done;
+		source_->retrieveNext(data_, timestamp);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());

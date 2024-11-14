@@ -694,13 +694,11 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
 
   - Render gauge:
     - hflip: flip icon and label
-    - gpx fix mode: disable gauge on nofix
     - svg: add icon svg support
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
   - Gallery photo import
   - User interface integration
-  - GPS interpolate data between two waypoints.
   - 360 videos support
 
 

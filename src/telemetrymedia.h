@@ -484,6 +484,8 @@ public:
 			if (flags)
 				setValue(has_value_ | (point.has_value_ & mask));
 		}
+
+		double distanceTo(const Point &to);
 	};
 
 	class PointPool {
@@ -703,7 +705,7 @@ private:
 protected:
 	std::ifstream stream_;
 
-	TelemetryData start_;
+	Point start_;
 
 	PointPool pool_;
 
