@@ -106,10 +106,12 @@ bool ImageRenderer::start(void) {
 
 	log_notice("Rendering...");
 
-	started_at_ = now;
-
 	// Start
+	Renderer::start();
+
+	// Compute start time
 	timecode_ = 0;
+	started_at_ = now;
 
 	// Create overlay buffer
 	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(layout_width_, layout_height_,

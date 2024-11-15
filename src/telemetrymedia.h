@@ -654,6 +654,9 @@ public:
 	TelemetrySource(const std::string &filename);
 	virtual ~TelemetrySource();
 
+	// Setter
+	void setQuiet(const bool quiet);
+
 	void setNumberOfPoints(const unsigned long number);
 
 	void skipBadPoint(bool check);
@@ -669,8 +672,15 @@ public:
 	int64_t timeOffset(void) const;
 	void setTimeOffset(const int64_t& offset);
 
+	// Getter
+	bool inRange(uint64_t timestamp) const;
+
+	uint64_t beginTimestamp(void) const;
+	uint64_t endTimestamp(void) const;
+
 	bool getBoundingBox(TelemetryData *p1, TelemetryData *p2);
 
+	// Data api
 	enum Data loadData(void);
 
 	enum Data retrieveFirst(TelemetryData &data);
@@ -678,19 +688,21 @@ public:
 	enum Data retrieveNext(TelemetryData &data, uint64_t timestamp=-1);
 	enum Data retrieveData(TelemetryData &data);
 	enum Data retrieveLast(TelemetryData &data);
+	enum Data retrieveTo(TelemetryData &data);
 
 	void dump(bool content);
 
+	// Parser implementation
 	virtual std::string name(void) = 0;
 	virtual void reset(void) = 0;
 	virtual enum Data read(Point &point) = 0;
 
 private:
 	void push(Point &pt);
-	void insert(Point &pt);
 
 	void clear(void);
 	bool load(void);
+	void range(void);
 	void filter(void);
 	void compute_i(TelemetryData &data, bool force=false);
 	void compute(void);
@@ -698,8 +710,9 @@ private:
 	void fix(void);
 	void trim(void);
 
+	void insertData(uint64_t timestamp);
 	void updateData(TelemetryData &data);
-	void predictData(TelemetryData &data, uint64_t timestamp);
+	void predictData(TelemetryData &data, TelemetrySettings::Method method, uint64_t timestamp);
 	void cleanData(TelemetryData &data, uint64_t timestamp);
 
 protected:
@@ -708,6 +721,8 @@ protected:
 	Point start_;
 
 	PointPool pool_;
+
+	bool quiet_;
 
 	bool eof_;
 	bool check_;
@@ -729,7 +744,7 @@ protected:
 
 class TelemetryMedia {
 public:
-	static TelemetrySource * open(const std::string &filename, const TelemetrySettings &settings);
+	static TelemetrySource * open(const std::string &filename, const TelemetrySettings &settings, bool quiet=true);
 
 	//void dump(void);
 };

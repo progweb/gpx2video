@@ -651,7 +651,9 @@ $ ./gpxtools -i ACTIVITY.gpx \
 **--telemetry-smooth** to smooth telemetry data results on several points. 
 
 **--from** and **--to** permits to define a datetime range where compute telemetry data. It can be used
-as you want compute data only on a segment. Outside this segment, only few data are computed.
+as you want compute data only on a segment. Outside this segment, only few data are computed. **--from**
+and **--to** range has to be in the data range defined by **--begin** and **--end**.
+
 
 ## Video encoder settings (in progress)
 

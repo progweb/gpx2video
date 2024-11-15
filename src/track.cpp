@@ -325,7 +325,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		// Draw each WPT
-		for (result = source->retrieveFrom(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
 			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
 			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
@@ -345,7 +345,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	// Draw each WPT
-	for (result = source->retrieveFrom(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+	for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
 		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
 		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
@@ -411,13 +411,14 @@ bool Track::load(void) {
 		path(*trackbuf_, source, divider_);
 
 		// Compute begin
-		source->retrieveFrom(wpt);
+		source->retrieveFirst(wpt);
 
 		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
 		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
 		x_start_ *= divider_;
 		y_start_ *= divider_;
+		ts_start_ = source->beginTimestamp();
 
 		// Compute end
 		source->retrieveLast(wpt);
@@ -427,6 +428,7 @@ bool Track::load(void) {
 
 		x_end_ *= divider_;
 		y_end_ *= divider_;
+		ts_end_ = source->endTimestamp();
 	}
 	else {
 		log_warn("Can't open '%s' telemetry data file", filename.c_str());
@@ -484,11 +486,21 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	}
 
 	// Current position
-	posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
-	posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
+	if (data.timestamp() > ts_end_) {
+		posX = x_end_;
+		posY = y_end_;
+	}
+	else if (data.timestamp() > ts_start_) {
+		posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
+		posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
 
-	posX *= divider_;
-	posY *= divider_;
+		posX *= divider_;
+		posY *= divider_;
+	}
+	else {
+		posX = x_start_;
+		posY = y_start_;
+	}
 
 	// width x height of track
 	w = (px2_ - px1_) * divider_; // floorf((float) Track::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
@@ -522,7 +534,8 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		drawPicto(*fg_buf_, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
 		drawPicto(*fg_buf_, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
-		drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+		if (data.hasValue(TelemetryData::DataFix))
+			drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
 
 	is_update = true;

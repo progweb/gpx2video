@@ -728,11 +728,21 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	height -= 2 * border;
 
 	// Center map on current position
-	posX = floorf((float) Map::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
-	posY = floorf((float) Map::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
+	if (data.timestamp() > ts_end_) {
+		posX = x_end_;
+		posY = y_end_;
+	}
+	else if (data.timestamp() > ts_start_) {
+		posX = floorf((float) Map::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
+		posY = floorf((float) Map::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
 
-	posX *= divider;
-	posY *= divider;
+		posX *= divider;
+		posY *= divider;
+	}
+	else {
+		posX = x_start_;
+		posY = y_start_;
+	}
 
 	offsetX = posX - (width / 2);
 	offsetY = posY - (height / 2);

@@ -59,7 +59,7 @@ bool Renderer::init(MediaContainer *container) {
 	if (container == NULL)
 		return false;
 
-	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
+//	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
 
 	// Media
 	container_ = container;
@@ -69,6 +69,16 @@ bool Renderer::init(MediaContainer *container) {
 //		// Telemetry data time fixing
 //		source_->retrieveFirst(data_);
 //	}
+
+	return true;
+}
+
+
+bool Renderer::start(void) {
+	log_call();
+
+	// Load telemetry data
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
 
 	return true;
 }

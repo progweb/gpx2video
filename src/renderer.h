@@ -151,6 +151,7 @@ protected:
 			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings); //, Map *map);
 
 	bool init(MediaContainer *container);
+	bool start(void);
 	bool load(void);
 	bool loadMap(layout::Map *m);
 	bool loadTrack(layout::Track *t);

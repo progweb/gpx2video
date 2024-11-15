@@ -75,9 +75,10 @@ protected:
 	int x1_, y1_, x2_, y2_;
 	int px1_, py1_, px2_, py2_;
 
-	// Start & end position
+	// Start & end position/timestamp
 	int x_end_, y_end_;
 	int x_start_, y_start_;
+	uint64_t ts_start_, ts_end_;
 };
 
 #endif

@@ -81,13 +81,13 @@ void TelemetryData::dump(void) {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Distance    | Duration | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  |\n");
-	printf("------+-------+---+-------------------------+-------------+----------+--------+--------------+---+--------------+--------------+----------+--------+---\n");
+	printf("      | Line  | T | Datetime (ms)           | Distance    | Duration | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  \n");
+	printf("------+-------+---+-------------------------+-------------+----------+--------+--------------+---+--------------+--------------+----------+--------\n");
 }
 
 
 void TelemetryData::writeData(size_t index) const {
-	printf("%5ld | %5d | %s | %s | %11.3f | %8d | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%% | %x\n",
+	printf("%5ld | %5d | %s | %s | %11.3f | %8d | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%%\n",
 		index,
 		line_,
 		type2string(),
@@ -95,8 +95,7 @@ void TelemetryData::writeData(size_t index) const {
 		distance_/1000.0, (int) round(duration_), speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
-		ele_, grade_,
-		has_value_);  
+		ele_, grade_);  
 }
 
 
@@ -113,7 +112,8 @@ double TelemetrySource::Point::distanceTo(const Point &to) {
 
 
 TelemetrySource::TelemetrySource(const std::string &filename) 
-	: eof_(false)
+	: quiet_(true)
+	, eof_(false)
 	, offset_(0) 
 	, begin_(0)
 	, end_(0)
@@ -134,6 +134,13 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 
 
 TelemetrySource::~TelemetrySource() {
+}
+
+
+void TelemetrySource::setQuiet(const bool quiet) {
+	log_call();
+
+	quiet_ = quiet;
 }
 
 
@@ -172,47 +179,71 @@ void TelemetrySource::setSmoothPoints(int number) {
 }
 
 
-bool TelemetrySource::setDataRange(std::string begin, std::string end) {
+bool TelemetrySource::setDataRange(std::string strbegin, std::string strend) {
+	uint64_t end = 0;
+	uint64_t begin = 0;
+
 	log_call();
 
-	if (!begin.empty()) {
+	if (!strbegin.empty()) {
 		// Convert begin range time to timestamp
-		if ((begin_ = ::string2timestamp(begin)) == 0) {
+		if ((begin = ::string2timestamp(strbegin)) == 0) {
 			log_error("Parse 'begin' date range failure");
 			return false;
 		}
 	}
 
-	if (!end.empty()) {
+	if (!strend.empty()) {
 		// Convert end range time to timestamp
-		if ((end_ = ::string2timestamp(end)) == 0) {
+		if ((end = ::string2timestamp(strend)) == 0) {
 			log_error("Parse 'end' date range failure");
 			return false;
 		}
+
+		if (end < begin) {
+			log_error("'begin-end' data range values invalid");
+			return false;
+		}
 	}
+
+	// save
+	end_ = end;
+	begin_ = begin;
 
 	return true;
 }
 
 
-bool TelemetrySource::setComputeRange(std::string from, std::string to) {
+bool TelemetrySource::setComputeRange(std::string strfrom, std::string strto) {
+	uint64_t to = 0;
+	uint64_t from = 0;
+
 	log_call();
 
-	if (!from.empty()) {
+	if (!strfrom.empty()) {
 		// Convert race start time to timestamp
-		if ((from_ = ::string2timestamp(from)) == 0) {
+		if ((from = ::string2timestamp(strfrom)) == 0) {
 			log_error("Parse 'from' date range failure");
 			return false;
 		}
 	}
 
-	if (!to.empty()) {
+	if (!strto.empty()) {
 		// Convert race start time to timestamp
-		if ((to_ = ::string2timestamp(to)) == 0) {
+		if ((to = ::string2timestamp(strto)) == 0) {
 			log_error("Parse 'to' date range failure");
 			return false;
 		}
+
+		if (to < from) {
+			log_error("'[from:to]' compute range values invalid");
+			return false;
+		}
 	}
+
+	// Save
+	to_ = to;
+	from_ = from;
 
 	return true;
 }
@@ -228,12 +259,30 @@ void TelemetrySource::setTimeOffset(const int64_t& offset) {
 }
 
 
-void TelemetrySource::insert(TelemetrySource::Point &point) {
-	// Insert point
-	pool_.insert(point);
+bool TelemetrySource::inRange(uint64_t timestamp) const {
+	bool in_range = true;
 
-	// Move to inserted point
-	pool_.seek(1);
+	uint64_t from, to;
+
+	from = !from_ ? begin_ : from_;
+	to = !to_ ? end_ : to_;
+
+	if (from && (timestamp <= from))
+		in_range = false;
+	if (to && (timestamp > to))
+		in_range = false;
+
+	return in_range;
+}
+
+
+uint64_t TelemetrySource::beginTimestamp(void) const {
+	return begin_;
+}
+
+
+uint64_t TelemetrySource::endTimestamp(void) const {
+	return end_;
 }
 
 
@@ -269,11 +318,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	curPoint = pool_.current();
 
 	// Compute data range
-	if ((from_ != 0) && (curPoint.timestamp() < from_))
-		enable = false;
-
-	if ((to_ != 0) && (curPoint.timestamp() > to_))
-		enable = false;
+	enable = inRange(curPoint.timestamp());
 
 	if (pool_.backlog() > 0) {
 		// Retrieve previous point
@@ -502,10 +547,49 @@ bool TelemetrySource::load(void) {
 
 	pool_.reset();
 
-	if (count > 0)
+	if (!quiet_ && (count > 0))
 		log_notice("%s: %lu skip points", name().c_str(), count);
 
 	return true;
+}
+
+
+void TelemetrySource::range(void) {
+	uint64_t first = pool_.first().timestamp();
+	uint64_t last = pool_.last().timestamp();
+
+	// Set data range [begin:end]
+	begin_ = (begin_ != 0) ? MAX(first, begin_) : first;
+	end_ = (end_ != 0) ? MIN(last, end_) : last;
+
+	// Set compute range [from:to]
+	from_ = (from_ != 0) ? MAX(begin_, from_) : begin_;
+	to_ = (to_ != 0) ? MIN(to_, end_) : end_;
+
+	// Data range sumup
+	if (!quiet_) {
+		log_info("%s: Telemetry available data range from '%s' to '%s'", 
+				name().c_str(),
+				::timestamp2string(begin_).c_str(),
+				::timestamp2string(end_).c_str());
+	}
+
+	// For each point
+	while (pool_.size() > 0) {
+		pool_.seek(1);
+
+		// Insert points
+		if ((pool_.current().timestamp() < begin_) && (pool_.next().timestamp() > begin_))
+			insertData(begin_);
+		else if ((pool_.current().timestamp() < from_) && (pool_.next().timestamp() > from_))
+			insertData(from_);
+		else if ((pool_.current().timestamp() < to_) && (pool_.next().timestamp() > to_))
+			insertData(to_);
+		else if ((pool_.current().timestamp() < end_) && (pool_.next().timestamp() > end_))
+			insertData(end_);
+	}
+
+	pool_.reset();
 }
 
 
@@ -534,7 +618,8 @@ void TelemetrySource::filter(void) {
 //		break;
 
 	case 1:
-		log_info("%s: Filter telemetry data in using 'Iglewicz & Hoaglin' method.", name().c_str());
+		if (!quiet_)
+			log_info("%s: Filter telemetry data in using 'Iglewicz & Hoaglin' method.", name().c_str());
 
 		// Build acceleration sorted list
 		for (size_t i=1; i<=pool_.size(); i++)
@@ -562,7 +647,8 @@ void TelemetrySource::filter(void) {
 			}
 		}
 
-		log_notice("%s: %lu outliers detected", name().c_str(), n);
+		if (!quiet_)
+			log_notice("%s: %lu outliers detected", name().c_str(), n);
 		break;
 
 	default:
@@ -576,8 +662,6 @@ void TelemetrySource::compute(void) {
 	int ss = -1;
 	int done = 0;
 
-	uint64_t from, to;
-
 	double ele = 0.0;
 	double grade = 0.0;
 
@@ -587,15 +671,14 @@ void TelemetrySource::compute(void) {
 
 	TelemetryData data;
 
-	// Comute range
-	from = (from_ == 0) ? pool_.first().timestamp() : from_;
-	to = (to_ == 0) ? pool_.last().timestamp() : to_;
+	if (!quiet_) {
+		log_info("%s: Compute telemetry data from '%s' to '%s'", 
+				name().c_str(),
+				::timestamp2string(from_).c_str(),
+				::timestamp2string(to_).c_str());
+	}
 
-	log_info("%s: Compute telemetry data from '%s' to '%s'", 
-			name().c_str(),
-			::timestamp2string(from).c_str(),
-			::timestamp2string(to).c_str());
-
+	// For each point
 	while (pool_.size() > 0) {
 		pool_.seek(1);
 
@@ -685,8 +768,10 @@ void TelemetrySource::smooth(void) {
 	if (window < 2)
 		return;
 
-	log_info("%s: Smooth telemetry data on window size '%ld' (+/- %d points)", 
-			name().c_str(), window, smooth_points_);
+	if (!quiet_) {
+		log_info("%s: Smooth telemetry data on window size '%ld' (+/- %d points)", 
+				name().c_str(), window, smooth_points_);
+	}
 
 	// Fill window
 	for (size_t i=0; i<window/2; i++) {
@@ -805,20 +890,31 @@ void TelemetrySource::fix(void) {
 		}
 		// Fix point by interpolation
 		else {
-			bool in_range = true;
+			bool in_range;
 
 			double k =  (double) (currentPoint.ts_ - prevPoint.ts_) / (double) (nextPoint.ts_ - prevPoint.ts_);
 
-			// Check if we have to compute data
-			if (from_ && (currentPoint.timestamp() < from_))
-				in_range = false;
-			if (to_ && (currentPoint.timestamp() > to_))
-				in_range = false;
+			// Check if we have to and able to compute data
+			in_range = inRange(currentPoint.timestamp());
 
 			if (currentPoint.hasValue(TelemetryData::DataSpeed)) {
 				double speed = prevPoint.speed_ + k * (nextPoint.speed_ - prevPoint.speed_);
 				currentPoint.setSpeed(speed);
 				currentPoint.setPause((speed == 0));
+			}
+
+			if (currentPoint.hasValue(TelemetryData::DataDuration)) {
+				double duration = prevPoint.duration_;
+				if (!currentPoint.isPause())
+				   duration += (currentPoint.ts_ - prevPoint.ts_) / 1000;
+				currentPoint.setDuration(duration);
+			}
+
+			if (currentPoint.hasValue(TelemetryData::DataRideTime)) {
+				double ridetime = prevPoint.ridetime_;
+				if (!currentPoint.isPause())
+				   ridetime += (currentPoint.ts_ - prevPoint.ts_) / 1000;
+				currentPoint.setRideTime(ridetime);
 			}
 
 			if (currentPoint.hasValue(TelemetryData::DataElevation)) {
@@ -827,7 +923,8 @@ void TelemetrySource::fix(void) {
 			}
 			
 			if (currentPoint.hasValue(TelemetryData::DataGrade)) {
-				double grade  = (currentPoint.speed() > 0) ? 100.0 * (currentPoint.elevation() - prevPoint.ele_) / currentPoint.distanceTo(prevPoint) : prevPoint.grade();
+				double distance = currentPoint.distanceTo(prevPoint);
+				double grade = ((distance > 0) && (currentPoint.speed() > 0)) ? 100.0 * (currentPoint.elevation() - prevPoint.ele_) / distance : prevPoint.grade();
 				currentPoint.setGrade(grade);
 
 				// Upgrade grade for next point
@@ -873,12 +970,7 @@ void TelemetrySource::fix(void) {
 
 
 void TelemetrySource::trim(void) {
-	uint64_t begin, end;
-
 	TelemetrySource::Point point;
-
-	if ((begin_ == 0) && (end_ == 0))
-		goto skip;
 
 	// Move to first point
 	pool_.seek(1);
@@ -888,13 +980,13 @@ void TelemetrySource::trim(void) {
 		point = pool_.current();
 
 		// Drop data before 'begin_' timestamp
-		if ((begin_ != 0) && (point.timestamp() < begin_)) {
+		if (point.timestamp() < begin_) {
 			pool_.remove();
 			continue;
 		}
 
 		// Drop data after 'end_' timestamp
-		if ((end_ != 0) && (point.timestamp() > end_)) {
+		if (point.timestamp() > end_) {
 			pool_.remove();
 			continue;
 		}
@@ -903,16 +995,6 @@ void TelemetrySource::trim(void) {
 	}
 
 	pool_.reset();
-
-skip:
-	// Data range
-	begin = pool_.first().timestamp();
-	end = pool_.last().timestamp();
-
-	log_info("%s: Telemetry available data range from '%s' to '%s'", 
-			name().c_str(),
-			::timestamp2string(begin).c_str(),
-			::timestamp2string(end).c_str());
 }
 
 
@@ -940,7 +1022,7 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 		if (!data.hasValue(TelemetryData::DataFix))
 			continue;
 
-		if ((from_ != 0) && (data.timestamp() < from_))
+		if (data.timestamp() < beginTimestamp())
 			continue;
 
 		if (!p1->hasValue(TelemetryData::DataFix))
@@ -960,7 +1042,7 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 		if (data.lat_ < p2->lat_)
 			p2->lat_ = data.lat_;
 
-		if ((to_ != 0) && (data.timestamp() > to_))
+		if (data.timestamp() > endTimestamp())
 			break;
 	}
 
@@ -976,6 +1058,7 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 	reset();
 	clear();
 	load();
+	range();
 	filter();
 	compute();
 	smooth();
@@ -986,20 +1069,44 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 }
 
 
-void TelemetrySource::updateData(TelemetryData &data) {
-	log_call();
+void TelemetrySource::insertData(uint64_t timestamp) {
+	int flags;
 
-	if (pool_.empty())
-		goto skip;
+	TelemetryData data;
 
+	TelemetrySource::Point point;
+
+	// Current data
 	data = pool_.current();
 
-skip:
-	return;
+	// Predict data by interpolation
+	predictData(data, TelemetrySettings::MethodInterpolate, timestamp);
+
+	// Create the new point
+	point.setType(TelemetryData::TypePredicted);
+	point.setPosition(timestamp, data.latitude(), data.longitude());
+	point.setElevation(data.elevation());
+	point.setPower(data.power());
+	point.setCadence(data.cadence());
+	point.setHeartrate(data.heartrate());
+	point.setTemperature(data.temperature());
+
+	// Set values flag
+	flags = data.has_value_ & (
+			TelemetryData::DataFix
+			| TelemetryData::DataElevation
+			| TelemetryData::DataPower
+			| TelemetryData::DataCadence
+			| TelemetryData::DataHeartrate
+			| TelemetryData::DataTemperature);
+	point.setValue(flags);
+
+	// Insert point
+	pool_.insert(point);
 }
 
 
-void TelemetrySource::predictData(TelemetryData &data, uint64_t timestamp) {
+void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method method, uint64_t timestamp) {
 	uint64_t offset;
 
 	double k;
@@ -1010,15 +1117,10 @@ void TelemetrySource::predictData(TelemetryData &data, uint64_t timestamp) {
 
 	TelemetrySource::Point prevPoint, curPoint, nextPoint;
 
-	TelemetrySettings::Method method = method_;
-
 	log_call();
 
-	// Check if we have to compute data
-	if (from_ && (timestamp < from_))
-		in_range = false;
-	if (to_ && (timestamp > to_))
-		in_range = false;
+	// Check if we have to and able to compute data
+	in_range = inRange(timestamp);
 
 	// Compute timestamp offset for the new predict point
 	offset = timestamp - data.timestamp();
@@ -1034,7 +1136,7 @@ void TelemetrySource::predictData(TelemetryData &data, uint64_t timestamp) {
 	switch (method) {
 	case TelemetrySettings::MethodKalman:
 	case TelemetrySettings::MethodInterpolate:
-		if (pool_.size() == 0) {
+		if ((pool_.tell() == -1) || (pool_.size() == 0)) {
 			if (pool_.backlog() > 1)
 				method = TelemetrySettings::MethodLinear;
 			else
@@ -1202,15 +1304,14 @@ void TelemetrySource::predictData(TelemetryData &data, uint64_t timestamp) {
 		break;
 	}
 
-	if (method_ != TelemetrySettings::MethodNone) {
+	if (method != TelemetrySettings::MethodNone) {
 		// Update common data
 		//--------------------
 		double duration = data.duration();
 		double ridetime = data.rideTime();
 		double maxspeed = data.maxspeed();
 
-//		if (data.hasValue(TelemetryData::DataElapsedTime))
-			point.setElapsedTime(data.elapsedTime() + (offset / 1000.0));
+		point.setElapsedTime(data.elapsedTime() + (offset / 1000.0));
 
 		if (in_range || data.hasValue(TelemetryData::DataDuration)) {
 			duration += in_range ? (offset / 1000.0) : 0;
@@ -1269,6 +1370,19 @@ void TelemetrySource::cleanData(TelemetryData &data, uint64_t timestamp) {
 }
 
 
+void TelemetrySource::updateData(TelemetryData &data) {
+	log_call();
+
+	if (pool_.empty())
+		goto skip;
+
+	data = pool_.current();
+
+skip:
+	return;
+}
+
+
 enum TelemetrySource::Data TelemetrySource::retrieveData(TelemetryData &data) {
 	enum TelemetrySource::Data type = TelemetrySource::DataAgain;
 
@@ -1293,9 +1407,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveFirst(TelemetryData &data) {
 
 	pool_.reset();
 
-	data = pool_.first();
-
-	return (data.type() != TelemetryData::TypeUnknown) ? TelemetrySource::DataAgain : TelemetrySource::DataEof;
+	return retrieveData(data);
 }
 
 
@@ -1337,7 +1449,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 			}
 			else if (timestamp < nextPoint.timestamp()) {
 //				printf(" <predict %lu %lu> ", timestamp, nextPoint.timestamp());
-				predictData(data, timestamp);
+				predictData(data, method_, timestamp);
 			}
 			else {
 //				printf(" <next> ");
@@ -1362,6 +1474,21 @@ eof:
 }
 
 
+enum TelemetrySource::Data TelemetrySource::retrieveTo(TelemetryData &data) {
+	enum TelemetrySource::Data result;
+
+	if (to_ != 0) {
+		result = retrieveFirst(data);
+
+		result = retrieveNext(data, to_);
+	}
+	else
+		result = retrieveLast(data);
+
+	return result;
+}
+
+
 enum TelemetrySource::Data TelemetrySource::retrieveLast(TelemetryData &data) {
 	log_call();
 
@@ -1371,7 +1498,7 @@ enum TelemetrySource::Data TelemetrySource::retrieveLast(TelemetryData &data) {
 }
 
 
-TelemetrySource * TelemetryMedia::open(const std::string &filename, const TelemetrySettings &settings) {
+TelemetrySource * TelemetryMedia::open(const std::string &filename, const TelemetrySettings &settings, bool quiet) {
 	TelemetryData data;
 
 	TelemetrySource *source = NULL;
@@ -1391,12 +1518,17 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 	// Init
 	if (source != NULL) {
+		bool ok = true;
+
+		// Verbose info
+		source->setQuiet(quiet);
+
 		// Timestamp offset
 		source->setTimeOffset(settings.telemetryOffset());
 
 		// Telemetry range
-		source->setDataRange(settings.telemetryBegin(), settings.telemetryEnd());
-		source->setComputeRange(settings.telemetryFrom(), settings.telemetryTo());
+		ok &= source->setDataRange(settings.telemetryBegin(), settings.telemetryEnd());
+		ok &= source->setComputeRange(settings.telemetryFrom(), settings.telemetryTo());
 
 		// Telemetry data filter
 		source->skipBadPoint(settings.telemetryCheck());
@@ -1406,6 +1538,12 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 		// Load telemtry data
 		source->loadData();
+
+		if (!ok) {
+			delete source;
+
+			source = NULL;
+		}
 	}
 
 	return source;

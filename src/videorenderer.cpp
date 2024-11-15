@@ -275,6 +275,10 @@ bool VideoRenderer::start(void) {
 
 	log_notice("Rendering...");
 
+	// Start
+	Renderer::start();
+
+	// Compute video start time
 	start_time = container_->startTime() + container_->timeOffset();
 
 	log_info("Video: start at '%s'", ::timestamp2string(start_time).c_str());
