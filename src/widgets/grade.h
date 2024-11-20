@@ -58,7 +58,7 @@ skip:
 
 		// Format data
 		if (data.hasValue(TelemetryData::DataGrade))
-			sprintf(s, "%.0f%%", data.grade());
+			sprintf(s, "%d%%", (int) std::round(data.grade()));
 		else
 			sprintf(s, "--%%");
 

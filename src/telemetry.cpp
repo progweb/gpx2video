@@ -283,51 +283,55 @@ bool Telemetry::run(void) {
 
 	switch (output_format_) {
 	case TelemetrySettings::FormatGPX:
-		gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
+		if (data_.type() != TelemetryData::TypeError) {
+			gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
 
-		out_ << std::setprecision(15);
-		out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
-		if (data_.hasValue(TelemetryData::DataElevation))
-			out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
-		out_ << "        <time>" << ::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
-		if (gpx_extension) {
-			out_ << "        <extensions>" << std::endl;
-			out_ << "          <ns3:TrackPointExtension>" << std::endl;
-			if (data_.hasValue(TelemetryData::DataCadence))
-				out_ << "            <ns3:cad>" << data_.cadence() << "</ns3:cad>" << std::endl;
-			if (data_.hasValue(TelemetryData::DataHeartrate))
-				out_ << "            <ns3:hr>" << data_.heartrate() << "</ns3:hr>" << std::endl;
-			if (data_.hasValue(TelemetryData::DataTemperature))
-				out_ << "            <ns3:atemp>" << data_.temperature() << "</ns3:atemp>" << std::endl;
-			out_ << "          </ns3:TrackPointExtension>" << std::endl;
-			out_ << "        </extensions>" << std::endl;
+			out_ << std::setprecision(15);
+			out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
+			if (data_.hasValue(TelemetryData::DataElevation))
+				out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
+			out_ << "        <time>" << ::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
+			if (gpx_extension) {
+				out_ << "        <extensions>" << std::endl;
+				out_ << "          <ns3:TrackPointExtension>" << std::endl;
+				if (data_.hasValue(TelemetryData::DataCadence))
+					out_ << "            <ns3:cad>" << data_.cadence() << "</ns3:cad>" << std::endl;
+				if (data_.hasValue(TelemetryData::DataHeartrate))
+					out_ << "            <ns3:hr>" << data_.heartrate() << "</ns3:hr>" << std::endl;
+				if (data_.hasValue(TelemetryData::DataTemperature))
+					out_ << "            <ns3:atemp>" << data_.temperature() << "</ns3:atemp>" << std::endl;
+				out_ << "          </ns3:TrackPointExtension>" << std::endl;
+				out_ << "        </extensions>" << std::endl;
+			}
+			out_ << "      </trkpt>" << std::endl;
 		}
-		out_ << "      </trkpt>" << std::endl;
 		break;
 
 	case TelemetrySettings::FormatCSV:
-		out_ << std::setprecision(8);
-		out_ << data_.timestamp();
-		out_ << ", \"" << ::timestamp2string(data_.timestamp()) << "\"";
-		out_ << ", " << round(data_.elapsedTime());
-		out_ << ", " << round(data_.duration());
-		out_ << ", " << round(data_.rideTime());
-		out_ << ", " << data_.type2string();
-		out_ << ", " << data_.latitude();
-		out_ << ", " << data_.longitude();
-		out_ << ", " << data_.elevation();
-		out_ << ", " << data_.grade(); 
-		out_ << ", " << data_.distance(); 
-		out_ << ", " << data_.speed(); 
-		out_ << ", " << data_.maxspeed(); 
-		out_ << ", " << data_.avgspeed(); 
-		out_ << ", " << data_.avgridespeed(); 
-		out_ << ", " << data_.cadence(); 
-		out_ << ", " << data_.heartrate(); 
-		out_ << ", " << data_.temperature(); 
-		out_ << ", " << data_.power(); 
-		out_ << ", " << data_.lap(); 
-		out_ << std::endl;
+		if (data_.type() != TelemetryData::TypeError) {
+			out_ << std::setprecision(8);
+			out_ << data_.timestamp();
+			out_ << ", \"" << ::timestamp2string(data_.timestamp()) << "\"";
+			out_ << ", " << round(data_.elapsedTime());
+			out_ << ", " << round(data_.duration());
+			out_ << ", " << round(data_.rideTime());
+			out_ << ", " << data_.type2string();
+			out_ << ", " << data_.latitude();
+			out_ << ", " << data_.longitude();
+			out_ << ", " << data_.elevation();
+			out_ << ", " << data_.grade(); 
+			out_ << ", " << data_.distance(); 
+			out_ << ", " << data_.speed(); 
+			out_ << ", " << data_.maxspeed(); 
+			out_ << ", " << data_.avgspeed(); 
+			out_ << ", " << data_.avgridespeed(); 
+			out_ << ", " << data_.cadence(); 
+			out_ << ", " << data_.heartrate(); 
+			out_ << ", " << data_.temperature(); 
+			out_ << ", " << data_.power(); 
+			out_ << ", " << data_.lap(); 
+			out_ << std::endl;
+		}
 		break;
 
 	case TelemetrySettings::FormatDump:

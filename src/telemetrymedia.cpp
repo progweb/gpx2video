@@ -81,18 +81,18 @@ void TelemetryData::dump(void) {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Distance    | Duration | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  \n");
-	printf("------+-------+---+-------------------------+-------------+----------+--------+--------------+---+--------------+--------------+----------+--------\n");
+	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  \n");
+	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+--------\n");
 }
 
 
 void TelemetryData::writeData(size_t index) const {
-	printf("%5ld | %5d | %s | %s | %11.3f | %8d | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%%\n",
+	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%%\n",
 		index,
 		line_,
 		type2string(),
 		::timestamp2string(ts_).c_str(),
-		distance_/1000.0, (int) round(duration_), speed_, acceleration_ / 9.81,
+		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
 		ele_, grade_);  
@@ -382,7 +382,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		// Grade elevation
 		if (curPoint.hasValue(TelemetryData::DataElevation)) {
 			if (force || !curPoint.hasValue(TelemetryData::DataGrade)) {
-				if (floor(dc) > 4)
+				if (floor(dc) > 0)
 					curPoint.setGrade(100.0 * dz / dc);
 				else
 					curPoint.setGrade(prevPoint.grade_);
@@ -659,11 +659,17 @@ void TelemetrySource::filter(void) {
 
 
 void TelemetrySource::compute(void) {
+	int gs = -1;
 	int ss = -1;
 	int done = 0;
 
-	double ele = 0.0;
+	double dc = 0.0;
+	double dz = 0.0;
+
+	double sele = 0.0;
 	double grade = 0.0;
+	double distance = 0.0;
+	double elevation = 0.0;
 
 	uint64_t interval = 4000; // 4s
 
@@ -678,6 +684,9 @@ void TelemetrySource::compute(void) {
 				::timestamp2string(to_).c_str());
 	}
 
+	// Start elevation
+	elevation = pool_.first().elevation();
+
 	// For each point
 	while (pool_.size() > 0) {
 		pool_.seek(1);
@@ -688,10 +697,33 @@ void TelemetrySource::compute(void) {
 
 		compute_i(data, true);
 
+		// Compute grade, each 10m
+		dc += pool_.current().distance() - distance;
+		dz += pool_.current().elevation() - elevation;
+
+		// Distance enough (> 10 meter), compute grade
+		if ((ss == -1) && (dc > 10)) {
+			grade = 100.0 * dz / dc;
+
+			if (pool_.current().hasValue(TelemetryData::DataFix))
+				pool_.current().setGrade(grade);
+
+			for (int k=0; k<=gs; k++) {
+				if (pool_.previous(k).hasValue(TelemetryData::DataFix))
+					pool_.previous(k).setGrade(grade);
+			}
+
+			dc = 0;
+			dz = 0;
+
+			gs = -1;
+		}
+		else
+			gs++;
+
 		// > 2.8 m/us => 0.40 m/us 
 		// < 2.8 m/us => 0.15 m/us
-		//
-		// * 3600 => km/h
+		// Detect move above...
 		if (!data.hasValue(TelemetryData::DataSpeed)) {
 			// If no data, we can't assume that it's a pause
 			ss = -1;
@@ -709,7 +741,7 @@ void TelemetrySource::compute(void) {
 			// In pause
 			ss++;
 
-			ele = pool_.current().elevation();
+			sele = pool_.current().elevation();
 		}
 
 		// Pause detection
@@ -719,7 +751,7 @@ void TelemetrySource::compute(void) {
 				pool_.current().setPause(true);
 				pool_.current().setSpeed(0);
 				pool_.current().setAcceleration(0);
-				pool_.current().setElevation(ele);
+				pool_.current().setElevation(sele);
 				pool_.current().setGrade(grade);
 
 				for (int k=0; k<=ss-done; k++) {
@@ -728,7 +760,7 @@ void TelemetrySource::compute(void) {
 					if (pool_.previous(k).hasValue(TelemetryData::DataFix)) {
 						pool_.previous(k).setSpeed(0);
 						pool_.previous(k).setAcceleration(0);
-						pool_.previous(k).setElevation(ele);
+						pool_.previous(k).setElevation(sele);
 						pool_.previous(k).setGrade(grade);
 					}
 				}
@@ -736,6 +768,10 @@ void TelemetrySource::compute(void) {
 				done = ss;
 			}
 		}
+
+		// Save last data
+		distance = pool_.current().distance();
+		elevation = pool_.current().elevation();
 	}
 
 	pool_.reset();
@@ -752,14 +788,25 @@ void TelemetrySource::compute(void) {
  *  - max speed
  */
 void TelemetrySource::smooth(void) {
+	bool first = true;
+
+	int gs = -1;
+
 	int count = 0;
 	size_t window = (smooth_points_ * 2) + 1;
 
-	double elevation = 0;
+	double dc = 0;
+	double dz = 0;
+
 	double grade = 0;
-	double speed = 0;
+	double distance = 0;
+	double elevation = 0;
 	double maxspeed = 0;
-	double acceleration = 0;
+
+	double sumspeed = 0;
+	double sumgrade = 0;
+	double sumelevation = 0;
+	double sumacceleration = 0;
 
 	std::deque<Point> points;
 
@@ -773,6 +820,9 @@ void TelemetrySource::smooth(void) {
 				name().c_str(), window, smooth_points_);
 	}
 
+	// 1s pass
+	//---------
+
 	// Fill window
 	for (size_t i=0; i<window/2; i++) {
 		nextPoint = pool_.next(i);
@@ -784,10 +834,9 @@ void TelemetrySource::smooth(void) {
 		points.emplace_back(nextPoint);
 
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			elevation += nextPoint.elevation();
-			grade += nextPoint.grade();
-			speed += nextPoint.speed();
-			acceleration += nextPoint.acceleration();
+			sumelevation += nextPoint.elevation();
+			sumspeed += nextPoint.speed();
+			sumacceleration += nextPoint.acceleration();
 			count += 1;
 		}
 	}
@@ -806,10 +855,9 @@ void TelemetrySource::smooth(void) {
 
 			if (nextPoint.type() != TelemetryData::TypeUnknown) {
 				if (nextPoint.hasValue(TelemetryData::DataFix)) {
-					elevation += nextPoint.elevation();
-					grade += nextPoint.grade();
-					speed += nextPoint.speed();
-					acceleration += nextPoint.acceleration();
+					sumelevation += nextPoint.elevation();
+					sumspeed += nextPoint.speed();
+					sumacceleration += nextPoint.acceleration();
 					count += 1;
 				}
 			}
@@ -820,27 +868,139 @@ void TelemetrySource::smooth(void) {
 				points.pop_front();
 
 				if (previousPoint.hasValue(TelemetryData::DataFix)) {
-					elevation -= previousPoint.elevation();
-					grade -= previousPoint.grade();
-					speed -= previousPoint.speed();
-					acceleration -= previousPoint.acceleration();
+					sumelevation -= previousPoint.elevation();
+					sumspeed -= previousPoint.speed();
+					sumacceleration -= previousPoint.acceleration();
 					count -= 1;
 				}
 			}
 
-			// New speed
+			// Compute smooth values: speed, elevation
 			if (!pool_.current().isPause()) {
 				if (pool_.current().hasValue(TelemetryData::DataFix)) {
 					if (pool_.current().hasValue(TelemetryData::DataMaxSpeed))
-						maxspeed = MAX(maxspeed, speed / count);
+						maxspeed = MAX(maxspeed, sumspeed / count);
 
-					pool_.current().setElevation(elevation / count);
-					pool_.current().setGrade(grade / count);
-					pool_.current().setSpeed(speed / count);
-					pool_.current().setAcceleration(acceleration / count);
+					pool_.current().setElevation(sumelevation / count);
+					pool_.current().setSpeed(sumspeed / count);
+					pool_.current().setAcceleration(sumacceleration / count);
 
 					if (pool_.current().hasValue(TelemetryData::DataMaxSpeed))
 						pool_.current().setMaxSpeed(maxspeed);
+				}
+			}
+			// Don't update values in pause
+			else {
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					pool_.current().setElevation(pool_.previous().elevation());
+					pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+				}
+			}
+
+			// Compute again slope with new smooth values
+			if (first) {
+				elevation = pool_.current().elevation();
+				first = false;
+			}
+
+			dc += pool_.current().distance() - distance;
+			dz += pool_.current().elevation() - elevation;
+
+			// Distance enough (> 10 meter), compute grade
+			if (!pool_.current().isPause() && (dc > 10)) {
+				grade = 100.0 * dz / dc;
+
+				if (pool_.current().hasValue(TelemetryData::DataFix))
+					pool_.current().setGrade(grade);
+
+				for (int k=0; k<=gs; k++) {
+					if (pool_.previous(k).hasValue(TelemetryData::DataFix))
+						pool_.previous(k).setGrade(grade);
+				}
+
+				dc = 0;
+				dz = 0;
+
+				gs = -1;
+			}
+			else 
+				gs++;
+
+			// Save last data
+			distance = pool_.current().distance();
+			elevation = pool_.current().elevation();
+		}
+
+		// Move to next
+		pool_.seek(1);
+	}
+
+	// Reset & prepare 2nd pass
+	pool_.reset();
+	points.clear();
+
+	count = 0;
+
+	// 2nd pass
+	//----------
+	
+#if 1
+	// Fill window
+	for (size_t i=0; i<window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			sumgrade += nextPoint.grade();
+			count += 1;
+		}
+	}
+
+	// Move to first point
+	pool_.seek(1);
+
+	// Compute average value for each point
+	while (!pool_.empty()) {
+		if (pool_.current().type() != TelemetryData::TypeError) {
+			// Add new point
+			nextPoint = pool_.next(window/2 - 1);
+
+			// Save point
+			points.emplace_back(nextPoint);
+
+			if (nextPoint.type() != TelemetryData::TypeUnknown) {
+				if (nextPoint.hasValue(TelemetryData::DataFix)) {
+					sumgrade += nextPoint.grade();
+					count += 1;
+				}
+			}
+
+			// Remove old point
+			if (points.size() > window) {
+				previousPoint = points.front();
+				points.pop_front();
+
+				if (previousPoint.hasValue(TelemetryData::DataFix)) {
+					sumgrade -= previousPoint.grade();
+					count -= 1;
+				}
+			}
+
+			// Compute smooth values: grade
+			if (!pool_.current().isPause()) {
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					pool_.current().setGrade(sumgrade / count);
+				}
+			}
+			// Don't update values in pause
+			else {
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					pool_.current().setGrade(pool_.previous().grade());
 				}
 			}
 		}
@@ -848,6 +1008,25 @@ void TelemetrySource::smooth(void) {
 		// Move to next
 		pool_.seek(1);
 	}
+#else
+	// Compute average value for each point
+	while (!pool_.empty()) {
+		if (pool_.tell() > 2) {
+			if (pool_.current().type() != TelemetryData::TypeError) {
+				double a = 4.0;
+				double z = 0.7;
+
+				pool_.current().setGrade(
+						(pool_.current().grade() + (pool_.previous().grade() * (a + ((a * a) / (2 * z * z)))) \
+						- (pool_.previous(1).grade() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+				);
+			}
+		}
+
+		// Move to next
+		pool_.seek(1);
+	}
+#endif
 
 	pool_.reset();
 }
@@ -923,13 +1102,14 @@ void TelemetrySource::fix(void) {
 			}
 			
 			if (currentPoint.hasValue(TelemetryData::DataGrade)) {
-				double distance = currentPoint.distanceTo(prevPoint);
-				double grade = ((distance > 0) && (currentPoint.speed() > 0)) ? 100.0 * (currentPoint.elevation() - prevPoint.ele_) / distance : prevPoint.grade();
+//				double distance = currentPoint.distanceTo(prevPoint);
+//				double grade = ((distance > 0) && (currentPoint.speed() > 0)) ? 100.0 * (currentPoint.elevation() - prevPoint.ele_) / distance : prevPoint.grade();
+				double grade = prevPoint.grade_ + k * (nextPoint.grade_ - prevPoint.grade_);
 				currentPoint.setGrade(grade);
 
-				// Upgrade grade for next point
-				if (!nextPoint.isPause())
-					nextPoint.setGrade(grade);
+//				// Upgrade grade for next point
+//				if (!nextPoint.isPause())
+//					nextPoint.setGrade(grade);
 			}
 
 			if (currentPoint.hasValue(TelemetryData::DataAcceleration)) {
