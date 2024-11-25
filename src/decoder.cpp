@@ -11,7 +11,8 @@
 Decoder::Decoder()
 	: fmt_ctx_(NULL)
 	, codec_ctx_(NULL)
-	, sws_ctx_(NULL) {
+	, sws_ctx_(NULL)
+	, opts_(NULL) {
 	pts_ = 0;
 }
 
@@ -293,8 +294,13 @@ bool Decoder::open(const std::string &filename, const int &index) {
 		return false;
 	}
 
+	// Enable multithread
+	if ((result = av_dict_set(&opts_, "threads", "auto", 0)) < 0) {
+		av_log(NULL, AV_LOG_ERROR, "Failed to set codec options, performance may suffer\n");
+	}
+
 	// Open decoder
-	result = avcodec_open2(codec_ctx_, decoder, NULL);
+	result = avcodec_open2(codec_ctx_, decoder, &opts_);
 
 	if (result < 0) {
 		char buf[64];
@@ -353,6 +359,11 @@ int Decoder::getFrame(AVPacket *packet, AVFrame *frame) {
 
 
 void Decoder::close(void) {
+	if (opts_) {
+		av_dict_free(&opts_);
+		opts_ = NULL;
+	}
+
 	if (sws_ctx_) {
 		sws_freeContext(sws_ctx_);
 		sws_ctx_ = NULL;

@@ -65,6 +65,8 @@ private:
 
 	SwsContext *sws_ctx_;
 
+	AVDictionary *opts_;
+
 	int64_t pts_;
 };
 
