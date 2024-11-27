@@ -93,6 +93,7 @@ public:
 
 		CommandSource,	// Dump map source list
 		CommandFormat,  // Dump extract format supported
+		CommandFilter, 	// Dump telemetry filter supported
 		CommandMethod,  // Dump telemetry method supported
 		CommandSync,	// Auto sync video time with gps sensor
 		CommandExtract,	// Extract gps sensor data from video

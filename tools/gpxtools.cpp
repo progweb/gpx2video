@@ -38,6 +38,7 @@ static const struct option options[] = {
 	{ "telemetry-offset",      required_argument, 0, 0 },
 	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
+	{ "telemetry-filter-list", no_argument,       0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 'r' },
@@ -61,6 +62,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --to                      : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
 	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
 	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
+	std::cout << "\t-    --telemetry-filter=filter : Telemetry filter" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
 	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default 'disable': 0))" << std::endl;
@@ -69,6 +71,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t- h, --help                    : Show this help screen" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
+	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
 	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
@@ -79,6 +82,20 @@ static void print_usage(const std::string &name) {
 }
 
 
+static void print_filter_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Telemetry filter supported: " << name << std::endl;
+
+	for (i=TelemetrySettings::FilterNone; i != TelemetrySettings::FilterCount; i++) {
+		std::string name = TelemetrySettings::getFriendlyFilterName((TelemetrySettings::Filter) i);
+
+		std::cout << "\t- " << i << ":\t" << name << std::endl;
+	}
+}
+
 static void print_method_supported(const std::string &name) {
 	int i;
 
@@ -87,7 +104,7 @@ static void print_method_supported(const std::string &name) {
 	std::cout << "Telemetry method supported: " << name << std::endl;
 
 	for (i=TelemetrySettings::MethodNone; i != TelemetrySettings::MethodCount; i++) {
-		std::string name = TelemetrySettings::getFriendlyName((TelemetrySettings::Method) i);
+		std::string name = TelemetrySettings::getFriendlyMethodName((TelemetrySettings::Method) i);
 
 		std::cout << "\t- " << i << ":\t" << name << std::endl;
 	}
@@ -177,8 +194,16 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				filter = (TelemetrySettings::Filter) atoi(optarg);
 			}
+			else if (s && !strcmp(s, "telemetry-filter-list")) {
+				setCommand(GPXTools::CommandFilter);
+				return 0;
+			}
 			else if (s && !strcmp(s, "telemetry-method")) {
 				method = (TelemetrySettings::Method) atoi(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-method-list")) {
+				setCommand(GPXTools::CommandMethod);
+				return 0;
 			}
 			else if (s && !strcmp(s, "telemetry-rate")) {
 				rate = atoi(optarg);
@@ -325,6 +350,11 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	// Process
 	switch (app.command()) {
+	case GPXTools::CommandFilter:
+		gpxtools::print_filter_supported(name);
+		goto exit;
+		break;
+
 	case GPXTools::CommandMethod:
 		gpxtools::print_method_supported(name);
 		goto exit;

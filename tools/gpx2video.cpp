@@ -58,6 +58,7 @@ static const struct option options[] = {
 	{ "telemetry-offset",      required_argument, 0, 0 },
 	{ "telemetry-check",       required_argument, 0, 0 },
 	{ "telemetry-filter",      required_argument, 0, 0 },
+	{ "telemetry-filter-list", no_argument,       0, 0 },
 	{ "telemetry-method",      required_argument, 0, 0 },
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 0 },
@@ -94,9 +95,10 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
 	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
 	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
+	std::cout << "\t-    --telemetry-filter=filter : Telemetry filter" << std::endl;
 	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 1000))" << std::endl;
-	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default 'disable': 0))" << std::endl;
+	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default '2', to disable set '0'))" << std::endl;
 //	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --map-factor              : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source              : Map source" << std::endl;
@@ -110,6 +112,7 @@ static void print_usage(const std::string &name) {
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
 	std::cout << "\t-    --extract-format-list     : Dump extract format supported" << std::endl;
+	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
 	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Encoder options:" << std::endl;
@@ -167,6 +170,20 @@ static void print_format_supported(const std::string &name) {
 	}
 }
 
+static void print_filter_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Telemetry filter supported: " << name << std::endl;
+
+	for (i=TelemetrySettings::FilterNone; i != TelemetrySettings::FilterCount; i++) {
+		std::string name = TelemetrySettings::getFriendlyFilterName((TelemetrySettings::Filter) i);
+
+		std::cout << "\t- " << i << ":\t" << name << std::endl;
+	}
+}
+
 static void print_method_supported(const std::string &name) {
 	int i;
 
@@ -175,7 +192,7 @@ static void print_method_supported(const std::string &name) {
 	std::cout << "Telemetry method supported: " << name << std::endl;
 
 	for (i=TelemetrySettings::MethodNone; i != TelemetrySettings::MethodCount; i++) {
-		std::string name = TelemetrySettings::getFriendlyName((TelemetrySettings::Method) i);
+		std::string name = TelemetrySettings::getFriendlyMethodName((TelemetrySettings::Method) i);
 
 		std::cout << "\t- " << i << ":\t" << name << std::endl;
 	}
@@ -274,10 +291,6 @@ int GPX2Video::setDefaultStartTime(void) {
 		return -1;
 	}
 
-//	// Telemetry data limits
-//	source->setFrom(settings().from());
-//	source->setTo(settings().to());
-
 	// Start time activity
 	source->retrieveFirst(data);
 	
@@ -307,10 +320,6 @@ Map * GPX2Video::buildMap(void) {
 		log_warn("Can't read telemetry data, none telemetry file found");
 		return NULL;
 	}
-
-//	// Telemetry data limits
-//	source->setFrom(settings().from());
-//	source->setTo(settings().to());
 
 	// Create map bounding box
 	TelemetryData p1, p2;
@@ -362,8 +371,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	double path_thick = 3.0;
 	double path_border = 1.4;
 
-	int telemetry_rate = 1000; // By default, update each 1 second
-	int telemetry_smooth_points = 0;
+	int telemetry_rate = 250; // By default, update each 250 milliseconds
+	int telemetry_smooth_points = 2; // By default, enable smooth filter
 
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
@@ -390,7 +399,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	int64_t telemetry_offset = 0;
 	bool telemetry_check = false;
-	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterNone;
+	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterOutlier;
 	TelemetrySettings::Method telemetry_method = TelemetrySettings::MethodInterpolate;
 
 	bool gpxfile_required = false;
@@ -476,6 +485,10 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
+			}
+			else if (s && !strcmp(s, "telemetry-filter-list")) {
+				setCommand(GPX2Video::CommandFilter);
+				return 0;
 			}
 			else if (s && !strcmp(s, "telemetry-method")) {
 				telemetry_method = (TelemetrySettings::Method) atoi(optarg);
@@ -852,6 +865,11 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPX2Video::CommandFormat:
 		gpx2video::print_format_supported(name);
+		goto exit;
+		break;
+
+	case GPX2Video::CommandFilter:
+		gpx2video::print_filter_supported(name);
 		goto exit;
 		break;
 

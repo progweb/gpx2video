@@ -21,7 +21,7 @@ public:
 	enum Filter {
 		FilterNone = 0,
 
-		FilterTest,
+		FilterOutlier,
 
 		FilterCount
 	};
@@ -69,7 +69,8 @@ public:
 	const int& telemetryRate(void) const;
 	const int& telemetrySmoothPoints(void) const;
 
-	static const std::string getFriendlyName(const Method &method);
+	static const std::string getFriendlyFilterName(const Filter &filter);
+	static const std::string getFriendlyMethodName(const Method &method);
 
 	void dump(void) const;
 

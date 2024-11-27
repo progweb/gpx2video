@@ -605,19 +605,7 @@ void TelemetrySource::filter(void) {
 
 	// Filter method
 	switch (filter_) {
-//	case 1:
-//		log_info("%s: Filter telemetry data in using '1'.", name().c_str());
-//		break;
-//
-//	case 2:
-//		log_info("%s: Filter telemetry data in using '2'.", name().c_str());
-//		break;
-//
-//	case 3:
-//		log_info("%s: Filter telemetry data in using '3'.", name().c_str());
-//		break;
-
-	case 1:
+	case TelemetrySettings::FilterOutlier:
 		if (!quiet_)
 			log_info("%s: Filter telemetry data in using 'Iglewicz & Hoaglin' method.", name().c_str());
 

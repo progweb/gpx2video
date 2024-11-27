@@ -109,7 +109,22 @@ const int& TelemetrySettings::telemetrySmoothPoints(void) const {
 }
 
 
-const std::string TelemetrySettings::getFriendlyName(const TelemetrySettings::Method &method) {
+const std::string TelemetrySettings::getFriendlyFilterName(const TelemetrySettings::Filter &filter) {
+	switch (filter) {
+	case FilterNone:
+		return "None";
+	case FilterOutlier:
+		return "Apply 'Iglewicz & Hoaglin' modified z-scores filter";
+	case FilterCount:
+	default:
+		return "";
+	}
+
+	return "";
+}
+
+
+const std::string TelemetrySettings::getFriendlyMethodName(const TelemetrySettings::Method &method) {
 	switch (method) {
 	case MethodNone:
 		return "None";
