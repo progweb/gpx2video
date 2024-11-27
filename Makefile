@@ -1,5 +1,8 @@
 BASE_IMAGE?=debian:11.10-slim
-BUILD_DIR=build
+BUILD_DIR=build-debian-11
+
+# Your video directory
+VIDEO_DIR?=$(PWD)
 
 
 # 11: bullseye
@@ -66,6 +69,7 @@ build-docker:
 build-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
+		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
 		-v $(PWD):/app \
 		--workdir=/app/build \
@@ -78,8 +82,10 @@ build-gpx2video:
 run-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
+		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
 		-v $(PWD)/assets:/app/build/assets \
+		-v $(VIDEO_DIR):/data \
 		--workdir=/app/build \
 		--name=gpx2video \
 		gpx2video-$(BASE_IMAGE) \

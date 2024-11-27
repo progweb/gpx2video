@@ -19,6 +19,10 @@ extern "C" {
 #include "videoparams.h"
 
 
+#if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(61, 13, 100)
+#define HAVE_FFMPEG_SUPPORTED_CONFIG
+#endif
+
 #if LIBAVCODEC_VERSION_INT > AV_VERSION_INT(59, 24, 100)
 #define HAVE_FFMPEG_CH_LAYOUT
 #endif

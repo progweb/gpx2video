@@ -142,7 +142,10 @@ $ ./gpx2video -m GOPR1860.MP4 --start-time "2021-12-08T09:56:26" --offset 300 ..
 
 ### Build in docker
 
-By default docker will use debian:11.10-slim as base image, but you can change it with BASE_IMAGE variable.
+#### Debian
+
+By default docker will use debian:11.10-slim as base image, but you can change it.
+
 ```bash
 make build-docker
 make build-gpx2video
@@ -151,14 +154,37 @@ make build-gpx2video
 Copy video files to data folder then you can start docker and try it out
 
 ```bash
-mkdir -p data
-make run
+make run VIDEO_DIR=~/Videos
 
 # run gpx2video
-./gpx2video -v -m /app/data/SOME_VID.mp4 -g /app/data/SOME_GPX.gpx -l /app/data/layout.xml -o /app/data/output.mp4
+./gpx2video -v -m /data/SOME_VID.mp4 -g /data/SOME_GPX.gpx -l /data/layout.xml -o /data/output.mp4
+```
+
+#### Ubuntu
+
+If you prefer build & run for ubuntu, fist create docker image, then build the application.
+
+```bash
+make ubuntu-noble
+```
+
+To rebuild the applicatio
+
+```bash
+make buid-ubuntu-noble
+```
+
+To execute the application
+
+```bash
+make run-ubuntu-noble VIDEO_DIR=~/Videos
+
+# run gpx2video
+./tools/gpx2video -v -m /data/SOME_VID.mp4 -g /data/SOME_GPX.gpx -l /data/layout.xml -o /data/output.mp4
 ```
 
 ### build on host
+
 To build gpx2video, please install all dependencies (on Debian):
 
 ```bash
@@ -167,6 +193,8 @@ apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
     libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
     libcairo2-dev libopenexr-dev
 ```
+
+*Warning, on some distribution, libgeographic-dev is called libgeographiclib-dev!*
 
 Then build in using cmake tools:
 

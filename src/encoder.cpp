@@ -411,17 +411,29 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		}
 		break;
 
-	case AVMEDIA_TYPE_AUDIO:
-		codec_context->sample_rate = settings().audioParams().sampleRate();
-#ifdef HAVE_FFMPEG_CH_LAYOUT
-		av_channel_layout_from_mask(&codec_context->ch_layout, settings().audioParams().channelLayout());
+	case AVMEDIA_TYPE_AUDIO: {
+			const enum AVSampleFormat *sample_fmts = NULL;
+
+#ifdef HAVE_FFMPEG_SUPPORTED_CONFIG
+			avcodec_get_supported_config(NULL, encoder,
+					AV_CODEC_CONFIG_SAMPLE_FORMAT, 0, (const void **) &sample_fmts, NULL);
 #else
-		codec_context->channel_layout = settings().audioParams().channelLayout();
-		codec_context->channels = av_get_channel_layout_nb_channels(codec_context->channel_layout);
+			sample_fmts = encoder->sample_fmts;
 #endif
-		// take first format from list of supported formats
-		codec_context->sample_fmt = encoder->sample_fmts[0];
-		codec_context->time_base = (AVRational) {1, codec_context->sample_rate};
+
+			codec_context->sample_rate = settings().audioParams().sampleRate();
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+			av_channel_layout_from_mask(&codec_context->ch_layout, settings().audioParams().channelLayout());
+#else
+			codec_context->channel_layout = settings().audioParams().channelLayout();
+			codec_context->channels = av_get_channel_layout_nb_channels(codec_context->channel_layout);
+#endif
+			// take first format from list of supported formats
+			if (sample_fmts != NULL)
+				codec_context->sample_fmt = sample_fmts[0];
+
+			codec_context->time_base = (AVRational) {1, codec_context->sample_rate};
+		}
 		break;
 
 	default:

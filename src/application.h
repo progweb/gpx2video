@@ -4,6 +4,7 @@
 #include <list>
 #include <cstdlib>
 #include <cstdint>
+#include <cstring>
 
 #include <unistd.h>
 
@@ -154,7 +155,8 @@ public:
 
 		info = (int32_t) action;
 
-		write(pipe_out_, &info, sizeof(info));
+		if (write(pipe_out_, &info, sizeof(info)) < 0)
+			log_error("Action perform failure, errno=%d, %s", errno, std::strerror(errno));
 	}
 
 	void run(enum Task::Action action) {

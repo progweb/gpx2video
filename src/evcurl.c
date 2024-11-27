@@ -53,24 +53,24 @@ CURLcode evcurl_ssl_ctx_callback(CURL *curl, void *sslctx, void *parm) {
 
 	case EVCURL_SSL_VERSION_3:
 #ifndef OPENSSL_NO_SSL3_METHOD
-		SSL_CTX_set_ssl_version(context, SSLv3_client_method());
+		SSL_CTX_set_min_proto_version(context, SSL3_VERSION);
 #endif
 		break;
 
 	case EVCURL_SSL_VERSION_2_AND_3:
-		SSL_CTX_set_ssl_version(context, SSLv23_client_method());
+//		SSL_CTX_set_ssl_version(context, SSLv23_client_method());
 		break;
 
 	case EVCURL_TLS_VERSION_1_0:
-		SSL_CTX_set_ssl_version(context, TLSv1_client_method());
+		SSL_CTX_set_min_proto_version(context, TLS1_VERSION);
 		break;
 
 	case EVCURL_TLS_VERSION_1_1:
-		SSL_CTX_set_ssl_version(context, TLSv1_1_client_method());
+		SSL_CTX_set_min_proto_version(context, TLS1_1_VERSION);
 		break;
 
 	case EVCURL_TLS_VERSION_1_2:
-		SSL_CTX_set_ssl_version(context, TLSv1_2_client_method());
+		SSL_CTX_set_min_proto_version(context, TLS1_2_VERSION);
 		break;
 
 	case EVCURL_DEFAULT_SSL_VERSION:
