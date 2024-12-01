@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "telemetrydata.h"
+
 
 class TelemetrySettings {
 public:
@@ -37,12 +39,25 @@ public:
 		MethodCount
 	};
 
+	enum Smooth {
+		SmoothNone = 0,
+
+		SmoothWindowedMovingAverage,
+		SmoothButterworth,
+
+		SmoothCount
+	};
+
 	TelemetrySettings(
 			int64_t offset=0,
 			bool check=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
 			int rate=0,
-			int smooth_points=0,
+//			TelemetrySettings::Smooth smooth_grade_method=TelemetrySettings::SmoothNone,
+//			int smooth_grade_points=0,
+//			int smooth_speed_points=0,
+//			int smooth_elevation_points=0,
+//			int smooth_acceleration_points=0,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
 	);
 	virtual ~TelemetrySettings();
@@ -64,13 +79,19 @@ public:
 
 	const bool& telemetryCheck(void) const;
 	const Filter& telemetryFilter(void) const;
-	const Method& telemetryMethod(void) const;
 
+	const Method& telemetryMethod(void) const;
 	const int& telemetryRate(void) const;
-	const int& telemetrySmoothPoints(void) const;
+
+	const TelemetrySettings::Smooth& telemetrySmoothMethod(TelemetryData::Data type) const;
+	void setTelemetrySmoothMethod(TelemetryData::Data type, TelemetrySettings::Smooth method);
+
+	const int& telemetrySmoothPoints(TelemetryData::Data type) const;
+	void setTelemetrySmoothPoints(TelemetryData::Data type, int number);
 
 	static const std::string getFriendlyFilterName(const Filter &filter);
 	static const std::string getFriendlyMethodName(const Method &method);
+	static const std::string getFriendlySmoothName(const Smooth &smooth);
 
 	void dump(void) const;
 
@@ -90,7 +111,18 @@ private:
 	enum Method telemetry_method_;
 
 	int telemetry_rate_;
-	int telemetry_smooth_points_;
+
+	TelemetrySettings::Smooth telemetry_smooth_default_method_;
+	TelemetrySettings::Smooth telemetry_smooth_grade_method_;
+	TelemetrySettings::Smooth telemetry_smooth_speed_method_;
+	TelemetrySettings::Smooth telemetry_smooth_elevation_method_;
+	TelemetrySettings::Smooth telemetry_smooth_acceleration_method_;
+
+	int telemetry_smooth_default_points_;
+	int telemetry_smooth_grade_points_;
+	int telemetry_smooth_speed_points_;
+	int telemetry_smooth_elevation_points_;
+	int telemetry_smooth_acceleration_points_;
 };
 
 

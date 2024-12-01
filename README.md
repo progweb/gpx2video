@@ -667,7 +667,7 @@ As you use **compute** command, other settings permit to smooth data:
 $ ./gpxtools -i ACTIVITY.gpx \
     --telemetry-check=true \
 	--telemetry-filter=1 \
-	--telemetry-smooth=2 \
+	--telemetry-smooth=data=speed,method=1,points=2 \
 	--telemetry-method=3 --telemtry-rate=500 \
 	-o data.gpx compute
 ```
@@ -676,7 +676,9 @@ $ ./gpxtools -i ACTIVITY.gpx \
 
 **--telemetry-filter** filter and update all incoherent points, then compute telemetry data.
 
-**--telemetry-smooth** to smooth telemetry data results on several points. 
+**--telemetry-smooth** to smooth telemetry data results on several points. Telemetry smooth argument 
+format value is: "data=type,method=<smooth method>,points=<number of points>". Data type can be "grade", "speed",
+"elevation" or "acceleration". Smooth method is given by the option **--telemtry-smooth-list**.
 
 **--from** and **--to** permits to define a datetime range where compute telemetry data. It can be used
 as you want compute data only on a segment. Outside this segment, only few data are computed. **--from**

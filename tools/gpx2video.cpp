@@ -63,6 +63,7 @@ static const struct option options[] = {
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 0 },
 	{ "telemetry-smooth",      required_argument, 0, 0 },
+	{ "telemetry-smooth-list", no_argument,       0, 0 },
 	{ "video-codec",           optional_argument, 0, 0 },
 	{ "video-hwdevice",        optional_argument, 0, 0 },
 	{ "video-preset",          required_argument, 0, 0 },
@@ -114,6 +115,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --extract-format-list     : Dump extract format supported" << std::endl;
 	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
 	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
+	std::cout << "\t-    --telemetry-smooth-list   : Dump telemetry smooth supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Encoder options:" << std::endl;
 	std::cout << "\t-    --video-codec             : Video encoder codec name" << std::endl;
@@ -193,6 +195,20 @@ static void print_method_supported(const std::string &name) {
 
 	for (i=TelemetrySettings::MethodNone; i != TelemetrySettings::MethodCount; i++) {
 		std::string name = TelemetrySettings::getFriendlyMethodName((TelemetrySettings::Method) i);
+
+		std::cout << "\t- " << i << ":\t" << name << std::endl;
+	}
+}
+
+static void print_smooth_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Telemetry smooth supported: " << name << std::endl;
+
+	for (i=TelemetrySettings::SmoothNone; i != TelemetrySettings::SmoothCount; i++) {
+		std::string name = TelemetrySettings::getFriendlySmoothName((TelemetrySettings::Smooth) i);
 
 		std::cout << "\t- " << i << ":\t" << name << std::endl;
 	}
@@ -352,6 +368,76 @@ Extractor * GPX2Video::buildExtractor(void) {
 }
 
 
+int GPX2Video::parseTelemetrySmoothArg(char *arg, 
+		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &number) {
+	int result = 0;
+
+	int value;
+	std::string name;
+
+	char *subopt;
+	char *subopts = arg;
+
+	enum {
+		TELEMETRY_SMOOTH_DATA = 0,
+		TELEMETRY_SMOOTH_METHOD,
+		TELEMETRY_SMOOTH_POINTS
+	};
+
+	const char * const token[] = {
+		[TELEMETRY_SMOOTH_DATA] = "data",
+		[TELEMETRY_SMOOTH_METHOD] = "method",
+		[TELEMETRY_SMOOTH_POINTS] = "points",
+		NULL
+	};
+
+	// Default values
+	type = TelemetryData::DataNone;
+	method = TelemetrySettings::SmoothNone;
+	number = 0;
+
+	// Parse args
+	while (*subopts != '\0' && (result != -1)) {
+		switch (getsubopt(&subopts, (char * const *) token, &subopt)) {
+		case TELEMETRY_SMOOTH_DATA:
+			name = std::string(subopt);
+
+			if (name == "grade")
+				type = TelemetryData::DataGrade;
+			else if (name == "speed")
+				type = TelemetryData::DataSpeed;
+			else if (name == "elevation")
+				type = TelemetryData::DataElevation;
+			else if (name == "acceleration")
+				type = TelemetryData::DataAcceleration;
+			else 
+				result = -1;
+			break;
+
+		case TELEMETRY_SMOOTH_METHOD:
+			value = std::stoi(subopt);
+
+			if ((value >= 0) && (value < TelemetrySettings::SmoothCount))
+				method = (TelemetrySettings::Smooth) value;
+			else
+				result = -1;
+			break;
+
+		case TELEMETRY_SMOOTH_POINTS:
+			number = std::stoi(subopt);
+			break;
+
+		default:
+			log_error("No match found for telemetry smooth token: '%s'\n", subopt);
+			result = -1;
+			break;
+		}
+	}
+
+	return result;
+}
+
+
 int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
@@ -372,7 +458,19 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	double path_border = 1.4;
 
 	int telemetry_rate = 250; // By default, update each 250 milliseconds
-	int telemetry_smooth_points = 2; // By default, enable smooth filter
+
+	// By default, enable grade smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_grade_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_grade_points = 2; 
+	// By default, enable speed smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_speed_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_speed_points = 2;
+	// By default, enable elevation smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_elevation_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_elevation_points = 2;
+	// By default, enable acceleration smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_acceleration_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_acceleration_points = 2;
 
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
@@ -501,7 +599,42 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				telemetry_rate = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-smooth")) {
-				telemetry_smooth_points = atoi(optarg);
+				int number;
+				TelemetryData::Data type;
+				TelemetrySettings::Smooth method;
+
+				// Format : "data:method:points"
+				parseTelemetrySmoothArg(optarg, type, method, number);
+
+				switch (type) {
+				case TelemetryData::DataGrade:
+					telemetry_smooth_grade_method = method;
+					telemetry_smooth_grade_points = number;
+					break;
+
+				case TelemetryData::DataSpeed:
+					telemetry_smooth_speed_method = method;
+					telemetry_smooth_speed_points = number;
+					break;
+
+				case TelemetryData::DataElevation:
+					telemetry_smooth_elevation_method = method;
+					telemetry_smooth_elevation_points = number;
+					break;
+
+				case TelemetryData::DataAcceleration:
+					telemetry_smooth_acceleration_method = method;
+					telemetry_smooth_acceleration_points = number;
+					break;
+
+				default:
+					std::cout << "'telemetry-smooth' option malformed!" << std::endl;
+					return -1;
+				}
+			}
+			else if (s && !strcmp(s, "telemetry-smooth-list")) {
+				setCommand(GPX2Video::CommandSmooth);
+				return 0;
 			}
 			else if (s && !strcmp(s, "video-codec")) {
 				if (optarg == NULL) {
@@ -661,7 +794,13 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	// Check command
 	if (argc == 1) {
-		if (!strcmp(argv[0], "extract")) {
+		if (!strcmp(argv[0], "method")) {
+			setCommand(GPX2Video::CommandMethod);
+		}
+		else if (!strcmp(argv[0], "smooth")) {
+			setCommand(GPX2Video::CommandSmooth);
+		}
+		else if (!strcmp(argv[0], "extract")) {
 			setCommand(GPX2Video::CommandExtract);
 
 			mediafile_required = true;
@@ -791,7 +930,14 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		telemetry_filter,
 		telemetry_method,
 		telemetry_rate,
-		telemetry_smooth_points,
+		telemetry_smooth_grade_method,
+		telemetry_smooth_grade_points,
+		telemetry_smooth_speed_method,
+		telemetry_smooth_speed_points,
+		telemetry_smooth_elevation_method,
+		telemetry_smooth_elevation_points,
+		telemetry_smooth_acceleration_method,
+		telemetry_smooth_acceleration_points,
 		video_codec,
 		video_hw_device,
 		video_preset,
@@ -878,6 +1024,11 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 		break;
 
+	case GPX2Video::CommandSmooth:
+		gpx2video::print_smooth_supported(name);
+		goto exit;
+		break;
+
 	case GPX2Video::CommandExtract:
 		extractor = app.buildExtractor();
 		app.append(extractor);
@@ -954,7 +1105,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
-					app.settings().telemetrySmoothPoints(),
 					TelemetrySettings::FormatCSV);
 
 			telemetrySettings.setDataRange(
@@ -964,6 +1114,18 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataElevation, app.settings().telemetrySmoothMethod(TelemetryData::DataElevation));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataElevation, app.settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
 			telemetry = Telemetry::create(app, telemetrySettings);
 			app.append(telemetry);
@@ -983,8 +1145,7 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
-					app.settings().telemetryRate(),
-					app.settings().telemetrySmoothPoints());
+					app.settings().telemetryRate());
 
 			telemetrySettings.setDataRange(
 					app.settings().telemetryBegin(),
@@ -993,6 +1154,18 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataElevation, app.settings().telemetrySmoothMethod(TelemetryData::DataElevation));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataElevation, app.settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
 			// Create cache directories
 			cache = Cache::create(app);
@@ -1033,8 +1206,7 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
-					app.settings().telemetryRate(),
-					app.settings().telemetrySmoothPoints());
+					app.settings().telemetryRate());
 
 			telemetrySettings.setDataRange(
 					app.settings().telemetryBegin(),
@@ -1043,6 +1215,18 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
 			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataElevation, app.settings().telemetrySmoothMethod(TelemetryData::DataElevation));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataElevation, app.settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
 			// Create cache directories
 			cache = Cache::create(app);

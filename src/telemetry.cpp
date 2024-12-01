@@ -18,7 +18,11 @@ TelemetrySettings::TelemetrySettings(
 		bool check,
 		TelemetrySettings::Method method,
 		int rate,
-		int smooth_points,
+//		TelemetrySettings::Smooth smooth_grade_method,
+//		int smooth_grade_points,
+//		int smooth_speed_points,
+//		int smooth_elevation_points,
+//		int smooth_acceleration_points,
 		TelemetrySettings::Format format)
 		: telemetry_offset_(offset)
 		, telemetry_begin_("")
@@ -29,8 +33,21 @@ TelemetrySettings::TelemetrySettings(
 		, telemetry_check_(check)
 		, telemetry_filter_(TelemetrySettings::FilterNone)
 		, telemetry_method_(method)
-		, telemetry_rate_(rate) 
-		, telemetry_smooth_points_(smooth_points) {
+		, telemetry_rate_(rate) {
+
+	telemetry_smooth_default_method_ = TelemetrySettings::SmoothNone;
+	telemetry_smooth_grade_method_ = telemetry_smooth_default_method_;
+
+	telemetry_smooth_default_points_ = 0;
+	telemetry_smooth_grade_points_ = telemetry_smooth_default_points_;
+	telemetry_smooth_speed_points_ = telemetry_smooth_default_points_;
+	telemetry_smooth_elevation_points_ = telemetry_smooth_default_points_;
+	telemetry_smooth_acceleration_points_ = telemetry_smooth_default_points_;
+
+//	telemetry_smooth_grade_points_ = smooth_grade_points;
+//	telemetry_smooth_speed_points_ = smooth_speed_points;
+//	telemetry_smooth_elevation_points_ = smooth_elevation_points;
+//	telemetry_smooth_acceleration_points_ = smooth_acceleration_points;
 }
 
 
@@ -104,8 +121,119 @@ const int& TelemetrySettings::telemetryRate(void) const {
 }
 
 
-const int& TelemetrySettings::telemetrySmoothPoints(void) const {
-	return telemetry_smooth_points_;
+const TelemetrySettings::Smooth& TelemetrySettings::telemetrySmoothMethod(TelemetryData::Data type) const {
+	switch (type) {
+	case TelemetryData::DataGrade:
+		return telemetry_smooth_grade_method_;
+		break;
+
+	case TelemetryData::DataSpeed:
+		return telemetry_smooth_speed_method_;
+		break;
+
+	case TelemetryData::DataElevation:
+		return telemetry_smooth_elevation_method_;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		return telemetry_smooth_acceleration_method_;
+		break;
+
+	default:
+		return telemetry_smooth_default_method_;
+		break;
+	}
+}
+
+
+void TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::Data type, TelemetrySettings::Smooth method) {
+	if (method >= TelemetrySettings::SmoothCount) {
+		log_error("Unknown smooth method");
+		return;
+	}
+
+	switch (type) {
+	case TelemetryData::DataGrade:
+		telemetry_smooth_grade_method_ = method;
+		break;
+
+	case TelemetryData::DataSpeed:
+		if (method == TelemetrySettings::SmoothButterworth) {
+			log_error("Smooth method not yet suppored");
+			return;
+		}
+		telemetry_smooth_speed_method_ = method;
+		break;
+
+	case TelemetryData::DataElevation:
+		if (method == TelemetrySettings::SmoothButterworth) {
+			log_error("Smooth method not yet suppored");
+			return;
+		}
+		telemetry_smooth_elevation_method_ = method;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		if (method == TelemetrySettings::SmoothButterworth) {
+			log_error("Smooth method not yet suppored");
+			return;
+		}
+		telemetry_smooth_acceleration_method_ = method;
+		break;
+
+	default:
+		// Not yet supported
+		break;
+	}
+}
+
+
+const int& TelemetrySettings::telemetrySmoothPoints(TelemetryData::Data type) const {
+	switch (type) {
+	case TelemetryData::DataGrade:
+		return telemetry_smooth_grade_points_;
+		break;
+
+	case TelemetryData::DataSpeed:
+		return telemetry_smooth_speed_points_;
+		break;
+
+	case TelemetryData::DataElevation:
+		return telemetry_smooth_elevation_points_;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		return telemetry_smooth_acceleration_points_;
+		break;
+
+	default:
+		return telemetry_smooth_default_points_;
+	}
+}
+
+
+void TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::Data type, int number) {
+	switch (type) {
+	case TelemetryData::DataGrade:
+		telemetry_smooth_grade_points_ = number;
+		break;
+
+	case TelemetryData::DataSpeed:
+		telemetry_smooth_speed_points_ = number;
+		break;
+
+	case TelemetryData::DataElevation:
+		telemetry_smooth_elevation_points_ = number;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		telemetry_smooth_acceleration_points_ = number;
+		break;
+
+	default:
+		// Not yet supported
+		break;
+	}
 }
 
 
@@ -131,12 +259,29 @@ const std::string TelemetrySettings::getFriendlyMethodName(const TelemetrySettin
 	case MethodSample:
 		return "Get sample each second from telemetry data";
 	case MethodLinear:
-		return "Apply a simple linear method on telemtry data";
+		return "Apply a simple linear method on telemetry data";
 	case MethodInterpolate:
 		return "Interpolate telemetry data method";
 	case MethodKalman:
 		return "Apply Kalman prediction on telemetry data (lat., lon. and ele.)";
 	case MethodCount:
+	default:
+		return "";
+	}
+
+	return "";
+}
+
+
+const std::string TelemetrySettings::getFriendlySmoothName(const TelemetrySettings::Smooth &smooth) {
+	switch (smooth) {
+	case SmoothNone:
+		return "None";
+	case SmoothWindowedMovingAverage:
+		return "Use 'windowed moving average' smooth filter";
+	case SmoothButterworth:
+		return "Use 'butterworth' smooth filter";
+	case SmoothCount:
 	default:
 		return "";
 	}
@@ -182,7 +327,7 @@ Telemetry * Telemetry::create(GPXApplication &app, TelemetrySettings &settings) 
 void Telemetry::init(void) {
 	log_call();
 
-	source_ = TelemetryMedia::open(app_.settings().inputfile(), settings());
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), settings(), false);
 
 	output_format_ = settings().telemetryFormat();
 

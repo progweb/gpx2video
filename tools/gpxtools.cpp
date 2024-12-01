@@ -43,6 +43,7 @@ static const struct option options[] = {
 	{ "telemetry-method-list", no_argument,       0, 0 },
 	{ "telemetry-rate",        required_argument, 0, 'r' },
 	{ "telemetry-smooth",      required_argument, 0, 0 },
+	{ "telemetry-smooth-list", no_argument,       0, 0 },
 	{ 0,                       0,                 0, 0 }
 };
 
@@ -73,6 +74,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "Option format:" << std::endl;
 	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
 	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
+	std::cout << "\t-    --telemetry-smooth-list   : Dump telemetry smooth supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
 	std::cout << "\t convert: Convert telemetry data file" << std::endl;
@@ -110,6 +112,20 @@ static void print_method_supported(const std::string &name) {
 	}
 }
 
+static void print_smooth_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Telemetry smooth supported: " << name << std::endl;
+
+	for (i=TelemetrySettings::SmoothNone; i != TelemetrySettings::SmoothCount; i++) {
+		std::string name = TelemetrySettings::getFriendlySmoothName((TelemetrySettings::Smooth) i);
+
+		std::cout << "\t- " << i << ":\t" << name << std::endl;
+	}
+}
+
 }; // namespace gpxtools
 
 
@@ -136,6 +152,76 @@ void GPXTools::setSettings(const GPXTools::Settings &settings) {
 }
 
 
+int GPXTools::parseTelemetrySmoothArg(char *arg,
+		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &number) {
+	int result = 0;
+
+	int value;
+	std::string name;
+
+	char *subopt;
+	char *subopts = arg;
+
+	enum {
+		TELEMETRY_SMOOTH_DATA = 0,
+		TELEMETRY_SMOOTH_METHOD,
+		TELEMETRY_SMOOTH_POINTS
+	};
+
+	const char * const token[] = {
+		[TELEMETRY_SMOOTH_DATA] = "data",
+		[TELEMETRY_SMOOTH_METHOD] = "method",
+		[TELEMETRY_SMOOTH_POINTS] = "points",
+		NULL
+	};
+
+	// Default values
+	type = TelemetryData::DataNone;
+	method = TelemetrySettings::SmoothNone;
+	number = 0;
+
+	// Parse args
+	while (*subopts != '\0' && (result != -1)) {
+		switch (getsubopt(&subopts, (char * const *) token, &subopt)) {
+		case TELEMETRY_SMOOTH_DATA:
+			name = std::string(subopt);
+
+			if (name == "grade")
+				type = TelemetryData::DataGrade;
+			else if (name == "speed")
+				type = TelemetryData::DataSpeed;
+			else if (name == "elevation")
+				type = TelemetryData::DataElevation;
+			else if (name == "acceleration")
+				type = TelemetryData::DataAcceleration;
+			else 
+				result = -1;
+			break;
+
+		case TELEMETRY_SMOOTH_METHOD:
+			value = std::stoi(subopt);
+
+			if ((value >= 0) && (value < TelemetrySettings::SmoothCount))
+				method = (TelemetrySettings::Smooth) value;
+			else
+				result = -1;
+			break;
+
+		case TELEMETRY_SMOOTH_POINTS:
+			number = std::stoi(subopt);
+			break;
+
+		default:
+			log_error("No match found for telemetry smooth token: '%s'\n", subopt);
+			result = -1;
+			break;
+		}
+	}
+
+	return result;
+}
+
+
 int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	int index;
 	int option;
@@ -145,7 +231,19 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	int rate = 0; // By default, no change
 	int offset = 0; // By default, no offset
 	int verbose = 0; // By default, not verbose
-	int smooth_points = 0; // By default, no smooth
+
+	// By default, disable grade smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_grade_method = TelemetrySettings::SmoothNone;
+	int telemetry_smooth_grade_points = 2; 
+	// By default, disable speed smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_speed_method = TelemetrySettings::SmoothNone;
+	int telemetry_smooth_speed_points = 2;
+	// By default, disable elevation smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_elevation_method = TelemetrySettings::SmoothNone;
+	int telemetry_smooth_elevation_points = 2;
+	// By default, disable acceleration smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_acceleration_method = TelemetrySettings::SmoothNone;
+	int telemetry_smooth_acceleration_points = 2;
 
 	const char *s;
 
@@ -209,7 +307,42 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 				rate = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-smooth")) {
-				smooth_points = atoi(optarg);
+				int number;
+				TelemetryData::Data type;
+				TelemetrySettings::Smooth method;
+
+				// Format : "data:method:points"
+				parseTelemetrySmoothArg(optarg, type, method, number);
+
+				switch (type) {
+				case TelemetryData::DataGrade:
+					telemetry_smooth_grade_method = method;
+					telemetry_smooth_grade_points = number;
+					break;
+
+				case TelemetryData::DataSpeed:
+					telemetry_smooth_speed_method = method;
+					telemetry_smooth_speed_points = number;
+					break;
+
+				case TelemetryData::DataElevation:
+					telemetry_smooth_elevation_method = method;
+					telemetry_smooth_elevation_points = number;
+					break;
+
+				case TelemetryData::DataAcceleration:
+					telemetry_smooth_acceleration_method = method;
+					telemetry_smooth_acceleration_points = number;
+					break;
+
+				default:
+					std::cout << "'telemetry-smooth' option malformed!" << std::endl;
+					return -1;
+				}
+			}
+			else if (s && !strcmp(s, "telemetry-smooth-list")) {
+				setCommand(GPXTools::CommandSmooth);
+				return 0;
 			}
 			else {
 				std::cout << "option " << s;
@@ -263,6 +396,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		if (!strcmp(argv[0], "method")) {
 			setCommand(GPXTools::CommandMethod);
 		}
+		else if (!strcmp(argv[0], "smooth")) {
+			setCommand(GPXTools::CommandSmooth);
+		}
 		else if (!strcmp(argv[0], "convert")) {
 			setCommand(GPXTools::CommandConvert);
 		}
@@ -289,7 +425,6 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		check = false; // Keep each point
 		filter = TelemetrySettings::FilterNone;	// Don't filter data
 		method = TelemetrySettings::MethodNone; // None interpolation
-		smooth_points = 0; // Don't smooth data
 	}
 
 	if (outputfile.empty())
@@ -309,7 +444,14 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		filter,
 		method,
 		rate,
-		smooth_points,
+		telemetry_smooth_grade_method,
+		telemetry_smooth_grade_points,
+		telemetry_smooth_speed_method,
+		telemetry_smooth_speed_points,
+		telemetry_smooth_elevation_method,
+		telemetry_smooth_elevation_points,
+		telemetry_smooth_acceleration_method,
+		telemetry_smooth_acceleration_points,
 		format)
 	);
 
@@ -360,6 +502,11 @@ int main(int argc, char *argv[], char *envp[]) {
 		goto exit;
 		break;
 
+	case GPXTools::CommandSmooth:
+		gpxtools::print_smooth_supported(name);
+		goto exit;
+		break;
+
 	case GPXTools::CommandConvert: {
 			// Telemetry settings
 			settings = TelemetrySettings(
@@ -367,7 +514,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
-					app.settings().telemetrySmoothPoints(),
 					app.settings().telemetryFormat());
 
 			settings.setDataRange(
@@ -388,7 +534,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryCheck(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
-					app.settings().telemetrySmoothPoints(),
 					app.settings().telemetryFormat());
 
 			settings.setDataRange(
@@ -398,6 +543,18 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
 			settings.setFilter(app.settings().telemetryFilter());
+
+			settings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+
+			settings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			settings.setTelemetrySmoothMethod(TelemetryData::DataElevation, app.settings().telemetrySmoothMethod(TelemetryData::DataElevation));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataElevation, app.settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+
+			settings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);

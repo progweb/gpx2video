@@ -95,6 +95,7 @@ public:
 		CommandFormat,  // Dump extract format supported
 		CommandFilter, 	// Dump telemetry filter supported
 		CommandMethod,  // Dump telemetry method supported
+		CommandSmooth,  // Dump telemetry smooth supported
 		CommandSync,	// Auto sync video time with gps sensor
 		CommandExtract,	// Extract gps sensor data from video
 		CommandClear,	// Clear cache directories
@@ -103,7 +104,7 @@ public:
 		CommandConvert, // Convert telemetry data
 		CommandCompute, // Compute telemetry data from gpx, csv...
 		CommandImage,	// Render alpha image with telemetry overlay
-		CommandVideo,	// Render video with telemtry overlay
+		CommandVideo,	// Render video with telemetry overlay
 		CommandTest, 	// Test tool
 
 		CommandCount

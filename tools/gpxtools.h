@@ -30,7 +30,14 @@ public:
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
-			int telemetry_smooth_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_grade_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_grade_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_speed_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_speed_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_elevation_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_elevation_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_acceleration_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_acceleration_points=0,
 			TelemetrySettings::Format telemetry_format=TelemetrySettings::FormatAuto)
 			: GPXApplication::Settings(
 					gpx_file, output_file,
@@ -40,11 +47,22 @@ public:
 					telemetry_check,
 					telemetry_method, 
 					telemetry_rate,
-					telemetry_smooth_points,
 					telemetry_format) {
 			TelemetrySettings::setFilter(telemetry_filter);
 			TelemetrySettings::setDataRange(begin, end);
 			TelemetrySettings::setComputeRange(from, to);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataGrade, telemetry_smooth_grade_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataGrade, telemetry_smooth_grade_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataSpeed, telemetry_smooth_speed_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataSpeed, telemetry_smooth_speed_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataElevation, telemetry_smooth_elevation_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataElevation, telemetry_smooth_elevation_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_points);
 		}
 
 		void dump(void) const {
@@ -61,6 +79,8 @@ public:
 	Settings& settings(void);
 	void setSettings(const Settings &settings);
 
+	int parseTelemetrySmoothArg(char *arg,
+		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &number);
 	int parseCommandLine(int argc, char *argv[]);
 
 private:
