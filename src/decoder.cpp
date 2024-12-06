@@ -508,6 +508,7 @@ FramePtr Decoder::retrieveVideo(AVRational timecode) {
 	FramePtr frame = Frame::create();
 
 	frame->setVideoParams(VideoParams(vs->width(), vs->height(),
+		vs->timeBase(),
 		native_pix_fmt_,
 		native_nb_channels_,
 		std::static_pointer_cast<VideoStream>(stream())->orientation(),
