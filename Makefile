@@ -1,5 +1,5 @@
-BASE_IMAGE?=debian:11.10-slim
-BUILD_DIR=build-debian-11
+BASE_IMAGE?=debian:12.8-slim
+BUILD_DIR=build-debian-12
 
 # Your video directory
 VIDEO_DIR?=$(PWD)
@@ -75,13 +75,16 @@ build-gpx2video:
 		--workdir=/app/build \
 		gpx2video-$(BASE_IMAGE) \
 		/bin/bash -c \
-		"cmake .. \
+		"cmake -DBUILD_GTK=ON .. \
 		&& $(MAKE) -j"
 
 
 run-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
+		-e XDG_RUNTIME_DIR=/tmp \
+		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
+		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
 		-v $(PWD)/assets:/app/build/assets \

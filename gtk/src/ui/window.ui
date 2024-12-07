@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<object class="GtkApplicationWindow" id="application_window">
+		<property name="title" translatable="yes">GPX2Video</property>
+		<property name="default-width">640</property>
+		<property name="default-height">480</property>
+		<property name="hide-on-close">True</property>
+        <child type="titlebar">
+            <object class="GtkHeaderBar" id="header">
+                <child type="end">
+                    <object class="GtkMenuButton" id="gears">
+                        <property name="direction">none</property>
+                    </object>
+                </child>
+            </object>
+        </child>
+		<child>
+			<object class="GtkBox" id="content_box">
+				<property name="orientation">vertical</property>
+				<child>
+					<object class="gtkmm__CustomObject_GPX2VideoArea" id="video_area">
+						<property name="visible">True</property>
+					</object>
+				</child>
+			</object>
+		</child>
+	</object>
+</interface>
+

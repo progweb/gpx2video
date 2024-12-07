@@ -1460,6 +1460,11 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 }
 
 
+bool TelemetrySource::isOpen(void) const {
+	return stream_.is_open();
+}
+
+
 enum TelemetrySource::Data TelemetrySource::loadData(void) {
 	enum TelemetrySource::Data type = TelemetrySource::DataAgain;
 
@@ -1925,6 +1930,12 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 	}
 	else
 		std::cout << "Can't determine '" << filename << "' input file format!" << std::endl;
+
+	// Source readable
+	if ((source != NULL) && !source->isOpen()) {
+		delete source;
+		source = NULL;
+	}
 
 	// Init
 	if (source != NULL) {

@@ -23,6 +23,11 @@ add_definitions(-Wall -Wextra -D_GNU_SOURCE)
 #
 # OPTIONS
 #
+OPTION(BUILD_GTK "Build gpx2video with gtk interface" OFF)
+
+#
+# CMAKE EXTENSIONS
+#
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 #
@@ -169,6 +174,10 @@ add_subdirectory(gpxlib)
 add_subdirectory(layoutlib)
 add_subdirectory(tools)
 #add_subdirectory(tests)
+
+if (BUILD_GTK)
+	add_subdirectory(gtk)
+endif (BUILD_GTK)
 
 #
 # ASSETS TOOL

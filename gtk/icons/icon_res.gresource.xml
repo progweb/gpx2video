@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+	<gresource prefix="/com/progweb/gpx2video/icons">
+		<file>48x48/apps/gpx2video.png</file>
+	</gresource>
+</gresources>
+
