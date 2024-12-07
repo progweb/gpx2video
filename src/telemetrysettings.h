@@ -53,11 +53,6 @@ public:
 			bool check=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
 			int rate=0,
-//			TelemetrySettings::Smooth smooth_grade_method=TelemetrySettings::SmoothNone,
-//			int smooth_grade_points=0,
-//			int smooth_speed_points=0,
-//			int smooth_elevation_points=0,
-//			int smooth_acceleration_points=0,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
 	);
 	virtual ~TelemetrySettings();

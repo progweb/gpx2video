@@ -186,7 +186,9 @@ int GPXTools::parseTelemetrySmoothArg(char *arg,
 		case TELEMETRY_SMOOTH_DATA:
 			name = std::string(subopt);
 
-			if (name == "grade")
+			if (name == "all")
+				type = TelemetryData::DataAll;
+			else if (name == "grade")
 				type = TelemetryData::DataGrade;
 			else if (name == "speed")
 				type = TelemetryData::DataSpeed;
@@ -331,6 +333,20 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 					break;
 
 				case TelemetryData::DataAcceleration:
+					telemetry_smooth_acceleration_method = method;
+					telemetry_smooth_acceleration_points = number;
+					break;
+
+				case TelemetryData::DataAll:
+					telemetry_smooth_grade_method = method;
+					telemetry_smooth_grade_points = number;
+
+					telemetry_smooth_speed_method = method;
+					telemetry_smooth_speed_points = number;
+
+					telemetry_smooth_elevation_method = method;
+					telemetry_smooth_elevation_points = number;
+
 					telemetry_smooth_acceleration_method = method;
 					telemetry_smooth_acceleration_points = number;
 					break;

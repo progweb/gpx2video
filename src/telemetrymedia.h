@@ -488,6 +488,8 @@ public:
 	bool getBoundingBox(TelemetryData *p1, TelemetryData *p2);
 
 	// Data api
+	bool isOpen(void) const;
+
 	enum Data loadData(void);
 
 	enum Data retrieveFirst(TelemetryData &data);
