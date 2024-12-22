@@ -313,6 +313,42 @@ bool Decoder::open(const std::string &filename, const int &index) {
 }
 
 
+void Decoder::close(void) {
+	if (opts_) {
+		av_dict_free(&opts_);
+		opts_ = NULL;
+	}
+
+	if (sws_ctx_) {
+		sws_freeContext(sws_ctx_);
+		sws_ctx_ = NULL;
+	}
+
+	if (codec_ctx_) {
+		avcodec_free_context(&codec_ctx_);
+		codec_ctx_ = NULL;
+	}
+
+	if (fmt_ctx_) {
+		avformat_close_input(&fmt_ctx_);
+		fmt_ctx_ = NULL;
+	}
+}
+
+
+int Decoder::seek(int64_t target_ts) {
+	int64_t seek_ts = av_rescale_q(target_ts, AV_TIME_BASE_Q, stream_->timeBase());
+
+	avcodec_flush_buffers(codec_ctx_);
+	return av_seek_frame(fmt_ctx_, avstream_->index, seek_ts, AVSEEK_FLAG_BACKWARD);
+}
+
+
+const AVCodecID& Decoder::codec(void) const {
+	return avstream_->codecpar->codec_id;
+}
+
+
 int Decoder::getFrame(AVPacket *packet, AVFrame *frame) {
 	int result = -1;
 
@@ -355,34 +391,6 @@ int Decoder::getFrame(AVPacket *packet, AVFrame *frame) {
 	}
 
 	return result;
-}
-
-
-void Decoder::close(void) {
-	if (opts_) {
-		av_dict_free(&opts_);
-		opts_ = NULL;
-	}
-
-	if (sws_ctx_) {
-		sws_freeContext(sws_ctx_);
-		sws_ctx_ = NULL;
-	}
-
-	if (codec_ctx_) {
-		avcodec_free_context(&codec_ctx_);
-		codec_ctx_ = NULL;
-	}
-
-	if (fmt_ctx_) {
-		avformat_close_input(&fmt_ctx_);
-		fmt_ctx_ = NULL;
-	}
-}
-
-
-const AVCodecID& Decoder::codec(void) const {
-	return avstream_->codecpar->codec_id;
 }
 
 
@@ -564,10 +572,11 @@ uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 
 		pts_ = frame->pts;
 
+//		printf("  PTS: %ld / TS: %ld ms\n", pts_,
+//			(uint64_t) ((pts_ * 1000) * av_q2d(stream_->timeBase())));
+
 		break;
 	}
-
-//	printf("  PTS: %ld\n", pts_);
 
 	av_frame_free(&frame);
 	av_packet_free(&packet);

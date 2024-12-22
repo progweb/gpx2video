@@ -22,6 +22,7 @@ protected:
 	void on_activate(void) override;
 	void on_open(const Gio::Application::type_vec_files& files,
 			const Glib::ustring& hint) override;
+
 	void on_action_about(void);
 	void on_action_preferences(void);
 	void on_action_quit(void);

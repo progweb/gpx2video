@@ -28,6 +28,9 @@ public:
 	int getFrame(AVPacket *packet, AVFrame *frame);
 	void close(void);
 
+//	int seek(AVRational timecode);
+	int seek(int64_t target_ts);
+
 	const AVCodecID& codec(void) const;
 
 	FramePtr retrieveAudio(const AudioParams &params, AVRational timecode, int duration);

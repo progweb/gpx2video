@@ -9,6 +9,7 @@
 #include <gtkmm/applicationwindow.h>
 
 #include "log.h"
+#include "compat.h"
 #include "application.h"
 #include "about.h"
 #include "prefs.h"

@@ -1,17 +1,10 @@
 precision highp float;
 
-//void main() {
-//  float lerpVal = gl_FragCoord.y / 500.0f;
-//
-//  gl_FragColor = mix(vec4(1.0f, 0.85f, 0.35f, 1.0f), vec4(0.2f, 0.2f, 0.2f, 1.0f), lerpVal);
-//}
-
-in vec2 vertexTexCoord;
-
-out vec4 fragColor;
+varying vec2 vertexTexCoord;
 
 uniform sampler2D inputTexture;
 
 void main() {
-	fragColor = texture(inputTexture, vertexTexCoord);
+	gl_FragColor = texture2D(inputTexture, vertexTexCoord);
 }
+

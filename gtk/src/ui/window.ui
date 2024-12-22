@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+	<object class="GtkAdjustment" id="progress_adjustment">
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
 	<object class="GtkApplicationWindow" id="application_window">
 		<property name="title" translatable="yes">GPX2Video</property>
 		<property name="default-width">640</property>
@@ -7,6 +13,17 @@
 		<property name="hide-on-close">True</property>
         <child type="titlebar">
             <object class="GtkHeaderBar" id="header">
+                <child>
+					<object class="GtkButton" id="open_button">
+						<property name="label" translatable="yes">Open</property>
+						<property name="action-name">win.open</property>
+					</object>
+				</child>
+				<child>
+					<object class="GtkButton" id="add_button">
+						<property name="icon-name">tab-new-symbolic</property>
+					</object>
+				</child>
                 <child type="end">
                     <object class="GtkMenuButton" id="gears">
                         <property name="direction">none</property>
@@ -17,9 +34,57 @@
 		<child>
 			<object class="GtkBox" id="content_box">
 				<property name="orientation">vertical</property>
+				<property name="halign">fill</property>
+				<property name="hexpand">True</property>
 				<child>
 					<object class="gtkmm__CustomObject_GPX2VideoArea" id="video_area">
 						<property name="visible">True</property>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox" id="action_box">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<child>
+							<object class="GtkButton" id="play_button">
+								<property name="valign">center</property>
+								<property name="vexpand">False</property>
+								<property name="icon-name">media-playback-start-symbolic</property>
+								<property name="margin-bottom">4</property>
+								<property name="margin-end">4</property>
+								<property name="margin-start">4</property>
+								<property name="margin-top">4</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkScale" id="progress_scale">
+								<property name="draw-value">0</property>
+								<property name="adjustment">progress_adjustment</property>
+								<property name="hexpand">True</property>
+								<property name="hexpand-set">True</property>
+								<property name="halign">fill</property>
+								<property name="margin-bottom">4</property>
+								<property name="margin-end">4</property>
+								<property name="margin-start">4</property>
+								<property name="margin-top">4</property>
+								<!--
+								<marks>
+									<mark value="0" position="bottom">0:00</mark>
+									<mark value="10" position="bottom">1:00</mark>
+									<mark value="20" position="bottom">2:00</mark>
+									<mark value="30" position="bottom">3:00</mark>
+									<mark value="40" position="bottom">4:00</mark>
+									<mark value="50" position="bottom">5:00</mark>
+									<mark value="60" position="bottom"></mark>
+									<mark value="70" position="bottom"></mark>
+									<mark value="80" position="bottom"></mark>
+									<mark value="90" position="bottom"></mark>
+									<mark value="100" position="bottom"></mark>
+								</marks>
+								-->
+							</object>
+						</child>
 					</object>
 				</child>
 			</object>

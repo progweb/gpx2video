@@ -144,13 +144,13 @@ $ ./gpx2video -m GOPR1860.MP4 --start-time "2021-12-08T09:56:26" --offset 300 ..
 
 #### Debian
 
-By default docker will use debian:11.10-slim as base image, but you can change it.
+By default docker will use debian:12.8-slim as base image, but you can change it.
 
 ```bash
 make build-docker
 make build-gpx2video
-
 ```
+
 Copy video files to data folder then you can start docker and try it out
 
 ```bash
@@ -183,7 +183,7 @@ make run-ubuntu-noble VIDEO_DIR=~/Videos
 ./tools/gpx2video -v -m /data/SOME_VID.mp4 -g /data/SOME_GPX.gpx -l /data/layout.xml -o /data/output.mp4
 ```
 
-### build on host
+### Build on host
 
 To build gpx2video, please install all dependencies (on Debian):
 
