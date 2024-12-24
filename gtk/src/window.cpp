@@ -66,8 +66,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	play_button_->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_play_clicked));
 
 	auto adjustment = progress_scale_->get_adjustment();
-	adjustment->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_value_change), adjustment));
+	progress_scale_->signal_change_value().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_change_value), adjustment), false);
 	video_area_->set_adjustment(adjustment);
 
 	// Key listener
@@ -169,12 +169,20 @@ void GPX2VideoApplicationWindow::on_play_clicked(void) {
 }
 
 
-void GPX2VideoApplicationWindow::on_progress_value_change(const Glib::RefPtr<Gtk::Adjustment> &adjustment) {
+bool GPX2VideoApplicationWindow::on_progress_change_value(Gtk::ScrollType type, double value, 
+		const Glib::RefPtr<Gtk::Adjustment> &adjustment) {
 	log_call();
 
-	(void) adjustment;
+	double diff = value - adjustment->get_value();
 
-//	log_notice("PROGESS VALUE CHANGE %f", adjustment->get_value());
+	(void) type;
+//	(void) value;
+
+//	log_notice("PROGESS CHANGE VALUE %f => %f", adjustment->get_value(), value);
+
+	video_area_->seek(diff);
+
+	return false;
 }
 
 

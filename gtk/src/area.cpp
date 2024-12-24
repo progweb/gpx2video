@@ -165,7 +165,9 @@ double GPX2VideoStream::duration(void) const {
 	if (!container_)
 		return 0.0;
 
-	return container_->getVideoStream()->duration();
+	VideoStreamPtr stream = container_->getVideoStream();
+
+	return stream->duration() * av_q2d(stream->timeBase());
 }
 
 
@@ -543,15 +545,17 @@ void GPX2VideoArea::set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment) {
 }
 
 
+void GPX2VideoArea::configure_adjustment(void) {
+	log_call();
+
+	double duration = stream_.duration();
+
+	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 60.0);
+}
+
 void GPX2VideoArea::update_adjustment(double value) {
 	log_call();
 
-//	// Update progress scale widget
-//	auto adjustment = progress_scale_->get_adjustment();
-//
-//	adjustment->clamp_page(0.0, 100.0);
-
-	adjustment_->clamp_page(0.0, stream_.duration());
 	adjustment_->set_value(value);
 }
 
@@ -569,7 +573,7 @@ void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
 
 	resize_viewport(get_width(), get_height());
 
-	update_adjustment();
+	configure_adjustment();
 }
 
 

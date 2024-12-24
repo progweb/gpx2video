@@ -46,7 +46,7 @@ protected:
 	void on_action_open(void);
 
 	void on_play_clicked(void);
-	void on_progress_value_change(const Glib::RefPtr<Gtk::Adjustment> &adjustment);
+	bool on_progress_change_value(Gtk::ScrollType type, double value, const Glib::RefPtr<Gtk::Adjustment> &adjustment);
 	bool on_key_pressed(guint, guint, Gdk::ModifierType);
 
 #if GTKMM_CHECK_VERSION(4, 10, 0)

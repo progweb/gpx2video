@@ -107,7 +107,8 @@ public:
 	}
 
 	void set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment);
-	void update_adjustment(double value=0.0);
+	void configure_adjustment(void);
+	void update_adjustment(double value);
 
 	void open_stream(const Glib::ustring &video_file);
 	void close_stream(void);
