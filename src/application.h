@@ -140,8 +140,6 @@ public:
 		command_ = command;
 	}
 
-	virtual int parseCommandLine(int argc, char *argv[]) = 0;
-
 	void append(Task *task) {
 		tasks_.push_back(task);
 	}

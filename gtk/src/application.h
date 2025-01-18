@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__APPLICATION_H__
-#define __GPX2VIDEO__APPLICATION_H__
+#ifndef __GPX2VIDEO__GTK__APPLICATION_H__
+#define __GPX2VIDEO__GTK__APPLICATION_H__
 
 #include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>

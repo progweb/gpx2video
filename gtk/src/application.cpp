@@ -121,7 +121,7 @@ void GPX2VideoApplication::on_open(const Gio::Application::type_vec_files& files
 
 	// The application has been asked to open some files,
 	// so let's open a new view for each one.
-	GPX2VideoApplicationWindow* appwindow = nullptr;
+	GPX2VideoApplicationWindow *appwindow = nullptr;
 
 	auto windows = get_windows();
 

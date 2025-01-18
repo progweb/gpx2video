@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__WINDOW_H__
-#define __GPX2VIDEO__WINDOW_H__
+#ifndef __GPX2VIDEO__GTK__WINDOW_H__
+#define __GPX2VIDEO__GTK__WINDOW_H__
 
 #include <gtkmm/version.h>
 #include <gtkmm/application.h>
@@ -16,10 +16,11 @@
 #include <gtkmm/filechooserdialog.h>
 #endif
 
+#include "../../src/application.h"
 #include "area.h"
 
 
-class GPX2VideoApplicationWindow : public Gtk::ApplicationWindow {
+class GPX2VideoApplicationWindow : public Gtk::ApplicationWindow, public GPXApplication {
 public:
 	GPX2VideoApplicationWindow(BaseObjectType *cobject,
 			const Glib::RefPtr<Gtk::Builder> &ref_builder);
@@ -47,6 +48,8 @@ protected:
 
 	void on_play_clicked(void);
 	bool on_progress_change_value(Gtk::ScrollType type, double value, const Glib::RefPtr<Gtk::Adjustment> &adjustment);
+	void on_progress_scale_pressed(guint n, double x, double y);
+	void on_progress_scale_released(guint n, double x, double y);
 	bool on_key_pressed(guint, guint, Gdk::ModifierType);
 
 #if GTKMM_CHECK_VERSION(4, 10, 0)

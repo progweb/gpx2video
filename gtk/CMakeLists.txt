@@ -30,6 +30,9 @@ LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 # 
 FIND_PACKAGE(PkgConfig)
 
+PKG_CHECK_MODULES(LIBGLM REQUIRED glm)
+include_directories(${LIBGLM_INCLUDE_DIRS})
+
 PKG_CHECK_MODULES(LIBEPOXY REQUIRED epoxy)
 include_directories(${LIBEPOXY_INCLUDE_DIRS})
 
@@ -147,17 +150,9 @@ set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/main.cpp
 	src/prefs.cpp
+	src/shader.cpp
 	src/window.cpp
-
-	#	../src/datetime.cpp
-	#../src/decoder.cpp
-	#../src/ffmpegutils.cpp
-	#../src/frame.cpp
-	#../src/media.cpp
-	#../src/oiio.cpp
-	#../src/oiioutils.cpp
-	#../src/stream.cpp
-	#../src/videoparams.cpp
+	src/videowidget.cpp
 )
 
 #
@@ -168,5 +163,5 @@ set(GPX2VIDEO_SOURCES
 # BINARIES
 #
 add_executable(gpx2video-gtk ${GPX2VIDEO_SOURCES} ${GPX2VIDEO_RESOURCES})
-target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES}            ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES})
+target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES}            ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES})
 

@@ -128,7 +128,7 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
-	_txtratio.setValue("2.0");
+	_txtratio.setValue("0.0");
 	_txtlinespace.setValue("-1");
 
 	_with_label.setValue("true");

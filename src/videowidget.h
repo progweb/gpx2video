@@ -401,6 +401,8 @@ public:
 		return true;
 	}
 
+	void dump(void);
+
 	virtual void initialize(void);
 	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0; 
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
@@ -437,7 +439,7 @@ protected:
 		setPadding(PaddingAll, 0);
 		setFont("./assets/fonts/Helvetica.ttf");
 		setLabel(name);
-		setTextRatio(5.0);
+		setTextRatio(2.0);
 		setTextShadow(0);
 		setTextLineSpace(10);
 		setUnit(VideoWidget::UnitNone);

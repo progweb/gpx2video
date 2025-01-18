@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__COMPAT_H__
-#define __GPX2VIDEO__COMPAT_H__
+#ifndef __GPX2VIDEO__GTK__COMPAT_H__
+#define __GPX2VIDEO__GTK__COMPAT_H__
 
 #include <giommconfig.h>
 #include <glibmmconfig.h>

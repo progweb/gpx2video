@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__PREFS_H__
-#define __GPX2VIDEO__PREFS_H__
+#ifndef __GPX2VIDEO__GTK__PREFS_H__
+#define __GPX2VIDEO__GTK__PREFS_H__
 
 #include <gtkmm/builder.h>
 #include <gtkmm/dialog.h>

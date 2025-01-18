@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__AREA_H__
-#define __GPX2VIDEO__AREA_H__
+#ifndef __GPX2VIDEO__GTK__AREA_H__
+#define __GPX2VIDEO__GTK__AREA_H__
 
 //#include <list>
 #include <deque>
@@ -12,13 +12,27 @@
 #include <epoxy/gl.h>
 #undef GLAPI
 
-#include "../src/decoder.h"
+#include <glm/glm.hpp>
+
+#include <OpenImageIO/imageio.h>
+#include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
+
+#include "../../src/stream.h"
+#include "../../src/decoder.h"
+#include "../../src/application.h"
+#include "../../src/videowidget.h"
+#include "videowidget.h"
+#include "shader.h"
+
 
 
 class GPX2VideoStream {
 public:
 	GPX2VideoStream();
 	~GPX2VideoStream();
+
+	MediaContainer * media();
 
 	bool open(const Glib::ustring &media_file);
 	void close(void);
@@ -31,6 +45,11 @@ public:
 	int height(void) const;
 
 	double duration(void) const;
+	double timeBase(void) const;
+
+	int nbChannels(void) const;
+
+	VideoParams::Format format(void) const;
 
 	Glib::Dispatcher& data_ready(void) {
 		return dispatcher_;
@@ -74,32 +93,9 @@ private:
 
 
 class GPX2VideoArea : public Gtk::GLArea {
-protected: 
-	class Shader {
-	public:
-		virtual ~Shader();
-
-		static Shader * create(const std::string &vertex_path, const std::string &fragment_path);
-
-		void use(void);
-
-		GLuint id(void) { return id_; }
-
-		void set(const std::string &name, bool value) const;
-		void set(const std::string &name, int value) const;
-		void set(const std::string &name, float value) const;
-
-	protected:
-		GLuint id_;
-
-		Shader(const GLchar *vertex_path, const GLchar *fragment_path);
-
-		GLuint build(int type, const char *src);
-	};
-
 public:
-	GPX2VideoArea();
-	GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder>& ref_builder);
+	GPX2VideoArea(GPXApplication& app);
+	GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder, GPXApplication &app);
 	virtual ~GPX2VideoArea();
 
 	bool is_playing(void) const {
@@ -117,6 +113,10 @@ public:
 	void toggle_pause(void);
 	void step_to_next_frame(void);
 	void seek(double incr);
+	void seeking(bool status);
+
+	void widget_append(VideoWidget *widget);
+	void widgets_draw();
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
@@ -125,7 +125,7 @@ protected:
 
 	sigc::slot<bool()> refresh_slot_;
 
-	Shader *shader_;
+	GPX2VideoShader *shader_;
 
 	void on_realize(void);
 	void on_unrealize(void);
@@ -139,16 +139,23 @@ protected:
 
 	void video_display(void);
 
-	void init_buffers();
 	void init_shaders(const std::string& vertex_path, const std::string& fragment_path);
-	void load_texture(FramePtr frame);
+	void init_video_buffers();
+	void init_widgets_buffers();
+	void load_video_texture(FramePtr frame);
+	void load_widgets_texture(FramePtr frame);
 	void resize_viewport(gint width, gint height);
+
+	void check_gl_error(void);
 
 private:
 	bool is_init_;
 	bool is_step_;
 	bool is_playing_;
+	bool is_seeking_;
 	bool force_refresh_;
+
+	GPXApplication &app_;
 
 	sigc::connection timer_;
 
@@ -157,6 +164,16 @@ private:
 	FramePtr frame;
 
 	double frame_timer_;
+
+
+
+
+	unsigned int real_duration_ms_;
+
+	uint64_t last_timecode_ms_ = 0;
+
+
+	GPX2VideoWidget *widget_;
 };
 
 #endif

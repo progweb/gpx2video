@@ -172,6 +172,13 @@ bool VideoWidget::hex2color(float color[4], std::string hex) {
 }
 
 
+void VideoWidget::dump(void) {
+	log_call();
+
+	printf("x: %d / y: %d - size: %dx%d\n", x(), y(), width(), height());
+}
+
+
 void VideoWidget::initialize(void) {
 	int height;
 

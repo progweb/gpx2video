@@ -9,15 +9,24 @@
 #include <giomm/liststore.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/eventcontrollerkey.h>
+#include <gtkmm/gestureclick.h>
+
+extern "C" {
+#include <event2/event.h>
+#include <libavcodec/avcodec.h>
+}
 
 #include "log.h"
 #include "compat.h"
 #include "window.h"
 
+#include "../src/widgets/time.h"
+
 
 GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder) 
 	: Gtk::ApplicationWindow(cobject)
+	, GPXApplication(event_base_new())
 	, ref_builder_(ref_builder)
 	, media_file_("") {
 	log_call();
@@ -45,7 +54,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	if (!progress_scale_)
 		throw std::runtime_error("No \"progress_scale\" object in window.ui");
 
-	video_area_ = Gtk::Builder::get_widget_derived<GPX2VideoArea>(ref_builder_, "video_area");
+	video_area_ = Gtk::Builder::get_widget_derived<GPX2VideoArea>(ref_builder_, "video_area", *this);
 	if (!video_area_)
 		throw std::runtime_error("No \"video_area\" object in window.ui");
 
@@ -70,12 +79,36 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_change_value), adjustment), false);
 	video_area_->set_adjustment(adjustment);
 
+	// Click listener
+	auto gesture = Gtk::GestureClick::create();
+	progress_scale_->add_controller(gesture);
+
+	gesture->signal_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_scale_pressed), false);
+	gesture->signal_released().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_scale_released), false);
+
 	// Key listener
 	auto controller = Gtk::EventControllerKey::create();
 	controller->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
 	add_controller(controller);
 
 	controller->signal_key_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_key_pressed), false);
+
+//	// Register application handle
+//	video_area_->set_application(this);
+
+
+	// WIDGET TEST
+	TimeWidget *widget = TimeWidget::create(*this);
+	widget->setPosition(30, 30);
+	widget->setSize(500, 100);
+	widget->setPadding(VideoWidget::PaddingAll, 5);
+	widget->setBorder(2);
+	widget->setTextColor("#ffffffff");
+	widget->setBorderColor("#0000ffff");
+	widget->setBackgroundColor("#00000099");
+	widget->setLabel("TIME");
+	widget->initialize();
+	video_area_->widget_append(widget);
 }
 
 
@@ -90,9 +123,11 @@ GPX2VideoApplicationWindow::~GPX2VideoApplicationWindow() {
 GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 	log_call();
 
+	GPXApplication dummy(NULL);
+
 	// Create a dummy instance before the call to Gtk::Builder::create_from_resource
 	// This creation registers GPX2VideoArea's class in the GType system.
-	static_cast<void>(GPX2VideoArea());
+	static_cast<void>(GPX2VideoArea(dummy));
 
 	// Load the Builder file and instantiate its widgets.
 	auto ref_builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/window.ui");
@@ -183,6 +218,28 @@ bool GPX2VideoApplicationWindow::on_progress_change_value(Gtk::ScrollType type, 
 	video_area_->seek(diff);
 
 	return false;
+}
+
+
+void GPX2VideoApplicationWindow::on_progress_scale_pressed(guint n, double x, double y) {
+	log_call();
+
+	(void) n;
+	(void) x;
+	(void) y;
+
+	video_area_->seeking(true);
+}
+
+
+void GPX2VideoApplicationWindow::on_progress_scale_released(guint n, double x, double y) {
+	log_call();
+
+	(void) n;
+	(void) x;
+	(void) y;
+
+	video_area_->seeking(false);
 }
 
 

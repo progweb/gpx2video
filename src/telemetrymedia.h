@@ -8,6 +8,7 @@
 #include <deque>
 
 #include "log.h"
+#include "macros.h"
 #include "kalman.h"
 #include "telemetrydata.h"
 #include "telemetrysettings.h"
@@ -324,7 +325,8 @@ public:
 
 			size -= index_ + 1;
 
-			return MAX(0, size);
+//			return MAX(0, size);
+			return (0 > size) ? 0 : size;
 		}
 
 		size_t backlog(void) {

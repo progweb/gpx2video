@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__LOG_H__
-#define __GPX2VIDEO__LOG_H__
+#ifndef __GPX2VIDEO__GTK__LOG_H__
+#define __GPX2VIDEO__GTK__LOG_H__
 
 #include "macros.h"
 

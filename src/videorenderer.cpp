@@ -301,6 +301,9 @@ bool VideoRenderer::start(void) {
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
 
+//		// Dump widget info
+//		widget->dump();
+
 		if ((begin != 0) || (end != 0))
 			continue;
 

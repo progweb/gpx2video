@@ -147,8 +147,8 @@ protected:
 
 	OIIO::ImageBuf *overlay_;
 
-	Renderer(GPXApplication &app, 
-			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings); //, Map *map);
+	Renderer(GPXApplication &app,
+			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings);
 
 	bool init(MediaContainer *container);
 	bool start(void);
@@ -162,6 +162,7 @@ protected:
 	void resize(OIIO::ImageBuf *buf, int width, int height);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
 };
+
 
 #endif
 
