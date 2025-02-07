@@ -23,6 +23,7 @@ RUN apt-get update \
         libopenimageio-dev \
         libgeographic.*-dev \
         libcairo2-dev \
+        libglm-dev \
 		\
 		libgtkmm-4.0-dev \
     && rm -rf /var/lib/apt/lists/* \

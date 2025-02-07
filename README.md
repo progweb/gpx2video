@@ -217,7 +217,7 @@ gpx2video is a command line tool.
   - To extract GoPro GPMD data from media stream:
 
 ```bash
-$ ./gpx2video -v -m GOPR1860.MP4 -o output.gpx -f 3 extract
+$ ./gpx2video -v -m GOPR1860.MP4 -o output.gpx --extract-format=3 extract
 gpx2video v0.0.0
 creation_time = 2020-12-13T09:56:27.000000Z
 Failed to find decoder for stream #2
@@ -602,19 +602,19 @@ Track settings:
 You can extract and parse GoPro MET stream:
 
 ```bash
-$ ./gpx2video -m GH010434.MP4 -o data.txt -f 1 extract
+$ ./gpx2video -m GH010434.MP4 -o data.txt --extract-format=1 extract
 ```
 
 Or, you can extract the GoPro MET stream as raw data:
 
 ```bash
-$ ./gpx2video -m GH010434.MP4 -o data.bin -f 2 extract
+$ ./gpx2video -m GH010434.MP4 -o data.bin --extract-format=2 extract
 ```
 
 As exiftool, you can extract GPX from GoPro MP4 video file too:
 
 ```bash
-$ ./gpx2video -m GH010434.MP4 -o track.gpx -f 3 extract
+$ ./gpx2video -m GH010434.MP4 -o track.gpx --extract-format=3 extract
 ```
 
 In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.
