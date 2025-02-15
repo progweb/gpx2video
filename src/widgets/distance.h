@@ -10,11 +10,7 @@ public:
 	virtual ~DistanceWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static DistanceWidget * create(GPXApplication &app) {
@@ -54,12 +50,21 @@ skip:
 		double distance = data.distance();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataDistance)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
+		no_value_ = !data.hasValue(TelemetryData::DataDistance);
+
 		if (unit() == VideoWidget::UnitKm) {
 			distance /= 1000.0;
 		}
@@ -73,7 +78,7 @@ skip:
 			distance *= 0.6213711922;
 		}
 
-		if (data.hasValue(TelemetryData::DataDistance)) {
+		if (!no_value_) {
 			const char *format;
 
 			if (distance < 10)
@@ -100,7 +105,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -108,6 +126,7 @@ private:
 		: VideoWidget(app, name)
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		no_value_ = false;
 	}
 };
 

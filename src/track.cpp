@@ -113,7 +113,7 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 
 
 Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, struct event_base *evbase)
-	: VideoWidget(app, "map")
+	: VideoWidget(app, "track")
 	, app_(app)
 	, track_settings_(track_settings)
 	, telemetry_settings_(telemetry_settings)
@@ -541,6 +541,10 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	is_update = true;
 skip:
 	return fg_buf_;
+}
+
+
+void Track::clear(void) {
 }
 
 

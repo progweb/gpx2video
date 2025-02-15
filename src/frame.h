@@ -63,7 +63,9 @@ public:
 	uint8_t * data(void) const;
 	const uint8_t * constData(void) const;
 
-	void setData(uint8_t *data);
+	void setData(uint8_t *data, bool allocated=true);
+
+	int index_;
 
 private:
 	VideoParams video_params_;
@@ -72,6 +74,7 @@ private:
 
 	int64_t timestamp_;
 
+	bool allocated_;
 	uint8_t *data_;
 };
 

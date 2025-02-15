@@ -10,11 +10,7 @@ public:
 	virtual ~GForceWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static GForceWidget * create(GPXApplication &app) {
@@ -54,9 +50,16 @@ skip:
 		double gforce;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataAcceleration)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Compute data
@@ -65,10 +68,12 @@ skip:
 		gforce = data.acceleration();
 	   
 		// Format data
+		no_value_ = !data.hasValue(TelemetryData::DataAcceleration);
+
 		if (unit() == VideoWidget::UnitG)
 			gforce /= 9.81;
 
-		if (data.hasValue(TelemetryData::DataAcceleration))
+		if (!no_value_)
 			sprintf(s, "%.2f %s", gforce, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
@@ -85,7 +90,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -93,6 +111,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		no_value_ = false;
 	}
 };
 

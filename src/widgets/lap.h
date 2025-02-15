@@ -10,11 +10,7 @@ public:
 	virtual ~LapWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static LapWidget * create(GPXApplication &app) {
@@ -57,13 +53,22 @@ skip:
 		int lap = data.lap();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataFix)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
-		if (data.hasValue(TelemetryData::DataFix))
+		no_value_ = !data.hasValue(TelemetryData::DataFix);
+
+		if (!no_value_)
 			sprintf(s, "%d/%d", lap, nbr_target_lap_);
 		else
 			sprintf(s, "--/--");
@@ -80,7 +85,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -91,6 +109,7 @@ private:
    		, bg_buf_(NULL)
    		, fg_buf_(NULL)
    		, nbr_target_lap_(1) {
+		no_value_ = false;
 	}
 };
 

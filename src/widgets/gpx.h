@@ -10,11 +10,7 @@ public:
 	virtual ~GPXWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static GPXWidget * create(GPXApplication &app) {
@@ -116,6 +112,17 @@ skip:
 		is_update = true;
 skip:
 		return fg_buf_;
+	}
+
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
 	}
 
 private:

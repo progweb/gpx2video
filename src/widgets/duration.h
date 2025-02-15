@@ -10,11 +10,7 @@ public:
 	virtual ~DurationWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static DurationWidget * create(GPXApplication &app) {
@@ -57,12 +53,21 @@ skip:
 		int duration;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataDuration)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
+		no_value_ = !data.hasValue(TelemetryData::DataDuration);
+
 		duration = data.duration();
 
 		if (duration > 0) {
@@ -72,7 +77,7 @@ skip:
 			hours = duration / 60;
 		}
 
-		if (data.hasValue(TelemetryData::DataDuration))
+		if (!no_value_)
 			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
 		else
 			sprintf(s, "--:--:--");
@@ -89,7 +94,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -97,6 +115,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		no_value_ = false;
 	}
 };
 

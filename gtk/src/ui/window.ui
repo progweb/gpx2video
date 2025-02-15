@@ -22,6 +22,7 @@
 				<child>
 					<object class="GtkButton" id="add_button">
 						<property name="icon-name">tab-new-symbolic</property>
+						<property name="action-name">win.append</property>
 					</object>
 				</child>
                 <child type="end">

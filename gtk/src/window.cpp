@@ -28,7 +28,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	: Gtk::ApplicationWindow(cobject)
 	, GPXApplication(event_base_new())
 	, ref_builder_(ref_builder)
-	, media_file_("") {
+	, media_file_("") 
+	, layout_file_("") {
 	log_call();
 
 	// Set the window icon.
@@ -69,6 +70,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	// Add actions and keyboard accelerators for the headerbar actions
 	add_action("open", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_open));
+	add_action("append", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_append));
 
 	// Connect signals
 //	open_button_->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_open_clicked));
@@ -96,19 +98,22 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 //	// Register application handle
 //	video_area_->set_application(this);
 
+	// Create renderer context
+	renderer_ = GPX2VideoRenderer::create(*this, renderer_settings_, telemetry_settings_);
+	video_area_->set_renderer(renderer_);
 
-	// WIDGET TEST
-	TimeWidget *widget = TimeWidget::create(*this);
-	widget->setPosition(30, 30);
-	widget->setSize(500, 100);
-	widget->setPadding(VideoWidget::PaddingAll, 5);
-	widget->setBorder(2);
-	widget->setTextColor("#ffffffff");
-	widget->setBorderColor("#0000ffff");
-	widget->setBackgroundColor("#00000099");
-	widget->setLabel("TIME");
-	widget->initialize();
-	video_area_->widget_append(widget);
+//	// WIDGET TEST
+//	TimeWidget *widget = TimeWidget::create(*this);
+//	widget->setPosition(30, 30);
+//	widget->setSize(500, 100);
+//	widget->setPadding(VideoWidget::PaddingAll, 5);
+//	widget->setBorder(2);
+//	widget->setTextColor("#ffffffff");
+//	widget->setBorderColor("#0000ffff");
+//	widget->setBackgroundColor("#00000099");
+//	widget->setLabel("TIME");
+//	widget->initialize();
+//	video_area_->widget_append(widget);
 }
 
 
@@ -141,13 +146,47 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 }
 
 
-void GPX2VideoApplicationWindow::open_file_view(const Glib::RefPtr<const Gio::File> &file) {
+void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	layout_file_ = file->get_parse_name();
+
+	// Video renderer
+	renderer_->setLayoutFile(layout_file_);
+
+	video_area_->update_layout();
+}
+
+
+void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
 	media_file_ = file->get_parse_name();
 
+//	// Settings
+//	settings().setInputfile("/data/video/2023-08-07 - La Planche des Belles Filles/activity_11733414834.gpx");
+
+	// Probe input media
+	media_ = Decoder::probe(media_file_);
+
+	// Video renderer
+	renderer_->setMediaContainer(media_);
+
+//	// Video renderer
+//	renderer_->setLayoutFile("/data/gpx2video/samples/my-layout-simple.xml");
+//	video_area_->update_layout();
+
 	// Update video area widget
-	video_area_->open_stream(media_file_);
+	video_area_->open_stream(media_);
+}
+
+
+void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	auto filename = file->get_parse_name();
+
+	video_area_->open_telemetry(filename);
 }
 
 
@@ -156,20 +195,26 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 
 	// File filter
 	auto filter_video = Gtk::FileFilter::create();
-	filter_video->set_name("Video");
+	filter_video->set_name("All video files");
 	filter_video->add_mime_type("video/*");
+
+	auto filter_layout = Gtk::FileFilter::create();
+	filter_layout->set_name("All layout files");
+//	filter_layout->add_mime_type("application/xml");
+	filter_layout->add_suffix("xml");
 
 	// Create file chooser dialog
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	auto dialog = Gtk::FileDialog::create(); 
 
-	dialog->set_title("Open video");
+	dialog->set_title("Open a file");
 	dialog->set_modal(true);
 
 	// Add filters, so that only certain file types can be selected:
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
 
 	filters->append(filter_video);
+	filters->append(filter_layout);
 
 	dialog->set_filters(filters);
 
@@ -177,12 +222,56 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 	dialog->open(*this, sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
 #else
-	auto dialog = new Gtk::FileChooserDialog(*this, "Open video", Gtk::FileChooserDialog::Action::OPEN);
+	auto dialog = new Gtk::FileChooserDialog(*this, "Open a file", Gtk::FileChooserDialog::Action::OPEN);
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_video);
+	dialog->add_filter(filter_layout);
+	dialog->add_button("Ok", Gtk::ResponseType::OK);
+	dialog->show();
+
+	dialog->signal_response().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
+#endif
+}
+
+
+void GPX2VideoApplicationWindow::on_action_append(void) {
+	log_call();
+
+	// File filter
+	auto filter_gpx = Gtk::FileFilter::create();
+	filter_gpx->set_name("All GPX files");
+	filter_gpx->add_mime_type("application/gpx+xml");
+//	filter_gpx->add_suffix("gpx");
+//	filter_gpx->add_suffix("GPX");
+
+	// Create file chooser dialog
+#if GTKMM_CHECK_VERSION(4, 10, 0)
+	auto dialog = Gtk::FileDialog::create(); 
+
+	dialog->set_title("Open a telemetry file");
+	dialog->set_modal(true);
+
+	// Add filters, so that only certain file types can be selected:
+	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
+
+	filters->append(filter_gpx);
+
+	dialog->set_filters(filters);
+
+	// Bind open file signal
+	dialog->open(*this, sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
+#else
+	auto dialog = new Gtk::FileChooserDialog(*this, "Open a telemetry file", Gtk::FileChooserDialog::Action::OPEN);
+
+	dialog->set_transient_for(*this);
+	dialog->set_modal(true);
+	dialog->set_default_size(640, 480);
+	dialog->add_filter(filter_gpx);
 	dialog->add_button("Ok", Gtk::ResponseType::OK);
 	dialog->show();
 
@@ -294,7 +383,16 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 	if (!file)
 		return;
 
-	open_file_view(file);
+	auto info = file->query_info();
+	auto type = info->get_content_type();
+log_info("OPEN %s", std::string(type).c_str());
+	// Open layout or media file
+	if (type == "application/gpx+xml")
+		open_telemetry_file(file);
+	else if (type == "application/xml")
+		open_layout_file(file);
+	else
+		open_media_file(file);
 }
 #else
 void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
@@ -318,8 +416,17 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 	if (!file)
 		return;
 
-	// Open media file
-	open_file_view(file);
+	// Open layout or media file
+	auto info = file->query_info();
+	auto type = info->get_content_type();
+
+log_info("OPEN %s", std::string(type).c_str());
+	if (type == "application/gpx+xml")
+		open_telemetry_file(file);
+	else if (type == "application/xml")
+		open_layout_file(file);
+	else
+		open_media_file(file);
 }
 #endif
 

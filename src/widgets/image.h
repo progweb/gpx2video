@@ -10,8 +10,7 @@ public:
 	virtual ~ImageWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
+		clear();
 	}
 
 	static ImageWidget * create(GPXApplication &app) {
@@ -46,6 +45,13 @@ skip:
 		is_update = false;
 
 		return NULL;
+	}
+
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		bg_buf_ = NULL;
 	}
 
 private:

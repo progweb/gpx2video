@@ -790,6 +790,10 @@ skip:
 }
 
 
+void Map::clear(void) {
+}
+
+
 void Map::downloadProgress(Map::Tile &tile, curl_off_t dltotal, curl_off_t dlnow) {
 	char buf[64];
 	const char *label = "Download tile";

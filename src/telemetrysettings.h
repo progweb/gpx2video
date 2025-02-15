@@ -52,7 +52,7 @@ public:
 			int64_t offset=0,
 			bool check=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
-			int rate=0,
+			int rate=1000,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
 	);
 	virtual ~TelemetrySettings();
@@ -63,6 +63,7 @@ public:
 	void setFilter(enum Filter filter);
 
 	const int64_t& telemetryOffset(void) const;
+	void setTelemetryOffset(const int64_t &offset);
 
 	const std::string& telemetryBegin(void) const;
 	const std::string& telemetryEnd(void) const;

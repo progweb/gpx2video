@@ -33,11 +33,13 @@ public:
 
 	const AVCodecID& codec(void) const;
 
+	size_t videoSize(void);
+
 	FramePtr retrieveAudio(const AudioParams &params, AVRational timecode, int duration);
 	uint8_t * retrieveAudioFrameData(const AudioParams &params, const int64_t& target_ts, const int& duration);
 
-	FramePtr retrieveVideo(AVRational timecode);
-	uint8_t * retrieveVideoFrameData(const int64_t& target_ts);
+	FramePtr retrieveVideo(AVRational timecode, uint8_t *data = NULL);
+	uint8_t * retrieveVideoFrameData(const int64_t& target_ts, uint8_t *data);
 
 protected:
 	StreamPtr stream(void) const {

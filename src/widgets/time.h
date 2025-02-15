@@ -10,11 +10,7 @@ public:
 	virtual ~TimeWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static TimeWidget * create(GPXApplication &app) {
@@ -29,8 +25,6 @@ public:
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
-
-		last_time_ = 0;
 
 		if (bg_buf_ != NULL) {
 			is_update = false;
@@ -61,9 +55,11 @@ skip:
 		t = app_.time() / 1000;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (t == last_time_)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (t == last_time_) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
@@ -85,6 +81,17 @@ skip:
 
 skip:
 		return fg_buf_;
+	}
+
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
 	}
 
 private:

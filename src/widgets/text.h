@@ -11,8 +11,7 @@ public:
 	virtual ~TextWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
+		clear();
 	}
 
 	static TextWidget * create(GPXApplication &app) {
@@ -80,6 +79,12 @@ skip:
 		return NULL;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		bg_buf_ = NULL;
+	}
 
 private:
 	OIIO::ImageBuf *bg_buf_;

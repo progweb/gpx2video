@@ -62,6 +62,10 @@ public:
 		return layout_file_;
 	}
 
+	void setLayoutfile(const std::string &layout_file) {
+		layout_file_ = layout_file;
+	}
+
 	const bool& isTimeFactorAuto(void) const {
 		return time_factor_auto_;
 	}

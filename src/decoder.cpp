@@ -501,15 +501,18 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 }
 
 
-FramePtr Decoder::retrieveVideo(AVRational timecode) {
-	uint8_t *data;
+FramePtr Decoder::retrieveVideo(AVRational timecode, uint8_t *data) {
+//	uint8_t *data;
+	bool allocated;
 
 	VideoStreamPtr vs = std::static_pointer_cast<VideoStream>(stream());
 
 	int64_t target_ts = vs->getTimeInTimeBaseUnits(timecode);
 
+	allocated = (data == NULL);
+
 	// Retrieve frame data
-	if ((data = retrieveVideoFrameData(target_ts)) == NULL)
+	if ((data = retrieveVideoFrameData(target_ts, data)) == NULL)
 		return NULL;
 
 	// Return the frame
@@ -524,15 +527,15 @@ FramePtr Decoder::retrieveVideo(AVRational timecode) {
 		std::static_pointer_cast<VideoStream>(stream())->interlacing()));
 	// TODO : do better !!!
 	frame->setTimestamp(pts_);
-	frame->setData(data);
+	frame->setData(data, allocated);
 	
 	return frame;
 }
 
-uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
+uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts, uint8_t *data) {
 	int result;
 
-	uint8_t *data = NULL;
+//	uint8_t *data = NULL;
 
 	AVPacket *packet = av_packet_alloc();
 	AVFrame *frame = av_frame_alloc();
@@ -560,7 +563,9 @@ uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 //printf("linesize = [%d,%d,%d] / dst_linesize = %d / height = %d\n", 
 //		frame->linesize[0], frame->linesize[1], frame->linesize[2], linesize, frame->height);
 //printf("buffsize = %ld\n", size);
-		data = (uint8_t *) malloc(size * sizeof(uint8_t));
+
+		if (data == NULL)
+			data = (uint8_t *) malloc(size * sizeof(uint8_t));
 
 		sws_scale(sws_ctx_,
 			(const uint8_t * const *) frame->data,
@@ -582,6 +587,16 @@ uint8_t * Decoder::retrieveVideoFrameData(const int64_t& target_ts) {
 	av_packet_free(&packet);
 
 	return data;
+}
+
+
+size_t Decoder::videoSize(void) {
+	VideoStreamPtr vs = std::static_pointer_cast<VideoStream>(stream());
+
+	int linesize = Frame::generateLinesizeBytes(vs->width(), native_pix_fmt_, native_nb_channels_);
+	size_t size = VideoParams::getBufferSize(linesize, vs->height(), native_pix_fmt_, native_nb_channels_);
+
+	return size;
 }
 
 

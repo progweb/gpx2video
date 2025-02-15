@@ -83,7 +83,7 @@ namespace layout
 
     while ((i < length) && (isdigit(getValue().at(i))))
     {
-      value = value * 10.0F + double(getValue().at(i) - '0');
+      value = value * 10.0f + double(getValue().at(i) - '0');
 
       i++;
     }
@@ -96,7 +96,7 @@ namespace layout
     while ((i < length) && (isdigit(getValue().at(i))))
     {
       value    += fraction * double(getValue().at(i) - '0');
-      fraction *= 0.1F;
+      fraction *= 0.1f;
 
       i++;
     }

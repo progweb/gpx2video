@@ -10,11 +10,7 @@ public:
 	virtual ~GradeWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static GradeWidget * create(GPXApplication &app) {
@@ -51,13 +47,22 @@ skip:
 		char s[128];
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataGrade)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
-		if (data.hasValue(TelemetryData::DataGrade))
+		no_value_ = !data.hasValue(TelemetryData::DataGrade);
+
+		if (!no_value_)
 			sprintf(s, "%d%%", (int) std::round(data.grade()));
 		else
 			sprintf(s, "--%%");
@@ -74,7 +79,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -82,6 +100,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		no_value_ = false;
 	}
 };
 

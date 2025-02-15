@@ -10,11 +10,7 @@ public:
 	virtual ~DateWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static DateWidget * create(GPXApplication &app) {
@@ -58,16 +54,20 @@ skip:
 
 		(void) data;
 
+		// Compute time
+		t = app_.time() / 1000;
+
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (t == last_time_) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
 		// Don't use gps time, but camera time!
 		// Indeed, with garmin devices, gpx time has an offset.
-		t = app_.time() / 1000;
 		localtime_r(&t, &time);
 
 		strftime(s, sizeof(s), format().c_str(), &time);
@@ -80,11 +80,26 @@ skip:
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
+		last_time_ = t;
+
 skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	time_t last_time_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -92,6 +107,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		last_time_ = 0;
 	}
 };
 

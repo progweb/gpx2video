@@ -17,6 +17,9 @@
 #endif
 
 #include "../../src/application.h"
+#include "../../src/renderer.h"
+#include "../../src/telemetrysettings.h"
+#include "renderer.h"
 #include "area.h"
 
 
@@ -28,12 +31,15 @@ public:
 
 	static GPX2VideoApplicationWindow * create(void);
 
-	void open_file_view(const Glib::RefPtr<const Gio::File> &file);
+	void open_media_file(const Glib::RefPtr<const Gio::File> &file);
+	void open_layout_file(const Glib::RefPtr<const Gio::File> &file);
+	void open_telemetry_file(const Glib::RefPtr<const Gio::File> &file);
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
 
 	Glib::ustring media_file_;
+	Glib::ustring layout_file_;
 
 //    Gtk::Stack *stack_ = NULL;
     Gtk::MenuButton *gears_ = NULL;
@@ -45,6 +51,7 @@ protected:
 	GPX2VideoArea *video_area_ = NULL;
 
 	void on_action_open(void);
+	void on_action_append(void);
 
 	void on_play_clicked(void);
 	bool on_progress_change_value(Gtk::ScrollType type, double value, const Glib::RefPtr<Gtk::Adjustment> &adjustment);
@@ -61,6 +68,12 @@ protected:
 #endif
 
 private:
+	RendererSettings renderer_settings_;
+	TelemetrySettings telemetry_settings_;
+
+	MediaContainer *media_;
+
+	GPX2VideoRenderer *renderer_;
 };
 
 #endif

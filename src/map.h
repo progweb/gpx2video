@@ -85,6 +85,7 @@ public:
 	// Render map
 	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
+	void clear(void);
 
 	static void downloadProgress(Tile &tile, curl_off_t dltotal, curl_off_t dlnow);
 	static void downloadComplete(Tile &tile);

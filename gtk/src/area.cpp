@@ -35,6 +35,22 @@ extern "C" {
  */
 
 
+
+static float vertices[] = {
+	// points             // texture coords
+	1.0f, 1.0f, 0.0f,     1.0f, 0.0f,   // top right
+	1.0f, -1.0f, 0.0f,    1.0f, 1.0f,   // bottom right
+	-1.0f, -1.0f, 0.0f,   0.0f, 1.0f,   // bottom left
+	-1.0f, 1.0f, 0.0f,    0.0f, 0.0f    // top left
+};
+
+static unsigned int indices[] = {
+	0, 1, 3,
+	1, 2, 3
+};
+
+
+
 GPX2VideoStream::GPX2VideoStream() 
 	: thread_(NULL)
 	, dispatcher_()
@@ -45,10 +61,21 @@ GPX2VideoStream::GPX2VideoStream()
 	, frame_(NULL) {
 	log_call();
 
+	is_init_ = false;
+
+	index_ = 0;
+	queue_size_ = 5;
+
 	frame_time_ = 0;
 
 	seek_pos_ = 0.0;
 	seek_req_ = false;
+
+	// Texture
+	texture_ = 0;
+
+	// Buffer
+	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
 }
 
 
@@ -67,13 +94,17 @@ MediaContainer * GPX2VideoStream::media(void) {
 }
 
 
-bool GPX2VideoStream::open(const Glib::ustring &video_file) {
+//bool GPX2VideoStream::open(const Glib::ustring &video_file) {
+bool GPX2VideoStream::open(MediaContainer *container) {
 	log_call();
 
 	VideoStreamPtr video_stream;
 
-	// Probe input media
-	container_ = Decoder::probe(video_file);
+	// Media container
+	container_ = container;
+
+//	// Probe input media
+//	container_ = Decoder::probe(video_file);
 
 	// Retrieve audio & video streams
 	video_stream = container_->getVideoStream();
@@ -100,12 +131,134 @@ void GPX2VideoStream::close(void) {
 }
 
 
+void GPX2VideoStream::init(void) {
+	log_call();
+
+	size_t size;
+
+	if (decoder_video_ == NULL)
+		return;
+
+	size = decoder_video_->videoSize();
+
+	log_info("Init video buffer size: %ld", size);
+
+	// Create buffers
+	glGenVertexArrays(1, &vao_);
+	glBindVertexArray(vao_);
+
+	glGenBuffers(1, &vbo_);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &ebo_);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+	glGenBuffers(queue_size_, pbo_);
+	for (size_t i=0; i<queue_size_; i++) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
+		glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
+
+		buffer_[i] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	}
+
+	// position attribute
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+	// texture attribute
+	glEnableVertexAttribArray(1);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+
+	is_init_ = true;
+}
+
+
+void GPX2VideoStream::load(FramePtr frame) {
+	log_call();
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[frame->index_]);
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+
+	// texture
+	if (!texture_) {
+		// video texture
+		glGenTextures(1, &texture_);
+//		glBindTexture(GL_UNPACK_ALIGNMENT, 1);
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_LINEAR_MIPMAP_LINEAR); //GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
+		glTexImage2D(GL_TEXTURE_2D, 
+				0, 
+				GL_RGBA, 
+				frame->width(),
+				frame->height(),
+				0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //frame->constData());
+
+//		shader->use();
+//		shader->set("inputTexture1", 0);
+	}
+	else {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, texture_);
+//		glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+//		glPixelStorei(GL_UNPACK_LSB_FIRST, GL_TRUE);
+		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
+		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
+		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+
+		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
+		glTexSubImage2D(GL_TEXTURE_2D, 
+				0,
+				0, 0, 
+				frame->width(),
+				frame->height(),
+				GL_RGBA, GL_UNSIGNED_BYTE, NULL); //frame->constData());
+	}
+//	glGenerateMipmap(GL_TEXTURE_2D);
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+}
+
+
+void GPX2VideoStream::render(GPX2VideoShader *shader) {
+	log_call();
+
+	// Transformations
+	glm::mat4 transform = glm::mat4(1.0f);
+
+	// 
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, texture_);
+//	glActiveTexture(GL_TEXTURE1);
+//	glBindTexture(GL_TEXTURE_2D, widgets_texture_);
+
+	//
+	shader->use();
+	shader->set("transform", transform);
+
+	//
+	glBindVertexArray(vao_);
+//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
+	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+
 bool GPX2VideoStream::play(void) {
 	log_call();
 
-	if (!decoder_video_)
+	if (!is_init_ || !decoder_video_)
 		return false;
 
+	// Launch decoder thread
 	if (!thread_) {
 		thread_ = new std::thread([this] {
 			run();
@@ -221,11 +374,22 @@ VideoParams::Format GPX2VideoStream::format(void) const {
 void GPX2VideoStream::nextFrame(void) {
 	log_call();
 
+
+	// Prepare next buffer
+	FramePtr frame = getFrame();
+	
+	if (frame) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[frame->index_]);
+		buffer_[frame->index_] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+	}
+
+
 	std::lock_guard<std::mutex> lock(mutex_);
 
 	if (queue_.empty())
 		return;
 
+	// Destroy frame
 	queue_.pop_front();
 
 	cond_.notify_all();
@@ -301,14 +465,25 @@ double GPX2VideoStream::getFrameDuration(void) {
 bool GPX2VideoStream::read(void) {
 	log_call();
 
+	int index;
+
+	uint8_t *buffer;
+
 	AVRational video_time;
+
+	// Texture buffer data
+	index_ = (index_ + 1) % 2;
+	index = (index_ + 1) % 2;
+
+	buffer = buffer_[index];
 
 	// Retrieve audio & video streams
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), video_stream->frameRate());
 
-	frame_ = decoder_video_->retrieveVideo(video_time);
+	frame_ = decoder_video_->retrieveVideo(video_time, buffer);
+	frame_->index_ = index;
 
 	if (!frame_)
 		return false;
@@ -364,7 +539,7 @@ void GPX2VideoStream::run(void) {
 		}
 
 		// If the queue are full, no need to read more
-		if (queue_.size() > 5) {
+		if (queue_.size() >= queue_size_) {
 			wait();
 			continue;
 		}
@@ -380,24 +555,6 @@ void GPX2VideoStream::run(void) {
 
 
 
-static GLuint vao_ = 0;
-static GLuint vbo_ = 0;
-static GLuint ebo_ = 0;
-static GLuint video_texture_;
-
-
-static float vertices[] = {
-	// points             // texture coords
-	1.0f, 1.0f, 0.0f,     1.0f, 0.0f,   // top right
-	1.0f, -1.0f, 0.0f,    1.0f, 1.0f,   // bottom right
-	-1.0f, -1.0f, 0.0f,   0.0f, 1.0f,   // bottom left
-	-1.0f, 1.0f, 0.0f,    0.0f, 0.0f    // top left
-};
-
-static unsigned int indices[] = {
-	0, 1, 3,
-	1, 2, 3
-};
 
 
 GPX2VideoArea::GPX2VideoArea(GPXApplication &app)
@@ -413,7 +570,9 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	, ref_builder_(ref_builder)
 	, adjustment_(NULL)
 	, shader_(NULL)
-	, app_(app) {
+	, app_(app) 
+	, source_(NULL) 
+	, renderer_(NULL) {
 	log_call();
 
 	//
@@ -421,6 +580,9 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	is_playing_ = false;
 	is_seeking_ = false;
 	force_refresh_ = false;
+
+	//
+	is_gl_context_ready_ = false;
 
 //#if GTKMM_CHECK_VERSION(4, 12, 0)
 //	set_allowed_apis(Gdk::GLApi::GL);
@@ -453,6 +615,13 @@ GPX2VideoArea::~GPX2VideoArea() {
 }
 
 
+void GPX2VideoArea::set_renderer(GPX2VideoRenderer *renderer) {
+	log_call();
+
+	renderer_ = renderer;
+}
+
+
 void GPX2VideoArea::set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment) {
 	log_call();
 
@@ -465,7 +634,7 @@ void GPX2VideoArea::configure_adjustment(void) {
 
 	double duration = stream_.duration();
 
-	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 60.0);
+	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 0.0); //60.0);
 }
 
 void GPX2VideoArea::update_adjustment(double value) {
@@ -478,19 +647,57 @@ void GPX2VideoArea::update_adjustment(double value) {
 }
 
 
-void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
+void GPX2VideoArea::update_layout(void) {
 	log_call();
+
+	// Widgets resize
+	widgets_resize(stream_.width(), stream_.height());
+
+	if (!is_gl_context_ready_)
+		return;
+
+	// 
+	init_widgets_buffers();
+
+	// 
+	refresh();
+}
+
+
+void GPX2VideoArea::open_telemetry(const Glib::ustring &telemetry_file) {
+	// Load telemetry data
+	source_ = TelemetryMedia::open(telemetry_file, renderer_->telemetrySettings(), false);
+
+	//
+	refresh();
+}
+
+
+//void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
+void GPX2VideoArea::open_stream(MediaContainer *container) {
+	log_call();
+
+	VideoStreamPtr video_stream;
 
 	// Reset
 	real_duration_ms_ = 0;
 	last_timecode_ms_ = 0;
 
+	// Retrieve audio & video streams
+	video_stream = container->getVideoStream();
+
 	// Open stream
-	stream_.open(video_file);
+	stream_.open(container);
+
+	// 
+	if (is_gl_context_ready_)
+		init_video_buffers();
+
+	// Go
 	stream_.play();
 
-	// Widgets layout
-	widget_->setLayoutSize(stream_.width(), stream_.height());
+	// Widgets resize
+	widgets_resize(stream_.width(), stream_.height());
 
 	// Update UI
 	is_init_ = false;
@@ -507,6 +714,7 @@ void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
 void GPX2VideoArea::close_stream(void) {
 	log_call();
 
+	// Close stream
 	stream_.close();
 }
 
@@ -551,6 +759,10 @@ void GPX2VideoArea::seek(double incr) {
 	if (!frame)
 		return;
 
+	// Force to refresh widgets
+	widgets_clear();
+
+	// Compute new video position
 	pos = frame->timestamp() * av_q2d(frame->videoParams().timeBase());
 	pos += incr;
 
@@ -564,22 +776,56 @@ void GPX2VideoArea::seeking(bool status) {
 }
 
 
-void GPX2VideoArea::widget_append(VideoWidget *widget) {
+void GPX2VideoArea::video_render(void) {
 	log_call();
 
-	widget_ = GPX2VideoWidget::create(widget);
+	stream_.render(shader_);
 }
+
+
+//void GPX2VideoArea::widget_append(VideoWidget *widget) {
+//	log_call();
+//
+//	widget_ = GPX2VideoWidget::create(widget);
+//}
 
 
 void GPX2VideoArea::widgets_draw(void) {
 	log_call();
 
-//	// Reset overlay layer
-//	overlay_->reset(OIIO::ImageSpec(stream_.width(), stream_.height(), 
-//		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
+////	// Reset overlay layer
+////	overlay_->reset(OIIO::ImageSpec(stream_.width(), stream_.height(), 
+////		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
 
 	// Draw each widget
-	widget_->draw();
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->draw(data_);
+}
+
+
+void GPX2VideoArea::widgets_render(void) {
+	log_call();
+
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->render(shader_);
+}
+
+
+void GPX2VideoArea::widgets_resize(int width, int height) {
+	log_call();
+
+	log_info("Set widget layout %d x %d", width, height);
+
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->setLayoutSize(width, height);
+}
+
+
+void GPX2VideoArea::widgets_clear(void) {
+	log_call();
+
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->clear();
 }
 
 
@@ -606,6 +852,12 @@ void GPX2VideoArea::on_realize(void) {
 
 		init_video_buffers();
 		init_widgets_buffers();
+
+		// TODO
+		stream_.play();
+
+		// GL context is now ready
+		is_gl_context_ready_ = true;
 	}
 	catch(const Gdk::GLError &gle) {
 		std::cerr << "An error occured making the context current during realize:" << std::endl;
@@ -623,10 +875,10 @@ void GPX2VideoArea::on_unrealize(void) {
 	try {
 		throw_if_error();
 
-		// Delete buffers and program
-		glDeleteBuffers(1, &ebo_);
-		glDeleteBuffers(1, &vbo_);
-		glDeleteBuffers(1, &vao_);
+//		// Delete buffers and program
+//		glDeleteBuffers(1, &ebo_);
+//		glDeleteBuffers(1, &vbo_);
+//		glDeleteBuffers(1, &vao_);
 
 		if (shader_)
 			delete shader_;
@@ -646,36 +898,18 @@ bool GPX2VideoArea::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 
 	(void) context;
 
-	if (!video_texture_)
-		return true;
-
 	try {
 		throw_if_error();
-
-		// Transformations
-		glm::mat4 transform = glm::mat4(1.0f);
 
 		//
 		glClearColor(0.0, 0.0, 0.3, 1.0);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, video_texture_);
-//		glActiveTexture(GL_TEXTURE1);
-//		glBindTexture(GL_TEXTURE_2D, widgets_texture_);
+		//
+		video_render();
 
 		//
-		shader_->use();
-		shader_->set("transform", transform);
-
-		//
-		glBindVertexArray(vao_);
-//		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-		//
-		widget_->render(shader_);
+		widgets_render();
 
 		//
 		glBindVertexArray(0);
@@ -745,6 +979,19 @@ bool GPX2VideoArea::on_timeout(void) {
 }
 
 
+void GPX2VideoArea::refresh(void) {
+	log_call();
+
+	// Force to draw widget again
+	widgets_clear();
+	
+	// Render video again
+	force_refresh_ = true;
+
+	schedule_refresh(0);
+}
+
+
 void GPX2VideoArea::schedule_refresh(unsigned int delay) {
 	log_call();
 
@@ -774,6 +1021,9 @@ bool GPX2VideoArea::video_refresh(double &remaining_time) {
 
 	if (!frame)
 		return false;
+
+	// OpenGL context
+	make_current();
 
 	if (is_playing_) {
 		time = av_gettime_relative() / 1000000.0;
@@ -845,8 +1095,8 @@ void GPX2VideoArea::video_display(void) {
 
 	start_time = stream_.media()->startTime() + stream_.media()->timeOffset();
 
-	// OpenGL context
-	make_current();
+//	// OpenGL context
+//	make_current();
 
 	// Get frame
 	FramePtr frame = stream_.getFrame();
@@ -859,6 +1109,14 @@ void GPX2VideoArea::video_display(void) {
 
 	// Update video real time 
 	app_.setTime(start_time + real_duration_ms_);
+
+	if (source_) {
+		uint64_t timestamp = start_time + real_duration_ms_;
+
+		// Read GPX data
+		timestamp -= (timestamp % renderer_->telemetrySettings().telemetryRate());
+		source_->retrieveNext(data_, timestamp);
+	}
 
 	// Draw widgets
 	widgets_draw();
@@ -885,32 +1143,22 @@ void GPX2VideoArea::video_display(void) {
 void GPX2VideoArea::init_video_buffers(void) {
 	log_call();
 
-	glGenVertexArrays(1, &vao_);
-	glBindVertexArray(vao_);
+	// OpenGL context
+	make_current();
 
-	glGenBuffers(1, &vbo_);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &ebo_);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	// position attribute
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
-	// texture attribute
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+	// Play
+	stream_.init();
 }
 
 
 void GPX2VideoArea::init_widgets_buffers(void) {
 	log_call();
 
-	widget_->init_buffers();
+	// OpenGL context
+	make_current();
+
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->init_buffers();
 }
 
 
@@ -920,6 +1168,8 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 	if (!frame)
 		return;
 
+	stream_.load(frame);
+
 //	log_info("width: %d x height: %d - linesize: %d", 
 //			frame->width(), frame->height(), frame->linesizeBytes());
 //
@@ -928,47 +1178,6 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 //			frame->timestamp(),
 //			(uint64_t) (frame->timestamp() * 1000 * av_q2d(frame->videoParams().timeBase())));
 
-	// texture
-	if (!video_texture_) {
-		glGenTextures(1, &video_texture_);
-//		glBindTexture(GL_UNPACK_ALIGNMENT, 1);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, video_texture_);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_LINEAR_MIPMAP_LINEAR); //GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-		glTexImage2D(GL_TEXTURE_2D, 
-				0, 
-				GL_RGBA, 
-				frame->width(),
-				frame->height(),
-				0, GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
-
-		shader_->use();
-		shader_->set("inputTexture1", 0);
-	}
-	else {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, video_texture_);
-//		glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-//		glPixelStorei(GL_UNPACK_LSB_FIRST, GL_TRUE);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-		glTexSubImage2D(GL_TEXTURE_2D, 
-				0,
-				0, 0, 
-				frame->width(),
-				frame->height(),
-				GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
-	}
-//	glGenerateMipmap(GL_TEXTURE_2D);
-
 	check_gl_error();
 }
 
@@ -976,7 +1185,9 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 void GPX2VideoArea::load_widgets_texture(FramePtr frame) {
 	log_call();
 
-	widget_->load_texture();
+
+	for (GPX2VideoWidget *item : renderer_->widgets_)
+		item->load_texture();
 
 //	log_call();
 //
@@ -1128,3 +1339,4 @@ void GPX2VideoArea::check_gl_error(void) {
 		log_error("GL '%d' error: %s", err, error.c_str());
 	}
 }
+

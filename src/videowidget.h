@@ -406,6 +406,7 @@ public:
 	virtual void initialize(void);
 	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0; 
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
+	virtual void clear(void) = 0;
 
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
@@ -461,7 +462,7 @@ protected:
 	void drawLabel(OIIO::ImageBuf *buf, const char *label);
 	void drawValue(OIIO::ImageBuf *buf, const char *value);
 
-	void textSize(std::string text, int fontsize, 
+	bool textSize(std::string text, int fontsize, 
 		int &x1, int &y1, int &x2, int &y2,
 		int &width, int &height);
 

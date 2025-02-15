@@ -150,6 +150,7 @@ set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/main.cpp
 	src/prefs.cpp
+	src/renderer.cpp
 	src/shader.cpp
 	src/window.cpp
 	src/videowidget.cpp

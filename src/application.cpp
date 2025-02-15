@@ -22,7 +22,7 @@ extern "C" {
 
 GPXApplication::GPXApplication(struct event_base *evbase) 
 	: evbase_(evbase) 
-	, time_(0) {
+	, time_(0) { 
 	log_call();
 
 //	setLogLevel(AV_LOG_INFO);
@@ -37,8 +37,10 @@ GPXApplication::~GPXApplication() {
 	log_call();
 
 	// Signal event
-	event_del(ev_signal_);
-	event_free(ev_signal_);
+	if (ev_signal_) {
+		event_del(ev_signal_);
+		event_free(ev_signal_);
+	}
 }
 
 
@@ -130,6 +132,8 @@ void GPXApplication::init(void) {
 
 	log_call();
 
+	ev_signal_ = NULL;
+
 //	// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
 //	sigemptyset(&mask);
 //	sigaddset(&mask, SIGHUP);
@@ -153,6 +157,9 @@ void GPXApplication::init(void) {
 //
 //	ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
 //	event_add(ev_signal_, NULL);
+
+	if (!evbase_)
+		return;
 
 	// SIGINT management
 	ev_signal_ = evsignal_new(evbase_, SIGINT, sighandler, this);

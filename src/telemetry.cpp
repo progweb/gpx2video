@@ -77,6 +77,11 @@ const int64_t& TelemetrySettings::telemetryOffset(void) const {
 }
 
 
+void TelemetrySettings::setTelemetryOffset(const int64_t &offset) {
+	telemetry_offset_ = offset;
+}
+
+
 const std::string& TelemetrySettings::telemetryBegin(void) const {
 	return telemetry_begin_;
 }

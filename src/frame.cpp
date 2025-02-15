@@ -15,7 +15,7 @@ Frame::Frame() :
 
 
 Frame::~Frame() {
-	if (data_ != NULL)
+	if (allocated_ && (data_ != NULL))
 		free(data_);
 }
 
@@ -67,8 +67,9 @@ const uint8_t * Frame::constData(void) const {
 }
 
 
-void Frame::setData(uint8_t *data) {
+void Frame::setData(uint8_t *data, bool allocated) {
 	data_ = data;
+	allocated_ = allocated;
 }
 
 

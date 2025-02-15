@@ -12,12 +12,6 @@
 #include "videowidget.h"
 
 
-static GLuint vao_ = 0;
-static GLuint vbo_ = 0;
-static GLuint ebo_ = 0;
-static GLuint texture_;
-
-
 static float vertices[] = {
 	// points             // texture coords
 	0.5f, 0.5f, 0.0f,     1.0f, 0.0f,   // top right
@@ -45,6 +39,8 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 		4, OIIO::TypeDesc::UINT8));
 //		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
 
+	// Texture
+	texture_ = 0;
 }
 
 
@@ -69,27 +65,25 @@ void GPX2VideoWidget::setLayoutSize(int width, int height) {
 }
 
 
-bool GPX2VideoWidget::draw(void) {
+bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	log_call();
 
-	TelemetryData data;
-
 	bool is_bg_update, is_fg_update;
+
+//	widget_->dump();
 
 	OIIO::ImageBuf *bg_buf = widget_->prepare(is_bg_update);
 	OIIO::ImageBuf *fg_buf = widget_->render(data, is_fg_update);
 
 	is_update_ = (is_bg_update || is_fg_update);
 
-	// Draw bg
-//	bg_buf->specmod().x = widget_->x();
-//	bg_buf->specmod().y = widget_->y();
-	OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi());
+	if (is_update_) {
+		// Draw bg
+		OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);
 
-	// Draw fg
-//	fg_buf->specmod().x = widget_->x();
-//	fg_buf->specmod().y = widget_->y();
-	OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi());
+		// Draw fg
+		OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi(), 4);
+	}
 
 	return is_update_;
 }
@@ -111,6 +105,8 @@ void GPX2VideoWidget::init_buffers(void) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &pbo_);
+
 	// position attribute
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
@@ -123,18 +119,41 @@ void GPX2VideoWidget::init_buffers(void) {
 void GPX2VideoWidget::load_texture(void) {
 	log_call();
 
+//	return;
+
+
+
+	void *buffer;
+
 	// 
 	int nchannels = 4;
-	static std::vector<unsigned char> m_tex_buffer;
+//	static std::vector<unsigned char> m_tex_buffer;
 
-	if (!texture_) {
-		m_tex_buffer.resize(overlay_->spec().width * overlay_->spec().height * nchannels
-							* overlay_->spec().channel_bytes());
-	}
+	if (texture_ && !is_update_)
+		return;
+
+	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
+						* overlay_->spec().channel_bytes();
+
+//	if (!texture_) {
+//
+//		m_tex_buffer.resize(size);
+//	}
+//
+//	overlay_->get_pixels(OIIO::ROI(), 
+//			overlay_->spec().format, 
+//			reinterpret_cast<char*>(m_tex_buffer.data()));
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+	glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
+
+	buffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 
 	overlay_->get_pixels(OIIO::ROI(), 
 			overlay_->spec().format, 
-			reinterpret_cast<char*>(m_tex_buffer.data()));
+			reinterpret_cast<char*>(buffer));
+
+	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
 	// texture
 	if (!texture_) {
@@ -160,7 +179,7 @@ void GPX2VideoWidget::load_texture(void) {
 				GL_RGBA, 
 				overlay_->spec().width,
 				overlay_->spec().height,
-				0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_buffer.data());
+				0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
 
 //		shader_->use();
 //		shader_->set("inputTexture2", 1);
@@ -187,8 +206,11 @@ void GPX2VideoWidget::load_texture(void) {
 				0, 0,
 				overlay_->spec().width,
 				overlay_->spec().height,
-				GL_RGBA, GL_UNSIGNED_BYTE, m_tex_buffer.data());
+				GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
 	}
+
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+//	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 
@@ -227,6 +249,8 @@ double GPX2VideoWidget::glHeight(void) const {
 void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	log_call();
 
+//	return;
+
 	// Transformations
 	glm::mat4 transform = glm::mat4(1.0f);
 //	transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
@@ -250,5 +274,12 @@ void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	glBindVertexArray(vao_);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+}
+
+
+void GPX2VideoWidget::clear(void) {
+	log_call();
+
+	widget_->clear();
 }
 

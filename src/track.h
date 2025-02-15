@@ -49,6 +49,7 @@ public:
 	// Render track
 	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
+	void clear(void);
 
 protected:
 	OIIO::ImageBuf *bg_buf_;

@@ -10,11 +10,7 @@ public:
 	virtual ~TemperatureWidget() {
 		log_call();
 
-		if (bg_buf_)
-			delete bg_buf_;
-
-		if (fg_buf_)
-			delete fg_buf_;
+		clear();
 	}
 
 	static TemperatureWidget * create(GPXApplication &app) {
@@ -55,19 +51,28 @@ skip:
 		double temperature = data.temperature();
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = false;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
+
+			if (no_value_ && !data.hasValue(TelemetryData::DataTemperature)) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Format data
+		no_value_ = !data.hasValue(TelemetryData::DataGrade);
+
 		if (unit() == VideoWidget::UnitCelsius) {
 		}
 		else {
 			temperature = (temperature * 9/5) + 32;
 		}
 
-		if (data.hasValue(TelemetryData::DataTemperature))
+		if (!no_value_)
 			sprintf(s, "%.0f %s", temperature, unit2string(unit()).c_str());
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
@@ -84,7 +89,20 @@ skip:
 		return fg_buf_;
 	}
 
+	void clear(void) {
+		if (bg_buf_)
+			delete bg_buf_;
+
+		if (fg_buf_)
+			delete fg_buf_;
+
+		bg_buf_ = NULL;
+		fg_buf_ = NULL;
+	}
+
 private:
+	bool no_value_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
@@ -92,6 +110,7 @@ private:
 		: VideoWidget(app, name) 
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
+		no_value_ = false;
 	}
 };
 

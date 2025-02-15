@@ -133,7 +133,7 @@ void GPX2VideoApplication::on_open(const Gio::Application::type_vec_files& files
 			appwindow = create_application_window();
 
 		for (const auto& file : files) {
-			appwindow->open_file_view(file);
+			appwindow->open_media_file(file);
 			break;
 		}
 

@@ -25,10 +25,11 @@ public:
 
 	void setLayoutSize(int width, int height);
 
-	bool draw(void);
+	bool draw(const TelemetryData &data);
 	void init_buffers(void);
 	void load_texture(void);
 	void render(GPX2VideoShader *shader);
+	void clear(void);
 
 protected:
 	GPX2VideoWidget(VideoWidget *widget);
@@ -42,6 +43,12 @@ private:
 	VideoWidget *widget_;
 
 	OIIO::ImageBuf *overlay_;
+
+	GLuint vao_ = 0;
+	GLuint vbo_ = 0;
+	GLuint ebo_ = 0;
+	GLuint pbo_ = 0;
+	GLuint texture_;
 };
 
 #endif

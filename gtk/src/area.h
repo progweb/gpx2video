@@ -22,7 +22,10 @@
 #include "../../src/decoder.h"
 #include "../../src/application.h"
 #include "../../src/videowidget.h"
+#include "../../src/telemetrymedia.h"
+#include "../../src/telemetrysettings.h"
 #include "videowidget.h"
+#include "renderer.h"
 #include "shader.h"
 
 
@@ -34,8 +37,13 @@ public:
 
 	MediaContainer * media();
 
-	bool open(const Glib::ustring &media_file);
+//	bool open(const Glib::ustring &media_file);
+	bool open(MediaContainer *container);
 	void close(void);
+
+	void init(void);
+	void load(FramePtr frame);
+	void render(GPX2VideoShader *shader);
 
 	bool play(void);
 	void stop(void);
@@ -72,6 +80,7 @@ protected:
 
 private:
 	bool loop_;
+	bool is_init_;
 
 	std::thread* thread_;
 	Glib::Dispatcher dispatcher_;
@@ -89,6 +98,16 @@ private:
 
 	bool seek_req_;
 	double seek_pos_;
+
+	int index_;
+	size_t queue_size_;
+	uint8_t **buffer_;
+
+	GLuint vao_ = 0;
+	GLuint vbo_ = 0;
+	GLuint ebo_ = 0;
+	GLuint pbo_[5];
+	GLuint texture_;
 };
 
 
@@ -102,11 +121,16 @@ public:
 		return is_playing_;
 	}
 
+	void set_renderer(GPX2VideoRenderer *renderer);
 	void set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment);
 	void configure_adjustment(void);
 	void update_adjustment(double value);
+	void update_layout(void);
 
-	void open_stream(const Glib::ustring &video_file);
+	void open_telemetry(const Glib::ustring &telemetry_file);
+
+//	void open_stream(const Glib::ustring &video_file);
+	void open_stream(MediaContainer *container);
 	void close_stream(void);
 	void stream_toggle_pause(void);
 
@@ -115,8 +139,13 @@ public:
 	void seek(double incr);
 	void seeking(bool status);
 
-	void widget_append(VideoWidget *widget);
-	void widgets_draw();
+	void video_render(void);
+
+//	void widget_append(VideoWidget *widget);
+	void widgets_draw(void);
+	void widgets_render(void);
+	void widgets_resize(int width, int height);
+	void widgets_clear(void);
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
@@ -134,14 +163,18 @@ protected:
 	void on_data_ready(void);
 	bool on_timeout(void);
 
+	void refresh(void);
 	void schedule_refresh(unsigned int delay);
 	bool video_refresh(double &remaining_time);
 
 	void video_display(void);
 
 	void init_shaders(const std::string& vertex_path, const std::string& fragment_path);
+
 	void init_video_buffers();
+
 	void init_widgets_buffers();
+
 	void load_video_texture(FramePtr frame);
 	void load_widgets_texture(FramePtr frame);
 	void resize_viewport(gint width, gint height);
@@ -154,6 +187,9 @@ private:
 	bool is_playing_;
 	bool is_seeking_;
 	bool force_refresh_;
+	bool widgets_refresh_;
+
+	bool is_gl_context_ready_;
 
 	GPXApplication &app_;
 
@@ -172,8 +208,11 @@ private:
 
 	uint64_t last_timecode_ms_ = 0;
 
+	TelemetrySource *source_;
+	TelemetryData data_;
 
-	GPX2VideoWidget *widget_;
+//	GPX2VideoWidget *widget_;
+	GPX2VideoRenderer *renderer_;
 };
 
 #endif

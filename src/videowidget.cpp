@@ -175,11 +175,14 @@ bool VideoWidget::hex2color(float color[4], std::string hex) {
 void VideoWidget::dump(void) {
 	log_call();
 
-	printf("x: %d / y: %d - size: %dx%d\n", x(), y(), width(), height());
+	printf("[%s] x: %d / y: %d - size: %dx%d\n", 
+			name().c_str(), x(), y(), width(), height());
 }
 
 
 void VideoWidget::initialize(void) {
+	bool ok;
+
 	int height;
 
 	int px;
@@ -233,9 +236,14 @@ void VideoWidget::initialize(void) {
 		// pt = 3 * px / 4;
 
 		for (height=px;; px += 1) {
-			this->textSize(text, px,
+			ok = this->textSize(text, px,
 					x1, y1, x2, y2,
 					text_width, text_height);
+
+			if (!ok) {
+				printf("ERROR: %s %d %d", text, height, px);
+				sleep(2);
+			}
 
 			if (text_height > height)
 				break;
@@ -564,7 +572,7 @@ void VideoWidget::drawValue(OIIO::ImageBuf *buf, const char *value) {
 }
 
 
-void VideoWidget::textSize(std::string text, int fontsize, 
+bool VideoWidget::textSize(std::string text, int fontsize, 
 	int &x1, int &y1, int &x2, int &y2,
 	int &width, int &height) {
 
@@ -577,6 +585,8 @@ void VideoWidget::textSize(std::string text, int fontsize,
 
 	width = roi.width();
 	height = roi.height();
+
+	return roi.defined();
 }
 
 

@@ -75,10 +75,14 @@ namespace gpx
 	}
     
 	operator double() const { 
-		if (this->getValue().empty())
-			return 0.0;
+		double value = 0.0;
 
-		return std::stod(this->getValue());
+		if (this->getValue().empty())
+			return value;
+
+		convert(value);
+
+		return value;
 	}
     
   protected:

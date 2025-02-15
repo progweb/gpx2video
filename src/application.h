@@ -27,11 +27,19 @@ public:
 		const std::string& inputfile(void) const {
 			return input_file_;
 		}
+
+		void setInputfile(const std::string &file) {
+			input_file_ = file;
+		}
 		
 		const std::string& outputfile(void) const {
 			return output_file_;
 		}
 
+		void setOutputfile(const std::string &file) {
+			output_file_ = file;
+		}
+		
 		const unsigned int& maxDuration(void) const {
 			return max_duration_ms_;
 		}
