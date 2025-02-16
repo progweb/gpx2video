@@ -204,9 +204,9 @@ private:
 
 
 
-	unsigned int real_duration_ms_;
-
-	uint64_t last_timecode_ms_ = 0;
+//	unsigned int real_duration_ms_;
+//
+//	uint64_t last_timecode_ms_ = 0;
 
 	TelemetrySource *source_;
 	TelemetryData data_;

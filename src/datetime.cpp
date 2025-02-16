@@ -27,7 +27,7 @@ std::string timestamp2iso(uint64_t timestamp) {
 }
 
 
-std::string timestamp2string(uint64_t timestamp, bool utc) {
+std::string timestamp2string(uint64_t timestamp, bool withdate, bool utc) {
 	int u;
 	time_t t;
 
@@ -36,16 +36,19 @@ std::string timestamp2string(uint64_t timestamp, bool utc) {
 	char str[128];
 	char time[64];
 
+	const char *fmttime = "%H:%M:%S";
+	const char *fmtdatetime = "%Y-%m-%d %H:%M:%S";
+
 	t = timestamp / 1000;
 	u = timestamp % 1000;
 
 	// Convert to local or utc
-	if (utc)
+	if (utc || !withdate)
 		::gmtime_r(&t, &tm);
 	else
 		::localtime_r(&t, &tm);
 
-	::strftime(time, sizeof(time), "%Y-%m-%d %H:%M:%S", &tm);
+	::strftime(time, sizeof(time), withdate ? fmtdatetime : fmttime, &tm);
 
 	::snprintf(str, sizeof(str), "%s.%03d", time, u);
 

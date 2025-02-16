@@ -188,7 +188,7 @@ bool Extractor::run(void) {
 	// Dump
 	if (app_.progressInfo()) {
 		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %sZ\n", 
-			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true).c_str());
+			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true, true).c_str());
 	}
 
 	if (settings().format() == ExtractorSettings::FormatRAW) {

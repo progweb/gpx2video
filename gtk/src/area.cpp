@@ -20,6 +20,7 @@ extern "C" {
 #include "../../src/oiioutils.h"
 #include "log.h"
 #include "compat.h"
+#include "datetime.h"
 #include "area.h"
 
 
@@ -295,6 +296,8 @@ void GPX2VideoStream::seek(double pos) {
 		seek_pos_ = pos;
 		seek_req_ = true;
 
+		log_info("[gtk] Stream seek position %s", ::timestamp2string(pos * 1000, false).c_str());
+
 		cond_.notify_all();
 	}
 }
@@ -442,6 +445,12 @@ void GPX2VideoStream::flushFrame(void) {
 	while (!queue_.empty())
 		queue_.pop_front();
 
+	// Remap buffers
+	for (size_t i=0; i<queue_size_; i++) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
+		buffer_[i] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+	}
+
 	cond_.notify_all();
 }
 
@@ -472,8 +481,9 @@ bool GPX2VideoStream::read(void) {
 	AVRational video_time;
 
 	// Texture buffer data
-	index_ = (index_ + 1) % 2;
-	index = (index_ + 1) % 2;
+	index = index_;
+	index_ = (index_ + 1) % queue_size_;
+//	index = (index_ + 1) % 2;
 
 	buffer = buffer_[index];
 
@@ -634,6 +644,8 @@ void GPX2VideoArea::configure_adjustment(void) {
 
 	double duration = stream_.duration();
 
+	log_info("Video duration: %s", ::timestamp2string(duration * 1000, false).c_str());
+
 	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 0.0); //60.0);
 }
 
@@ -642,6 +654,9 @@ void GPX2VideoArea::update_adjustment(double value) {
 
 	if (is_seeking_)
 		return;
+
+	if (!is_playing_)
+		log_info("[gtk] Update scale position position: %s", ::timestamp2string(value * 1000, false).c_str());
 
 	adjustment_->set_value(value);
 }
@@ -679,9 +694,9 @@ void GPX2VideoArea::open_stream(MediaContainer *container) {
 
 	VideoStreamPtr video_stream;
 
-	// Reset
-	real_duration_ms_ = 0;
-	last_timecode_ms_ = 0;
+//	// Reset
+//	real_duration_ms_ = 0;
+//	last_timecode_ms_ = 0;
 
 	// Retrieve audio & video streams
 	video_stream = container->getVideoStream();
@@ -759,6 +774,10 @@ void GPX2VideoArea::seek(double incr) {
 	if (!frame)
 		return;
 
+//	// Reset telemetry data from start
+//	if (incr < 0)
+//		source_->retrieveFrom(data_);
+
 	// Force to refresh widgets
 	widgets_clear();
 
@@ -772,7 +791,7 @@ void GPX2VideoArea::seek(double incr) {
 void GPX2VideoArea::seeking(bool status) {
 	log_call();
 
-	is_seeking_ = status;
+//	is_seeking_ = status;
 }
 
 
@@ -1107,11 +1126,15 @@ void GPX2VideoArea::video_display(void) {
 	timecode = frame->timestamp();
 	timecode_ms = timecode * stream_.timeBase() * 1000;
 
+	// Compute real time, so assume time_factor is constant 
+	// todo: fix later since time_factor is variable
+	real_duration_ms = time_factor * timecode_ms;
+
 	// Update video real time 
-	app_.setTime(start_time + real_duration_ms_);
+	app_.setTime(start_time + real_duration_ms);
 
 	if (source_) {
-		uint64_t timestamp = start_time + real_duration_ms_;
+		uint64_t timestamp = start_time + real_duration_ms;
 
 		// Read GPX data
 		timestamp -= (timestamp % renderer_->telemetrySettings().telemetryRate());
@@ -1132,11 +1155,11 @@ void GPX2VideoArea::video_display(void) {
 	timestamp = frame->timestamp() * av_q2d(frame->videoParams().timeBase());
 	update_adjustment(timestamp);
 
-	// Compute real time by step, since time_factor is variable
-	real_duration_ms = timecode_ms - last_timecode_ms_;
-	real_duration_ms_ += time_factor * real_duration_ms;
+//	// Compute real time by step, since time_factor is variable
+//	real_duration_ms = timecode_ms - last_timecode_ms_;
+//	real_duration_ms_ += time_factor * real_duration_ms;
 
-	last_timecode_ms_ = timecode_ms;
+//	last_timecode_ms_ = timecode_ms;
 }
 
 

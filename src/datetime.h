@@ -7,7 +7,7 @@
 
 
 std::string timestamp2iso(uint64_t timestamp);
-std::string timestamp2string(uint64_t timestamp, bool utc=false);
+std::string timestamp2string(uint64_t timestamp, bool withdate=true, bool utc=false);
 
 uint64_t string2timestamp(std::string str);
 

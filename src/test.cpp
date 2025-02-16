@@ -63,13 +63,13 @@ void Test::printTimestamp(uint64_t timestamp) {
 
 	printf("  Datetime ISO: %s\n", ::timestamp2iso(timestamp).c_str());
 
-	printf("  Datetime UTC: %s\n", ::timestamp2string(timestamp, true).c_str());
+	printf("  Datetime UTC: %s\n", ::timestamp2string(timestamp, true, true).c_str());
 
 	// Convert to string in local
 //	localtime_r(&t, &tm);
 //	strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S%z", &tm);
 
-	printf("  Datetime local: %s\n", ::timestamp2string(timestamp, false).c_str());
+	printf("  Datetime local: %s\n", ::timestamp2string(timestamp, true, false).c_str());
 }
 
 

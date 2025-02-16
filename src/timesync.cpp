@@ -119,7 +119,7 @@ bool TimeSync::run(void) {
 	// Dump
 	if (app_.progressInfo()) {
 		printf("PACKET: %d - PTS: %ld - TIMESTAMP: %ld ms - TIME: %sZ - GPS FIX: %d - GPS TIME: %s - OFFSET: %d\n", 
-			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true).c_str(), gpmd.fix, gpmd.date.c_str(), offset);
+			n_, timecode, timecode_ms, ::timestamp2string(camera_time, true, true).c_str(), gpmd.fix, gpmd.date.c_str(), offset);
 	}
 
 	n_++;
@@ -165,7 +165,7 @@ bool TimeSync::stop(void) {
 		// Compute start time
 		timestamp = container_->startTime() + container_->timeOffset();
 
-		log_info("Video start time: %s", ::timestamp2string(timestamp).c_str());
+		log_info("Video start time: %s", ::timestamp2string(timestamp, true).c_str());
 	}
 
 	close();

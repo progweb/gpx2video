@@ -314,7 +314,7 @@ int GPX2Video::setDefaultStartTime(void) {
 	container_->setStartTime(data.timestamp());
 
 	// Dump result
-	log_notice("Use default creation time: %s", ::timestamp2string(data.timestamp()).c_str());
+	log_notice("Use default creation time: %s", ::timestamp2string(data.timestamp(), true).c_str());
 
 	// Free
 	delete source;

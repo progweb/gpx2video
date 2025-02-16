@@ -281,7 +281,7 @@ bool VideoRenderer::start(void) {
 	// Compute video start time
 	start_time = container_->startTime() + container_->timeOffset();
 
-	log_info("Video: start at '%s'", ::timestamp2string(start_time).c_str());
+	log_info("Video: start at '%s'", ::timestamp2string(start_time, true).c_str());
 
 	// SAR & orientation video
 	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
@@ -468,7 +468,7 @@ bool VideoRenderer::run(void) {
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s (x %.01f)\n", 
-				frame_time_, timecode, timecode_ms, ::timestamp2string(app_.time()).c_str(), time_factor);
+				frame_time_, timecode, timecode_ms, ::timestamp2string(app_.time(), true).c_str(), time_factor);
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

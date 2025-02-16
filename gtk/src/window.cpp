@@ -317,6 +317,8 @@ void GPX2VideoApplicationWindow::on_progress_scale_pressed(guint n, double x, do
 	(void) x;
 	(void) y;
 
+//	log_info("PROGRES SCALE PRESSED");
+
 	video_area_->seeking(true);
 }
 
@@ -327,6 +329,8 @@ void GPX2VideoApplicationWindow::on_progress_scale_released(guint n, double x, d
 	(void) n;
 	(void) x;
 	(void) y;
+
+//	log_info("PROGRES SCALE RELEASED");
 
 	video_area_->seeking(false);
 }

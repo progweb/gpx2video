@@ -72,7 +72,7 @@ void TelemetryData::dump(void) {
 			line_,
 			type2string(),
 			hasValue(TelemetryData::DataFix) ? 'Y' : 'N',
-			::timestamp2string(ts_).c_str(),
+			::timestamp2string(ts_, true).c_str(),
 			lon_, lat_,
 			distance_/1000.0, (int) round(duration_), speed_, 
 			is_pause_ ? "true": "false",
@@ -91,7 +91,7 @@ void TelemetryData::writeData(size_t index) const {
 		index,
 		line_,
 		type2string(),
-		::timestamp2string(ts_).c_str(),
+		::timestamp2string(ts_, true).c_str(),
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
@@ -628,8 +628,8 @@ void TelemetrySource::range(void) {
 	if (!quiet_) {
 		log_info("%s: Telemetry available data range from '%s' to '%s'", 
 				name().c_str(),
-				::timestamp2string(begin_).c_str(),
-				::timestamp2string(end_).c_str());
+				::timestamp2string(begin_, true).c_str(),
+				::timestamp2string(end_, true).c_str());
 	}
 
 	// For each point
@@ -726,8 +726,8 @@ void TelemetrySource::compute(void) {
 	if (!quiet_) {
 		log_info("%s: Compute telemetry data from '%s' to '%s'", 
 				name().c_str(),
-				::timestamp2string(from_).c_str(),
-				::timestamp2string(to_).c_str());
+				::timestamp2string(from_, true).c_str(),
+				::timestamp2string(to_, true).c_str());
 	}
 
 	// Start elevation

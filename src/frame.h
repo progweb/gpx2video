@@ -57,6 +57,8 @@ public:
 		return linesize_;
 	}
 
+	uint64_t time(void) const;
+
 	const int64_t& timestamp(void) const;
 	void setTimestamp(const int64_t &timestamp);
 

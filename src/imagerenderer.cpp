@@ -274,7 +274,7 @@ error:
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-				timecode_, timecode_ms, ::timestamp2string(app_.time()).c_str());
+				timecode_, timecode_ms, ::timestamp2string(app_.time(), true).c_str());
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

@@ -476,7 +476,7 @@ bool Telemetry::run(void) {
 		if (data_.type() != TelemetryData::TypeError) {
 			out_ << std::setprecision(8);
 			out_ << data_.timestamp();
-			out_ << ", \"" << ::timestamp2string(data_.timestamp()) << "\"";
+			out_ << ", \"" << ::timestamp2string(data_.timestamp(), true) << "\"";
 			out_ << ", " << round(data_.elapsedTime());
 			out_ << ", " << round(data_.duration());
 			out_ << ", " << round(data_.rideTime());
