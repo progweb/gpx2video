@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__SPEED_H__
 #define __GPX2VIDEO__WIDGETS__SPEED_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class SpeedWidget : public VideoWidget {
 public:
 	virtual ~SpeedWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static SpeedWidget * create(GPXApplication &app) {
 		SpeedWidget *widget;
-
-		log_call();
 
 		widget = new SpeedWidget(app, "speed");
 

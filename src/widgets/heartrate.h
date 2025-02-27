@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__HEARTRATE_H__
 #define __GPX2VIDEO__WIDGETS__HEARTRATE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class HeartRateWidget : public VideoWidget {
 public:
 	virtual ~HeartRateWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static HeartRateWidget * create(GPXApplication &app) {
 		HeartRateWidget *widget;
-
-		log_call();
 
 		widget = new HeartRateWidget(app, "heartrate");
 

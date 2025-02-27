@@ -6,10 +6,19 @@
 #include <string>
 
 
-std::string timestamp2iso(uint64_t timestamp);
-std::string timestamp2string(uint64_t timestamp, bool withdate=true, bool utc=false);
+class Datetime {
+public:
+	enum Format {
+		FormatDate,
+		FormatTime,
+		FormatDatetime
+	};
 
-uint64_t string2timestamp(std::string str);
+	static std::string timestamp2iso(uint64_t timestamp);
+	static std::string timestamp2string(uint64_t timestamp, Format format=FormatDatetime, bool utc=false);
+
+	static uint64_t string2timestamp(std::string str);
+};
 
 #endif
 

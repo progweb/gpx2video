@@ -8,7 +8,8 @@
 
 MediaContainer::MediaContainer() 
 	: offset_(0) 
-	, start_time_(0) {
+	, start_time_(0)
+	, creation_time_(0) {
 }
 
 
@@ -26,6 +27,26 @@ void MediaContainer::setFilename(const std::string &filename) {
 }
 
 
+uint64_t MediaContainer::creationTime(void) const {
+	return creation_time_;
+}
+
+
+void MediaContainer::setCreationTime(const uint64_t &creation_time) {
+	creation_time_ = creation_time;
+}
+
+
+/**
+ * GoPro creation_time metadata format:
+ *   2021-10-03T19:12:01.000000Z
+ * creation_time is in local time
+ */
+void MediaContainer::setCreationTime(const std::string &creation_time) {
+	creation_time_ = Datetime::string2timestamp(creation_time);
+}
+
+
 uint64_t MediaContainer::startTime(void) const {
 	return start_time_;
 }
@@ -36,13 +57,8 @@ void MediaContainer::setStartTime(const uint64_t &start_time) {
 }
 
 
-/**
- * GoPro creation_time metadata format:
- *   2021-10-03T19:12:01.000000Z
- * creation_time is in local time
- */
 void MediaContainer::setStartTime(const std::string &start_time) {
-	start_time_ = ::string2timestamp(start_time);
+	start_time_ = Datetime::string2timestamp(start_time);
 }
 
 

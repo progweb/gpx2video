@@ -124,6 +124,12 @@ const TelemetrySettings::Method& TelemetrySettings::telemetryMethod(void) const 
 const int& TelemetrySettings::telemetryRate(void) const {
 	return telemetry_rate_;
 }
+	
+
+void TelemetrySettings::setTelemetryMethod(const TelemetrySettings::Method &method, int rate) {
+	telemetry_method_ = method;
+	telemetry_rate_ = rate;
+}
 
 
 const TelemetrySettings::Smooth& TelemetrySettings::telemetrySmoothMethod(TelemetryData::Data type) const {
@@ -455,7 +461,7 @@ bool Telemetry::run(void) {
 			out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
 			if (data_.hasValue(TelemetryData::DataElevation))
 				out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
-			out_ << "        <time>" << ::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
+			out_ << "        <time>" << Datetime::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
 			if (gpx_extension) {
 				out_ << "        <extensions>" << std::endl;
 				out_ << "          <ns3:TrackPointExtension>" << std::endl;
@@ -476,7 +482,7 @@ bool Telemetry::run(void) {
 		if (data_.type() != TelemetryData::TypeError) {
 			out_ << std::setprecision(8);
 			out_ << data_.timestamp();
-			out_ << ", \"" << ::timestamp2string(data_.timestamp(), true) << "\"";
+			out_ << ", \"" << Datetime::timestamp2string(data_.timestamp()) << "\"";
 			out_ << ", " << round(data_.elapsedTime());
 			out_ << ", " << round(data_.duration());
 			out_ << ", " << round(data_.rideTime());

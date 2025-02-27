@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__MAXSPEED_H__
 #define __GPX2VIDEO__WIDGETS__MAXSPEED_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class MaxSpeedWidget : public VideoWidget {
 public:
 	virtual ~MaxSpeedWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static MaxSpeedWidget * create(GPXApplication &app) {
 		MaxSpeedWidget *widget;
-
-		log_call();
 
 		widget = new MaxSpeedWidget(app, "maxspeed");
 

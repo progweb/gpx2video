@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__GFORCE_H__
 #define __GPX2VIDEO__WIDGETS__GFORCE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class GForceWidget : public VideoWidget {
 public:
 	virtual ~GForceWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static GForceWidget * create(GPXApplication &app) {
 		GForceWidget *widget;
-
-		log_call();
 
 		widget = new GForceWidget(app, "g-force");
 

@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__GRADE_H__
 #define __GPX2VIDEO__WIDGETS__GRADE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class GradeWidget : public VideoWidget {
 public:
 	virtual ~GradeWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static GradeWidget * create(GPXApplication &app) {
 		GradeWidget *widget;
-
-		log_call();
 
 		widget = new GradeWidget(app, "grade");
 

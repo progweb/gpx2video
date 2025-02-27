@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__POWER_H__
 #define __GPX2VIDEO__WIDGETS__POWER_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class PowerWidget : public VideoWidget {
 public:
 	virtual ~PowerWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static PowerWidget * create(GPXApplication &app) {
 		PowerWidget *widget;
-
-		log_call();
 
 		widget = new PowerWidget(app, "power");
 

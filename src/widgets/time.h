@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__TIME_H__
 #define __GPX2VIDEO__WIDGETS__TIME_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class TimeWidget : public VideoWidget {
 public:
 	virtual ~TimeWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static TimeWidget * create(GPXApplication &app) {
 		TimeWidget *widget;
-
-		log_call();
 
 		widget = new TimeWidget(app, "time");
 

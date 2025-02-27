@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__CADENCE_H__
 #define __GPX2VIDEO__WIDGETS__CADENCE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class CadenceWidget : public VideoWidget {
 public:
 	virtual ~CadenceWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static CadenceWidget * create(GPXApplication &app) {
 		CadenceWidget *widget;
-
-		log_call();
 
 		widget = new CadenceWidget(app, "cadence");
 

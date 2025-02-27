@@ -48,6 +48,13 @@ GPX2VideoWidget::~GPX2VideoWidget() {
 }
 
 
+VideoWidget * GPX2VideoWidget::widget(void) {
+	log_call();
+
+	return widget_;
+}
+
+
 GPX2VideoWidget * GPX2VideoWidget::create(VideoWidget *widget) {
 	log_call();
 

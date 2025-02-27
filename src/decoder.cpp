@@ -25,7 +25,7 @@ Decoder::~Decoder() {
 MediaContainer * Decoder::probe(const std::string &filename) {
 	int result;
 	std::string name;
-	std::string start_time;
+	std::string creation_time;
 
 	unsigned int i;
 
@@ -46,7 +46,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 	if ((entry != NULL) && (entry->value != NULL)) {
 		av_log(NULL, AV_LOG_INFO, "%s = %s\n", entry->key, entry->value);
 		
-		start_time = entry->value;
+		creation_time = entry->value;
 	}
 
 	// Get stream information from format
@@ -188,12 +188,13 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 	if (container->getDataStream("GoPro MET") != NULL) {
 		// creation_time = 2020-12-13T09:56:27.000000Z
 		// GoPro uses utc notation for local time...
-		if (start_time.back() == 'Z')
-			start_time.pop_back();
+		if (creation_time.back() == 'Z')
+			creation_time.pop_back();
 	}
 
 	// Metadata info
-	container->setStartTime(start_time);
+	container->setCreationTime(creation_time);
+	container->setStartTime(creation_time);
 	container->setFilename(filename);
 
 	// Dump input info

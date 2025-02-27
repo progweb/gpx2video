@@ -127,6 +127,7 @@ public:
 	void update_adjustment(double value);
 	void update_layout(void);
 
+	TelemetrySource * telemetry(void);
 	void open_telemetry(const Glib::ustring &telemetry_file);
 
 //	void open_stream(const Glib::ustring &video_file);
@@ -138,6 +139,8 @@ public:
 	void step_to_next_frame(void);
 	void seek(double incr);
 	void seeking(bool status);
+
+	void refresh(void);
 
 	void video_render(void);
 
@@ -163,7 +166,6 @@ protected:
 	void on_data_ready(void);
 	bool on_timeout(void);
 
-	void refresh(void);
 	void schedule_refresh(unsigned int delay);
 	bool video_refresh(double &remaining_time);
 

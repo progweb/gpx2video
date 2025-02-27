@@ -36,7 +36,6 @@ extern "C" {
  */
 
 
-
 static float vertices[] = {
 	// points             // texture coords
 	1.0f, 1.0f, 0.0f,     1.0f, 0.0f,   // top right
@@ -233,6 +232,9 @@ void GPX2VideoStream::load(FramePtr frame) {
 void GPX2VideoStream::render(GPX2VideoShader *shader) {
 	log_call();
 
+	if (decoder_video_ == NULL)
+		return;
+
 	// Transformations
 	glm::mat4 transform = glm::mat4(1.0f);
 
@@ -296,7 +298,9 @@ void GPX2VideoStream::seek(double pos) {
 		seek_pos_ = pos;
 		seek_req_ = true;
 
-		log_info("[gtk] Stream seek position %s", ::timestamp2string(pos * 1000, false).c_str());
+		FramePtr frame = getFrame();
+
+		log_info("Stream seek position %s", Datetime::timestamp2string(pos, Datetime::FormatTime).c_str());
 
 		cond_.notify_all();
 	}
@@ -335,7 +339,7 @@ double GPX2VideoStream::duration(void) const {
 
 	VideoStreamPtr stream = container_->getVideoStream();
 
-	return stream->duration() * av_q2d(stream->timeBase());
+	return stream->duration() * av_q2d(stream->timeBase()) * 1000.0;
 }
 
 
@@ -377,7 +381,6 @@ VideoParams::Format GPX2VideoStream::format(void) const {
 void GPX2VideoStream::nextFrame(void) {
 	log_call();
 
-
 	// Prepare next buffer
 	FramePtr frame = getFrame();
 	
@@ -386,7 +389,7 @@ void GPX2VideoStream::nextFrame(void) {
 		buffer_[frame->index_] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
 	}
 
-
+	// Delete oldest frame
 	std::lock_guard<std::mutex> lock(mutex_);
 
 	if (queue_.empty())
@@ -444,14 +447,6 @@ void GPX2VideoStream::flushFrame(void) {
 
 	while (!queue_.empty())
 		queue_.pop_front();
-
-	// Remap buffers
-	for (size_t i=0; i<queue_size_; i++) {
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
-		buffer_[i] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-	}
-
-	cond_.notify_all();
 }
 
 
@@ -539,7 +534,9 @@ void GPX2VideoStream::run(void) {
 
 		// Read video data
 		if (seek_req_ == true) {
-			decoder_video_->seek((int64_t) (seek_pos_ * AV_TIME_BASE));
+			log_info("Seeking... flush previous video frames");
+
+			decoder_video_->seek((int64_t) (seek_pos_ * AV_TIME_BASE / 1000.0));
 
 			flushFrame();
 
@@ -600,7 +597,7 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 //	set_use_es(false);
 //#endif
 	set_expand(true);
-	set_size_request(320, 240);
+//	set_size_request(320, 240);
 	set_auto_render(true);
 
 	stream_.data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
@@ -644,7 +641,7 @@ void GPX2VideoArea::configure_adjustment(void) {
 
 	double duration = stream_.duration();
 
-	log_info("Video duration: %s", ::timestamp2string(duration * 1000, false).c_str());
+	log_info("Video duration: %s", Datetime::timestamp2string(duration, Datetime::FormatTime).c_str());
 
 	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 0.0); //60.0);
 }
@@ -656,7 +653,7 @@ void GPX2VideoArea::update_adjustment(double value) {
 		return;
 
 	if (!is_playing_)
-		log_info("[gtk] Update scale position position: %s", ::timestamp2string(value * 1000, false).c_str());
+		log_info("Update scale position position: %s", Datetime::timestamp2string(value, Datetime::FormatTime).c_str());
 
 	adjustment_->set_value(value);
 }
@@ -679,9 +676,16 @@ void GPX2VideoArea::update_layout(void) {
 }
 
 
+TelemetrySource * GPX2VideoArea::telemetry(void) {
+	return source_;
+}
+
+
 void GPX2VideoArea::open_telemetry(const Glib::ustring &telemetry_file) {
 	// Load telemetry data
 	source_ = TelemetryMedia::open(telemetry_file, renderer_->telemetrySettings(), false);
+
+//	source_->dump(true);
 
 	//
 	refresh();
@@ -774,19 +778,23 @@ void GPX2VideoArea::seek(double incr) {
 	if (!frame)
 		return;
 
-//	// Reset telemetry data from start
-//	if (incr < 0)
-//		source_->retrieveFrom(data_);
+	// OpenGL context
+	make_current();
+
+	// Reset telemetry data from start
+	if (incr < 0)
+		source_->retrieveFrom(data_);
 
 	// Force to refresh widgets
 	widgets_clear();
 
-	// Compute new video position
-	pos = frame->timestamp() * av_q2d(frame->videoParams().timeBase());
-	pos += incr;
+	// Compute new video position (in ms)
+	pos = frame->time();
+	pos += incr * 1000.0;
 
 	stream_.seek(pos);
 }
+
 
 void GPX2VideoArea::seeking(bool status) {
 	log_call();
@@ -1099,11 +1107,8 @@ bool GPX2VideoArea::video_refresh(double &remaining_time) {
 void GPX2VideoArea::video_display(void) {
 	log_call();
 
-	double timestamp;
-
 	uint64_t start_time;
 
-	int64_t timecode;
 	uint64_t timecode_ms;
 
 	double time_factor;
@@ -1123,8 +1128,7 @@ void GPX2VideoArea::video_display(void) {
 	if (!frame)
 		return;
 
-	timecode = frame->timestamp();
-	timecode_ms = timecode * stream_.timeBase() * 1000;
+	timecode_ms = frame->time();
 
 	// Compute real time, so assume time_factor is constant 
 	// todo: fix later since time_factor is variable
@@ -1152,8 +1156,7 @@ void GPX2VideoArea::video_display(void) {
 	queue_draw();
 
 	// Refresh adjustment
-	timestamp = frame->timestamp() * av_q2d(frame->videoParams().timeBase());
-	update_adjustment(timestamp);
+	update_adjustment(frame->time());
 
 //	// Compute real time by step, since time_factor is variable
 //	real_duration_ms = timecode_ms - last_timecode_ms_;

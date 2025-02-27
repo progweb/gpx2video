@@ -155,7 +155,7 @@ eof:
 		str = wpt->time().getValue().c_str();
 
 		// Parse datetime string
-		ts = ::string2timestamp(str);
+		ts = Datetime::string2timestamp(str);
 
 		// Line
 		point.setLine(wpt->line());

@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__DISTANCE_H__
 #define __GPX2VIDEO__WIDGETS__DISTANCE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class DistanceWidget : public VideoWidget {
 public:
 	virtual ~DistanceWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static DistanceWidget * create(GPXApplication &app) {
 		DistanceWidget *widget;
-
-		log_call();
 
 		widget = new DistanceWidget(app, "distance");
 

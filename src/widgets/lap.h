@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__LAP_H__
 #define __GPX2VIDEO__WIDGETS__LAP_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class LapWidget : public VideoWidget {
 public:
 	virtual ~LapWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static LapWidget * create(GPXApplication &app) {
 		LapWidget *widget;
-
-		log_call();
 
 		widget = new LapWidget(app, "lap");
 

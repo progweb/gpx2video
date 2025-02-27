@@ -14,7 +14,6 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
-#include "log.h"
 #include "tracksettings.h"
 #include "videowidget.h"
 #include "telemetrymedia.h"
@@ -32,8 +31,6 @@ public:
 	void setSize(int width, int height);
 
 	bool run(void) {
-		log_call();
-
 		init();
 		complete();
 

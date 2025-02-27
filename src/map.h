@@ -14,7 +14,6 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
-#include "log.h"
 #include "evcurl.h"
 #include "track.h"
 #include "mapsettings.h"
@@ -70,8 +69,6 @@ public:
 	void setSize(int width, int height);
 
 	bool run(void) {
-		log_call();
-
 		init();
 		limits();
 		download();

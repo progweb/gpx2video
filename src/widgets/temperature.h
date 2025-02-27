@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 #define __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class TemperatureWidget : public VideoWidget {
 public:
 	virtual ~TemperatureWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static TemperatureWidget * create(GPXApplication &app) {
 		TemperatureWidget *widget;
-
-		log_call();
 
 		widget = new TemperatureWidget(app, "temperature");
 

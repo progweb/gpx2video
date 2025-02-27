@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__ELEVATION_H__
 #define __GPX2VIDEO__WIDGETS__ELEVATION_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class ElevationWidget : public VideoWidget {
 public:
 	virtual ~ElevationWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static ElevationWidget * create(GPXApplication &app) {
 		ElevationWidget *widget;
-
-		log_call();
 
 		widget = new ElevationWidget(app, "elevation");
 

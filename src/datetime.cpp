@@ -7,7 +7,7 @@
 #include "datetime.h"
 
 
-std::string timestamp2iso(uint64_t timestamp) {
+std::string Datetime::timestamp2iso(uint64_t timestamp) {
 	int u;
 	time_t t;
 
@@ -27,7 +27,7 @@ std::string timestamp2iso(uint64_t timestamp) {
 }
 
 
-std::string timestamp2string(uint64_t timestamp, bool withdate, bool utc) {
+std::string Datetime::timestamp2string(uint64_t timestamp, Datetime::Format format, bool utc) {
 	int u;
 	time_t t;
 
@@ -36,27 +36,35 @@ std::string timestamp2string(uint64_t timestamp, bool withdate, bool utc) {
 	char str[128];
 	char time[64];
 
-	const char *fmttime = "%H:%M:%S";
-	const char *fmtdatetime = "%Y-%m-%d %H:%M:%S";
+	const char *fmt[] = {
+		"%Y-%m-%d",
+		"%H:%M:%S",
+		"%Y-%m-%d %H:%M:%S",
+		NULL
+	};
 
 	t = timestamp / 1000;
 	u = timestamp % 1000;
 
 	// Convert to local or utc
-	if (utc || !withdate)
+	if (utc || (format == Datetime::FormatTime))
 		::gmtime_r(&t, &tm);
 	else
 		::localtime_r(&t, &tm);
 
-	::strftime(time, sizeof(time), withdate ? fmtdatetime : fmttime, &tm);
+	// String format
+	::strftime(time, sizeof(time), fmt[format], &tm);
 
-	::snprintf(str, sizeof(str), "%s.%03d", time, u);
+	if (format != Datetime::FormatDate)
+		::snprintf(str, sizeof(str), "%s.%03d", time, u);
+	else
+		::strncpy(str, time, sizeof(str));
 
 	return std::string(str);
 }
 
 
-uint64_t string2timestamp(std::string str) {
+uint64_t Datetime::string2timestamp(std::string str) {
 	uint64_t timestamp = 0;
 
 	struct tm time;

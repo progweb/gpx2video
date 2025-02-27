@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__DATE_H__
 #define __GPX2VIDEO__WIDGETS__DATE_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class DateWidget : public VideoWidget {
 public:
 	virtual ~DateWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static DateWidget * create(GPXApplication &app) {
 		DateWidget *widget;
-
-		log_call();
 
 		widget = new DateWidget(app, "date");
 

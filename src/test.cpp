@@ -61,15 +61,15 @@ void Test::printTimestamp(uint64_t timestamp) {
 //	strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S", &tm);
 //	snprintf(datetime, sizeof(datetime), "%s.%03dZ", buf, (int) (timestamp % 1000));
 
-	printf("  Datetime ISO: %s\n", ::timestamp2iso(timestamp).c_str());
+	printf("  Datetime ISO: %s\n", Datetime::timestamp2iso(timestamp).c_str());
 
-	printf("  Datetime UTC: %s\n", ::timestamp2string(timestamp, true, true).c_str());
+	printf("  Datetime UTC: %s\n", Datetime::timestamp2string(timestamp, Datetime::FormatDatetime, true).c_str());
 
 	// Convert to string in local
 //	localtime_r(&t, &tm);
 //	strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%S%z", &tm);
 
-	printf("  Datetime local: %s\n", ::timestamp2string(timestamp, true, false).c_str());
+	printf("  Datetime local: %s\n", Datetime::timestamp2string(timestamp, Datetime::FormatDatetime, false).c_str());
 }
 
 
@@ -80,7 +80,7 @@ void Test::testParseDatetime(const char *string) {
 
 	printf("Parsing... '%s'\n", string);
 
-	if ((timestamp = ::string2timestamp(string)) != 0) {
+	if ((timestamp = Datetime::string2timestamp(string)) != 0) {
 		printTimestamp(timestamp);
 	}
 	else

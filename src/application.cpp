@@ -90,6 +90,74 @@ void GPXApplication::setSettings(const GPXApplication::Settings &settings) {
 }
 
 
+void GPXApplication::perform(enum Task::Action action) {
+	int32_t info;
+
+	info = (int32_t) action;
+
+	if (write(pipe_out_, &info, sizeof(info)) < 0)
+		log_error("Action perform failure, errno=%d, %s", errno, std::strerror(errno));
+}
+
+
+void GPXApplication::run(enum Task::Action action) {
+	Task *task;
+
+	if (tasks_.empty())
+		goto done;
+
+	switch (action) {
+	case Task::ActionStart:
+		task = tasks_.front();
+		if (task->start() == true)
+			perform(Task::ActionPerform);
+		else
+			perform(Task::ActionStop);
+		break;
+
+	case Task::ActionPerform:
+		task = tasks_.front();
+		task->run();
+		break;
+
+	case Task::ActionStop:
+		task = tasks_.front();
+		task->stop();
+
+		tasks_.pop_front();
+
+		perform(Task::ActionStart);
+		break;
+
+	default:
+		break;
+	}
+
+	return;
+
+done:
+	abort();
+}
+
+
+void GPXApplication::exec(void) {
+	perform(Task::ActionStart);
+	loop();
+}
+
+
+void GPXApplication::abort(void) {
+	// Before loop exit, stop the current task
+	if (!tasks_.empty()) {
+		Task *task = tasks_.front();
+
+		task->stop();
+	}
+
+	loopexit();
+}
+
+
 void GPXApplication::sighandler(int sfd, short kind, void *data) {
 	GPXApplication *app = (GPXApplication *) data;
 

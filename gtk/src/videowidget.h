@@ -15,6 +15,8 @@ public:
 	static GPX2VideoWidget * create(VideoWidget *widget);
 	virtual ~GPX2VideoWidget();
 
+	VideoWidget * widget(void);
+
 //	int x(void) const;
 //	int y(void) const;
 

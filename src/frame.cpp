@@ -48,7 +48,7 @@ int Frame::generateLinesizeBytes(int width, VideoParams::Format format, int nb_c
 
 
 uint64_t Frame::time(void) const {
-	return timestamp() * av_q2d(videoParams().timeBase());
+	return timestamp() * av_q2d(videoParams().timeBase()) * 1000.0;
 }
 
 

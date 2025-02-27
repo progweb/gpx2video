@@ -72,7 +72,7 @@ void TelemetryData::dump(void) {
 			line_,
 			type2string(),
 			hasValue(TelemetryData::DataFix) ? 'Y' : 'N',
-			::timestamp2string(ts_, true).c_str(),
+			Datetime::timestamp2string(ts_).c_str(),
 			lon_, lat_,
 			distance_/1000.0, (int) round(duration_), speed_, 
 			is_pause_ ? "true": "false",
@@ -91,7 +91,7 @@ void TelemetryData::writeData(size_t index) const {
 		index,
 		line_,
 		type2string(),
-		::timestamp2string(ts_, true).c_str(),
+		Datetime::timestamp2string(ts_).c_str(),
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
@@ -127,6 +127,7 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 
 	skipBadPoint(false);
 	setMethod(TelemetrySettings::MethodNone);
+	setRate(1000);
 
 	setSmoothMethod(TelemetryData::DataGrade, TelemetrySettings::SmoothNone);
 	setSmoothPoints(TelemetryData::DataGrade, 0);
@@ -180,6 +181,13 @@ void TelemetrySource::setMethod(enum TelemetrySettings::Method method) {
 	log_call();
 
 	method_ = method;
+}
+
+
+void TelemetrySource::setRate(int rate) {
+	log_call();
+
+	rate_ = rate;
 }
 
 
@@ -245,7 +253,7 @@ bool TelemetrySource::setDataRange(std::string strbegin, std::string strend) {
 
 	if (!strbegin.empty()) {
 		// Convert begin range time to timestamp
-		if ((begin = ::string2timestamp(strbegin)) == 0) {
+		if ((begin = Datetime::string2timestamp(strbegin)) == 0) {
 			log_error("Parse 'begin' date range failure");
 			return false;
 		}
@@ -253,7 +261,7 @@ bool TelemetrySource::setDataRange(std::string strbegin, std::string strend) {
 
 	if (!strend.empty()) {
 		// Convert end range time to timestamp
-		if ((end = ::string2timestamp(strend)) == 0) {
+		if ((end = Datetime::string2timestamp(strend)) == 0) {
 			log_error("Parse 'end' date range failure");
 			return false;
 		}
@@ -280,7 +288,7 @@ bool TelemetrySource::setComputeRange(std::string strfrom, std::string strto) {
 
 	if (!strfrom.empty()) {
 		// Convert race start time to timestamp
-		if ((from = ::string2timestamp(strfrom)) == 0) {
+		if ((from = Datetime::string2timestamp(strfrom)) == 0) {
 			log_error("Parse 'from' date range failure");
 			return false;
 		}
@@ -288,7 +296,7 @@ bool TelemetrySource::setComputeRange(std::string strfrom, std::string strto) {
 
 	if (!strto.empty()) {
 		// Convert race start time to timestamp
-		if ((to = ::string2timestamp(strto)) == 0) {
+		if ((to = Datetime::string2timestamp(strto)) == 0) {
 			log_error("Parse 'to' date range failure");
 			return false;
 		}
@@ -628,8 +636,8 @@ void TelemetrySource::range(void) {
 	if (!quiet_) {
 		log_info("%s: Telemetry available data range from '%s' to '%s'", 
 				name().c_str(),
-				::timestamp2string(begin_, true).c_str(),
-				::timestamp2string(end_, true).c_str());
+				Datetime::timestamp2string(begin_).c_str(),
+				Datetime::timestamp2string(end_).c_str());
 	}
 
 	// For each point
@@ -726,8 +734,8 @@ void TelemetrySource::compute(void) {
 	if (!quiet_) {
 		log_info("%s: Compute telemetry data from '%s' to '%s'", 
 				name().c_str(),
-				::timestamp2string(from_, true).c_str(),
-				::timestamp2string(to_, true).c_str());
+				Datetime::timestamp2string(from_).c_str(),
+				Datetime::timestamp2string(to_).c_str());
 	}
 
 	// Start elevation
@@ -1415,6 +1423,7 @@ void TelemetrySource::dump(bool content) {
 	std::cout << " - end: " << end_ << std::endl;
 	std::cout << " - from: " << from_ << std::endl;
 	std::cout << " - to: " << to_ << std::endl;
+	std::cout << " - method: " << method_ << " (rate: " << rate_ << ")" << std::endl;
 
 	pool_.dump(content);
 }
@@ -1955,6 +1964,7 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 		source->skipBadPoint(settings.telemetryCheck());
 		source->setFilter(settings.telemetryFilter());
 		source->setMethod(settings.telemetryMethod());
+		source->setRate(settings.telemetryRate());
 
 		// Telemetry data smooth
 		source->setSmoothMethod(TelemetryData::DataGrade, settings.telemetrySmoothMethod(TelemetryData::DataGrade));

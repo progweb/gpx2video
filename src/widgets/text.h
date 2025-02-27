@@ -1,7 +1,6 @@
 #ifndef __GPX2VIDEO__WIDGETS__TEXT_H__
 #define __GPX2VIDEO__WIDGETS__TEXT_H__
 
-#include "log.h"
 #include "oiio.h"
 #include "videowidget.h"
 
@@ -9,15 +8,11 @@
 class TextWidget : public VideoWidget {
 public:
 	virtual ~TextWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static TextWidget * create(GPXApplication &app) {
 		TextWidget *widget;
-
-		log_call();
 
 		widget = new TextWidget(app, "text");
 

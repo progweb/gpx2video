@@ -78,6 +78,7 @@ public:
 
 	const Method& telemetryMethod(void) const;
 	const int& telemetryRate(void) const;
+	void setTelemetryMethod(const Method &method, int rate=1000);
 
 	const TelemetrySettings::Smooth& telemetrySmoothMethod(TelemetryData::Data type) const;
 	void setTelemetrySmoothMethod(TelemetryData::Data type, TelemetrySettings::Smooth method);

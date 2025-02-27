@@ -21,6 +21,11 @@ GPX2VideoApplication::GPX2VideoApplication()
 			Gio::Application::Flags::NON_UNIQUE | Gio::Application::Flags::HANDLES_OPEN) {
 	log_call();
 
+	log_info("gpx2video built with gtkmm v%d.%d.%d", 
+			GTKMM_MAJOR_VERSION, GTKMM_MINOR_VERSION, GTKMM_MICRO_VERSION);
+	log_info("  glibmm v%d.%d.%d",
+			GLIBMM_MAJOR_VERSION, GLIBMM_MINOR_VERSION, GLIBMM_MICRO_VERSION);
+
 #if GIOMM_CHECK_VERSION(2, 80, 0)
 	set_version("v0.0.0");
 #endif

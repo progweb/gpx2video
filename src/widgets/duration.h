@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__DURATION_H__
 #define __GPX2VIDEO__WIDGETS__DURATION_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class DurationWidget : public VideoWidget {
 public:
 	virtual ~DurationWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static DurationWidget * create(GPXApplication &app) {
 		DurationWidget *widget;
-
-		log_call();
 
 		widget = new DurationWidget(app, "duration");
 
@@ -52,9 +47,18 @@ skip:
 
 		int duration;
 
+		// Compute duration
+		duration = data.duration();
+
+
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {
-			if (data.type() == TelemetryData::TypeUnchanged) {
+//			if (data.type() == TelemetryData::TypeUnchanged) {
+//				is_update = false;
+//				goto skip;
+//			}
+
+			if (duration == last_duration_) {
 				is_update = false;
 				goto skip;
 			}
@@ -67,8 +71,6 @@ skip:
 
 		// Format data
 		no_value_ = !data.hasValue(TelemetryData::DataDuration);
-
-		duration = data.duration();
 
 		if (duration > 0) {
 			seconds = duration % 60;
@@ -90,6 +92,7 @@ skip:
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
+		last_duration_ = duration;
 skip:
 		return fg_buf_;
 	}
@@ -107,6 +110,8 @@ skip:
 
 private:
 	bool no_value_;
+		
+	int last_duration_;
 
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
@@ -116,6 +121,8 @@ private:
    		, bg_buf_(NULL)
    		, fg_buf_(NULL) {
 		no_value_ = false;
+
+		last_duration_ = 0;
 	}
 };
 

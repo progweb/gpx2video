@@ -20,7 +20,7 @@ extern int gpx2video_log_debug_enabled;
 
 #include <stdio.h>
 
-#define LOG_PREFIX ""
+#define LOG_PREFIX "[gtk] "
 
 /*
  * Only log to stderr so that all messages are correctly ordered on the same

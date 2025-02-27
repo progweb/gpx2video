@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__GPX_H__
 #define __GPX2VIDEO__WIDGETS__GPX_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class GPXWidget : public VideoWidget {
 public:
 	virtual ~GPXWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static GPXWidget * create(GPXApplication &app) {
 		GPXWidget *widget;
-
-		log_call();
 
 		widget = new GPXWidget(app, "gpx");
 

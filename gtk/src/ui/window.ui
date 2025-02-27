@@ -1,15 +1,63 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+	<menu id="starttime_menumodel">
+		<section>
+			<item>
+				<attribute name="action">win.use_creation_time</attribute>
+				<attribute name="label">Use video creation time</attribute>
+			</item>
+		</section>
+		<section>
+			<item>
+				<attribute name="action">win.use_gpmf_stream</attribute>
+				<attribute name="label">Use GPMF GoPro stream</attribute>
+			</item>
+		</section>
+		<section>
+			<item>
+				<attribute name="action">win.use_gpx_data</attribute>
+				<attribute name="label">Use GPX first point</attribute>
+			</item>
+		</section>
+	</menu>
 	<object class="GtkAdjustment" id="progress_adjustment">
 		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">1000</property>
+	</object>
+	<object class="GtkAdjustment" id="hour_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">23</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="minute_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">59</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="second_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">59</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">99</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkApplicationWindow" id="application_window">
 		<property name="title" translatable="yes">GPX2Video</property>
-		<property name="default-width">640</property>
-		<property name="default-height">480</property>
+		<property name="default-width">800</property>
+		<property name="default-height">600</property>
 		<property name="hide-on-close">True</property>
         <child type="titlebar">
             <object class="GtkHeaderBar" id="header">
@@ -33,61 +81,645 @@
             </object>
         </child>
 		<child>
-			<object class="GtkBox" id="content_box">
-				<property name="orientation">vertical</property>
-				<property name="halign">fill</property>
+			<object class="GtkPaned">
 				<property name="hexpand">True</property>
-				<child>
-					<object class="gtkmm__CustomObject_GPX2VideoArea" id="video_area">
-						<property name="visible">True</property>
-					</object>
-				</child>
-				<child>
-					<object class="GtkBox" id="action_box">
-						<property name="orientation">horizontal</property>
+				<property name="vexpand">True</property>
+				<property name="orientation">horizontal</property>
+				<property name="resize-start-child">True</property>
+				<property name="shrink-start-child">False</property>
+        		<property name="resize-end-child">False</property>
+				<property name="shrink-end-child">True</property>
+				<property name="start-child">
+					<object class="GtkBox" id="video_box">
+						<property name="orientation">vertical</property>
 						<property name="halign">fill</property>
+						<property name="valign">fill</property>
 						<property name="hexpand">True</property>
+						<property name="vexpand">True</property>
 						<child>
-							<object class="GtkButton" id="play_button">
-								<property name="valign">center</property>
-								<property name="vexpand">False</property>
-								<property name="icon-name">media-playback-start-symbolic</property>
-								<property name="margin-bottom">4</property>
-								<property name="margin-end">4</property>
-								<property name="margin-start">4</property>
-								<property name="margin-top">4</property>
-							</object>
-						</child>
-						<child>
-							<object class="GtkScale" id="progress_scale">
-								<property name="draw-value">0</property>
-								<property name="adjustment">progress_adjustment</property>
+							<object class="gtkmm__CustomObject_GPX2VideoArea" id="video_area">
+								<property name="visible">True</property>
 								<property name="hexpand">True</property>
-								<property name="hexpand-set">True</property>
+								<property name="vexpand">True</property>
+                				<property name="width-request">480</property>
+							</object>
+							</child>
+						<child>
+							<object class="GtkBox" id="action_box">
+								<property name="orientation">horizontal</property>
 								<property name="halign">fill</property>
-								<property name="margin-bottom">4</property>
-								<property name="margin-end">4</property>
-								<property name="margin-start">4</property>
-								<property name="margin-top">4</property>
-								<!--
-								<marks>
-									<mark value="0" position="bottom">0:00</mark>
-									<mark value="10" position="bottom">1:00</mark>
-									<mark value="20" position="bottom">2:00</mark>
-									<mark value="30" position="bottom">3:00</mark>
-									<mark value="40" position="bottom">4:00</mark>
-									<mark value="50" position="bottom">5:00</mark>
-									<mark value="60" position="bottom"></mark>
-									<mark value="70" position="bottom"></mark>
-									<mark value="80" position="bottom"></mark>
-									<mark value="90" position="bottom"></mark>
-									<mark value="100" position="bottom"></mark>
-								</marks>
-								-->
+								<property name="hexpand">True</property>
+								<child>
+									<object class="GtkButton" id="play_button">
+										<property name="valign">center</property>
+										<property name="vexpand">False</property>
+										<property name="icon-name">media-playback-start-symbolic</property>
+										<property name="margin-bottom">4</property>
+										<property name="margin-end">4</property>
+										<property name="margin-start">4</property>
+										<property name="margin-top">4</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkScale" id="progress_scale">
+										<property name="draw-value">False</property>
+										<property name="adjustment">progress_adjustment</property>
+										<property name="hexpand">True</property>
+										<property name="hexpand-set">True</property>
+										<property name="halign">fill</property>
+										<property name="margin-bottom">4</property>
+										<property name="margin-end">4</property>
+										<property name="margin-start">4</property>
+										<property name="margin-top">4</property>
+										<!--
+										<marks>
+											<mark value="0" position="bottom">0:00</mark>
+											<mark value="10" position="bottom">1:00</mark>
+											<mark value="20" position="bottom">2:00</mark>
+											<mark value="30" position="bottom">3:00</mark>
+											<mark value="40" position="bottom">4:00</mark>
+											<mark value="50" position="bottom">5:00</mark>
+											<mark value="60" position="bottom"></mark>
+											<mark value="70" position="bottom"></mark>
+											<mark value="80" position="bottom"></mark>
+											<mark value="90" position="bottom"></mark>
+											<mark value="100" position="bottom"></mark>
+										</marks>
+										-->
+									</object>
+								</child>
 							</object>
 						</child>
 					</object>
-				</child>
+				</property>
+				<property name="end-child">
+
+					<object class="GtkPaned" id="info_box">
+						<property name="hexpand">True</property>
+						<property name="vexpand">True</property>
+						<property name="orientation">vertical</property>
+						<property name="resize-start-child">False</property>
+						<property name="shrink-start-child">False</property>
+						<property name="resize-end-child">True</property>
+						<property name="shrink-end-child">True</property>
+						<property name="width-request">300</property>
+						<property name="start-child">
+
+							<object class="GtkFrame">
+								<property name="halign">fill</property>
+								<property name="valign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="vexpand">True</property>
+								<property name="margin-bottom">10</property>
+								<property name="margin-end">10</property>
+								<property name="margin-start">10</property>
+								<property name="margin-top">10</property>
+								<property name="height-request">240</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="vexpand">True</property>
+										<child>
+											<object class="GtkActionBar">
+												<child type="start">
+													<object class="GtkStackSwitcher" id="info_stackswitcher">
+														<property name="stack">info_stack</property>
+													</object>
+												</child>
+												<child type="end">
+													<object class="GtkButton" id="widget_append_button">
+														<property name="icon-name">list-add-symbolic</property>
+														<property name="visible">False</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkStack" id="info_stack">
+												<property name="transition-type">slide-left-right</property>
+												<property name="transition-duration">200</property>
+												<child>
+													<object class="GtkStackPage">
+														<property name="name">video_page</property>
+														<property name="title">Video</property>
+														<property name="icon-name">camera-video-symbolic</property>
+														<property name="child">
+															<object class="GtkBox" id="video_stackpage">
+																<property name="orientation">vertical</property>
+																<property name="margin-bottom">6</property>
+																<property name="margin-end">6</property>
+																<property name="margin-start">6</property>
+																<property name="margin-top">6</property>
+																<property name="spacing">12</property>
+																<child>
+																	<object class="GtkGrid" id="metadata_grid">
+																		<property name="can-focus">False</property>
+																		<property name="column-spacing">6</property>
+																		<property name="row-spacing">3</property>
+																		<child>
+																			<object class="GtkLabel">
+																				<property name="can-focus">False</property>
+																				<property name="justify">right</property>
+																				<property name="label">Date</property>
+																				<property name="mnemonic-widget">date_label</property>
+																				<property name="valign">baseline</property>
+																				<property name="xalign">1</property>
+																				<property name="yalign">0</property>
+																				<style>
+																					<class name="dim-label"/>
+																				</style>
+																				<layout>
+																					<property name="column">0</property>
+																					<property name="row">0</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel" id="date_label">
+																				<property name="can-focus">False</property>
+																				<property name="label">-</property>
+																				<property name="selectable">True</property>
+																				<property name="xalign">0</property>
+																				<layout>
+																					<property name="column">1</property>
+																					<property name="row">0</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel">
+																				<property name="can-focus">False</property>
+																				<property name="justify">right</property>
+																				<property name="label">Time</property>
+																				<property name="mnemonic-widget">time_label</property>
+																				<property name="valign">baseline</property>
+																				<property name="xalign">1</property>
+																				<property name="yalign">0</property>
+																				<style>
+																					<class name="dim-label"/>
+																				</style>
+																				<layout>
+																					<property name="column">0</property>
+																					<property name="row">1</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel" id="time_label">
+																				<property name="can-focus">False</property>
+																				<property name="label">-</property>
+																				<property name="selectable">True</property>
+																				<property name="xalign">0</property>
+																				<layout>
+																					<property name="column">1</property>
+																					<property name="row">1</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel">
+																				<property name="can-focus">False</property>
+																				<property name="justify">right</property>
+																				<property name="label">Size</property>
+																				<property name="mnemonic-widget">size_label</property>
+																				<property name="valign">baseline</property>
+																				<property name="xalign">1</property>
+																				<property name="yalign">0</property>
+																				<style>
+																					<class name="dim-label"/>
+																				</style>
+																				<layout>
+																					<property name="column">0</property>
+																					<property name="row">2</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel" id="size_label">
+																				<property name="can-focus">False</property>
+																				<property name="label">-</property>
+																				<property name="selectable">True</property>
+																				<property name="xalign">0</property>
+																				<layout>
+																					<property name="column">1</property>
+																					<property name="row">2</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel">
+																				<property name="can-focus">False</property>
+																				<property name="justify">right</property>
+																				<property name="label">File size</property>
+																				<property name="mnemonic-widget">filesize_label</property>
+																				<property name="valign">baseline</property>
+																				<property name="xalign">1</property>
+																				<property name="yalign">0</property>
+																				<style>
+																					<class name="dim-label"/>
+																				</style>
+																				<layout>
+																					<property name="column">0</property>
+																					<property name="row">3</property>
+																				</layout>
+																			</object>
+																		</child>
+																		<child>
+																			<object class="GtkLabel" id="filesize_label">
+																				<property name="can-focus">False</property>
+																				<property name="label">-</property>
+																				<property name="selectable">True</property>
+																				<property name="xalign">0</property>
+																				<layout>
+																					<property name="column">1</property>
+																					<property name="row">3</property>
+																				</layout>
+																			</object>
+																		</child>
+																	</object>
+																</child>
+															</object>
+														</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkStackPage">
+														<property name="name">telemetry_page</property>
+														<property name="title">Telemetry</property>
+														<property name="icon-name">network-cellular-signal-excellent-symbolic</property>
+														<property name="child">
+															<object class="GtkLabel">
+																<property name="label">-</property>
+															</object>
+														</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkStackPage">
+														<property name="name">widgets_page</property>
+														<property name="title">Widgets</property>
+														<property name="icon-name">power-profile-performance-symbolic</property>
+														<property name="child">
+															<object class="GtkScrolledWindow" id="widgets_stackpage">
+																<property name="hscrollbar-policy">2</property>
+																<property name="vexpand">1</property>
+																<property name="has-frame">1</property>
+																<property name="child">
+																	<object class="GtkListBox" id="widgets_listbox">
+																		<property name="selection-mode">single</property>
+																		<property name="activate-on-single-click">True</property>
+																		<property name="vexpand">True</property>
+																		<!--
+																		<child>
+																			<object class="GtkListBoxRow">
+																				<child>
+																					<object class="GtkBox">
+																						<property name="hexpand">True</property>
+																						<child>
+																							<object class="GtkLabel">
+																								<property name="halign">start</property>
+																								<property name="hexpand">True</property>
+																								<property name="valign">center</property>
+																								<property name="label">widget-1</property>
+																								<property name="xalign">0.0</property>
+																								<property name="yalign">1.0</property>
+																							</object>
+																						</child>
+																						<child>
+																							<object class="GtkButton">
+																								<property name="halign">end</property>
+																								<property name="icon-name">user-trash-symbolic</property>
+																								<property name="valign">center</property>
+																							</object>
+																						</child>
+																					</object>
+																				</child>
+																			</object>
+																		</child>
+																		-->
+																	</object>
+																</property>
+															</object>
+														</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+
+						</property>
+						<property name="end-child">
+
+							<object class="GtkBox">
+								<property name="hexpand">True</property>
+								<child>
+									<object class="GtkFrame" id="video_frame">
+										<property name="halign">fill</property>
+										<property name="valign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="vexpand">True</property>
+										<property name="margin-bottom">10</property>
+										<property name="margin-end">10</property>
+										<property name="margin-start">10</property>
+										<property name="margin-top">10</property>
+										<property name="visible">True</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">vertical</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">True</property>
+												<property name="margin-bottom">6</property>
+												<property name="margin-end">6</property>
+												<property name="margin-start">6</property>
+												<property name="margin-top">6</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">center</property>
+														<property name="label">Video properties</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+														<property name="margin-bottom">6</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Start time</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.0</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkBox">
+														<property name="hexpand">True</property>
+														<property name="valign">start</property>
+														<child>
+															<object class="GtkEntry" id="datetimestart_entry">
+																<property name="hexpand">True</property>
+																<property name="placeholder-text">Video start time</property>
+																<property name="valign">center</property>
+																<property name="editable">False</property>
+															</object>
+														</child>
+														<child>
+															<object class="GtkMenuButton" id="datetimestart_menubutton">
+																<property name="halign">end</property>
+																<property name="icon-name">x-office-calendar-symbolic</property>
+																<property name="popover">
+																	<object class="GtkPopover" id="datetimestart_popover">
+																		<property name="position">top</property>
+																		<property name="margin-bottom">12</property>
+																		<property name="margin-end">12</property>
+																		<property name="margin-start">12</property>
+																		<property name="margin-top">12</property>
+																		<child>
+																			<object class="GtkBox">
+																				<property name="hexpand">True</property>
+																				<property name="orientation">vertical</property>
+																				<child>
+																					<object class="GtkBox">
+																						<property name="hexpand">True</property>
+																						<property name="orientation">horizontal</property>
+																						<child>
+																							<object class="GtkCalendar" id="datestart_calendar" />
+																						</child>
+																						<child>
+																							<object class="GtkSpinButton" id="hourstart_spinbutton">
+																								<property name="width-chars">2</property>
+																								<property name="max-width-chars">2</property>
+																								<property name="numeric">True</property>
+																								<property name="orientation">vertical</property>
+																								<property name="valign">center</property>
+																								<property name="adjustment">hour_adjustment</property>
+																							</object>
+																						</child>
+																						<child>
+																							<object class="GtkSpinButton" id="minutestart_spinbutton">
+																								<property name="width-chars">2</property>
+																								<property name="max-width-chars">2</property>
+																								<property name="numeric">True</property>
+																								<property name="orientation">vertical</property>
+																								<property name="valign">center</property>
+																								<property name="adjustment">minute_adjustment</property>
+																							</object>
+																						</child>
+																						<child>
+																							<object class="GtkSpinButton" id="secondstart_spinbutton">
+																								<property name="width-chars">2</property>
+																								<property name="max-width-chars">2</property>
+																								<property name="numeric">True</property>
+																								<property name="orientation">vertical</property>
+																								<property name="valign">center</property>
+																								<property name="adjustment">second_adjustment</property>
+																							</object>
+																						</child>
+																					</object>
+																				</child>
+																				<child>
+																					<object class="GtkButton" id="datetimestart_button">
+																						<property name="halign">end</property>
+																						<property name="margin-bottom">4</property>
+																						<property name="margin-end">4</property>
+																						<property name="margin-start">4</property>
+																						<property name="margin-top">4</property>
+																						<property name="valign">center</property>
+																						<property name="label">Ok</property>
+																					</object>
+																				</child>
+																			</object>
+																		</child>
+																	</object>
+																</property>
+															</object>
+														</child>
+														<child>
+															<object class="GtkMenuButton" id="starttime_menubutton">
+																<property name="icon-name">view-more-symbolic</property>
+																<property name="menu-model">starttime_menumodel</property>
+															</object>
+														</child>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkFrame" id="telemetry_frame">
+										<property name="halign">fill</property>
+										<property name="valign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="vexpand">True</property>
+										<property name="margin-bottom">10</property>
+										<property name="margin-end">10</property>
+										<property name="margin-start">10</property>
+										<property name="margin-top">10</property>
+										<property name="visible">False</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">vertical</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">True</property>
+												<property name="margin-bottom">6</property>
+												<property name="margin-end">6</property>
+												<property name="margin-start">6</property>
+												<property name="margin-top">6</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">center</property>
+														<property name="label">Telemetry properties</property>
+														<property name="valign">baseline</property>
+														<property name="margin-bottom">6</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+								<child>
+									<object class="GtkFrame" id="widget_frame">
+										<property name="halign">fill</property>
+										<property name="valign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="vexpand">True</property>
+										<property name="margin-bottom">10</property>
+										<property name="margin-end">10</property>
+										<property name="margin-start">10</property>
+										<property name="margin-top">10</property>
+										<property name="visible">False</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">vertical</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">True</property>
+												<property name="margin-bottom">6</property>
+												<property name="margin-end">6</property>
+												<property name="margin-start">6</property>
+												<property name="margin-top">6</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">center</property>
+														<property name="label">Widget properties</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+														<property name="margin-bottom">6</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkBox">
+														<property name="orientation">horizontal</property>
+														<property name="halign">fill</property>
+														<property name="hexpand">True</property>
+														<property name="valign">start</property>
+														<property name="vexpand">False</property>
+														<child>
+															<object class="GtkLabel">
+																<property name="can-focus">False</property>
+																<property name="justify">left</property>
+																<property name="label">Background color:</property>
+																<property name="valign">baseline</property>
+																<property name="xalign">0.5</property>
+															</object>
+														</child>
+														<child>
+															<object class="GtkColorButton" id="background_color_button">
+																<property name="halign">end</property>
+																<property name="hexpand">True</property>
+																<property name="valign">center</property>
+																<property name="rgba">#9141AC</property>
+																<property name="show-editor">False</property>
+																<property name="use-alpha">True</property>
+																<property name="tooltip-text" translatable="1">Select a color</property>
+															</object>
+														</child>
+													</object>
+												</child>
+												<child>
+													<object class="GtkBox">
+														<property name="orientation">horizontal</property>
+														<property name="halign">fill</property>
+														<property name="hexpand">True</property>
+														<property name="valign">start</property>
+														<property name="vexpand">False</property>
+														<child>
+															<object class="GtkLabel">
+																<property name="can-focus">False</property>
+																<property name="justify">left</property>
+																<property name="label">Border color:</property>
+																<property name="valign">baseline</property>
+																<property name="xalign">0.5</property>
+															</object>
+														</child>
+														<child>
+															<object class="GtkColorButton" id="border_color_button">
+																<property name="halign">end</property>
+																<property name="hexpand">True</property>
+																<property name="valign">center</property>
+																<property name="rgba">#9141AC</property>
+																<property name="show-editor">False</property>
+																<property name="use-alpha">True</property>
+																<property name="tooltip-text" translatable="1">Select a color</property>
+															</object>
+														</child>
+													</object>
+												</child>
+												<child>
+													<object class="GtkBox">
+														<property name="orientation">horizontal</property>
+														<property name="halign">fill</property>
+														<property name="hexpand">True</property>
+														<property name="valign">start</property>
+														<property name="vexpand">False</property>
+														<child>
+															<object class="GtkLabel">
+																<property name="can-focus">False</property>
+																<property name="justify">left</property>
+																<property name="label">Border width:</property>
+																<property name="valign">baseline</property>
+																<property name="xalign">0.5</property>
+															</object>
+														</child>
+														<child>
+															<object class="GtkSpinButton" id="border_spinbutton">
+																<property name="halign">end</property>
+																<property name="hexpand">True</property>
+																<property name="width-chars">2</property>
+																<property name="max-width-chars">2</property>
+																<property name="numeric">True</property>
+																<property name="orientation">horizontal</property>
+																<property name="valign">center</property>
+																<property name="adjustment">border_adjustment</property>
+															</object>
+														</child>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+
+						</property>
+					</object>
+
+				</property>
 			</object>
 		</child>
 	</object>

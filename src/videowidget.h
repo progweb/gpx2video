@@ -10,7 +10,6 @@
 
 #include <OpenImageIO/imagebuf.h>
 
-#include "log.h"
 #include "telemetrymedia.h"
 #include "application.h"
 
@@ -94,7 +93,6 @@ public:
 	};
 
 	virtual ~VideoWidget() {
-		log_call();
 	}
 
 	uint64_t& atBeginTime(void) {
@@ -394,8 +392,6 @@ public:
 	}
 
 	virtual bool run(void) {
-		log_call();
-
 		complete();
 
 		return true;
@@ -429,8 +425,6 @@ protected:
 		, value_offset_(0)
 		, txtratio_(0.0)
 		, name_(name) {
-		log_call();
-
 		setPosition(PositionNone);
 		setAlign(AlignNone);
 		setAtTime(0, 0);

@@ -7,7 +7,6 @@
 #include <string>
 #include <deque>
 
-#include "log.h"
 #include "macros.h"
 #include "kalman.h"
 #include "telemetrydata.h"
@@ -306,8 +305,6 @@ public:
 		}
 
 		void setNumberOfPoints(const unsigned long number) {
-			log_warn("PointPool::setNumberOfPoints not yet supported");
-
 			(void) number;
 //			nbr_points_max_ = number;
 		}
@@ -471,6 +468,7 @@ public:
 
 	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
+	void setRate(int rate);
 
 	void setSmoothMethod(enum TelemetryData::Data type, enum TelemetrySettings::Smooth method);
 	void setSmoothPoints(enum TelemetryData::Data type, int number);

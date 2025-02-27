@@ -1,22 +1,17 @@
 #ifndef __GPX2VIDEO__WIDGETS__AVGRIDESPEED_H__
 #define __GPX2VIDEO__WIDGETS__AVGRIDESPEED_H__
 
-#include "log.h"
 #include "videowidget.h"
 
 
 class AvgRideSpeedWidget : public VideoWidget {
 public:
 	virtual ~AvgRideSpeedWidget() {
-		log_call();
-
 		clear();
 	}
 
 	static AvgRideSpeedWidget * create(GPXApplication &app) {
 		AvgRideSpeedWidget *widget;
-
-		log_call();
 
 		widget = new AvgRideSpeedWidget(app, "avgridespeed");
 

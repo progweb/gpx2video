@@ -66,6 +66,21 @@ build-docker:
 		-f docker/Dockerfile .
 
 
+dev-gpx2video:
+	mkdir -p $(BUILD_DIR)
+	docker run --rm -it \
+		-e XDG_RUNTIME_DIR=/tmp \
+		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
+		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
+		-u $(shell id -u):$(shell id -g) \
+		-v $(PWD)/$(BUILD_DIR):/app/build \
+		-v $(PWD):/app \
+		-v $(VIDEO_DIR):/data \
+		--workdir=/app/build \
+		gpx2video-$(BASE_IMAGE) \
+		/bin/bash
+
+
 build-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
