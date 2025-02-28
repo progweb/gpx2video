@@ -20,9 +20,6 @@
 #include <gtkmm/listbox.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
-#include <gtkmm/calendar.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/colorbutton.h>
 
 extern "C" {
 #include <event2/event.h>
@@ -47,7 +44,6 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	log_call();
 
 	Gtk::Button *button;
-	Gtk::ColorButton *colorbutton;
 
 	// Set the window icon.
 	Gtk::IconTheme::get_for_display(get_display())->add_resource_path("/com/progweb/gpx2video/icons");
@@ -56,10 +52,6 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 //	set_theme_name("gpx2video");
 
 	// Get widgets from the Gtk::Builder file
-//    stack_ = ref_builder_->get_widget<Gtk::Stack>("stack");
-//    if (!stack_)
-//        throw std::runtime_error("No \"stack\" object in window.ui");
-
 	gears_ = ref_builder_->get_widget<Gtk::MenuButton>("gears");
 	if (!gears_)
 		throw std::runtime_error("No \"gears\" object in window.ui");
@@ -78,20 +70,53 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	// Connect the menu to the MenuButton gears_.
 	// (The connection between action and menu item is specified in gears_menu.ui)
-	auto menu_builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/gears_menu.ui");
-	auto menu = menu_builder->get_object<Gio::MenuModel>("menu");
+	Glib::RefPtr<Gtk::Builder> builder;
+
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/gears_menu.ui");
+	auto menu = builder->get_object<Gio::MenuModel>("menu");
 	if (!menu)
 		throw std::runtime_error("No \"main_menu\" object in gears_menu.ui");
 
 	gears_->set_menu_model(menu);
 
+	// Video frame object
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/video_frame.ui");
+	video_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoVideoFrame>(builder, "video_frame");
+	if (!video_frame_)
+		throw std::runtime_error("No \"video_frame\" object in video_frame.ui");
+
+	// Widget frame object
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/widget_frame.ui");
+	widget_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoWidgetFrame>(builder, "widget_frame");
+	if (!widget_frame_)
+		throw std::runtime_error("No \"widget_frame\" object in widget_frame.ui");
+
+	// Telemetry frame object
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/telemetry_frame.ui");
+	telemetry_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoTelemetryFrame>(builder, "telemetry_frame");
+	if (!telemetry_frame_)
+		throw std::runtime_error("No \"telemetry_frame\" object in telemetry_frame.ui");
+
+	// Append video, widget & telemetry frame objects to box
+	auto box = ref_builder_->get_widget<Gtk::Box>("frames_box");
+	if (!box)
+		throw std::runtime_error("No \"frames_box\" object in window.ui");
+
+	box->append(*video_frame_);
+	box->append(*telemetry_frame_);
+	box->append(*widget_frame_);
+
 	// Add actions and keyboard accelerators for the headerbar actions
 	add_action("open", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_open));
 	add_action("append", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_append));
 
-	add_action("use_creation_time", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_use_creation_time));
-	add_action("use_gpmf_stream", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_use_gpmf_stream));
-	add_action("use_gpx_data", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_use_gpx_data));
+	add_action("use_creation_time", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_creation_time));
+	add_action("use_gpmf_stream", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpmf_stream));
+	add_action("use_gpx_data", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpx_data));
+
+	// Video, telemetry & widget frame listener
+	video_frame_->signal_video_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_changed));
+	widget_frame_->signal_widget_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_changed));
 
 	// Connect signals
 	play_button_->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_play_clicked));
@@ -136,25 +161,6 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	button->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_append_clicked));
 
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"background_color_button\" object in window.ui");
-	colorbutton->signal_color_set().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_background_color_set));
-
-	// Connect datetimestart popover
-	auto popover = ref_builder_->get_widget<Gtk::Popover>("datetimestart_popover");
-	if (!popover)
-		throw std::runtime_error("No \"popover\" object in window.ui");
-
-	popover->signal_show().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_datetimestart_shown));
-
-	// Connect datetimestart button
-	button = ref_builder_->get_widget<Gtk::Button>("datetimestart_button");
-	if (!button)
-		throw std::runtime_error("No \"datetimestart_button\" object in window.ui");
-
-	button->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_datetimestart_clicked));
-
 	// Listen stack changes
 	info_stack_ = ref_builder_->get_widget<Gtk::Stack>("info_stack");
 	if (!info_stack_)
@@ -193,6 +199,9 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 	// Create a dummy instance before the call to Gtk::Builder::create_from_resource
 	// This creation registers GPX2VideoArea's class in the GType system.
 	static_cast<void>(GPX2VideoArea(dummy));
+	static_cast<void>(GPX2VideoVideoFrame());
+	static_cast<void>(GPX2VideoWidgetFrame());
+	static_cast<void>(GPX2VideoTelemetryFrame());
 
 	// Load the Builder file and instantiate its widgets.
 	auto ref_builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/window.ui");
@@ -260,18 +269,11 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 
 	media_file_ = file->get_parse_name();
 
-//	// Settings
-//	settings().setInputfile("/data/video/2023-08-07 - La Planche des Belles Filles/activity_11733414834.gpx");
-
 	// Probe input media
 	media_ = Decoder::probe(media_file_);
 
 	// Video renderer
 	renderer_->setMediaContainer(media_);
-
-//	// Video renderer
-//	renderer_->setLayoutFile("/data/gpx2video/samples/my-layout-simple.xml");
-//	video_area_->update_layout();
 
 	// Video resolution
 	stream = media_->getVideoStream();
@@ -297,12 +299,8 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 	label = ref_builder_->get_widget<Gtk::Label>("filesize_label");
 	label->set_label(Glib::format_size(info->get_size()));
 
-	// Update datetime start entry
-	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
-	if (!entry)
-		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
-
-	entry->get_buffer()->set_text(media_->creationTime() ? creationtime.format("%Ex %EX").c_str() : "");
+	// Update video frame
+	video_frame_->set_video_selected(media_);
 
 	// Update video area widget
 	video_area_->open_stream(media_);
@@ -316,7 +314,13 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 
 	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
 
-	video_area_->open_telemetry(filename);
+	// Load telemetry data
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, false);
+
+	// Update ui components
+	video_area_->set_telemetry(source);
+
+	video_frame_->set_telemetry(source);
 }
 
 
@@ -429,79 +433,21 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 }
 
 
-void GPX2VideoApplicationWindow::on_action_use_creation_time(void) {
+void GPX2VideoApplicationWindow::on_video_changed(void) {
 	log_call();
 
-	Glib::DateTime creationtime;
+	log_info("Video metadata changed");
 
-	// Video creation time
-//#if GLIBMM_CHECK_VERSION(2, 80, 0)
-//	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
-//#else
-//	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
-//#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
-
-	if (!media_->creationTime())
-		return;
-
-	log_info("Sync video starttime with creation time video metadata");
-
-	// Set video start time
-	media_->setStartTime(media_->creationTime());
-
-	// Update datetime start entry
-	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
-	if (!entry)
-		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
-
-	entry->get_buffer()->set_text(creationtime.format("%Ex %EX").c_str());
+	video_area_->refresh();
 }
 
 
-void GPX2VideoApplicationWindow::on_action_use_gpmf_stream(void) {
+void GPX2VideoApplicationWindow::on_widget_changed(void) {
 	log_call();
 
-	log_info("Sync video starttime with GPMF video stream");
-}
+	log_info("Widget properties changed");
 
-
-void GPX2VideoApplicationWindow::on_action_use_gpx_data(void) {
-	log_call();
-
-	TelemetryData data;
-
-	TelemetrySource *source;
-
-	Glib::DateTime starttime;
-
-	// Telemetry source
-	source = video_area_->telemetry();
-
-	if (source == NULL)
-		return;
-
-	log_info("Sync video starttime with the GPX first point");
-
-	source->retrieveFirst(data);
-
-	// Use first point as start time
-	media_->setStartTime(data.timestamp());
-
-	// Convert video start time
-//#if GLIBMM_CHECK_VERSION(2, 80, 0)
-//	starttime = Glib::DateTime::create_from_utc_usec(media_->startTime() * 1000);
-//#else
-//	starttime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->startTime()));
-//#endif
-	starttime = Glib::DateTime::create_now_utc(media_->startTime() / 1000);
-
-	// Update datetime start entry
-	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
-	if (!entry)
-		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
-
-	entry->get_buffer()->set_text(starttime.format("%Ex %EX").c_str());
+	video_area_->refresh();
 }
 
 
@@ -601,118 +547,8 @@ bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, 
 }
 
 
-void GPX2VideoApplicationWindow::on_datetimestart_shown(void) {
-	log_call();
-
-	Gtk::Calendar *calendar;
-	Gtk::SpinButton *spin;
-
-	Glib::DateTime creationtime;
-
-	log_info("Datetime start popover shown");
-
-	if (media_ == NULL)
-		return;
-
-	// Video creation time
-//#if GLIBMM_CHECK_VERSION(2, 80, 0)
-//	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
-//#else
-//	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
-//#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
-
-	// Populate date start popover
-	calendar = ref_builder_->get_widget<Gtk::Calendar>("datestart_calendar");
-	if (!calendar)
-		throw std::runtime_error("No \"datestart_calendar\" object in window.ui");
-
-	calendar->select_day(creationtime);
-
-	// Populate hour time start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("hourstart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"hourstart_spinbutton\" object in window.ui");
-
-	spin->set_value(creationtime.get_hour());
-
-	// Populate minute time start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("minutestart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"minutestart_spinbutton\" object in window.ui");
-
-	spin->set_value(creationtime.get_minute());
-
-	// Populate second time start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("secondstart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"secondstart_spinbutton\" object in window.ui");
-
-	spin->set_value(creationtime.get_second());
-}
-
-
-void GPX2VideoApplicationWindow::on_datetimestart_clicked(void) {
-	log_call();
-
-	Gtk::Calendar *calendar;
-	Gtk::SpinButton *spin;
-
-	Glib::DateTime datetimestart;
-
-	log_info("Datetime start button clicked");
-
-	// Get date start popover
-	calendar = ref_builder_->get_widget<Gtk::Calendar>("datestart_calendar");
-	if (!calendar)
-		throw std::runtime_error("No \"datestart_calendar\" object in window.ui");
-
-//#if GTKMM_CHECK_VERSION(4, 14, 0)
-//	datetimestart = Glib::DateTime::create_local(calendar->get_year(), calendar->get_month() + 1, calendar->get_day(), 0, 0, 0);
-//#endif
-	datetimestart = Glib::DateTime::create_now_local(calendar->get_date().to_unix());
-
-	// Get hour start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("hourstart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"hourstart_spinbutton\" object in window.ui");
-
-	datetimestart = datetimestart.add_hours(spin->get_value());
-
-	// Get minute start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("minutestart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"minutestart_spinbutton\" object in window.ui");
-
-	datetimestart = datetimestart.add_minutes(spin->get_value());
-
-	// Get second start popover
-   	spin = ref_builder_->get_widget<Gtk::SpinButton>("secondstart_spinbutton");
-	if (!spin)
-		throw std::runtime_error("No \"secondstart_spinbutton\" object in window.ui");
-
-	datetimestart = datetimestart.add_seconds(spin->get_value());
-
-	// Hide datetime start popover
-	auto popover = ref_builder_->get_widget<Gtk::Popover>("datetimestart_popover");
-	if (!popover)
-		throw std::runtime_error("No \"datetimestart_popover\" object in window.ui");
-
-	popover->popdown();
-
-	// Update datetime start entry
-	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
-	if (!entry)
-		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
-
-	entry->get_buffer()->set_text(datetimestart.format("%Ex %EX").c_str());
-}
-
-
 void GPX2VideoApplicationWindow::on_stack_changed(void) {
 	log_call();
-
-	Gtk::Frame *frame = NULL;
 
 	// Video / Telemetry / Widget editing
 	Glib::ustring name = info_stack_->get_visible_child_name();
@@ -726,36 +562,19 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 
 	button->set_visible((name == "widgets_page"));
 
-	// Video frame
-	frame = ref_builder_->get_widget<Gtk::Frame>("video_frame");
-
-	frame->set_visible((name == "video_page"));
-
-	// Telemetry frame
-	frame = ref_builder_->get_widget<Gtk::Frame>("telemetry_frame");
-
-	frame->set_visible((name == "telemetry_page"));
-
-	// Widget frame
-	frame = ref_builder_->get_widget<Gtk::Frame>("widget_frame");
-
-	frame->set_visible((name == "widgets_page"));
+	// Update visible frame
+	video_frame_->set_visible((name == "video_page"));
+	telemetry_frame_->set_visible((name == "telemetry_page"));
+	widget_frame_->set_visible((name == "widgets_page"));
 }
 
 
 void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 	log_call();
 
-	Gdk::RGBA rgba;
-
 	int index = row->get_index();
 
 	log_info("Widget selected at index: %d", index);
-
-	// Widget color button
-	auto button = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
-	if (!button)
-		throw std::runtime_error("No \"background_color_button\" object in window.ui");
 
 	// Widget item
 	int i = 0;
@@ -764,11 +583,7 @@ void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 		if (i++ != index)
 			continue;
 
-		const float *color = item->widget()->backgroundColor();
-
-		rgba.set_rgba(color[0], color[1], color[2], color[3]);
-
-		button->set_rgba(rgba);
+		widget_frame_->set_widget_selected(item);
 
 		break;
 	}
@@ -786,58 +601,6 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 	log_call();
 
 	log_info("Remove widget '%s'", widget->widget()->name().c_str());
-}
-
-
-void GPX2VideoApplicationWindow::on_widget_background_color_set(void) {
-	log_call();
-
-	Gdk::RGBA rgba;
-
-	Glib::ustring color;
-
-	// Widget color button
-	auto button = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
-	if (!button)
-		throw std::runtime_error("No \"background_color_button\" object in window.ui");
-
-	rgba = button->get_rgba();
-
-	// Convert to hexa string color
-	color = Glib::ustring::sprintf("#%02X%02X%02X%02X",
-			(unsigned char) std::round(rgba.get_red() * 255),
-			(unsigned char) std::round(rgba.get_green() * 255),
-			(unsigned char) std::round(rgba.get_blue() * 255),
-			(unsigned char) std::round(rgba.get_alpha() * 255)
-	);
-
-	log_info("Background color changed to '%s'", color.c_str());
-
-	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
-	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
-
-	int index = list->get_selected_row()->get_index();
-
-	// Widget item
-	int i = 0;
-
-	for (GPX2VideoWidget *item : renderer_->widgets_) {
-		if (i++ != index)
-			continue;
-
-		item->widget()->setBackgroundColor(color);
-
-		break;
-	}
-
-	// Refresh
-	video_area_->refresh();
-}
-
-
-void GPX2VideoApplicationWindow::on_widget_border_color_clicked(void) {
 }
 
 

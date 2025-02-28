@@ -71,6 +71,8 @@ dev-gpx2video:
 	docker run --rm -it \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
+		-v /etc/timezone:/etc/timezone \
+		-v /etc/localtime:/etc/localtime \
 		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
@@ -99,6 +101,8 @@ run-gpx2video:
 	docker run --rm -it \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
+		-v /etc/timezone:/etc/timezone \
+		-v /etc/localtime:/etc/localtime \
 		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \

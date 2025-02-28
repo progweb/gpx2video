@@ -128,7 +128,7 @@ public:
 	void update_layout(void);
 
 	TelemetrySource * telemetry(void);
-	void open_telemetry(const Glib::ustring &telemetry_file);
+	void set_telemetry(TelemetrySource *source);
 
 //	void open_stream(const Glib::ustring &video_file);
 	void open_stream(MediaContainer *container);

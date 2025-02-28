@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="gtk40">
+	<object class="GtkAdjustment" id="border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">99</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="gtkmm__CustomObject_GPX2VideoWidgetFrame" id="widget_frame">
+		<property name="halign">fill</property>
+		<property name="valign">fill</property>
+		<property name="hexpand">True</property>
+		<property name="vexpand">True</property>
+		<property name="margin-bottom">10</property>
+		<property name="margin-end">10</property>
+		<property name="margin-start">10</property>
+		<property name="margin-top">10</property>
+		<property name="visible">False</property>
+		<child>
+			<object class="GtkBox">
+				<property name="orientation">vertical</property>
+				<property name="halign">fill</property>
+				<property name="hexpand">True</property>
+				<property name="valign">start</property>
+				<property name="vexpand">True</property>
+				<property name="margin-bottom">6</property>
+				<property name="margin-end">6</property>
+				<property name="margin-start">6</property>
+				<property name="margin-top">6</property>
+				<property name="spacing">6</property>
+				<child>
+					<object class="GtkLabel">
+						<property name="can-focus">False</property>
+						<property name="justify">center</property>
+						<property name="label">Widget properties</property>
+						<property name="valign">baseline</property>
+						<property name="xalign">0.5</property>
+						<property name="margin-bottom">6</property>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">False</property>
+						<child>
+							<object class="GtkLabel">
+								<property name="can-focus">False</property>
+								<property name="justify">left</property>
+								<property name="label">Background color:</property>
+								<property name="valign">baseline</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkColorButton" id="background_color_button">
+								<property name="halign">end</property>
+								<property name="hexpand">True</property>
+								<property name="valign">center</property>
+								<property name="rgba">#9141AC</property>
+								<property name="show-editor">False</property>
+								<property name="use-alpha">True</property>
+								<property name="tooltip-text" translatable="1">Select a color</property>
+							</object>
+						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">False</property>
+						<child>
+							<object class="GtkLabel">
+								<property name="can-focus">False</property>
+								<property name="justify">left</property>
+								<property name="label">Border color:</property>
+								<property name="valign">baseline</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkColorButton" id="border_color_button">
+								<property name="halign">end</property>
+								<property name="hexpand">True</property>
+								<property name="valign">center</property>
+								<property name="rgba">#9141AC</property>
+								<property name="show-editor">False</property>
+								<property name="use-alpha">True</property>
+								<property name="tooltip-text" translatable="1">Select a color</property>
+							</object>
+						</child>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">False</property>
+						<child>
+							<object class="GtkLabel">
+								<property name="can-focus">False</property>
+								<property name="justify">left</property>
+								<property name="label">Border width:</property>
+								<property name="valign">baseline</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkSpinButton" id="border_width_spinbutton">
+								<property name="halign">end</property>
+								<property name="hexpand">True</property>
+								<property name="width-chars">2</property>
+								<property name="max-width-chars">2</property>
+								<property name="numeric">True</property>
+								<property name="orientation">horizontal</property>
+								<property name="valign">center</property>
+								<property name="adjustment">border_adjustment</property>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+	</object>
+</interface>

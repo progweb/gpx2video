@@ -79,6 +79,9 @@ set(RESOURCE_UI_LIST
     gears_menu.ui
 	prefs.ui
 	window.ui
+	video_frame.ui
+	widget_frame.ui
+	telemetry_frame.ui
 )
 
 set(RESOURCE_GL_LIST
@@ -153,6 +156,9 @@ set(GPX2VIDEO_SOURCES
 	src/renderer.cpp
 	src/shader.cpp
 	src/window.cpp
+	src/videoframe.cpp
+	src/widgetframe.cpp
+	src/telemetryframe.cpp
 	src/videowidget.cpp
 )
 

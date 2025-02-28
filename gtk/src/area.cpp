@@ -681,11 +681,9 @@ TelemetrySource * GPX2VideoArea::telemetry(void) {
 }
 
 
-void GPX2VideoArea::open_telemetry(const Glib::ustring &telemetry_file) {
-	// Load telemetry data
-	source_ = TelemetryMedia::open(telemetry_file, renderer_->telemetrySettings(), false);
-
-//	source_->dump(true);
+void GPX2VideoArea::set_telemetry(TelemetrySource *source) {
+	// Save telemetry source
+	source_ = source;
 
 	//
 	refresh();
@@ -782,7 +780,7 @@ void GPX2VideoArea::seek(double incr) {
 	make_current();
 
 	// Reset telemetry data from start
-	if (incr < 0)
+	if ((incr < 0) && (source_ != NULL))
 		source_->retrieveFrom(data_);
 
 	// Force to refresh widgets
@@ -1008,6 +1006,10 @@ bool GPX2VideoArea::on_timeout(void) {
 
 void GPX2VideoArea::refresh(void) {
 	log_call();
+
+	// Reset telemetry data from start
+	if (source_ != NULL)
+		source_->retrieveFrom(data_);
 
 	// Force to draw widget again
 	widgets_clear();

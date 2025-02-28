@@ -22,8 +22,11 @@
 #include "../../src/application.h"
 #include "../../src/renderer.h"
 #include "../../src/telemetrysettings.h"
-#include "renderer.h"
 #include "area.h"
+#include "renderer.h"
+#include "videoframe.h"
+#include "widgetframe.h"
+#include "telemetryframe.h"
 
 
 class GPX2VideoApplicationWindow : public Gtk::ApplicationWindow, public GPXApplication {
@@ -52,6 +55,9 @@ protected:
 	Gtk::Scale *progress_scale_ = NULL;
 
 	GPX2VideoArea *video_area_ = NULL;
+	GPX2VideoVideoFrame *video_frame_ = NULL;
+	GPX2VideoWidgetFrame *widget_frame_ = NULL;
+	GPX2VideoTelemetryFrame *telemetry_frame_ = NULL;
 
 	Gtk::Stack *info_stack_ = NULL;
 
@@ -60,9 +66,8 @@ protected:
 	void on_action_open(void);
 	void on_action_append(void);
 
-	void on_action_use_creation_time(void);
-	void on_action_use_gpmf_stream(void);
-	void on_action_use_gpx_data(void);
+	void on_video_changed(void);
+	void on_widget_changed(void);
 
 	void on_play_clicked(void);
 
@@ -71,18 +76,12 @@ protected:
 	void on_progress_scale_released(guint n, double x, double y);
 	bool on_key_pressed(guint, guint, Gdk::ModifierType);
 
-	void on_datetimestart_shown(void);
-	void on_datetimestart_clicked(void);
-
 	void on_stack_changed(void);
 
 	void on_widget_selected(Gtk::ListBoxRow *row);
 
 	void on_widget_append_clicked(void);
 	void on_widget_remove_clicked(GPX2VideoWidget *widget);
-
-	void on_widget_background_color_set(void);
-	void on_widget_border_color_clicked(void);
 
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	void on_file_dialog_open_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,
