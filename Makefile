@@ -61,18 +61,25 @@ run-ubuntu-noble: config-ubuntu-noble run-gpx2video
 
 
 build-docker:
+	-cp /etc/locale.gen docker
 	docker build --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		-t "gpx2video-$(BASE_IMAGE)" \
 		-f docker/Dockerfile .
+	-rm docker/locale.gen
 
 
 dev-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
+		-e LANG=$(LANG) \
+		-e LANGUAGE=$(LANG) \
+		-e LC_ALL=$(LANG) \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
 		-v /etc/timezone:/etc/timezone \
 		-v /etc/localtime:/etc/localtime \
+		-v /etc/locale.gen:/etc/locale.gen \
+		-v /etc/locale.conf:/etc/locale.conf \
 		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
@@ -81,7 +88,6 @@ dev-gpx2video:
 		--workdir=/app/build \
 		gpx2video-$(BASE_IMAGE) \
 		/bin/bash
-
 
 build-gpx2video:
 	mkdir -p $(BUILD_DIR)
@@ -99,10 +105,13 @@ build-gpx2video:
 run-gpx2video:
 	mkdir -p $(BUILD_DIR)
 	docker run --rm -it \
+		-e LANG=$(LANG) \
+		-e LC_ALL=$(LANG) \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
 		-v /etc/timezone:/etc/timezone \
 		-v /etc/localtime:/etc/localtime \
+		-v /etc/locale.gen:/etc/locale.gen \
 		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \
 		-u $(shell id -u):$(shell id -g) \
 		-v $(PWD)/$(BUILD_DIR):/app/build \
