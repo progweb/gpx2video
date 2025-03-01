@@ -1,11 +1,12 @@
-#include "log.h"
-#include "videoframe.h"
-
 #include <gtkmm/entry.h>
 #include <gtkmm/button.h>
 #include <gtkmm/calendar.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/spinbutton.h>
+
+#include "log.h"
+#include "compat.h"
+#include "videoframe.h"
 
 
 GPX2VideoVideoFrame::GPX2VideoVideoFrame()
@@ -92,7 +93,8 @@ void GPX2VideoVideoFrame::on_action_use_creation_time(void) {
 //#else
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
+//	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000).to_local();
 
 	if (!media_->creationTime())
 		return;
@@ -107,7 +109,11 @@ void GPX2VideoVideoFrame::on_action_use_creation_time(void) {
 	if (!entry)
 		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
 
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	entry->get_buffer()->set_text(creationtime.format("%Ex %EX").c_str());
+#else
+	entry->get_buffer()->set_text(creationtime.format("%x %X").c_str());
+#endif
 
 	// Refresh video preview
 	dispatcher_.emit();
@@ -144,14 +150,18 @@ void GPX2VideoVideoFrame::on_action_use_gpx_data(void) {
 //#else
 //	starttime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->startTime()));
 //#endif
-	starttime = Glib::DateTime::create_now_utc(media_->startTime() / 1000);
+	starttime = Glib::DateTime::create_now_local(media_->startTime() / 1000);
 
 	// Update datetime start entry
 	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
 	if (!entry)
 		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
 
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	entry->get_buffer()->set_text(starttime.format("%Ex %EX").c_str());
+#else
+	entry->get_buffer()->set_text(starttime.format("%x %X").c_str());
+#endif
 
 	// Refresh video preview
 	dispatcher_.emit();
@@ -176,14 +186,18 @@ void GPX2VideoVideoFrame::update_content(void) {
 //#else
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
 
 	// Update datetime start entry
 	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
 	if (!entry)
 		throw std::runtime_error("No \"datetimestart_entry\" object in video_frame.ui");
 
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	entry->get_buffer()->set_text(media_->creationTime() ? creationtime.format("%Ex %EX").c_str() : "");
+#else
+	entry->get_buffer()->set_text(media_->creationTime() ? creationtime.format("%x %X").c_str() : "");
+#endif
 }
 
 
@@ -206,7 +220,7 @@ void GPX2VideoVideoFrame::on_datetimestart_shown(void) {
 //#else
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
 
 	// Populate date start popover
 	calendar = ref_builder_->get_widget<Gtk::Calendar>("datestart_calendar");
@@ -256,28 +270,38 @@ void GPX2VideoVideoFrame::on_datetimestart_clicked(void) {
 //#if GTKMM_CHECK_VERSION(4, 14, 0)
 //	datetimestart = Glib::DateTime::create_local(calendar->get_year(), calendar->get_month() + 1, calendar->get_day(), 0, 0, 0);
 //#endif
-	datetimestart = Glib::DateTime::create_now_local(calendar->get_date().to_unix());
+
+	// Extract calendar date
+	gint64 date = calendar->get_date().to_unix();
+
+	date = date - (date % (24 * 60 * 60));
+	date += 24 * 60 * 60;
+
+	datetimestart = Glib::DateTime::create_now_utc(date);
 
 	// Get hour start popover
    	spin = ref_builder_->get_widget<Gtk::SpinButton>("hourstart_spinbutton");
 	if (!spin)
 		throw std::runtime_error("No \"hourstart_spinbutton\" object in video_frame.ui");
 
-	datetimestart = datetimestart.add_hours(spin->get_value());
+	int hour = spin->get_value();
 
 	// Get minute start popover
    	spin = ref_builder_->get_widget<Gtk::SpinButton>("minutestart_spinbutton");
 	if (!spin)
 		throw std::runtime_error("No \"minutestart_spinbutton\" object in video_frame.ui");
 
-	datetimestart = datetimestart.add_minutes(spin->get_value());
+	int minute = spin->get_value();
 
 	// Get second start popover
    	spin = ref_builder_->get_widget<Gtk::SpinButton>("secondstart_spinbutton");
 	if (!spin)
 		throw std::runtime_error("No \"secondstart_spinbutton\" object in video_frame.ui");
 
-	datetimestart = datetimestart.add_seconds(spin->get_value());
+	int second = spin->get_value();
+
+	// Create new local date
+	datetimestart = Glib::DateTime::create_local(datetimestart.get_year(), datetimestart.get_month(), datetimestart.get_day_of_month(), hour, minute, second);
 
 	// Hide datetime start popover
 	auto popover = ref_builder_->get_widget<Gtk::Popover>("datetimestart_popover");
@@ -294,7 +318,11 @@ void GPX2VideoVideoFrame::on_datetimestart_clicked(void) {
 	if (!entry)
 		throw std::runtime_error("No \"datetimestart_entry\" object in video_frame.ui");
 
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	entry->get_buffer()->set_text(datetimestart.format("%Ex %EX").c_str());
+#else
+	entry->get_buffer()->set_text(datetimestart.format("%x %X").c_str());
+#endif
 
 	// Refresh video preview
 	dispatcher_.emit();

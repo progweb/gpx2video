@@ -284,14 +284,22 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 //#else
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
 
 	// Populate video properties
 	label = ref_builder_->get_widget<Gtk::Label>("date_label");
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	label->set_label(media_->creationTime() ? creationtime.format("%Ex").c_str() : "-");
+#else
+	label->set_label(media_->creationTime() ? creationtime.format("%x").c_str() : "-");
+#endif
 	
 	label = ref_builder_->get_widget<Gtk::Label>("time_label");
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
 	label->set_label(media_->creationTime() ? creationtime.format("%EX").c_str() : "-");
+#else
+	label->set_label(media_->creationTime() ? creationtime.format("%X").c_str() : "-");
+#endif
 	
 	label = ref_builder_->get_widget<Gtk::Label>("size_label");
 	label->set_label(Glib::ustring::sprintf("%d × %d pixels", stream->width(), stream->height()));
