@@ -26,25 +26,26 @@ extern "C" {
 namespace gpxtools {
 
 static const struct option options[] = {
-	{ "help",                  no_argument,       0, 'h' },
-	{ "verbose",               no_argument,       0, 'v' },
-	{ "quiet",                 no_argument,       0, 'q' },
-	{ "input",                 required_argument, 0, 'i' },
-	{ "output",                required_argument, 0, 'o' },
-	{ "begin",                 required_argument, 0, 0 },
-	{ "end",                   required_argument, 0, 0 },
-	{ "from",                  required_argument, 0, 0 },
-	{ "to",                    required_argument, 0, 0 },
-	{ "telemetry-offset",      required_argument, 0, 0 },
-	{ "telemetry-check",       required_argument, 0, 0 },
-	{ "telemetry-filter",      required_argument, 0, 0 },
-	{ "telemetry-filter-list", no_argument,       0, 0 },
-	{ "telemetry-method",      required_argument, 0, 0 },
-	{ "telemetry-method-list", no_argument,       0, 0 },
-	{ "telemetry-rate",        required_argument, 0, 'r' },
-	{ "telemetry-smooth",      required_argument, 0, 0 },
-	{ "telemetry-smooth-list", no_argument,       0, 0 },
-	{ 0,                       0,                 0, 0 }
+	{ "help",                        no_argument,       0, 'h' },
+	{ "verbose",                     no_argument,       0, 'v' },
+	{ "quiet",                       no_argument,       0, 'q' },
+	{ "input",                       required_argument, 0, 'i' },
+	{ "output",                      required_argument, 0, 'o' },
+	{ "begin",                       required_argument, 0, 0 },
+	{ "end",                         required_argument, 0, 0 },
+	{ "from",                        required_argument, 0, 0 },
+	{ "to",                          required_argument, 0, 0 },
+	{ "telemetry-offset",            required_argument, 0, 0 },
+	{ "telemetry-check",             required_argument, 0, 0 },
+	{ "telemetry-pause-detection",   required_argument, 0, 0 },
+	{ "telemetry-filter",            required_argument, 0, 0 },
+	{ "telemetry-filter-list",       no_argument,       0, 0 },
+	{ "telemetry-method",            required_argument, 0, 0 },
+	{ "telemetry-method-list",       no_argument,       0, 0 },
+	{ "telemetry-rate",              required_argument, 0, 'r' },
+	{ "telemetry-smooth",            required_argument, 0, 0 },
+	{ "telemetry-smooth-list",       no_argument,       0, 0 },
+	{ 0,                             0,                 0, 0 }
 };
 
 
@@ -55,26 +56,27 @@ static void print_usage(const std::string &name) {
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
-	std::cout << "\t- i, --input=file              : Input telemetry file name" << std::endl;
-	std::cout << "\t- o, --output=file             : Output telemetry file name" << std::endl;
-	std::cout << "\t-    --begin                   : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --end                     : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --from                    : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --to                      : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
-	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
-	std::cout << "\t-    --telemetry-filter=filter : Telemetry filter" << std::endl;
-	std::cout << "\t-    --telemetry-method=method : Interpolate method (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate=value    : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
-	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default 'disable': 0))" << std::endl;
-	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
-	std::cout << "\t- q, --quiet                   : Quiet mode" << std::endl;
-	std::cout << "\t- h, --help                    : Show this help screen" << std::endl;
+	std::cout << "\t- i, --input=file                      : Input telemetry file name" << std::endl;
+	std::cout << "\t- o, --output=file                     : Output telemetry file name" << std::endl;
+	std::cout << "\t-    --begin                           : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --end                             : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --from                            : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --to                              : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --telemetry-offset=value          : Apply time offset as data reading (value in ms)" << std::endl;
+	std::cout << "\t-    --telemetry-check=bool            : Check & skip bad point (default: false)" << std::endl;
+	std::cout << "\t-    --telemetry-pause-detection=bool  : Detect move & pause (default: true)" << std::endl;
+	std::cout << "\t-    --telemetry-filter=filter         : Telemetry filter" << std::endl;
+	std::cout << "\t-    --telemetry-method=method         : Interpolate method (none, sample, linear...)" << std::endl;
+	std::cout << "\t-    --telemetry-rate=value            : Telemetry rate (refresh each ms) (default 'no change': 0))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=value          : Number of points to smooth data (default 'disable': 0))" << std::endl;
+	std::cout << "\t- v, --verbose                         : Show trace" << std::endl;
+	std::cout << "\t- q, --quiet                           : Quiet mode" << std::endl;
+	std::cout << "\t- h, --help                            : Show this help screen" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
-	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
-	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
-	std::cout << "\t-    --telemetry-smooth-list   : Dump telemetry smooth supported" << std::endl;
+	std::cout << "\t-    --telemetry-filter-list           : Dump telemetry filter supported" << std::endl;
+	std::cout << "\t-    --telemetry-method-list           : Dump telemetry method supported" << std::endl;
+	std::cout << "\t-    --telemetry-smooth-list           : Dump telemetry smooth supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
 	std::cout << "\t convert: Convert telemetry data file" << std::endl;
@@ -229,6 +231,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	int option;
 
 	bool check = false;
+	bool pause_detection = true;
 
 	int rate = 0; // By default, no change
 	int offset = 0; // By default, no offset
@@ -290,6 +293,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-check")) {
 				check = (std::string(optarg) == "true");
+			}
+			else if (s && !strcmp(s, "telemetry-pause-detection")) {
+				pause_detection = (std::string(optarg) == "true");
 			}
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				filter = (TelemetrySettings::Filter) atoi(optarg);
@@ -439,6 +445,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		to = "";
 		offset = 0; // Don't change timestamp
 		check = false; // Keep each point
+		pause_detection = false; // Disable pause detection
 		filter = TelemetrySettings::FilterNone;	// Don't filter data
 		method = TelemetrySettings::MethodNone; // None interpolation
 	}
@@ -457,6 +464,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		to,
 		offset,
 		check,
+		pause_detection,
 		filter,
 		method,
 		rate,
@@ -528,6 +536,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings = TelemetrySettings(
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
+					app.settings().telemetryPauseDetection(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					app.settings().telemetryFormat());
@@ -548,6 +557,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings = TelemetrySettings(
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
+					app.settings().telemetryPauseDetection(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					app.settings().telemetryFormat());

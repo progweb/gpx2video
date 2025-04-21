@@ -36,6 +36,7 @@ public:
 		index_maxspeed_ = -1;
 		index_avgspeed_ = -1;
 		index_avgridespeed_ = -1;
+		index_verticalspeed_ = -1;
 
 		index_cadence_ = -1;
 		index_heartrate_ = -1;
@@ -145,6 +146,8 @@ eof:
 				index_avgspeed_ = i;
 			else if (columns[i] == "Ride Average")
 				index_avgridespeed_ = i;
+			else if (columns[i] == "VerticalSpeed")
+				index_verticalspeed_ = i;
 			else if (columns[i] == "Cadence")
 				index_cadence_ = i;
 			else if (columns[i] == "Heartrate")
@@ -288,6 +291,9 @@ eof:
 		if (index_avgridespeed_ != -1)
 			point.setAverageRideSpeed(strtod(columns[index_avgridespeed_].c_str(), NULL));
 
+		if (index_verticalspeed_ != -1)
+			point.setVerticalSpeed(strtod(columns[index_verticalspeed_].c_str(), NULL));
+
 		if (index_cadence_ != -1)
 			point.setCadence(std::stoi(columns[index_cadence_]));
 
@@ -326,6 +332,7 @@ private:
 	int index_maxspeed_;
 	int index_avgspeed_;
 	int index_avgridespeed_;
+	int index_verticalspeed_;
 
 	int index_cadence_;
 	int index_heartrate_;

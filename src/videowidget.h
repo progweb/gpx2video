@@ -54,6 +54,7 @@ public:
 
 	enum Unit {
 		UnitNone,
+		UnitMPS,
 		UnitMPH,
 		UnitKPH,
 		UnitKm,

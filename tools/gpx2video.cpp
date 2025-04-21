@@ -33,45 +33,46 @@ extern "C" {
 namespace gpx2video {
 
 static const struct option options[] = {
-	{ "help",                  no_argument,       0, 'h' },
-	{ "verbose",               no_argument,       0, 'v' },
-	{ "quiet",                 no_argument,       0, 'q' },
-	{ "duration",              required_argument, 0, 'd' },
-	{ "trim",                  required_argument, 0, 0 },
-	{ "media",                 required_argument, 0, 'm' },
-	{ "gpx",                   required_argument, 0, 'g' },
-	{ "layout",                required_argument, 0, 'l' },
-	{ "output",                required_argument, 0, 'o' },
-	{ "rate",                  required_argument, 0, 'r' },
-	{ "start-time",            required_argument, 0, 0 },
-	{ "time-factor",           required_argument, 0, 0 },
-	{ "map-source",            required_argument, 0, 0 },
-	{ "map-factor",            required_argument, 0, 0 },
-	{ "map-zoom",              required_argument, 0, 0 },
-	{ "map-source-list",       no_argument,       0, 0 },
-	{ "extract-format",        required_argument, 0, 0 },
-	{ "extract-format-list",   no_argument,       0, 0 },
-	{ "gpx-begin",             required_argument, 0, 0 },
-	{ "gpx-end",               required_argument, 0, 0 },
-	{ "gpx-from",              required_argument, 0, 0 },
-	{ "gpx-to",                required_argument, 0, 0 },
-	{ "telemetry-offset",      required_argument, 0, 0 },
-	{ "telemetry-check",       required_argument, 0, 0 },
-	{ "telemetry-filter",      required_argument, 0, 0 },
-	{ "telemetry-filter-list", no_argument,       0, 0 },
-	{ "telemetry-method",      required_argument, 0, 0 },
-	{ "telemetry-method-list", no_argument,       0, 0 },
-	{ "telemetry-rate",        required_argument, 0, 0 },
-	{ "telemetry-smooth",      required_argument, 0, 0 },
-	{ "telemetry-smooth-list", no_argument,       0, 0 },
-	{ "video-codec",           optional_argument, 0, 0 },
-	{ "video-hwdevice",        optional_argument, 0, 0 },
-	{ "video-preset",          required_argument, 0, 0 },
-	{ "video-crf",             required_argument, 0, 0 },
-	{ "video-bitrate",         required_argument, 0, 0 },
-	{ "video-min-bitrate",     required_argument, 0, 0 },
-	{ "video-max-bitrate",     required_argument, 0, 0 },
-	{ 0,                       0,                 0, 0 }
+	{ "help",                       no_argument,       0, 'h' },
+	{ "verbose",                    no_argument,       0, 'v' },
+	{ "quiet",                      no_argument,       0, 'q' },
+	{ "duration",                   required_argument, 0, 'd' },
+	{ "trim",                       required_argument, 0, 0 },
+	{ "media",                      required_argument, 0, 'm' },
+	{ "gpx",                        required_argument, 0, 'g' },
+	{ "layout",                     required_argument, 0, 'l' },
+	{ "output",                     required_argument, 0, 'o' },
+	{ "rate",                       required_argument, 0, 'r' },
+	{ "start-time",                 required_argument, 0, 0 },
+	{ "time-factor",                required_argument, 0, 0 },
+	{ "map-source",                 required_argument, 0, 0 },
+	{ "map-factor",                 required_argument, 0, 0 },
+	{ "map-zoom",                   required_argument, 0, 0 },
+	{ "map-source-list",            no_argument,       0, 0 },
+	{ "extract-format",             required_argument, 0, 0 },
+	{ "extract-format-list",        no_argument,       0, 0 },
+	{ "gpx-begin",                  required_argument, 0, 0 },
+	{ "gpx-end",                    required_argument, 0, 0 },
+	{ "gpx-from",                   required_argument, 0, 0 },
+	{ "gpx-to",                     required_argument, 0, 0 },
+	{ "telemetry-offset",           required_argument, 0, 0 },
+	{ "telemetry-check",            required_argument, 0, 0 },
+	{ "telemetry-pause-detection",  required_argument, 0, 0 },
+	{ "telemetry-filter",           required_argument, 0, 0 },
+	{ "telemetry-filter-list",      no_argument,       0, 0 },
+	{ "telemetry-method",           required_argument, 0, 0 },
+	{ "telemetry-method-list",      no_argument,       0, 0 },
+	{ "telemetry-rate",             required_argument, 0, 0 },
+	{ "telemetry-smooth",           required_argument, 0, 0 },
+	{ "telemetry-smooth-list",      no_argument,       0, 0 },
+	{ "video-codec",                optional_argument, 0, 0 },
+	{ "video-hwdevice",             optional_argument, 0, 0 },
+	{ "video-preset",               required_argument, 0, 0 },
+	{ "video-crf",                  required_argument, 0, 0 },
+	{ "video-bitrate",              required_argument, 0, 0 },
+	{ "video-min-bitrate",          required_argument, 0, 0 },
+	{ "video-max-bitrate",          required_argument, 0, 0 },
+	{ 0,                            0,                 0, 0 }
 };
 
 static void print_usage(const std::string &name) {
@@ -81,50 +82,51 @@ static void print_usage(const std::string &name) {
 	std::cout << "       " << name << " -h" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Options:" << std::endl;
-	std::cout << "\t- m, --media=file              : Input media file name" << std::endl;
-	std::cout << "\t- g, --gpx=file                : GPX file name" << std::endl;
-	std::cout << "\t-    --gpx-begin               : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-end                 : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-from                : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t-    --gpx-to                  : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
-	std::cout << "\t- l, --layout=file             : Layout file name" << std::endl;
-	std::cout << "\t- o, --output=file             : Output file name" << std::endl;
-	std::cout << "\t- d, --duration                : Duration (in ms) (not required)" << std::endl;
-	std::cout << "\t-    --trim                    : Left trim crop (in ms) (not required)" << std::endl;
-	std::cout << "\t-    --start-time              : Overwrite or set creation_time field" << std::endl;
-	std::cout << "\t-    --time-factor             : Time factor - To read video timelapse (default: 1.0)" << std::endl;
-	std::cout << "\t-    --extract-format=name     : Extract format (dump, gpx)" << std::endl;
-	std::cout << "\t-    --telemetry-offset=value  : Apply time offset as data reading (value in ms)" << std::endl;
-	std::cout << "\t-    --telemetry-check=bool    : Check & skip bad point (default: false)" << std::endl;
-	std::cout << "\t-    --telemetry-filter=filter : Telemetry filter" << std::endl;
-	std::cout << "\t-    --telemetry-method=method : Telemetry interpolate method (none, sample, linear...)" << std::endl;
-	std::cout << "\t-    --telemetry-rate          : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
-	std::cout << "\t-    --telemetry-smooth=value  : Number of points to smooth data (default '2', to disable set '0'))" << std::endl;
-//	std::cout << "\t- r, --rate                    : Frame per second (not implemented" << std::endl;
-	std::cout << "\t-    --map-factor              : Map factor (default: 1.0)" << std::endl;
-	std::cout << "\t-    --map-source              : Map source" << std::endl;
-	std::cout << "\t-    --map-zoom                : Map zoom" << std::endl;
-	std::cout << "\t-    --path-thick              : Path thick (default: 3.0)" << std::endl;
-	std::cout << "\t-    --path-border             : Path border (default: 1.4)" << std::endl;
-	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
-	std::cout << "\t- q, --quiet                   : Quiet mode" << std::endl;
-	std::cout << "\t- h, --help                    : Show this help screen" << std::endl;
+	std::cout << "\t- m, --media=file                      : Input media file name" << std::endl;
+	std::cout << "\t- g, --gpx=file                        : GPX file name" << std::endl;
+	std::cout << "\t-    --gpx-begin                       : Drop data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-end                         : Drop data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-from                        : Compute data after datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t-    --gpx-to                          : Compute data before datetime (format: yyyy-mm-dd hh:mm:ss) (not required)" << std::endl;
+	std::cout << "\t- l, --layout=file                     : Layout file name" << std::endl;
+	std::cout << "\t- o, --output=file                     : Output file name" << std::endl;
+	std::cout << "\t- d, --duration                        : Duration (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --trim                            : Left trim crop (in ms) (not required)" << std::endl;
+	std::cout << "\t-    --start-time                      : Overwrite or set creation_time field" << std::endl;
+	std::cout << "\t-    --time-factor                     : Time factor - To read video timelapse (default: 1.0)" << std::endl;
+	std::cout << "\t-    --extract-format=name             : Extract format (dump, gpx)" << std::endl;
+	std::cout << "\t-    --telemetry-offset=value          : Apply time offset as data reading (value in ms)" << std::endl;
+	std::cout << "\t-    --telemetry-check=bool            : Check & skip bad point (default: false)" << std::endl;
+	std::cout << "\t-    --telemetry-pause-detection=bool  : Detect move & pause (default: true)" << std::endl;
+	std::cout << "\t-    --telemetry-filter=filter         : Telemetry filter" << std::endl;
+	std::cout << "\t-    --telemetry-method=method         : Telemetry interpolate method (none, sample, linear...)" << std::endl;
+	std::cout << "\t-    --telemetry-rate                  : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=value          : Number of points to smooth data (default '2', to disable set '0'))" << std::endl;
+//	std::cout << "\t- r, --rate                            : Frame per second (not implemented" << std::endl;
+	std::cout << "\t-    --map-factor                      : Map factor (default: 1.0)" << std::endl;
+	std::cout << "\t-    --map-source                      : Map source" << std::endl;
+	std::cout << "\t-    --map-zoom                        : Map zoom" << std::endl;
+	std::cout << "\t-    --path-thick                      : Path thick (default: 3.0)" << std::endl;
+	std::cout << "\t-    --path-border                     : Path border (default: 1.4)" << std::endl;
+	std::cout << "\t- v, --verbose                         : Show trace" << std::endl;
+	std::cout << "\t- q, --quiet                           : Quiet mode" << std::endl;
+	std::cout << "\t- h, --help                            : Show this help screen" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
-	std::cout << "\t-    --extract-format-list     : Dump extract format supported" << std::endl;
-	std::cout << "\t-    --map-source-list         : Dump supported map providers list" << std::endl;
-	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
-	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
-	std::cout << "\t-    --telemetry-smooth-list   : Dump telemetry smooth supported" << std::endl;
+	std::cout << "\t-    --extract-format-list             : Dump extract format supported" << std::endl;
+	std::cout << "\t-    --map-source-list                 : Dump supported map providers list" << std::endl;
+	std::cout << "\t-    --telemetry-filter-list           : Dump telemetry filter supported" << std::endl;
+	std::cout << "\t-    --telemetry-method-list           : Dump telemetry method supported" << std::endl;
+	std::cout << "\t-    --telemetry-smooth-list           : Dump telemetry smooth supported" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Encoder options:" << std::endl;
-	std::cout << "\t-    --video-codec             : Video encoder codec name" << std::endl;
-	std::cout << "\t-    --video-hwdevice          : Video encoder hardware device" << std::endl;
-	std::cout << "\t-    --video-preset            : Video encoder preset settings" << std::endl;
-	std::cout << "\t-    --video-crf               : Video encoder constant rate factor" << std::endl;
-	std::cout << "\t-    --video-bitrate           : Video encoder bitrate" << std::endl;
-	std::cout << "\t-    --video-min-bitrate       : Video encoder min bitrate" << std::endl;
-	std::cout << "\t-    --video-max-bitrate       : Video encoder max bitrate" << std::endl;
+	std::cout << "\t-    --video-codec                     : Video encoder codec name" << std::endl;
+	std::cout << "\t-    --video-hwdevice                  : Video encoder hardware device" << std::endl;
+	std::cout << "\t-    --video-preset                    : Video encoder preset settings" << std::endl;
+	std::cout << "\t-    --video-crf                       : Video encoder constant rate factor" << std::endl;
+	std::cout << "\t-    --video-bitrate                   : Video encoder bitrate" << std::endl;
+	std::cout << "\t-    --video-min-bitrate               : Video encoder min bitrate" << std::endl;
+	std::cout << "\t-    --video-max-bitrate               : Video encoder max bitrate" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Command:" << std::endl;
 	std::cout << "\t extract: Extract GPS sensor data from media stream" << std::endl;
@@ -499,6 +501,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	int64_t telemetry_offset = 0;
 	bool telemetry_check = false;
+	bool telemetry_pause_detection = true;
 	TelemetrySettings::Filter telemetry_filter = TelemetrySettings::FilterOutlier;
 	TelemetrySettings::Method telemetry_method = TelemetrySettings::MethodInterpolate;
 
@@ -582,6 +585,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "telemetry-check")) {
 				telemetry_check = (std::string(optarg) == "true");
+			}
+			else if (s && !strcmp(s, "telemetry-pause-detection")) {
+				telemetry_pause_detection = (std::string(optarg) == "true");
 			}
 			else if (s && !strcmp(s, "telemetry-filter")) {
 				telemetry_filter = (TelemetrySettings::Filter) atoi(optarg);
@@ -943,6 +949,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		extract_format,
 		telemetry_offset,
 		telemetry_check,
+		telemetry_pause_detection,
 		telemetry_filter,
 		telemetry_method,
 		telemetry_rate,
@@ -1119,6 +1126,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
+					app.settings().telemetryPauseDetection(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate(),
 					TelemetrySettings::FormatCSV);
@@ -1160,6 +1168,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
+					app.settings().telemetryPauseDetection(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 
@@ -1221,6 +1230,7 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings = TelemetrySettings(
 					app.settings().telemetryOffset(),
 					app.settings().telemetryCheck(),
+					app.settings().telemetryPauseDetection(),
 					app.settings().telemetryMethod(),
 					app.settings().telemetryRate());
 

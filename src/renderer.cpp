@@ -35,6 +35,7 @@
 #include "widgets/time.h"
 #include "widgets/gforce.h"
 #include "widgets/temperature.h"
+#include "widgets/verticalspeed.h"
 #include "renderer.h"
 
 
@@ -430,6 +431,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = PowerWidget::create(app_);
 	else if (s == "gforce")
 		widget = GForceWidget::create(app_);
+	else if (s == "vspeed")
+		widget = VerticalSpeedWidget::create(app_);
 	else if (s == "lap") {
 		LapWidget *lap = LapWidget::create(app_);
 		lap->setTargetLap(w->nbrLap());

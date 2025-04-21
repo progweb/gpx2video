@@ -51,6 +51,7 @@ public:
 	TelemetrySettings(
 			int64_t offset=0,
 			bool check=false,
+			bool pause_detection=false,
 			TelemetrySettings::Method method=TelemetrySettings::MethodNone,
 			int rate=1000,
 			TelemetrySettings::Format format=TelemetrySettings::FormatAuto
@@ -74,6 +75,8 @@ public:
 	const Format& telemetryFormat(void) const;
 
 	const bool& telemetryCheck(void) const;
+	const bool& telemetryPauseDetection(void) const;
+
 	const Filter& telemetryFilter(void) const;
 
 	const Method& telemetryMethod(void) const;
@@ -104,6 +107,8 @@ private:
 	enum Format telemetry_format_;
 
 	bool telemetry_check_;
+	bool telemetry_pause_detection_;
+
 	enum Filter telemetry_filter_;
 	enum Method telemetry_method_;
 

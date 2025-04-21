@@ -77,6 +77,8 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 
 	if (s.empty() || (s == "none"))
 		unit = VideoWidget::UnitNone;
+	else if (s == "mps")
+		unit = VideoWidget::UnitMPS;
 	else if (s == "mph")
 		unit = VideoWidget::UnitMPH;
 	else if (s == "kph")
@@ -126,6 +128,8 @@ VideoWidget::Zoom VideoWidget::string2zoom(std::string &s) {
 
 std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 	switch (unit) {
+	case VideoWidget::UnitMPS:
+		return "m/s";
 	case VideoWidget::UnitMPH:
 		return "m/h";
 	case VideoWidget::UnitKPH:

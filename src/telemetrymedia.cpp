@@ -61,6 +61,7 @@ void TelemetryData::reset(bool all) {
 	elapsedtime_ = 0.0;
 	avgspeed_ = 0.0;
 	avgridespeed_ = 0.0;
+	verticalspeed_ = 0.0;
 
 	lap_ = 1;
 	in_lap_ = false;
@@ -81,13 +82,13 @@ void TelemetryData::dump(void) {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  \n");
-	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+--------\n");
+	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  | VSpeed \n");
+	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+--------+--------\n");
 }
 
 
 void TelemetryData::writeData(size_t index) const {
-	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%%\n",
+	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%% | %6.1f\n",
 		index,
 		line_,
 		type2string(),
@@ -95,7 +96,7 @@ void TelemetryData::writeData(size_t index) const {
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
-		ele_, grade_);  
+		ele_, grade_, verticalspeed_);  
 }
 
 
@@ -126,6 +127,7 @@ TelemetrySource::TelemetrySource(const std::string &filename)
     stream_ = std::ifstream(filename);
 
 	skipBadPoint(false);
+	setPauseDetection(false);
 	setMethod(TelemetrySettings::MethodNone);
 	setRate(1000);
 
@@ -167,6 +169,13 @@ void TelemetrySource::skipBadPoint(bool check) {
 	log_call();
 
 	check_ = check;
+}
+
+
+void TelemetrySource::setPauseDetection(bool enable) {
+	log_call();
+
+	pause_detection_ = enable;
 }
 
 
@@ -373,6 +382,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	double speed = 0;
 	double maxspeed = 0;
 	double acceleration = 0;
+	double verticalspeed = 0;
 
 	GeographicLib::Math::real d;
 
@@ -445,14 +455,20 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		else
 			maxspeed = curPoint.maxspeed();
 
-		// Grade elevation
 		if (curPoint.hasValue(TelemetryData::DataElevation)) {
+			// Grade elevation
 			if (force || !curPoint.hasValue(TelemetryData::DataGrade)) {
 				if (floor(dc) > 0)
 					curPoint.setGrade(100.0 * dz / dc);
 				else
 					curPoint.setGrade(prevPoint.grade_);
 			}
+
+			// Vertical speed
+			if (force || !curPoint.hasValue(TelemetryData::DataVerticalSpeed))
+				verticalspeed = prevPoint.verticalspeed_;
+			else
+				verticalspeed = curPoint.verticalspeed();
 		}
 
 		// Speed & maxspeed & ridetime
@@ -475,6 +491,10 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 						ridetime = prevPoint.ridetime_ + (dt / 1000.0);
 				}
 			}
+
+			// Compute vertical speed (m/s)
+			if (force || !curPoint.hasValue(TelemetryData::DataVerticalSpeed))
+				verticalspeed = 1000.0 * dz / (1.0 * dt);
 		}
 
 		// Update telemetry data
@@ -508,6 +528,9 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 			curPoint.setAverageRideSpeed(avgridespeed);
 		}
 
+		// Vertical speed
+		curPoint.setVerticalSpeed(verticalspeed);
+
 		// By default, in the same lap
 		curPoint.setLap(prevPoint.lap());
 
@@ -536,6 +559,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 					| TelemetryData::DataRideTime
 					| TelemetryData::DataAverageSpeed
 					| TelemetryData::DataAverageRideSpeed
+					| TelemetryData::DataVerticalSpeed
 				);
 		}
 
@@ -736,6 +760,9 @@ void TelemetrySource::compute(void) {
 				name().c_str(),
 				Datetime::timestamp2string(from_).c_str(),
 				Datetime::timestamp2string(to_).c_str());
+		log_info("%s: Pause detection: %s",
+				name().c_str(),
+				pause_detection_ ? "enabled" : "disabled");
 	}
 
 	// Start elevation
@@ -784,7 +811,7 @@ void TelemetrySource::compute(void) {
 			done = 0;
 			timestamp = data.timestamp();
 		}
-		else if (data.speed() > 1.5) {
+		else if (!pause_detection_ || data.speed() > 1.5) {
 			// In move
 			ss = -1;
 			done = 0;
@@ -799,27 +826,29 @@ void TelemetrySource::compute(void) {
 		}
 
 		// Pause detection
-		if ((ss >= 0) && (data.timestamp() > (timestamp + interval))) {
-			// pause detected
-			if (pool_.current().hasValue(TelemetryData::DataFix)) {
-				pool_.current().setPause(true);
-				pool_.current().setSpeed(0);
-				pool_.current().setAcceleration(0);
-				pool_.current().setElevation(sele);
-				pool_.current().setGrade(grade);
+		if (pause_detection_) {
+			if ((ss >= 0) && (data.timestamp() > (timestamp + interval))) {
+				// pause detected
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					pool_.current().setPause(true);
+					pool_.current().setSpeed(0);
+					pool_.current().setAcceleration(0);
+					pool_.current().setElevation(sele);
+					pool_.current().setGrade(grade);
 
-				for (int k=0; k<=ss-done; k++) {
-					pool_.previous(k).setPause(true);
+					for (int k=0; k<=ss-done; k++) {
+						pool_.previous(k).setPause(true);
 
-					if (pool_.previous(k).hasValue(TelemetryData::DataFix)) {
-						pool_.previous(k).setSpeed(0);
-						pool_.previous(k).setAcceleration(0);
-						pool_.previous(k).setElevation(sele);
-						pool_.previous(k).setGrade(grade);
+						if (pool_.previous(k).hasValue(TelemetryData::DataFix)) {
+							pool_.previous(k).setSpeed(0);
+							pool_.previous(k).setAcceleration(0);
+							pool_.previous(k).setElevation(sele);
+							pool_.previous(k).setGrade(grade);
+						}
 					}
+				
+					done = ss;
 				}
-			
-				done = ss;
 			}
 		}
 
@@ -1279,6 +1308,7 @@ void TelemetrySource::smooth(void) {
  * So compute:
  *  - grade
  *  - maxspeed
+ *  - verticalspeed
  */
 void TelemetrySource::fix(void) {
 	TelemetrySource::Point currentPoint;
@@ -1373,6 +1403,11 @@ void TelemetrySource::fix(void) {
 			if (currentPoint.hasValue(TelemetryData::DataAverageRideSpeed)) {
 				double avgridespeed = in_range ? prevPoint.avgridespeed_ + k * (nextPoint.avgridespeed_ - prevPoint.avgridespeed_) : prevPoint.avgridespeed_;
 				currentPoint.setAverageRideSpeed(avgridespeed);
+			}
+
+			if (currentPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
+				double verticalspeed = in_range ? prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_) : prevPoint.verticalspeed_;
+				currentPoint.setVerticalSpeed(verticalspeed);
 			}
 
 			currentPoint.setType(TelemetryData::TypeFixed);
@@ -1649,6 +1684,11 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 			double avgridespeed = in_range ? prevPoint.avgridespeed_ + k * (nextPoint.avgridespeed_ - prevPoint.avgridespeed_) : prevPoint.avgridespeed_;
 			point.setAverageRideSpeed(avgridespeed);
 		}
+
+		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && nextPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
+			double verticalspeed = in_range ? prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_) : prevPoint.verticalspeed_;
+			point.setVerticalSpeed(verticalspeed);
+		}
 		break;
 
 	case TelemetrySettings::MethodLinear:
@@ -1707,6 +1747,11 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataAverageRideSpeed) && curPoint.hasValue(TelemetryData::DataAverageRideSpeed)) {
 			double avgridespeed = in_range ? curPoint.avgridespeed_ + k * (curPoint.avgridespeed_ - prevPoint.avgridespeed_) : curPoint.avgridespeed_;
 			point.setAverageRideSpeed(avgridespeed);
+		}
+
+		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && curPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
+			double verticalspeed = in_range ? curPoint.verticalspeed_ + k * (curPoint.verticalspeed_ - prevPoint.verticalspeed_) : curPoint.verticalspeed_;
+			point.setVerticalSpeed(verticalspeed);
 		}
 		break;
 
@@ -1962,6 +2007,7 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 		// Telemetry data filter
 		source->skipBadPoint(settings.telemetryCheck());
+		source->setPauseDetection(settings.telemetryPauseDetection());
 		source->setFilter(settings.telemetryFilter());
 		source->setMethod(settings.telemetryMethod());
 		source->setRate(settings.telemetryRate());

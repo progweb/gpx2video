@@ -41,8 +41,9 @@ public:
 		DataElapsedTime = (1 << 13),      // activity duration between begin & end 
 		DataAverageSpeed = (1 << 14),     // average computed for duration time
 		DataAverageRideSpeed = (1 << 15), // average computed for ride time
+		DataVerticalSpeed = (1 << 16),
 
-		DataAll = (1 << 15) -1
+		DataAll = (1 << 16) -1
 	};
 
 	TelemetryData();
@@ -144,6 +145,10 @@ public:
 		return avgridespeed_;
 	}
 
+	const double& verticalspeed(void) const {
+		return verticalspeed_;
+	}
+
 	const int& lap(void) const {
 		return lap_;
 	}
@@ -196,6 +201,7 @@ protected:
 	double elapsedtime_;
 	double avgspeed_;
 	double avgridespeed_;
+	double verticalspeed_;
 
 	int lap_;
 	bool in_lap_;

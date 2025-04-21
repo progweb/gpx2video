@@ -179,6 +179,12 @@ public:
 			addValue(Data::DataAverageRideSpeed);
 		}
 
+		void setVerticalSpeed(double speed) {
+			verticalspeed_ = speed;
+
+			addValue(Data::DataVerticalSpeed);
+		}
+
 		void setLap(int lap) {
 			lap_ = lap;
 		}
@@ -282,6 +288,11 @@ public:
 			if (!hasValue(TelemetryData::DataAverageRideSpeed)) {
 				avgridespeed_ = point.avgridespeed_;
 				mask |= (point.has_value_ & DataAverageRideSpeed);
+			}
+
+			if (!hasValue(TelemetryData::DataVerticalSpeed)) {
+				verticalspeed_ = point.verticalspeed_;
+				mask |= (point.has_value_ & DataVerticalSpeed);
 			}
 
 			lap_ = point.lap_;
@@ -465,6 +476,7 @@ public:
 	void setNumberOfPoints(const unsigned long number);
 
 	void skipBadPoint(bool check);
+	void setPauseDetection(bool enable);
 
 	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
 	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
@@ -537,6 +549,7 @@ protected:
 
 	bool eof_;
 	bool check_;
+	bool pause_detection_;
 
 	int rate_;
 	int64_t offset_;

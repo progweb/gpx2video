@@ -16,6 +16,7 @@
 TelemetrySettings::TelemetrySettings(
 		int64_t offset,
 		bool check,
+		bool pause_detection,
 		TelemetrySettings::Method method,
 		int rate,
 //		TelemetrySettings::Smooth smooth_grade_method,
@@ -31,6 +32,7 @@ TelemetrySettings::TelemetrySettings(
 		, telemetry_to_("")
 		, telemetry_format_(format)
 		, telemetry_check_(check)
+		, telemetry_pause_detection_(pause_detection)
 		, telemetry_filter_(TelemetrySettings::FilterNone)
 		, telemetry_method_(method)
 		, telemetry_rate_(rate) {
@@ -110,6 +112,12 @@ const TelemetrySettings::Format& TelemetrySettings::telemetryFormat(void) const 
 const bool& TelemetrySettings::telemetryCheck(void) const {
 	return telemetry_check_;
 }
+
+
+const bool& TelemetrySettings::telemetryPauseDetection(void) const {
+	return telemetry_pause_detection_;
+}
+
 
 const TelemetrySettings::Filter& TelemetrySettings::telemetryFilter(void) const {
 	return telemetry_filter_;
@@ -305,6 +313,7 @@ void TelemetrySettings::dump(void) const {
 	std::cout << "Telemetry settings:" << std::endl;
 	std::cout << "  offset:             " << telemetry_offset_ << std::endl;
 	std::cout << "  skip bad point:     " << (telemetry_check_ ? "true" : "false") << std::endl;
+	std::cout << "  pause detection:    " << (telemetry_pause_detection_ ? "true" : "false") << std::endl;
 	std::cout << "  begin data range:   " << telemetry_begin_ << std::endl;
 	std::cout << "  end data range:     " << telemetry_end_ << std::endl;
 	std::cout << "  from compute range: " << telemetry_from_ << std::endl;

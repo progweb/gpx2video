@@ -27,6 +27,7 @@ public:
 			std::string to="",
 			int telemetry_offset=0,
 			bool telemetry_check=false,
+			bool telemetry_pause_detection=false,
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
@@ -45,6 +46,7 @@ public:
 			, TelemetrySettings(
 					telemetry_offset,
 					telemetry_check,
+					telemetry_pause_detection,
 					telemetry_method, 
 					telemetry_rate,
 					telemetry_format) {
