@@ -547,6 +547,8 @@ $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-fact
 $ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 track
 ```
 
+**--map-source** to select map provider. Map providers list is given by the option **--map-source-list**.
+
 Map settings: 
 
 ```xml
@@ -563,6 +565,7 @@ Map settings:
 </map>		
 ```
 
+**source** map provider.
 **zoom** value sets the map details.
 **factor** value applies a zoom factor as render.
 **marker** marker size in pixels.

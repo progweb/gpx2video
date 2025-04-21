@@ -48,7 +48,7 @@ static const struct option options[] = {
 	{ "map-source",            required_argument, 0, 0 },
 	{ "map-factor",            required_argument, 0, 0 },
 	{ "map-zoom",              required_argument, 0, 0 },
-	{ "map-list",              no_argument,       0, 0 },
+	{ "map-source-list",       no_argument,       0, 0 },
 	{ "extract-format",        required_argument, 0, 0 },
 	{ "extract-format-list",   no_argument,       0, 0 },
 	{ "gpx-begin",             required_argument, 0, 0 },
@@ -104,7 +104,6 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --map-factor              : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source              : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom                : Map zoom" << std::endl;
-	std::cout << "\t-    --map-list                : Dump supported map list" << std::endl;
 	std::cout << "\t-    --path-thick              : Path thick (default: 3.0)" << std::endl;
 	std::cout << "\t-    --path-border             : Path border (default: 1.4)" << std::endl;
 	std::cout << "\t- v, --verbose                 : Show trace" << std::endl;
@@ -113,6 +112,7 @@ static void print_usage(const std::string &name) {
 	std::cout << std::endl;
 	std::cout << "Option format:" << std::endl;
 	std::cout << "\t-    --extract-format-list     : Dump extract format supported" << std::endl;
+	std::cout << "\t-    --map-source-list         : Dump supported map providers list" << std::endl;
 	std::cout << "\t-    --telemetry-filter-list   : Dump telemetry filter supported" << std::endl;
 	std::cout << "\t-    --telemetry-method-list   : Dump telemetry method supported" << std::endl;
 	std::cout << "\t-    --telemetry-smooth-list   : Dump telemetry smooth supported" << std::endl;
@@ -539,7 +539,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				printf("Not yet implemented\n");
 				return 0;
 			}
-			else if (s && !strcmp(s, "map-list")) {
+			else if (s && !strcmp(s, "map-source-list")) {
 				setCommand(GPX2Video::CommandSource);
 				return 0;
 			}
