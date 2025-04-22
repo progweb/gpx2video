@@ -42,8 +42,9 @@ public:
 		DataAverageSpeed = (1 << 14),     // average computed for duration time
 		DataAverageRideSpeed = (1 << 15), // average computed for ride time
 		DataVerticalSpeed = (1 << 16),
+		DataHeading = (1 << 17),
 
-		DataAll = (1 << 16) -1
+		DataAll = (1 << 17) -1
 	};
 
 	TelemetryData();
@@ -111,6 +112,10 @@ public:
 
 	const double& distance(void) const {
 		return distance_;
+	}
+
+	const double& heading(void) const {
+		return heading_;
 	}
 
 	const double& grade(void) const {
@@ -192,6 +197,7 @@ protected:
 	int power_;
 
 	double distance_;
+	double heading_;
 	double duration_;
 	double grade_;
 	double speed_;

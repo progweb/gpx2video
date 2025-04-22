@@ -131,6 +131,12 @@ public:
 			addValue(Data::DataDistance);
 		}
 
+		void setHeading(double heading) {
+			heading_ = heading;
+
+			addValue(Data::DataHeading);
+		}
+
 		void setGrade(double grade) {
 			grade_ = grade;
 
@@ -250,6 +256,11 @@ public:
 				mask |= (point.has_value_ & DataDistance);
 			}
 
+			if (!hasValue(TelemetryData::DataHeading)) {
+				heading_ = point.heading_;
+				mask |= (point.has_value_ & DataHeading);
+			}
+
 			if (!hasValue(TelemetryData::DataSpeed)) {
 				speed_ = point.speed_;
 				mask |= (point.has_value_ & DataSpeed);
@@ -303,6 +314,7 @@ public:
 		}
 
 		double distanceTo(const Point &to);
+		double headingTo(const Point &to);
 	};
 
 	class PointPool {

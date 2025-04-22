@@ -96,7 +96,7 @@ void TelemetryData::writeData(size_t index) const {
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
-		ele_, grade_, verticalspeed_);  
+		ele_, grade_, heading_); //verticalspeed_);  
 }
 
 
@@ -109,6 +109,21 @@ double TelemetrySource::Point::distanceTo(const Point &to) {
 	gsic.Inverse(lat_, lon_, to.lat_, to.lon_, d);
 
 	return d;
+}
+
+
+double TelemetrySource::Point::headingTo(const Point &to) {
+	double azi1, azi2;
+
+	GeographicLib::Geodesic gsic(6378137.0, 1.0/298.2572);
+
+	// Maths
+	gsic.Inverse(lat_, lon_, to.lat_, to.lon_, azi1, azi2);
+
+	if (azi1 < 0)
+		azi1 += 380.0;
+
+	return azi1; //1 + 180.0;
 }
 
 
@@ -377,6 +392,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 
 	double duration = 0;
 	double distance = 0;
+	double heading = 0;
 	double ridetime = 0;
 	double elapsedtime = 0;
 	double speed = 0;
@@ -384,7 +400,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	double acceleration = 0;
 	double verticalspeed = 0;
 
-	GeographicLib::Math::real d;
+	GeographicLib::Math::real d, h;
 
 	TelemetrySource::Point prevPoint, curPoint;
 
@@ -404,7 +420,8 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 			return;
 
 		// Maths
-		d = curPoint.distanceTo(prevPoint);
+		d = prevPoint.distanceTo(curPoint);
+		h = prevPoint.headingTo(curPoint);
 
 		dc = (curPoint.hasValue(TelemetryData::DataFix)) ? d : 0;
 		dt = curPoint.ts_ - prevPoint.ts_;
@@ -419,6 +436,12 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		}
 		else
 			distance = curPoint.distance();
+
+		// Heading
+		if (force || !curPoint.hasValue(TelemetryData::DataHeading))
+			heading = h;
+		else
+			heading = curPoint.heading();
 
 		// Elapsed time
 		if (force || !curPoint.hasValue(TelemetryData::DataElapsedTime)) {
@@ -506,6 +529,9 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		// Distance
 		curPoint.setDistance(distance);
 
+		// Heading
+		curPoint.setHeading(heading);
+
 		// Duration, elasped time, ride itme
 		curPoint.setDuration(duration);
 		curPoint.setElapsedTime(elapsedtime);
@@ -551,7 +577,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	
 		// Clear flag
 		if (!enable && (curPoint.timestamp() < from_)) {
-			// Before first point, no data
+			// Before first point, no computed data
 			curPoint.clearValue(
 					TelemetryData::DataDuration
 					| TelemetryData::DataDistance
@@ -559,7 +585,6 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 					| TelemetryData::DataRideTime
 					| TelemetryData::DataAverageSpeed
 					| TelemetryData::DataAverageRideSpeed
-					| TelemetryData::DataVerticalSpeed
 				);
 		}
 
@@ -1307,6 +1332,7 @@ void TelemetrySource::smooth(void) {
  *  - elevation
  * So compute:
  *  - grade
+ *  - heading
  *  - maxspeed
  *  - verticalspeed
  */
@@ -1344,6 +1370,7 @@ void TelemetrySource::fix(void) {
 			// Check if we have to and able to compute data
 			in_range = inRange(currentPoint.timestamp());
 
+			// Compute for each point
 			if (currentPoint.hasValue(TelemetryData::DataSpeed)) {
 				double speed = prevPoint.speed_ + k * (nextPoint.speed_ - prevPoint.speed_);
 				currentPoint.setSpeed(speed);
@@ -1380,11 +1407,22 @@ void TelemetrySource::fix(void) {
 //					nextPoint.setGrade(grade);
 			}
 
+			if (currentPoint.hasValue(TelemetryData::DataHeading)) {
+				double heading = prevPoint.heading_ + k * (nextPoint.heading_ - prevPoint.heading_);
+				currentPoint.setHeading(heading);
+			}
+
 			if (currentPoint.hasValue(TelemetryData::DataAcceleration)) {
 				double acceleration = prevPoint.acceleration_ + k * (nextPoint.acceleration_ - prevPoint.acceleration_);
 				currentPoint.setAcceleration(acceleration);
 			}
 
+			if (currentPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
+				double verticalspeed = prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_);
+				currentPoint.setVerticalSpeed(verticalspeed);
+			}
+
+			// Compute if we are in the range defined by the user
 			if (currentPoint.hasValue(TelemetryData::DataDistance)) {
 				double distance = in_range ? prevPoint.distance_ + k * (nextPoint.distance_ - prevPoint.distance_) : prevPoint.distance_;
 				currentPoint.setDistance(distance);
@@ -1403,11 +1441,6 @@ void TelemetrySource::fix(void) {
 			if (currentPoint.hasValue(TelemetryData::DataAverageRideSpeed)) {
 				double avgridespeed = in_range ? prevPoint.avgridespeed_ + k * (nextPoint.avgridespeed_ - prevPoint.avgridespeed_) : prevPoint.avgridespeed_;
 				currentPoint.setAverageRideSpeed(avgridespeed);
-			}
-
-			if (currentPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
-				double verticalspeed = in_range ? prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_) : prevPoint.verticalspeed_;
-				currentPoint.setVerticalSpeed(verticalspeed);
 			}
 
 			currentPoint.setType(TelemetryData::TypeFixed);
@@ -1664,16 +1697,23 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataSpeed) && nextPoint.hasValue(TelemetryData::DataSpeed))
 			point.setSpeed(prevPoint.speed_ + k * (nextPoint.speed_ - prevPoint.speed_));
 
+		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && nextPoint.hasValue(TelemetryData::DataVerticalSpeed))
+			point.setVerticalSpeed(prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_));
+
 		if (prevPoint.hasValue(TelemetryData::DataAcceleration) && nextPoint.hasValue(TelemetryData::DataAcceleration))
 			point.setAcceleration(prevPoint.acceleration_ + k * (nextPoint.acceleration_ - prevPoint.acceleration_));
 
+		if (prevPoint.hasValue(TelemetryData::DataGrade) && nextPoint.hasValue(TelemetryData::DataGrade))
+			point.setGrade(prevPoint.grade_ + k * (nextPoint.grade_ - prevPoint.grade_));
+
+		if (prevPoint.hasValue(TelemetryData::DataHeading) && nextPoint.hasValue(TelemetryData::DataHeading))
+			point.setHeading(prevPoint.heading_ + k * (nextPoint.heading_ - prevPoint.heading_));
+
+		// Computed data in range
 		if (prevPoint.hasValue(TelemetryData::DataDistance) && nextPoint.hasValue(TelemetryData::DataDistance)) {
 			double distance = in_range ? prevPoint.distance_ + k * (nextPoint.distance_ - prevPoint.distance_) : prevPoint.distance_;
 			point.setDistance(distance);
 		}
-
-		if (prevPoint.hasValue(TelemetryData::DataGrade) && nextPoint.hasValue(TelemetryData::DataGrade))
-			point.setGrade(prevPoint.grade_ + k * (nextPoint.grade_ - prevPoint.grade_));
 
 		if (prevPoint.hasValue(TelemetryData::DataAverageSpeed) && nextPoint.hasValue(TelemetryData::DataAverageSpeed)) {
 			double avgspeed = in_range ? prevPoint.avgspeed_ + k * (nextPoint.avgspeed_ - prevPoint.avgspeed_) : prevPoint.avgspeed_;
@@ -1683,11 +1723,6 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataAverageRideSpeed) && nextPoint.hasValue(TelemetryData::DataAverageRideSpeed)) {
 			double avgridespeed = in_range ? prevPoint.avgridespeed_ + k * (nextPoint.avgridespeed_ - prevPoint.avgridespeed_) : prevPoint.avgridespeed_;
 			point.setAverageRideSpeed(avgridespeed);
-		}
-
-		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && nextPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
-			double verticalspeed = in_range ? prevPoint.verticalspeed_ + k * (nextPoint.verticalspeed_ - prevPoint.verticalspeed_) : prevPoint.verticalspeed_;
-			point.setVerticalSpeed(verticalspeed);
 		}
 		break;
 
@@ -1728,16 +1763,23 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataSpeed) && curPoint.hasValue(TelemetryData::DataSpeed))
 			point.setSpeed(curPoint.speed_ + k * (curPoint.speed_ - prevPoint.speed_));
 
+		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && curPoint.hasValue(TelemetryData::DataVerticalSpeed))
+			point.setVerticalSpeed(curPoint.verticalspeed_ + k * (curPoint.verticalspeed_ - prevPoint.verticalspeed_));
+
 		if (prevPoint.hasValue(TelemetryData::DataAcceleration) && curPoint.hasValue(TelemetryData::DataAcceleration))
 			point.setAcceleration(curPoint.acceleration_ + k * (curPoint.acceleration_ - prevPoint.acceleration_));
 
+		if (prevPoint.hasValue(TelemetryData::DataGrade) && curPoint.hasValue(TelemetryData::DataGrade))
+			point.setGrade(curPoint.grade_ + k * (curPoint.grade_ - prevPoint.grade_));
+
+		if (prevPoint.hasValue(TelemetryData::DataHeading) && curPoint.hasValue(TelemetryData::DataHeading))
+			point.setHeading(curPoint.heading_ + k * (curPoint.heading_ - prevPoint.heading_));
+
+		// Computed data in range
 		if (prevPoint.hasValue(TelemetryData::DataDistance) && curPoint.hasValue(TelemetryData::DataDistance)) {
 			double distance = in_range ? curPoint.distance_ + k * (curPoint.distance_ - prevPoint.distance_) : curPoint.distance_;
 			point.setDistance(distance);
 		}
-
-		if (prevPoint.hasValue(TelemetryData::DataGrade) && curPoint.hasValue(TelemetryData::DataGrade))
-			point.setGrade(curPoint.grade_ + k * (curPoint.grade_ - prevPoint.grade_));
 
 		if (prevPoint.hasValue(TelemetryData::DataAverageSpeed) && curPoint.hasValue(TelemetryData::DataAverageSpeed)) {
 			double avgspeed = in_range ? curPoint.avgspeed_ + k * (curPoint.avgspeed_ - prevPoint.avgspeed_) : curPoint.avgspeed_;
@@ -1747,11 +1789,6 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataAverageRideSpeed) && curPoint.hasValue(TelemetryData::DataAverageRideSpeed)) {
 			double avgridespeed = in_range ? curPoint.avgridespeed_ + k * (curPoint.avgridespeed_ - prevPoint.avgridespeed_) : curPoint.avgridespeed_;
 			point.setAverageRideSpeed(avgridespeed);
-		}
-
-		if (prevPoint.hasValue(TelemetryData::DataVerticalSpeed) && curPoint.hasValue(TelemetryData::DataVerticalSpeed)) {
-			double verticalspeed = in_range ? curPoint.verticalspeed_ + k * (curPoint.verticalspeed_ - prevPoint.verticalspeed_) : curPoint.verticalspeed_;
-			point.setVerticalSpeed(verticalspeed);
 		}
 		break;
 
@@ -1831,6 +1868,7 @@ void TelemetrySource::cleanData(TelemetryData &data, uint64_t timestamp) {
 
 			| TelemetryData::DataSpeed
 			| TelemetryData::DataGrade
+			| TelemetryData::DataHeading
 			| TelemetryData::DataAcceleration
 		);
 

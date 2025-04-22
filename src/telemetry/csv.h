@@ -32,6 +32,7 @@ public:
 
 		index_grade_ = -1;
 		index_distance_ = -1;
+		index_heading_ = -1;
 		index_speed_ = -1;
 		index_maxspeed_ = -1;
 		index_avgspeed_ = -1;
@@ -115,7 +116,7 @@ eof:
 		// Timestamp, Time, Total duration, Partial duration, RideTime, 
 		// Data, 
 		// Lat, Lon, Ele, 
-		// Grade, Distance, Speed, MaxSpeed, Average, Ride Average, 
+		// Grade, Distance, Heading, Speed, MaxSpeed, Average, Ride Average, 
 		// Cadence, Heartrate, Power, Lap
 		for (size_t i=0; i<columns.size(); i++) {
 			if (columns[i] == "Timestamp")
@@ -138,6 +139,8 @@ eof:
 				index_grade_ = i;
 			else if (columns[i] == "Distance")
 				index_distance_ = i;
+			else if (columns[i] == "Heading")
+				index_heading_ = i;
 			else if (columns[i] == "Speed")
 				index_speed_ = i;
 			else if (columns[i] == "MaxSpeed")
@@ -250,7 +253,7 @@ eof:
 		// 0: Timestamp, 1: Time, 2: Total duration, 3: Partial duration, 4: RideTime, 
 		// 5: Data, 
 		// 6: Lat, 7: Lon, 8: Ele, 
-		// 9:Grade, 10: Distance, 11: Speed, 12: MaxSpeed, 13: Average, 14: Ride Average, 
+		// 9: Grade, 10: Distance, 11: Speed, 12: MaxSpeed, 13: Average, 14: Ride Average, 
 		// 15: Cadence, 16: Heartrate, 17: Power, 18: Lap
 		point.setLine(line_);
 
@@ -278,6 +281,9 @@ eof:
 
 		if (index_distance_ != -1)
 			point.setDistance(strtod(columns[index_distance_].c_str(), NULL));
+
+		if (index_heading_ != -1)
+			point.setHeading(strtod(columns[index_heading_].c_str(), NULL));
 
 		if (index_speed_ != -1)
 			point.setSpeed(strtod(columns[index_speed_].c_str(), NULL));
@@ -328,6 +334,7 @@ private:
 
 	int index_grade_;
 	int index_distance_;
+	int index_heading_;
 	int index_speed_;
 	int index_maxspeed_;
 	int index_avgspeed_;

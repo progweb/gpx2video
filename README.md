@@ -391,6 +391,7 @@ Node elements are:
 
 **type** gauges supported are:
   - speed, maxspeed, avgspeed, avgridespeed
+  - heading, vspeed
   - grade, elevation
   - date, time, duration
   - position
@@ -427,6 +428,18 @@ The **display** default value is true.
 ```
 
 **unit** values are: mph or kph.
+
+
+#### vertical speed widget
+
+```xml
+<widget>
+	<type>vspeed</type>
+	<unit>mps</unit>
+</widget>		
+```
+
+**unit** values are: mps.
 
 
 #### distance widget
@@ -669,6 +682,7 @@ As you use **compute** command, other settings permit to smooth data:
 ```bash
 $ ./gpxtools -i ACTIVITY.gpx \
     --telemetry-check=true \
+    --telemetry-pause_detection=true \
 	--telemetry-filter=1 \
 	--telemetry-smooth=data=speed,method=1,points=2 \
 	--telemetry-method=3 --telemtry-rate=500 \
@@ -676,6 +690,8 @@ $ ./gpxtools -i ACTIVITY.gpx \
 ```
 
 **--telemetry-check** drops invalid points, before compute.
+
+**--telemetry-pause-detection** detects pause and adjust speed and other data.
 
 **--telemetry-filter** filter and update all incoherent points, then compute telemetry data.
 

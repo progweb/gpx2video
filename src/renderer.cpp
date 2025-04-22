@@ -20,6 +20,7 @@
 #include "widgets/distance.h"
 #include "widgets/duration.h"
 #include "widgets/grade.h"
+#include "widgets/heading.h"
 #include "widgets/elevation.h"
 #include "widgets/cadence.h"
 #include "widgets/heartrate.h"
@@ -417,6 +418,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = AvgRideSpeedWidget::create(app_);
 	else if (s == "grade") 
 		widget = GradeWidget::create(app_);
+	else if (s == "heading") 
+		widget = HeadingWidget::create(app_);
 	else if (s == "image")
 		widget = ImageWidget::create(app_);
 	else if (s == "elevation") 
