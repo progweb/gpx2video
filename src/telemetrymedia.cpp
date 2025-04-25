@@ -82,13 +82,13 @@ void TelemetryData::dump(void) {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Grade  | VSpeed \n");
-	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+--------+--------\n");
+	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Head | Grade \n");
+	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+------+-------\n");
 }
 
 
 void TelemetryData::writeData(size_t index) const {
-	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %5.1f%% | %6.1f\n",
+	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %4d° | %5.1f%%\n",
 		index,
 		line_,
 		type2string(),
@@ -96,7 +96,7 @@ void TelemetryData::writeData(size_t index) const {
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
-		ele_, grade_, heading_); //verticalspeed_);  
+		ele_, (int) heading_, grade_);
 }
 
 
@@ -601,6 +601,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 			curPoint.setDistance(0);
 			curPoint.setDuration(0);
 			curPoint.setRideTime(0);
+			curPoint.setHeading(pool_.next().heading());
 		}
 
 		curPoint.setElapsedTime(0);
@@ -657,6 +658,13 @@ bool TelemetrySource::load(void) {
 		previous = point;
 	}
 
+	// Compute data for last point
+	pool_.seek(1);
+	compute_i(data);
+
+	pool_.reset();
+
+	// Compute first point again
 	pool_.seek(1);
 	compute_i(data);
 
@@ -789,6 +797,9 @@ void TelemetrySource::compute(void) {
 				name().c_str(),
 				pause_detection_ ? "enabled" : "disabled");
 	}
+
+	if ((filter_ == TelemetrySettings::FilterNone) && !pause_detection_)
+		return;
 
 	// Start elevation
 	elevation = pool_.first().elevation();

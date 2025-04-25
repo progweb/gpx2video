@@ -98,6 +98,8 @@ eof:
 	}
 
 	bool readAndParseHeader() {
+		std::string name;
+
 		std::string line;
 
 		std::vector<std::string> columns;
@@ -119,47 +121,49 @@ eof:
 		// Grade, Distance, Heading, Speed, MaxSpeed, Average, Ride Average, 
 		// Cadence, Heartrate, Power, Lap
 		for (size_t i=0; i<columns.size(); i++) {
-			if (columns[i] == "Timestamp")
+			name = capitalize(columns[i]);
+
+			if (name == "Timestamp")
 				index_timestamp_ = i;
-			else if (columns[i] == "Total duration")
+			else if (name == "Total Duration")
 				index_total_duration_ = i;
-			else if (columns[i] == "Partial duration")
+			else if (name == "Partial Duration")
 				index_partial_duration_ = i;
-			else if (columns[i] == "RideTime")
+			else if (name == "Ride Time")
 				index_ridetime_ = i;
-			else if (columns[i] == "Data")
+			else if (name == "Data")
 				index_data_ = i;
-			else if ((columns[i] == "Lat") || (columns[i] == "Latitude"))
+			else if ((name == "Lat") || (name == "Latitude"))
 				index_latitude_ = i;
-			else if ((columns[i] == "Lon") || (columns[i] == "Longitude"))
+			else if ((name == "Lon") || (name == "Longitude"))
 				index_longitude_ = i;
-			else if ((columns[i] == "Ele") || (columns[i] == "Elevation"))
+			else if ((name == "Ele") || (name == "Elevation"))
 				index_elevation_ = i;
-			else if (columns[i] == "Grade")
+			else if (name == "Grade")
 				index_grade_ = i;
-			else if (columns[i] == "Distance")
+			else if (name == "Distance")
 				index_distance_ = i;
-			else if (columns[i] == "Heading")
+			else if (name == "Heading")
 				index_heading_ = i;
-			else if (columns[i] == "Speed")
+			else if (name == "Speed")
 				index_speed_ = i;
-			else if (columns[i] == "MaxSpeed")
+			else if (name == "Max Speed")
 				index_maxspeed_ = i;
-			else if (columns[i] == "Average")
+			else if (name == "Average")
 				index_avgspeed_ = i;
-			else if (columns[i] == "Ride Average")
+			else if (name == "Ride Average")
 				index_avgridespeed_ = i;
-			else if (columns[i] == "VerticalSpeed")
+			else if ((name == "Vspeed") || (name == "Vertical Speed"))
 				index_verticalspeed_ = i;
-			else if (columns[i] == "Cadence")
+			else if (name == "Cadence")
 				index_cadence_ = i;
-			else if (columns[i] == "Heartrate")
+			else if (name == "Heartrate")
 				index_heartrate_ = i;
-			else if (columns[i] == "Temperature")
+			else if ((name == "Temp") || (name == "Temperature"))
 				index_temperature_ = i;
-			else if (columns[i] == "Power")
+			else if (name == "Power")
 				index_power_ = i;
-			else if (columns[i] == "Lap")
+			else if (name == "Lap")
 				index_lap_ = i;
 		}
 

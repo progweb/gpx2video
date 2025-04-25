@@ -13,6 +13,7 @@ int mkpath(std::string &path, mode_t mode);
 
 void rmpath(std:: string path);
 
+std::string capitalize(std::string s);
 
 class IndentingOStreambuf : public std::streambuf {
 	std::streambuf *myDest;

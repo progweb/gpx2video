@@ -657,6 +657,29 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
 
 gpx2video accepts the same options that gpxtools.
 
+CSV format is given by gpx2video or gpxtools. Columns (no case sensitive) supported are:
+  - Timestamp (in ms)
+  - Total Duration (seconds)
+  - Partial Duration (seconds)
+  - Ride Time (seconds)
+  - Data (U: Unknown, M: Measured, F: Fixed, P: Predicted, C: Unchanged, E: Error)
+  - Lat / Latitude
+  - Lon / Longitude
+  - Ele / Elevation
+  - Grade
+  - Distance (meter)
+  - Heading (degrees)
+  - Speed (kph)
+  - Max Speed (kph)
+  - Average (kph)
+  - Ride Average (kph)
+  - Vertical Speed (mps)
+  - Cadence
+  - Heartrate (bpm)
+  - Temperature (degrees)
+  - Power
+  - Lap
+
 
 ## Telemetry tools
 

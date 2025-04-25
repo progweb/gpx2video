@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <string>
+#include <cstring>
 
-#include <string.h>
 #include <limits.h>
 #include <sys/stat.h>
 #include <errno.h>
@@ -104,5 +104,28 @@ void rmpath(std::string path) {
 	}   
 
 	::remove(path.c_str());
+}
+
+
+std::string capitalize(std::string s) {
+    bool cap = true;
+
+	unsigned int i;
+
+	std::string input(s);
+
+    for(i=0; i<=input.length(); i++) {
+        if (isalpha(input[i])) {
+			if (cap == true)
+            	input[i] = toupper(input[i]);
+			else
+				input[i] = tolower(input[i]);
+            cap = false;
+        }
+        else if (isspace(s[i]))
+            cap = true;
+    }
+
+	return input;
 }
 
