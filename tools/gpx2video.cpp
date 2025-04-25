@@ -414,6 +414,8 @@ int GPX2Video::parseTelemetrySmoothArg(char *arg,
 				type = TelemetryData::DataElevation;
 			else if (name == "acceleration")
 				type = TelemetryData::DataAcceleration;
+			else if (name == "verticalspeed")
+				type = TelemetryData::DataVerticalSpeed;
 			else 
 				result = -1;
 			break;
@@ -475,6 +477,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	// By default, enable acceleration smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_acceleration_method = TelemetrySettings::SmoothWindowedMovingAverage;
 	int telemetry_smooth_acceleration_points = 2;
+	// By default, enable verticalspeed smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_verticalspeed_points = 2;
 
 	// Video encoder settings
 	ExportCodec::Codec video_codec = ExportCodec::CodecH264;
@@ -635,6 +640,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 					telemetry_smooth_acceleration_points = number;
 					break;
 
+				case TelemetryData::DataVerticalSpeed:
+					telemetry_smooth_verticalspeed_method = method;
+					telemetry_smooth_verticalspeed_points = number;
+					break;
+
 				case TelemetryData::DataAll:
 					telemetry_smooth_grade_method = method;
 					telemetry_smooth_grade_points = number;
@@ -647,6 +657,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 					telemetry_smooth_acceleration_method = method;
 					telemetry_smooth_acceleration_points = number;
+
+					telemetry_smooth_verticalspeed_method = method;
+					telemetry_smooth_verticalspeed_points = number;
 					break;
 
 				default:
@@ -961,6 +974,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		telemetry_smooth_elevation_points,
 		telemetry_smooth_acceleration_method,
 		telemetry_smooth_acceleration_points,
+		telemetry_smooth_verticalspeed_method,
+		telemetry_smooth_verticalspeed_points,
 		video_codec,
 		video_hw_device,
 		video_preset,
@@ -1151,6 +1166,9 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
+
 			telemetry = Telemetry::create(app, telemetrySettings);
 			app.append(telemetry);
 		}
@@ -1191,6 +1209,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 			// Create cache directories
 			cache = Cache::create(app);
@@ -1253,6 +1274,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 			// Create cache directories
 			cache = Cache::create(app);

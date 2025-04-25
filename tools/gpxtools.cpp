@@ -198,6 +198,8 @@ int GPXTools::parseTelemetrySmoothArg(char *arg,
 				type = TelemetryData::DataElevation;
 			else if (name == "acceleration")
 				type = TelemetryData::DataAcceleration;
+			else if (name == "verticalspeed")
+				type = TelemetryData::DataVerticalSpeed;
 			else 
 				result = -1;
 			break;
@@ -249,6 +251,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	// By default, disable acceleration smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_acceleration_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_acceleration_points = 2;
+	// By default, enable verticalspeed smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method = TelemetrySettings::SmoothNone;
+	int telemetry_smooth_verticalspeed_points = 2;
 
 	const char *s;
 
@@ -343,6 +348,11 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 					telemetry_smooth_acceleration_points = number;
 					break;
 
+				case TelemetryData::DataVerticalSpeed:
+					telemetry_smooth_verticalspeed_method = method;
+					telemetry_smooth_verticalspeed_points = number;
+					break;
+
 				case TelemetryData::DataAll:
 					telemetry_smooth_grade_method = method;
 					telemetry_smooth_grade_points = number;
@@ -355,6 +365,9 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 
 					telemetry_smooth_acceleration_method = method;
 					telemetry_smooth_acceleration_points = number;
+
+					telemetry_smooth_verticalspeed_method = method;
+					telemetry_smooth_verticalspeed_points = number;
 					break;
 
 				default:
@@ -476,6 +489,8 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		telemetry_smooth_elevation_points,
 		telemetry_smooth_acceleration_method,
 		telemetry_smooth_acceleration_points,
+		telemetry_smooth_verticalspeed_method,
+		telemetry_smooth_verticalspeed_points,
 		format)
 	);
 
@@ -581,6 +596,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+
+			settings.setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);

@@ -584,6 +584,9 @@ protected:
 	enum TelemetrySettings::Smooth smooth_acceleration_method_;
 	int smooth_acceleration_points_;
 
+	enum TelemetrySettings::Smooth smooth_verticalspeed_method_;
+	int smooth_verticalspeed_points_;
+
 	KalmanFilter kalman_;
 };
 

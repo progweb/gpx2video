@@ -45,6 +45,7 @@ TelemetrySettings::TelemetrySettings(
 	telemetry_smooth_speed_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_elevation_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_acceleration_points_ = telemetry_smooth_default_points_;
+	telemetry_smooth_verticalspeed_points_ = telemetry_smooth_default_points_;
 
 //	telemetry_smooth_grade_points_ = smooth_grade_points;
 //	telemetry_smooth_speed_points_ = smooth_speed_points;
@@ -158,6 +159,10 @@ const TelemetrySettings::Smooth& TelemetrySettings::telemetrySmoothMethod(Teleme
 		return telemetry_smooth_acceleration_method_;
 		break;
 
+	case TelemetryData::DataVerticalSpeed:
+		return telemetry_smooth_verticalspeed_method_;
+		break;
+
 	default:
 		return telemetry_smooth_default_method_;
 		break;
@@ -200,6 +205,14 @@ void TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::Data type, Telem
 		telemetry_smooth_acceleration_method_ = method;
 		break;
 
+	case TelemetryData::DataVerticalSpeed:
+		if (method == TelemetrySettings::SmoothButterworth) {
+			log_error("Smooth method not yet suppored");
+			return;
+		}
+		telemetry_smooth_verticalspeed_method_ = method;
+		break;
+
 	default:
 		// Not yet supported
 		break;
@@ -225,6 +238,10 @@ const int& TelemetrySettings::telemetrySmoothPoints(TelemetryData::Data type) co
 		return telemetry_smooth_acceleration_points_;
 		break;
 
+	case TelemetryData::DataVerticalSpeed:
+		return telemetry_smooth_verticalspeed_points_;
+		break;
+
 	default:
 		return telemetry_smooth_default_points_;
 	}
@@ -247,6 +264,10 @@ void TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::Data type, int n
 
 	case TelemetryData::DataAcceleration:
 		telemetry_smooth_acceleration_points_ = number;
+		break;
+
+	case TelemetryData::DataVerticalSpeed:
+		telemetry_smooth_verticalspeed_points_ = number;
 		break;
 
 	default:

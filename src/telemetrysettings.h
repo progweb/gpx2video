@@ -119,12 +119,14 @@ private:
 	TelemetrySettings::Smooth telemetry_smooth_speed_method_;
 	TelemetrySettings::Smooth telemetry_smooth_elevation_method_;
 	TelemetrySettings::Smooth telemetry_smooth_acceleration_method_;
+	TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method_;
 
 	int telemetry_smooth_default_points_;
 	int telemetry_smooth_grade_points_;
 	int telemetry_smooth_speed_points_;
 	int telemetry_smooth_elevation_points_;
 	int telemetry_smooth_acceleration_points_;
+	int telemetry_smooth_verticalspeed_points_;
 };
 
 

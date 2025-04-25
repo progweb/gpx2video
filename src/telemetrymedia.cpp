@@ -158,6 +158,9 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 	setSmoothMethod(TelemetryData::DataAcceleration, TelemetrySettings::SmoothNone);
 	setSmoothPoints(TelemetryData::DataAcceleration, 0);
 
+	setSmoothMethod(TelemetryData::DataVerticalSpeed, TelemetrySettings::SmoothNone);
+	setSmoothPoints(TelemetryData::DataVerticalSpeed, 0);
+
 	kalman_ = alloc_filter_velocity2d(10.0);
 }
 
@@ -235,6 +238,10 @@ void TelemetrySource::setSmoothMethod(enum TelemetryData::Data type, enum Teleme
 		smooth_acceleration_method_ = method;
 		break;
 
+	case TelemetryData::DataVerticalSpeed:
+		smooth_verticalspeed_method_ = method;
+		break;
+
 	default:
 		// Not yet supported
 		break;
@@ -260,6 +267,10 @@ void TelemetrySource::setSmoothPoints(enum TelemetryData::Data type, int number)
 
 	case TelemetryData::DataAcceleration:
 		smooth_acceleration_points_ = number;
+		break;
+
+	case TelemetryData::DataVerticalSpeed:
+		smooth_verticalspeed_points_ = number;
 		break;
 
 	default:
@@ -937,6 +948,7 @@ void TelemetrySource::smooth_step_one(void) {
 
 	TelemetrySource::Point nextPoint, previousPoint;
 
+	log_call();
 
 	speed_window = (smooth_speed_method_ == TelemetrySettings::SmoothWindowedMovingAverage) ? (smooth_speed_points_ * 2) + 1 : 0;
 	elevation_window = (smooth_elevation_method_ == TelemetrySettings::SmoothWindowedMovingAverage) ? (smooth_elevation_points_ * 2) + 1 : 0;
@@ -1168,16 +1180,22 @@ void TelemetrySource::smooth_step_one(void) {
 
 void TelemetrySource::smooth_step_two(void) {
 	int grade_count = 0;
+	int verticalspeed_count = 0;
 
 	size_t grade_window = (smooth_grade_points_ * 2) + 1;
+	size_t verticalspeed_window = 0;
 
 	double grade_sum = 0;
+	double verticalspeed_sum = 0;
 
 	std::deque<Point> grade_points;
+	std::deque<Point> verticalspeed_points;
 
 	TelemetrySource::Point nextPoint, previousPoint;
 
 	log_call();
+
+	verticalspeed_window = (smooth_verticalspeed_method_ == TelemetrySettings::SmoothWindowedMovingAverage) ? (smooth_verticalspeed_points_ * 2) + 1 : 0;
 
 	switch (smooth_grade_method_) {
 	case TelemetrySettings::SmoothWindowedMovingAverage:
@@ -1282,6 +1300,75 @@ void TelemetrySource::smooth_step_two(void) {
 	}
 
 	pool_.reset();
+
+	if (verticalspeed_window < 2)
+		return;
+
+	// Fill 'verticalspeed' window
+	for (size_t i=0; i<verticalspeed_window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		verticalspeed_points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			verticalspeed_sum += nextPoint.verticalspeed();
+			verticalspeed_count += 1;
+		}
+	}
+
+	// Move to first point
+	pool_.seek(1);
+
+	// Compute average value for each point
+	while (!pool_.empty()) {
+		if (pool_.current().type() != TelemetryData::TypeError) {
+			// verticalspeed
+			//-------
+
+			if (verticalspeed_window > 1) {
+				// Add new point
+				nextPoint = pool_.next(verticalspeed_window/2 - 1);
+
+				// Save point
+				verticalspeed_points.emplace_back(nextPoint);
+
+				if (nextPoint.type() != TelemetryData::TypeUnknown) {
+					if (nextPoint.hasValue(TelemetryData::DataFix)) {
+						verticalspeed_sum += nextPoint.verticalspeed();
+						verticalspeed_count += 1;
+					}
+				}
+
+				// Remove old point
+				if (verticalspeed_points.size() > verticalspeed_window) {
+					previousPoint = verticalspeed_points.front();
+					verticalspeed_points.pop_front();
+
+					if (previousPoint.hasValue(TelemetryData::DataFix)) {
+						verticalspeed_sum -= previousPoint.verticalspeed();
+						verticalspeed_count -= 1;
+					}
+				}
+
+				// Compute 'verticalspeed' smooth values
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					if (!pool_.current().isPause()) {
+						pool_.current().setSpeed(verticalspeed_sum / verticalspeed_count);
+					}
+				}
+			}
+		}
+
+		// Move to next
+		pool_.seek(1);
+	}
+
+	// Reset
+	pool_.reset();
 }
 
 
@@ -1290,6 +1377,7 @@ void TelemetrySource::smooth(void) {
 	size_t speed_window = (smooth_speed_points_ * 2) + 1;
 	size_t elevation_window = (smooth_elevation_points_ * 2) + 1;
 	size_t acceleration_window = (smooth_acceleration_points_ * 2) + 1;
+	size_t verticalspeed_window = (smooth_verticalspeed_points_ * 2) + 1;
 
 	log_call();
 
@@ -1320,6 +1408,12 @@ void TelemetrySource::smooth(void) {
 					acceleration_window, smooth_acceleration_points_);
 		else
 			log_info("     - acceleration: no");
+
+		if ((smooth_verticalspeed_method_ == TelemetrySettings::SmoothWindowedMovingAverage) && (verticalspeed_window > 1))
+			log_info("     - verticalspeed: window size '%ld' (+/- %d points)", 
+					verticalspeed_window, smooth_verticalspeed_points_);
+		else
+			log_info("     - verticalspeed: no");
 
 		// 2/
 		log_info("%s: Smooth telemetry data using 'butterworth' filter ", name().c_str());
@@ -2073,6 +2167,9 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 		source->setSmoothMethod(TelemetryData::DataAcceleration, settings.telemetrySmoothMethod(TelemetryData::DataAcceleration));
 		source->setSmoothPoints(TelemetryData::DataAcceleration, settings.telemetrySmoothPoints(TelemetryData::DataAcceleration));
+
+		source->setSmoothMethod(TelemetryData::DataVerticalSpeed, settings.telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
+		source->setSmoothPoints(TelemetryData::DataVerticalSpeed, settings.telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 		// Load telemetry data
 		source->loadData();

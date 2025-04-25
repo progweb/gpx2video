@@ -39,6 +39,8 @@ public:
 			int telemetry_smooth_elevation_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_acceleration_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_acceleration_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_verticalspeed_points=0,
 			TelemetrySettings::Format telemetry_format=TelemetrySettings::FormatAuto)
 			: GPXApplication::Settings(
 					gpx_file, output_file,
@@ -65,6 +67,9 @@ public:
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, telemetry_smooth_verticalspeed_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, telemetry_smooth_verticalspeed_points);
 		}
 
 		void dump(void) const {
