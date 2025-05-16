@@ -39,6 +39,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	, ref_builder_(ref_builder)
 	, media_file_("") 
 	, layout_file_("") 
+	, audio_device_(NULL)
 	, media_(NULL)
 	, renderer_(NULL) {
 	log_call();
@@ -143,6 +144,10 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 //	// Register application handle
 //	video_area_->set_application(this);
 
+	// Create audio device
+	audio_device_ = GPX2VideoAudioDevice::create();
+	video_area_->set_audio_device(audio_device_);
+
 	// Create renderer context
 	renderer_ = GPX2VideoRenderer::create(*this, renderer_settings_, telemetry_settings_);
 	video_area_->set_renderer(renderer_);
@@ -167,19 +172,6 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 		throw std::runtime_error("No \"info_stack\" object in window.ui");
 
 	info_stack_->property_visible_child().signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_stack_changed));
-
-//	// WIDGET TEST
-//	TimeWidget *widget = TimeWidget::create(*this);
-//	widget->setPosition(30, 30);
-//	widget->setSize(500, 100);
-//	widget->setPadding(VideoWidget::PaddingAll, 5);
-//	widget->setBorder(2);
-//	widget->setTextColor("#ffffffff");
-//	widget->setBorderColor("#0000ffff");
-//	widget->setBackgroundColor("#00000099");
-//	widget->setLabel("TIME");
-//	widget->initialize();
-//	video_area_->widget_append(widget);
 }
 
 
@@ -320,6 +312,10 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 
 	auto filename = file->get_parse_name();
 
+	// Register telemetry file
+	settings().setInputfile(filename);
+
+	// Update telemetry settings
 	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
 
 	// Load telemetry data

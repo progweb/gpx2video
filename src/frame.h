@@ -62,6 +62,9 @@ public:
 	const int64_t& timestamp(void) const;
 	void setTimestamp(const int64_t &timestamp);
 
+	const double& duration(void) const;
+	void setDuration(const double &duration);
+
 	uint8_t * data(void) const;
 	const uint8_t * constData(void) const;
 
@@ -75,6 +78,8 @@ private:
 	int linesize_;
 
 	int64_t timestamp_;
+
+	double duration_;
 
 	bool allocated_;
 	uint8_t *data_;

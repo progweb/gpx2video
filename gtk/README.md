@@ -35,10 +35,10 @@ xdg-desktop-menu forceupdate
 ### Build on host
 
 To build gpx2video, please install all gpx2video tool dependencies 
-and gtk-4 libraries (on Debian):
+and gtk-4 and pulseaudio libraries (on Debian):
 
 ```bash
-apt-get install libgtkmm-4.0-dev libglibmm-2.68-dev libepoxy-dev
+apt-get install libpulse-dev libgtkmm-4.0-dev libglibmm-2.68-dev libepoxy-dev libglm-dev
 ```
 
 Then build in using cmake tools:

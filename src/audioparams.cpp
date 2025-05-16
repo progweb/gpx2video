@@ -6,6 +6,7 @@ AudioParams::AudioParams()
 	: sample_rate_(0)
 	, format_(AudioParams::FormatInvalid)
 	, channel_layout_(0) {
+	time_base_ = av_make_q(1, sampleRate());
 }
 
 
@@ -15,6 +16,7 @@ AudioParams::AudioParams(const int &sample_rate,
 	: sample_rate_(sample_rate)
 	, format_(format)
 	, channel_layout_(channel_layout) {
+	time_base_ = av_make_q(1, sampleRate());
 }
 
 
@@ -37,6 +39,16 @@ const uint64_t& AudioParams::channelLayout(void) const {
 }
 
 
+const AVRational& AudioParams::timeBase(void) const {
+	return time_base_;
+}
+
+
+void AudioParams::setTimeBase(const AVRational &time_base) {
+	time_base_ = time_base;
+}
+
+
 int AudioParams::channelCount() const { 
 #ifdef HAVE_FFMPEG_CH_LAYOUT
 	AVChannelLayout channel_layout = {};
@@ -48,6 +60,15 @@ int AudioParams::channelCount() const {
 	return av_get_channel_layout_nb_channels(channelLayout());
 #endif
 }   
+
+
+int AudioParams::bytesPerSecond(void) const {
+	return av_samples_get_buffer_size(NULL,
+			channelCount(),
+			sample_rate_,
+			FFmpegUtils::getFFmpegSampleFormat(format_),
+			1);
+}
 
 
 int AudioParams::bytesPerSamplePerChannel() const

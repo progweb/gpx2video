@@ -18,97 +18,19 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include <pulse/stream.h>
+
 #include "../../src/stream.h"
 #include "../../src/decoder.h"
 #include "../../src/application.h"
 #include "../../src/videowidget.h"
 #include "../../src/telemetrymedia.h"
 #include "../../src/telemetrysettings.h"
+#include "audiodevice.h"
 #include "videowidget.h"
 #include "renderer.h"
 #include "shader.h"
-
-
-
-class GPX2VideoStream {
-public:
-	GPX2VideoStream();
-	~GPX2VideoStream();
-
-	MediaContainer * media();
-
-//	bool open(const Glib::ustring &media_file);
-	bool open(MediaContainer *container);
-	void close(void);
-
-	void init(void);
-	void load(FramePtr frame);
-	void render(GPX2VideoShader *shader);
-
-	bool play(void);
-	void stop(void);
-	void seek(double pos); //, int64_t rel);
-
-	int width(void) const;
-	int height(void) const;
-
-	double duration(void) const;
-	double timeBase(void) const;
-
-	int nbChannels(void) const;
-
-	VideoParams::Format format(void) const;
-
-	Glib::Dispatcher& data_ready(void) {
-		return dispatcher_;
-	}
-
-	void nextFrame(void);
-
-	FramePtr getFrame(void);
-	FramePtr getNextFrame(void);
-
-	void flushFrame(void);
-
-	double getFrameDuration(void);
-
-protected:
-	bool read(void);
-
-	void run(void);
-	void wait(void);
-
-private:
-	bool loop_;
-	bool is_init_;
-
-	std::thread* thread_;
-	Glib::Dispatcher dispatcher_;
-
-	mutable std::mutex mutex_;
-	mutable std::condition_variable cond_;
-
-	MediaContainer *container_;
-
-	Decoder *decoder_video_;
-
-	std::deque<FramePtr> queue_;
-	int frame_time_;
-	FramePtr frame_;
-
-	bool seek_req_;
-	double seek_pos_;
-
-	int index_;
-	size_t queue_size_;
-	uint8_t **buffer_;
-
-	GLuint vao_ = 0;
-	GLuint vbo_ = 0;
-	GLuint ebo_ = 0;
-	GLuint pbo_[5];
-	GLuint texture_;
-};
+#include "stream.h"
 
 
 class GPX2VideoArea : public Gtk::GLArea {
@@ -122,6 +44,7 @@ public:
 	}
 
 	void set_renderer(GPX2VideoRenderer *renderer);
+	void set_audio_device(GPX2VideoAudioDevice *audio_device);
 	void set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment);
 	void configure_adjustment(void);
 	void update_adjustment(double value);
@@ -130,7 +53,6 @@ public:
 	TelemetrySource * telemetry(void);
 	void set_telemetry(TelemetrySource *source);
 
-//	void open_stream(const Glib::ustring &video_file);
 	void open_stream(MediaContainer *container);
 	void close_stream(void);
 	void stream_toggle_pause(void);
@@ -195,6 +117,8 @@ private:
 
 	GPXApplication &app_;
 
+	GPX2VideoAudioDevice *audio_device_;
+
 	sigc::connection timer_;
 
 	GPX2VideoStream stream_;
@@ -206,14 +130,9 @@ private:
 
 
 
-//	unsigned int real_duration_ms_;
-//
-//	uint64_t last_timecode_ms_ = 0;
-
 	TelemetrySource *source_;
 	TelemetryData data_;
 
-//	GPX2VideoWidget *widget_;
 	GPX2VideoRenderer *renderer_;
 };
 

@@ -9,7 +9,8 @@
 MediaContainer::MediaContainer() 
 	: offset_(0) 
 	, start_time_(0)
-	, creation_time_(0) {
+	, creation_time_(0) 
+	, max_frame_duration_(0) {
 }
 
 
@@ -69,6 +70,16 @@ int MediaContainer::timeOffset(void) const {
 
 void MediaContainer::setTimeOffset(const int& offset) {
 	offset_ = offset;
+}
+
+
+double MediaContainer::maxFrameDuration(void) const {
+	return max_frame_duration_;
+}
+
+
+void MediaContainer::setMaxFrameDuration(double duration) {
+	max_frame_duration_ = duration;
 }
 
 

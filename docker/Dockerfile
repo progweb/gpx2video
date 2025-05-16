@@ -28,6 +28,8 @@ RUN apt-get update \
 		\
         libglm-dev \
 		libgtkmm-4.0-dev \
+		\
+		libpulse-dev \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean all
 

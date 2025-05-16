@@ -60,6 +60,9 @@ include_directories(${LIBSWSCALE_INCLUDE_DIRS})
 PKG_CHECK_MODULES(LIBFREETYPE REQUIRED freetype2)
 include_directories(${LIBFREETYPE_INCLUDE_DIRS})
 
+PKG_CHECK_MODULES(LIBPULSE REQUIRED libpulse-mainloop-glib)
+include_directories(${LIBPULSE_INCLUDE_DIRS})
+
 FIND_PACKAGE(OpenImageIO 2.1.12 REQUIRED)
 
 # 
@@ -150,11 +153,13 @@ set(GPX2VIDEO_SOURCES
 	src/about.cpp
 	src/application.cpp
 	src/area.cpp
+	src/audiodevice.cpp
 	src/log.c
 	src/main.cpp
 	src/prefs.cpp
 	src/renderer.cpp
 	src/shader.cpp
+	src/stream.cpp
 	src/window.cpp
 	src/videoframe.cpp
 	src/widgetframe.cpp
@@ -170,5 +175,5 @@ set(GPX2VIDEO_SOURCES
 # BINARIES
 #
 add_executable(gpx2video-gtk ${GPX2VIDEO_SOURCES} ${GPX2VIDEO_RESOURCES})
-target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES}            ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES})
+target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBPULSE_LIBRARIES} ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES})
 

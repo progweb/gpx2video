@@ -33,6 +33,9 @@ public:
 	int timeOffset(void) const;
 	void setTimeOffset(const int& offset);
 
+	double maxFrameDuration(void) const;
+	void setMaxFrameDuration(double duration);
+
 	void addStream(StreamPtr stream);
 
 	StreamPtr getFirstStreamOfType(const AVMediaType &type) const;
@@ -46,6 +49,8 @@ private:
 
 	uint64_t start_time_;
 	uint64_t creation_time_;
+
+	double max_frame_duration_;
 
 	std::string filename_;
 

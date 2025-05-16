@@ -17,6 +17,15 @@ extern "C" {
 #include <libavutil/time.h>
 }
 
+// TST BEGIN
+extern "C" {
+#include <libavformat/avio.h>
+#include <libavutil/bprint.h>
+}
+// TST END
+
+#include <pulse/error.h>
+
 #include "../../src/oiioutils.h"
 #include "log.h"
 #include "compat.h"
@@ -25,548 +34,14 @@ extern "C" {
 
 
 // polls for possible required screen refresh at least this often, should be less than 1/fps
-#define REFRESH_RATE 0.005
-
-
-/**
- * Queue:
- *  - rindex: last picture displayed picture (peek_last)
- *  - rindex + rindex_shown: current picture not yet displayed (peek)
- *  - rindex + rindex_shown + 1: next picture (peek_next)
- */
-
-
-static float vertices[] = {
-	// points             // texture coords
-	1.0f, 1.0f, 0.0f,     1.0f, 0.0f,   // top right
-	1.0f, -1.0f, 0.0f,    1.0f, 1.0f,   // bottom right
-	-1.0f, -1.0f, 0.0f,   0.0f, 1.0f,   // bottom left
-	-1.0f, 1.0f, 0.0f,    0.0f, 0.0f    // top left
-};
-
-static unsigned int indices[] = {
-	0, 1, 3,
-	1, 2, 3
-};
-
-
-
-GPX2VideoStream::GPX2VideoStream() 
-	: thread_(NULL)
-	, dispatcher_()
-	, mutex_()
-	, cond_()
-	, container_(NULL)
-	, decoder_video_(NULL) 
-	, frame_(NULL) {
-	log_call();
-
-	is_init_ = false;
-
-	index_ = 0;
-	queue_size_ = 5;
-
-	frame_time_ = 0;
-
-	seek_pos_ = 0.0;
-	seek_req_ = false;
-
-	// Texture
-	texture_ = 0;
-
-	// Buffer
-	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
-}
-
-
-GPX2VideoStream::~GPX2VideoStream() {
-	log_call();
-
-	stop();
-	close();
-}
-
-
-MediaContainer * GPX2VideoStream::media(void) {
-	log_call();
-
-	return container_;
-}
-
-
-//bool GPX2VideoStream::open(const Glib::ustring &video_file) {
-bool GPX2VideoStream::open(MediaContainer *container) {
-	log_call();
-
-	VideoStreamPtr video_stream;
-
-	// Media container
-	container_ = container;
-
-//	// Probe input media
-//	container_ = Decoder::probe(video_file);
-
-	// Retrieve audio & video streams
-	video_stream = container_->getVideoStream();
-
-	// Open & decode input media
-	decoder_video_ = Decoder::create();
-	decoder_video_->open(video_stream);
-
-	return true;
-}
-
-
-void GPX2VideoStream::close(void) {
-	log_call();
-
-	if (decoder_video_)
-		delete decoder_video_;
-
-	if (container_)
-		delete container_;
-
-	decoder_video_ = NULL;
-	container_ = NULL;
-}
-
-
-void GPX2VideoStream::init(void) {
-	log_call();
-
-	size_t size;
-
-	if (decoder_video_ == NULL)
-		return;
-
-	size = decoder_video_->videoSize();
-
-	log_info("Init video buffer size: %ld", size);
-
-	// Create buffers
-	glGenVertexArrays(1, &vao_);
-	glBindVertexArray(vao_);
-
-	glGenBuffers(1, &vbo_);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo_);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-//	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &ebo_);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-	glGenBuffers(queue_size_, pbo_);
-	for (size_t i=0; i<queue_size_; i++) {
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
-		glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
-
-		buffer_[i] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-	}
-
-	// position attribute
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
-	// texture attribute
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
-
-	is_init_ = true;
-}
-
-
-void GPX2VideoStream::load(FramePtr frame) {
-	log_call();
-
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[frame->index_]);
-	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
-	// texture
-	if (!texture_) {
-		// video texture
-		glGenTextures(1, &texture_);
-//		glBindTexture(GL_UNPACK_ALIGNMENT, 1);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture_);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_LINEAR_MIPMAP_LINEAR); //GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-		glTexImage2D(GL_TEXTURE_2D, 
-				0, 
-				GL_RGBA, 
-				frame->width(),
-				frame->height(),
-				0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //frame->constData());
-
-//		shader->use();
-//		shader->set("inputTexture1", 0);
-	}
-	else {
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture_);
-//		glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-//		glPixelStorei(GL_UNPACK_LSB_FIRST, GL_TRUE);
-		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-		glTexSubImage2D(GL_TEXTURE_2D, 
-				0,
-				0, 0, 
-				frame->width(),
-				frame->height(),
-				GL_RGBA, GL_UNSIGNED_BYTE, NULL); //frame->constData());
-	}
-//	glGenerateMipmap(GL_TEXTURE_2D);
-
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-}
-
-
-void GPX2VideoStream::render(GPX2VideoShader *shader) {
-	log_call();
-
-	if (decoder_video_ == NULL)
-		return;
-
-	// Transformations
-	glm::mat4 transform = glm::mat4(1.0f);
-
-	// 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_);
-//	glActiveTexture(GL_TEXTURE1);
-//	glBindTexture(GL_TEXTURE_2D, widgets_texture_);
-
-	//
-	shader->use();
-	shader->set("transform", transform);
-
-	//
-	glBindVertexArray(vao_);
-//	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
-	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-
-bool GPX2VideoStream::play(void) {
-	log_call();
-
-	if (!is_init_ || !decoder_video_)
-		return false;
-
-	// Launch decoder thread
-	if (!thread_) {
-		thread_ = new std::thread([this] {
-			run();
-		});
-	}
-
-	return true;
-}
-
-
-void GPX2VideoStream::stop(void) {
-	log_call();
-
-	loop_ = false;
-
-	// Wait & destroy
-	if (thread_) {
-		cond_.notify_all();
-
-		if (thread_->joinable())
-			thread_->join();
-
-		delete thread_;
-	}
-
-	thread_ = NULL;
-}
-
-
-void GPX2VideoStream::seek(double pos) {
-	log_call();
-
-	if (!seek_req_) {
-		seek_pos_ = pos;
-		seek_req_ = true;
-
-		FramePtr frame = getFrame();
-
-		log_info("Stream seek position %s", Datetime::timestamp2string(pos, Datetime::FormatTime).c_str());
-
-		cond_.notify_all();
-	}
-}
-
-
-int GPX2VideoStream::width(void) const {
-	log_call();
-
-	if (!container_)
-		return 0;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return round(stream->width() * av_q2d(stream->pixelAspectRatio()));
-}
-
-
-int GPX2VideoStream::height(void) const {
-	log_call();
-
-	if (!container_)
-		return 0;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return stream->height();
-}
-
-
-double GPX2VideoStream::duration(void) const {
-	log_call();
-
-	if (!container_)
-		return 0.0;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return stream->duration() * av_q2d(stream->timeBase()) * 1000.0;
-}
-
-
-double GPX2VideoStream::timeBase(void) const {
-	log_call();
-
-	if (!container_)
-		return 0.0;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return av_q2d(stream->timeBase());
-}
-
-
-int GPX2VideoStream::nbChannels(void) const {
-	log_call();
-
-	if (!container_)
-		return 0;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return stream->nbChannels();
-}
-
-
-VideoParams::Format GPX2VideoStream::format(void) const {
-	log_call();
-
-	if (!container_)
-		return VideoParams::FormatInvalid;
-
-	VideoStreamPtr stream = container_->getVideoStream();
-
-	return stream->format();
-}
-
-void GPX2VideoStream::nextFrame(void) {
-	log_call();
-
-	// Prepare next buffer
-	FramePtr frame = getFrame();
-	
-	if (frame) {
-		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[frame->index_]);
-		buffer_[frame->index_] = (uint8_t *) glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-	}
-
-	// Delete oldest frame
-	std::lock_guard<std::mutex> lock(mutex_);
-
-	if (queue_.empty())
-		return;
-
-	// Destroy frame
-	queue_.pop_front();
-
-	cond_.notify_all();
-}
-
-
-FramePtr GPX2VideoStream::getFrame(void) {
-	log_call();
-
-	size_t size;
-	size_t index = 0;
-
-	std::lock_guard<std::mutex> lock(mutex_);
-
-	if (queue_.empty())
-		return NULL;
-
-	size = queue_.size();
-
-	FramePtr frame = queue_[(index) % size];
-
-	return frame;
-}
-
-
-FramePtr GPX2VideoStream::getNextFrame(void) {
-	log_call();
-
-	size_t size;
-	size_t index = 0;
-
-	std::lock_guard<std::mutex> lock(mutex_);
-
-	if (queue_.empty())
-		return NULL;
-
-	size = queue_.size();
-
-	FramePtr frame = queue_[(index + 1) % size];
-
-	return frame;
-}
-
-
-void GPX2VideoStream::flushFrame(void) {
-	log_call();
-
-	std::lock_guard<std::mutex> lock(mutex_);
-
-	while (!queue_.empty())
-		queue_.pop_front();
-}
-
-
-double GPX2VideoStream::getFrameDuration(void) {
-	log_call();
-
-	FramePtr frame = getFrame();
-	FramePtr nextframe = getNextFrame();
-	
-	if (frame && nextframe) {
-		double duration = nextframe->timestamp() - frame->timestamp();
-
-		return duration * av_q2d(frame->videoParams().timeBase());
-	}
-
-	return 0.0;
-}
-
-
-bool GPX2VideoStream::read(void) {
-	log_call();
-
-	int index;
-
-	uint8_t *buffer;
-
-	AVRational video_time;
-
-	// Texture buffer data
-	index = index_;
-	index_ = (index_ + 1) % queue_size_;
-//	index = (index_ + 1) % 2;
-
-	buffer = buffer_[index];
-
-	// Retrieve audio & video streams
-	VideoStreamPtr video_stream = container_->getVideoStream();
-
-	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), video_stream->frameRate());
-
-	frame_ = decoder_video_->retrieveVideo(video_time, buffer);
-	frame_->index_ = index;
-
-	if (!frame_)
-		return false;
-
-	// next frame
-	frame_time_ += 1;
-
-	// Lock mutex
-	std::lock_guard<std::mutex> lock(mutex_);
-
-	queue_.push_back(frame_);
-
-	return true;
-}
-
-
-void GPX2VideoStream::wait(void) {
-	log_call();
-
-	std::unique_lock<std::mutex> lock(mutex_);
-
-    cond_.wait(lock);
-}
-
-
-void GPX2VideoStream::run(void) {
-	log_call();
-
-	loop_ = true;
-
-	for (; loop_;) {
-//		// 25fps = 40ms
-//		// 50fps = 20ms
-//		std::this_thread::sleep_for(std::chrono::milliseconds(10)); //1000)); //250));
-//
-//		if (queue_.size() < 5) {
-////			log_info("Read frame %ld", queue_.size());
-//
-//		read();
-//
-//			dispatcher_.emit();
-//		}
-
-		// Read video data
-		if (seek_req_ == true) {
-			log_info("Seeking... flush previous video frames");
-
-			decoder_video_->seek((int64_t) (seek_pos_ * AV_TIME_BASE / 1000.0));
-
-			flushFrame();
-
-			seek_req_ = false;
-
-			dispatcher_.emit();
-		}
-
-		// If the queue are full, no need to read more
-		if (queue_.size() >= queue_size_) {
-			wait();
-			continue;
-		}
-
-		// Read
-		if (read() == false)
-			break;
-	}
-}
-
-
-
-
-
+#define REFRESH_RATE 0.01 // 0.05
 
 
 
 GPX2VideoArea::GPX2VideoArea(GPXApplication &app)
 	: Glib::ObjectBase("GPX2VideoArea") 
-	, app_(app) {
+	, app_(app) 
+	, audio_device_(NULL) {
 	log_call();
 }
 
@@ -578,6 +53,7 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	, adjustment_(NULL)
 	, shader_(NULL)
 	, app_(app) 
+	, audio_device_(NULL)
 	, source_(NULL) 
 	, renderer_(NULL) {
 	log_call();
@@ -600,7 +76,7 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 //	set_size_request(320, 240);
 	set_auto_render(true);
 
-	stream_.data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
+	stream_.video().data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
 
 	// Creation of a new object prevents long lines and shows us a little
 	// how slots work.  We have 0 parameters and bool as a return value
@@ -626,6 +102,15 @@ void GPX2VideoArea::set_renderer(GPX2VideoRenderer *renderer) {
 	log_call();
 
 	renderer_ = renderer;
+}
+
+
+void GPX2VideoArea::set_audio_device(GPX2VideoAudioDevice *audio_device) {
+	log_call();
+
+	stream_.set_audio_device(audio_device);
+
+	audio_device_ = audio_device;
 }
 
 
@@ -700,6 +185,9 @@ void GPX2VideoArea::open_stream(MediaContainer *container) {
 //	real_duration_ms_ = 0;
 //	last_timecode_ms_ = 0;
 
+	// Audio
+	audio_device_->connect();
+
 	// Retrieve audio & video streams
 	video_stream = container->getVideoStream();
 
@@ -733,15 +221,33 @@ void GPX2VideoArea::close_stream(void) {
 
 	// Close stream
 	stream_.close();
+
+	// Audio
+	if (audio_device_)
+		audio_device_->disconnect();
 }
 
 
 void GPX2VideoArea::stream_toggle_pause(void) {
 	log_call();
 
+	if (!is_playing_) {
+		frame_timer_ += av_gettime_relative() / 1000000.0 - stream_.video().clock().last_updated_;
+		stream_.video().clock().paused_ = 0;
+		stream_.video().clock().set(stream_.video().clock().get(), stream_.video().clock().serial_);
+	}
+
+	// Clock
+	stream_.clock().set(stream_.clock().get(), stream_.clock().serial_);
+
+	stream_.audio().clock().paused_ = stream_.video().clock().paused_ = stream_.clock().paused_ = is_playing_;
+
 	// Toggle play  / pause
 	is_init_ = false;
 	is_playing_ = !is_playing_;
+
+	// Audio
+	stream_.toggle_pause();
 }
 
 
@@ -771,7 +277,7 @@ void GPX2VideoArea::seek(double incr) {
 	double pos;
 
 	// Get frame
-	FramePtr frame = stream_.getFrame();
+	FramePtr frame = stream_.video().getFrame();
 
 	if (!frame)
 		return;
@@ -923,6 +429,8 @@ bool GPX2VideoArea::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 
 	(void) context;
 
+//	log_info("R: %7.3f", stream_.get_master_clock());
+
 	try {
 		throw_if_error();
 
@@ -973,10 +481,26 @@ void GPX2VideoArea::on_data_ready(void) {
 bool GPX2VideoArea::on_timeout(void) {
 	log_call();
 
+//	static double time = 0.0;
+
 	double remaining_time = 0.0;
 
+//	log_info("T: %7.3f", stream_.get_master_clock());
+
+//	time += 0.0100;
+//
+//	stream_.update_video_pts(time, 0);
+//
+//	schedule_refresh(100);
+//
+//	queue_draw();
+//
+//	return false;
+
+
+
 	for (;;) {
-        remaining_time = 0.0;
+        remaining_time = REFRESH_RATE; //0.0;
 
 		if (!video_refresh(remaining_time)) {
 			// Retry later
@@ -984,7 +508,7 @@ bool GPX2VideoArea::on_timeout(void) {
 			break;
 		}
 
-        if (remaining_time > 0.0) {
+       if (remaining_time > 0.0) {
 			// Convert in ms
 			remaining_time *= 1000.0;
 
@@ -1044,15 +568,20 @@ bool GPX2VideoArea::video_refresh(double &remaining_time) {
 	double time;
 	double delay;
 	double duration;
+	double last_duration;
 
+//	log_info("U: %7.3f", stream_.get_master_clock());
+
+//	// OpenGL context
+//	make_current();
+
+retry:
 	// Get frame
-	FramePtr frame = stream_.getFrame();
+	FramePtr frame = stream_.video().getFrame();
+	FramePtr lastframe = stream_.video().getLastFrame();
 
 	if (!frame)
 		return false;
-
-	// OpenGL context
-	make_current();
 
 	if (is_playing_) {
 		time = av_gettime_relative() / 1000000.0;
@@ -1062,29 +591,47 @@ bool GPX2VideoArea::video_refresh(double &remaining_time) {
 			is_init_ = true;
 		}
 
-		// Get frame delay
-		duration = stream_.getFrameDuration();
-		delay = duration;
+		// Compute nominal last_duration
+		last_duration = stream_.vp_duration(lastframe, frame);
+		delay = stream_.compute_target_delay(last_duration);
 
 //		log_debug("Time:\t\t\t\t%f", time);
 //		log_debug("Frame timer:\t\t\t%f", frame_timer_);
-//		log_debug("PTS Duration:\t\t\t%f", duration); 
+//		log_debug("PTS last duration:\t\t\t%f", last_duration); 
+//		log_debug("Delay:\t\t\t%f", delay); 
 
 		if (time < frame_timer_ + delay) {
-			remaining_time = frame_timer_ + delay - time;
+//			remaining_time = frame_timer_ + delay - time;
+			remaining_time = FFMIN(frame_timer_ + delay - time, remaining_time);
 
-//			log_debug("Remaining time:\t\t\t%f", remaining_time);
+			log_debug("Remaining time:\t\t\t%f", remaining_time);
 		}
 		else {
 			frame_timer_ += delay;
 			if ((delay > 0) && ((time - frame_timer_) > AV_SYNC_THRESHOLD_MAX))
 				frame_timer_ = time;
 
+			stream_.update_video_pts(frame->time() / 1000.0, 0);
+
 			// Drop frame
-			// ...
+			if (stream_.video().getFrameNbRemaining() > 1) {
+				double duration;
+
+				FramePtr nextFrame = stream_.video().getNextFrame();
+
+				duration = stream_.vp_duration(frame, nextFrame);
+
+				if (!is_step_
+						&& (stream_.get_master_sync_type() != AV_SYNC_VIDEO_MASTER) 
+						&& (time > frame_timer_ + duration)) {
+					stream_.frame_drops_late_++;
+					stream_.video().nextFrame();
+					goto retry;
+				}
+			}
 
 			// Next frame
-			stream_.nextFrame();
+			stream_.video().nextFrame();
 			force_refresh_ = true;
 
 			// Step frame
@@ -1102,6 +649,46 @@ bool GPX2VideoArea::video_refresh(double &remaining_time) {
 	// Refresh done
 	force_refresh_ = false;
 
+#if 1
+	{
+		AVBPrint buf;
+		static int64_t last_time;
+		int64_t cur_time;
+		double av_diff;
+
+		cur_time = av_gettime_relative();
+
+		if (!last_time || (cur_time - last_time) >= 30000) {
+			av_diff = 0;
+			if (stream_.withAudio() && stream_.withVideo())
+				av_diff = stream_.audio().clock().get() - stream_.video().clock().get();
+			else if (stream_.withAudio())
+				av_diff = stream_.get_master_clock() - stream_.audio().clock().get();
+			else if (stream_.withVideo())
+				av_diff = stream_.get_master_clock() - stream_.video().clock().get();
+
+			av_bprint_init(&buf, 0, AV_BPRINT_SIZE_AUTOMATIC);
+			av_bprintf(&buf,
+					"%7.2f %s: A: %7.3f / V: %7.3f - %7.3f fd=%4d \r",
+					stream_.clock().get(),
+					(stream_.withAudio() && stream_.withVideo()) ? "A-V" : (stream_.withVideo() ? "M-V" : (stream_.withAudio() ? "M-A" : "   ")),
+					stream_.audio().clock().get(),
+					stream_.video().clock().get(),
+					av_diff,
+					stream_.frame_drops_early_ + stream_.frame_drops_late_);
+
+			if (is_playing_)
+				fprintf(stderr, "%s", buf.str);
+			else
+				fprintf(stderr, "\n");
+
+			av_bprint_finalize(&buf, NULL);
+
+			last_time = cur_time;
+		}
+	}
+#endif
+
 	return true;
 }
 
@@ -1117,18 +704,22 @@ void GPX2VideoArea::video_display(void) {
 
 	unsigned int real_duration_ms;
 
+//	log_info("D: %7.3f", stream_.get_master_clock());
+
 	time_factor = 1.0;
 
 	start_time = stream_.media()->startTime() + stream_.media()->timeOffset();
 
-//	// OpenGL context
-//	make_current();
+	// OpenGL context
+	make_current();
 
 	// Get frame
-	FramePtr frame = stream_.getFrame();
+	FramePtr frame = stream_.video().getFrame();
 
-	if (!frame)
+	if (!frame) {
+		log_warn("No frame");
 		return;
+	}
 
 	timecode_ms = frame->time();
 
@@ -1155,6 +746,7 @@ void GPX2VideoArea::video_display(void) {
 	load_widgets_texture(frame);
 
 	// OpenGL context redraw
+//	log_info("Q: %7.3f", stream_.get_master_clock());
 	queue_draw();
 
 	// Refresh adjustment
@@ -1346,22 +938,22 @@ void GPX2VideoArea::check_gl_error(void) {
 	while ((err = glGetError()) != GL_NO_ERROR) {
 		std::string error;
 
-		switch(err) {
-			case GL_INVALID_OPERATION:
-				error="INVALID_OPERATION";
-				break;
-			case GL_INVALID_ENUM:
-				error="INVALID_ENUM";
-				break;
-			case GL_INVALID_VALUE:
-				error="INVALID_VALUE";
-				break;
-			case GL_OUT_OF_MEMORY:
-				error="OUT_OF_MEMORY";
-				break;
-			case GL_INVALID_FRAMEBUFFER_OPERATION:
-				error="INVALID_FRAMEBUFFER_OPERATION";
-				break;
+		switch (err) {
+		case GL_INVALID_OPERATION:
+			error = "INVALID_OPERATION";
+			break;
+		case GL_INVALID_ENUM:
+			error = "INVALID_ENUM";
+			break;
+		case GL_INVALID_VALUE:
+			error = "INVALID_VALUE";
+			break;
+		case GL_OUT_OF_MEMORY:
+			error = "OUT_OF_MEMORY";
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			error = "INVALID_FRAMEBUFFER_OPERATION";
+			break;
 		}
 
 		log_error("GL '%d' error: %s", err, error.c_str());

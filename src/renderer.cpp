@@ -293,7 +293,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
 
 	if (source == NULL) {
-		log_warn("Can't read telemetry data, skip map widget");
+		log_warn("Can't read telemetry data, skip track widget");
 		return false;
 	}
 

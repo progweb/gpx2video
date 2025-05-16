@@ -38,14 +38,20 @@ public:
 
 	const uint64_t& channelLayout(void) const;
 
-	int channelCount() const;
-	int bytesPerSamplePerChannel() const;
+	const AVRational& timeBase(void) const;
+	void setTimeBase(const AVRational &time_base);
+
+	int channelCount(void) const;
+	int bytesPerSecond(void) const;
+	int bytesPerSamplePerChannel(void) const;
 	int64_t samplesToBytes(const int64_t &samples) const;
 
 private:
 	int sample_rate_;
 	Format format_;
 	uint64_t channel_layout_;
+
+	AVRational time_base_;
 };
 
 #endif

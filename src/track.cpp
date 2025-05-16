@@ -128,6 +128,13 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 	trackbuf_ = NULL;
 
 	divider_ = 1.0;
+
+	x1_ = y1_ = x2_ = y2_ = 0;
+	px1_ = py1_ = px2_ = py2_ = 0;
+
+	x_end_ = y_end_ = 0;
+	x_start_ = y_start_ = 0;
+	ts_start_ = ts_end_ = 0;
 }
 
 

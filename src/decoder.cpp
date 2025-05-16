@@ -57,6 +57,9 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 
 	container = new MediaContainer();
 
+	// Max frame duration
+	container->setMaxFrameDuration((fmt_ctx->iformat->flags & AVFMT_TS_DISCONT) ? 10.0 : 3600.0);
+
 	// For each stream
 	for (i=0; i<fmt_ctx->nb_streams; i++) {
 		StreamPtr stream;
@@ -165,6 +168,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 				audio_stream->setNbChannels(avstream->codecpar->channels);
 #endif
 				audio_stream->setSampleRate(avstream->codecpar->sample_rate);
+				audio_stream->setFormat(AudioParams::FormatFloat32);
 
 				stream = audio_stream;
 			}
@@ -433,8 +437,10 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 //	printf("RETRIEVE: %ld\n", target_ts);
 
 	// Check if PTS is in the range [target_ts:target_ts + duration]
-	if ((1000 * pts_) > (target_ts + duration))
-		return NULL;
+	if (duration > 0) {
+		if ((1000 * pts_) > (target_ts + duration))
+			return NULL;
+	}
 
 	packet = av_packet_alloc();
 	frame = av_frame_alloc();
@@ -445,19 +451,6 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 		fprintf(stderr, "Failed to determine channel layout of audio file, could not conform\n");
 //		return NULL;
 	}                                          
-
-//	// Create resampling context
-//	SwrContext* resampler = swr_alloc_set_opts(NULL,
-//			params.channelLayout(),                        
-//			FFmpegUtils::getFFmpegSampleFormat(params.format()),
-//			params.sampleRate(),                           
-//			channel_layout,                                 
-//			static_cast<AVSampleFormat>(avstream_->codecpar->format),
-//			avstream_->codecpar->sample_rate,    
-//			0,
-//			NULL);                                       
-//  
-//	swr_init(resampler);   
 
 	while (true) {
 		// Pull from decoder
@@ -472,11 +465,6 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 			break;
 		}
 
-//		// Allocate buffers
-//		int nb_samples = swr_get_out_samples(resampler, frame->nb_samples);
-//		size_t size = params.samplesToBytes(nb_samples);
-//		data = (uint8_t *) malloc(size * sizeof(uint8_t));
-
 		// Store data
 		data = (uint8_t *) frame;
 
@@ -484,8 +472,6 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 
 		break;
 	}
-
-//	swr_free(&resampler);
 
 //	printf("  PTS: %ld / TS: %ld ms / DURATION: %d\n", 
 //		pts_, 
@@ -495,7 +481,163 @@ uint8_t * Decoder::retrieveAudioFrameData(const AudioParams &params, const int64
 ////		avstream_->duration, 
 ////		target_ts);
 
-//	av_frame_free(&frame);
+	av_packet_free(&packet);
+
+	return data;
+}
+
+
+SampleBufferPtr Decoder::retrieveAudio2(const AudioParams &params, AVRational timecode, int duration) {
+//	uint8_t *data;
+//
+//	size_t size;
+
+	SampleBufferPtr buffer;
+
+	AudioStreamPtr as = std::static_pointer_cast<AudioStream>(stream());
+
+	int64_t target_ts = as->getTimeInTimeBaseUnits(timecode);
+
+	duration = as->getTimeInTimeBaseUnits(av_make_q(duration, 1));
+
+	// Retrieve frame data
+	if ((buffer = retrieveAudioFrameData2(params, target_ts, duration)) == NULL)
+		return NULL;
+
+//	// Return the audio buffer
+//	SampleBufferPtr buffer = SampleBuffer::create();
+
+	// TODO : do better !!!
+//	frame->setAudioParams();
+	buffer->setTimestamp(pts_);
+//	buffer->setSampleCount(size / params.channelCount());
+//	buffer->set((const float *) data);
+
+	return buffer;
+}
+
+
+SampleBufferPtr Decoder::retrieveAudioFrameData2(const AudioParams &params, const int64_t& target_ts, const int& duration) {
+	int result = 0;
+
+	AVPacket *packet = NULL;
+	AVFrame *frame = NULL;
+
+	SampleBufferPtr data = SampleBuffer::create();
+
+	(void) params;
+
+//	printf("RETRIEVE: %ld\n", target_ts);
+
+	// Check if PTS is in the range [target_ts:target_ts + duration]
+	if (duration > 0) {
+		if ((1000 * pts_) > (target_ts + duration))
+			return NULL;
+	}
+
+	packet = av_packet_alloc();
+	frame = av_frame_alloc();
+
+	// Handle NULL channel layout
+	uint64_t channel_layout = validateChannelLayout(avstream_);
+	if (!channel_layout) {                     
+		fprintf(stderr, "Failed to determine channel layout of audio file, could not conform\n");
+//		return NULL;
+	}                                          
+
+	// Create resampling context
+	SwrContext *resampler = NULL;
+
+#ifdef HAVE_FFMPEG_CH_LAYOUT
+	result = swr_alloc_set_opts2(&resampler,
+			&(AVChannelLayout) AV_CHANNEL_LAYOUT_MASK(params.channelCount(), params.channelLayout()),
+			AV_SAMPLE_FMT_S16, // FFmpegUtils::getFFmpegSampleFormat(params.format()),
+			params.sampleRate(),                           
+			&(AVChannelLayout) AV_CHANNEL_LAYOUT_MASK(avstream_->codecpar->ch_layout.nb_channels, channel_layout),
+			static_cast<AVSampleFormat>(avstream_->codecpar->format),
+			avstream_->codecpar->sample_rate,    
+			0,
+			NULL);
+#else
+	resampler = swr_alloc_set_opts(NULL,
+			params.channelLayout(),                        
+//			AV_CH_LAYOUT_MONO,
+//			AV_CH_LAYOUT_STEREO,
+			AV_SAMPLE_FMT_S16, // FFmpegUtils::getFFmpegSampleFormat(params.format()),
+			params.sampleRate(),                           
+			channel_layout,                                 
+			static_cast<AVSampleFormat>(avstream_->codecpar->format),
+			avstream_->codecpar->sample_rate,    
+			0,
+			NULL);
+#endif
+
+	if ((result < 0) || (resampler == NULL)) {
+		fprintf(stderr, "Failed to allocate SwrContext\n");
+	}
+  
+	swr_init(resampler);   
+
+	while (true) {
+		// Pull from decoder
+		result = getFrame(packet, frame);
+
+		// Handle any errors that aren't EOF (EOF is handled later on)
+		if ((result < 0) && (result != AVERROR_EOF)) {
+			break;
+		}
+
+		if (result == AVERROR_EOF) {
+			break;
+		}
+
+		// Allocate buffers
+//		int nb_channels = params.channelCount();
+		int nb_samples = swr_get_out_samples(resampler, frame->nb_samples);
+//		int nb_bytes_per_channel = params.samplesToBytes(nb_samples) / nb_channels;
+
+		data->setAudioParams(params);
+		data->setSampleCount(nb_samples);
+		data->allocate();
+
+		// Resample audio
+		nb_samples = swr_convert(resampler, 
+				reinterpret_cast<uint8_t **>(data->toRawPtrs().data()),
+				nb_samples,
+				const_cast<const uint8_t**>(frame->data),
+				frame->nb_samples);
+
+		if (nb_samples > 0) {
+//			nb_bytes_per_channel = params.samplesToBytes(nb_samples) / nb_channels;
+//
+//			printf("FINAL NB_SAMPLES %d / NB BYTES PER CHANNEL %d\n", 
+//					nb_samples, nb_bytes_per_channel);
+		}
+		else {
+			char msg[512];
+			av_strerror(nb_samples, msg, 512);
+			log_warn("libswresample failed with error: '%d' %s", nb_samples, msg);
+		}
+
+//		data->save();
+
+		pts_ = frame->pts;
+
+		break;
+	}
+
+//	printf("  PTS: %ld / TS: %ld ms / SAMPLERATE: %d / SAMPLES: %d / SIZE: %ld\n", 
+//		pts_, 
+//		(uint64_t) ((pts_ * 1000) * av_q2d(stream_->timeBase())), 
+//		data->audioParams().sampleRate(), data->sampleCount(), data->size());
+////	printf("  STREAM DURATION: %ld / TS: %ld\n", 
+////		avstream_->duration, 
+////		target_ts);
+
+	swr_free(&resampler);
+
+	av_frame_free(&frame);
+
 	av_packet_free(&packet);
 
 	return data;
@@ -506,6 +648,10 @@ FramePtr Decoder::retrieveVideo(AVRational timecode, uint8_t *data) {
 //	uint8_t *data;
 	bool allocated;
 
+	double duration;
+
+	AVRational frame_rate;
+
 	VideoStreamPtr vs = std::static_pointer_cast<VideoStream>(stream());
 
 	int64_t target_ts = vs->getTimeInTimeBaseUnits(timecode);
@@ -515,6 +661,9 @@ FramePtr Decoder::retrieveVideo(AVRational timecode, uint8_t *data) {
 	// Retrieve frame data
 	if ((data = retrieveVideoFrameData(target_ts, data)) == NULL)
 		return NULL;
+
+	frame_rate = vs->frameRate();
+	duration = (frame_rate.num && frame_rate.den ? av_q2d((AVRational){frame_rate.den, frame_rate.num}) : 0);
 
 	// Return the frame
 	FramePtr frame = Frame::create();
@@ -528,6 +677,7 @@ FramePtr Decoder::retrieveVideo(AVRational timecode, uint8_t *data) {
 		std::static_pointer_cast<VideoStream>(stream())->interlacing()));
 	// TODO : do better !!!
 	frame->setTimestamp(pts_);
+	frame->setDuration(duration);
 	frame->setData(data, allocated);
 	
 	return frame;

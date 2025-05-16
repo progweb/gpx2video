@@ -160,6 +160,8 @@ bool VideoRenderer::init(MediaContainer *container) {
 			audio_stream->channelLayout(),
 			audio_stream->format());
 
+		audio_params.setTimeBase(audio_stream->timeBase());
+
 		encoderSettings.setAudioParams(audio_params, ExportCodec::CodecAAC);
 		encoderSettings.setAudioBitrate(44 * 1000);
 	}

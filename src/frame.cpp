@@ -62,6 +62,16 @@ void Frame::setTimestamp(const int64_t &timestamp) {
 }
 
 
+const double& Frame::duration(void) const {
+	return duration_;
+}
+
+
+void Frame::setDuration(const double &duration) {
+	duration_ = duration;
+}
+
+
 uint8_t * Frame::data(void) const {
 	return data_;
 }

@@ -152,6 +152,7 @@ void GPX2VideoWidget::load_texture(void) {
 //			reinterpret_cast<char*>(m_tex_buffer.data()));
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+
 	glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
 
 	buffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);

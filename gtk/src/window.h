@@ -22,6 +22,7 @@
 #include "../../src/application.h"
 #include "../../src/renderer.h"
 #include "../../src/telemetrysettings.h"
+#include "audiodevice.h"
 #include "area.h"
 #include "renderer.h"
 #include "videoframe.h"
@@ -54,12 +55,14 @@ protected:
 
 	Gtk::Scale *progress_scale_ = NULL;
 
+	Gtk::Stack *info_stack_ = NULL;
+
 	GPX2VideoArea *video_area_ = NULL;
 	GPX2VideoVideoFrame *video_frame_ = NULL;
 	GPX2VideoWidgetFrame *widget_frame_ = NULL;
 	GPX2VideoTelemetryFrame *telemetry_frame_ = NULL;
 
-	Gtk::Stack *info_stack_ = NULL;
+	GPX2VideoAudioDevice *audio_device_ = NULL;
 
 	void update_stack(void);
 
