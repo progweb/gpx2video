@@ -38,6 +38,10 @@ public:
 
 	static GPX2VideoApplicationWindow * create(void);
 
+	void run(void);
+	void start(void);
+	void stop(void);
+
 	void open_media_file(const Glib::RefPtr<const Gio::File> &file);
 	void open_layout_file(const Glib::RefPtr<const Gio::File> &file);
 	void open_telemetry_file(const Glib::RefPtr<const Gio::File> &file);
@@ -95,6 +99,10 @@ protected:
 #endif
 
 private:
+	bool loop_;
+
+	std::thread* thread_;
+
 	RendererSettings renderer_settings_;
 	TelemetrySettings telemetry_settings_;
 

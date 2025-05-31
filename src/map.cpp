@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <format>
+#include <locale>
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -393,8 +395,27 @@ std::string Map::buildPath(int zoom, int x, int y) {
 std::string Map::buildFilename(int zoom, int x, int y) {
 	std::ostringstream stream;
 
+	struct no_separator : std::numpunct<char> {
+	public:
+		no_separator(std::locale& base_locale) :
+			np(std::use_facet< std::numpunct<char> >(base_locale)) {
+		}
+
+	protected:
+		string_type do_grouping() const override { return ""; }
+//		char_type do_decimal_point() const override { return np.decimal_point(); }
+//		char_type do_thousands_sep() const override { return np.thousands_sep(); }
+//		string_type do_truename() const override { return np.truename(); }
+//		string_type do_falsename() const override { return np.truename(); }
+
+		const std::numpunct<char> & np;
+	};
+
 	(void) zoom;
 
+	std::locale locale("");
+
+	stream.imbue(std::locale(locale, new no_separator(locale)));
 	stream << "tile_" << y << "_" << x << ".png";
 
 	return stream.str();

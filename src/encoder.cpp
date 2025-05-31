@@ -384,12 +384,20 @@ bool Encoder::initializeStream(AVMediaType type, AVStream **stream_ptr, AVCodecC
 		if (codec == ExportCodec::CodecVAAPIH264)
 			codec_context->pix_fmt = AV_PIX_FMT_VAAPI;
 
-// codec/ffmpeg/ffmpegencoder.cpp:503
-//				enc_ctx->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;
+		if (settings().videoParams().interlacing() != VideoParams::InterlaceNone) {
+//			codec/ffmpeg/ffmpegencoder.cpp:503
+//			codec_context->flags |= AV_CODEC_FLAG_INTERLACED_DCT | AV_CODEC_FLAG_INTERLACED_ME;
 
-		// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
-		if (codec == ExportCodec::CodecH264)
-			av_opt_set(codec_context->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+			if (settings().videoParams().interlacing() == VideoParams::InterlacedTopFirst)
+				codec_context->field_order = AV_FIELD_TT;
+			else {
+				codec_context->field_order = AV_FIELD_BB;
+
+				// For some reason, FFmpeg doesn't set libx264's bff flag so we have to do it ourselves
+				if (codec == ExportCodec::CodecH264)
+					av_opt_set(codec_context->priv_data, "x264opts", "bff=1", AV_OPT_SEARCH_CHILDREN);
+			}
+		}
 
 		if (codec == ExportCodec::CodecNVEncH264)
 			codec_context->dct_algo = FF_DCT_FASTINT;
@@ -548,7 +556,7 @@ bool Encoder::writeFrame(FramePtr frame, AVRational time) {
 //	encoded_frame->linesize[0] = 2752;
 //	encoded_frame->linesize[1] = 1376;
 //	encoded_frame->linesize[2] = 1376;
-	
+
 //printf("width x height: %d x %d\n", encoded_frame->width, encoded_frame->height);
 //printf("format = %d\n", encoded_frame->format);
 	// Set interlacing

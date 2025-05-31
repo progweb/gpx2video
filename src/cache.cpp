@@ -31,7 +31,7 @@ void Cache::init(void) {
 }
 
 
-bool Cache::run(void) {
+bool Cache::start(void) {
 	log_call();
 
 	log_notice("Cache initialization...");
@@ -42,6 +42,13 @@ bool Cache::run(void) {
 	rmpath(path_);
 
 done:
+	return true;
+}
+
+
+bool Cache::run(void) {
+	log_call();
+
 	complete();
 
 	return true;

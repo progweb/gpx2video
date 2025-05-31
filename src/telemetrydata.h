@@ -74,6 +74,15 @@ public:
 		return types[type_];
 	}
 
+
+	const uint64_t& datetime(void) const {
+		return datetime_;
+	}
+
+	void setDatetime(const uint64_t &datetime) {
+		datetime_ = datetime;
+	}
+
 	const uint64_t& timestamp(void) const {
 		return ts_;
 	}
@@ -196,6 +205,7 @@ protected:
 	int cadence_;
 	int power_;
 
+	uint64_t datetime_;
 	double distance_;
 	double heading_;
 	double duration_;

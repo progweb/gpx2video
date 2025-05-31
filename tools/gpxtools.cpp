@@ -134,6 +134,7 @@ static void print_smooth_supported(const std::string &name) {
 GPXTools::GPXTools(struct event_base *evbase) 
 	: GPXApplication(evbase) {
 	log_call();
+	listen();
 }
 
 

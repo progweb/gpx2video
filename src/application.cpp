@@ -21,8 +21,7 @@ extern "C" {
 
 
 GPXApplication::GPXApplication(struct event_base *evbase) 
-	: evbase_(evbase) 
-	, time_(0) { 
+	: evbase_(evbase) { 
 	log_call();
 
 //	setLogLevel(AV_LOG_INFO);
@@ -129,6 +128,14 @@ void GPXApplication::run(enum Task::Action action) {
 		perform(Task::ActionStart);
 		break;
 
+	case Task::ActionExit:
+		task = tasks_.front();
+		task->stop();
+
+		tasks_.pop_front();
+		loopexit();
+		break;
+
 	default:
 		break;
 	}
@@ -194,13 +201,35 @@ void GPXApplication::init(void) {
 	int error;
 
 	int fds[2];
+
+	log_call();
+
+	ev_signal_ = NULL;
+
+	if (!evbase_)
+		return;
+
+	// Create pipe to schedule tasks
+	error = pipe(fds);
+
+	if (error == -1) {
+		log_error("Unable to create pipe");
+		return;
+	}
+
+	pipe_in_ = fds[0];
+	pipe_out_ = fds[1];
+	ev_pipe_ = event_new(evbase_, pipe_in_, EV_READ | EV_PERSIST, pipehandler, this);
+	event_add(ev_pipe_, NULL);
+}
+
+
+void GPXApplication::listen(void) {
 //	int sfd = -1;
 //
 //	sigset_t mask;
 
 	log_call();
-
-	ev_signal_ = NULL;
 
 //	// SIGHUP, SIGTERM, SIGINT, SIGQUIT management
 //	sigemptyset(&mask);
@@ -226,25 +255,11 @@ void GPXApplication::init(void) {
 //	ev_signal_ = event_new(evbase_, sfd, EV_READ | EV_PERSIST, sighandler, this);
 //	event_add(ev_signal_, NULL);
 
-	if (!evbase_)
-		return;
-
-	// SIGINT management
-	ev_signal_ = evsignal_new(evbase_, SIGINT, sighandler, this);
-	event_add(ev_signal_, NULL);
-
-	// Create pipe to schedule tasks
-	error = pipe(fds);
-
-	if (error == -1) {
-		log_error("Unable to create pipe");
-		return;
+	if (ev_signal_ == NULL) {
+		// SIGINT management
+		ev_signal_ = evsignal_new(evbase_, SIGINT, sighandler, this);
+		event_add(ev_signal_, NULL);
 	}
-
-	pipe_in_ = fds[0];
-	pipe_out_ = fds[1];
-	ev_pipe_ = event_new(evbase_, pipe_in_, EV_READ | EV_PERSIST, pipehandler, this);
-	event_add(ev_pipe_, NULL);
 }
 
 

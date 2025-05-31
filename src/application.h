@@ -61,7 +61,8 @@ public:
 		enum Action {
 			ActionStart,
 			ActionPerform,
-			ActionStop
+			ActionStop,
+			ActionExit,
 		};
 
 		typedef void (*callback_t)(void *object);
@@ -126,14 +127,6 @@ public:
 	bool progressInfo(void);
 	void setProgressInfo(bool enable);
 
-	const uint64_t& time(void) {
-		return time_;
-	}
-
-	void setTime(const uint64_t &time) {
-		time_ = time;
-	}
-
 	static const std::string version(void);
 
 	Settings& settings(void);
@@ -151,6 +144,10 @@ public:
 		tasks_.push_back(task);
 	}
 
+	void remove(Task *task) {
+		tasks_.remove(task);
+	}
+
 	struct event_base *evbase(void) {
 		return evbase_;
 	}
@@ -165,6 +162,7 @@ protected:
 	static void pipehandler(int sfd, short kind, void *data);
 
 	void init(void);
+	void listen(void);
 
 	void loop(void);
 	void loopexit(void);
@@ -183,8 +181,6 @@ private:
 	Settings settings_;
 
 	std::list<Task *> tasks_;
-
-	uint64_t time_;
 };
 
 

@@ -147,6 +147,7 @@ bool ImageRenderer::run(void) {
 	int pos = -1;
 	size_t len = 0;
 
+	uint64_t datetime;
 	uint64_t start_time;
 
 	uint64_t timecode_ms;
@@ -200,7 +201,7 @@ bool ImageRenderer::run(void) {
 	}
 
 	// Compute video time
-	app_.setTime(start_time + (time_factor * timecode_ms));
+	datetime = start_time + (time_factor * timecode_ms);
 
 	if (source_) {
 		uint64_t timestamp = start_time + (time_factor * timecode_ms);
@@ -211,6 +212,9 @@ bool ImageRenderer::run(void) {
 		// Read GPX data
 		timestamp -= (timestamp % telemetrySettings().telemetryRate());
 		source_->retrieveNext(data_, timestamp);
+
+		// Set current datetime
+		data_.setDatetime(datetime);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());
@@ -274,7 +278,7 @@ error:
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - TIMESTAMP: %ld ms - TIME: %s\n", 
-				timecode_, timecode_ms, Datetime::timestamp2string(app_.time()).c_str());
+				timecode_, timecode_ms, Datetime::timestamp2string(datetime).c_str());
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

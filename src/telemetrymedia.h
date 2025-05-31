@@ -72,6 +72,9 @@ public:
 
 		void setTimestamp(uint64_t ts) {
 			ts_ = ts;
+	
+			if (datetime_ == 0)
+				datetime_ = ts;
 		}
 
 		void setPosition(uint64_t ts, double lat, double lon) {

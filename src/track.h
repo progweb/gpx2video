@@ -30,8 +30,13 @@ public:
 
 	void setSize(int width, int height);
 
-	bool run(void) {
+	bool start(void) {
 		init();
+
+		return true;
+	}
+
+	bool run(void) {
 		complete();
 
 		return true;

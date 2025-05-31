@@ -36,6 +36,7 @@ void TelemetryData::reset(bool all) {
 		type_ = TelemetryData::TypeUnknown;
 
 		ts_ = 0;
+		datetime_ = 0;
 		lat_ = 0.0;
 		lon_ = 0.0;
 		ele_ = 0.0;

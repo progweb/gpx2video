@@ -9,6 +9,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include "log.h"
+#include "datetime.h"
 #include "videowidget.h"
 
 
@@ -26,9 +27,69 @@ static unsigned int indices[] = {
 };
 
 
+/**
+ * Widget buffer
+ */
+
+GPX2VideoWidget::Buffer::Buffer(void) 
+	: data_(NULL) {
+}
+
+
+GPX2VideoWidget::Buffer::~Buffer(void) {
+}
+
+
+GPX2VideoWidget::BufferPtr GPX2VideoWidget::Buffer::create(void) {
+	GPX2VideoWidget::BufferPtr buffer;
+
+	buffer = std::make_shared<GPX2VideoWidget::Buffer>();
+
+	return buffer;
+}
+
+
+const uint64_t& GPX2VideoWidget::Buffer::timestamp(void) const {
+	return timestamp_;
+}
+
+// Save buffer
+
+void GPX2VideoWidget::Buffer::setTimestamp(const uint64_t &timestamp) {
+	timestamp_ = timestamp;
+}
+
+
+int GPX2VideoWidget::Buffer::index(void) {
+	return index_;
+}
+
+
+uint8_t * GPX2VideoWidget::Buffer::data(void) {
+	return data_;
+}
+
+
+void GPX2VideoWidget::Buffer::setData(int index, uint8_t *data) {
+	index_ = index;
+	data_ = data;
+}
+
+
+/**
+ * Widget
+ */
+
 GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget) 
-	: widget_(widget) {
+	: widget_(widget)
+	, mutex_() {
+	log_call();
+
 	is_update_ = false;
+	is_buffer_init_ = false;
+
+	rate_ = 0;
+	timestamp_ = 0;
 
 	// Layout size
 	layout_width_ = 0;
@@ -39,12 +100,24 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 		4, OIIO::TypeDesc::UINT8));
 //		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
 
+	// Init
+	index_ = 0;
+	queue_size_ = 2;
+
+	clear_req_ = false;
+
 	// Texture
 	texture_ = 0;
+
+	// Buffer
+	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
 }
 
 
 GPX2VideoWidget::~GPX2VideoWidget() {
+	log_call();
+
+	clear_buffers();
 }
 
 
@@ -64,6 +137,13 @@ GPX2VideoWidget * GPX2VideoWidget::create(VideoWidget *widget) {
 }
 
 
+void GPX2VideoWidget::setRate(int rate) {
+	log_call();
+
+	rate_ = rate;
+}
+
+
 void GPX2VideoWidget::setLayoutSize(int width, int height) {
 	log_call();
 
@@ -72,33 +152,125 @@ void GPX2VideoWidget::setLayoutSize(int width, int height) {
 }
 
 
+void GPX2VideoWidget::setTelemetry(TelemetrySource *source) {
+	log_call();
+
+	clear();
+
+	source_ = source;
+}
+
+
+bool GPX2VideoWidget::full(void) {
+	return (!is_buffer_init_ || (queue_.size() >= queue_size_));
+}
+
+
+/**
+ * Switch to next frame
+ * (Called from video thread)
+ */
+void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
+	log_call();
+
+	GPX2VideoWidget::BufferPtr next;
+
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	// Save current timestamp
+	timestamp_ = timestamp;
+
+	// Drop old buffers
+	if (source_) {
+		timestamp -= (timestamp % rate_);
+
+		while (queue_.size() > 1) {
+			next = queue_[1];
+
+			if (next->timestamp() > timestamp)
+				break;
+
+			queue_.pop_front();
+
+			is_update_ = true;
+		}
+	}
+}
+
+
 bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	log_call();
 
+	int index;
+
+	bool is_update;
 	bool is_bg_update, is_fg_update;
+
+	GPX2VideoWidget::BufferPtr buffer;
+
+//printf("WIDGET::DRAW\n");
 
 //	widget_->dump();
 
 	OIIO::ImageBuf *bg_buf = widget_->prepare(is_bg_update);
 	OIIO::ImageBuf *fg_buf = widget_->render(data, is_fg_update);
 
-	is_update_ = (is_bg_update || is_fg_update);
+	is_update = (is_bg_update || is_fg_update);
 
-	if (is_update_) {
+	if (is_update) {
+		// Buffer index
+		index = index_;
+		index_ = (index_ + 1) % queue_size_;
+
+		// Create new buffer
+		buffer = GPX2VideoWidget::Buffer::create();
+
+		buffer->setTimestamp(data.timestamp());
+		buffer->setData(index, buffer_[index]);
+
 		// Draw bg
 		OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);
 
 		// Draw fg
 		OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi(), 4);
+
+		// Update buffer
+		overlay_->get_pixels(OIIO::ROI(), 
+				overlay_->spec().format, 
+				reinterpret_cast<char*>(buffer->data()));
+		
+		// Save buffer
+		std::lock_guard<std::mutex> lock(mutex_);
+
+		queue_.push_back(buffer);
 	}
 
-	return is_update_;
+	return is_update;
+}
+
+
+/**
+ * Clear widget cache
+ * (Called from main thread)
+ */
+void GPX2VideoWidget::clear(void) {
+	log_call();
+
+	clear_req_ = true;
 }
 
 
 void GPX2VideoWidget::init_buffers(void) {
 	log_call();
 
+	int nchannels = 4;
+
+	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
+						* overlay_->spec().channel_bytes();
+
+//printf("WIDGET::INIT BUFFERS\n");
+
+	// Create buffers
 	glGenVertexArrays(1, &vao_);
 	glBindVertexArray(vao_);
 
@@ -112,7 +284,20 @@ void GPX2VideoWidget::init_buffers(void) {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-	glGenBuffers(1, &pbo_);
+//	glGenBuffers(1, &pbo_);
+
+	glGenBuffers(queue_size_, pbo_);
+	for (size_t i=0; i<queue_size_; i++) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
+
+		GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, 0, flags);
+
+		buffer_[i] = (uint8_t *) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, flags);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	}
 
 	// position attribute
 	glEnableVertexAttribArray(0);
@@ -120,27 +305,119 @@ void GPX2VideoWidget::init_buffers(void) {
 	// texture attribute
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+
+	// Buffer ready
+	is_buffer_init_ = true;
 }
 
 
+/**
+ * Widget drawing
+ * (Called from renderer thread)
+ */
+void GPX2VideoWidget::write_buffers(void) {
+	log_call();
+
+	uint64_t timestamp;
+
+//printf("WIDGET::WRITE BUFFERS\n");
+
+	if (source_) {
+		GPX2VideoWidget::BufferPtr buffer;
+
+		TelemetrySource::Data type = TelemetrySource::DataUnknown;
+
+		if (clear_req_) {
+			// Clear & free texture
+			clear_buffers();
+
+			// Done
+			clear_req_ = false;
+		}
+
+		if ((buffer = get_last_buffer()) != NULL) {
+			timestamp = buffer->timestamp() + rate_;
+		}
+		else if (timestamp_ > 0) {
+			timestamp = timestamp_;
+
+			source_->retrieveFrom(data_);
+			data_.setDatetime(timestamp);
+		}
+		else
+			return;
+
+		timestamp -= (timestamp % rate_);
+
+		while ((type != TelemetrySource::DataEof) && !full()) {
+			type = source_->retrieveNext(data_, timestamp);
+			data_.setDatetime(timestamp);
+
+			draw(data_);
+
+			timestamp += rate_;
+		}
+	}
+	else {
+		if (queue_.empty()) {
+			TelemetryData data;
+
+			draw(data);
+		}
+	}
+}
+
+
+void GPX2VideoWidget::clear_buffers(void) {
+	log_call();
+
+	is_update_ = false;
+
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	if (texture_)
+		glDeleteTextures(1, &texture_);
+	texture_ = 0;
+
+	// Drop buffers
+	while (!queue_.empty())
+		queue_.pop_front();
+
+	// Reset index
+	index_ = 0;
+
+	// Reset
+	widget_->clear();
+}
+
+
+/**
+ * Load new texture
+ * (Called from video thread)
+ */
 void GPX2VideoWidget::load_texture(void) {
 	log_call();
 
-//	return;
+//printf("WIDGET::LOAD TEXTURE\n");
 
-
-
-	void *buffer;
+	std::lock_guard<std::mutex> lock(mutex_);
 
 	// 
-	int nchannels = 4;
+//	int nchannels = 4;
 //	static std::vector<unsigned char> m_tex_buffer;
+
+	if (queue_.empty())
+		return;
 
 	if (texture_ && !is_update_)
 		return;
 
-	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
-						* overlay_->spec().channel_bytes();
+//printf("WIDGET::LOADING TEXTURE...\n");
+
+	GPX2VideoWidget::BufferPtr buffer = queue_.front();
+
+//	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
+//						* overlay_->spec().channel_bytes();
 
 //	if (!texture_) {
 //
@@ -151,17 +428,19 @@ void GPX2VideoWidget::load_texture(void) {
 //			overlay_->spec().format, 
 //			reinterpret_cast<char*>(m_tex_buffer.data()));
 
-	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
+//
+//	glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
+//
+//	buffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+//
+//	overlay_->get_pixels(OIIO::ROI(), 
+//			overlay_->spec().format, 
+//			reinterpret_cast<char*>(buffer));
+//
+//	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
 
-	glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
-
-	buffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-
-	overlay_->get_pixels(OIIO::ROI(), 
-			overlay_->spec().format, 
-			reinterpret_cast<char*>(buffer));
-
-	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[buffer->index()]);
 
 	// texture
 	if (!texture_) {
@@ -219,6 +498,9 @@ void GPX2VideoWidget::load_texture(void) {
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
 //	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// Texture updated
+	is_update_ = false;
 }
 
 
@@ -254,15 +536,36 @@ double GPX2VideoWidget::glHeight(void) const {
 }
 
 
+GPX2VideoWidget::BufferPtr GPX2VideoWidget::get_last_buffer(void) {
+	log_call();
+
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	if (!queue_.empty())
+		return queue_.back();
+
+	return NULL;
+}
+
+
+/**
+ * Do OpenGL rendering
+ * (Called from main thread)
+ */
 void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	log_call();
 
-//	return;
+//printf("WIDGET::RENDER\n");
+
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	if (!texture_)
+		return;
+
+//printf("WIDGET::RENDERING...\n");
 
 	// Transformations
 	glm::mat4 transform = glm::mat4(1.0f);
-//	transform = glm::translate(transform, glm::vec3(0.5f, -0.5f, 0.0f));
-//	transform = glm::rotate(transform, (float) 30.0, glm::vec3(0.0f, 0.0f, 1.0f));
 	transform = glm::translate(transform, glm::vec3(glX(), glY(), 0.0f));
 	transform = glm::scale(transform, glm::vec3(glWidth(), glHeight(), 0.0f));
 
@@ -282,12 +585,5 @@ void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	glBindVertexArray(vao_);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-}
-
-
-void GPX2VideoWidget::clear(void) {
-	log_call();
-
-	widget_->clear();
 }
 

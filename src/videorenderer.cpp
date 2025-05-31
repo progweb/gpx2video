@@ -335,6 +335,7 @@ bool VideoRenderer::run(void) {
 	double sar;
 	int orientation;
 
+	uint64_t datetime;
 	uint64_t start_time;
 
 	int64_t timecode;
@@ -393,7 +394,7 @@ bool VideoRenderer::run(void) {
 	timecode_ms = timecode * av_q2d(video_stream->timeBase()) * 1000;
 
 	// Update video real time 
-	app_.setTime(start_time + real_duration_ms_);
+	datetime = start_time + real_duration_ms_;
 
 	if (source_) {
 		uint64_t timestamp = start_time + real_duration_ms_;
@@ -403,6 +404,9 @@ bool VideoRenderer::run(void) {
 		// Read GPX data
 		timestamp -= (timestamp % telemetrySettings().telemetryRate());
 		source_->retrieveNext(data_, timestamp);
+
+		// Set current datetime
+		data_.setDatetime(datetime);
 
 		// Draw overlay
 		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
@@ -470,7 +474,7 @@ bool VideoRenderer::run(void) {
 
 		if (app_.progressInfo()) {
 			printf("FRAME: %ld - PTS: %ld - TIMESTAMP: %ld ms - TIME: %s (x %.01f)\n", 
-				frame_time_, timecode, timecode_ms, Datetime::timestamp2string(app_.time()).c_str(), time_factor);
+				frame_time_, timecode, timecode_ms, Datetime::timestamp2string(datetime).c_str(), time_factor);
 		}
 		else {
 			int percent = 100 * timecode_ms / duration_ms_;

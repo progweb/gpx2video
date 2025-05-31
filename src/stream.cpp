@@ -1,7 +1,8 @@
 #include "stream.h"
 
 
-Stream::Stream() {
+Stream::Stream() 
+	: eof_(false) {
 }
 
 
@@ -36,6 +37,16 @@ const std::string& Stream::name(void) const {
 
 void Stream::setName(const std::string &name) {
 	name_ = name;
+}
+
+
+const bool& Stream::isEOF(void) const {
+	return eof_;
+}
+
+
+void Stream::setEOF(const bool &eof) {
+	eof_ = eof;
 }
 
 

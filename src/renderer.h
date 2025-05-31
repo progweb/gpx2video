@@ -132,6 +132,7 @@ public:
 	}
 
 	void append(VideoWidget *widget);
+	void drop(void);
 
 protected:
 	GPXApplication &app_;

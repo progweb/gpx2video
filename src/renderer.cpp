@@ -566,6 +566,17 @@ void Renderer::append(VideoWidget *widget) {
 }
 
 
+void Renderer::drop(void) {
+	while (!widgets_.empty()) {
+		VideoWidget *widget = widgets_.front();
+
+		widgets_.pop_front();
+
+		delete widget;
+	}
+}
+
+
 void Renderer::computeWidgetsPosition(void) {
 	bool is_first;
 

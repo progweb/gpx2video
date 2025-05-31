@@ -50,9 +50,6 @@ public:
 	void update_adjustment(double value);
 	void update_layout(void);
 
-	TelemetrySource * telemetry(void);
-	void set_telemetry(TelemetrySource *source);
-
 	void open_stream(MediaContainer *container);
 	void close_stream(void);
 	void stream_toggle_pause(void);
@@ -67,10 +64,6 @@ public:
 	void video_render(void);
 
 //	void widget_append(VideoWidget *widget);
-	void widgets_draw(void);
-	void widgets_render(void);
-	void widgets_resize(int width, int height);
-	void widgets_clear(void);
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
@@ -86,6 +79,7 @@ protected:
 	bool on_render(const Glib::RefPtr<Gdk::GLContext> &context);
 	void on_resize(gint width, gint height);
 	void on_data_ready(void);
+	void on_renderer_ready(void);
 	bool on_timeout(void);
 
 	void schedule_refresh(unsigned int delay);
@@ -129,9 +123,6 @@ private:
 
 
 
-
-	TelemetrySource *source_;
-	TelemetryData data_;
 
 	GPX2VideoRenderer *renderer_;
 };

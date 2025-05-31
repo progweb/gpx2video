@@ -395,8 +395,6 @@ void GPX2VideoStream::render(GPX2VideoShader *shader) {
 	// 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_);
-//	glActiveTexture(GL_TEXTURE1);
-//	glBindTexture(GL_TEXTURE_2D, widgets_texture_);
 
 	//
 	shader->use();
@@ -791,7 +789,7 @@ void GPX2VideoStream::Audio::write(size_t length) {
 
 		nextSampleBuffer();
 
-		if (write_size > length)
+		if (write_size > 2 * length)
 			break;
 	}
 
@@ -833,8 +831,14 @@ void GPX2VideoStream::Audio::run(void) {
 		}
 
 		// Read
-		if (read() == false)
+		if (read() == false) {
+			if (stream_->isEOF()) {
+				wait();
+				continue;
+			}
+
 			break;
+		}
 	}
 }
 
@@ -967,7 +971,7 @@ GPX2VideoStream::Video::Video(Clock &extclk)
 GPX2VideoStream::Video::~Video() {
 	log_call();
 
-//	free(buffer_);
+	free(buffer_);
 }
 
 
@@ -1040,9 +1044,6 @@ bool GPX2VideoStream::Video::read(void) {
 	buffer = buffer_[index];
 
 	// Retrieve video streams
-//	VideoStreamPtr video_stream = container_->getVideoStream();
-//
-//	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), video_stream->frameRate());
 	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), stream_->frameRate());
 
 	frame = decoder_->retrieveVideo(video_time, buffer);
@@ -1101,8 +1102,14 @@ void GPX2VideoStream::Video::run(void) {
 		}
 
 		// Read
-		if (read() == false)
+		if (read() == false) {
+			if (stream_->isEOF()) {
+				wait();
+				continue;
+			}
+
 			break;
+		}
 	}
 }
 

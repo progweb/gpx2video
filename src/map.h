@@ -68,11 +68,15 @@ public:
 
 	void setSize(int width, int height);
 
-	bool run(void) {
+	bool start(void) {
 		init();
 		limits();
 		download();
-		
+
+		return true;
+	}
+
+	bool run(void) {
 		return true;
 	}
 

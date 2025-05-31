@@ -40,6 +40,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	, media_file_("") 
 	, layout_file_("") 
 	, audio_device_(NULL)
+	, loop_(true)
+	, thread_(NULL)
 	, media_(NULL)
 	, renderer_(NULL) {
 	log_call();
@@ -151,6 +153,10 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	// Create renderer context
 	renderer_ = GPX2VideoRenderer::create(*this, renderer_settings_, telemetry_settings_);
 	video_area_->set_renderer(renderer_);
+	widget_frame_->set_renderer(renderer_);
+
+	// GPX2Video application thread 
+	start();
 
 	// Connect widget list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
@@ -177,6 +183,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 GPX2VideoApplicationWindow::~GPX2VideoApplicationWindow() {
 	log_call();
+
+	// Stop & destroy GPX2Video application thread
+	stop();
 
 	if (video_area_)
 		delete video_area_;
@@ -207,6 +216,42 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 }
 
 
+void GPX2VideoApplicationWindow::run(void) {
+	log_call();
+
+	while (loop_)
+		loop();
+}
+
+
+void GPX2VideoApplicationWindow::start(void) {
+	log_call();
+
+	loop_ = true;
+
+	if (!thread_) {
+		thread_ = new std::thread([this] {
+			run();
+		});
+	}
+}
+
+void GPX2VideoApplicationWindow::stop(void) {
+	log_call();
+
+	loop_ = false;
+
+	if (thread_) {
+		perform(Task::ActionExit);
+
+		if (thread_->joinable())
+			thread_->join();
+
+		delete thread_;
+	}
+}
+
+
 void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
@@ -215,12 +260,15 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 	// Video renderer
 	renderer_->setLayoutFile(layout_file_);
 
+	// Exec async widgets tasks
+	perform(Task::ActionStart);
+
 	// Populate widgets list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
 	if (!list)
 		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
 
-	for (GPX2VideoWidget *item : renderer_->widgets_) {
+	for (GPX2VideoWidget *item : renderer_->widgets()) {
 		auto box = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
 		auto label = Gtk::Label(item->widget()->name());
 		auto button = Gtk::make_managed<Gtk::Button>(); //(new Gtk::Button());
@@ -316,13 +364,14 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 	settings().setInputfile(filename);
 
 	// Update telemetry settings
+//	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
 	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
 
 	// Load telemetry data
 	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, false);
 
 	// Update ui components
-	video_area_->set_telemetry(source);
+	renderer_->set_telemetry(source);
 
 	video_frame_->set_telemetry(source);
 }
@@ -583,7 +632,7 @@ void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 	// Widget item
 	int i = 0;
 
-	for (GPX2VideoWidget *item : renderer_->widgets_) {
+	for (GPX2VideoWidget *item : renderer_->widgets()) {
 		if (i++ != index)
 			continue;
 

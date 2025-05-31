@@ -44,10 +44,8 @@ skip:
 		time_t t;
 		struct tm time;
 
-		(void) data;
-
 		// Compute time
-		t = app_.time() / 1000;
+		t = data.datetime() / 1000;
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {

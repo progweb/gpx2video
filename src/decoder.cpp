@@ -130,7 +130,9 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 				}
 
     			// Warning, value isn't the same result as FFprobe.
-				av_log(NULL, AV_LOG_INFO, "%s = %0.2f\n", "rotate", theta);
+				av_log(NULL, AV_LOG_INFO, "interlacing = %s, rotate = %0.2f\n", 
+						(interlacing != VideoParams::InterlaceNone) ? 
+							((interlacing = VideoParams::InterlacedBottomFirst) ? "BFF" : "TFF") : "none", theta);
 
 				AVPixelFormat compatible_pix_fmt = FFmpegUtils::getCompatiblePixelFormat(static_cast<AVPixelFormat>(avstream->codecpar->format));
 
@@ -342,10 +344,17 @@ void Decoder::close(void) {
 
 
 int Decoder::seek(int64_t target_ts) {
+	int result;
+
 	int64_t seek_ts = av_rescale_q(target_ts, AV_TIME_BASE_Q, stream_->timeBase());
 
 	avcodec_flush_buffers(codec_ctx_);
-	return av_seek_frame(fmt_ctx_, avstream_->index, seek_ts, AVSEEK_FLAG_BACKWARD);
+
+	result = av_seek_frame(fmt_ctx_, avstream_->index, seek_ts, AVSEEK_FLAG_BACKWARD);
+
+	stream_->setEOF(false);
+
+	return result;
 }
 
 
@@ -378,6 +387,9 @@ int Decoder::getFrame(AVPacket *packet, AVFrame *frame) {
 
 			// Send a null packet to signal end of 
 			avcodec_send_packet(codec_ctx_, NULL);
+
+			// End of stream
+			stream_->setEOF(true);
 		}
 		else if (result < 0) {
 			// Handle other error by breaking loop and returning the code we received
@@ -523,7 +535,7 @@ SampleBufferPtr Decoder::retrieveAudioFrameData2(const AudioParams &params, cons
 	AVPacket *packet = NULL;
 	AVFrame *frame = NULL;
 
-	SampleBufferPtr data = SampleBuffer::create();
+	SampleBufferPtr data = NULL;
 
 	(void) params;
 
@@ -596,6 +608,7 @@ SampleBufferPtr Decoder::retrieveAudioFrameData2(const AudioParams &params, cons
 		int nb_samples = swr_get_out_samples(resampler, frame->nb_samples);
 //		int nb_bytes_per_channel = params.samplesToBytes(nb_samples) / nb_channels;
 
+		data = SampleBuffer::create();
 		data->setAudioParams(params);
 		data->setSampleCount(nb_samples);
 		data->allocate();

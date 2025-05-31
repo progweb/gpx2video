@@ -54,7 +54,6 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	, shader_(NULL)
 	, app_(app) 
 	, audio_device_(NULL)
-	, source_(NULL) 
 	, renderer_(NULL) {
 	log_call();
 
@@ -74,7 +73,7 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 //#endif
 	set_expand(true);
 //	set_size_request(320, 240);
-	set_auto_render(true);
+	set_auto_render(false);
 
 	stream_.video().data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
 
@@ -102,6 +101,8 @@ void GPX2VideoArea::set_renderer(GPX2VideoRenderer *renderer) {
 	log_call();
 
 	renderer_ = renderer;
+	
+	renderer_->ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_renderer_ready));
 }
 
 
@@ -148,7 +149,7 @@ void GPX2VideoArea::update_layout(void) {
 	log_call();
 
 	// Widgets resize
-	widgets_resize(stream_.width(), stream_.height());
+	renderer_->set_layout_size(stream_.width(), stream_.height());
 
 	if (!is_gl_context_ready_)
 		return;
@@ -161,18 +162,13 @@ void GPX2VideoArea::update_layout(void) {
 }
 
 
-TelemetrySource * GPX2VideoArea::telemetry(void) {
-	return source_;
-}
-
-
-void GPX2VideoArea::set_telemetry(TelemetrySource *source) {
-	// Save telemetry source
-	source_ = source;
-
-	//
-	refresh();
-}
+//void GPX2VideoArea::set_telemetry(TelemetrySource *source) {
+//	// Save telemetry source
+//	source_ = source;
+//
+//	//
+//	refresh();
+//}
 
 
 //void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
@@ -202,7 +198,7 @@ void GPX2VideoArea::open_stream(MediaContainer *container) {
 	stream_.play();
 
 	// Widgets resize
-	widgets_resize(stream_.width(), stream_.height());
+	renderer_->set_layout_size(stream_.width(), stream_.height());
 
 	// Update UI
 	is_init_ = false;
@@ -285,12 +281,11 @@ void GPX2VideoArea::seek(double incr) {
 	// OpenGL context
 	make_current();
 
-	// Reset telemetry data from start
-	if ((incr < 0) && (source_ != NULL))
-		source_->retrieveFrom(data_);
-
 	// Force to refresh widgets
-	widgets_clear();
+	pos = renderer_->time();
+	pos += (incr * 1000.0);
+
+	renderer_->seek(pos);
 
 	// Compute new video position (in ms)
 	pos = frame->time();
@@ -319,45 +314,6 @@ void GPX2VideoArea::video_render(void) {
 //
 //	widget_ = GPX2VideoWidget::create(widget);
 //}
-
-
-void GPX2VideoArea::widgets_draw(void) {
-	log_call();
-
-////	// Reset overlay layer
-////	overlay_->reset(OIIO::ImageSpec(stream_.width(), stream_.height(), 
-////		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
-
-	// Draw each widget
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->draw(data_);
-}
-
-
-void GPX2VideoArea::widgets_render(void) {
-	log_call();
-
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->render(shader_);
-}
-
-
-void GPX2VideoArea::widgets_resize(int width, int height) {
-	log_call();
-
-	log_info("Set widget layout %d x %d", width, height);
-
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->setLayoutSize(width, height);
-}
-
-
-void GPX2VideoArea::widgets_clear(void) {
-	log_call();
-
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->clear();
-}
 
 
 void GPX2VideoArea::on_realize(void) {
@@ -441,8 +397,8 @@ bool GPX2VideoArea::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 		//
 		video_render();
 
-		//
-		widgets_render();
+		// Widgets rendering
+		renderer_->render(shader_);
 
 		//
 		glBindVertexArray(0);
@@ -475,6 +431,14 @@ void GPX2VideoArea::on_data_ready(void) {
 
 	if (!is_playing_)
 		step_to_next_frame();
+}
+
+
+void GPX2VideoArea::on_renderer_ready(void) {
+	log_call();
+
+	if (!is_playing_)
+		refresh();
 }
 
 
@@ -531,13 +495,11 @@ bool GPX2VideoArea::on_timeout(void) {
 void GPX2VideoArea::refresh(void) {
 	log_call();
 
-	// Reset telemetry data from start
-	if (source_ != NULL)
-		source_->retrieveFrom(data_);
+// TODO
+//	// Reset telemetry data from start
+//	if (source_ != NULL)
+//		source_->retrieveFrom(data_);
 
-	// Force to draw widget again
-	widgets_clear();
-	
 	// Render video again
 	force_refresh_ = true;
 
@@ -649,7 +611,7 @@ retry:
 	// Refresh done
 	force_refresh_ = false;
 
-#if 1
+#if 0
 	{
 		AVBPrint buf;
 		static int64_t last_time;
@@ -669,10 +631,12 @@ retry:
 
 			av_bprint_init(&buf, 0, AV_BPRINT_SIZE_AUTOMATIC);
 			av_bprintf(&buf,
-					"%7.2f %s: A: %7.3f / V: %7.3f - %7.3f fd=%4d \r",
+					"%7.2f %s: A%s: %7.3f / V%s: %7.3f - %7.3f fd=%4d \r",
 					stream_.clock().get(),
 					(stream_.withAudio() && stream_.withVideo()) ? "A-V" : (stream_.withVideo() ? "M-V" : (stream_.withAudio() ? "M-A" : "   ")),
+					stream_.get_master_sync_type() == AV_SYNC_AUDIO_MASTER ? "*" : "",
 					stream_.audio().clock().get(),
+					stream_.get_master_sync_type() == AV_SYNC_VIDEO_MASTER ? "*" : "",
 					stream_.video().clock().get(),
 					av_diff,
 					stream_.frame_drops_early_ + stream_.frame_drops_late_);
@@ -696,6 +660,7 @@ retry:
 void GPX2VideoArea::video_display(void) {
 	log_call();
 
+	uint64_t datetime;
 	uint64_t start_time;
 
 	uint64_t timecode_ms;
@@ -728,18 +693,21 @@ void GPX2VideoArea::video_display(void) {
 	real_duration_ms = time_factor * timecode_ms;
 
 	// Update video real time 
-	app_.setTime(start_time + real_duration_ms);
+	datetime = start_time + real_duration_ms;
 
-	if (source_) {
-		uint64_t timestamp = start_time + real_duration_ms;
+//	if (source_) {
+//		uint64_t timestamp = start_time + real_duration_ms;
+//
+//		// Read GPX data
+//		timestamp -= (timestamp % renderer_->telemetrySettings().telemetryRate());
+//		source_->retrieveNext(data_, timestamp);
+//	}
 
-		// Read GPX data
-		timestamp -= (timestamp % renderer_->telemetrySettings().telemetryRate());
-		source_->retrieveNext(data_, timestamp);
-	}
+	// Notify renderer
+	renderer_->update(datetime);
 
-	// Draw widgets
-	widgets_draw();
+//	// Draw widgets
+//	renderer_->draw();
 
 	// Create & load OpenGL texture
 	load_video_texture(frame);
@@ -747,7 +715,8 @@ void GPX2VideoArea::video_display(void) {
 
 	// OpenGL context redraw
 //	log_info("Q: %7.3f", stream_.get_master_clock());
-	queue_draw();
+//	queue_draw();
+	queue_render();
 
 	// Refresh adjustment
 	update_adjustment(frame->time());
@@ -777,8 +746,8 @@ void GPX2VideoArea::init_widgets_buffers(void) {
 	// OpenGL context
 	make_current();
 
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->init_buffers();
+	// Widget buffers initialization
+	renderer_->init_buffers();
 }
 
 
@@ -805,9 +774,7 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 void GPX2VideoArea::load_widgets_texture(FramePtr frame) {
 	log_call();
 
-
-	for (GPX2VideoWidget *item : renderer_->widgets_)
-		item->load_texture();
+	renderer_->load_texture();
 
 //	log_call();
 //

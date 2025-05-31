@@ -10,6 +10,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame()
 	: Glib::ObjectBase("GPX2VideoWidgetFrame")
 	, ref_builder_(NULL) 
 	, dispatcher_()
+	, renderer_(NULL)
 	, widget_selected_(NULL) {
 	log_call();
 }
@@ -20,6 +21,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	, Gtk::Frame(cobject)
 	, ref_builder_(ref_builder) 
 	, dispatcher_()
+	, renderer_(NULL)
 	, widget_selected_(NULL) {
 	log_call();
 
@@ -49,6 +51,13 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 
 GPX2VideoWidgetFrame::~GPX2VideoWidgetFrame() {
 	log_call();
+}
+
+
+void GPX2VideoWidgetFrame::set_renderer(GPX2VideoRenderer *renderer) {
+	log_call();
+
+	renderer_ = renderer;
 }
 
 
@@ -143,6 +152,7 @@ void GPX2VideoWidgetFrame::on_widget_background_color_set(void) {
 	log_info("Background color changed to '%s'", color.c_str());
 
 	widget_selected_->widget()->setBackgroundColor(color);
+	renderer_->refresh(widget_selected_);
 
 	// Refresh video preview
 	dispatcher_.emit();
@@ -174,6 +184,7 @@ void GPX2VideoWidgetFrame::on_widget_border_color_set(void) {
 	log_info("Border color changed to '%s'", color.c_str());
 
 	widget_selected_->widget()->setBorderColor(color);
+	renderer_->refresh(widget_selected_);
 
 	// Refresh video preview
 	dispatcher_.emit();
@@ -195,6 +206,7 @@ void GPX2VideoWidgetFrame::on_widget_border_value_changed(void) {
 	log_info("Border widget changed to '%d'", border);
 
 	widget_selected_->widget()->setBorder(border);
+	renderer_->refresh(widget_selected_);
 
 	// Refresh video preview
 	dispatcher_.emit();

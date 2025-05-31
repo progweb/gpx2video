@@ -38,6 +38,9 @@ public:
 	const std::string& name(void) const;
 	void setName(const std::string &name);
 
+	const bool& isEOF(void) const;
+	void setEOF(const bool &eof);
+
 	const AVMediaType& type(void) const;
 	void setType(const AVMediaType &type);
 
@@ -54,6 +57,8 @@ private:
 	std::string name_;
 
 	MediaContainer *container_;
+
+	bool eof_;
 
 	AVMediaType type_;
 	AVRational time_base_;

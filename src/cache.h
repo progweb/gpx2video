@@ -16,6 +16,7 @@ public:
 		return path_;
 	}
 
+	bool start(void);
 	bool run(void);
 
 private:

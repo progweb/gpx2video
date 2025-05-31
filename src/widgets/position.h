@@ -75,6 +75,8 @@ skip:
 	}
 
 	void clear(void) {
+		no_value_ = false;
+
 		if (bg_buf_)
 			delete bg_buf_;
 

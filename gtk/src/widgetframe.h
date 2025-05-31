@@ -5,6 +5,7 @@
 #include <glibmm/dispatcher.h>
 #include <gtkmm/frame.h>
 
+#include "renderer.h"
 #include "videowidget.h"
 
 
@@ -13,6 +14,8 @@ public:
 	GPX2VideoWidgetFrame();
 	GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder);
 	virtual ~GPX2VideoWidgetFrame();
+
+	void set_renderer(GPX2VideoRenderer *renderer);
 
 	void set_visible(bool visible);
 
@@ -34,6 +37,8 @@ protected:
 	void on_widget_border_value_changed(void);
 
 private:
+	GPX2VideoRenderer *renderer_;
+
 	GPX2VideoWidget *widget_selected_;
 };
 

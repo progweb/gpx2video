@@ -239,6 +239,7 @@ GPX2Video::GPX2Video(struct event_base *evbase)
 //#endif
 
 //	init();
+	listen();
 }
 
 
