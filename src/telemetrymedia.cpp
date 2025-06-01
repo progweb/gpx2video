@@ -102,7 +102,7 @@ void TelemetryData::writeData(size_t index) const {
 
 
 double TelemetrySource::Point::distanceTo(const Point &to) {
-	double d;
+	double d = 0.0;
 
 	GeographicLib::Geodesic gsic(6378137.0, 1.0/298.2572);
 
@@ -670,10 +670,7 @@ bool TelemetrySource::load(void) {
 		previous = point;
 	}
 
-	// Compute data for last point
-	pool_.seek(1);
-	compute_i(data);
-
+	// Back to first point
 	pool_.reset();
 
 	// Compute first point again
@@ -1328,7 +1325,7 @@ void TelemetrySource::smooth_step_two(void) {
 	while (!pool_.empty()) {
 		if (pool_.current().type() != TelemetryData::TypeError) {
 			// verticalspeed
-			//-------
+			//--------------
 
 			if (verticalspeed_window > 1) {
 				// Add new point
@@ -1358,7 +1355,7 @@ void TelemetrySource::smooth_step_two(void) {
 				// Compute 'verticalspeed' smooth values
 				if (pool_.current().hasValue(TelemetryData::DataFix)) {
 					if (!pool_.current().isPause()) {
-						pool_.current().setSpeed(verticalspeed_sum / verticalspeed_count);
+						pool_.current().setVerticalSpeed(verticalspeed_sum / verticalspeed_count);
 					}
 				}
 			}
@@ -1450,11 +1447,10 @@ void TelemetrySource::fix(void) {
 	pool_.seek(1);
 
 	prevPoint = pool_.current();
+	pool_.seek(1);
 
 	// Process each point
-	while (!pool_.empty()) {
-		pool_.seek(1);
-
+	for (; !pool_.empty(); pool_.seek(1)) {
 		currentPoint = pool_.current();
 
 		if (currentPoint.type() != TelemetryData::TypeError) {

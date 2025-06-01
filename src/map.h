@@ -71,12 +71,13 @@ public:
 	bool start(void) {
 		init();
 		limits();
-		download();
 
 		return true;
 	}
 
 	bool run(void) {
+		download();
+
 		return true;
 	}
 

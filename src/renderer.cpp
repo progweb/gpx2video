@@ -49,6 +49,8 @@ Renderer::Renderer(GPXApplication &app,
 	container_ = NULL;
 
 	overlay_ = NULL;
+
+	source_ = NULL;
 }
 
 
