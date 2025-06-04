@@ -278,6 +278,8 @@ Map::Map(GPXApplication &app, const TelemetrySettings &telemetry_settings, const
 	fg_buf_ = NULL;
 	mapbuf_ = NULL;
 
+	refresh_is_required_ = false;
+
 	evcurl_ = EVCurl::init(evbase);
 	
 	evcurl_->setOption(CURLMOPT_MAXCONNECTS, 1);
@@ -444,6 +446,9 @@ void Map::init(bool zoomfit) {
 			tiles_.push_back(tile);
 		}
 	}
+
+	// Donwload tile is required
+	refresh_is_required_ = true;
 }
 
 
@@ -510,6 +515,9 @@ void Map::download(void) {
 
 	log_call();
 
+	if (!refresh_is_required_)
+		return;
+
 	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
 
 	nbr_downloads_ = 1;
@@ -521,6 +529,8 @@ void Map::download(void) {
 		if (tile->download() == false)
 			log_error("Download failure!");
 	}
+
+	refresh_is_required_ = false;
 }
 
 
@@ -995,6 +1005,10 @@ bool Map::Tile::download(void) {
 			return true;
 		}
 	}
+
+	// Downloading?
+	if (evtaskh_ != NULL)
+		return true;
 	
 	// Download
 	evtaskh_ = map_.evcurl()->download(uri_.c_str(), downloadComplete, this);

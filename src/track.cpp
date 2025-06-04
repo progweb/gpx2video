@@ -406,7 +406,7 @@ bool Track::load(void) {
 	// Create track buffer
 	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
-	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
 
 	if (source != NULL) {
 //		// Telemetry data limits

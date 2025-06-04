@@ -1588,12 +1588,14 @@ void TelemetrySource::trim(void) {
 
 void TelemetrySource::dump(bool content) {
 	std::cout << "Telemetry settings:" << std::endl;
-	std::cout << " - offset: " << offset_ << std::endl;
-	std::cout << " - begin: " << begin_ << std::endl;
-	std::cout << " - end: " << end_ << std::endl;
-	std::cout << " - from: " << from_ << std::endl;
-	std::cout << " - to: " << to_ << std::endl;
-	std::cout << " - method: " << method_ << " (rate: " << rate_ << ")" << std::endl;
+	std::cout << "  offset:               " << offset_ << std::endl;
+	std::cout << "  skip bad point:       " << (check_ ? "true" : "false") << std::endl;
+	std::cout << "  pause detection:      " << (pause_detection_ ? "true" : "false") << std::endl;
+	std::cout << "  begin data range:     " << Datetime::timestamp2string(begin_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << begin_ << ")" << std::endl;
+	std::cout << "  end data range:       " << Datetime::timestamp2string(end_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << end_ << ")" << std::endl;
+	std::cout << "  from compute range:   " << Datetime::timestamp2string(from_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << from_ << ")" << std::endl;
+	std::cout << "  to compute range:     " << Datetime::timestamp2string(to_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << to_ << ")" << std::endl;
+	std::cout << "  interpolation method: " << method_ << " (rate: " << rate_ << ")" << std::endl;
 
 	pool_.dump(content);
 }

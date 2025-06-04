@@ -64,16 +64,8 @@ bool Renderer::init(MediaContainer *container) {
 	if (container == NULL)
 		return false;
 
-//	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
-
 	// Media
 	container_ = container;
-
-//	// Telemetry data initialization
-//	if (source_) {
-//		// Telemetry data time fixing
-//		source_->retrieveFirst(data_);
-//	}
 
 	return true;
 }
@@ -186,7 +178,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	}
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, skip map widget");
@@ -292,7 +284,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	}
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings());
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, skip track widget");

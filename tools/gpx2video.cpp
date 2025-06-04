@@ -303,7 +303,7 @@ int GPX2Video::setDefaultStartTime(void) {
 	log_call();
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings());
+	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings(), true);
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, set default start time failure");
@@ -333,7 +333,7 @@ Map * GPX2Video::buildMap(void) {
 	log_call();
 
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings());
+	TelemetrySource *source = TelemetryMedia::open(settings().gpxfile(), settings(), true);
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, none telemetry file found");

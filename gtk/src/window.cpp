@@ -364,11 +364,12 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 	settings().setInputfile(filename);
 
 	// Update telemetry settings
-//	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
-	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
+	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
+//	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
+//	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 2000);
 
 	// Load telemetry data
-	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, false);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
 
 	// Update ui components
 	renderer_->set_telemetry(source);

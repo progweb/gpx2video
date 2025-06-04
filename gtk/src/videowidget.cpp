@@ -88,7 +88,6 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 	is_update_ = false;
 	is_buffer_init_ = false;
 
-	rate_ = 0;
 	timestamp_ = 0;
 
 	// Layout size
@@ -137,13 +136,6 @@ GPX2VideoWidget * GPX2VideoWidget::create(VideoWidget *widget) {
 }
 
 
-void GPX2VideoWidget::setRate(int rate) {
-	log_call();
-
-	rate_ = rate;
-}
-
-
 void GPX2VideoWidget::setLayoutSize(int width, int height) {
 	log_call();
 
@@ -152,16 +144,10 @@ void GPX2VideoWidget::setLayoutSize(int width, int height) {
 }
 
 
-void GPX2VideoWidget::setTelemetry(TelemetrySource *source) {
-	log_call();
-
-	clear();
-
-	source_ = source;
-}
-
-
 bool GPX2VideoWidget::full(void) {
+	if (clear_req_)
+		return false;
+
 	return (!is_buffer_init_ || (queue_.size() >= queue_size_));
 }
 
@@ -181,19 +167,15 @@ void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 	timestamp_ = timestamp;
 
 	// Drop old buffers
-	if (source_) {
-		timestamp -= (timestamp % rate_);
+	while (queue_.size() > 1) {
+		next = queue_[1];
 
-		while (queue_.size() > 1) {
-			next = queue_[1];
+		if (next->timestamp() > timestamp)
+			break;
 
-			if (next->timestamp() > timestamp)
-				break;
+		queue_.pop_front();
 
-			queue_.pop_front();
-
-			is_update_ = true;
-		}
+		is_update_ = true;
 	}
 }
 
@@ -208,7 +190,7 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 
 	GPX2VideoWidget::BufferPtr buffer;
 
-//printf("WIDGET::DRAW\n");
+//printf("WIDGET::DRAW %f\n", data.speed());
 
 //	widget_->dump();
 
@@ -315,56 +297,21 @@ void GPX2VideoWidget::init_buffers(void) {
  * Widget drawing
  * (Called from renderer thread)
  */
-void GPX2VideoWidget::write_buffers(void) {
+void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 	log_call();
-
-	uint64_t timestamp;
 
 //printf("WIDGET::WRITE BUFFERS\n");
 
-	if (source_) {
-		GPX2VideoWidget::BufferPtr buffer;
+	if (clear_req_) {
+		// Clear & free texture
+		clear_buffers();
 
-		TelemetrySource::Data type = TelemetrySource::DataUnknown;
-
-		if (clear_req_) {
-			// Clear & free texture
-			clear_buffers();
-
-			// Done
-			clear_req_ = false;
-		}
-
-		if ((buffer = get_last_buffer()) != NULL) {
-			timestamp = buffer->timestamp() + rate_;
-		}
-		else if (timestamp_ > 0) {
-			timestamp = timestamp_;
-
-			source_->retrieveFrom(data_);
-			data_.setDatetime(timestamp);
-		}
-		else
-			return;
-
-		timestamp -= (timestamp % rate_);
-
-		while ((type != TelemetrySource::DataEof) && !full()) {
-			type = source_->retrieveNext(data_, timestamp);
-			data_.setDatetime(timestamp);
-
-			draw(data_);
-
-			timestamp += rate_;
-		}
+		// Done
+		clear_req_ = false;
 	}
-	else {
-		if (queue_.empty()) {
-			TelemetryData data;
 
-			draw(data);
-		}
-	}
+	if ((data.type() != TelemetryData::TypeUnknown) || queue_.empty())
+		draw(data);
 }
 
 

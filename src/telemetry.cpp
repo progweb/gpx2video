@@ -338,7 +338,7 @@ void TelemetrySettings::dump(void) const {
 	std::cout << "  begin data range:   " << telemetry_begin_ << std::endl;
 	std::cout << "  end data range:     " << telemetry_end_ << std::endl;
 	std::cout << "  from compute range: " << telemetry_from_ << std::endl;
-	std::cout << "  to compute range:   " << telemetry_from_ << std::endl;
+	std::cout << "  to compute range:   " << telemetry_to_ << std::endl;
 }
 
 

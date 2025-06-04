@@ -128,6 +128,8 @@ private:
 	// Bounding box (track area)
 	int lim_x1_, lim_y1_, lim_x2_, lim_y2_;
 
+	bool refresh_is_required_;
+
 	unsigned int nbr_downloads_;
 	std::list<Tile *> tiles_;
 };

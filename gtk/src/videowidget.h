@@ -48,25 +48,22 @@ public:
 	double glWidth(void) const;
 	double glHeight(void) const;
 
-	void setRate(int rate);
-
 	void setLayoutSize(int width, int height);
-	void setTelemetry(TelemetrySource *source);
 
 	void set_timestamp(uint64_t timestamp);
 
 	void clear(void);
 
+	bool full(void);
+
 	void init_buffers(void);
-	void write_buffers(void);
+	void write_buffers(const TelemetryData &data);
 	void clear_buffers(void);
 	void load_texture(void);
 	void render(GPX2VideoShader *shader);
 
 protected:
 	GPX2VideoWidget(VideoWidget *widget);
-
-	bool full(void);
 
 	bool draw(const TelemetryData &data);
 
@@ -76,16 +73,12 @@ private:
 	bool is_update_;
 	bool is_buffer_init_;
 
-	int rate_;
 	uint64_t timestamp_;
 
 	int layout_width_;
 	int layout_height_;
 
 	VideoWidget *widget_;
-
-	TelemetryData data_;
-	TelemetrySource *source_;
 
 	OIIO::ImageBuf *overlay_;
 

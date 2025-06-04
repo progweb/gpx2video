@@ -118,9 +118,12 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	// Save telemetry source
 	source_ = source;
 
-	// Set telemetry source for each widget
-	for (GPX2VideoWidget *item : widgets_)
-		item->setTelemetry(source_);
+	// Reset telemetry data
+	data_ = TelemetryData();
+
+//	// Set telemetry source for each widget
+//	for (GPX2VideoWidget *item : widgets_)
+//		item->setTelemetry(source_);
 
 	// Request buffering
 	refresh();
@@ -147,10 +150,14 @@ const uint64_t& GPX2VideoRenderer::time(void) const {
 void GPX2VideoRenderer::set_timestamp(uint64_t timestamp) {
 	log_call();
 
+	int rate = telemetrySettings().telemetryRate();
+
 	// Save current timestamp
 	timestamp_ = timestamp;
 
 	// Set timestamp for each widget
+	timestamp -= (timestamp % rate);
+
 	for (GPX2VideoWidget *item : widgets_)
 		item->set_timestamp(timestamp);
 }
@@ -166,7 +173,7 @@ const std::list<GPX2VideoWidget *>& GPX2VideoRenderer::widgets(void) {
 void GPX2VideoRenderer::seek(double pos) {
 	log_call();
 
-	log_info("Widgets seek position %s", Datetime::timestamp2string(pos, Datetime::FormatTime).c_str());
+	log_info("Widgets seek position %s", Datetime::timestamp2string(pos, Datetime::FormatDatetime).c_str());
 
 	if (!seek_req_) {
 		seek_pos_ = pos;
@@ -188,8 +195,8 @@ void GPX2VideoRenderer::load(void) {
 	for (VideoWidget *item : Renderer::widgets_) {
 		GPX2VideoWidget *widget = GPX2VideoWidget::create(item);
 
-		widget->setRate(telemetrySettings().telemetryRate());
-		widget->setTelemetry(source_);
+//		widget->setRate(telemetrySettings().telemetryRate());
+//		widget->setTelemetry(source_);
 
 		widgets_.push_back(widget);
 	}
@@ -216,7 +223,43 @@ void GPX2VideoRenderer::reset(void) {
 void GPX2VideoRenderer::draw(void) {
 	log_call();
 
-	write_buffers();
+	uint64_t timestamp;
+
+	int rate = telemetrySettings().telemetryRate();
+
+	if (widgets_.empty())
+		return;
+
+	if (source_) {
+		TelemetrySource::Data type = TelemetrySource::DataUnknown;
+
+		if (data_.type() == TelemetryData::TypeUnknown) {
+			timestamp = timestamp_;
+			timestamp -= (timestamp_ % rate);
+
+			// Retrieve first point
+			source_->retrieveFrom(data_);
+			data_.setDatetime(timestamp_);
+		}
+		else {
+			// Continue from the last datetime
+			timestamp = data_.datetime() + rate;
+		}
+
+		while ((type != TelemetrySource::DataEof) && !full_buffers()) {
+			type = source_->retrieveNext(data_, timestamp);
+			data_.setDatetime(timestamp);
+
+			write_buffers();
+
+			timestamp += rate;
+		}
+	}
+	else {
+		data_ = TelemetryData();
+
+		write_buffers();
+	}
 }
 
 
@@ -258,11 +301,22 @@ void GPX2VideoRenderer::init_buffers(void) {
 }
 
 
+bool GPX2VideoRenderer::full_buffers(void) {
+	log_call();
+
+	for (GPX2VideoWidget *item : widgets_)
+		if (item->full())
+			return true;
+
+	return false;
+}
+
+
 void GPX2VideoRenderer::write_buffers(void) {
 	log_call();
 
 	for (GPX2VideoWidget *item : widgets_)
-		item->write_buffers();
+		item->write_buffers(data_);
 }
 
 
@@ -298,6 +352,9 @@ bool GPX2VideoRenderer::run(void) {
 	// Seek
 	if (seek_req_) {
 		is_ready_ = false;
+
+		// Reset telemetry data
+		data_ = TelemetryData();
 
 		// Move to new timestamp
 		set_timestamp(seek_pos_);

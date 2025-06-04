@@ -30,6 +30,12 @@
                         <property name="direction">none</property>
                     </object>
                 </child>
+        <child type="end">
+          <object class="GtkButton" id="save_button">
+            <property name="action-name">win.open</property>
+            <property name="label" translatable="yes">Save</property>
+          </object>
+        </child>
             </object>
         </child>
 		<child>
