@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <format>
 #include <locale>
 
 #include <sys/types.h>
