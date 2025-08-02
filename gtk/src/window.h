@@ -46,6 +46,8 @@ public:
 	void open_layout_file(const Glib::RefPtr<const Gio::File> &file);
 	void open_telemetry_file(const Glib::RefPtr<const Gio::File> &file);
 
+	void save_layout_file(const Glib::RefPtr<const Gio::File> &file);
+
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
 
@@ -71,6 +73,7 @@ protected:
 	void update_stack(void);
 
 	void on_action_open(void);
+	void on_action_save(void);
 	void on_action_append(void);
 
 	void on_video_changed(void);
@@ -95,6 +98,14 @@ protected:
 			const Glib::RefPtr<Gtk::FileDialog> &dialog);
 #else
 	void on_file_dialog_open_clicked(int response_id,
+			Gtk::FileChooserDialog *dialog);
+#endif
+
+#if GTKMM_CHECK_VERSION(4, 10, 0)
+	void on_file_dialog_save_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,
+			const Glib::RefPtr<Gtk::FileDialog> &dialog);
+#else
+	void on_file_dialog_save_clicked(int response_id,
 			Gtk::FileChooserDialog *dialog);
 #endif
 

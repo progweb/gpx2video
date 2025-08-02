@@ -1,6 +1,7 @@
 #ifndef __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 #define __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 
+#include "utils.h"
 #include "videowidget.h"
 
 
@@ -93,6 +94,16 @@ skip:
 
 		bg_buf_ = NULL;
 		fg_buf_ = NULL;
+	}
+
+protected:
+	void xmlwrite(std::ostream &os) {
+		VideoWidget::xmlwrite(os);
+
+		IndentingOStreambuf indent(os, 4);
+
+		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
+		os << "<text-shadow>" << textShadow() << "</text-shadow>" << std::endl;
 	}
 
 private:

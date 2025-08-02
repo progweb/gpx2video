@@ -32,7 +32,7 @@
                 </child>
         <child type="end">
           <object class="GtkButton" id="save_button">
-            <property name="action-name">win.open</property>
+            <property name="action-name">win.save</property>
             <property name="label" translatable="yes">Save</property>
           </object>
         </child>

@@ -14,6 +14,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "utils.h"
 #include "tracksettings.h"
 #include "videowidget.h"
 #include "telemetrymedia.h"
@@ -63,6 +64,36 @@ protected:
 	bool load(void);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
+
+	void xmlopen(std::ostream &os) {
+		log_call();
+
+		os << "<track";
+		os <<   " x=\"" << x() << "\" y=\"" << y() << "\"";
+		os <<   " width=\"" << width() << "\" height=\"" << height() << "\"";
+		os <<   " position=\"" << position2string(position()) << "\"";
+		os <<   " align=\"" << align2string(align()) << "\"";
+		os <<   " display=\"true\"";
+		os <<   ">" << std::endl;
+	}
+
+	void xmlclose(std::ostream &os) {
+		log_call();
+
+		os << "</track>" << std::endl;
+	}
+
+	void xmlwrite(std::ostream &os) {
+		IndentingOStreambuf indent(os, 4);
+
+		os << "<margin-left>" << margin(Margin::MarginLeft) << "</margin-left>" << std::endl;
+		os << "<margin-right>" << margin(Margin::MarginRight) << "</margin-right>" << std::endl;
+		os << "<margin-top>" << margin(Margin::MarginTop) << "</margin-top>" << std::endl;
+		os << "<margin-bottom>" << margin(Margin::MarginBottom) << "</margin-bottom>" << std::endl;
+		os << "<border>" << border() << "</border>" << std::endl;
+		os << "<border-color>" << color2hex(textColor()) << "</border-color>" << std::endl;
+		os << "<background-color>" << color2hex(backgroundColor()) << "</background-color>" << std::endl;
+	}
 
 	GPXApplication &app_;
 	TrackSettings track_settings_;

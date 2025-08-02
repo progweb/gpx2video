@@ -27,6 +27,7 @@ extern "C" {
 }
 
 #include "log.h"
+#include "utils.h"
 #include "compat.h"
 #include "datetime.h"
 #include "window.h"
@@ -111,6 +112,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	// Add actions and keyboard accelerators for the headerbar actions
 	add_action("open", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_open));
+	add_action("save", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_save));
 	add_action("append", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_append));
 
 	add_action("use_creation_time", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_creation_time));
@@ -394,6 +396,34 @@ void GPX2VideoApplicationWindow::update_stack(void) {
 }
 
 
+void GPX2VideoApplicationWindow::save_layout_file(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	auto filename = file->get_parse_name();
+
+	// Open output stream
+	std::ofstream out = std::ofstream(filename);
+
+	if (!out.is_open()) {
+		log_error("Open '%s' failure", filename.c_str());
+		return;
+	}
+
+	out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << std::endl;
+	out << "<layout>" << std::endl;
+
+	for (GPX2VideoWidget *item : renderer_->widgets()) {
+		IndentingOStreambuf indent(out, 4);
+
+		item->widget()->save(out);
+	}
+
+	out << "</layout>" << std::endl;
+
+	log_info("Layout exported in '%s' with success", filename.c_str());
+}
+
+
 void GPX2VideoApplicationWindow::on_action_open(void) {
 	log_call();
 
@@ -440,6 +470,51 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 
 	dialog->signal_response().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
+#endif
+}
+
+
+void GPX2VideoApplicationWindow::on_action_save(void) {
+	log_call();
+
+	// File filter
+	auto filter = Gtk::FileFilter::create();
+	filter->set_name("All layout files");
+//	filter->add_mime_type("application/xml");
+	filter->add_suffix("xml");
+
+	// Create file chooser dialog
+#if GTKMM_CHECK_VERSION(4, 10, 0)
+	auto dialog = Gtk::FileDialog::create(); 
+
+	dialog->set_title("Export layout");
+	dialog->set_modal(true);
+
+	// Add filters, so that only certain file types can be selected:
+	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
+
+	filters->append(filter);
+
+	dialog->set_default_filter(filter);
+	dialog->set_filters(filters);
+	dialog->set_initial_name(layout_file_.empty() ? "layout.xml" : layout_file_);
+
+	// Bind open file signal
+	dialog->save(*this, sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_save_clicked), dialog));
+#else
+	auto dialog = new Gtk::FileChooserDialog(*this, "Export layout", Gtk::FileChooserDialog::Action::SAVE);
+
+	dialog->set_transient_for(*this);
+	dialog->set_modal(true);
+	dialog->set_default_size(640, 480);
+	dialog->add_filter(filter);
+	dialog->set_filter(filter);
+	dialog->add_button("Ok", Gtk::ResponseType::OK);
+	dialog->show();
+
+	dialog->signal_response().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_save_clicked), dialog));
 #endif
 }
 
@@ -715,6 +790,50 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 		open_layout_file(file);
 	else
 		open_media_file(file);
+}
+#endif
+
+#if GTKMM_CHECK_VERSION(4, 10, 0)
+void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,
+		const Glib::RefPtr<Gtk::FileDialog> &dialog) {
+	log_call();
+
+	auto file = dialog->save_finish(result);
+
+	if (!file)
+		return;
+
+	// Export layout
+	log_info("Export layout in %s ", file->get_parse_name().c_str());
+
+	save_layout_file(file);
+}
+#else
+void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(
+		int response_id, Gtk::FileChooserDialog *dialog) {
+	log_call();
+
+	Glib::RefPtr<const Gio::File> file = NULL;
+
+	switch (response_id) {
+	case Gtk::ResponseType::OK:
+		file = dialog->get_file();
+		break;
+
+	default:
+		break;
+	}
+
+	// Close & destroy file chooser dialog
+	delete dialog;
+
+	if (!file)
+		return;
+
+	// Export layout
+	log_info("Export layout in %s ", file->get_parse_name().c_str());
+
+	save_layout_file(file);
 }
 #endif
 

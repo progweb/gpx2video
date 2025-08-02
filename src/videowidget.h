@@ -405,13 +405,20 @@ public:
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 	virtual void clear(void) = 0;
 
+	virtual void save(std::ostream &os);
+
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
 	static TextAlign string2textAlign(std::string &s);
 	static Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
-	static std::string unit2string(Unit unit);
+
+	static std::string position2string(Position position);
+	static std::string align2string(Align align);
+	static std::string unit2string(Unit unit, bool label=true);
+
 	static bool hex2color(float color[4], std::string html);
+	static std::string color2hex(const float color[4]);
 
 protected:
 	VideoWidget(GPXApplication &app, std::string name)  
@@ -460,6 +467,10 @@ protected:
 	bool textSize(std::string text, int fontsize, 
 		int &x1, int &y1, int &x2, int &y2,
 		int &width, int &height);
+
+	virtual void xmlopen(std::ostream &os);
+	virtual void xmlwrite(std::ostream &os);
+	virtual void xmlclose(std::ostream &os);
 
 	GPXApplication &app_;
 	Position position_;

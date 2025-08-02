@@ -1,3 +1,4 @@
+#include <iomanip>
 #include <iostream>
 #include <memory>
 
@@ -6,6 +7,7 @@
 #include <OpenImageIO/imagebufalgo.h>
 
 #include "log.h"
+#include "utils.h"
 #include "oiio.h"
 #include "oiioutils.h"
 #include "videowidget.h"
@@ -126,14 +128,50 @@ VideoWidget::Zoom VideoWidget::string2zoom(std::string &s) {
 }
 
 
-std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
+std::string VideoWidget::position2string(Position position) {
+	switch (position) {
+	case VideoWidget::PositionLeft:
+		return "left";
+	case VideoWidget::PositionRight:
+		return "right";
+	case VideoWidget::PositionBottom:
+		return "bottom";
+	case VideoWidget::PositionTop:
+		return "top";
+	case VideoWidget::PositionBottomLeft:
+		return "bottomleft";
+	case VideoWidget::PositionBottomRight:
+		return "bottomright";
+	case VideoWidget::PositionTopLeft:
+		return "topleft";
+	case VideoWidget::PositionTopRight:
+		return "topright";
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::align2string(Align align) {
+	switch (align) {
+	case AlignHorizontal:
+		return "horizontal";
+	case AlignVertical:
+		return "vertical";
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::unit2string(VideoWidget::Unit unit, bool label) {
 	switch (unit) {
 	case VideoWidget::UnitMPS:
-		return "m/s";
+		return label ? "m/s" : "mps";
 	case VideoWidget::UnitMPH:
-		return "m/h";
+		return label ? "m/h" : "mph";
 	case VideoWidget::UnitKPH:
-		return "km/h";
+		return label ? "km/h" : "kph";
 	case VideoWidget::UnitKm:
 		return "km";
 	case VideoWidget::UnitMeter:
@@ -143,13 +181,13 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 	case VideoWidget::UnitMiles:
 		return "miles";
 	case VideoWidget::UnitCelsius:
-		return "°C";
+		return label ? "°C" : "celsius";
 	case VideoWidget::UnitFarenheit:
-		return "F";
+		return label ? "F" : "farenheit";
 	case VideoWidget::UnitG:
 		return "g";
 	case VideoWidget::UnitMeterPS2:
-		return "m/s²";
+		return label ? "m/s²" : "mps2";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:
@@ -174,6 +212,71 @@ bool VideoWidget::hex2color(float color[4], std::string hex) {
 	color[3] = std::stoi(hex.substr(6, 2), NULL, 16) / 255.0;
 
 	return true;
+}
+
+
+std::string VideoWidget::color2hex(const float color[4]) {
+	log_call();
+
+	std::ostringstream stream;
+
+	stream << "#" 
+		<< std::setfill('0') << std::setw(2) << std::setbase(16) 
+		<< (int) (color[0] * 255.0)  // R
+		<< (int) (color[1] * 255.0)  // G
+		<< (int) (color[2] * 255.0)  // B
+		<< (int) (color[3] * 255.0); // A
+
+	return stream.str();
+}
+
+
+void VideoWidget::save(std::ostream &os) {
+	log_call();
+
+	xmlopen(os);
+	xmlwrite(os);
+	xmlclose(os);
+}
+
+
+void VideoWidget::xmlopen(std::ostream &os) {
+	log_call();
+
+	os << "<widget";
+	os <<   " x=\"" << x() << "\" y=\"" << y() << "\"";
+	os <<   " width=\"" << width() << "\" height=\"" << height() << "\"";
+	os <<   " position=\"" << position2string(position()) << "\"";
+	os <<   " align=\"" << align2string(align()) << "\"";
+	os <<   " display=\"true\"";
+   	os <<   ">" << std::endl;
+}
+
+void VideoWidget::xmlclose(std::ostream &os) {
+	log_call();
+
+	os << "</widget>" << std::endl;
+}
+
+
+void VideoWidget::xmlwrite(std::ostream &os) {
+	log_call();
+
+	IndentingOStreambuf indent(os, 4);
+
+	os << "<type>" << name() << "</type>" << std::endl;
+	os << "<name>" << label() << "</name>" << std::endl;
+	os << "<margin-left>" << margin(Margin::MarginLeft) << "</margin-left>" << std::endl;
+	os << "<margin-right>" << margin(Margin::MarginRight) << "</margin-right>" << std::endl;
+	os << "<margin-top>" << margin(Margin::MarginTop) << "</margin-top>" << std::endl;
+	os << "<margin-bottom>" << margin(Margin::MarginBottom) << "</margin-bottom>" << std::endl;
+	os << "<padding-left>" << padding(Padding::PaddingLeft) << "</padding-left>" << std::endl;
+	os << "<padding-right>" << padding(Padding::PaddingRight) << "</padding-right>" << std::endl;
+	os << "<padding-top>" << padding(Padding::PaddingTop) << "</padding-top>" << std::endl;
+	os << "<padding-bottom>" << padding(Padding::PaddingBottom) << "</padding-bottom>" << std::endl;
+	os << "<border>" << border() << "</border>" << std::endl;
+	os << "<border-color>" << color2hex(textColor()) << "</border-color>" << std::endl;
+	os << "<background-color>" << color2hex(backgroundColor()) << "</background-color>" << std::endl;
 }
 
 

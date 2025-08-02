@@ -106,6 +106,33 @@ protected:
 	// Draw the full map
 	void build(void);
 
+	void xmlopen(std::ostream &os) {
+		log_call();
+
+		os << "<map";
+		os <<   " x=\"" << x() << "\" y=\"" << y() << "\"";
+		os <<   " width=\"" << width() << "\" height=\"" << height() << "\"";
+		os <<   " position=\"" << position2string(position()) << "\"";
+		os <<   " align=\"" << align2string(align()) << "\"";
+		os <<   " display=\"true\"";
+		os <<   ">" << std::endl;
+	}
+
+	void xmlclose(std::ostream &os) {
+		log_call();
+
+		os << "</map>" << std::endl;
+	}
+
+	void xmlwrite(std::ostream &os) {
+		Track::xmlwrite(os);
+
+		IndentingOStreambuf indent(os, 4);
+
+		os << "<source>" << settings().source() << "</source>" << std::endl;
+		os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
+	}
+
 private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
