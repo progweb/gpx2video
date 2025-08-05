@@ -57,6 +57,8 @@ public:
 		UnitMPS,
 		UnitMPH,
 		UnitKPH,
+		UnitMinMile,
+		UnitMinKm,
 		UnitKm,
 		UnitMeter,
 		UnitFoot,
