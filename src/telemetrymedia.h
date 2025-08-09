@@ -360,8 +360,13 @@ public:
 			return index_;
 		}
 
-		void seek(int offset) {
-			index_ += offset;
+		void seek(int offset, int whence=SEEK_CUR) {
+			if (whence == SEEK_CUR)
+				index_ += offset;
+			else if (whence == SEEK_SET)
+				index_ = offset;
+//			else if (whence == SEEK_END)
+//				; // TODO
 
 			if (index_ < 0)
 				index_ = -1;

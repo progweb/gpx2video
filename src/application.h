@@ -84,12 +84,20 @@ public:
 			return true;
 		};
 
+		void go(void) {
+			app_.perform(ActionStart);
+		}
+
 		void schedule(void) {
 			app_.perform(ActionPerform);
 		}
 
 		void complete(void) {
 			app_.perform(ActionStop);
+		}
+
+		void finish(void) {
+			app_.perform(Task::ActionExit);
 		}
 
 	private:
@@ -146,6 +154,11 @@ public:
 
 	void remove(Task *task) {
 		tasks_.remove(task);
+	}
+
+	void purge(void) {
+		while (!tasks_.empty())
+			tasks_.pop_front();
 	}
 
 	struct event_base *evbase(void) {

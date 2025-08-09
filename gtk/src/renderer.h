@@ -43,8 +43,6 @@ public:
 	}
 
 	void init_buffers(void);
-	bool full_buffers(void);
-	void write_buffers(void);
 	void load_texture(void);
 	void render(GPX2VideoShader *shader);
 
@@ -56,6 +54,7 @@ protected:
 			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings);
 
 	bool init(MediaContainer *container);
+	void restart(void);
 
 private:
 //public:

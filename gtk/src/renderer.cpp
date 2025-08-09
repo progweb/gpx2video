@@ -102,6 +102,21 @@ bool GPX2VideoRenderer::init(MediaContainer *container) {
 }
 
 
+void GPX2VideoRenderer::restart(void) {
+	log_call();
+
+	// Purge old tasks
+	app_.purge();
+
+	// Append each widget task
+	for (GPX2VideoWidget *item : widgets_)
+		app_.append(item->widget());
+
+	// Finaly append renderer
+	app_.append(this);
+}
+
+
 void GPX2VideoRenderer::setMediaContainer(MediaContainer *container) {
 	log_call();
 
@@ -145,9 +160,8 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	// Reset telemetry data
 	data_ = TelemetryData();
 
-//	// Set telemetry source for each widget
-//	for (GPX2VideoWidget *item : widgets_)
-//		item->setTelemetry(source_);
+	// Need to start widget again
+	restart();
 
 	// Request buffering
 	refresh();
@@ -219,7 +233,7 @@ void GPX2VideoRenderer::load(void) {
 	Renderer::computeWidgetsPosition();
 
 	for (VideoWidget *item : Renderer::widgets_) {
-		GPX2VideoWidget *widget; // = GPX2VideoWidget::create(item);
+		GPX2VideoWidget *widget;
 
 		// Type
 		s = item->name();
@@ -314,32 +328,38 @@ void GPX2VideoRenderer::draw(void) {
 	if (source_) {
 		TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
-		if (data_.type() == TelemetryData::TypeUnknown) {
-			timestamp = timestamp_;
-			timestamp -= (timestamp_ % rate);
+		for (GPX2VideoWidget *item : widgets_) {
+			while (!item->full()) {
+				TelemetryData data = item->data();
 
-			// Retrieve first point
-			source_->retrieveFrom(data_);
-			data_.setDatetime(timestamp_);
-		}
-		else {
-			// Continue from the last datetime
-			timestamp = data_.datetime() + rate;
-		}
+				if (data.type() == TelemetryData::TypeUnknown) {
+					timestamp = timestamp_;
+					timestamp -= (timestamp_ % rate);
 
-		while ((type != TelemetrySource::DataEof) && !full_buffers()) {
-			type = source_->retrieveNext(data_, timestamp);
-			data_.setDatetime(timestamp);
+					// Retrieve first point
+					source_->retrieveFrom(data);
+					data.setDatetime(timestamp_);
+				}
+				else {
+					// Continue from the last datetime
+					timestamp = data.datetime() + rate;
+				}
 
-			write_buffers();
+				type = source_->retrieveNext(data, timestamp);
+				data.setDatetime(timestamp);
 
-			timestamp += rate;
+				item->write_buffers(data);
+				
+				(void) type;
+			}
 		}
 	}
 	else {
-		data_ = TelemetryData();
+		TelemetryData data;
 
-		write_buffers();
+		for (GPX2VideoWidget *item : widgets_) {
+			item->write_buffers(data);
+		}
 	}
 }
 
@@ -374,7 +394,7 @@ void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget) {
 	clear(widget);
 
 	// Buffering
-	schedule();
+	go();
 }
 
 
@@ -387,25 +407,6 @@ void GPX2VideoRenderer::init_buffers(void) {
 
 	// Force widget drawing
 	refresh();
-}
-
-
-bool GPX2VideoRenderer::full_buffers(void) {
-	log_call();
-
-	for (GPX2VideoWidget *item : widgets_)
-		if (item->full())
-			return true;
-
-	return false;
-}
-
-
-void GPX2VideoRenderer::write_buffers(void) {
-	log_call();
-
-	for (GPX2VideoWidget *item : widgets_)
-		item->write_buffers(data_);
 }
 
 

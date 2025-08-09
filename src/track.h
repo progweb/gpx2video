@@ -60,6 +60,7 @@ protected:
 
 	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, std::string name, struct event_base *evbase);
 
+	bool preinit(void);
 	void init(bool zoomfit=true);
 	bool load(void);
 

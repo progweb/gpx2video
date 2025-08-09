@@ -30,6 +30,8 @@ TelemetryData::~TelemetryData() {
 void TelemetryData::reset(bool all) {
 	log_call();
 
+	index_ = -1;
+
 	if (all) {
 		line_ = 0;
 
@@ -1988,6 +1990,7 @@ void TelemetrySource::updateData(TelemetryData &data) {
 		goto skip;
 
 	data = pool_.current();
+	data.setIndex(pool_.tell());
 
 skip:
 	return;
@@ -2041,6 +2044,9 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 	log_call();
+
+	// Restore pool context
+	pool_.seek(data.index(), SEEK_SET);
 
 	// Last point
 	nextPoint = pool_.next();

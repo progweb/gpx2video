@@ -529,13 +529,23 @@ void GPX2VideoWidgetFrame::on_widget_margin_value_changed(const VideoWidget::Mar
 
 	int value;
 
+	const char *margins[] = {
+		"",
+		"margin_left_spinbutton",
+		"margin_right_spinbutton",
+		"margin_bottom_spinbutton",
+		"margin_top_spinbutton"
+	};
+
 	if (loading_)
 		return;
 
 	// Widget margin
-	auto spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("margin_left_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"margin_left_spinbutton\" object in widget_frame.ui");
+	auto spinbutton = ref_builder_->get_widget<Gtk::SpinButton>(margins[margin]);
+	if (!spinbutton) {
+		std::string str = std::string("No \"") + std::string(margins[margin]) + std::string("\" object in widget_frame.ui");
+		throw std::runtime_error(str);
+	}
 
 	value = spinbutton->get_value_as_int();
 
@@ -558,13 +568,23 @@ void GPX2VideoWidgetFrame::on_widget_padding_value_changed(const VideoWidget::Pa
 
 	int value;
 
+	const char *paddings[] = {
+		"",
+		"padding_left_spinbutton",
+		"padding_right_spinbutton",
+		"padding_bottom_spinbutton",
+		"padding_top_spinbutton"
+	};
+
 	if (loading_)
 		return;
 
 	// Widget padding
-	auto spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_left_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"padding_left_spinbutton\" object in widget_frame.ui");
+	auto spinbutton = ref_builder_->get_widget<Gtk::SpinButton>(paddings[padding]);
+	if (!spinbutton) {
+		std::string str = std::string("No \"") + std::string(paddings[padding]) + std::string("\" object in widget_frame.ui");
+		throw std::runtime_error(str);
+	}
 
 	value = spinbutton->get_value_as_int();
 
