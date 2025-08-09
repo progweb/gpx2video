@@ -74,9 +74,13 @@ bool Renderer::init(MediaContainer *container) {
 bool Renderer::start(void) {
 	log_call();
 
+	if (source_)
+		goto skip;
+
 	// Load telemetry data
 	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
 
+skip:
 	return true;
 }
 
@@ -283,13 +287,11 @@ bool Renderer::loadTrack(layout::Track *t) {
 		return true;
 	}
 
-	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
-
-	if (source == NULL) {
-		log_warn("Can't read telemetry data, skip track widget");
-		return false;
-	}
+//	// Open telemetry data file
+//	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
+//
+//	if (source == NULL)
+//		log_warn("Can't read telemetry data, track widget init delayed");
 
 //	// Telemetry data limits
 //	source->setFrom(app_.settings().from());
@@ -311,9 +313,10 @@ bool Renderer::loadTrack(layout::Track *t) {
 	x = (t->x() > 0) ? t->x() : video_stream->width() - width - t->margin();
 	y = (t->y() > 0) ? t->y() : video_stream->height() - height - t->margin();
 
-	// Create map bounding box
-	TelemetryData p1, p2;
-	source->getBoundingBox(&p1, &p2);
+//	// Create map bounding box
+//	TelemetryData p1, p2;
+//	if (source != NULL)
+//		source->getBoundingBox(&p1, &p2);
 
 	// Alignment
 	s = (const char *) t->align();
@@ -332,7 +335,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	// Track settings
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
-	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+//	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 

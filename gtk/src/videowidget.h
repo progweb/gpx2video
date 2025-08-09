@@ -43,6 +43,10 @@ public:
 
 	VideoWidget * widget(void);
 
+	TelemetryData& data(void) {
+		return data_;
+	}
+
 	double glX(void) const;
 	double glY(void) const;
 	double glWidth(void) const;
@@ -96,6 +100,8 @@ private:
 	int index_;
 	size_t queue_size_;
 	uint8_t **buffer_;
+
+	TelemetryData data_;
 
 	GLuint vao_ = 0;
 	GLuint vbo_ = 0;

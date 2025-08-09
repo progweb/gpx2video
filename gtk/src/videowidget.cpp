@@ -205,7 +205,9 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 
 	GPX2VideoWidget::BufferPtr buffer;
 
-//printf("WIDGET::DRAW %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::DRAW %s\n", widget()->name().c_str());
+#endif
 
 //	widget_->dump();
 
@@ -214,9 +216,11 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 
 	is_update = (is_bg_update || is_fg_update);
 
-//printf("WIDGET::DRAW %s - updated: %s\n", 
-//		widget()->name().c_str(),
-//		is_update ? "true" : "false");
+#ifdef WIDGET_DEBUG
+printf("WIDGET::DRAW %s - updated: %s\n", 
+		widget()->name().c_str(),
+		is_update ? "true" : "false");
+#endif
 
 	if (is_update) {
 		// Buffer index
@@ -230,10 +234,12 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 		buffer->setData(index, buffer_[index]);
 
 		// Draw bg
-		OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);
+		if (bg_buf)
+			OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);
 
 		// Draw fg
-		OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi(), 4);
+		if (fg_buf)
+			OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi(), 4);
 
 		// Update buffer
 		overlay_->get_pixels(OIIO::ROI(), 
@@ -268,7 +274,9 @@ void GPX2VideoWidget::init_buffers(void) {
 
 	int nchannels = 4;
 
-//printf("WIDGET::INIT BUFFERS %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::INIT BUFFERS %s\n", widget()->name().c_str());
+#endif
 
 	// Buffer
 	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
@@ -332,7 +340,9 @@ void GPX2VideoWidget::resize_buffers(void) {
 
 	int nchannels = 4;
 
-//printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
+#endif
 
 	// Old texture not valid
 	unload_texture();
@@ -376,7 +386,9 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 
 	bool clear_req = clear_req_;
 
-//printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
+#endif
 
 	if (clear_req_) {
 		// Clear & free texture
@@ -390,9 +402,14 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 		return;
 
 	if ((data.type() != TelemetryData::TypeUnknown) || queue_.empty()) {
+		// Save data
+		data_ = data;
+
+		// Draw
 		draw(data);
 
-		is_update_ = clear_req;
+		if (clear_req)
+			is_update_ = true;
 	}
 }
 
@@ -400,7 +417,9 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 void GPX2VideoWidget::clear_buffers(void) {
 	log_call();
 
-//printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
+#endif
 
 	is_update_ = false;
 
@@ -417,6 +436,9 @@ void GPX2VideoWidget::clear_buffers(void) {
 
 	// Reset
 	widget_->clear();
+
+	// Clear previous data
+	data_ = TelemetryData();
 }
 
 
@@ -427,7 +449,11 @@ void GPX2VideoWidget::clear_buffers(void) {
 void GPX2VideoWidget::load_texture(void) {
 	log_call();
 
-//printf("WIDGET::LOAD TEXTURE %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::LOAD TEXTURE %s - updated: %s\n", 
+		widget()->name().c_str(),
+		is_update_ ? "true" : "false");
+#endif
 
 	std::lock_guard<std::mutex> lock(mutex_);
 
@@ -441,7 +467,9 @@ void GPX2VideoWidget::load_texture(void) {
 	if (texture_ && !is_update_)
 		return;
 
-//printf("WIDGET::LOADING TEXTURE...\n");
+#ifdef WIDGET_DEBUG
+printf("WIDGET::LOADING TEXTURE...\n");
+#endif
 
 	GPX2VideoWidget::BufferPtr buffer = queue_.front();
 
@@ -595,7 +623,9 @@ GPX2VideoWidget::BufferPtr GPX2VideoWidget::get_last_buffer(void) {
 void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	log_call();
 
-//printf("WIDGET::RENDER %s\n", widget()->name().c_str());
+#ifdef WIDGET_DEBUG
+printf("WIDGET::RENDER %s\n", widget()->name().c_str());
+#endif
 
 	std::lock_guard<std::mutex> lock(mutex_);
 
@@ -604,7 +634,9 @@ void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 		return;
 	}
 
-//printf("WIDGET::RENDERING...\n");
+#ifdef WIDGET_DEBUG
+printf("WIDGET::RENDERING...\n");
+#endif
 
 	// Transformations
 	glm::mat4 transform = glm::mat4(1.0f);

@@ -54,6 +54,14 @@ public:
 		return line_;
 	}
 
+	int index(void) const {
+		return index_;
+	}
+
+	void setIndex(int index) {
+		index_ = index;
+	}
+
 	const Type& type(void) const {
 		return type_;
 	}
@@ -195,6 +203,8 @@ protected:
 	uint32_t line_;
 
 	Type type_;
+
+	int index_;
 
 	uint64_t ts_;
 	double lat_, lon_;

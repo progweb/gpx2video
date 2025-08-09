@@ -209,6 +209,26 @@ int Track::lon2pixel(int zoom, float lon) {
 }
 
 
+bool Track::preinit(void) {
+	// Open telemetry data file
+	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetry_settings_, true);
+
+	if (source == NULL) {
+		log_warn("Can't read telemetry data, skip track widget");
+		return false;
+	}
+
+	// Create map bounding box
+	TelemetryData p1, p2;
+	source->getBoundingBox(&p1, &p2);
+
+	// Track settings
+	track_settings_.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+
+	return true;
+}
+
+
 void Track::init(bool zoomfit) {
 	int zoom;
 	int padding;
@@ -222,6 +242,12 @@ void Track::init(bool zoomfit) {
 
 	log_call();
 
+	if (!preinit()) {
+		log_warn("Track init failure!");
+		return;
+	}
+
+	// Compute track area
 	zoom = settings().zoom();
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
 
@@ -255,16 +281,18 @@ void Track::init(bool zoomfit) {
 	height -= 2 * padding;
 
 	if (zoomfit) {
-		double divider;
+		double divider = 1.0;
 
 		// Compute divider to match with the size of widget
 		w = ceilf((float) px2_ - px1_);
 		h = ceilf((float) py2_ - py1_);
 
-		if (((float) width / w) > ((float) height / h))
-			divider = (float) height / h;
-		else
-			divider = (float) width / w;
+		if ((w > 0) && (h > 0)) {
+			if (((float) width / w) > ((float) height / h))
+				divider = (float) height / h;
+			else
+				divider = (float) width / w;
+		}
 
 		// Save computed divider value
 		divider_ = divider;
@@ -403,6 +431,9 @@ bool Track::load(void) {
 	width = (x2_ - x1_) * TILESIZE;
 	height = (y2_ - y1_) * TILESIZE;
 
+	if ((width == 0) || (height == 0))
+		return true;
+
 	// Create track buffer
 	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
@@ -482,7 +513,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 
 	// Check track buffer
 	if (trackbuf_ == NULL) {
-		log_warn("Track renderer failure");
+		is_update = false;
 		return NULL;
 	}
 
@@ -526,6 +557,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	if (fg_buf_ != NULL)
 		delete fg_buf_;
 
+	// Draw
 	this->createBox(&fg_buf_, this->width(), this->height());
 
 	// Image over
@@ -546,12 +578,21 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	}
 
 	is_update = true;
+
 skip:
 	return fg_buf_;
 }
 
 
 void Track::clear(void) {
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 
