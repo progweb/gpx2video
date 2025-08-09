@@ -35,6 +35,7 @@ public:
 
 	void draw(void);
 	void clear(GPX2VideoWidget *widget=NULL);
+	void compute(void);
 	void refresh(GPX2VideoWidget *widget=NULL);
 
 	Glib::Dispatcher& ready(void) {

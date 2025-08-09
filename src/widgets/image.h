@@ -1,7 +1,7 @@
 #ifndef __GPX2VIDEO__WIDGETS__IMAGE_H__
 #define __GPX2VIDEO__WIDGETS__IMAGE_H__
 
-#include "videowidget.h"
+#include "../videowidget.h"
 
 
 class ImageWidget : public VideoWidget {

@@ -94,22 +94,17 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 	layout_width_ = 0;
 	layout_height_ = 0;
 
-	// Widgets overlay
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(widget->width(), widget->height(), 
-		4, OIIO::TypeDesc::UINT8));
-//		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
-
 	// Init
 	index_ = 0;
 	queue_size_ = 2;
+
+	buffer_ = NULL;
+	overlay_ = NULL;
 
 	clear_req_ = false;
 
 	// Texture
 	texture_ = 0;
-
-	// Buffer
-	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
 }
 
 
@@ -117,6 +112,14 @@ GPX2VideoWidget::~GPX2VideoWidget() {
 	log_call();
 
 	clear_buffers();
+
+	unload_texture();
+
+	if (buffer_ != NULL)
+		free(buffer_);
+
+	if (overlay_ != NULL)
+		delete overlay_;
 }
 
 
@@ -133,6 +136,18 @@ GPX2VideoWidget * GPX2VideoWidget::create(VideoWidget *widget) {
 	GPX2VideoWidget *component = new GPX2VideoWidget(widget);
 
 	return component;
+}
+
+
+void GPX2VideoWidget::setSize(int width, int height) {
+	log_call();
+
+	is_buffer_init_ = false;
+
+	widget()->setSize(width, height);
+	widget()->initialize();
+
+	resize_buffers();
 }
 
 
@@ -190,7 +205,7 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 
 	GPX2VideoWidget::BufferPtr buffer;
 
-//printf("WIDGET::DRAW %f\n", data.speed());
+//printf("WIDGET::DRAW %s\n", widget()->name().c_str());
 
 //	widget_->dump();
 
@@ -198,6 +213,10 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	OIIO::ImageBuf *fg_buf = widget_->render(data, is_fg_update);
 
 	is_update = (is_bg_update || is_fg_update);
+
+//printf("WIDGET::DRAW %s - updated: %s\n", 
+//		widget()->name().c_str(),
+//		is_update ? "true" : "false");
 
 	if (is_update) {
 		// Buffer index
@@ -245,12 +264,23 @@ void GPX2VideoWidget::clear(void) {
 void GPX2VideoWidget::init_buffers(void) {
 	log_call();
 
+	size_t size;
+
 	int nchannels = 4;
 
-	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
-						* overlay_->spec().channel_bytes();
+//printf("WIDGET::INIT BUFFERS %s\n", widget()->name().c_str());
 
-//printf("WIDGET::INIT BUFFERS\n");
+	// Buffer
+	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
+
+	// Widgets overlay
+	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(widget_->width(), widget_->height(), 
+		4, OIIO::TypeDesc::UINT8));
+//		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
+
+	// Buffer size
+	size = overlay_->spec().width * overlay_->spec().height * nchannels
+						* overlay_->spec().channel_bytes();
 
 	// Create buffers
 	glGenVertexArrays(1, &vao_);
@@ -290,6 +320,50 @@ void GPX2VideoWidget::init_buffers(void) {
 
 	// Buffer ready
 	is_buffer_init_ = true;
+
+//	check_gl_error();
+}
+
+
+void GPX2VideoWidget::resize_buffers(void) {
+	log_call();
+
+	size_t size;
+
+	int nchannels = 4;
+
+//printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
+
+	// Old texture not valid
+	unload_texture();
+
+	// Widgets overlay
+	overlay_->reset(OIIO::ImageSpec(widget_->width(), widget_->height(), 
+		4, OIIO::TypeDesc::UINT8));
+
+	// Buffer size
+	size = overlay_->spec().width * overlay_->spec().height * nchannels
+						* overlay_->spec().channel_bytes();
+
+	glDeleteBuffers(queue_size_, pbo_);
+
+	glGenBuffers(queue_size_, pbo_);
+	for (size_t i=0; i<queue_size_; i++) {
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[i]);
+
+		GLbitfield flags = GL_MAP_WRITE_BIT | GL_MAP_PERSISTENT_BIT | GL_MAP_COHERENT_BIT;
+
+		glBufferStorage(GL_PIXEL_UNPACK_BUFFER, size, 0, flags);
+
+		buffer_[i] = (uint8_t *) glMapBufferRange(GL_PIXEL_UNPACK_BUFFER, 0, size, flags);
+
+		glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+	}
+
+	// Buffer ready
+	is_buffer_init_ = true;
+
+//	check_gl_error();
 }
 
 
@@ -300,7 +374,9 @@ void GPX2VideoWidget::init_buffers(void) {
 void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 	log_call();
 
-//printf("WIDGET::WRITE BUFFERS\n");
+	bool clear_req = clear_req_;
+
+//printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
 
 	if (clear_req_) {
 		// Clear & free texture
@@ -310,21 +386,27 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 		clear_req_ = false;
 	}
 
-	if ((data.type() != TelemetryData::TypeUnknown) || queue_.empty())
+	if (!is_buffer_init_)
+		return;
+
+	if ((data.type() != TelemetryData::TypeUnknown) || queue_.empty()) {
 		draw(data);
+
+		is_update_ = clear_req;
+	}
 }
 
 
 void GPX2VideoWidget::clear_buffers(void) {
 	log_call();
 
+//printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
+
 	is_update_ = false;
 
 	std::lock_guard<std::mutex> lock(mutex_);
 
-	if (texture_)
-		glDeleteTextures(1, &texture_);
-	texture_ = 0;
+	log_info("Clear widget '%s' cache", widget()->name().c_str());
 
 	// Drop buffers
 	while (!queue_.empty())
@@ -345,7 +427,7 @@ void GPX2VideoWidget::clear_buffers(void) {
 void GPX2VideoWidget::load_texture(void) {
 	log_call();
 
-//printf("WIDGET::LOAD TEXTURE\n");
+//printf("WIDGET::LOAD TEXTURE %s\n", widget()->name().c_str());
 
 	std::lock_guard<std::mutex> lock(mutex_);
 
@@ -451,6 +533,17 @@ void GPX2VideoWidget::load_texture(void) {
 }
 
 
+void GPX2VideoWidget::unload_texture(void) {
+	log_call();
+
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	if (texture_)
+		glDeleteTextures(1, &texture_);
+	texture_ = 0;
+}
+
+
 double GPX2VideoWidget::glX(void) const {
 	log_call();
 
@@ -502,12 +595,14 @@ GPX2VideoWidget::BufferPtr GPX2VideoWidget::get_last_buffer(void) {
 void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	log_call();
 
-//printf("WIDGET::RENDER\n");
+//printf("WIDGET::RENDER %s\n", widget()->name().c_str());
 
 	std::lock_guard<std::mutex> lock(mutex_);
 
-	if (!texture_)
+	if (!texture_) {
+		log_warn("Widget %s can't rendered, no texture", widget()->name().c_str());
 		return;
+	}
 
 //printf("WIDGET::RENDERING...\n");
 
@@ -532,5 +627,35 @@ void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 	glBindVertexArray(vao_);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+	log_debug("DONE");
 }
 
+
+void GPX2VideoWidget::check_gl_error(void) {
+	GLenum err;
+
+	while ((err = glGetError()) != GL_NO_ERROR) {
+		std::string error;
+
+		switch (err) {
+		case GL_INVALID_OPERATION:
+			error = "INVALID_OPERATION";
+			break;
+		case GL_INVALID_ENUM:
+			error = "INVALID_ENUM";
+			break;
+		case GL_INVALID_VALUE:
+			error = "INVALID_VALUE";
+			break;
+		case GL_OUT_OF_MEMORY:
+			error = "OUT_OF_MEMORY";
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			error = "INVALID_FRAMEBUFFER_OPERATION";
+			break;
+		}
+
+		log_error("GL '%d' error: %s", err, error.c_str());
+	}
+}

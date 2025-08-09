@@ -268,7 +268,7 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 Map::Map(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings &map_settings, struct event_base *evbase)
-	: Track(app, telemetry_settings, map_settings, evbase)
+	: Track(app, telemetry_settings, map_settings, "map", evbase)
 	, map_settings_(map_settings)
 	, nbr_downloads_(0) {
 	log_call();

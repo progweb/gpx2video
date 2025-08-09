@@ -48,6 +48,7 @@ public:
 	double glWidth(void) const;
 	double glHeight(void) const;
 
+	void setSize(int width, int height);
 	void setLayoutSize(int width, int height);
 
 	void set_timestamp(uint64_t timestamp);
@@ -57,10 +58,14 @@ public:
 	bool full(void);
 
 	void init_buffers(void);
+	void resize_buffers(void);
 	void write_buffers(const TelemetryData &data);
 	void clear_buffers(void);
 	void load_texture(void);
+	void unload_texture(void);
 	void render(GPX2VideoShader *shader);
+
+	void check_gl_error(void);
 
 protected:
 	GPX2VideoWidget(VideoWidget *widget);

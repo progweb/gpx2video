@@ -132,6 +132,7 @@ void GPX2VideoArea::configure_adjustment(void) {
 	adjustment_->configure(0.0, 0.0, duration, 1.0, 10.0, 0.0); //60.0);
 }
 
+
 void GPX2VideoArea::update_adjustment(double value) {
 	log_call();
 
@@ -145,6 +146,11 @@ void GPX2VideoArea::update_adjustment(double value) {
 }
 
 
+/**
+ * Update layout
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoArea::update_layout(void) {
 	log_call();
 
@@ -171,7 +177,11 @@ void GPX2VideoArea::update_layout(void) {
 //}
 
 
-//void GPX2VideoArea::open_stream(const Glib::ustring &video_file) {
+/**
+ * Open media stream
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoArea::open_stream(MediaContainer *container) {
 	log_call();
 
@@ -305,7 +315,16 @@ void GPX2VideoArea::seeking(bool status) {
 void GPX2VideoArea::video_render(void) {
 	log_call();
 
+	// Video render
 	stream_.render(shader_);
+}
+
+
+void GPX2VideoArea::widgets_render(void) {
+	log_call();
+
+	// Widgets rendering
+	renderer_->render(shader_);
 }
 
 
@@ -396,9 +415,7 @@ bool GPX2VideoArea::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 
 		//
 		video_render();
-
-		// Widgets rendering
-		renderer_->render(shader_);
+		widgets_render();
 
 		//
 		glBindVertexArray(0);
@@ -437,8 +454,10 @@ void GPX2VideoArea::on_data_ready(void) {
 void GPX2VideoArea::on_renderer_ready(void) {
 	log_call();
 
-	if (!is_playing_)
+	if (!is_playing_) {
+		log_info("Widget rendering ready");
 		refresh();
+	}
 }
 
 

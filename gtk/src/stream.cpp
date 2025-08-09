@@ -269,6 +269,13 @@ GPX2VideoStream::Video& GPX2VideoStream::video(void) {
 }
 
 
+/**
+ * Init OpenGL buffers
+ *
+ * OpenGL has to be ready
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoStream::init(void) {
 	log_call();
 
@@ -331,6 +338,11 @@ void GPX2VideoStream::init(void) {
 }
 
 
+/**
+ * Load OpenGL texture
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoStream::load(FramePtr frame) {
 	log_call();
 
@@ -383,6 +395,11 @@ void GPX2VideoStream::load(FramePtr frame) {
 }
 
 
+/**
+ * Render OpenGL texture
+ *
+ * Called from GTK main thread in OpenGL context
+ */
 void GPX2VideoStream::render(GPX2VideoShader *shader) {
 	log_call();
 

@@ -1,9 +1,9 @@
 #ifndef __GPX2VIDEO__WIDGETS__TEXT_H__
 #define __GPX2VIDEO__WIDGETS__TEXT_H__
 
-#include "oiio.h"
-#include "utils.h"
-#include "videowidget.h"
+#include "../oiio.h"
+#include "../utils.h"
+#include "../videowidget.h"
 
 
 class TextWidget : public VideoWidget {
