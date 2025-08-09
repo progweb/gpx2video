@@ -1,8 +1,8 @@
 #ifndef __GPX2VIDEO__WIDGETS__HEADING_H__
 #define __GPX2VIDEO__WIDGETS__HEADING_H__
 
-#include "utils.h"
-#include "videowidget.h"
+#include "../utils.h"
+#include "../videowidget.h"
 
 
 class HeadingWidget : public VideoWidget {
@@ -20,6 +20,7 @@ public:
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
+		log_call();
 		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
 
 		if (bg_buf_ != NULL) {
@@ -40,6 +41,7 @@ skip:
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		log_call();
 		char s[128];
 
 		// Refresh dynamic info

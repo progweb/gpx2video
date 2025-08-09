@@ -1,8 +1,8 @@
 #ifndef __GPX2VIDEO__WIDGETS__GFORCE_H__
 #define __GPX2VIDEO__WIDGETS__GFORCE_H__
 
-#include "utils.h"
-#include "videowidget.h"
+#include "../utils.h"
+#include "../videowidget.h"
 
 
 class GForceWidget : public VideoWidget {
@@ -14,7 +14,7 @@ public:
 	static GForceWidget * create(GPXApplication &app) {
 		GForceWidget *widget;
 
-		widget = new GForceWidget(app, "g-force");
+		widget = new GForceWidget(app, "gforce");
 
 		widget->setUnit(VideoWidget::UnitG);
 

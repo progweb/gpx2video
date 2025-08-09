@@ -3,6 +3,30 @@
 
 #include "log.h"
 #include "datetime.h"
+#include "widgets/gpx.h"
+#include "widgets/date.h"
+#include "widgets/distance.h"
+#include "widgets/duration.h"
+#include "widgets/grade.h"
+#include "widgets/heading.h"
+#include "widgets/elevation.h"
+#include "widgets/cadence.h"
+#include "widgets/heartrate.h"
+#include "widgets/power.h"
+#include "widgets/lap.h"
+#include "widgets/position.h"
+#include "widgets/image.h"
+#include "widgets/speed.h"
+#include "widgets/maxspeed.h"
+#include "widgets/avgspeed.h"
+#include "widgets/avgridespeed.h"
+#include "widgets/text.h"
+#include "widgets/time.h"
+#include "widgets/gforce.h"
+#include "widgets/temperature.h"
+#include "widgets/verticalspeed.h"
+#include "widgets/track.h"
+#include "widgets/map.h"
 #include "renderer.h"
 
 
@@ -188,13 +212,70 @@ void GPX2VideoRenderer::seek(double pos) {
 void GPX2VideoRenderer::load(void) {
 	log_call();
 
+	std::string s;
+
 	// Load layout & widget initialization
 	Renderer::load();
 	Renderer::computeWidgetsPosition();
 
 	for (VideoWidget *item : Renderer::widgets_) {
-		GPX2VideoWidget *widget = GPX2VideoWidget::create(item);
+		GPX2VideoWidget *widget; // = GPX2VideoWidget::create(item);
 
+		// Type
+		s = item->name();
+
+		if (s == "gpx")
+			widget = GPX2VideoGPXWidget::create(item);
+		else if (s == "date") 
+			widget = GPX2VideoDateWidget::create(item);
+		else if (s == "time") 
+			widget = GPX2VideoTimeWidget::create(item);
+		else if (s == "text") 
+			widget = GPX2VideoTextWidget::create(item);
+		else if (s == "distance") 
+			widget = GPX2VideoDistanceWidget::create(item);
+		else if (s == "duration") 
+			widget = GPX2VideoDurationWidget::create(item);
+		else if (s == "position") 
+			widget = GPX2VideoPositionWidget::create(item);
+		else if (s == "speed") 
+			widget = GPX2VideoSpeedWidget::create(item);
+		else if (s == "maxspeed") 
+			widget = GPX2VideoMaxSpeedWidget::create(item);
+		else if (s == "avgspeed") 
+			widget = GPX2VideoAvgSpeedWidget::create(item);
+		else if (s == "avgridespeed") 
+			widget = GPX2VideoAvgRideSpeedWidget::create(item);
+		else if (s == "grade") 
+			widget = GPX2VideoGradeWidget::create(item);
+		else if (s == "heading") 
+			widget = GPX2VideoHeadingWidget::create(item);
+		else if (s == "image")
+			widget = GPX2VideoImageWidget::create(item);
+		else if (s == "elevation") 
+			widget = GPX2VideoElevationWidget::create(item);
+		else if (s == "cadence") 
+			widget = GPX2VideoCadenceWidget::create(item);
+		else if (s == "heartrate") 
+			widget = GPX2VideoHeartRateWidget::create(item);
+		else if (s == "temperature")
+			widget = GPX2VideoTemperatureWidget::create(item);
+		else if (s == "power") 
+			widget = GPX2VideoPowerWidget::create(item);
+		else if (s == "gforce")
+			widget = GPX2VideoGForceWidget::create(item);
+		else if (s == "vspeed")
+			widget = GPX2VideoVerticalSpeedWidget::create(item);
+		else if (s == "lap")
+			widget = GPX2VideoLapWidget::create(item);
+		else if (s == "track")
+			widget = GPX2VideoTrackWidget::create(item);
+		else if (s == "map")
+			widget = GPX2VideoMapWidget::create(item);
+		else {
+			log_error("Widget loading error, '%s' type unknown", s.c_str());
+			continue;
+		}
 //		widget->setRate(telemetrySettings().telemetryRate());
 //		widget->setTelemetry(source_);
 
@@ -275,6 +356,14 @@ void GPX2VideoRenderer::clear(GPX2VideoWidget *widget) {
 }
 
 
+void GPX2VideoRenderer::compute(void) {
+	log_call();
+
+	// Update widgets position
+	Renderer::computeWidgetsPosition();
+}
+
+
 void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget) {
 	log_call();
 
@@ -320,6 +409,11 @@ void GPX2VideoRenderer::write_buffers(void) {
 }
 
 
+/**
+ * Load OpenGL texture
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoRenderer::load_texture(void) {
 	log_call();
 
@@ -328,6 +422,11 @@ void GPX2VideoRenderer::load_texture(void) {
 }
 
 
+/**
+ * Render OpenGL texture
+ *
+ * Called from GTK main thread in OpenGL context
+ */
 void GPX2VideoRenderer::render(GPX2VideoShader *shader) {
 	log_call();
 

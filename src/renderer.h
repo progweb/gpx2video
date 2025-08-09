@@ -131,6 +131,14 @@ public:
 		return telemetry_settings_;
 	}
 
+	const int& width(void) const {
+		return layout_width_;
+	}
+
+	const int& height(void) const {
+		return layout_height_;
+	}
+
 	void append(VideoWidget *widget);
 	void drop(void);
 

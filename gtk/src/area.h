@@ -62,6 +62,7 @@ public:
 	void refresh(void);
 
 	void video_render(void);
+	void widgets_render(void);
 
 //	void widget_append(VideoWidget *widget);
 

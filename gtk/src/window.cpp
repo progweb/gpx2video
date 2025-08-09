@@ -218,6 +218,9 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 }
 
 
+/**
+ * Exec GPX2Video core application in thread (evbase)
+ */
 void GPX2VideoApplicationWindow::run(void) {
 	log_call();
 
@@ -226,6 +229,9 @@ void GPX2VideoApplicationWindow::run(void) {
 }
 
 
+/**
+ * Start GPX2Video core thread
+ */
 void GPX2VideoApplicationWindow::start(void) {
 	log_call();
 
@@ -238,6 +244,10 @@ void GPX2VideoApplicationWindow::start(void) {
 	}
 }
 
+
+/**
+ * Stop GPX2Video core thread
+ */
 void GPX2VideoApplicationWindow::stop(void) {
 	log_call();
 
@@ -254,6 +264,17 @@ void GPX2VideoApplicationWindow::stop(void) {
 }
 
 
+/**
+ * Open XML layout file
+ *
+ *  - load each widgets
+ *  - append each widgets to UI list
+ *  - notify video area to refresh view
+ *
+ * Called from GTK main thread
+ * Can be called from the application startup as user open a project file.
+ * Can be called at runtime from the application menu.
+ */
 void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
@@ -300,6 +321,17 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 }
 
 
+/**
+ * Open media file
+ *
+ *  - detect video properties
+ *  - update video ui section
+ *  - notify video area to refresh view
+ *
+ * Called from GTK main thread
+ * Can be called from the application startup as user open a project file.
+ * Can be called at runtime from the application menu.
+ */
 void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
@@ -357,6 +389,17 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 }
 
 
+/**
+ * Open telemetry file
+ *
+ *  - load telemetry data
+ *  - apply telemetry compute settings
+ *  - notify renderer to update widgets
+ *
+ * Called from GTK main thread
+ * Can be called from the application startup as user open a project file.
+ * Can be called at runtime from the application menu.
+ */
 void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
@@ -380,6 +423,8 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 }
 
 
+/**
+ */
 void GPX2VideoApplicationWindow::update_stack(void) {
 	log_call();
 
@@ -396,6 +441,13 @@ void GPX2VideoApplicationWindow::update_stack(void) {
 }
 
 
+/**
+ * Save XML layout file
+ *
+ *  - serialize layout description
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::save_layout_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
@@ -424,6 +476,11 @@ void GPX2VideoApplicationWindow::save_layout_file(const Glib::RefPtr<const Gio::
 }
 
 
+/**
+ * Open media or layout file
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_action_open(void) {
 	log_call();
 
@@ -474,6 +531,11 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 }
 
 
+/**
+ * Save layout file
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_action_save(void) {
 	log_call();
 
@@ -519,6 +581,14 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 }
 
 
+/**
+ * Load telemetry file
+ *
+ * Later shoule be able to load several telemetry files
+ * (ak. gpx file, gmpf stream and more)
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_action_append(void) {
 	log_call();
 
@@ -562,6 +632,14 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 }
 
 
+/**
+ * Notification video change
+ *
+ * User has changed video properties as start time.
+ * So refresh video area is required.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_video_changed(void) {
 	log_call();
 
@@ -571,6 +649,14 @@ void GPX2VideoApplicationWindow::on_video_changed(void) {
 }
 
 
+/**
+ * Notification widget change
+ *
+ * User has changed widget properties (size, position...)
+ * So refresh video area is required.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_widget_changed(void) {
 	log_call();
 
@@ -580,6 +666,13 @@ void GPX2VideoApplicationWindow::on_widget_changed(void) {
 }
 
 
+/**
+ * Notification play/stop
+ *
+ * User starts or stops the video rendering.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_play_clicked(void) {
 	log_call();
 
@@ -592,6 +685,13 @@ void GPX2VideoApplicationWindow::on_play_clicked(void) {
 }
 
 
+/**
+ * Notification video progress change
+ *
+ * User seeks. So update the video stream position then refresh view.
+ *
+ * Called from GTK main thread
+ */
 bool GPX2VideoApplicationWindow::on_progress_change_value(Gtk::ScrollType type, double value, 
 		const Glib::RefPtr<Gtk::Adjustment> &adjustment) {
 	log_call();
@@ -609,6 +709,13 @@ bool GPX2VideoApplicationWindow::on_progress_change_value(Gtk::ScrollType type, 
 }
 
 
+/**
+ * Notification video progress pressed
+ *
+ * User starts to change the video position.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_progress_scale_pressed(guint n, double x, double y) {
 	log_call();
 
@@ -622,6 +729,13 @@ void GPX2VideoApplicationWindow::on_progress_scale_pressed(guint n, double x, do
 }
 
 
+/**
+ * Notification video progress released
+ *
+ * User stops to change the video position.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_progress_scale_released(guint n, double x, double y) {
 	log_call();
 
@@ -635,6 +749,13 @@ void GPX2VideoApplicationWindow::on_progress_scale_released(guint n, double x, d
 }
 
 
+/**
+ * Notification key pressed
+ *
+ * Move in video stream.
+ *
+ * Called from GTK main thread
+ */
 bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, Gdk::ModifierType modifier) {
 	log_call();
 
@@ -676,6 +797,13 @@ bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, 
 }
 
 
+/**
+ * Notification video, telemetry or widgets stack change
+ *
+ * Update the UI from the selected stack
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_stack_changed(void) {
 	log_call();
 
@@ -698,6 +826,13 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 }
 
 
+/**
+ * Notification widget selected
+ *
+ * Update the UI from the selected widget
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 	log_call();
 
@@ -719,6 +854,13 @@ void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 }
 
 
+/**
+ * Append new widget
+ *
+ * User appends a new widget.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_widget_append_clicked(void) {
 	log_call();
 
@@ -726,6 +868,13 @@ void GPX2VideoApplicationWindow::on_widget_append_clicked(void) {
 }
 
 
+/**
+ * Remove widget
+ *
+ * User removes a widget.
+ *
+ * Called from GTK main thread
+ */
 void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widget) {
 	log_call();
 
@@ -733,6 +882,11 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 }
 
 
+/**
+ * File dialog selection
+ *
+ * Called from GTK main thread
+ */
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,
 		const Glib::RefPtr<Gtk::FileDialog> &dialog) {
@@ -793,6 +947,11 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 }
 #endif
 
+/**
+ * File dialog selection
+ *
+ * Called from GTK main thread
+ */
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,
 		const Glib::RefPtr<Gtk::FileDialog> &dialog) {

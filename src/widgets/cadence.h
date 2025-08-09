@@ -1,8 +1,8 @@
 #ifndef __GPX2VIDEO__WIDGETS__CADENCE_H__
 #define __GPX2VIDEO__WIDGETS__CADENCE_H__
 
-#include "utils.h"
-#include "videowidget.h"
+#include "../utils.h"
+#include "../videowidget.h"
 
 
 class CadenceWidget : public VideoWidget {

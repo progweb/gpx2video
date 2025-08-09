@@ -1,8 +1,8 @@
 #ifndef __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 #define __GPX2VIDEO__WIDGETS__TEMPERATURE_H__
 
-#include "utils.h"
-#include "videowidget.h"
+#include "../utils.h"
+#include "../videowidget.h"
 
 
 class TemperatureWidget : public VideoWidget {
