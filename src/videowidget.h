@@ -54,11 +54,11 @@ public:
 
 	enum Unit {
 		UnitNone,
-		UnitMPS,
-		UnitMPH,
-		UnitKPH,
-		UnitMinMile,
-		UnitMinKm,
+		UnitMPS, // Meter / S
+		UnitMPH, // Mile / H
+		UnitKPH, // Km / H
+		UnitMPM, // Min / Mile
+		UnitMPK, // Min / Km
 		UnitKm,
 		UnitMeter,
 		UnitFoot,
