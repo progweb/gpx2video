@@ -43,6 +43,7 @@ skip:
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		char s[128];
+		bool pace_unit = false;
 		double speed = data.maxspeed();
 
 		// Refresh dynamic info
@@ -61,14 +62,37 @@ skip:
 		// Format data
 		no_value_ = !data.hasValue(TelemetryData::DataMaxSpeed);
 
-		if (unit() == VideoWidget::UnitKPH) {
-		}
-		else {
+		switch (unit()) {
+		case VideoWidget::UnitMPH:
 			speed *= 0.6213711922;
+			break;
+		case VideoWidget::UnitKPH:
+			break;
+		case VideoWidget::UnitMPM:
+			speed *= 0.6213711922;
+			pace_unit = true;
+			break;
+		case VideoWidget::UnitMPK:
+			pace_unit = true;
+			break;
+		default:
+			break;
+		}
+
+		if (pace_unit) {
+			if (speed <= 0.0)
+				no_value_ = true;
 		}
 
 		if (!no_value_)
 			sprintf(s, "%.0f %s", speed, unit2string(unit()).c_str());
+		else if (pace_unit) {
+			double pace = 60.0 / speed;
+			int min = (int) pace;
+			int sec = (int) round((pace - min) * 60) % 60;
+
+			sprintf(s, "%d:%02d %s", min, sec, unit2string(unit()).c_str());
+		} 
 		else
 			sprintf(s, "-- %s", unit2string(unit()).c_str());
 
