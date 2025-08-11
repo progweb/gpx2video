@@ -140,6 +140,7 @@ public:
 	}
 
 	void append(VideoWidget *widget);
+	void remove(VideoWidget *widget);
 	void drop(void);
 
 protected:

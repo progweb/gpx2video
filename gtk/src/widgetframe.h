@@ -21,6 +21,7 @@ public:
 
 	void set_visible(bool visible);
 
+	GPX2VideoWidget * widget_selected(void);
 	void set_widget_selected(GPX2VideoWidget *widget);
 
 	Glib::Dispatcher& signal_widget_changed(void) {

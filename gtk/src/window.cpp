@@ -836,7 +836,15 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
 	log_call();
 
-	int index = row->get_index();
+	int index;
+
+	if (row == NULL) {
+		widget_frame_->set_widget_selected(NULL);
+		return;
+	}
+   
+	// Get selected row
+	index = row->get_index();
 
 	log_info("Widget selected at index: %d", index);
 
@@ -879,6 +887,30 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 	log_call();
 
 	log_info("Remove widget '%s'", widget->widget()->name().c_str());
+
+	// Search widget item index
+	int index = 0;
+
+	for (GPX2VideoWidget *item : renderer_->widgets()) {
+		if (item == widget)
+			break;
+
+		index++;
+	}
+
+//	// Unselect widget
+//	if (widget_frame_->widget_selected() == widget)
+//		widget_frame_->set_widget_selected(NULL);
+
+	// Remove widget from the widgets list
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	if (!list)
+		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+	auto row = list->get_row_at_index(index);
+	list->remove(*row);
+
+	// At last, remove & destroy widget
+	renderer_->remove(widget);
 }
 
 

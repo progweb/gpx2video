@@ -208,6 +208,29 @@ const std::list<GPX2VideoWidget *>& GPX2VideoRenderer::widgets(void) {
 }
 
 
+void GPX2VideoRenderer::append(GPX2VideoWidget *widget) {
+	log_call();
+}
+
+
+void GPX2VideoRenderer::remove(GPX2VideoWidget *widget) {
+	log_call();
+
+	// Remove widget
+	widgets_.remove(widget);
+
+	// Destroy widget
+	delete widget;
+
+	// Remove widget from core
+	Renderer::remove(widget->widget());
+
+	// Refresh
+	compute();
+	refresh();
+}
+
+
 void GPX2VideoRenderer::seek(double pos) {
 	log_call();
 

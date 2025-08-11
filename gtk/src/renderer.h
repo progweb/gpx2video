@@ -29,6 +29,9 @@ public:
 
 	const std::list<GPX2VideoWidget *>& widgets(void);
 
+	void append(GPX2VideoWidget *widget);
+	void remove(GPX2VideoWidget *widget);
+
 	void seek(double pos);
 	void load(void);
 	void reset(void);
