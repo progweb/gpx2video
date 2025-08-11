@@ -63,38 +63,38 @@ skip:
 		no_value_ = !data.hasValue(TelemetryData::DataSpeed);
 
 		switch (unit()) {
-			case VideoWidget::UnitMPH:
-				speed *= 0.6213711922;
-				break;
-			case VideoWidget::UnitKPH:
-				break;
-			case VideoWidget::UnitMinMile:
-				speed *= 0.6213711922;
-				pace_unit = true;
-				break;
-			case VideoWidget::UnitMinKm:
-				pace_unit = true;
-				break;
-			default:
-				break;
+		case VideoWidget::UnitMPH:
+			speed *= 0.6213711922;
+			break;
+		case VideoWidget::UnitKPH:
+			break;
+		case VideoWidget::UnitMPM:
+			speed *= 0.6213711922;
+			pace_unit = true;
+			break;
+		case VideoWidget::UnitMPK:
+			pace_unit = true;
+			break;
+		default:
+			break;
 		}
 
-		if (no_value_) {
-			sprintf(s, "-- %s", unit2string(unit()).c_str());
-		} else {
-			if (pace_unit) {
-				if (speed > 0.0) {
-					double pace = 60.0 / speed;
-					int min = (int)pace;
-					int sec = (int)round((pace - min) * 60) % 60;
-					sprintf(s, "%d:%02d %s", min, sec, unit2string(unit()).c_str());
-				} else {
-					sprintf(s, "∞ %s", unit2string(unit()).c_str());
-				}
-			} else {
-				sprintf(s, "%.1f %s", speed, unit2string(unit()).c_str());
-			}
+		if (pace_unit) {
+			if (speed <= 0.0)
+				no_value_ = true;
 		}
+
+		if (no_value_)
+			sprintf(s, "-- %s", unit2string(unit()).c_str());
+		else if (pace_unit) {
+			double pace = 60.0 / speed;
+			int min = (int) pace;
+			int sec = (int) round((pace - min) * 60) % 60;
+
+			sprintf(s, "%d:%02d %s", min, sec, unit2string(unit()).c_str());
+		} 
+		else
+			sprintf(s, "%.1f %s", speed, unit2string(unit()).c_str());
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)

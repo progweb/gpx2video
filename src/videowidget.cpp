@@ -85,10 +85,10 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitMPH;
 	else if (s == "kph")
 		unit = VideoWidget::UnitKPH;
-	else if (s == "minmile")
-		unit = VideoWidget::UnitMinMile;
-	else if (s == "minkm")
-		unit = VideoWidget::UnitMinKm;
+	else if ((s == "mpm") || (s == "minmile"))
+		unit = VideoWidget::UnitMPM;
+	else if ((s == "mpk") || (s == "minkm"))
+		unit = VideoWidget::UnitMPK;
 	else if (s == "km")
 		unit = VideoWidget::UnitKm;
 	else if (s == "m")
@@ -176,10 +176,10 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit, bool label) {
 		return label ? "m/h" : "mph";
 	case VideoWidget::UnitKPH:
 		return label ? "km/h" : "kph";
-	case VideoWidget::UnitMinMile:
-		return "min/mile";
-	case VideoWidget::UnitMinKm:
-		return "min/km";
+	case VideoWidget::UnitMPM:
+		return label ? "min/mile" : "mpm";
+	case VideoWidget::UnitMPK:
+		return label ? "min/km" : "mpk";
 	case VideoWidget::UnitKm:
 		return "km";
 	case VideoWidget::UnitMeter:
