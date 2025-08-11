@@ -223,6 +223,13 @@ void GPX2VideoWidgetFrame::set_visible(bool visible) {
 }
 
 
+GPX2VideoWidget * GPX2VideoWidgetFrame::widget_selected(void) {
+	log_call();
+
+	return widget_selected_;
+}
+
+
 void GPX2VideoWidgetFrame::set_widget_selected(GPX2VideoWidget *widget) {
 	log_call();
 

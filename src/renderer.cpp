@@ -563,6 +563,13 @@ void Renderer::append(VideoWidget *widget) {
 }
 
 
+void Renderer::remove(VideoWidget *widget) {
+	widgets_.remove(widget);
+
+	delete widget;
+}
+
+
 void Renderer::drop(void) {
 	while (!widgets_.empty()) {
 		VideoWidget *widget = widgets_.front();
