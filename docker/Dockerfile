@@ -26,6 +26,8 @@ RUN apt-get update \
         libgeographic.*-dev \
         libcairo2-dev \
 		\
+		libfreetype-dev \
+		\
         libglm-dev \
 		libgtkmm-4.0-dev \
 		\

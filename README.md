@@ -191,7 +191,8 @@ To build gpx2video, please install all dependencies (on Debian):
 apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev \
     libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
-    libcairo2-dev libopenexr-dev
+    libcairo2-dev libopenexr-dev \
+    libfreetype-dev
 ```
 
 *Warning, on some distribution, libgeographic-dev is called libgeographiclib-dev!*
