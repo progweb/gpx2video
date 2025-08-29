@@ -205,6 +205,13 @@ namespace layout
     String  &borderColor() { return _bordercolor; }
 
     ///
+    /// Get background color
+    ///
+    /// @return the background color element
+    ///
+    String  &backgroundColor() { return _bgcolor; }
+
+    ///
     /// Get path thick
     ///
     /// @return the path thick element
@@ -240,6 +247,7 @@ namespace layout
 	Unsigned     _marker;
 	Unsigned     _border;
 	String       _bordercolor;
+	String       _bgcolor;
 	Decimal      _path_thick;
 	Decimal      _path_border;
     

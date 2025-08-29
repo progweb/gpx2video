@@ -731,6 +731,7 @@ OIIO::ImageBuf * Map::prepare(bool &is_update) {
 
 	this->createBox(&bg_buf_, this->width(), this->height());
 	this->drawBorder(bg_buf_);
+	this->drawBackground(bg_buf_);
 
 	// Load map
 	if (this->load() == false)

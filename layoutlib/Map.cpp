@@ -52,6 +52,7 @@ namespace layout
     _marker(this, "marker", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
+	_bgcolor(this, "background-color", Node::ELEMENT, false),
 	_path_thick(this, "path-thick", Node::ELEMENT, false),
 	_path_border(this, "path-border", Node::ELEMENT, false)
   {
@@ -75,6 +76,7 @@ namespace layout
     getInterfaces().push_back(&_marker);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
+    getInterfaces().push_back(&_bgcolor);
     getInterfaces().push_back(&_path_thick);
     getInterfaces().push_back(&_path_border);
 

@@ -260,6 +260,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setMargin(VideoWidget::MarginBottom, m->marginBottom());
 	map->setBorder(m->border());
 	map->setBorderColor((const char *) m->borderColor());
+	map->setBackgroundColor((const char *) m->backgroundColor());
 
 	// Append
 	app_.append(map);
