@@ -517,6 +517,12 @@ void Map::download(void) {
 	if (!refresh_is_required_)
 		return;
 
+	if (tiles_.empty()) {
+		build();
+
+		goto done;
+	}
+
 	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
 
 	nbr_downloads_ = 1;
@@ -529,6 +535,7 @@ void Map::download(void) {
 			log_error("Download failure!");
 	}
 
+done:
 	refresh_is_required_ = false;
 }
 
@@ -544,78 +551,87 @@ void Map::build(void) {
 
 	log_notice("Build map...");
 
-	// Filename is output if user builds map/track
-	if (app_.command() == GPXApplication::CommandMap) {
-		filename_ = app_.settings().outputfile();
-	}
-	else {
-		char *s;
-
-		// Make tmp filename
-		s = strdup(template_name);
-		fd = mkstemp(s);
-
-		filename_ = s;
-
-		close(fd);
-		free(s);
-	}
+	// Default filename
+	filename_ = "";
 
 	// Map size
 	width = (x2_ - x1_) * TILESIZE;
 	height = (y2_ - y1_) * TILESIZE;
 
-	// Create image buffer
-	OIIO::ImageSpec outspec(width, height, 4);
-	OIIO::ImageBuf image_buffer(outspec); 
+	// Build map
+	if ((width > 0) && (height > 0)) {
+		// Filename is output if user builds map/track
+		if (app_.command() == GPXApplication::CommandMap) {
+			filename_ = app_.settings().outputfile();
+		}
+		else {
+			char *s;
 
-	// Create map
-	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
+			// Make tmp filename
+			s = strdup(template_name);
+			fd = mkstemp(s);
 
-	// Collapse echo tile
-	for (Tile *tile : tiles_) {
-		std::string filename = tile->path() + "/" + tile->filename();
+			filename_ = s;
 
-		// Open tile image
-		auto img = OIIO::ImageInput::open(filename.c_str());
-
-		if (img == NULL) {
-			log_warn("Can't open '%s' tile", filename.c_str());
-			continue;
+			close(fd);
+			free(s);
 		}
 
-		const OIIO::ImageSpec& spec = img->spec();
-		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+		// Create image buffer
+		OIIO::ImageSpec outspec(width, height, 4);
+		OIIO::ImageBuf image_buffer(outspec); 
 
-		// Create tile buffer
-		OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
-		img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
+		// Create map
+		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create("map.png");
 
-		// Add alpha channel
-		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
-		float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
-		std::string channelnames[] = { "", "", "", "A" };
+		// Collapse echo tile
+		for (Tile *tile : tiles_) {
+			std::string filename = tile->path() + "/" + tile->filename();
 
-		OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+			// Open tile image
+			auto img = OIIO::ImageInput::open(filename.c_str());
 
-		// Write tile
-		outbuf.specmod().x = (tile->x() - x1_) * TILESIZE;
-		outbuf.specmod().y = (tile->y() - y1_) * TILESIZE;
-		OIIO::ImageBufAlgo::over(image_buffer, outbuf, image_buffer, outbuf.roi());
+			if (img == NULL) {
+				log_warn("Can't open '%s' tile", filename.c_str());
+				continue;
+			}
+
+			const OIIO::ImageSpec& spec = img->spec();
+			OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
+
+			// Create tile buffer
+			OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
+			img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
+
+			// Add alpha channel
+			int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+			float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+			std::string channelnames[] = { "", "", "", "A" };
+
+			OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+
+			// Write tile
+			outbuf.specmod().x = (tile->x() - x1_) * TILESIZE;
+			outbuf.specmod().y = (tile->y() - y1_) * TILESIZE;
+			OIIO::ImageBufAlgo::over(image_buffer, outbuf, image_buffer, outbuf.roi());
+		}
+
+		// Write map file
+		if (out->open(filename_, image_buffer.spec()) == false) {
+			log_error("Build map failure, can't open '%s' file", filename_.c_str());
+			goto error;
+		}
+
+		out->write_image(image_buffer.spec().format, image_buffer.localpixels());
+		out->close();
+
+		// User requests track draw
+		if (app_.command() == GPXApplication::CommandTrack)
+			draw();
 	}
-
-	// Write map file
-	if (out->open(filename_, image_buffer.spec()) == false) {
-		log_error("Build map failure, can't open '%s' file", filename_.c_str());
-		goto error;
+	else {
+		log_warn("No data, can't build map");
 	}
-
-	out->write_image(image_buffer.spec().format, image_buffer.localpixels());
-	out->close();
-
-	// User requests track draw
-	if (app_.command() == GPXApplication::CommandTrack)
-		draw();
 
 error:
 	// Done
@@ -677,9 +693,12 @@ bool Map::load(void) {
 
 	double divider = divider_; //settings().divider();
 
-	std::string filename = app_.settings().inputfile();
+//	std::string filename = app_.settings().inputfile();
 
 	log_call();
+
+	if (filename_.empty())
+		return true;
 
 	// Open map
 	auto img = OIIO::ImageInput::open(filename_);
@@ -741,7 +760,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 	// Check map & track buffers
 	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
-		log_warn("Map renderer failure");
+		is_update = false;
 		return NULL;
 	}
 
@@ -821,6 +840,18 @@ skip:
 
 
 void Map::clear(void) {
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	if (mapbuf_)
+		delete mapbuf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
+	mapbuf_ = NULL;
 }
 
 

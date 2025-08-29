@@ -210,11 +210,19 @@ int Track::lon2pixel(int zoom, float lon) {
 
 
 bool Track::preinit(void) {
+	TelemetrySource *source;
+   
+	log_call();
+
+	// Init
+	x1_ = y1_ = x2_ = y2_ = 0;
+	px1_ = py1_ = px2_ = py2_ = 0;
+
 	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetry_settings_, true);
+	source = TelemetryMedia::open(app_.settings().inputfile(), telemetry_settings_, true);
 
 	if (source == NULL) {
-		log_warn("Can't read telemetry data, skip track widget");
+		log_warn("Can't read telemetry data, skip %s widget initialization", name().c_str());
 		return false;
 	}
 

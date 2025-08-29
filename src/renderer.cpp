@@ -181,13 +181,13 @@ bool Renderer::loadMap(layout::Map *m) {
 		return false;
 	}
 
-	// Open telemetry data file
-	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
-
-	if (source == NULL) {
-		log_warn("Can't read telemetry data, skip map widget");
-		return false;
-	}
+//	// Open telemetry data file
+//	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
+//
+//	if (source == NULL) {
+//		log_warn("Can't read telemetry data, skip map widget");
+//		return false;
+//	}
 
 //	// Telemetry data limits
 //	source->setFrom(app_.settings().from());
@@ -214,9 +214,9 @@ bool Renderer::loadMap(layout::Map *m) {
 	//  432x240  =>  ?x?
 	marker_size = (m->marker() > 0) ? m->marker() : 60 * video_stream->height() / 1520.0;
 
-	// Create map bounding box
-	TelemetryData p1, p2;
-	source->getBoundingBox(&p1, &p2);
+//	// Create map bounding box
+//	TelemetryData p1, p2;
+//	source->getBoundingBox(&p1, &p2);
 
 	// Alignment
 	s = (const char *) m->align();
@@ -239,7 +239,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setDivider(m->factor());
 	mapSettings.setMarkerSize(marker_size);
-	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+//	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 
@@ -340,6 +340,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathBorder((double) t->pathBorder());
 
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
+
+	log_info("Load track widget");
 
 	// Widget settings
 	track->setPosition(position);
