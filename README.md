@@ -428,7 +428,7 @@ The **display** default value is true.
 </widget>		
 ```
 
-**unit** values are: mph or kph.
+**unit** values are: mph, kph, mpm / minmile, mpk / minkm.
 
 
 #### vertical speed widget
