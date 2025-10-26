@@ -36,7 +36,7 @@ run: build-gpx2video run-gpx2video
 debian: debian-bullseye debian-bookworm 
 	
 debian-bullseye: config-debian-bullseye build-docker build-gpx2video
-debian-bookworm: config-debian-bullseye build-docker build-gpx2video
+debian-bookworm: config-debian-bookworm build-docker build-gpx2video
 
 
 # Ubuntu
@@ -48,14 +48,14 @@ ubuntu-noble: config-ubuntu-noble build-docker build-gpx2video
 
 # Build
 build-debian-bullseye: config-debian-bullseye build-gpx2video
-build-debian-bookworm: config-debian-bullseye build-gpx2video
+build-debian-bookworm: config-debian-bookworm build-gpx2video
 build-ubuntu-jammy: config-ubuntu-jammy build-gpx2video
 build-ubuntu-noble: config-ubuntu-noble build-gpx2video
 
 
 # Exec
 run-debian-bullseye: config-debian-bullseye run-gpx2video
-run-debian-bookworm: config-debian-bullseye run-gpx2video
+run-debian-bookworm: config-debian-bookworm run-gpx2video
 run-ubuntu-jammy: config-ubuntu-jammy run-gpx2video
 run-ubuntu-noble: config-ubuntu-noble run-gpx2video
 
