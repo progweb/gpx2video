@@ -44,7 +44,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	, loop_(true)
 	, thread_(NULL)
 	, media_(NULL)
-	, renderer_(NULL) {
+	, renderer_(NULL) 
+	, working_folder_(NULL)
+	, working_layout_(NULL) {
 	log_call();
 
 	Gtk::Button *button;
@@ -71,6 +73,35 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	video_area_ = Gtk::Builder::get_widget_derived<GPX2VideoArea>(ref_builder_, "video_area", *this);
 	if (!video_area_)
 		throw std::runtime_error("No \"video_area\" object in window.ui");
+
+	// Application settings
+	settings_ = Gio::Settings::create("com.progweb.gpx2video");
+
+	if (settings_) {
+		settings_->bind("width",
+				this, 
+				"default-width", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("height",
+				this, 
+				"default-height", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("is-maximized",
+				this, 
+				"maximized", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("is-fullscreen",
+				this, 
+				"fullscreened", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+	}
 
 	// Connect the menu to the MenuButton gears_.
 	// (The connection between action and menu item is specified in gears_menu.ui)
@@ -500,6 +531,7 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 
 	dialog->set_title("Open a file");
 	dialog->set_modal(true);
+	dialog->set_initial_folder(working_folder_);
 
 	// Add filters, so that only certain file types can be selected:
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
@@ -518,6 +550,7 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
+	dialog->set_current_folder(working_folder_);
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_video);
 	dialog->add_filter(filter_layout);
@@ -551,6 +584,8 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 
 	dialog->set_title("Export layout");
 	dialog->set_modal(true);
+	dialog->set_initial_folder(working_layout_);
+	dialog->set_initial_name(working_layout_->get_basename());
 
 	// Add filters, so that only certain file types can be selected:
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
@@ -569,6 +604,7 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
+	dialog->set_file(working_layout_);
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter);
 	dialog->set_filter(filter);
@@ -605,6 +641,7 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 
 	dialog->set_title("Open a telemetry file");
 	dialog->set_modal(true);
+	dialog->set_initial_folder(working_folder_);
 
 	// Add filters, so that only certain file types can be selected:
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
@@ -621,6 +658,7 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
+	dialog->set_current_folder(working_folder_);
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_gpx);
 	dialog->add_button("Ok", Gtk::ResponseType::OK);
@@ -924,21 +962,29 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 		const Glib::RefPtr<Gtk::FileDialog> &dialog) {
 	log_call();
 
+	// Get selected file
 	auto file = dialog->open_finish(result);
 
 	if (!file)
 		return;
 
+	// Save working folder
+	working_folder_ = file->get_parent();
+
+	// Get filename
 	auto info = file->query_info();
 	auto type = info->get_content_type();
 
 	log_info("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
 
 	// Open layout or media file
-	if (type == "application/gpx+xml")
-		open_telemetry_file(file);
-	else if (type == "application/xml")
+	if (type == "application/xml") {
 		open_layout_file(file);
+
+		working_layout_ = file;
+	}
+	else if (type == "application/gpx+xml")
+		open_telemetry_file(file);
 	else
 		open_media_file(file);
 }
@@ -949,6 +995,10 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 
 	Glib::RefPtr<const Gio::File> file = NULL;
 
+	// Save working folder
+	working_folder_ = dialog->get_current_folder();
+
+	// Get selected file
 	switch (response_id) {
 	case Gtk::ResponseType::OK:
 		file = dialog->get_file();
@@ -964,16 +1014,22 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 	if (!file)
 		return;
 
+	// Save working folder
+	working_folder_ = file->get_parent();
+
 	// Open layout or media file
 	auto info = file->query_info();
 	auto type = info->get_content_type();
 
 	log_info("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
 
-	if (type == "application/gpx+xml")
-		open_telemetry_file(file);
-	else if (type == "application/xml")
+	if (type == "application/xml") {
 		open_layout_file(file);
+
+		working_layout_ = file;
+	}
+	else if (type == "application/gpx+xml")
+		open_telemetry_file(file);
 	else
 		open_media_file(file);
 }
