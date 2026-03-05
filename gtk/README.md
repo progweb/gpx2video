@@ -30,6 +30,14 @@ xdg-desktop-menu forceupdate
 ```
 
 
+### Add gpx2video gsettings file 
+
+```bash
+cp -a data/com.progweb.gpx2video.gschema.xml /usr/share/glib-2.0/schemas
+glib-compile-schemas /usr/share/glib-2.0/schemas
+```
+
+
 ## Build
 
 ### Build on host

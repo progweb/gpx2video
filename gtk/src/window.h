@@ -18,6 +18,7 @@
 #else
 #include <gtkmm/filechooserdialog.h>
 #endif
+#include <giomm/settings.h>
 
 #include "../../src/application.h"
 #include "../../src/renderer.h"
@@ -50,6 +51,7 @@ public:
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
+	Glib::RefPtr<Gio::Settings> settings_;
 
 	Glib::ustring media_file_;
 	Glib::ustring layout_file_;
@@ -120,6 +122,9 @@ private:
 	MediaContainer *media_;
 
 	GPX2VideoRenderer *renderer_;
+
+	Glib::RefPtr<Gio::File> working_folder_;
+	Glib::RefPtr<Gio::File> working_layout_;
 };
 
 #endif
