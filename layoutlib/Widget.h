@@ -78,6 +78,13 @@ namespace layout
     ///
     String  &type() { return _type; }
 
+    ///
+    /// Get shape
+    ///
+    /// @return the shape element
+    ///
+    String  &shape() { return _shape; }
+
 	/// 
 	/// Get display
 	///
@@ -358,6 +365,7 @@ namespace layout
     // Members
     String       _name;
     String       _type;
+    String       _shape;
 	Boolean      _display;
     String       _position;
     String       _align;

@@ -140,7 +140,7 @@ void GPX2VideoArea::update_adjustment(double value) {
 		return;
 
 	if (!is_playing_)
-		log_info("Update scale position position: %s", Datetime::timestamp2string(value, Datetime::FormatTime).c_str());
+		log_info("Update scale position: %s", Datetime::timestamp2string(value, Datetime::FormatTime).c_str());
 
 	adjustment_->set_value(value);
 }

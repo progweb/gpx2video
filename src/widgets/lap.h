@@ -1,43 +1,48 @@
 #ifndef __GPX2VIDEO__WIDGETS__LAP_H__
 #define __GPX2VIDEO__WIDGETS__LAP_H__
 
-#include "../utils.h"
-#include "../videowidget.h"
+#include "../shape/text.h"
 
 
-class LapWidget : public VideoWidget {
+/**
+ * Lap text & icon shape widget
+ */
+
+class LapTextShape : public TextShape {
 public:
-	virtual ~LapWidget() {
+	virtual ~LapTextShape() {
 		clear();
 	}
 
-	static LapWidget * create(GPXApplication &app) {
-		LapWidget *widget;
+	static LapTextShape * create(VideoWidget *widget, int nbr_target_lap) {
+		LapTextShape *shape;
 
-		widget = new LapWidget(app, "lap");
+		shape = new LapTextShape(widget);
+		
+		shape->initialize();
+		shape->setTargetLap(nbr_target_lap);
 
-		return widget;
+		return shape;
 	}
 
 	void setTargetLap(int target) {
 		nbr_target_lap_ = target;
 	}
 
-
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
+		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
 
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, this->width(), this->height());
+		this->createBox(&bg_buf_, widget_->width(), widget_->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
 		if (with_picto)
-			this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_laps.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, label().c_str());
+			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_laps.png", VideoWidget::ZoomFit);
+		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -73,7 +78,7 @@ skip:
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, this->width(), this->height());
+		this->createBox(&fg_buf_, widget_->width(), widget_->height());
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
@@ -82,6 +87,8 @@ skip:
 	}
 
 	void clear(void) {
+		no_value_ = false;
+
 		if (bg_buf_)
 			delete bg_buf_;
 
@@ -90,6 +97,84 @@ skip:
 
 		bg_buf_ = NULL;
 		fg_buf_ = NULL;
+	}
+
+private:
+	bool no_value_;
+
+	Theme theme_;
+
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
+
+	int nbr_target_lap_;
+
+	LapTextShape(VideoWidget *widget) 
+		: TextShape(theme_, widget)
+		, bg_buf_(NULL)
+		, fg_buf_(NULL) {
+		no_value_ = false;
+	}
+};
+
+
+/**
+ * Widget definition
+ */
+
+class LapWidget : public VideoWidget {
+public:
+	virtual ~LapWidget() {
+		delete shape_;
+	}
+
+	static LapWidget * create(GPXApplication &app) {
+		LapWidget *widget;
+
+		widget = new LapWidget(app, "lap");
+
+		return widget;
+	}
+
+	void setTargetLap(int target) {
+		shape_->setTargetLap(target);
+
+		nbr_target_lap_ = target;
+	}
+
+	void setShape(VideoWidget::Shape type) {
+		(void) type;
+
+		if (shape_)
+			delete shape_;
+
+		shape_ = LapTextShape::create(this, nbr_target_lap_);
+	}
+
+	bool setBackgroundColor(std::string color) {
+		bool result = VideoWidget::setBackgroundColor(color);
+
+		const float *c = backgroundColor();
+
+		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
+
+		return result;
+	}
+
+	void initialize(void) {
+		shape_->initialize();
+	}
+
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		return shape_->prepare(is_update);
+	}
+
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		return shape_->render(data, is_update);
+	}
+
+	void clear(void) {
+		shape_->clear();
 	}
 
 protected:
@@ -102,19 +187,15 @@ protected:
 	}
 
 private:
-	bool no_value_;
-
-	OIIO::ImageBuf *bg_buf_;
-	OIIO::ImageBuf *fg_buf_;
+	LapTextShape *shape_;
 
 	int nbr_target_lap_;
 
 	LapWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
-   		, bg_buf_(NULL)
-   		, fg_buf_(NULL)
+   		, shape_(NULL)
    		, nbr_target_lap_(1) {
-		no_value_ = false;
+		setShape(VideoWidget::ShapeText);
 	}
 };
 

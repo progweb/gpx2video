@@ -136,12 +136,12 @@ bool Renderer::load(void) {
 
 		const std::string name = node->getName();
 
-		if (name == "widget")
-			loadWidget((layout::Widget *) node);
-		else if (name == "map")
+		if (name == "map")
 			loadMap((layout::Map *) node);
 		else if (name == "track")
 			loadTrack((layout::Track *) node);
+		else if (name == "widget")
+			loadWidget((layout::Widget *) node);
 	}
 
 done:
@@ -375,6 +375,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	int flags = VideoWidget::FlagNone;
 
+	VideoWidget::Shape shape = VideoWidget::ShapeNone;
+
 	VideoWidget::Unit unit = VideoWidget::UnitNone;
 	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
@@ -446,6 +448,15 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Shape 
+	s = (const char *) w->shape();
+	shape = VideoWidget::string2shape(s);
+
+	if (shape == VideoWidget::ShapeUnknown) {
+		log_error("Widget loading error, shape value '%s' unknown", s.c_str());
+		goto error;
+	}
+
 	// Alignment
 	s = (const char *) w->align();
 	align = VideoWidget::string2align(s);
@@ -478,7 +489,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	zoom = VideoWidget::string2zoom(s);
 
-	log_info("Load widget '%s'", (const char *) w->type());
+	log_info("Load widget '%s' (shape: %s)", (const char *) w->type(), (const char *) w->shape());
 
 	// Text alignment for label
 	s = (const char *) w->labelAlign();
@@ -509,6 +520,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		flags |= VideoWidget::FlagUnit;
 
 	// Widget settings
+	widget->setShape(shape);
 	widget->setPosition(position);
 	widget->setAlign(align);
 	widget->setPosition(w->x(), w->y());

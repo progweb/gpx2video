@@ -233,6 +233,12 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 		buffer->setTimestamp(data.timestamp());
 		buffer->setData(index, buffer_[index]);
 
+		// Swap fg & bg ?
+		if (!bg_buf) {
+			bg_buf = fg_buf;
+			fg_buf = NULL;
+		}
+
 		// Draw bg
 		if (bg_buf)
 			OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);

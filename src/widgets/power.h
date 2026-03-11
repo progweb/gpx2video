@@ -1,38 +1,43 @@
 #ifndef __GPX2VIDEO__WIDGETS__POWER_H__
 #define __GPX2VIDEO__WIDGETS__POWER_H__
 
-#include "../utils.h"
-#include "../videowidget.h"
+#include "../shape/text.h"
 
 
-class PowerWidget : public VideoWidget {
+/**
+ * Power text & icon shape widget
+ */
+
+class PowerTextShape : public TextShape {
 public:
-	virtual ~PowerWidget() {
+	virtual ~PowerTextShape() {
 		clear();
 	}
 
-	static PowerWidget * create(GPXApplication &app) {
-		PowerWidget *widget;
+	static PowerTextShape * create(VideoWidget *widget) {
+		PowerTextShape *shape;
 
-		widget = new PowerWidget(app, "power");
+		shape = new PowerTextShape(widget);
+		
+		shape->initialize();
 
-		return widget;
+		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
+		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
 
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, this->width(), this->height());
+		this->createBox(&bg_buf_, widget_->width(), widget_->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
 		if (with_picto)
-			this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_power.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, label().c_str());
+			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_power.png", VideoWidget::ZoomFit);
+		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -67,7 +72,7 @@ skip:
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, this->width(), this->height());
+		this->createBox(&fg_buf_, widget_->width(), widget_->height());
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
@@ -76,6 +81,8 @@ skip:
 	}
 
 	void clear(void) {
+		no_value_ = false;
+
 		if (bg_buf_)
 			delete bg_buf_;
 
@@ -84,6 +91,79 @@ skip:
 
 		bg_buf_ = NULL;
 		fg_buf_ = NULL;
+	}
+
+private:
+	bool no_value_;
+
+	Theme theme_;
+
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
+
+	PowerTextShape(VideoWidget *widget) 
+		: TextShape(theme_, widget)
+		, bg_buf_(NULL)
+		, fg_buf_(NULL) {
+		no_value_ = false;
+	}
+};
+
+
+/**
+ * Widget definition
+ */
+
+class PowerWidget : public VideoWidget {
+public:
+	virtual ~PowerWidget() {
+		delete shape_;
+	}
+
+	static PowerWidget * create(GPXApplication &app) {
+		PowerWidget *widget;
+
+		widget = new PowerWidget(app, "power");
+
+		return widget;
+	}
+
+	void setShape(VideoWidget::Shape type) {
+		if (shape_)
+			delete shape_;
+
+		switch (type) {
+		case VideoWidget::ShapeText:
+		default:
+			shape_ = PowerTextShape::create(this);
+			break;
+		}
+	}
+
+	bool setBackgroundColor(std::string color) {
+		bool result = VideoWidget::setBackgroundColor(color);
+
+		const float *c = backgroundColor();
+
+		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
+
+		return result;
+	}
+
+	void initialize(void) {
+		shape_->initialize();
+	}
+
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		return shape_->prepare(is_update);
+	}
+
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		return shape_->render(data, is_update);
+	}
+
+	void clear(void) {
+		shape_->clear();
 	}
 
 protected:
@@ -97,16 +177,12 @@ protected:
 	}
 
 private:
-	bool no_value_;
-
-	OIIO::ImageBuf *bg_buf_;
-	OIIO::ImageBuf *fg_buf_;
+	ShapeBase *shape_;
 
 	PowerWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
-   		, bg_buf_(NULL)
-   		, fg_buf_(NULL) {
-		no_value_ = false;
+   		, shape_(NULL) {
+		setShape(VideoWidget::ShapeText);
 	}
 };
 

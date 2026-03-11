@@ -16,6 +16,7 @@
 
 #include <OpenImageIO/imageio.h>
 #include <OpenImageIO/imagebuf.h>
+#include <OpenImageIO/imagebufalgo.h>
 #include <OpenImageIO/fmath.h>
 #include <OpenImageIO/parallel.h>
 #include <OpenImageIO/span.h>

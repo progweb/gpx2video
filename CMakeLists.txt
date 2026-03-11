@@ -144,6 +144,10 @@ set(GPX2VIDEO_SOURCES
 	src/test.cpp
 	src/utils.cpp
 
+	src/shape/arc.cpp
+	src/shape/base.cpp
+	src/shape/text.cpp
+
  	utmconvert/utmconvert.cpp
 )
 

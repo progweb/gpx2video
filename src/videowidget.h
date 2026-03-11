@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include <list>
 
+#include <cairo.h>
 #include <OpenImageIO/imagebuf.h>
 
 #include "telemetrymedia.h"
@@ -16,6 +17,13 @@
 
 class VideoWidget : public GPXApplication::Task {
 public:
+	enum Shape {
+		ShapeNone = 0,
+		ShapeText,
+		ShapeArc,
+		ShapeUnknown
+	};
+
 	enum Position {
 		PositionNone = 0,
 		PositionLeft,
@@ -96,6 +104,14 @@ public:
 	};
 
 	virtual ~VideoWidget() {
+	}
+
+	Shape& shape(void) {
+		return shape_;
+	}
+
+	virtual void setShape(Shape shape) {
+		shape_ = shape;
 	}
 
 	uint64_t& atBeginTime(void) {
@@ -409,6 +425,7 @@ public:
 
 	virtual void save(std::ostream &os);
 
+	static Shape string2shape(std::string &s);
 	static Position string2position(std::string &s);
 	static Align string2align(std::string &s);
 	static TextAlign string2textAlign(std::string &s);
@@ -435,6 +452,7 @@ protected:
 		, value_offset_(0)
 		, txtratio_(0.0)
 		, name_(name) {
+		setShape(ShapeText),
 		setPosition(PositionNone);
 		setAlign(AlignNone);
 		setAtTime(0, 0);
@@ -475,6 +493,7 @@ protected:
 	virtual void xmlclose(std::ostream &os);
 
 	GPXApplication &app_;
+	Shape shape_;
 	Position position_;
 	Align align_;
 	Unit unit_;

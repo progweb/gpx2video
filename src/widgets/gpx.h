@@ -1,22 +1,27 @@
 #ifndef __GPX2VIDEO__WIDGETS__GPX_H__
 #define __GPX2VIDEO__WIDGETS__GPX_H__
 
-#include "../utils.h"
-#include "../videowidget.h"
+#include "../shape/text.h"
 
 
-class GPXWidget : public VideoWidget {
+/**
+ * GPX text & icon shape widget
+ */
+
+class GPXTextShape : public TextShape {
 public:
-	virtual ~GPXWidget() {
+	virtual ~GPXTextShape() {
 		clear();
 	}
 
-	static GPXWidget * create(GPXApplication &app) {
-		GPXWidget *widget;
+	static GPXTextShape * create(VideoWidget *widget) {
+		GPXTextShape *shape;
 
-		widget = new GPXWidget(app, "gpx");
+		shape = new GPXTextShape(widget);
+		
+		shape->initialize();
 
-		return widget;
+		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -25,11 +30,10 @@ public:
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, this->width(), this->height());
+		this->createBox(&bg_buf_, widget_->width(), widget_->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-//		this->drawLabel(bg_buf_, label().c_str());
-	
+
 		is_update = true;
 skip:
 		return bg_buf_;
@@ -44,13 +48,13 @@ skip:
 		int h;
 		int offset;
 
-		int border = this->border();
-		int padding_yt = this->padding(VideoWidget::PaddingTop);
-		int padding_yb = this->padding(VideoWidget::PaddingBottom);
+		int border = widget_->border();
+		int padding_yt = widget_->padding(VideoWidget::PaddingTop);
+		int padding_yb = widget_->padding(VideoWidget::PaddingBottom);
 
 		// width x height
-//		w = this->height() - 2 * border;
-		h = this->height() - 2 * border;
+//		w = widget_->height() - 2 * border;
+		h = widget_->height() - 2 * border;
 
 		// Add text (1 pt = 1.333 px)
 		// +-------------
@@ -72,7 +76,7 @@ skip:
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, this->width(), this->height());
+		this->createBox(&fg_buf_, widget_->width(), widget_->height());
 
 		// title
 		offset = 0;
@@ -121,6 +125,76 @@ skip:
 		fg_buf_ = NULL;
 	}
 
+private:
+	Theme theme_;
+
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
+
+	GPXTextShape(VideoWidget *widget) 
+		: TextShape(theme_, widget)
+		, bg_buf_(NULL)
+		, fg_buf_(NULL) {
+	}
+};
+
+
+/**
+ * Widget definition
+ */
+
+class GPXWidget : public VideoWidget {
+public:
+	virtual ~GPXWidget() {
+		delete shape_;
+	}
+
+	static GPXWidget * create(GPXApplication &app) {
+		GPXWidget *widget;
+
+		widget = new GPXWidget(app, "gpx");
+
+		return widget;
+	}
+
+	void setShape(VideoWidget::Shape type) {
+		if (shape_)
+			delete shape_;
+
+		switch (type) {
+		case VideoWidget::ShapeText:
+		default:
+			shape_ = GPXTextShape::create(this);
+			break;
+		}
+	}
+
+	bool setBackgroundColor(std::string color) {
+		bool result = VideoWidget::setBackgroundColor(color);
+
+		const float *c = backgroundColor();
+
+		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
+
+		return result;
+	}
+
+	void initialize(void) {
+		shape_->initialize();
+	}
+
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		return shape_->prepare(is_update);
+	}
+
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		return shape_->render(data, is_update);
+	}
+
+	void clear(void) {
+		shape_->clear();
+	}
+
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
@@ -131,13 +205,12 @@ protected:
 	}
 
 private:
-	OIIO::ImageBuf *bg_buf_;
-	OIIO::ImageBuf *fg_buf_;
+	ShapeBase *shape_;
 
 	GPXWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
-   		, bg_buf_(NULL)
-   		, fg_buf_(NULL) {
+   		, shape_(NULL) {
+		setShape(VideoWidget::ShapeText);
 	}
 };
 

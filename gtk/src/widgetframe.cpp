@@ -54,6 +54,19 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		row[model_.m_name] = "Vertical";
 	}
 
+	shape_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = shape_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = 1;
+		row[model_.m_name] = "Text";
+
+		row = *(shape_model_->append());
+		row[model_.m_id] = 2;
+		row[model_.m_name] = "Arc";
+	}
+
 	position_model_ = Gtk::ListStore::create(model_);
 
 	{
@@ -97,6 +110,14 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 
 	// Connect widgets button
 	//------------------------
+
+	// Shape
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
+//	combobox->pack_start(model_.m_id);
+	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_shape_value_changed));
 
 	// Position
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("position_combobox");
@@ -270,6 +291,15 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	width = renderer_->width();
 	height = renderer_->height();
 
+	// Widget shape
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(shape_model_);
+
+	combobox->set_active(widget_selected_->widget()->shape());
+
 	// Widget position
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("position_combobox");
 	if (!combobox)
@@ -411,6 +441,36 @@ void GPX2VideoWidgetFrame::update_content(void) {
 }
 
 
+void GPX2VideoWidgetFrame::on_widget_shape_value_changed(void) {
+	log_call();
+
+	int value;
+
+	if (loading_)
+		return;
+
+	// Widget shape
+	auto combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
+
+	auto iter = combobox->get_active();
+
+	value = iter->get_value(model_.m_id);
+
+	log_info("Widget %s: shape changed to '%s'", 
+			widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+	widget_selected_->widget()->setShape((VideoWidget::Shape) value);
+	renderer_->refresh(widget_selected_);
+
+	// Compute new position
+	renderer_->compute();
+
+	// Refresh video preview
+	dispatcher_.emit();
+}
+
 void GPX2VideoWidgetFrame::on_widget_position_value_changed(void) {
 	log_call();
 
@@ -424,10 +484,12 @@ void GPX2VideoWidgetFrame::on_widget_position_value_changed(void) {
 	if (!combobox)
 		throw std::runtime_error("No \"position_combobox\" object in widget_frame.ui");
 
-	value = combobox->get_active_row_number();
+	auto iter = combobox->get_active();
 
-	log_info("Widget %s: position changed to '%d'", 
-			widget_selected_->widget()->name().c_str(), value);
+	value = iter->get_value(model_.m_id);
+
+	log_info("Widget %s: position changed to '%s'", 
+			widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 	widget_selected_->widget()->setPosition((VideoWidget::Position) value);
 	renderer_->refresh(widget_selected_);
@@ -453,10 +515,12 @@ void GPX2VideoWidgetFrame::on_widget_align_value_changed(void) {
 	if (!combobox)
 		throw std::runtime_error("No \"align_combobox\" object in widget_frame.ui");
 
-	value = combobox->get_active_row_number();
+	auto iter = combobox->get_active();
 
-	log_info("Widget %s: align changed to '%d'", 
-			widget_selected_->widget()->name().c_str(), value);
+	value = iter->get_value(model_.m_id);
+
+	log_info("Widget %s: align changed to '%s'", 
+			widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 	widget_selected_->widget()->setAlign((VideoWidget::Align) value);
 	renderer_->refresh(widget_selected_);

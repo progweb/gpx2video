@@ -14,6 +14,22 @@
 
 
 
+VideoWidget::Shape VideoWidget::string2shape(std::string &s) {
+	VideoWidget::Shape shape;
+
+	if (s.empty() || (s == "none"))
+		shape = VideoWidget::ShapeNone;
+	else if (s == "text")
+		shape = VideoWidget::ShapeText;
+	else if (s == "arc")
+		shape = VideoWidget::ShapeArc;
+	else
+		shape = VideoWidget::ShapeUnknown;
+
+	return shape;
+}
+
+
 VideoWidget::Position VideoWidget::string2position(std::string &s) {
 	VideoWidget::Position position;
 

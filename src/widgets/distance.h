@@ -1,40 +1,43 @@
 #ifndef __GPX2VIDEO__WIDGETS__DISTANCE_H__
 #define __GPX2VIDEO__WIDGETS__DISTANCE_H__
 
-#include "../utils.h"
-#include "../videowidget.h"
+#include "../shape/text.h"
 
 
-class DistanceWidget : public VideoWidget {
+/**
+ * Distance text & icon shape widget
+ */
+
+class DistanceTextShape : public TextShape {
 public:
-	virtual ~DistanceWidget() {
+	virtual ~DistanceTextShape() {
 		clear();
 	}
 
-	static DistanceWidget * create(GPXApplication &app) {
-		DistanceWidget *widget;
+	static DistanceTextShape * create(VideoWidget *widget) {
+		DistanceTextShape *shape;
 
-		widget = new DistanceWidget(app, "distance");
+		shape = new DistanceTextShape(widget);
+		
+		shape->initialize();
 
-		widget->setUnit(VideoWidget::UnitMiles);
-
-		return widget;
+		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = this->hasFlag(VideoWidget::FlagPicto);
+		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
 
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, this->width(), this->height());
+		this->createBox(&bg_buf_, widget_->width(), widget_->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
 		if (with_picto)
-			this->drawImage(bg_buf_, this->border(), this->border(), "./assets/picto/DataOverlay_icn_distance.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, label().c_str());
+			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_distance.png", VideoWidget::ZoomFit);
+		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -47,7 +50,7 @@ skip:
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {
-			if (data.type() == TelemetryData::TypeUnchanged) {
+			if ((data.type() == TelemetryData::TypeUnchanged)) {
 				is_update = false;
 				goto skip;
 			}
@@ -58,15 +61,12 @@ skip:
 			}
 		}
 
-		// Format data
-		no_value_ = !data.hasValue(TelemetryData::DataDistance);
-
-		if (unit() == VideoWidget::UnitKm) {
+		if (widget_->unit() == VideoWidget::UnitKm) {
 			distance /= 1000.0;
 		}
-		else if (unit() == VideoWidget::UnitMeter) {
+		else if (widget_->unit() == VideoWidget::UnitMeter) {
 		}
-		else if (unit() == VideoWidget::UnitFoot) {
+		else if (widget_->unit() == VideoWidget::UnitFoot) {
 			distance *= 3.28084;
 		}
 		else {
@@ -84,16 +84,16 @@ skip:
 			else
 				format = "%.0f %s";
 
-			sprintf(s, format, distance, unit2string(unit()).c_str());
+			sprintf(s, format, distance, widget_->unit2string(widget_->unit()).c_str());
 		}
 		else
-			sprintf(s, "-- %s", unit2string(unit()).c_str());
+			sprintf(s, "-- %s", widget_->unit2string(widget_->unit()).c_str());
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, this->width(), this->height());
+		this->createBox(&fg_buf_, widget_->width(), widget_->height());
 		this->drawValue(fg_buf_, s);
 
 		is_update = true;
@@ -102,6 +102,8 @@ skip:
 	}
 
 	void clear(void) {
+		no_value_ = false;
+
 		if (bg_buf_)
 			delete bg_buf_;
 
@@ -110,6 +112,81 @@ skip:
 
 		bg_buf_ = NULL;
 		fg_buf_ = NULL;
+	}
+
+private:
+	bool no_value_;
+
+	Theme theme_;
+
+	OIIO::ImageBuf *bg_buf_;
+	OIIO::ImageBuf *fg_buf_;
+
+	DistanceTextShape(VideoWidget *widget) 
+		: TextShape(theme_, widget)
+		, bg_buf_(NULL)
+		, fg_buf_(NULL) {
+		no_value_ = false;
+	}
+};
+
+
+/**
+ * Widget definition
+ */
+
+class DistanceWidget : public VideoWidget {
+public:
+	virtual ~DistanceWidget() {
+		delete shape_;
+	}
+
+	static DistanceWidget * create(GPXApplication &app) {
+		DistanceWidget *widget;
+
+		widget = new DistanceWidget(app, "distance");
+
+		widget->setUnit(VideoWidget::UnitMiles);
+
+		return widget;
+	}
+
+	void setShape(VideoWidget::Shape type) {
+		if (shape_)
+			delete shape_;
+
+		switch (type) {
+		case VideoWidget::ShapeText:
+		default:
+			shape_ = DistanceTextShape::create(this);
+			break;
+		}
+	}
+
+	bool setBackgroundColor(std::string color) {
+		bool result = VideoWidget::setBackgroundColor(color);
+
+		const float *c = backgroundColor();
+
+		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
+
+		return result;
+	}
+
+	void initialize(void) {
+		shape_->initialize();
+	}
+
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		return shape_->prepare(is_update);
+	}
+
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		return shape_->render(data, is_update);
+	}
+
+	void clear(void) {
+		shape_->clear();
 	}
 
 protected:
@@ -123,16 +200,12 @@ protected:
 	}
 
 private:
-	bool no_value_;
-
-	OIIO::ImageBuf *bg_buf_;
-	OIIO::ImageBuf *fg_buf_;
+	ShapeBase *shape_;
 
 	DistanceWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name)
-   		, bg_buf_(NULL)
-   		, fg_buf_(NULL) {
-		no_value_ = false;
+   		, shape_(NULL) {
+		setShape(VideoWidget::ShapeText);
 	}
 };
 

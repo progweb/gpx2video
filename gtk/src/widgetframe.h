@@ -45,11 +45,13 @@ protected:
 	Glib::Dispatcher dispatcher_;
 
 	Model model_;
+	Glib::RefPtr<Gtk::ListStore> shape_model_;
 	Glib::RefPtr<Gtk::ListStore> align_model_;
 	Glib::RefPtr<Gtk::ListStore> position_model_;
 
 	void update_content(void);
 
+	void on_widget_shape_value_changed(void);
 	void on_widget_position_value_changed(void);
 	void on_widget_align_value_changed(void);
 	void on_widget_width_value_changed(void);

@@ -1,21 +1,27 @@
 #ifndef __GPX2VIDEO__WIDGETS__IMAGE_H__
 #define __GPX2VIDEO__WIDGETS__IMAGE_H__
 
-#include "../videowidget.h"
+#include "../shape/base.h"
 
 
-class ImageWidget : public VideoWidget {
+/**
+ * Image shape widget
+ */
+
+class ImageShape : public ShapeBase {
 public:
-	virtual ~ImageWidget() {
+	virtual ~ImageShape() {
 		clear();
 	}
 
-	static ImageWidget * create(GPXApplication &app) {
-		ImageWidget *widget;
+	static ImageShape * create(VideoWidget *widget) {
+		ImageShape *shape;
 
-		widget = new ImageWidget(app, "image");
+		shape = new ImageShape(widget);
+		
+		shape->initialize();
 
-		return widget;
+		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -24,10 +30,10 @@ public:
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, this->width(), this->height());
+		this->createBox(&bg_buf_, widget_->width(), widget_->height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-		this->drawImage(bg_buf_, this->border(), this->border(), this->source().c_str(), this->zoom());
+		this->drawImage(bg_buf_, widget_->border(), widget_->border(), widget_->source().c_str(), widget_->zoom());
 
 		is_update = true;
 skip:
@@ -50,11 +56,79 @@ skip:
 	}
 
 private:
+	Theme theme_;
+
 	OIIO::ImageBuf *bg_buf_;
+
+	ImageShape(VideoWidget *widget) 
+		: ShapeBase(theme_, widget)
+		, bg_buf_(NULL) {
+	}
+};
+
+
+/**
+ * Widget definition
+ */
+
+class ImageWidget : public VideoWidget {
+public:
+	virtual ~ImageWidget() {
+		delete shape_;
+	}
+
+	static ImageWidget * create(GPXApplication &app) {
+		ImageWidget *widget;
+
+		widget = new ImageWidget(app, "image");
+
+		return widget;
+	}
+
+	void setShape(VideoWidget::Shape type) {
+		(void) type;
+
+		if (shape_)
+			delete shape_;
+
+		shape_ = ImageShape::create(this);
+	}
+
+	bool setBackgroundColor(std::string color) {
+		bool result = VideoWidget::setBackgroundColor(color);
+
+		const float *c = backgroundColor();
+
+		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
+
+		return result;
+	}
+
+	void initialize(void) {
+		shape_->initialize();
+	}
+
+	OIIO::ImageBuf * prepare(bool &is_update) {
+		return shape_->prepare(is_update);
+	}
+
+	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
+		return shape_->render(data, is_update);
+	}
+
+	void clear(void) {
+		shape_->clear();
+	}
+
+protected:
+
+private:
+	ImageShape *shape_;
 
 	ImageWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
-		, bg_buf_(NULL) {
+   		, shape_(NULL) {
+		setShape(VideoWidget::ShapeNone);
 	}
 };
 

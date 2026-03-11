@@ -115,6 +115,25 @@
 							</object>
 						</child>
 						<child>
+							<object class="GtkExpander" id="shape_expander">
+								<property name="label">Shape</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkComboBox" id="shape_combobox">
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
 							<object class="GtkExpander" id="position_expander">
 								<property name="label">Position &amp; Alignment</property>
 								<child>
