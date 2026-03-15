@@ -13,6 +13,9 @@
 #include "videowidget.h"
 
 
+//#define WIDGET_DEBUG
+
+
 static float vertices[] = {
 	// points             // texture coords
 	0.5f, 0.5f, 0.0f,     1.0f, 0.0f,   // top right
@@ -82,6 +85,7 @@ void GPX2VideoWidget::Buffer::setData(int index, uint8_t *data) {
 
 GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget) 
 	: widget_(widget)
+	, dispatcher_()
 	, mutex_() {
 	log_call();
 
@@ -96,7 +100,7 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 
 	// Init
 	index_ = 0;
-	queue_size_ = 2;
+	queue_size_ = !widget->isStatic() ? 2 : 1;
 
 	buffer_ = NULL;
 	overlay_ = NULL;
@@ -145,7 +149,6 @@ void GPX2VideoWidget::setSize(int width, int height) {
 	is_buffer_init_ = false;
 
 	widget()->setSize(width, height);
-	widget()->initialize();
 
 	resize_buffers();
 }
@@ -164,6 +167,11 @@ bool GPX2VideoWidget::full(void) {
 		return false;
 
 	return (!is_buffer_init_ || (queue_.size() >= queue_size_));
+}
+
+
+bool GPX2VideoWidget::ready(void) {
+	return !clear_req_;
 }
 
 
@@ -195,6 +203,9 @@ void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 }
 
 
+/**
+ * draw widget
+ */
 bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	log_call();
 
@@ -269,6 +280,7 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 void GPX2VideoWidget::clear(void) {
 	log_call();
 
+	// Clear buffer requested
 	clear_req_ = true;
 }
 
@@ -288,7 +300,7 @@ printf("WIDGET::INIT BUFFERS %s\n", widget()->name().c_str());
 	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
 
 	// Widgets overlay
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(widget_->width(), widget_->height(), 
+	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(widget_->theme().width(), widget_->theme().height(), 
 		4, OIIO::TypeDesc::UINT8));
 //		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
 
@@ -354,7 +366,7 @@ printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
 	unload_texture();
 
 	// Widgets overlay
-	overlay_->reset(OIIO::ImageSpec(widget_->width(), widget_->height(), 
+	overlay_->reset(OIIO::ImageSpec(widget_->theme().width(), widget_->theme().height(), 
 		4, OIIO::TypeDesc::UINT8));
 
 	// Buffer size
@@ -387,7 +399,7 @@ printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
  * Widget drawing
  * (Called from renderer thread)
  */
-void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
+void GPX2VideoWidget::write_buffers(const TelemetryData &data, bool &loop) {
 	log_call();
 
 	bool clear_req = clear_req_;
@@ -395,6 +407,9 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data) {
 #ifdef WIDGET_DEBUG
 printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
 #endif
+
+	// By default continue to buffering
+	loop = true;
 
 	if (clear_req_) {
 		// Clear & free texture
@@ -416,6 +431,10 @@ printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
 
 		if (clear_req)
 			is_update_ = true;
+	}
+	else {
+		// Stop buffering
+		loop = false;
 	}
 }
 
@@ -581,7 +600,7 @@ void GPX2VideoWidget::unload_texture(void) {
 double GPX2VideoWidget::glX(void) const {
 	log_call();
 
-	double x = widget_->x() + (widget_->width() / 2.0) - (layout_width_ / 2.0);
+	double x = widget_->x() + (widget_->theme().width() / 2.0) - (layout_width_ / 2.0);
 
 	return x * 2.0 / layout_width_;
 }
@@ -590,7 +609,7 @@ double GPX2VideoWidget::glX(void) const {
 double GPX2VideoWidget::glY(void) const {
 	log_call();
 
-	double y = widget_->y() + (widget_->height() / 2.0) - (layout_height_ / 2.0);
+	double y = widget_->y() + (widget_->theme().height() / 2.0) - (layout_height_ / 2.0);
 
 	return -(y * 2.0 / layout_height_);
 }
@@ -599,14 +618,14 @@ double GPX2VideoWidget::glY(void) const {
 double GPX2VideoWidget::glWidth(void) const {
 	log_call();
 
-	return widget_->width() * 2.0 / layout_width_;
+	return widget_->theme().width() * 2.0 / layout_width_;
 }
 
 
 double GPX2VideoWidget::glHeight(void) const {
 	log_call();
 
-	return widget_->height() * 2.0 / layout_height_;
+	return widget_->theme().height() * 2.0 / layout_height_;
 }
 
 
@@ -697,3 +716,4 @@ void GPX2VideoWidget::check_gl_error(void) {
 		log_error("GL '%d' error: %s", err, error.c_str());
 	}
 }
+

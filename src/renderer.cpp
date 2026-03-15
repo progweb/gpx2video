@@ -162,8 +162,8 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	unsigned int mapsource;
 
-	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Position position = VideoWidget::PositionNone;
+	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
 	log_call();
 
@@ -218,19 +218,19 @@ bool Renderer::loadMap(layout::Map *m) {
 //	TelemetryData p1, p2;
 //	source->getBoundingBox(&p1, &p2);
 
-	// Alignment
-	s = (const char *) m->align();
-	align = VideoWidget::string2align(s);
-
-	if (align == VideoWidget::AlignUnknown)
-		log_error("Map align value '%s' unknown", s.c_str());
-
 	// Position
 	s = (const char *) m->position();
 	position = VideoWidget::string2position(s);
 
 	if (position == VideoWidget::PositionUnknown)
 		log_error("Map position value '%s' unknown", s.c_str());
+
+	// Orientation
+	s = (const char *) m->orientation();
+	orientation = VideoWidget::string2orientation(s);
+
+	if (orientation == VideoWidget::OrientationUnknown)
+		log_error("Map orientation value '%s' unknown", s.c_str());
 
 	// Map settings
 	MapSettings mapSettings;
@@ -249,7 +249,7 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	// Widget settings
 	map->setPosition(position);
-	map->setAlign(align);
+	map->setOrientation(orientation);
 	map->setPosition(x, y);
 	map->setAtTime(m->at(), m->at() + m->duration());
 	map->setSize(mapSettings.width(), mapSettings.height());
@@ -258,9 +258,9 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setMargin(VideoWidget::MarginRight, m->marginRight());
 	map->setMargin(VideoWidget::MarginTop, m->marginTop());
 	map->setMargin(VideoWidget::MarginBottom, m->marginBottom());
-	map->setBorder(m->border());
-	map->setBorderColor((const char *) m->borderColor());
-	map->setBackgroundColor((const char *) m->backgroundColor());
+	map->theme().setBorder(m->border());
+	map->theme().setBorderColor((const char *) m->borderColor());
+	map->theme().setBackgroundColor((const char *) m->backgroundColor());
 
 	// Append
 	app_.append(map);
@@ -277,8 +277,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	std::string s;
 
-	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Position position = VideoWidget::PositionNone;
+	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
 	log_call();
 
@@ -319,19 +319,19 @@ bool Renderer::loadTrack(layout::Track *t) {
 //	if (source != NULL)
 //		source->getBoundingBox(&p1, &p2);
 
-	// Alignment
-	s = (const char *) t->align();
-	align = VideoWidget::string2align(s);
-
-	if (align == VideoWidget::AlignUnknown)
-		log_error("Track align value '%s' unknown", s.c_str());
-
 	// Position
 	s = (const char *) t->position();
 	position = VideoWidget::string2position(s);
 
 	if (position == VideoWidget::PositionUnknown)
 		log_error("Track position value '%s' unknown", s.c_str());
+
+	// Orientation
+	s = (const char *) t->orientation();
+	orientation = VideoWidget::string2orientation(s);
+
+	if (orientation == VideoWidget::OrientationUnknown)
+		log_error("Track orientation value '%s' unknown", s.c_str());
 
 	// Track settings
 	TrackSettings trackSettings;
@@ -346,7 +346,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	// Widget settings
 	track->setPosition(position);
-	track->setAlign(align);
+	track->setOrientation(orientation);
 	track->setPosition(x, y);
 	track->setAtTime(t->at(), t->at() + t->duration());
 	track->setSize(trackSettings.width(), trackSettings.height());
@@ -355,9 +355,9 @@ bool Renderer::loadTrack(layout::Track *t) {
 	track->setMargin(VideoWidget::MarginRight, t->marginRight());
 	track->setMargin(VideoWidget::MarginTop, t->marginTop());
 	track->setMargin(VideoWidget::MarginBottom, t->marginBottom());
-	track->setBorder(t->border());
-	track->setBorderColor((const char *) t->borderColor());
-	track->setBackgroundColor((const char *) t->backgroundColor());
+	track->theme().setBorder(t->border());
+	track->theme().setBorderColor((const char *) t->borderColor());
+	track->theme().setBackgroundColor((const char *) t->backgroundColor());
 
 	// Append
 	app_.append(track);
@@ -373,18 +373,18 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget *widget = NULL;
 
-	int flags = VideoWidget::FlagNone;
+	int flags = VideoWidget::Theme::FlagNone;
 
 	VideoWidget::Shape shape = VideoWidget::ShapeNone;
 
 	VideoWidget::Unit unit = VideoWidget::UnitNone;
 	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
-	VideoWidget::Align align = VideoWidget::AlignNone;
 	VideoWidget::Position position = VideoWidget::PositionNone;
+	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
-	VideoWidget::TextAlign label_align = VideoWidget::TextAlignLeft;
-	VideoWidget::TextAlign value_align = VideoWidget::TextAlignLeft;
+	VideoWidget::Theme::Align label_align = VideoWidget::Theme::AlignLeft;
+	VideoWidget::Theme::Align value_align = VideoWidget::Theme::AlignLeft;
 
 	// Display
 	if ((bool) w->display() == false) {
@@ -457,21 +457,21 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
-	// Alignment
-	s = (const char *) w->align();
-	align = VideoWidget::string2align(s);
-
-	if (align == VideoWidget::AlignUnknown) {
-		log_error("Widget loading error, align value '%s' unknown", s.c_str());
-		goto error;
-	}
-
 	// Position
 	s = (const char *) w->position();
 	position = VideoWidget::string2position(s);
 
 	if (position == VideoWidget::PositionUnknown) {
 		log_error("Widget position value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Orientation
+	s = (const char *) w->orientation();
+	orientation = VideoWidget::string2orientation(s);
+
+	if (orientation == VideoWidget::OrientationUnknown) {
+		log_error("Widget loading error, orientation value '%s' unknown", s.c_str());
 		goto error;
 	}
 
@@ -493,36 +493,43 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Text alignment for label
 	s = (const char *) w->labelAlign();
-	label_align = VideoWidget::string2textAlign(s);
+	label_align = VideoWidget::string2align(s);
 
-	if (label_align == VideoWidget::TextAlignUnknown) {
+	if (label_align == VideoWidget::Theme::AlignUnknown) {
 		log_error("Widget loading error, label align value '%s' unknown", s.c_str());
 		goto error;
 	}
 
 	// Text alignment for value
 	s = (const char *) w->valueAlign();
-	value_align = VideoWidget::string2textAlign(s);
+	value_align = VideoWidget::string2align(s);
 
-	if (value_align == VideoWidget::TextAlignUnknown) {
+	if (value_align == VideoWidget::Theme::AlignUnknown) {
 		log_error("Widget loading error, value align value '%s' unknown", s.c_str());
 		goto error;
 	}
 
 	// Flags
 	if (w->withLabel())
-		flags |= VideoWidget::FlagLabel;
+		flags |= VideoWidget::Theme::FlagLabel;
 	if (w->withValue())
-		flags |= VideoWidget::FlagValue;
-	if (w->withPicto())
-		flags |= VideoWidget::FlagPicto;
+		flags |= VideoWidget::Theme::FlagValue;
+	if (w->withIcon())
+		flags |= VideoWidget::Theme::FlagIcon;
 	if (w->withUnit())
-		flags |= VideoWidget::FlagUnit;
+		flags |= VideoWidget::Theme::FlagUnit;
+
+	// TODO
+	flags |= VideoWidget::Theme::FlagNeedle;
+	flags |= VideoWidget::Theme::FlagTick;
+	flags |= VideoWidget::Theme::FlagTickLabel;
+	flags |= VideoWidget::Theme::FlagCursor;
+	flags |= VideoWidget::Theme::FlagGauge;
 
 	// Widget settings
 	widget->setShape(shape);
 	widget->setPosition(position);
-	widget->setAlign(align);
+	widget->setOrientation(orientation);
 	widget->setPosition(w->x(), w->y());
 	widget->setAtTime(w->at(), w->at() + w->duration());
 	widget->setFormat((const char *) w->format());
@@ -532,28 +539,31 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setMargin(VideoWidget::MarginRight, w->marginRight());
 	widget->setMargin(VideoWidget::MarginTop, w->marginTop());
 	widget->setMargin(VideoWidget::MarginBottom, w->marginBottom());
-	widget->setPadding(VideoWidget::PaddingAll, w->padding());
-	widget->setPadding(VideoWidget::PaddingLeft, w->paddingLeft());
-	widget->setPadding(VideoWidget::PaddingRight, w->paddingRight());
-	widget->setPadding(VideoWidget::PaddingTop, w->paddingTop());
-	widget->setPadding(VideoWidget::PaddingBottom, w->paddingBottom());
-	widget->setFont((const char *) w->font());
+	widget->theme().setPadding(VideoWidget::Theme::PaddingAll, w->padding());
+	widget->theme().setPadding(VideoWidget::Theme::PaddingLeft, w->paddingLeft());
+	widget->theme().setPadding(VideoWidget::Theme::PaddingRight, w->paddingRight());
+	widget->theme().setPadding(VideoWidget::Theme::PaddingTop, w->paddingTop());
+	widget->theme().setPadding(VideoWidget::Theme::PaddingBottom, w->paddingBottom());
+	widget->theme().setBorder(w->border());
+	widget->theme().setBorderColor((const char *) w->borderColor());
+	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
+
+	widget->theme().setFont((const char *) w->font());
 	widget->setLabel((const char *) w->name());
 	widget->setText((const char *) w->text());
-	widget->setTextColor((const char *) w->textColor());
-	widget->setTextRatio((double) w->textRatio());
-	widget->setTextShadow(w->textShadow());
-	widget->setTextLineSpace(w->textLineSpace());
-	widget->setLabelAlign(label_align);
-	widget->setValueAlign(value_align);
-	widget->setBorder(w->border());
-	widget->setBorderColor((const char *) w->borderColor());
-	widget->setBackgroundColor((const char *) w->backgroundColor());
+	widget->theme().setLabelAlign(label_align);
+	widget->theme().setLabelColor((const char *) w->textColor());
+
+//	widget->theme().setTextShadow(w->textShadow());
+//	widget->theme().setTextRatio((double) w->textRatio());
+//	widget->theme().setTextLineSpace(w->textLineSpace());
+
+	widget->theme().setValueAlign(value_align);
 	if (unit != VideoWidget::UnitNone)
 		widget->setUnit(unit);
 	widget->setZoom(zoom);
 	widget->setSource((const char *) w->source());
-	widget->setFlags(flags);
+	widget->theme().setFlags(flags);
 
 	// Append
 	app_.append(widget);
@@ -613,12 +623,6 @@ void Renderer::computeWidgetsPosition(void) {
 
 	log_call();
 
-	// Initialize widget
-	//-----------------------------------------------------------
-	for (VideoWidget *widget : widgets_) {
-		widget->initialize();
-	}
-
 	// TopLeft
 	//-----------------------------------------------------------
 	offset_x = 0;
@@ -634,22 +638,22 @@ void Renderer::computeWidgetsPosition(void) {
 		x = widget->margin(VideoWidget::MarginLeft);
 		y = widget->margin(VideoWidget::MarginTop);
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x += offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y += offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -669,25 +673,25 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionTopRight)
 			continue;
 
-		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->theme().width();
 		y = widget->margin(VideoWidget::MarginTop);
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x -= offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y += offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -708,24 +712,24 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		x = widget->margin(VideoWidget::MarginLeft);
-		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->theme().height();
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x += offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y -= offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -745,25 +749,25 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionBottomRight)
 			continue;
 
-		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
-		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->theme().width();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->theme().height();
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x -= offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y -= offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -781,15 +785,15 @@ void Renderer::computeWidgetsPosition(void) {
 	// Compute available height on the left side
 	for (VideoWidget *widget : widgets_) {
 		if (widget->position() == VideoWidget::PositionTopLeft) {
-			if ((margintop == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-				margintop = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
+			if ((margintop == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+				margintop = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
 				continue;
 			}
 		}
 
 		if (widget->position() == VideoWidget::PositionBottomLeft) {
-			if ((marginbottom == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-				marginbottom = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
+			if ((marginbottom == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+				marginbottom = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
 				continue;
 			}
 		}
@@ -797,8 +801,8 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionLeft)
 			continue;
 
-		if ((n == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-			height += widget->height();
+		if ((n == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			height += widget->theme().height();
 			height += widget->margin(VideoWidget::MarginTop);
 			height += widget->margin(VideoWidget::MarginBottom);
 			n++;
@@ -823,22 +827,22 @@ void Renderer::computeWidgetsPosition(void) {
 		x = widget->margin(VideoWidget::MarginLeft);
 		y = margintop + offset + widget->margin(VideoWidget::MarginTop);
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x += offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y += offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -856,15 +860,15 @@ void Renderer::computeWidgetsPosition(void) {
 	// Compute available height on the right side
 	for (VideoWidget *widget : widgets_) {
 		if (widget->position() == VideoWidget::PositionTopRight) {
-			if ((margintop == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-				margintop = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
+			if ((margintop == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+				margintop = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
 				continue;
 			}
 		}
 
 		if (widget->position() == VideoWidget::PositionBottomRight) {
-			if ((marginbottom == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-				marginbottom = MAX(widget->height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
+			if ((marginbottom == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+				marginbottom = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), marginbottom);
 				continue;
 			}
 		}
@@ -872,8 +876,8 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionRight)
 			continue;
 
-		if ((n == 0) || (widget->align() == VideoWidget::AlignVertical)) {
-			height += widget->height();
+		if ((n == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			height += widget->theme().height();
 			height += widget->margin(VideoWidget::MarginTop);
 			height += widget->margin(VideoWidget::MarginBottom);
 			n++;
@@ -895,25 +899,25 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionRight)
 			continue;
 
-		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->width();
+		x = layout_width_ - widget->margin(VideoWidget::MarginRight) - widget->theme().width();
 		y = margintop + offset + widget->margin(VideoWidget::MarginTop);
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x -= offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y += offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -931,15 +935,15 @@ void Renderer::computeWidgetsPosition(void) {
 	// Compute available width on the top side
 	for (VideoWidget *widget : widgets_) {
 		if (widget->position() == VideoWidget::PositionTopLeft) {
-			if ((marginleft == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-				marginleft = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
+			if ((marginleft == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+				marginleft = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
 				continue;
 			}
 		}
 
 		if (widget->position() == VideoWidget::PositionTopRight) {
-			if ((marginright == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-				marginright = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
+			if ((marginright == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+				marginright = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
 				continue;
 			}
 		}
@@ -947,8 +951,8 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionTop)
 			continue;
 
-		if ((n == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-			width += widget->width();
+		if ((n == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			width += widget->theme().width();
 			width += widget->margin(VideoWidget::MarginLeft);
 			width += widget->margin(VideoWidget::MarginRight);
 			n++;
@@ -973,22 +977,22 @@ void Renderer::computeWidgetsPosition(void) {
 		x = marginleft + offset + widget->margin(VideoWidget::MarginLeft);
 		y = widget->margin(VideoWidget::MarginTop);
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x += offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y += offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}
@@ -1006,15 +1010,15 @@ void Renderer::computeWidgetsPosition(void) {
 	// Compute available width on the bottom side
 	for (VideoWidget *widget : widgets_) {
 		if (widget->position() == VideoWidget::PositionBottomLeft) {
-			if ((marginleft == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-				marginleft = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
+			if ((marginleft == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+				marginleft = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
 				continue;
 			}
 		}
 
 		if (widget->position() == VideoWidget::PositionBottomRight) {
-			if ((marginright == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-				marginright = MAX(widget->width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
+			if ((marginright == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+				marginright = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginright);
 				continue;
 			}
 		}
@@ -1022,8 +1026,8 @@ void Renderer::computeWidgetsPosition(void) {
 		if (widget->position() != VideoWidget::PositionBottom)
 			continue;
 
-		if ((n == 0) || (widget->align() == VideoWidget::AlignHorizontal)) {
-			width += widget->width();
+		if ((n == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			width += widget->theme().width();
 			width += widget->margin(VideoWidget::MarginLeft);
 			width += widget->margin(VideoWidget::MarginRight);
 			n++;
@@ -1046,24 +1050,24 @@ void Renderer::computeWidgetsPosition(void) {
 			continue;
 
 		x = marginleft + offset + widget->margin(VideoWidget::MarginLeft);
-		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->height();
+		y = layout_height_ - widget->margin(VideoWidget::MarginBottom) - widget->theme().height();
 
-		if (widget->align() == VideoWidget::AlignHorizontal)
+		if (widget->orientation() == VideoWidget::OrientationHorizontal)
 			x += offset_x;
 
-		if (widget->align() == VideoWidget::AlignVertical)
+		if (widget->orientation() == VideoWidget::OrientationVertical)
 			y -= offset_y;
 
 		widget->setPosition(x, y);
 
-		if (is_first || (widget->align() == VideoWidget::AlignHorizontal)) {
-			offset_x += widget->width();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
+			offset_x += widget->theme().width();
 			offset_x += widget->margin(VideoWidget::MarginLeft);
 			offset_x += widget->margin(VideoWidget::MarginRight);
 		}
 
-		if (is_first || (widget->align() == VideoWidget::AlignVertical)) {
-			offset_y += widget->height();
+		if (is_first || (widget->orientation() == VideoWidget::OrientationVertical)) {
+			offset_y += widget->theme().height();
 			offset_y += widget->margin(VideoWidget::MarginTop);
 			offset_y += widget->margin(VideoWidget::MarginBottom);
 		}

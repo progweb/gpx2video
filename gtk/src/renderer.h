@@ -26,6 +26,7 @@ public:
 
 	const uint64_t& time(void) const;
 	void set_timestamp(uint64_t timestamp);
+	void reset_timestamp(void);
 
 	const std::list<GPX2VideoWidget *>& widgets(void);
 
@@ -43,6 +44,10 @@ public:
 
 	Glib::Dispatcher& ready(void) {
 		return dispatcher_;
+	}
+
+	Glib::Dispatcher& widget_position_change(void) {
+		return widget_position_dispatcher_;
 	}
 
 	void init_buffers(void);
@@ -69,6 +74,7 @@ private:
 	TelemetrySource *source_;
 
 	Glib::Dispatcher dispatcher_;
+	Glib::Dispatcher widget_position_dispatcher_;
 
 	std::list<GPX2VideoWidget *> widgets_;
 

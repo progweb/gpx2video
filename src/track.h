@@ -19,9 +19,10 @@
 #include "videowidget.h"
 #include "telemetrymedia.h"
 #include "application.h"
+#include "shape/base.h"
 
 
-class Track : public VideoWidget {
+class Track : public VideoWidget, public ShapeBase {
 public:
 	virtual ~Track();
 
@@ -71,9 +72,9 @@ protected:
 
 		os << "<track";
 		os <<   " x=\"" << x() << "\" y=\"" << y() << "\"";
-		os <<   " width=\"" << width() << "\" height=\"" << height() << "\"";
+		os <<   " width=\"" << theme().width() << "\" height=\"" << theme().height() << "\"";
 		os <<   " position=\"" << position2string(position()) << "\"";
-		os <<   " align=\"" << align2string(align()) << "\"";
+		os <<   " orientation=\"" << orientation2string(orientation()) << "\"";
 		os <<   " display=\"true\"";
 		os <<   ">" << std::endl;
 	}
@@ -91,9 +92,6 @@ protected:
 		os << "<margin-right>" << margin(Margin::MarginRight) << "</margin-right>" << std::endl;
 		os << "<margin-top>" << margin(Margin::MarginTop) << "</margin-top>" << std::endl;
 		os << "<margin-bottom>" << margin(Margin::MarginBottom) << "</margin-bottom>" << std::endl;
-		os << "<border>" << border() << "</border>" << std::endl;
-		os << "<border-color>" << color2hex(textColor()) << "</border-color>" << std::endl;
-		os << "<background-color>" << color2hex(backgroundColor()) << "</background-color>" << std::endl;
 	}
 
 	GPXApplication &app_;

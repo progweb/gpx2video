@@ -6,7 +6,8 @@
 
 class ArcShape : public ShapeBase {
 public:
-	int center_;
+	int center_x_;
+	int center_y_;
 	int correction_;
 
 	double start_angle_;
@@ -17,89 +18,48 @@ public:
 		double y;
 	};
 
-	class Theme : public ShapeBase::Theme {
-	public:
-		Theme() : ShapeBase::Theme() {
-			setArcColor(0, 0.0, 0.8, 0.0, 0.8);
-			setArcColor(1, 1.0, 0.0, 0.0, 1.0);
-			setTickColor(1.0, 1.0, 1.0, 1.0);
-			setTextColor(1.0, 1.0, 1.0, 1.0);
-		}
-
-		const float * arcColor(int index) const {
-			return arc_color_[index];
-		}
-
-		void setArcColor(int index, double r, double g, double b, double a) {
-			arc_color_[index][0] = r;
-			arc_color_[index][1] = g;
-			arc_color_[index][2] = b;
-			arc_color_[index][3] = a;
-		}
-
-		const float * tickColor(void) const {
-			return tick_color_;
-		}
-
-		void setTickColor(double r, double g, double b, double a) {
-			tick_color_[0] = r;
-			tick_color_[1] = g;
-			tick_color_[2] = b;
-			tick_color_[3] = a;
-		}
-
-		const float * textColor(void) const {
-			return text_color_;
-		}
-
-		void setTextColor(double r, double g, double b, double a) {
-			text_color_[0] = r;
-			text_color_[1] = g;
-			text_color_[2] = b;
-			text_color_[3] = a;
-		}
-
-	private:
-		float arc_color_[2][4];
-		float tick_color_[4];
-		float text_color_[4];
-	};
-
-	ArcShape(Theme &theme, VideoWidget *widget, cairo_font_face_t *fontface = NULL, int size = 0,
-			double start = 30.0, double end = 360.0 - 30.0)
-		: ShapeBase(theme, widget)
-		, theme_(theme) {
+	ArcShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface = NULL, int width = 0, int height = 0)
+		: ShapeBase(theme) {
 		correction_ = 90;
 
-		init(fontface, size, start, end);
+		// Default arc range
+		setArcRange(30.0, 360.0 - 30.0);
+
+		init(fontface, width, height);
 	}
 
 	virtual ~ArcShape() {
 		clear();
 	}
 
-	Theme& theme(void) {
+	VideoWidget::Theme& theme(void) {
 		return theme_;
 	}
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
-	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
-
-	void init(cairo_font_face_t *fontface, int size, 
-			double start = 30.0, double end = 360.0 - 30.0) {
-		setSize(size, start, end);
+	void init(cairo_font_face_t *fontface, int width, int height, int size = 0) {
+		setSize(width, height, size);
 
 		fontface_ = fontface;
 	}
 
-	void setSize(int size,
-			double start = 30.0, double end = 360.0 - 30.0) {
+	void setSize(int width, int height, int size = 0) {
 		size_ = size;
 
-		start_angle_ = start;
-		end_angle_ = end; //360.0 - _start_angle;
+		center_x_ = width / 2;
+		center_y_ = height / 2;
+	}
 
-		center_ = size / 2;
+	const double& start(void) const {
+		return start_angle_;
+	}
+
+	const double &end(void) const {
+		return end_angle_;
+	}
+
+	void setArcRange(double start, double end) {
+		start_angle_ = start;
+		end_angle_ = end;
 	}
 
 	double scale(double min, double max, double value, int rotate = 0) {
@@ -116,20 +76,23 @@ public:
 
 	struct point locate(double angle, double r_delta) {
 		return {
-			.x = center_ + ((center_ - r_delta) * sin(DEG2RAD(angle))),
-			.y = center_ - ((center_ - r_delta) * cos(DEG2RAD(angle)))
+			.x = center_x_ + ((size_ / 2 - r_delta) * sin(DEG2RAD(angle))),
+			.y = center_y_ - ((size_ / 2 - r_delta) * cos(DEG2RAD(angle)))
 		};
 	}
 
-	void arc(cairo_t *cr, int index, double a1, double a2, double offset, double width, double border);
+	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
+	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
+
+	void arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 	void pieslice(cairo_t *cr, double a1, double a2, double border);
-	void line(cairo_t *cr, double a, double d1, double d2);
-	void text(cairo_t *cr, double a, double d, std::string str);
+	void line(cairo_t *cr, double a, double d1, double d2, const float *fill);
+	void text(cairo_t *cr, double a, double d, const float *fill, std::string str);
+
+	void xmlwrite(std::ostream &os);
 
 private:
 	int size_;
-
-	Theme &theme_;
 
 	cairo_font_face_t *fontface_;
 };

@@ -3,12 +3,17 @@
 
 #include <gtkmm/builder.h>
 #include <glibmm/dispatcher.h>
+#include <gtkmm/box.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/switch.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/colorbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 
 #include "renderer.h"
 #include "videowidget.h"
+#include "shape/base.h"
 
 
 class GPX2VideoWidgetFrame : public Gtk::Frame {
@@ -20,6 +25,10 @@ public:
 	void set_renderer(GPX2VideoRenderer *renderer);
 
 	void set_visible(bool visible);
+
+	void update(void) {
+		update_content();
+	}
 
 	GPX2VideoWidget * widget_selected(void);
 	void set_widget_selected(GPX2VideoWidget *widget);
@@ -46,27 +55,40 @@ protected:
 
 	Model model_;
 	Glib::RefPtr<Gtk::ListStore> shape_model_;
-	Glib::RefPtr<Gtk::ListStore> align_model_;
 	Glib::RefPtr<Gtk::ListStore> position_model_;
+	Glib::RefPtr<Gtk::ListStore> orientation_model_;
+	Glib::RefPtr<Gtk::ListStore> font_style_model_;
+	Glib::RefPtr<Gtk::ListStore> font_weight_model_;
+	Glib::RefPtr<Gtk::ListStore> text_align_model_;
+
+	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
+
+	void build_shape_settings(void);
 
 	void update_content(void);
+	void update_boundaries(void);
 
-	void on_widget_shape_value_changed(void);
-	void on_widget_position_value_changed(void);
-	void on_widget_align_value_changed(void);
-	void on_widget_width_value_changed(void);
-	void on_widget_height_value_changed(void);
+	void update_shape_content(void);
+
 	void on_widget_margin_value_changed(const VideoWidget::Margin &margin);
-	void on_widget_padding_value_changed(const VideoWidget::Padding &padding);
-	void on_widget_text_color_set(void);
-	void on_widget_border_color_set(void);
-	void on_widget_border_value_changed(void);
-	void on_widget_background_color_set(void);
+	void on_widget_padding_value_changed(const VideoWidget::Theme::Padding &padding);
+
+	void on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
+	void on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set);
+	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
+	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);
+
+	void on_widget_changed(void);
 
 private:
 	GPX2VideoRenderer *renderer_;
 
 	GPX2VideoWidget *widget_selected_;
+
+//	Glib::RefPtr<Gtk::Box> child_box_;
+	GPX2VideoBaseSettingsBox *child_box_;
+
+	sigc::connection sigc_connection_;
 
 	bool loading_;
 };

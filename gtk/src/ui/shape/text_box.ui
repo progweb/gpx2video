@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="gtk40">
+	<object class="GtkBox" id="settings_box">
+		<property name="orientation">vertical</property>
+		<property name="halign">fill</property>
+		<property name="hexpand">True</property>
+		<property name="valign">start</property>
+		<property name="margin-bottom">0</property>
+		<property name="margin-end">0</property>
+		<property name="margin-start">0</property>
+		<property name="margin-top">0</property>
+		<property name="spacing">6</property>
+		<child>
+			<object class="GtkLabel">
+				<property name="can-focus">False</property>
+				<property name="justify">center</property>
+				<property name="label">Bar extension</property>
+				<property name="valign">baseline</property>
+				<property name="xalign">0.5</property>
+				<property name="margin-bottom">6</property>
+			</object>
+		</child>
+
+		<child>
+			<object class="GtkExpander" id="icon_expander">
+				<property name="label">Icon</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Icon enable:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSwitch" id="icon_enable_switch">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+									</object>
+								</child>
+							</object>
+						</child>
+
+					</object>
+				</child>
+			</object>
+
+		</child>
+	</object>
+</interface>
+

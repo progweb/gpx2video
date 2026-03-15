@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "macros.h"
+
 
 class TelemetrySource;
 

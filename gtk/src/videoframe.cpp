@@ -3,6 +3,7 @@
 #include <gtkmm/calendar.h>
 #include <gtkmm/popover.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/menubutton.h>
 
 #include "log.h"
 #include "compat.h"
@@ -124,6 +125,8 @@ void GPX2VideoVideoFrame::on_action_use_gpmf_stream(void) {
 	log_call();
 
 	log_info("Sync video starttime with GPMF video stream");
+
+	log_warn("NOT YET IMPLEMENTED");
 }
 
 
@@ -220,7 +223,8 @@ void GPX2VideoVideoFrame::on_datetimestart_shown(void) {
 //#else
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
+//	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_local(media_->startTime() / 1000);
 
 	// Populate date start popover
 	calendar = ref_builder_->get_widget<Gtk::Calendar>("datestart_calendar");
@@ -274,8 +278,8 @@ void GPX2VideoVideoFrame::on_datetimestart_clicked(void) {
 	// Extract calendar date
 	gint64 date = calendar->get_date().to_unix();
 
-	date = date - (date % (24 * 60 * 60));
-	date += 24 * 60 * 60;
+//	date = date - (date % (24 * 60 * 60));
+//	date += 24 * 60 * 60;
 
 	datetimestart = Glib::DateTime::create_now_utc(date);
 

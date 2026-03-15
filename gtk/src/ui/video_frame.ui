@@ -7,7 +7,7 @@
 				<attribute name="label">Use video creation time</attribute>
 			</item>
 		</section>
-		<section>
+		<section id="starttime_gpmf_menusection">
 			<item>
 				<attribute name="action">win.use_gpmf_stream</attribute>
 				<attribute name="label">Use GPMF GoPro stream</attribute>

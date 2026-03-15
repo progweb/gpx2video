@@ -461,7 +461,7 @@ void Map::limits(void) {
 	log_call();
 
 	// Use padding (to see markers)
-	padding = this->border() + settings().markerSize(); 
+	padding = theme().border() + settings().markerSize(); 
 
 	// width x height of track
 	w = ceilf((float) px2_ - px1_);
@@ -729,7 +729,7 @@ OIIO::ImageBuf * Map::prepare(bool &is_update) {
 		goto skip;
 	}
 
-	this->createBox(&bg_buf_, this->width(), this->height());
+	this->createBox(&bg_buf_, theme().width(), theme().height());
 	this->drawBorder(bg_buf_);
 	this->drawBackground(bg_buf_);
 
@@ -757,7 +757,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	double divider = divider_; //settings().divider();
 	double marker_size = settings().markerSize();
 
-	int border = this->border();
+	int border = theme().border();
 
 	// Check map & track buffers
 	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
@@ -810,7 +810,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	if (fg_buf_ != NULL)
 		delete fg_buf_;
 
-	this->createBox(&fg_buf_, this->width(), this->height());
+	this->createBox(&fg_buf_, theme().width(), theme().height());
 
 	// Map image over
 	mapbuf_->specmod().x = x - offsetX;

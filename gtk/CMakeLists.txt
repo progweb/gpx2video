@@ -5,31 +5,23 @@ project(GPX2VIDEO-GTK)
 include(GNUInstallDirs)
 include(CheckFunctionExists)
 
-#
-# DEBUG DEFAULT MODE
-#
+# Debug default mode
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "DEBUG")
 endif()
 
-#
-# CONFIGURATION
-#
+# Configuration
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g -ggdb -fPIC -rdynamic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -g -ggdb -fPIC -fpermissive -rdynamic")
 
 add_definitions(-Wall -Wextra -D_GNU_SOURCE)
 
-#
-# OPTIONS
-#
+# Options
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/GSettings.cmake)
 
-#
-# LIBS
-# 
+# Libs
 FIND_PACKAGE(PkgConfig)
 
 PKG_CHECK_MODULES(LIBGLM REQUIRED glm)
@@ -62,15 +54,21 @@ include_directories(${LIBSWSCALE_INCLUDE_DIRS})
 PKG_CHECK_MODULES(LIBFREETYPE REQUIRED freetype2)
 include_directories(${LIBFREETYPE_INCLUDE_DIRS})
 
+PKG_CHECK_MODULES(LIBCAIRO REQUIRED cairo)
+include_directories(${LIBCAIRO_INCLUDE_DIRS})
+
+PKG_CHECK_MODULES(LIBPANGOCAIRO REQUIRED pangocairo)
+include_directories(${LIBPANGOCAIRO_INCLUDE_DIRS})
+
+PKG_CHECK_MODULES(LIBRSVG REQUIRED librsvg-2.0>=2.52)
+include_directories(${LIBRSVG_INCLUDE_DIRS})
+
 PKG_CHECK_MODULES(LIBPULSE REQUIRED libpulse-mainloop-glib)
 include_directories(${LIBPULSE_INCLUDE_DIRS})
 
 FIND_PACKAGE(OpenImageIO 2.1.12 REQUIRED)
 
-# 
 # GTK resources
-#
-
 include(GlibCompileResourcesSupport)
 
 # Set the resources to bundle.
@@ -87,6 +85,9 @@ set(RESOURCE_UI_LIST
 	video_frame.ui
 	widget_frame.ui
 	telemetry_frame.ui
+	shape/arc_box.ui
+	shape/bar_box.ui
+	shape/text_box.ui
 )
 
 set(RESOURCE_GL_LIST
@@ -133,29 +134,21 @@ set(GPX2VIDEO_RESOURCES
 	${RESOURCE_GL_FILE}
 )
 
-# 
-# GSETTINGS
-#
+# GSettings schema
 add_schema("com.progweb.gpx2video.gschema.xml" GPX2VIDEO_GSCHEMA)
 
-#
-# INCLUDE
-#
+# Include
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}
 	${CMAKE_CURRENT_BINARY_DIR}
 	${OIIO_INCLUDE_DIRS}
 )
 
-#
-# HEADERS
-#
+# Headers
 set(GPX2VIDEO_HEADERS
 )
 
-#
-# SOURCES
-#
+# Sources
 set(GPX2VIDEO_SOURCES
 	src/about.cpp
 	src/application.cpp
@@ -172,15 +165,15 @@ set(GPX2VIDEO_SOURCES
 	src/widgetframe.cpp
 	src/telemetryframe.cpp
 	src/videowidget.cpp
+	src/shape/base.cpp
+	src/shape/arc.cpp
+	src/shape/bar.cpp
+	src/shape/text.cpp
 )
 
-#
-# SUB DIRECTORIES
-#
+# Subdirectories
 
-#
-# BINARIES
-#
+# Binaries
 add_executable(gpx2video-gtk ${GPX2VIDEO_SOURCES} ${GPX2VIDEO_RESOURCES} ${GPX2VIDEO_GSCHEMA})
-target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBPULSE_LIBRARIES} ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES})
+target_link_libraries(gpx2video-gtk gpxcore gpxlib layoutlib ${LIBPULSE_LIBRARIES} ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES} ${LIBRSVG_LIBRARIES} ${LIBPANGOCAIRO_LIBRARIES} ${LIBCAIRO_LIBRARIES})
 

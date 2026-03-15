@@ -38,6 +38,7 @@ public:
 
 	void addStream(StreamPtr stream);
 
+	bool hasDataStream(const std::string &name) const;
 	StreamPtr getFirstStreamOfType(const AVMediaType &type) const;
 	StreamPtr getDataStream(const std::string &name) const;
 

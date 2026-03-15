@@ -232,19 +232,19 @@ void VideoRenderer::computeWidgetsPosition(void) {
 		switch (orientation) {
 		case 180:
 		case -180:
-			x = layout_width_ - widget->x() - widget->width();
-			y = layout_height_ - widget->y() - widget->height();
+			x = layout_width_ - widget->x() - widget->theme().width();
+			y = layout_height_ - widget->y() - widget->theme().height();
 			break;
 
 		case 90:
 		case -270:
 			x = widget->y();
-			y = layout_width_ - widget->x() - widget->width();
+			y = layout_width_ - widget->x() - widget->theme().width();
 			break;
 
 		case -90:
 		case 270:
-			x = layout_height_ - widget->y() - widget->height();
+			x = layout_height_ - widget->y() - widget->theme().height();
 			y = widget->x();
 			break;
 
@@ -316,7 +316,7 @@ bool VideoRenderer::start(void) {
 			continue;
 
 		// Rotate & rescale
-		this->resize(buf, round((double) widget->width() / sar), widget->height());
+		this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
 		this->rotate(buf, orientation);
 
 		// Image over
@@ -430,7 +430,7 @@ bool VideoRenderer::run(void) {
 				if (buf != NULL) {
 					// Rotate & resize
 					if (is_update) {
-						this->resize(buf, round((double) widget->width() / sar), widget->height());
+						this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
 						this->rotate(buf, orientation);
 					}
 
@@ -449,7 +449,7 @@ bool VideoRenderer::run(void) {
 
 			// Rotate & resize
 			if (is_update) {
-				this->resize(buf, round((double) widget->width() / sar), widget->height());
+				this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
 				this->rotate(buf, orientation);
 			}
 

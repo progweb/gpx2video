@@ -19,25 +19,19 @@ public:
 
 		shape = new PowerTextShape(widget);
 		
-		shape->initialize();
-
 		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
-
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, widget_->width(), widget_->height());
+		this->initialize();
+		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-		if (with_picto)
-			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_power.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -45,7 +39,7 @@ skip:
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		char s[128];
+		cairo_t *cairo;
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {
@@ -63,17 +57,24 @@ skip:
 		// Format data
 		no_value_ = !data.hasValue(TelemetryData::DataPower);
 
-		if (!no_value_)
-			sprintf(s, "%d Watt", data.power());
-		else
-			sprintf(s, "-- Watt");
-
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, widget_->width(), widget_->height());
-		this->drawValue(fg_buf_, s);
+		// Image buffer
+		this->createBox(&fg_buf_, theme().width(), theme().height());
+
+		// Cairo context
+		cairo = this->createCairoContext(fg_buf_);
+
+		// Draw
+		draw(cairo, data);
+
+		// Data bytes
+		this->renderCairoContext(fg_buf_, cairo);
+
+		// Release
+		this->destroyCairoContext(cairo);
 
 		is_update = true;
 skip:
@@ -96,17 +97,21 @@ skip:
 private:
 	bool no_value_;
 
-	Theme theme_;
-
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	PowerTextShape(VideoWidget *widget) 
-		: TextShape(theme_, widget)
+	VideoWidget *widget_;
+
+	PowerTextShape(VideoWidget *widget)
+		: TextShape(widget->theme())
 		, bg_buf_(NULL)
-		, fg_buf_(NULL) {
+		, fg_buf_(NULL)
+		, widget_(widget) {
 		no_value_ = false;
 	}
+
+	void initialize(void);
+	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 
@@ -134,24 +139,13 @@ public:
 
 		switch (type) {
 		case VideoWidget::ShapeText:
-		default:
 			shape_ = PowerTextShape::create(this);
 			break;
+
+		default:
+			// TODO raise exception
+			break;
 		}
-	}
-
-	bool setBackgroundColor(std::string color) {
-		bool result = VideoWidget::setBackgroundColor(color);
-
-		const float *c = backgroundColor();
-
-		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
-
-		return result;
-	}
-
-	void initialize(void) {
-		shape_->initialize();
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -172,8 +166,9 @@ protected:
 
 		IndentingOStreambuf indent(os, 4);
 
+		shape_->xmlwrite(os);
+
 //		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
-		os << "<text-shadow>" << textShadow() << "</text-shadow>" << std::endl;
 	}
 
 private:

@@ -5,6 +5,9 @@
 #include <glibmm/datetime.h>
 #include <glibmm/miscutils.h>
 
+//#include <giomm/simpleaction.h>
+#include <giomm/settingsschemasource.h>
+
 #include <gtkmm/window.h>
 #include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>
@@ -75,33 +78,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 		throw std::runtime_error("No \"video_area\" object in window.ui");
 
 	// Application settings
-	settings_ = Gio::Settings::create("com.progweb.gpx2video");
-
-	if (settings_) {
-		settings_->bind("width",
-				this, 
-				"default-width", 
-				Gio::Settings::BindFlags::DEFAULT
-		);
-
-		settings_->bind("height",
-				this, 
-				"default-height", 
-				Gio::Settings::BindFlags::DEFAULT
-		);
-
-		settings_->bind("is-maximized",
-				this, 
-				"maximized", 
-				Gio::Settings::BindFlags::DEFAULT
-		);
-
-		settings_->bind("is-fullscreen",
-				this, 
-				"fullscreened", 
-				Gio::Settings::BindFlags::DEFAULT
-		);
-	}
+	bind_settings();
 
 	// Connect the menu to the MenuButton gears_.
 	// (The connection between action and menu item is specified in gears_menu.ui)
@@ -146,9 +123,14 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	add_action("save", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_save));
 	add_action("append", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_append));
 
-	add_action("use_creation_time", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_creation_time));
-	add_action("use_gpmf_stream", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpmf_stream));
-	add_action("use_gpx_data", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpx_data));
+	use_creation_time_action_ = add_action("use_creation_time", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_creation_time));
+   	use_gpmf_stream_action_ = add_action("use_gpmf_stream", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpmf_stream));
+	use_gpx_data_action_ = add_action("use_gpx_data", sigc::mem_fun(*video_frame_, &GPX2VideoVideoFrame::on_action_use_gpx_data));
+
+	// By default actions are disabled
+	use_gpx_data_action_->set_enabled(false);
+	use_gpmf_stream_action_->set_enabled(false);
+	use_creation_time_action_->set_enabled(false);
 
 	// Video, telemetry & widget frame listener
 	video_frame_->signal_video_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_changed));
@@ -187,6 +169,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	renderer_ = GPX2VideoRenderer::create(*this, renderer_settings_, telemetry_settings_);
 	video_area_->set_renderer(renderer_);
 	widget_frame_->set_renderer(renderer_);
+
+	renderer_->widget_position_change().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
 
 	// GPX2Video application thread 
 	start();
@@ -231,7 +215,7 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 	GPXApplication dummy(NULL);
 
 	// Create a dummy instance before the call to Gtk::Builder::create_from_resource
-	// This creation registers GPX2VideoArea's class in the GType system.
+	// This creation registers custom GPX2VideoWidget's class in the GType system.
 	static_cast<void>(GPX2VideoArea(dummy));
 	static_cast<void>(GPX2VideoVideoFrame());
 	static_cast<void>(GPX2VideoWidgetFrame());
@@ -296,6 +280,55 @@ void GPX2VideoApplicationWindow::stop(void) {
 
 
 /**
+ *
+ */
+void GPX2VideoApplicationWindow::bind_settings(void) {
+	const std::string id = "com.progweb.gpx2video";
+
+	const Glib::RefPtr<Gio::SettingsSchemaSource> source = Gio::SettingsSchemaSource::get_default();
+
+	if (!source) {
+		log_error("Gets the default system schema source failure!");
+		return;
+	}
+
+	if (source->lookup(id, true) == NULL) {
+		log_warn("Schema '%s' not installed!", id.c_str());
+		return;
+	}
+
+	// Open & load user settings
+	settings_ = Gio::Settings::create(id);
+
+	if (settings_) {
+		settings_->bind("width",
+				this, 
+				"default-width", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("height",
+				this, 
+				"default-height", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("is-maximized",
+				this, 
+				"maximized", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+
+		settings_->bind("is-fullscreen",
+				this, 
+				"fullscreened", 
+				Gio::Settings::BindFlags::DEFAULT
+		);
+	}
+}
+
+
+/**
  * Open XML layout file
  *
  *  - load each widgets
@@ -311,6 +344,18 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 
 	layout_file_ = file->get_parse_name();
 
+	// Widgets list
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	if (!list)
+		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+
+	// Clear widgets list
+	for (auto child = list->get_first_child(); child;) {
+		auto next = child->get_next_sibling();
+		list->remove(*child);
+		child = next;
+	}
+
 	// Video renderer
 	renderer_->setLayoutFile(layout_file_);
 
@@ -318,10 +363,6 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 	perform(Task::ActionStart);
 
 	// Populate widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
-	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
-
 	for (GPX2VideoWidget *item : renderer_->widgets()) {
 		auto box = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
 		auto label = Gtk::Label(item->widget()->name());
@@ -412,6 +453,10 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 	label = ref_builder_->get_widget<Gtk::Label>("filesize_label");
 	label->set_label(Glib::format_size(info->get_size()));
 
+	// Update actions
+	use_creation_time_action_->set_enabled(media_->creationTime() != 0);
+	use_gpmf_stream_action_->set_enabled(media_->hasDataStream("GoPro MET"));
+
 	// Update video frame
 	video_frame_->set_video_selected(media_);
 
@@ -446,6 +491,9 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 
 	// Load telemetry data
 	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
+
+	// Update actions
+	use_gpx_data_action_->set_enabled(true);
 
 	// Update ui components
 	renderer_->set_telemetry(source);
@@ -683,6 +731,10 @@ void GPX2VideoApplicationWindow::on_video_changed(void) {
 
 	log_info("Video metadata changed");
 
+	// Timestamp updated
+	renderer_->reset_timestamp();
+
+	// Video refresh
 	video_area_->refresh();
 }
 
@@ -701,6 +753,20 @@ void GPX2VideoApplicationWindow::on_widget_changed(void) {
 	log_info("Widget properties changed");
 
 	video_area_->refresh();
+}
+
+
+/**
+ * Notification widgets position computed
+ *
+ * Update the UI
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::on_widget_position_changed(void) {
+	log_call();
+
+	widget_frame_->update();
 }
 
 
@@ -936,9 +1002,9 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 		index++;
 	}
 
-//	// Unselect widget
-//	if (widget_frame_->widget_selected() == widget)
-//		widget_frame_->set_widget_selected(NULL);
+	// Unselect widget
+	if (widget_frame_->widget_selected() == widget)
+		widget_frame_->set_widget_selected(NULL);
 
 	// Remove widget from the widgets list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");

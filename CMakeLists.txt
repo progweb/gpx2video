@@ -5,34 +5,24 @@ project(GPX2VIDEO)
 include(GNUInstallDirs)
 include(CheckFunctionExists)
 
-#
-# DEBUG DEFAULT MODE
-#
+# Debug default mode
 if(NOT CMAKE_BUILD_TYPE)
 	set(CMAKE_BUILD_TYPE "DEBUG")
 endif()
 
-#
-# CONFIGURATION
-#
+# Configuration
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O2 -g -ggdb -fPIC -rdynamic")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -g -ggdb -fPIC -fpermissive -rdynamic")
 
 add_definitions(-Wall -Wextra -D_GNU_SOURCE)
 
-#
-# OPTIONS
-#
+# Options
 OPTION(BUILD_GTK "Build gpx2video with gtk interface" OFF)
 
-#
-# CMAKE EXTENSIONS
-#
+# CMake extensions
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
-#
-# VERSION
-#
+# Version
 set(MAJOR 0)
 set(MINOR 1)
 set(PATCH 0)
@@ -41,9 +31,7 @@ set(VERSION ${MAJOR}.${MINOR}.${PATCH})
 FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 configure_file(src/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 
-#
-# LIBS
-# 
+# Libs
 FIND_PACKAGE(PkgConfig)
 
 PKG_CHECK_MODULES(LIBEVENT REQUIRED libevent>=2.0.0)
@@ -82,13 +70,17 @@ include_directories(${LIBFREETYPE_INCLUDE_DIRS})
 PKG_CHECK_MODULES(LIBCAIRO REQUIRED cairo)
 include_directories(${LIBCAIRO_INCLUDE_DIRS})
 
+PKG_CHECK_MODULES(LIBPANGOCAIRO REQUIRED pangocairo)
+include_directories(${LIBPANGOCAIRO_INCLUDE_DIRS})
+
+PKG_CHECK_MODULES(LIBRSVG REQUIRED librsvg-2.0>=2.52)
+include_directories(${LIBRSVG_INCLUDE_DIRS})
+
 FIND_PACKAGE(OpenImageIO 2.1.12 REQUIRED)
 
 #FIND_PACKAGE(Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 
-#
-# INCLUDE
-#
+# Include
 include_directories(
 	${CMAKE_CURRENT_BINARY_DIR}/src
 	${CMAKE_CURRENT_SOURCE_DIR}
@@ -100,15 +92,11 @@ include_directories(
 	${Qt5Widgets_INCLUDE_DIR}
 )
 
-#
-# HEADERS
-#
+# Headers
 set(GPX2VIDEO_HEADERS
 )
 
-#
-# SOURCES
-#
+# Sources
 set(GPX2VIDEO_SOURCES
 	src/log.c
 	src/evcurl.c
@@ -145,36 +133,50 @@ set(GPX2VIDEO_SOURCES
 	src/utils.cpp
 
 	src/shape/arc.cpp
+	src/shape/bar.cpp
 	src/shape/base.cpp
 	src/shape/text.cpp
+
+	src/widgets/avgridespeed.cpp
+	src/widgets/avgspeed.cpp
+	src/widgets/cadence.cpp
+	src/widgets/date.cpp
+	src/widgets/distance.cpp
+	src/widgets/duration.cpp
+	src/widgets/elevation.cpp
+	src/widgets/gforce.cpp
+	src/widgets/gpx.cpp
+	src/widgets/grade.cpp
+	src/widgets/heading.cpp
+	src/widgets/heartrate.cpp
+	src/widgets/image.cpp
+	src/widgets/lap.cpp
+	src/widgets/maxspeed.cpp
+	src/widgets/position.cpp
+	src/widgets/power.cpp
+	src/widgets/speed.cpp
+	src/widgets/temperature.cpp
+	src/widgets/text.cpp
+	src/widgets/time.cpp
+	src/widgets/verticalspeed.cpp
 
  	utmconvert/utmconvert.cpp
 )
 
-# 
-# QT
-#
+# Qt
 #SET(QT_LIBRARIES Qt5::Core Qt5::Gui Qt5::Widgets)
 #SET(CMAKE_AUTOMOC ON)
 
-#
-# LINK
-#
+# Link
 #add_library(core STATIC ${OVERLAY_CORE_SOURCES})
 
-#
-# PROPRERTIES
-#
+# Proprerties
 
-#
-# LIBRARIES
-#
+# Libraries
 add_library(gpxcore ${GPX2VIDEO_SOURCES})
 target_link_libraries(gpxcore gpxlib layoutlib ${LIBEVENT_LIBRARIES} ${LIBCURL_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${OIIO_LIBRARIES} ${LIBGEOGRAPHIC_LIBRARIES} ${LIBCAIRO_LIBRARIES} ${LIBFREETYPE_LIBRARIES} ssl crypto)
 
-#
-# SUB DIRECTORIES
-#
+# Subdirectories
 add_subdirectory(gpxlib)
 add_subdirectory(layoutlib)
 add_subdirectory(tools)
@@ -184,8 +186,6 @@ if (BUILD_GTK)
 	add_subdirectory(gtk)
 endif (BUILD_GTK)
 
-#
-# ASSETS TOOL
-#
+# Assets tool
 file(COPY assets DESTINATION ${CMAKE_BINARY_DIR}/tools/)
 

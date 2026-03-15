@@ -19,8 +19,6 @@ public:
 
 		shape = new GPXTextShape(widget);
 		
-		shape->initialize();
-
 		return shape;
 	}
 
@@ -30,7 +28,8 @@ public:
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, widget_->width(), widget_->height());
+		this->initialize();
+		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
 
@@ -40,31 +39,7 @@ skip:
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		char s[128];
-
-		time_t t;
-		struct tm time;
-
-		int h;
-		int offset;
-
-		int border = widget_->border();
-		int padding_yt = widget_->padding(VideoWidget::PaddingTop);
-		int padding_yb = widget_->padding(VideoWidget::PaddingBottom);
-
-		// width x height
-//		w = widget_->height() - 2 * border;
-		h = widget_->height() - 2 * border;
-
-		// Add text (1 pt = 1.333 px)
-		// +-------------
-		// |  Text    px
-		// |  Text    px
-		// |  ....    ..
-		// +-------------
-		//          (with n nbr of lines)
-		//        h = n * px + padding_top + padding_bottom
-		int px = (h - padding_yt - padding_yb) / 6;
+		cairo_t *cairo;
 
 		// Refresh dynamic info
 		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
@@ -76,38 +51,22 @@ skip:
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, widget_->width(), widget_->height());
+		this->createBox(&fg_buf_, theme().width(), theme().height());
 
-		// title
-		offset = 0;
-		this->drawText(fg_buf_, 0, offset, px, "GPX WPT");
+		// Image buffer
+		this->createBox(&fg_buf_, theme().width(), theme().height());
 
-		// time
-		offset += px;
-		t = data.timestamp() / 1000;
-		gmtime_r(&t, &time);
-		strftime(s, sizeof(s), "time: %H:%M:%S", &time);
-		this->drawText(fg_buf_, 0, offset, px, s);
+		// Cairo context
+		cairo = this->createCairoContext(fg_buf_);
 
-		// latitude
-		offset += px;
-		sprintf(s, "lat: %.4f", data.latitude());
-		this->drawText(fg_buf_, 0, offset, px, s);
+		// Draw
+		draw(cairo, data);
 
-		// longitude
-		offset += px;
-		sprintf(s, "lon: %.4f", data.longitude());
-		this->drawText(fg_buf_, 0, offset, px, s);
+		// Data bytes
+		this->renderCairoContext(fg_buf_, cairo);
 
-		// elevation
-		offset += px;
-		sprintf(s, "ele: %.4f", data.elevation());
-		this->drawText(fg_buf_, 0, offset, px, s);
-
-		// line
-		offset += px;
-		sprintf(s, "line: %d", data.line());
-		this->drawText(fg_buf_, 0, offset, px, s);
+		// Release
+		this->destroyCairoContext(cairo);
 
 		is_update = true;
 skip:
@@ -126,16 +85,20 @@ skip:
 	}
 
 private:
-	Theme theme_;
-
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
+	VideoWidget *widget_;
+
 	GPXTextShape(VideoWidget *widget) 
-		: TextShape(theme_, widget)
+		: TextShape(widget->theme())
 		, bg_buf_(NULL)
-		, fg_buf_(NULL) {
+		, fg_buf_(NULL) 
+		, widget_(widget) {
 	}
+
+	void initialize(void);
+	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 
@@ -163,24 +126,13 @@ public:
 
 		switch (type) {
 		case VideoWidget::ShapeText:
-		default:
 			shape_ = GPXTextShape::create(this);
 			break;
+
+		default:
+			// TODO raise exception
+			break;
 		}
-	}
-
-	bool setBackgroundColor(std::string color) {
-		bool result = VideoWidget::setBackgroundColor(color);
-
-		const float *c = backgroundColor();
-
-		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
-
-		return result;
-	}
-
-	void initialize(void) {
-		shape_->initialize();
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -201,7 +153,7 @@ protected:
 
 		IndentingOStreambuf indent(os, 4);
 
-		os << "<text-shadow>" << textShadow() << "</text-shadow>" << std::endl;
+		shape_->xmlwrite(os);
 	}
 
 private:

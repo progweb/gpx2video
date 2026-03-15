@@ -19,25 +19,19 @@ public:
 
 		shape = new DurationTextShape(widget);
 		
-		shape->initialize();
-
 		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
-
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, widget_->width(), widget_->height());
+		this->initialize();
+		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-		if (with_picto)
-			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_duration.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -45,17 +39,12 @@ skip:
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		char s[128];
-
-		int hours = 0;
-		int minutes = 0;
-		int seconds = 0;
+		cairo_t *cairo;
 
 		int duration;
 
 		// Compute duration
 		duration = data.duration();
-
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {
@@ -78,24 +67,24 @@ skip:
 		// Format data
 		no_value_ = !data.hasValue(TelemetryData::DataDuration);
 
-		if (duration > 0) {
-			seconds = duration % 60;
-			duration = duration / 60;
-			minutes = duration % 60;
-			hours = duration / 60;
-		}
-
-		if (!no_value_)
-			sprintf(s, "%d:%02d:%02d", hours, minutes, seconds);
-		else
-			sprintf(s, "--:--:--");
-
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, widget_->width(), widget_->height());
-		this->drawValue(fg_buf_, s);
+		// Image buffer
+		this->createBox(&fg_buf_, theme().width(), theme().height());
+
+		// Cairo context
+		cairo = this->createCairoContext(fg_buf_);
+
+		// Draw
+		draw(cairo, data);
+
+		// Data bytes
+		this->renderCairoContext(fg_buf_, cairo);
+
+		// Release
+		this->destroyCairoContext(cairo);
 
 		is_update = true;
 		last_duration_ = duration;
@@ -121,21 +110,25 @@ skip:
 private:
 	bool no_value_;
 
-	Theme theme_;
-
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
+
+	VideoWidget *widget_;
 
 	int last_duration_;
 
 	DurationTextShape(VideoWidget *widget) 
-		: TextShape(theme_, widget)
+		: TextShape(widget->theme())
 		, bg_buf_(NULL)
-		, fg_buf_(NULL) {
+		, fg_buf_(NULL) 
+		, widget_(widget) {
 		no_value_ = false;
 
 		last_duration_ = 0;
 	}
+
+	void initialize(void);
+	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 
@@ -163,24 +156,13 @@ public:
 
 		switch (type) {
 		case VideoWidget::ShapeText:
-		default:
 			shape_ = DurationTextShape::create(this);
 			break;
+
+		default:
+			// TODO raise exception
+			break;
 		}
-	}
-
-	bool setBackgroundColor(std::string color) {
-		bool result = VideoWidget::setBackgroundColor(color);
-
-		const float *c = backgroundColor();
-
-		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
-
-		return result;
-	}
-
-	void initialize(void) {
-		shape_->initialize();
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -201,7 +183,7 @@ protected:
 
 		IndentingOStreambuf indent(os, 4);
 
-		os << "<text-shadow>" << textShadow() << "</text-shadow>" << std::endl;
+		shape_->xmlwrite(os);
 	}
 
 private:

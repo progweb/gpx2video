@@ -1,31 +1,21 @@
-#
-# CONFIGURATION
-#
+# Configuration
 remove_definitions(-Wall)
 add_definitions(-Wno-unused-parameter)
 
-#
-# LIBS
-# 
+# Libs
 FIND_PACKAGE(EXPAT REQUIRED)
 include_directories(. .. ${EXPAT_INCLUDE_DIRS})
 
-#
-# INCLUDE
-#
+# Include
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-#
-# HEADERS
-#
+# Headers
 set(GPXLIB_HEADERS
 )
 
-#
-# SOURCES
-#
+# Sources
 set(GPXLIB_SOURCES
 	Node.cpp
 	Decimal.cpp
@@ -59,9 +49,7 @@ set(GPXLIB_SOURCES
 	Algorithm.cpp
 )
 
-#
-# LIBRARIES
-#
+# Libraries
 add_library(gpxlib STATIC ${GPXLIB_SOURCES})
 target_link_libraries(gpxlib ${EXPAT_LIBRARIES})
 

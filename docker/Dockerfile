@@ -25,6 +25,7 @@ RUN apt-get update \
         libopenimageio-dev \
         libgeographic.*-dev \
         libcairo2-dev \
+		librsvg2-dev \
 		\
 		libfreetype-dev \
 		\

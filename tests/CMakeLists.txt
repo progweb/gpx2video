@@ -1,17 +1,11 @@
-#
-# CONFIGURATION
-#
+# Configuration
 remove_definitions(-Wall)
 
-#
-# LIBS
-# 
+# Libs
 FIND_PACKAGE(EXPAT REQUIRED)
 include_directories(. .. ${EXPAT_INCLUDE_DIRS})
 
-#
-# SOURCES
-#
+# Sources
 set(EXTRACT_GPX_SOURCES
 #	test-decoder.c
 	test-extract.c
@@ -35,9 +29,7 @@ set(TIME_SOURCES
 	time.c
 )
 
-#
-# BINARIES
-# 
+# Binaries
 add_executable(extract-gpx ${EXTRACT_GPX_SOURCES})
 target_link_libraries(extract-gpx ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWSCALE_LIBRARIES})
 
@@ -55,9 +47,7 @@ target_link_libraries(extract-gpx ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES
 
 add_executable(time ${TIME_SOURCES})
 
-#
-# INSTALL
-#
+# Installation
 #install(TARGETS overlay-ff DESTINATION bin)
 #install(TARGETS overlay-qt DESTINATION bin)
 #install(TARGETS overlay-oiio DESTINATION bin)

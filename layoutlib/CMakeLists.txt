@@ -1,30 +1,20 @@
-#
-# CONFIGURATION
-#
+# Configuration
 add_definitions(-Wno-unused-parameter)
 
-#
-# LIBS
-# 
+# Libs
 FIND_PACKAGE(EXPAT REQUIRED)
 include_directories(. .. ${EXPAT_INCLUDE_DIRS})
 
-#
-# INCLUDE
-#
+# Include
 include_directories(
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-#
-# HEADERS
-#
+# Headers
 set(LAYOUTLIB_HEADERS
 )
 
-#
-# SOURCES
-#
+# Sources
 set(LAYOUTLIB_SOURCES
 	Node.cpp
 	Boolean.cpp
@@ -40,9 +30,7 @@ set(LAYOUTLIB_SOURCES
 	ReportCerr.cpp
 )
 
-#
-# LIBRARIES
-#
+# Libraries
 add_library(layoutlib STATIC ${LAYOUTLIB_SOURCES})
 target_link_libraries(layoutlib ${EXPAT_LIBRARIES})
 

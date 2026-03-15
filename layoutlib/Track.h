@@ -86,11 +86,11 @@ namespace layout
     String  &position() { return _position; }
 
     ///
-    /// Get align
+    /// Get orientation
     ///
-    /// @return the align attribute
+    /// @return the orientation attribute
     ///
-    String  &align() { return _align; }
+    String  &orientation() { return _orientation; }
 
     ///
     /// Get at
@@ -212,7 +212,7 @@ namespace layout
     Unsigned     _source;
 	Boolean      _display;	
     String       _position;
-    String       _align;
+    String       _orientation;
     Unsigned     _at, _duration;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;

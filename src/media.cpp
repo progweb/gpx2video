@@ -90,6 +90,16 @@ void MediaContainer::addStream(StreamPtr stream) {
 }
 
 
+bool MediaContainer::hasDataStream(const std::string &name) const {
+	for (StreamPtr stream : streams_) {
+		if (stream->name().find(name) != std::string::npos)
+			return true;
+	}
+
+	return false;
+}
+
+
 StreamPtr MediaContainer::getFirstStreamOfType(const AVMediaType &type) const {
 	for (StreamPtr stream : streams_) {
 		if (stream->type() == type)
@@ -101,8 +111,6 @@ StreamPtr MediaContainer::getFirstStreamOfType(const AVMediaType &type) const {
 
 
 StreamPtr MediaContainer::getDataStream(const std::string &name) const {
-	(void) name;
-
 	for (StreamPtr stream : streams_) {
 		if (stream->name().find(name) != std::string::npos)
 			return stream;
