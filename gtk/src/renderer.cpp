@@ -3,30 +3,7 @@
 
 #include "log.h"
 #include "datetime.h"
-#include "widgets/gpx.h"
-#include "widgets/date.h"
-#include "widgets/distance.h"
-#include "widgets/duration.h"
-#include "widgets/grade.h"
-#include "widgets/heading.h"
-#include "widgets/elevation.h"
-#include "widgets/cadence.h"
-#include "widgets/heartrate.h"
-#include "widgets/power.h"
-#include "widgets/lap.h"
-#include "widgets/position.h"
-#include "widgets/image.h"
-#include "widgets/speed.h"
-#include "widgets/maxspeed.h"
-#include "widgets/avgspeed.h"
-#include "widgets/avgridespeed.h"
-#include "widgets/text.h"
-#include "widgets/time.h"
-#include "widgets/gforce.h"
-#include "widgets/temperature.h"
-#include "widgets/verticalspeed.h"
-#include "widgets/track.h"
-#include "widgets/map.h"
+#include "videowidget.h"
 #include "renderer.h"
 
 
@@ -123,8 +100,8 @@ void GPX2VideoRenderer::setMediaContainer(MediaContainer *container) {
 	if (init(container) == false)
 		return;
 
-	// TOREMOVE !!!
-	container_->setTimeOffset(-139000);
+//	// TOREMOVE !!!
+//	container_->setTimeOffset(-139000);
 }
 
 
@@ -201,6 +178,14 @@ void GPX2VideoRenderer::set_timestamp(uint64_t timestamp) {
 }
 
 
+void GPX2VideoRenderer::reset_timestamp(void) {
+	log_call();
+
+	// Widget refresh
+	refresh();
+}
+
+
 const std::list<GPX2VideoWidget *>& GPX2VideoRenderer::widgets(void) {
 	log_call();
 
@@ -258,61 +243,7 @@ void GPX2VideoRenderer::load(void) {
 	for (VideoWidget *item : Renderer::widgets_) {
 		GPX2VideoWidget *widget;
 
-		// Type
-		s = item->name();
-
-		if (s == "gpx")
-			widget = GPX2VideoGPXWidget::create(item);
-		else if (s == "date") 
-			widget = GPX2VideoDateWidget::create(item);
-		else if (s == "time") 
-			widget = GPX2VideoTimeWidget::create(item);
-		else if (s == "text") 
-			widget = GPX2VideoTextWidget::create(item);
-		else if (s == "distance") 
-			widget = GPX2VideoDistanceWidget::create(item);
-		else if (s == "duration") 
-			widget = GPX2VideoDurationWidget::create(item);
-		else if (s == "position") 
-			widget = GPX2VideoPositionWidget::create(item);
-		else if (s == "speed") 
-			widget = GPX2VideoSpeedWidget::create(item);
-		else if (s == "maxspeed") 
-			widget = GPX2VideoMaxSpeedWidget::create(item);
-		else if (s == "avgspeed") 
-			widget = GPX2VideoAvgSpeedWidget::create(item);
-		else if (s == "avgridespeed") 
-			widget = GPX2VideoAvgRideSpeedWidget::create(item);
-		else if (s == "grade") 
-			widget = GPX2VideoGradeWidget::create(item);
-		else if (s == "heading") 
-			widget = GPX2VideoHeadingWidget::create(item);
-		else if (s == "image")
-			widget = GPX2VideoImageWidget::create(item);
-		else if (s == "elevation") 
-			widget = GPX2VideoElevationWidget::create(item);
-		else if (s == "cadence") 
-			widget = GPX2VideoCadenceWidget::create(item);
-		else if (s == "heartrate") 
-			widget = GPX2VideoHeartRateWidget::create(item);
-		else if (s == "temperature")
-			widget = GPX2VideoTemperatureWidget::create(item);
-		else if (s == "power") 
-			widget = GPX2VideoPowerWidget::create(item);
-		else if (s == "gforce")
-			widget = GPX2VideoGForceWidget::create(item);
-		else if (s == "vspeed")
-			widget = GPX2VideoVerticalSpeedWidget::create(item);
-		else if (s == "lap")
-			widget = GPX2VideoLapWidget::create(item);
-		else if (s == "track")
-			widget = GPX2VideoTrackWidget::create(item);
-		else if (s == "map")
-			widget = GPX2VideoMapWidget::create(item);
-		else {
-			log_error("Widget loading error, '%s' type unknown", s.c_str());
-			continue;
-		}
+		widget = GPX2VideoWidget::create(item);
 //		widget->setRate(telemetrySettings().telemetryRate());
 //		widget->setTelemetry(source_);
 
@@ -352,36 +283,51 @@ void GPX2VideoRenderer::draw(void) {
 		TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 		for (GPX2VideoWidget *item : widgets_) {
-			while (!item->full()) {
+			bool loop = true;
+
+			while (loop && !item->full()) {
 				TelemetryData data = item->data();
 
-				if (data.type() == TelemetryData::TypeUnknown) {
+				if (!item->ready() || (data.type() == TelemetryData::TypeUnknown)) {
 					timestamp = timestamp_;
 					timestamp -= (timestamp_ % rate);
 
 					// Retrieve first point
 					source_->retrieveFrom(data);
+
+					// Set timestamp requested
 					data.setDatetime(timestamp_);
 				}
 				else {
-					// Continue from the last datetime
+					// Continue from the last datetime requested
 					timestamp = data.datetime() + rate;
 				}
 
 				type = source_->retrieveNext(data, timestamp);
+
+				// Optimize timestamp
+				timestamp = data.timestamp();
+				timestamp -= (timestamp_ % rate);
+
+				// Save timestamp requested
 				data.setDatetime(timestamp);
 
-				item->write_buffers(data);
+				item->write_buffers(data, loop);
 				
 				(void) type;
 			}
 		}
 	}
 	else {
+		bool loop;
+
 		TelemetryData data;
 
+		// Set timestamp requested
+		data.setDatetime(timestamp_);
+
 		for (GPX2VideoWidget *item : widgets_) {
-			item->write_buffers(data);
+			item->write_buffers(data, loop);
 		}
 	}
 }
@@ -404,6 +350,9 @@ void GPX2VideoRenderer::compute(void) {
 
 	// Update widgets position
 	Renderer::computeWidgetsPosition();
+
+	// Broadcast event
+	widget_position_dispatcher_.emit();
 }
 
 

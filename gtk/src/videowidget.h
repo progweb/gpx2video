@@ -1,6 +1,9 @@
 #ifndef __GPX2VIDEO__GTK__VIDEOWIDGET_H__
 #define __GPX2VIDEO__GTK__VIDEOWIDGET_H__
 
+#include <glibmm/dispatcher.h>
+#include <gtkmm/box.h>
+
 #include <OpenImageIO/imageio.h>
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
@@ -43,8 +46,24 @@ public:
 
 	VideoWidget * widget(void);
 
+	const std::string& name(void) const {
+		return widget_->name();
+	}
+
+	VideoWidget::Theme& theme(void) {
+		return widget_->theme();
+	}
+
 	TelemetryData& data(void) {
 		return data_;
+	}
+
+	void dispatchEvent(void) {
+		dispatcher_.emit();
+	}
+
+	Glib::Dispatcher& signal_changed(void) {
+		return dispatcher_;
 	}
 
 	double glX(void) const;
@@ -60,10 +79,11 @@ public:
 	void clear(void);
 
 	bool full(void);
+	bool ready(void);
 
 	void init_buffers(void);
 	void resize_buffers(void);
-	void write_buffers(const TelemetryData &data);
+	void write_buffers(const TelemetryData &data, bool &loop);
 	void clear_buffers(void);
 	void load_texture(void);
 	void unload_texture(void);
@@ -89,6 +109,8 @@ private:
 
 	VideoWidget *widget_;
 
+	Glib::Dispatcher dispatcher_;
+
 	OIIO::ImageBuf *overlay_;
 
 	mutable std::mutex mutex_;
@@ -110,7 +132,6 @@ private:
 	GLuint pbo_[5];
 	GLuint texture_;
 };
-
 
 #endif
 

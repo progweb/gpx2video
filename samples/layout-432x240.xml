@@ -8,7 +8,7 @@
 		<background-color>#00000066</background-color>
 	</widget>
 
-	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
+	<widget x="25" y="45" width="110" height="30" position="left" orientation="vertical">
 		<type>grade</type>
 		<name>PENTE</name>
 		<margin>5</margin>
@@ -16,7 +16,7 @@
 		<padding-left>5</padding-left>
 		<text-linespace>2</text-linespace>
 	</widget>		
-	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
+	<widget x="25" y="45" width="110" height="30" position="left" orientation="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>5</margin>
@@ -25,7 +25,7 @@
 		<padding-left>5</padding-left>
 		<text-linespace>2</text-linespace>
 	</widget>		
-	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
+	<widget x="25" y="45" width="110" height="30" position="left" orientation="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>5</margin>
@@ -34,7 +34,7 @@
 		<padding-left>5</padding-left>
 		<text-linespace>2</text-linespace>
 	</widget>
-	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" orientation="vertical">
 		<type>time</type>
 		<name>HEURE</name>
 		<margin>5</margin>
@@ -42,7 +42,7 @@
 		<text-linespace>2</text-linespace>
 		<with-label>false</with-label>
 	</widget>
-	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" orientation="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>5</margin>
@@ -51,7 +51,7 @@
 		<text-linespace>2</text-linespace>
 		<with-label>false</with-label>
 	</widget>
-	<widget x="25" y="25" width="110" height="20" position="right" align="vertical">
+	<widget x="25" y="25" width="110" height="20" position="right" orientation="vertical">
 		<type>duration</type>
 		<name>DUREE</name>
 		<margin>5</margin>
@@ -59,7 +59,7 @@
 		<text-linespace>2</text-linespace>
 		<with-label>false</with-label>
 	</widget>
-	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
+	<widget x="25" y="45" width="110" height="30" position="left" orientation="vertical">
 		<type>cadence</type>
 		<name>CADENCE</name>
 		<margin>5</margin>
@@ -68,14 +68,14 @@
 		<text-linespace>2</text-linespace>
 	</widget>
 	<!--
-	<widget x="25" y="45" width="110" height="30" position="left" align="vertical">
+	<widget x="25" y="45" width="110" height="30" position="left" orientation="vertical">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>5</margin>
 		<padding>5</padding>
 	</widget>		
 	-->
-	<widget x="25" y="45" width="110" height="30" position="bottom" align="horizontal">
+	<widget x="25" y="45" width="110" height="30" position="bottom" orientation="horizontal">
 		<type>distance</type>
 		<name>DISTANCE</name>
 		<margin>5</margin>
@@ -84,7 +84,7 @@
 		<text-linespace>2</text-linespace>
 		<unit>km</unit>
 	</widget>		
-	<widget x="25" y="45" width="110" height="30" position="bottom" align="horizontal">
+	<widget x="25" y="45" width="110" height="30" position="bottom" orientation="horizontal">
 		<type>avgspeed</type>
 		<name>MOYENNE</name>
 		<margin>5</margin>
@@ -93,7 +93,7 @@
 		<text-linespace>2</text-linespace>
 		<unit>kph</unit>
 	</widget>		
-	<widget x="25" y="45" width="110" height="30" position="bottom" align="horizontal">
+	<widget x="25" y="45" width="110" height="30" position="bottom" orientation="horizontal">
 		<type>maxspeed</type>
 		<name>VITESSE MAX.</name>
 		<margin>5</margin>
@@ -109,7 +109,7 @@
 		<marker>30</marker>
 	</map>
 
-	<map position="top" align="horizontal" display="true">
+	<map position="top" orientation="horizontal" display="true">
 		<source>1</source>
 		<zoom>12</zoom>
 		<factor>2.0</factor>

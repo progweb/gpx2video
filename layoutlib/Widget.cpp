@@ -37,7 +37,7 @@ namespace layout
     _shape(this, "shape",   Node::ELEMENT, true),
 	_display(this, "display", Node::ATTRIBUTE, false),
     _position(this, "position",   Node::ATTRIBUTE, false),
-    _align(this, "align",   Node::ATTRIBUTE, false),
+    _orientation(this, "orientation",   Node::ATTRIBUTE, false),
     _unit(this, "unit",   Node::ELEMENT, false),
     _zoom(this, "zoom",   Node::ELEMENT, false),
     _format(this, "format",   Node::ELEMENT, false),
@@ -72,7 +72,7 @@ namespace layout
 	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false),
 	_with_label(this, "with-label", Node::ELEMENT, false),
 	_with_value(this, "with-value", Node::ELEMENT, false),
-	_with_picto(this, "with-picto", Node::ELEMENT, false),
+	_with_icon(this, "with-icon", Node::ELEMENT, false),
 	_with_unit(this, "with-unit", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
@@ -80,7 +80,7 @@ namespace layout
     getInterfaces().push_back(&_shape);
     getInterfaces().push_back(&_display);
     getInterfaces().push_back(&_position);
-    getInterfaces().push_back(&_align);
+    getInterfaces().push_back(&_orientation);
     getInterfaces().push_back(&_unit);
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_format);
@@ -115,7 +115,7 @@ namespace layout
     getInterfaces().push_back(&_nbr_lap);
     getInterfaces().push_back(&_with_label);
     getInterfaces().push_back(&_with_value);
-    getInterfaces().push_back(&_with_picto);
+    getInterfaces().push_back(&_with_icon);
     getInterfaces().push_back(&_with_unit);
 
 	_shape.setValue("text");
@@ -137,7 +137,7 @@ namespace layout
 
 	_with_label.setValue("true");
 	_with_value.setValue("true");
-	_with_picto.setValue("true");
+	_with_icon.setValue("true");
 	_with_unit.setValue("true");
   }
 

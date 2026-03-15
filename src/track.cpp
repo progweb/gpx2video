@@ -114,14 +114,15 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 
 Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, std::string name, struct event_base *evbase)
 	: VideoWidget(app, name)
+	, ShapeBase(VideoWidget::theme())
 	, app_(app)
 	, track_settings_(track_settings)
 	, telemetry_settings_(telemetry_settings)
 	, evbase_(evbase) {
 	log_call();
 
-	VideoWidget::setFlags(VideoWidget::FlagNone);
-	VideoWidget::setSize(settings().width(), settings().height());
+	theme().setFlags(VideoWidget::Theme::FlagNone);
+	theme().setSize(settings().width(), settings().height());
 
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
@@ -169,7 +170,7 @@ Track * Track::create(GPXApplication &app, const TelemetrySettings &telemetry_se
 
 
 void Track::setSize(int width, int height) {
-	VideoWidget::setSize(width, height); 
+	theme().setSize(width, height); 
 
 	track_settings_.setSize(width, height);
 }
@@ -283,7 +284,7 @@ void Track::init(bool zoomfit) {
 	y2_ = ceilf((float) py2_ / (float) TILESIZE);
 
 	// Use padding (to see markers)
-	padding = this->border() + settings().markerSize();
+	padding = theme().border() + settings().markerSize();
 
 	width -= 2 * padding;
 	height -= 2 * padding;
@@ -493,7 +494,7 @@ OIIO::ImageBuf * Track::prepare(bool &is_update) {
 		goto skip;
 	}
 
-	this->createBox(&bg_buf_, this->width(), this->height());
+	this->createBox(&bg_buf_, theme().width(), theme().height());
 	this->drawBorder(bg_buf_);
 	this->drawBackground(bg_buf_);
 
@@ -566,7 +567,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		delete fg_buf_;
 
 	// Draw
-	this->createBox(&fg_buf_, this->width(), this->height());
+	this->createBox(&fg_buf_, theme().width(), theme().height());
 
 	// Image over
 	trackbuf_->specmod().x = x - offsetX;

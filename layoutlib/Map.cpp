@@ -35,7 +35,7 @@ namespace layout
     _source(this, "source",   Node::ELEMENT, true),
 	_display(this, "display", Node::ATTRIBUTE, false),
     _position(this, "position",   Node::ATTRIBUTE, false),
-    _align(this, "align",   Node::ATTRIBUTE, false),
+    _orientation(this, "orientation",   Node::ATTRIBUTE, false),
 	_at(this, "at", Node::ATTRIBUTE, false),
 	_duration(this, "duration", Node::ATTRIBUTE, false),
     _x(this, "x", Node::ATTRIBUTE, false),
@@ -59,7 +59,7 @@ namespace layout
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);
     getInterfaces().push_back(&_position);
-    getInterfaces().push_back(&_align);
+    getInterfaces().push_back(&_orientation);
     getInterfaces().push_back(&_at);
     getInterfaces().push_back(&_duration);
     getInterfaces().push_back(&_x);

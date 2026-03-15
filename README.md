@@ -191,7 +191,7 @@ To build gpx2video, please install all dependencies (on Debian):
 apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev \
     libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
-    libcairo2-dev libopenexr-dev \
+    libcairo2-dev librsvg2-dev libopenexr-dev \
     libfreetype-dev
 ```
 
@@ -300,28 +300,28 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <layout>
-	<widget x="250" y="450" width="600" height="120" position="left" align="vertical">
+	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical">
 		<type>speed</type>
 		<name>VITESSE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<unit>kph</unit>
 	</widget>		
-	<widget x="250" y="450" width="600" height="120" position="left" align="vertical">
+	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical">
 		<type>elevation</type>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<unit>m</unit>
 	</widget>
-	<widget x="250" y="450" width="600" height="120" position="right" align="vertical">
+	<widget x="250" y="450" width="600" height="120" position="right" orientation="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
 		<padding>5</padding>
 		<format>%d-%m-%Y</format>
 	</widget>
-	<widget x="250" y="450" width="600" height="120" position="left" align="vertical" display="false">
+	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical" display="false">
 		<type>heartrate</type>
 		<name>FREQ. CARDIAQUE</name>
 		<margin>20</margin>
@@ -343,17 +343,17 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 Here all widget common element settings:
 
 ```xml
-<widget x="250" y="450" width="600" height="120" position="left" align="vertical" at="1000" duration="9000" display="true">
+<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical" at="1000" duration="9000" display="true">
 	<type>speed</type>
 	<name>VITESSE</name>
 	<margin>20</margin>
 	<padding>5</padding>
 	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
-	<text-color>#00ff00ff</text-color>
 	<text-ratio>2.0</text-ratio>
 	<text-shadow>3</text-shadow>
 	<text-linespace>2</text-linespace>
 	<label-align>left</label-align>
+	<label-color>#00ff00ff</label-color>
 	<value-align>right</value-align>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
@@ -369,7 +369,7 @@ Node attributes are:
   - **x** / **y**: to set the widget position.
   - **width** / **height**: to set the widget size.
   - **position**: to compute the widget position.
-  - **align**: to set the align direction.
+  - **orientation**: to set the horizontal / vertical alignment.
   - **at** / **duration**: to display widget at a specific time (in ms) during a specific duration (in ms).
   - **display**: to render or not the widget.
 
@@ -382,11 +382,12 @@ Node elements are:
   - **border**: to set the border width.
   - **border-color**: to set the border color in #RGBA.
   - **background-color**: to set the background color in #RGBA.
-  - **text-color**: to set the text color in #RGBA.
+  - **label-color**: to set the text color in #RGBA.
+  - **label-align**: to set text alignement (left, center, right)
   - **text-ratio**: define the label and value size ratio.
   - **text-shadow**: text shadow thickness.
   - **text-linespace**: line space between label and value.
-  - **label-align**: to set text alignement (left, center, right)
+  - **value-color**: to set the value color in #RGBA.
   - **value-align**: to set value alignement (left, center, right)
   - **with-xxxx**: to show or not the field (default is true).
 
@@ -408,8 +409,8 @@ Node elements are:
 **position** values are: none, left, right, top, bottom, bottom-left, bottom-right, top-left, top-right.
 If **position** element is set, gpx2video ignores and computes **x** and **y** values.
 
-**align** values are: horizontal or vertical.
-If **position** isn't defined, align value isn't used.
+**orientation** values are: horizontal or vertical.
+If **position** isn't defined, orientation value isn't used.
 
 **display** values are: true or false. It permits to render or not the widget.
 The **display** default value is true.

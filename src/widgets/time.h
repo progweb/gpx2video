@@ -19,25 +19,19 @@ public:
 
 		shape = new TimeTextShape(widget);
 		
-		shape->initialize();
-
 		return shape;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
-		bool with_picto = widget_->hasFlag(VideoWidget::FlagPicto);
-
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, widget_->width(), widget_->height());
+		this->initialize();
+		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-		if (with_picto)
-			this->drawImage(bg_buf_, widget_->border(), widget_->border(), "./assets/picto/DataOverlay_icn_time.png", VideoWidget::ZoomFit);
-		this->drawLabel(bg_buf_, widget_->label().c_str());
 
 		is_update = true;
 skip:
@@ -45,10 +39,9 @@ skip:
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		char s[128];
+		cairo_t *cairo;
 
 		time_t t;
-		struct tm time;
 
 		// Compute time
 		t = data.datetime() / 1000;
@@ -61,19 +54,24 @@ skip:
 			}
 		}
 
-		// Format data
-		// Don't use gps time, but camera time!
-		// Indeed, with garmin devices, gpx time has an offset.
-		localtime_r(&t, &time);
-
-		strftime(s, sizeof(s), "%H:%M:%S", &time);
-
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
 
-		this->createBox(&fg_buf_, widget_->width(), widget_->height());
-		this->drawValue(fg_buf_, s);
+		// Image buffer
+		this->createBox(&fg_buf_, theme().width(), theme().height());
+
+		// Cairo context
+		cairo = this->createCairoContext(fg_buf_);
+
+		// Draw
+		draw(cairo, data);
+
+		// Data bytes
+		this->renderCairoContext(fg_buf_, cairo);
+
+		// Release
+		this->destroyCairoContext(cairo);
 
 		is_update = true;
 		last_time_ = t;
@@ -94,19 +92,23 @@ skip:
 	}
 
 private:
-	Theme theme_;
-
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
+	VideoWidget *widget_;
+
 	time_t last_time_;
 
-	TimeTextShape(VideoWidget *widget) 
-		: TextShape(theme_, widget)
+	TimeTextShape(VideoWidget *widget)
+		: TextShape(widget->theme())
 		, bg_buf_(NULL)
-		, fg_buf_(NULL) {
+		, fg_buf_(NULL)
+		, widget_(widget) {
 		last_time_ = 0;
 	}
+
+	void initialize(void);
+	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 
@@ -134,24 +136,13 @@ public:
 
 		switch (type) {
 		case VideoWidget::ShapeText:
-		default:
 			shape_ = TimeTextShape::create(this);
 			break;
+
+		default:
+			// TODO raise exception
+			break;
 		}
-	}
-
-	bool setBackgroundColor(std::string color) {
-		bool result = VideoWidget::setBackgroundColor(color);
-
-		const float *c = backgroundColor();
-
-		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
-
-		return result;
-	}
-
-	void initialize(void) {
-		shape_->initialize();
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -172,7 +163,7 @@ protected:
 
 		IndentingOStreambuf indent(os, 4);
 
-		os << "<text-shadow>" << textShadow() << "</text-shadow>" << std::endl;
+		shape_->xmlwrite(os);
 	}
 
 private:

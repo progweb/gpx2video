@@ -1,7 +1,4 @@
-# 
 # GTK resources
-#
-
 include(GlibCompileResourcesSupport)
 
 # Set the resources to bundle.

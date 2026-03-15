@@ -5,23 +5,20 @@
 
 
 /**
- * Image shape widget
+ * Widget definition
  */
 
-class ImageShape : public ShapeBase {
+class ImageWidget : public VideoWidget, public ShapeBase {
 public:
-	virtual ~ImageShape() {
-		clear();
+	virtual ~ImageWidget() {
 	}
 
-	static ImageShape * create(VideoWidget *widget) {
-		ImageShape *shape;
+	static ImageWidget * create(GPXApplication &app) {
+		ImageWidget *widget;
 
-		shape = new ImageShape(widget);
-		
-		shape->initialize();
+		widget = new ImageWidget(app, "image");
 
-		return shape;
+		return widget;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -30,10 +27,11 @@ public:
 			goto skip;
 		}
 
-		this->createBox(&bg_buf_, widget_->width(), widget_->height());
+		this->initialize();
+		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
-		this->drawImage(bg_buf_, widget_->border(), widget_->border(), widget_->source().c_str(), widget_->zoom());
+		this->drawImage(bg_buf_, theme().border(), theme().border(), this->source().c_str(), this->zoom());
 
 		is_update = true;
 skip:
@@ -55,81 +53,31 @@ skip:
 		bg_buf_ = NULL;
 	}
 
-private:
-	Theme theme_;
-
-	OIIO::ImageBuf *bg_buf_;
-
-	ImageShape(VideoWidget *widget) 
-		: ShapeBase(theme_, widget)
-		, bg_buf_(NULL) {
-	}
-};
-
-
-/**
- * Widget definition
- */
-
-class ImageWidget : public VideoWidget {
-public:
-	virtual ~ImageWidget() {
-		delete shape_;
-	}
-
-	static ImageWidget * create(GPXApplication &app) {
-		ImageWidget *widget;
-
-		widget = new ImageWidget(app, "image");
-
-		return widget;
-	}
-
-	void setShape(VideoWidget::Shape type) {
-		(void) type;
-
-		if (shape_)
-			delete shape_;
-
-		shape_ = ImageShape::create(this);
-	}
-
-	bool setBackgroundColor(std::string color) {
-		bool result = VideoWidget::setBackgroundColor(color);
-
-		const float *c = backgroundColor();
-
-		shape_->theme().setBackgroundColor(c[0], c[1], c[2], c[3]);
-
-		return result;
-	}
-
-	void initialize(void) {
-		shape_->initialize();
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		return shape_->prepare(is_update);
-	}
-
-	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		return shape_->render(data, is_update);
-	}
-
-	void clear(void) {
-		shape_->clear();
+	bool isStatic(void) {
+		return true;
 	}
 
 protected:
+	void xmlwrite(std::ostream &os) {
+		VideoWidget::xmlwrite(os);
+
+		IndentingOStreambuf indent(os, 4);
+
+		ShapeBase::xmlwrite(os);
+	}
+
 
 private:
-	ImageShape *shape_;
+	OIIO::ImageBuf *bg_buf_;
 
 	ImageWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
-   		, shape_(NULL) {
+		, ShapeBase(theme()) {
 		setShape(VideoWidget::ShapeNone);
 	}
+
+	void initialize(void);
+	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 #endif

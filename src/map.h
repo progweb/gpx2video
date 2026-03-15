@@ -111,9 +111,9 @@ protected:
 
 		os << "<map";
 		os <<   " x=\"" << x() << "\" y=\"" << y() << "\"";
-		os <<   " width=\"" << width() << "\" height=\"" << height() << "\"";
+		os <<   " width=\"" << theme().width() << "\" height=\"" << theme().height() << "\"";
 		os <<   " position=\"" << position2string(position()) << "\"";
-		os <<   " align=\"" << align2string(align()) << "\"";
+		os <<   " orientation=\"" << orientation2string(orientation()) << "\"";
 		os <<   " display=\"true\"";
 		os <<   ">" << std::endl;
 	}

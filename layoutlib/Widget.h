@@ -100,11 +100,11 @@ namespace layout
     String  &position() { return _position; }
 
     ///
-    /// Get align
+    /// Get orientation
     ///
-    /// @return the align attribute
+    /// @return the orientation attribute
     ///
-    String  &align() { return _align; }
+    String  &orientation() { return _orientation; }
 
     ///
     /// Get unit
@@ -345,11 +345,11 @@ namespace layout
 	Boolean  &withValue() { return _with_value; }
 
 	/// 
-	/// Get picto flag
+	/// Get icon flag
 	///
-	/// @return the picto flag element
+	/// @return the icon flag element
 	///
-	Boolean  &withPicto() { return _with_picto; }
+	Boolean  &withIcon() { return _with_icon; }
 
 	/// 
 	/// Get unit flag
@@ -368,7 +368,7 @@ namespace layout
     String       _shape;
 	Boolean      _display;
     String       _position;
-    String       _align;
+    String       _orientation;
     String       _unit;
     String       _zoom;
     String       _format;
@@ -401,7 +401,7 @@ namespace layout
 
 	Boolean      _with_label;
 	Boolean      _with_value;
-	Boolean      _with_picto;
+	Boolean      _with_icon;
 	Boolean      _with_unit;
     
     // Disable copy constructors

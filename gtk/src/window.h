@@ -72,6 +72,8 @@ protected:
 
 	GPX2VideoAudioDevice *audio_device_ = NULL;
 
+	void bind_settings(void);
+
 	void update_stack(void);
 
 	void on_action_open(void);
@@ -80,6 +82,7 @@ protected:
 
 	void on_video_changed(void);
 	void on_widget_changed(void);
+	void on_widget_position_changed(void);
 
 	void on_play_clicked(void);
 
@@ -123,8 +126,17 @@ private:
 
 	GPX2VideoRenderer *renderer_;
 
+	Glib::RefPtr<Gio::SimpleAction> use_gpx_data_action_;
+	Glib::RefPtr<Gio::SimpleAction> use_gpmf_stream_action_;
+	Glib::RefPtr<Gio::SimpleAction> use_creation_time_action_;
+
+#if GTKMM_CHECK_VERSION(4, 10, 0)
 	Glib::RefPtr<Gio::File> working_folder_;
 	Glib::RefPtr<Gio::File> working_layout_;
+#else
+	Glib::RefPtr<const Gio::File> working_folder_;
+	Glib::RefPtr<const Gio::File> working_layout_;
+#endif
 };
 
 #endif
