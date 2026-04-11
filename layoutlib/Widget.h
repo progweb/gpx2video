@@ -69,21 +69,21 @@ namespace layout
     ///
     /// @return the name element
     ///
-    String  &name() { return _name; }
+    String &name() { return _name; }
     
     ///
     /// Get type
     ///
     /// @return the type element
     ///
-    String  &type() { return _type; }
+    String &type() { return _type; }
 
     ///
     /// Get shape
     ///
     /// @return the shape element
     ///
-    String  &shape() { return _shape; }
+    String &shape() { return _shape; }
 
 	/// 
 	/// Get display
@@ -97,42 +97,42 @@ namespace layout
     ///
     /// @return the position attribute
     ///
-    String  &position() { return _position; }
+    String &position() { return _position; }
 
     ///
     /// Get orientation
     ///
     /// @return the orientation attribute
     ///
-    String  &orientation() { return _orientation; }
+    String &orientation() { return _orientation; }
 
     ///
     /// Get unit
     ///
     /// @return the unit element
     ///
-    String  &unit() { return _unit; }
+    String &unit() { return _unit; }
 
     ///
     /// Get zoom
     ///
     /// @return the zoom element
     ///
-    String  &zoom() { return _zoom; }
+    String &zoom() { return _zoom; }
 
     ///
     /// Get format
     ///
     /// @return the format element
     ///
-    String  &format() { return _format; }
+    String &format() { return _format; }
 
     ///
     /// Get source
     ///
     /// @return the source element
     ///
-    String  &source() { return _source; }
+    String &source() { return _source; }
 
     ///
     /// Get at
@@ -251,56 +251,140 @@ namespace layout
     ///
     /// @return the font element
     ///
-    String  &font() { return _font; }
+    String &font() { return _font; }
 
     ///
     /// Get text color
     ///
     /// @return the text color element
     ///
-    String  &text() { return _text; }
+    String &text() { return _text; }
 
     ///
-    /// Get text color
+    /// Get label font size
     ///
-    /// @return the text color element
+    /// @return the label font size element
     ///
-    String  &textColor() { return _txtcolor; }
+    Decimal  &labelFontSize() { return _label_fontsize; }
 
     ///
-    /// Get text ratio
+    /// Get label font style
     ///
-    /// @return the text ratio attribute
+    /// @return the label font style element
     ///
-    Decimal  &textRatio() { return _txtratio; }
+    String &labelFontStyle() { return _label_fontstyle; }
 
     ///
-    /// Get text shadow
+    /// Get label font weight
     ///
-    /// @return the text shadow attribute
+    /// @return the label font weight element
     ///
-    Unsigned  &textShadow() { return _txtshadow; }
-
-    ///
-    /// Get text line space
-    ///
-    /// @return the text linespace attribute
-    ///
-    Unsigned  &textLineSpace() { return _txtlinespace; }
+    String &labelFontWeight() { return _label_fontweight; }
 
     ///
     /// Get label align
     ///
     /// @return the label align element
     ///
-    String  &labelAlign() { return _label_align; }
+    String &labelAlign() { return _label_align; }
+
+    ///
+    /// Get label color
+    ///
+    /// @return the label color element
+    ///
+    String &labelColor() { return _label_color; }
+
+    ///
+    /// Get label shadow opacity
+    ///
+    /// @return the label shadow opacity element
+    ///
+    Decimal  &labelShadowOpacity() { return _label_shadowopacity; }
+
+    ///
+    /// Get label shadow distance
+    ///
+    /// @return the label shadow distance element
+    ///
+    Decimal  &labelShadowDistance() { return _label_shadowdistance; }
+
+    ///
+    /// Get label border width
+    ///
+    /// @return the label border width element
+    ///
+    Decimal  &labelBorderWidth() { return _label_borderwidth; }
+
+    ///
+    /// Get label border color
+    ///
+    /// @return the label border color element
+    ///
+    String &labelBorderColor() { return _label_bordercolor; }
+
+    ///
+    /// Get value font size
+    ///
+    /// @return the value font size element
+    ///
+    Decimal  &valueFontSize() { return _value_fontsize; }
+
+    ///
+    /// Get value font style
+    ///
+    /// @return the value font style element
+    ///
+    String &valueFontStyle() { return _value_fontstyle; }
+
+    ///
+    /// Get value font weight
+    ///
+    /// @return the value font weight element
+    ///
+    String &valueFontWeight() { return _value_fontweight; }
 
     ///
     /// Get value align
     ///
     /// @return the value align element
     ///
-    String  &valueAlign() { return _value_align; }
+    String &valueAlign() { return _value_align; }
+
+    ///
+    /// Get value color
+    ///
+    /// @return the value color element
+    ///
+    String &valueColor() { return _value_color; }
+
+    ///
+    /// Get value shadow opacity
+    ///
+    /// @return the value shadow opacity element
+    ///
+    Decimal  &valueShadowOpacity() { return _value_shadowopacity; }
+
+    ///
+    /// Get value shadow distance
+    ///
+    /// @return the value shadow distance element
+    ///
+    Decimal  &valueShadowDistance() { return _value_shadowdistance; }
+
+    ///
+    /// Get value border width
+    ///
+    /// @return the value border width element
+    ///
+    Decimal  &valueBorderWidth() { return _value_borderwidth; }
+
+    ///
+    /// Get value border color
+    ///
+    /// @return the value border color element
+    ///
+    String &valueBorderColor() { return _value_bordercolor; }
 
     ///
     /// Get border
@@ -314,14 +398,14 @@ namespace layout
     ///
     /// @return the border color element
     ///
-    String  &borderColor() { return _bordercolor; }
+    String &borderColor() { return _bordercolor; }
 
     ///
     /// Get background color
     ///
     /// @return the background color element
     ///
-    String  &backgroundColor() { return _bgcolor; }
+    String &backgroundColor() { return _bgcolor; }
 
     ///
     /// Get nbr lap
@@ -369,10 +453,6 @@ namespace layout
 	Boolean      _display;
     String       _position;
     String       _orientation;
-    String       _unit;
-    String       _zoom;
-    String       _format;
-	String       _source;
     Unsigned     _at, _duration;
     Unsigned     _x, _y;
 	Unsigned     _width, _height;
@@ -386,17 +466,38 @@ namespace layout
 	Decimal      _padding_right;
 	Decimal      _padding_top;
 	Decimal      _padding_bottom;
-	String       _font;
-	String       _text;
-	String       _txtcolor;
-	Decimal      _txtratio;
-	Unsigned     _txtshadow;
-	Unsigned     _txtlinespace;
-	String       _label_align;
-	String       _value_align;
+
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;
+
+	String       _font;
+	String       _text;
+
+	Decimal      _label_fontsize;
+	String       _label_fontstyle;
+	String       _label_fontweight;
+	String       _label_align;
+	String       _label_color;
+	Decimal      _label_shadowopacity;
+	Decimal      _label_shadowdistance;
+	Decimal      _label_borderwidth;
+	String       _label_bordercolor;
+
+	Decimal      _value_fontsize;
+	String       _value_fontstyle;
+	String       _value_fontweight;
+	String       _value_align;
+	String       _value_color;
+	Decimal      _value_shadowopacity;
+	Decimal      _value_shadowdistance;
+	Decimal      _value_borderwidth;
+	String       _value_bordercolor;
+
+    String       _unit;
+    String       _zoom;
+    String       _format;
+	String       _source;
 	Unsigned     _nbr_lap;
 
 	Boolean      _with_label;

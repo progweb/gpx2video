@@ -977,6 +977,8 @@ void GPX2VideoApplicationWindow::on_widget_append_clicked(void) {
 	log_call();
 
 	log_info("Append new widget");
+
+	log_warn("NOT YET IMPLEMENTED");
 }
 
 

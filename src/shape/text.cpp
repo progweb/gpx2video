@@ -320,6 +320,8 @@ void TextShape::xmlwrite(std::ostream &os) {
 
 	ShapeBase::xmlwrite(os);
 
+	os << "<shape>text</shape>" << std::endl;
+
 	os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 
 //	os << "<text-ratio>" << theme().textRatio() << "</text-ratio>" << std::endl;

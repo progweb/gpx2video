@@ -38,10 +38,6 @@ namespace layout
 	_display(this, "display", Node::ATTRIBUTE, false),
     _position(this, "position",   Node::ATTRIBUTE, false),
     _orientation(this, "orientation",   Node::ATTRIBUTE, false),
-    _unit(this, "unit",   Node::ELEMENT, false),
-    _zoom(this, "zoom",   Node::ELEMENT, false),
-    _format(this, "format",   Node::ELEMENT, false),
-    _source(this, "source",   Node::ELEMENT, false),
 	_at(this, "at", Node::ATTRIBUTE, false),
 	_duration(this, "duration", Node::ATTRIBUTE, false),
     _x(this, "x", Node::ATTRIBUTE, false),
@@ -58,18 +54,40 @@ namespace layout
     _padding_right(this, "padding-right", Node::ELEMENT, false),
     _padding_top(this, "padding-top", Node::ELEMENT, false),
     _padding_bottom(this, "padding-bottom", Node::ELEMENT, false),
-	_font(this, "font", Node::ELEMENT, false),
-	_text(this, "text", Node::ELEMENT, false),
-	_txtcolor(this, "text-color", Node::ELEMENT, false),
-	_txtratio(this, "text-ratio", Node::ELEMENT, false),
-	_txtshadow(this, "text-shadow", Node::ELEMENT, false),
-	_txtlinespace(this, "text-linespace", Node::ELEMENT, false),
-	_label_align(this, "label-align", Node::ELEMENT, false),
-	_value_align(this, "value-align", Node::ELEMENT, false),
+
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
+
+	_font(this, "font", Node::ELEMENT, false),
+	_text(this, "text", Node::ELEMENT, false),
+
+	_label_fontsize(this, "label-font-size", Node::ELEMENT, false),
+	_label_fontstyle(this, "label-font-style", Node::ELEMENT, false),
+	_label_fontweight(this, "label-font-weight", Node::ELEMENT, false),
+	_label_align(this, "label-align", Node::ELEMENT, false),
+	_label_color(this, "label-color", Node::ELEMENT, false),
+	_label_shadowopacity(this, "label-shadow-opactiy", Node::ELEMENT, false),
+	_label_shadowdistance(this, "label-shadow-distance", Node::ELEMENT, false),
+	_label_borderwidth(this, "label-border-width", Node::ELEMENT, false),
+	_label_bordercolor(this, "label-border-color", Node::ELEMENT, false),
+
+	_value_fontsize(this, "value-font-size", Node::ELEMENT, false),
+	_value_fontstyle(this, "value-font-style", Node::ELEMENT, false),
+	_value_fontweight(this, "value-font-weight", Node::ELEMENT, false),
+	_value_align(this, "value-align", Node::ELEMENT, false),
+	_value_color(this, "value-color", Node::ELEMENT, false),
+	_value_shadowopacity(this, "value-shadow-opactiy", Node::ELEMENT, false),
+	_value_shadowdistance(this, "value-shadow-distance", Node::ELEMENT, false),
+	_value_borderwidth(this, "value-border-width", Node::ELEMENT, false),
+	_value_bordercolor(this, "value-border-color", Node::ELEMENT, false),
+
+    _unit(this, "unit",   Node::ELEMENT, false),
+    _zoom(this, "zoom",   Node::ELEMENT, false),
+    _format(this, "format",   Node::ELEMENT, false),
+    _source(this, "source",   Node::ELEMENT, false),
 	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false),
+
 	_with_label(this, "with-label", Node::ELEMENT, false),
 	_with_value(this, "with-value", Node::ELEMENT, false),
 	_with_icon(this, "with-icon", Node::ELEMENT, false),
@@ -81,10 +99,6 @@ namespace layout
     getInterfaces().push_back(&_display);
     getInterfaces().push_back(&_position);
     getInterfaces().push_back(&_orientation);
-    getInterfaces().push_back(&_unit);
-    getInterfaces().push_back(&_zoom);
-    getInterfaces().push_back(&_format);
-    getInterfaces().push_back(&_source);
     getInterfaces().push_back(&_at);
     getInterfaces().push_back(&_duration);
     getInterfaces().push_back(&_x);
@@ -101,18 +115,40 @@ namespace layout
     getInterfaces().push_back(&_padding_right);
     getInterfaces().push_back(&_padding_top);
     getInterfaces().push_back(&_padding_bottom);
-    getInterfaces().push_back(&_font);
-    getInterfaces().push_back(&_text);
-    getInterfaces().push_back(&_txtcolor);
-    getInterfaces().push_back(&_txtratio);
-    getInterfaces().push_back(&_txtshadow);
-    getInterfaces().push_back(&_txtlinespace);
-    getInterfaces().push_back(&_label_align);
-    getInterfaces().push_back(&_value_align);
+
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
+
+    getInterfaces().push_back(&_font);
+    getInterfaces().push_back(&_text);
+
+    getInterfaces().push_back(&_label_fontsize);
+    getInterfaces().push_back(&_label_fontstyle);
+    getInterfaces().push_back(&_label_fontweight);
+    getInterfaces().push_back(&_label_align);
+    getInterfaces().push_back(&_label_color);
+    getInterfaces().push_back(&_label_shadowopacity);
+    getInterfaces().push_back(&_label_shadowdistance);
+    getInterfaces().push_back(&_label_borderwidth);
+    getInterfaces().push_back(&_label_bordercolor);
+
+    getInterfaces().push_back(&_value_fontsize);
+    getInterfaces().push_back(&_value_fontstyle);
+    getInterfaces().push_back(&_value_fontweight);
+    getInterfaces().push_back(&_value_align);
+    getInterfaces().push_back(&_value_color);
+    getInterfaces().push_back(&_value_shadowopacity);
+    getInterfaces().push_back(&_value_shadowdistance);
+    getInterfaces().push_back(&_value_borderwidth);
+    getInterfaces().push_back(&_value_bordercolor);
+
+    getInterfaces().push_back(&_unit);
+    getInterfaces().push_back(&_zoom);
+    getInterfaces().push_back(&_format);
+    getInterfaces().push_back(&_source);
     getInterfaces().push_back(&_nbr_lap);
+
     getInterfaces().push_back(&_with_label);
     getInterfaces().push_back(&_with_value);
     getInterfaces().push_back(&_with_icon);
@@ -132,8 +168,15 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
-	_txtratio.setValue("0.0");
-	_txtlinespace.setValue("-1");
+	_label_fontsize.setValue("-1");
+	_label_shadowopacity.setValue("-1");
+	_label_shadowdistance.setValue("-1");
+	_label_borderwidth.setValue("-1");
+
+	_value_fontsize.setValue("-1");
+	_value_shadowopacity.setValue("-1");
+	_value_shadowdistance.setValue("-1");
+	_value_borderwidth.setValue("-1");
 
 	_with_label.setValue("true");
 	_with_value.setValue("true");

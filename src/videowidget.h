@@ -135,62 +135,10 @@ public:
 			FontWeightUltraBold = 800,
 			FontWeightHeavy = 900,
 			FontWeightUltraHeavy = 1000,
-			FontWeightUnkown
+			FontWeightUnknown
 		};
 
-		Theme() {
-			setSize(64, 64);
-			setFlags(FlagAll);
-		
-			setPadding(PaddingAll, 0);
-
-			setBorder(0);
-			setBorderColor(0.0, 0.0, 0.0, 0.0);
-			setBackgroundColor(0.0, 0.0, 0.0, 0.0);
-
-			setTickAlign(AlignCenter);
-			setTickColor(1.0, 1.0, 1.0, 1.0);
-			setTickLabelColor(1.0, 1.0, 1.0, 1.0);
-
-			setNeedleColor(1.0, 1.0, 1.0, 1.0);
-
-			setGaugeBorder(0);
-			setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
-			setGaugeBackgroundColor(0.0, 0.0, 0.0, 0.0);
-			setGaugeColor(0, 0.0, 0.8, 0.0, 0.8);
-			setGaugeColor(1, 1.0, 0.0, 0.0, 1.0);
-
-			setCursorColor(0.8, 0.0, 0.0, 0.8);
-
-			setFont("./assets/fonts/Helvetica.ttf");
-
-			setLabelAlign(AlignLeft);
-			setLabelFontSize(20);
-			setLabelFontStyle(FontStyleNormal);
-			setLabelFontWeight(FontWeightNormal);
-			setLabelBorder(0);
-			setLabelShadowOpacity(80);
-			setLabelShadowDistance(0);
-			setLabelColor(1.0, 1.0, 1.0, 1.0);
-			setLabelBorderColor(1.0, 1.0, 1.0, 1.0);
-
-			setValueMin(0);
-			setValueMax(1000);
-			setValueAlign(AlignLeft);
-			setValueFontSize(20);
-			setValueFontStyle(FontStyleNormal);
-			setValueFontWeight(FontWeightNormal);
-			setValueBorder(2);
-			setValueShadowOpacity(80);
-			setValueShadowDistance(0);
-			setValueColor(1.0, 1.0, 1.0, 1.0);
-			setValueBorderColor(1.0, 1.0, 1.0, 1.0);
-			setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
-
-//			setTextShadow(0);
-//			setTextRatio(2.0);
-//			setTextLineSpace(10);
-		}
+		Theme();
 
 		void setSize(int width, int height) {
 			width_ = width;
@@ -376,6 +324,9 @@ public:
 		}
 
 		void setLabelFontSize(int size) {
+			if (size < 0)
+				return;
+
 			label_font_size_ = size;
 		}
 
@@ -416,6 +367,9 @@ public:
 		}
 
 		void setLabelShadowDistance(int distance) {
+			if (distance < 0)
+				return;
+
 			label_shadow_distance_ = distance;
 		}
 
@@ -424,15 +378,21 @@ public:
 		}
 
 		void setLabelShadowOpacity(int opacity) {
+			if (opacity < 0)
+				return;
+
 			label_shadow_opacity_ = opacity;
 		}
 
-		int labelBorder(void) const {
-			return label_border_;
+		int labelBorderWidth(void) const {
+			return label_border_width_;
 		}
 
-		void setLabelBorder(int border) {
-			label_border_ = border;
+		void setLabelBorderWidth(int width) {
+			if (width < 0)
+				return;
+
+			label_border_width_ = width;
 		}
 
 		const float * labelBorderColor(void) const {
@@ -590,6 +550,9 @@ public:
 		}
 
 		void setValueFontSize(int size) {
+			if (size < 0)
+				return;
+
 			value_font_size_ = size;
 		}
 
@@ -630,6 +593,9 @@ public:
 		}
 
 		void setValueShadowDistance(int distance) {
+			if (distance < 0)
+				return;
+
 			value_shadow_distance_ = distance;
 		}
 
@@ -638,15 +604,21 @@ public:
 		}
 
 		void setValueShadowOpacity(int opacity) {
+			if (opacity < 0)
+				return;
+
 			value_shadow_opacity_ = opacity;
 		}
 
-		const int& valueBorder(void) const {
-			return value_border_;
+		const int& valueBorderWidth(void) const {
+			return value_border_width_;
 		}
 
-		void setValueBorder(int border) {
-			value_border_ = border;
+		void setValueBorderWidth(int width) {
+			if (width < 0)
+				return;
+
+			value_border_width_ = width;
 		}
 
 		const float * valueBorderColor(void) const {
@@ -720,7 +692,7 @@ public:
 		int label_font_size_;
 		FontStyle label_font_style_;
 		FontWeight label_font_weight_;
-		int label_border_;
+		int label_border_width_;
 		int label_shadow_opacity_;
 		int label_shadow_distance_;
 		float label_color_[4];
@@ -734,7 +706,7 @@ public:
 		int value_font_size_;
 		FontStyle value_font_style_;
 		FontWeight value_font_weight_;
-		int value_border_;
+		int value_border_width_;
 		int value_shadow_opacity_;
 		int value_shadow_distance_;
 		float value_color_[4];
@@ -924,6 +896,7 @@ public:
 	static Orientation string2orientation(std::string &s);
 	static Theme::Align string2align(std::string &s);
 	static Theme::FontStyle string2fontstyle(std::string &s);
+	static Theme::FontWeight string2fontweight(std::string &s);
 	static Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
 
@@ -932,6 +905,7 @@ public:
 	static std::string orientation2string(Orientation orientation);
 	static std::string align2string(Theme::Align align);
 	static std::string fontstyle2string(Theme::FontStyle style);
+	static std::string fontweight2string(Theme::FontWeight weight);
 	static std::string unit2string(Unit unit, bool label=true);
 
 protected:

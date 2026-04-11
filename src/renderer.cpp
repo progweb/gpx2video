@@ -386,6 +386,12 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Theme::Align label_align = VideoWidget::Theme::AlignLeft;
 	VideoWidget::Theme::Align value_align = VideoWidget::Theme::AlignLeft;
 
+	VideoWidget::Theme::FontStyle label_font_style = VideoWidget::Theme::FontStyleNormal;
+	VideoWidget::Theme::FontStyle value_font_style = VideoWidget::Theme::FontStyleNormal;
+
+	VideoWidget::Theme::FontWeight label_font_weight = VideoWidget::Theme::FontWeightNormal;
+	VideoWidget::Theme::FontWeight value_font_weight = VideoWidget::Theme::FontWeightNormal;
+
 	// Display
 	if ((bool) w->display() == false) {
 		log_info("Skip widget '%s'", (const char *) w->type());
@@ -491,12 +497,48 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	log_info("Load widget '%s' (shape: %s)", (const char *) w->type(), (const char *) w->shape());
 
+	// Font style for label
+	s = (const char *) w->labelFontStyle();
+	label_font_style = VideoWidget::string2fontstyle(s);
+
+	if (label_font_style == VideoWidget::Theme::FontStyleUnknown) {
+		log_error("Widget loading error, label font style value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Font weight for label
+	s = (const char *) w->labelFontWeight();
+	label_font_weight = VideoWidget::string2fontweight(s);
+
+	if (label_font_weight == VideoWidget::Theme::FontWeightUnknown) {
+		log_error("Widget loading error, label font weight value '%s' unknown", s.c_str());
+		goto error;
+	}
+
 	// Text alignment for label
 	s = (const char *) w->labelAlign();
 	label_align = VideoWidget::string2align(s);
 
 	if (label_align == VideoWidget::Theme::AlignUnknown) {
 		log_error("Widget loading error, label align value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Font style for value
+	s = (const char *) w->valueFontStyle();
+	value_font_style = VideoWidget::string2fontstyle(s);
+
+	if (value_font_style == VideoWidget::Theme::FontStyleUnknown) {
+		log_error("Widget loading error, value font style value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Font weight for value
+	s = (const char *) w->valueFontWeight();
+	label_font_weight = VideoWidget::string2fontweight(s);
+
+	if (value_font_weight == VideoWidget::Theme::FontWeightUnknown) {
+		log_error("Widget loading error, value font weight value '%s' unknown", s.c_str());
 		goto error;
 	}
 
@@ -526,7 +568,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	flags |= VideoWidget::Theme::FlagCursor;
 	flags |= VideoWidget::Theme::FlagGauge;
 
-	// Widget settings
+	// Widget common settings
 	widget->setShape(shape);
 	widget->setPosition(position);
 	widget->setOrientation(orientation);
@@ -551,14 +593,33 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setFont((const char *) w->font());
 	widget->setLabel((const char *) w->name());
 	widget->setText((const char *) w->text());
-	widget->theme().setLabelAlign(label_align);
-	widget->theme().setLabelColor((const char *) w->textColor());
 
+	// Widget label settings
+	widget->theme().setLabelFontSize(w->labelFontSize());
+	widget->theme().setLabelFontStyle(label_font_style);
+	widget->theme().setLabelFontWeight(label_font_weight);
+	widget->theme().setLabelAlign(label_align);
+	widget->theme().setLabelColor((const char *) w->labelColor());
+	widget->theme().setLabelShadowOpacity(w->labelShadowOpacity());
+	widget->theme().setLabelShadowDistance(w->labelShadowDistance());
+	widget->theme().setLabelBorderWidth(w->labelBorderWidth());
+	widget->theme().setLabelBorderColor((const char *) w->labelBorderColor());
+
+	// Widget value settings
+	widget->theme().setValueFontSize(w->valueFontSize());
+	widget->theme().setValueFontStyle(value_font_style);
+	widget->theme().setValueFontWeight(value_font_weight);
+	widget->theme().setValueAlign(value_align);
+	widget->theme().setValueColor((const char *) w->valueColor());
+	widget->theme().setValueShadowOpacity(w->valueShadowOpacity());
+	widget->theme().setValueShadowDistance(w->valueShadowDistance());
+	widget->theme().setValueBorderWidth(w->valueBorderWidth());
+	widget->theme().setValueBorderColor((const char *) w->valueBorderColor());
+
+	// Widget misc. settings
 //	widget->theme().setTextShadow(w->textShadow());
 //	widget->theme().setTextRatio((double) w->textRatio());
 //	widget->theme().setTextLineSpace(w->textLineSpace());
-
-	widget->theme().setValueAlign(value_align);
 	if (unit != VideoWidget::UnitNone)
 		widget->setUnit(unit);
 	widget->setZoom(zoom);

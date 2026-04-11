@@ -45,7 +45,7 @@ void VerticalSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
 		font = (TextShape::Font) {
 			.size = theme().labelFontSize(),
-			.border = theme().labelBorder(),
+			.border = theme().labelBorderWidth(),
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.style = theme().labelFontStyle(),
@@ -59,7 +59,7 @@ void VerticalSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
-			.border = theme().valueBorder(),
+			.border = theme().valueBorderWidth(),
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.style = theme().valueFontStyle(),
@@ -251,7 +251,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		std::string value = std::to_string((int) std::round(verticalspeed));
 
-		marker(cr, xb, theme().valueBorder(), theme().valueColor(), theme().valueBackgroundColor(), theme().valueBorderColor(), value);
+		marker(cr, xb, theme().valueBorderWidth(), theme().valueColor(), theme().valueBackgroundColor(), theme().valueBorderColor(), value);
 	}
 
 	// Draw label
