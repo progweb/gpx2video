@@ -191,7 +191,7 @@ To build gpx2video, please install all dependencies (on Debian):
 apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev \
     libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
-    libcairo2-dev librsvg2-dev libopenexr-dev \
+    libpango1.0-dev libcairo2-dev librsvg2-dev libopenexr-dev \
     libfreetype-dev
 ```
 
@@ -309,6 +309,7 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 	</widget>		
 	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical">
 		<type>elevation</type>
+		<shape>text</shape>
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
@@ -337,29 +338,54 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 </layout>
 ```
 
+#### Shapes: text, arc or bar
 
-#### Widget common settings
+Some gauges support different shapes: text, bar or arc. 
+
+Default shape is text (label, value and icon)
+
+WARNING: bar & arc shapes are in progress.
+
+##### Text shape common settings
 
 Here all widget common element settings:
 
 ```xml
 <widget x="250" y="450" width="600" height="120" position="left" orientation="vertical" at="1000" duration="9000" display="true">
 	<type>speed</type>
-	<name>VITESSE</name>
+    <shape>text</shape>
+
+	<name>SPEED</name>
 	<margin>20</margin>
 	<padding>5</padding>
-	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
-	<text-ratio>2.0</text-ratio>
-	<text-shadow>3</text-shadow>
-	<text-linespace>2</text-linespace>
-	<label-align>left</label-align>
-	<label-color>#00ff00ff</label-color>
-	<value-align>right</value-align>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
+	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
+
 	<with-label>true</with-label>
+	<label-font-size>20</label-font-size>
+	<label-font-style>normal</label-font-style>
+	<label-font-weight>400</label-font-weight>
+	<label-align>left</label-align>
+	<label-color>#00ff00ff</label-color>
+	<label-shadow-opacity>3</label-shadow-opacity>
+	<label-shadow-distance>3</label-shadow-distance>
+	<label-border-width>2</label-border-width>
+	<label-border-color>#000000ff</label-border-color>
+
 	<with-value>true</with-value>
+	<value-align>right</value-align>
+	<value-font-size>20</value-font-size>
+	<value-font-style>normal</value-font-style>
+	<value-font-weight>400</value-font-weight>
+	<value-align>left</value-align>
+	<value-color>#00ff00ff</value-color>
+	<value-shadow-opacity>3</value-shadow-opacity>
+	<value-shadow-distance>3</value-shadow-distance>
+	<value-border-width>2</value-border-width>
+	<value-border-color>#000000ff</value-border-color>
+
 	<with-picto>true</with-picto>
 	<with-unit>true</with-unit>
 </widget>		
@@ -382,13 +408,18 @@ Node elements are:
   - **border**: to set the border width.
   - **border-color**: to set the border color in #RGBA.
   - **background-color**: to set the background color in #RGBA.
-  - **label-color**: to set the text color in #RGBA.
-  - **label-align**: to set text alignement (left, center, right)
-  - **text-ratio**: define the label and value size ratio.
-  - **text-shadow**: text shadow thickness.
-  - **text-linespace**: line space between label and value.
-  - **value-color**: to set the value color in #RGBA.
-  - **value-align**: to set value alignement (left, center, right)
+
+Label or value node elements are:
+  - **xxxx-font-size**: to set the text size.
+  - **xxxx-font-style**: to set the text style (normal or italic).
+  - **xxxx-font-weight**: to set the text weight value (100, 200, 300, 350, 380, 400, 500, 600, 700, 800, 900 or 1000)).
+  - **xxxx-color**: to set the text color in #RGBA.
+  - **xxxx-align**: to set text alignement (left, center, right)
+  - **xxxx-shadow-opacity**: text shadow opacity (in percent).
+  - **xxxx-shadow-distance**: text shadow thickness.
+  - **xxxx-border-width**: to set the text border width.
+  - **xxxx-border-color**: to set the text border color in #RGBA.
+
   - **with-xxxx**: to show or not the field (default is true).
 
 **type** gauges supported are:
@@ -419,8 +450,19 @@ The **display** default value is true.
 
 **padding** value sets the space around the text. Whereas, **margin** value defines the space around the widget.
 
+##### Arc shape common settings
 
-#### speed, maxspeed, avgspeed and avgridespeed widgets
+TODO (in devel)
+
+##### Bar shape common settings
+
+TODO (in devel)
+
+#### Widget units
+
+You can specify units for some widgets.
+
+##### speed, maxspeed, avgspeed and avgridespeed widgets
 
 ```xml
 <widget>
@@ -432,7 +474,7 @@ The **display** default value is true.
 **unit** values are: mph, kph, mpm / minmile, mpk / minkm.
 
 
-#### vertical speed widget
+##### vertical speed widget
 
 ```xml
 <widget>
@@ -444,7 +486,7 @@ The **display** default value is true.
 **unit** values are: mps.
 
 
-#### distance widget
+##### distance widget
 
 ```xml
 <widget>
@@ -456,7 +498,7 @@ The **display** default value is true.
 **unit** values are: m, km, ft or miles.
 
 
-#### elevation widget
+##### elevation widget
 
 ```xml
 <widget>
@@ -468,7 +510,7 @@ The **display** default value is true.
 **unit** values are: m or ft.
 
 
-#### date widget
+##### date widget
 
 ```xml
 <widget>
@@ -478,7 +520,7 @@ The **display** default value is true.
 ```
 
 
-#### temperature widget
+##### temperature widget
 
 ```xml
 <widget>
@@ -490,7 +532,7 @@ The **display** default value is true.
 **unit** values are: C, celsius or F, fahrenheit.
 
 
-#### g-force widget
+##### g-force widget
 
 ```xml
 <widget>
@@ -502,7 +544,7 @@ The **display** default value is true.
 **unit** values are: g or mps2.
 
 
-#### lap widget
+##### lap widget
 
 ```xml
 <widget>
@@ -514,7 +556,7 @@ The **display** default value is true.
 **nbr-lap** value is the lap target number.
 
 
-#### image widget
+##### image widget
 
 ```xml
 <widget>
@@ -528,7 +570,7 @@ The **display** default value is true.
 **source** is optional.
 
 
-#### text widget
+##### text widget
 
 ```xml
 <widget>
@@ -766,15 +808,19 @@ $ ./gpx2video -v -m GH020340.MP4 -g ACTIVITY.gpx -l layout.xml \
 ```
 
 
-## ToDo
+## ToDo & Roadmap
 
+v0.1.0: First release in command line
+
+v0.2.0:
+  - User interface integration
+  - Render fonts with pango
   - Render gauge:
     - hflip: flip icon and label
     - svg: add icon svg support
   - Render maps (alpha, size, position, zoom...)
   - Render track (color, remaining, speed gradient...)
   - Gallery photo import
-  - User interface integration
   - 360 videos support
 
 

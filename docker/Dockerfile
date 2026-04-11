@@ -24,6 +24,7 @@ RUN apt-get update \
         libopenexr-dev \
         libopenimageio-dev \
         libgeographic.*-dev \
+		libpango1.0-dev \
         libcairo2-dev \
 		librsvg2-dev \
 		\
