@@ -119,6 +119,10 @@ void GPX2VideoRenderer::setLayoutFile(const Glib::ustring &layout_file) {
 	reset();
 	load();
 
+	// Set last timestamp
+	set_timestamp(timestamp_);
+
+	// Register tasks
 	app_.append(this);
 
 //	// Request buffering
