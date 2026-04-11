@@ -561,17 +561,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 					}
 			));
 
-	// Label border size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_border_size_spinbutton");
+	// Label border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_border_width_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"label_border_size_spinbutton\" object in widget_frame.ui");
+		throw std::runtime_error("No \"label_border_width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: label border size changed to '%d'",
+						log_info("Widget %s: label border width changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
-						widget_selected_->widget()->theme().setLabelBorder(value);
+						widget_selected_->widget()->theme().setLabelBorderWidth(value);
 					}
 			));
 
@@ -713,17 +713,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 					}
 			));
 
-	// Value border size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_border_size_spinbutton");
+	// Value border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_border_width_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"value_border_size_spinbutton\" object in widget_frame.ui");
+		throw std::runtime_error("No \"value_border_width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value border size changed to '%d'",
+						log_info("Widget %s: value border width changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
-						widget_selected_->widget()->theme().setValueBorder(value);
+						widget_selected_->widget()->theme().setValueBorderWidth(value);
 					}
 			));
 
@@ -1144,12 +1144,12 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget label border size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_border_size_spinbutton");
+	// Widget label border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_border_width_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"label_border_size_spinbutton\" object in widget_frame.ui");
+		throw std::runtime_error("No \"label_border_width_spinbutton\" object in widget_frame.ui");
 
-	spinbutton->set_value(widget_selected_->widget()->theme().labelBorder());
+	spinbutton->set_value(widget_selected_->widget()->theme().labelBorderWidth());
 
 	// Widget label border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("label_border_color_button");
@@ -1231,12 +1231,12 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget value border size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_border_size_spinbutton");
+	// Widget value border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_border_width_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"value_border_size_spinbutton\" object in widget_frame.ui");
+		throw std::runtime_error("No \"value_border_width_spinbutton\" object in widget_frame.ui");
 
-	spinbutton->set_value(widget_selected_->widget()->theme().valueBorder());
+	spinbutton->set_value(widget_selected_->widget()->theme().valueBorderWidth());
 
 	// Widget value border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("value_border_color_button");

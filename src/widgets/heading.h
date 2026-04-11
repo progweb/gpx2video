@@ -108,6 +108,7 @@ private:
 	HeadingTextShape(VideoWidget *widget)
 		: TextShape(widget->theme())
 		, bg_buf_(NULL)
+		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
 	}

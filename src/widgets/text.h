@@ -142,6 +142,8 @@ protected:
 		IndentingOStreambuf indent(os, 4);
 
 		ShapeBase::xmlwrite(os);
+
+		os << "<text>" << text() << "</text>" << std::endl;
 	}
 
 private:

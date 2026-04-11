@@ -18,6 +18,61 @@
  * VideoWidget::Theme
  */
 
+VideoWidget::Theme::Theme() {
+	setSize(64, 64);
+	setFlags(VideoWidget::Theme::FlagAll);
+
+	setPadding(VideoWidget::Theme::PaddingAll, 0);
+
+	setBorder(0);
+	setBorderColor(0.0, 0.0, 0.0, 0.0);
+	setBackgroundColor(0.0, 0.0, 0.0, 0.0);
+
+	setTickAlign(VideoWidget::Theme::AlignCenter);
+	setTickColor(1.0, 1.0, 1.0, 1.0);
+	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
+
+	setNeedleColor(1.0, 1.0, 1.0, 1.0);
+
+	setGaugeBorder(0);
+	setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
+	setGaugeBackgroundColor(0.0, 0.0, 0.0, 0.0);
+	setGaugeColor(0, 0.0, 0.8, 0.0, 0.8);
+	setGaugeColor(1, 1.0, 0.0, 0.0, 1.0);
+
+	setCursorColor(0.8, 0.0, 0.0, 0.8);
+
+	setFont("./assets/fonts/Helvetica.ttf");
+
+	setLabelFontSize(30);
+	setLabelFontStyle(VideoWidget::Theme::FontStyleNormal);
+	setLabelFontWeight(VideoWidget::Theme::FontWeightNormal);
+	setLabelShadowOpacity(80);
+	setLabelShadowDistance(3);
+	setLabelAlign(VideoWidget::Theme::AlignLeft);
+	setLabelColor(1.0, 1.0, 1.0, 1.0);
+	setLabelBorderWidth(0);
+	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
+
+	setValueMin(0);
+	setValueMax(1000);
+	setValueFontSize(60);
+	setValueFontStyle(VideoWidget::Theme::FontStyleNormal);
+	setValueFontWeight(VideoWidget::Theme::FontWeightNormal);
+	setValueShadowOpacity(80);
+	setValueShadowDistance(3);
+	setValueAlign(VideoWidget::Theme::AlignLeft);
+	setValueColor(1.0, 1.0, 1.0, 1.0);
+	setValueBorderWidth(0);
+	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
+	setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
+
+//	setTextShadow(0);
+//	setTextRatio(2.0);
+//	setTextLineSpace(10);
+}
+
+
 bool VideoWidget::Theme::hex2color(float color[4], std::string hex) {
 	if (hex.empty())
 		return false;
@@ -45,8 +100,11 @@ std::string VideoWidget::Theme::color2hex(const float color[4]) {
 	stream << "#" 
 		<< std::setfill('0') << std::setw(2) << std::setbase(16) 
 		<< (int) (color[0] * 255.0)  // R
+		<< std::setfill('0') << std::setw(2) << std::setbase(16) 
 		<< (int) (color[1] * 255.0)  // G
+		<< std::setfill('0') << std::setw(2) << std::setbase(16) 
 		<< (int) (color[2] * 255.0)  // B
+		<< std::setfill('0') << std::setw(2) << std::setbase(16) 
 		<< (int) (color[3] * 255.0); // A
 
 	return stream.str();
@@ -151,6 +209,55 @@ VideoWidget::Theme::FontStyle VideoWidget::string2fontstyle(std::string &s) {
 }
 
 
+VideoWidget::Theme::FontWeight VideoWidget::string2fontweight(std::string &s) {
+	int v = 0;
+
+	VideoWidget::Theme::FontWeight weight;
+
+	if (s.empty() || (s == "none"))
+		weight = VideoWidget::Theme::FontWeightNormal;
+	else {
+		// Catch stoi errors
+		try {
+			v = std::stoi(s);
+		}
+		catch (const std::invalid_argument &e) {
+		}
+		catch (const std::out_of_range &e) {
+		}
+
+		if ((s == "thin") || (v == 100))
+			weight = VideoWidget::Theme::FontWeightThin;
+		else if ((s == "ultralight") || (v == 200))
+			weight = VideoWidget::Theme::FontWeightUltraLight;
+		else if ((s == "light") || (v == 300))
+			weight = VideoWidget::Theme::FontWeightLight;
+		else if ((s == "semilight") || (v == 350))
+			weight = VideoWidget::Theme::FontWeightSemiLight;
+		else if ((s == "book") || (v == 380))
+			weight = VideoWidget::Theme::FontWeightBook;
+		else if ((s == "normal") || (v == 400))
+			weight = VideoWidget::Theme::FontWeightNormal;
+		else if ((s == "medium") || (v == 500))
+			weight = VideoWidget::Theme::FontWeightMedium;
+		else if ((s == "semibold") || (v == 600))
+			weight = VideoWidget::Theme::FontWeightSemiBold;
+		else if ((s == "bold") || (v == 700))
+			weight = VideoWidget::Theme::FontWeightBold;
+		else if ((s == "ultrabold") || (v == 800))
+			weight = VideoWidget::Theme::FontWeightUltraBold;
+		else if ((s == "heavy") || (v == 900))
+			weight = VideoWidget::Theme::FontWeightHeavy;
+		else if ((s == "ultraheavy") || (v == 1000))
+			weight = VideoWidget::Theme::FontWeightUltraHeavy;
+		else
+			weight = VideoWidget::Theme::FontWeightUnknown;
+	}
+
+	return weight;
+}
+
+
 VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 	VideoWidget::Unit unit;
 
@@ -225,13 +332,13 @@ std::string VideoWidget::position2string(Position position) {
 	case VideoWidget::PositionTop:
 		return "top";
 	case VideoWidget::PositionBottomLeft:
-		return "bottomleft";
+		return "bottom-left";
 	case VideoWidget::PositionBottomRight:
-		return "bottomright";
+		return "bottom-right";
 	case VideoWidget::PositionTopLeft:
-		return "topleft";
+		return "top-left";
 	case VideoWidget::PositionTopRight:
-		return "topright";
+		return "top-right";
 	default:
 		return "";
 	}
@@ -272,6 +379,38 @@ std::string VideoWidget::fontstyle2string(Theme::FontStyle style) {
 		return "oblique";
 	case Theme::FontStyleItalic:
 		return "italic";
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::fontweight2string(Theme::FontWeight weight) {
+	switch (weight) {
+	case Theme::FontWeightThin:
+		return "thin";
+	case Theme::FontWeightUltraLight:
+		return "ultralight";
+	case Theme::FontWeightLight:
+		return "light";
+	case Theme::FontWeightSemiLight:
+		return "semilight";
+	case Theme::FontWeightBook:
+		return "book";
+	case Theme::FontWeightNormal:
+		return "normal";
+	case Theme::FontWeightMedium:
+		return "medium";
+	case Theme::FontWeightSemiBold:
+		return "semibold";
+	case Theme::FontWeightBold:
+		return "bold";
+	case Theme::FontWeightUltraBold:
+		return "ultrabold";
+	case Theme::FontWeightHeavy:
+		return "heavy";
+	case Theme::FontWeightUltraHeavy:
+		return "ultraheavy";
 	default:
 		return "";
 	}

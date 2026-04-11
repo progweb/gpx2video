@@ -18,7 +18,7 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 //	PangoFontMetrics *metrics;
 	PangoFontDescription *desc;
 
-	int border = theme().labelBorder();
+	int border = theme().labelBorderWidth();
 	const float *fill = theme().labelColor(); //{ 1.0, 1.0, 1.0, 1.0 };
 	const float *outline = theme().labelBorderColor(); //{ 0.0, 0.0, 1.0, 1.0 };
 
