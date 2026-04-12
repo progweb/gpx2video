@@ -10,9 +10,9 @@ int main(int argc, char *argv[]) {
 	// Trace
 //	g_setenv ("GSETTINGS_SCHEMA_DIR", ".", FALSE);
 //::gpx2video_ui_register_resource();
-	gpx2video_log_setup("gpx2video-gtk");
-	gpx2video_log_quiet(0);
-	gpx2video_log_debug_enable(0);
+	GPX2VideoLog::setup("gpx2video-gtk");
+	GPX2VideoLog::quiet(0);
+	GPX2VideoLog::debug_enable(0);
 
 	// gpx2video application
 	auto app = GPX2VideoApplication::create();

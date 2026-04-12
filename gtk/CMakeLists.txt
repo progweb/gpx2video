@@ -154,7 +154,7 @@ set(GPX2VIDEO_SOURCES
 	src/application.cpp
 	src/area.cpp
 	src/audiodevice.cpp
-	src/log.c
+	src/log.cpp
 	src/main.cpp
 	src/prefs.cpp
 	src/renderer.cpp
