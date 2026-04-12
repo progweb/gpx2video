@@ -4,11 +4,24 @@ GTK interface for gpx2video tool.
 
 ![overview](./data/overview.png)
 
+![overview](./data/gpx2video-gtk.png)
 
 ## Features
 
 *Dev in progress*
 
+- Load video
+- Load & export layout file
+- Load telemetry file
+- Video start time (from video metadata or GPX)
+- Widget settings (in progress)
+
+TODO:
+
+- Video start time from GPMF (for GoPro)
+- Widget full settings
+- Telemetry settings
+- Optimization & fix cpu usage
 
 ## Data installation
 
@@ -33,8 +46,8 @@ xdg-desktop-menu forceupdate
 ### Add gpx2video gsettings file 
 
 ```bash
-cp -a data/com.progweb.gpx2video.gschema.xml /usr/share/glib-2.0/schemas
-glib-compile-schemas /usr/share/glib-2.0/schemas
+sudo cp -a data/com.progweb.gpx2video.gschema.xml /usr/share/glib-2.0/schemas
+sudo glib-compile-schemas /usr/share/glib-2.0/schemas
 ```
 
 
@@ -84,44 +97,46 @@ Shortkey:
   - Key 's': step one frame
 
 
-## Software architecture
+## Software thread architecture
 
-+ GTK main thread: 
-|     - GPX2VideoApplication
-|     - GPX2VideoApplicationWindow
-|     - GPX2VideoVideoFrame
-|     - GPX2VideoTelemetryFrame
-|     - GPX2VideoWidgetFrame
-|     - GPX2VideoAudioDevice
-|
-+--+ GPX2Video thread:
-|     - GPX2Video core application (evbase)
-|     - GPX2VideoRenderer
-|
-|        ApplicationWindow::run
-|
-+--+ GPX2VideoArea
+      + GTK main thread: 
+      |     - GPX2VideoApplication
+      |     - GPX2VideoApplicationWindow
+      |     - GPX2VideoVideoFrame
+      |     - GPX2VideoTelemetryFrame
+      |     - GPX2VideoWidgetFrame
+      |     - GPX2VideoAudioDevice
+      |
+      +--+ GPX2Video thread:
+      |     - GPX2Video core application (evbase)
+      |     - GPX2VideoRenderer
+      |
+      |        ApplicationWindow::run
+      |
+      +--+ GPX2VideoArea
 
-         GPX2VideoArea::open_stream
-           GPX2VideoStream::play
-             GPX2VideoStream::Audio::run [thread]
-             GPX2VideoStream::Video::run [thread]
+## Software stack call
 
-         GPX2VideoArea::schedule_refresh
-           GPX2VideoArea::on_timeout
-             GPX2VideoArea::video_refresh
-                 go to next frame or no change
-             GPX2VideoArea::video_display
-             GPX2VideoRenderer::update
-                 notify GPX2VideoRenderer thread
-             GPX2VideoArea::load_video_texture
-             GPX2VideoArea::load_widgets_texture
-               GPX2VideoRenderer::load_texture
-                 GPX2VideoWidget::load_texture
-             GPX2VideoArea::queue_render
-               GPX2VideoArea::on_render
-                 GPX2VideoArea::video_render
-                 GPX2VideoArea::widgets_render
-                   GPX2VideoRenderer::render
-                     GPX2VideoWidget::render
+      GPX2VideoArea::open_stream
+        GPX2VideoStream::play
+          GPX2VideoStream::Audio::run [thread]
+          GPX2VideoStream::Video::run [thread]
+
+      GPX2VideoArea::schedule_refresh
+        GPX2VideoArea::on_timeout
+          GPX2VideoArea::video_refresh
+              go to next frame or no change
+          GPX2VideoArea::video_display
+          GPX2VideoRenderer::update
+              notify GPX2VideoRenderer thread
+          GPX2VideoArea::load_video_texture
+          GPX2VideoArea::load_widgets_texture
+            GPX2VideoRenderer::load_texture
+              GPX2VideoWidget::load_texture
+          GPX2VideoArea::queue_render
+            GPX2VideoArea::on_render
+              GPX2VideoArea::video_render
+              GPX2VideoArea::widgets_render
+                GPX2VideoRenderer::render
+                  GPX2VideoWidget::render
 
