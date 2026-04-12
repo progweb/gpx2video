@@ -30,7 +30,8 @@ GPX2VideoApplication::GPX2VideoApplication()
 	set_version("v0.0.0");
 #endif
 
-	add_main_option_entry(Gio::Application::OptionType::BOOL, "debug", 'v', "Verbose mode", "boolean");
+	add_main_option_entry(Gio::Application::OptionType::BOOL, "debug", 'd', "Debug gpx2video core mode", "boolean");
+	add_main_option_entry(Gio::Application::OptionType::BOOL, "verbose", 'v', "Verbose mode", "boolean");
 }
 
 
@@ -67,7 +68,7 @@ int GPX2VideoApplication::on_handle_local_options(const Glib::RefPtr<Glib::Varia
 	bool debug = false;
 
 	if (options->lookup_value("debug", debug))
-		gpx2video_log_debug_enable(debug ? 1 : 0);
+		GPX2VideoLog::debug_enable(debug ? 1 : 0);
 
 	return -1;
 }

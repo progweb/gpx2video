@@ -6,10 +6,10 @@
 #endif /* LOG_MODE_PRINTF */
 
 
-int gpx2video_log_debug_enabled = 0;
+int gpx2video_gtk_log_debug_enabled = 0;
 
 
-void gpx2video_log_quiet(int quiet) {
+void GPX2VideoLog::quiet(int quiet) {
 #if defined(LOG_MODE_PRINTF)
 	if (quiet)
 		fclose(stderr);
@@ -20,7 +20,7 @@ void gpx2video_log_quiet(int quiet) {
 }
 
 
-void gpx2video_log_setup(const char *ident)
+void GPX2VideoLog::setup(const char *ident)
 {
 #if defined(LOG_MODE_PRINTF)
     (void) ident;
@@ -30,7 +30,7 @@ void gpx2video_log_setup(const char *ident)
 }
 
 
-void gpx2video_log_debug_enable(int verbose) {
-	gpx2video_log_debug_enabled = (verbose > 0);
+void GPX2VideoLog::debug_enable(int verbose) {
+	gpx2video_gtk_log_debug_enabled = (verbose > 0);
 }
 
