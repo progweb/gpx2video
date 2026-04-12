@@ -60,7 +60,7 @@ const std::string ExtractorSettings::getFriendlyName(const ExtractorSettings::Fo
 //---------------
 
 Extractor::Extractor(GPXApplication &app, const ExtractorSettings &settings) 
-	: Task(app) 
+	: Task(app, "extractor") 
 	, app_(app) 
 	, settings_(settings) {
 	container_ = NULL;
@@ -104,6 +104,8 @@ bool Extractor::start(void) {
 	std::string filename = app_.settings().outputfile();
 
 	log_call();
+
+	Task::start();
 
 	n_ = 0;
 	ok_ = false;

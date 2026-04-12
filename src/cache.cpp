@@ -4,7 +4,7 @@
 
 
 Cache::Cache(GPXApplication &app) 
-	: Task(app) 
+	: Task(app, "cache") 
 	, app_(app) {
 }
 
@@ -33,6 +33,8 @@ void Cache::init(void) {
 
 bool Cache::start(void) {
 	log_call();
+
+	Task::start();
 
 	log_notice("Cache initialization...");
 

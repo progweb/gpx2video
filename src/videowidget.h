@@ -910,7 +910,7 @@ public:
 
 protected:
 	VideoWidget(GPXApplication &app, std::string name)  
-		: GPXApplication::Task(app)
+		: GPXApplication::Task(app, name)
 		, app_(app) 
 		, at_begin_time_(0)
 		, at_end_time_(0)

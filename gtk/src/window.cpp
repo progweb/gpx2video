@@ -359,8 +359,8 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 	// Video renderer
 	renderer_->setLayoutFile(layout_file_);
 
-	// Exec async widgets tasks
-	perform(Task::ActionStart);
+//	// Exec async widgets tasks
+//	perform(Task::ActionStart);
 
 	// Populate widgets list
 	for (GPX2VideoWidget *item : renderer_->widgets()) {

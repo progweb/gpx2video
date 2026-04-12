@@ -20,6 +20,68 @@ extern "C" {
 #include "application.h"
 
 
+bool GPXApplication::Task::start(void) {
+//	printf("Task '%s' starting...\n", name().c_str());
+
+	is_running_ = true;
+
+	return true;
+}
+
+bool GPXApplication::Task::stop(void) {
+//	printf("Task '%s' stopping...\n", name().c_str());
+
+	is_running_ = false;
+
+	return true;
+};
+
+
+void GPXApplication::Task::go(void) {
+//	printf("Task '%s' exec requested\n", name().c_str());
+
+	if (!is_running_)
+		app_.perform(ActionStart);
+	else
+		log_warn("Task is yet running!");
+}
+
+
+void GPXApplication::Task::schedule(void) {
+//	printf("Task '%s' squeduling...\n", name().c_str());
+
+	if (is_running_)
+		app_.perform(ActionPerform);
+	else
+		log_warn("Task isn't running!");
+}
+
+
+void GPXApplication::Task::complete(void) {
+//	printf("Task '%s' completed\n", name().c_str());
+
+	if (is_running_)
+		app_.perform(ActionStop);
+	else
+		log_warn("Task isn't running!");
+}
+
+void GPXApplication::Task::finish(void) {
+//	printf("Task '%s' finish\n", name().c_str());
+
+	if (is_running_)
+		app_.perform(Task::ActionExit);
+	else
+		log_warn("Task isn't running!");
+}
+
+void GPXApplication::Task::reset(void) {
+//	printf("Task '%s' reset\n", name().c_str());
+
+	is_running_ = false;
+}
+
+
 GPXApplication::GPXApplication(struct event_base *evbase) 
 	: evbase_(evbase) { 
 	log_call();
