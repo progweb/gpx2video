@@ -67,7 +67,7 @@ int GPX2VideoApplication::on_handle_local_options(const Glib::RefPtr<Glib::Varia
 
 	bool debug = false;
 
-	if (options->lookup_value("debug", debug))
+	if (options->lookup_value("verbose", debug))
 		GPX2VideoLog::debug_enable(debug ? 1 : 0);
 
 	return -1;

@@ -108,6 +108,7 @@ void GPX2VideoRenderer::setMediaContainer(MediaContainer *container) {
 void GPX2VideoRenderer::setLayoutFile(const Glib::ustring &layout_file) {
 	log_call();
 
+	// Widget drawing...
 	is_ready_ = false;
 
 	app_.remove(this);
@@ -124,9 +125,6 @@ void GPX2VideoRenderer::setLayoutFile(const Glib::ustring &layout_file) {
 
 	// Register tasks
 	app_.append(this);
-
-//	// Request buffering
-//	refresh();
 }
 
 

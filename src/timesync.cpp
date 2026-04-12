@@ -39,6 +39,8 @@ bool TimeSync::start(void) {
 
 	log_call();
 
+	Task::start();
+
 	n_ = 0;
 	ok_ = false;
 	offset_ = 0;

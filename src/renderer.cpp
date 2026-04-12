@@ -42,7 +42,7 @@
 
 Renderer::Renderer(GPXApplication &app, 
 		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
-	: Task(app) 
+	: Task(app, "renderer") 
 	, app_(app)
 	, renderer_settings_(renderer_settings) 
 	, telemetry_settings_(telemetry_settings) {
@@ -73,6 +73,8 @@ bool Renderer::init(MediaContainer *container) {
 
 bool Renderer::start(void) {
 	log_call();
+
+	Task::start();
 
 	if (source_)
 		goto skip;

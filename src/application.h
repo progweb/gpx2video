@@ -67,41 +67,35 @@ public:
 
 		typedef void (*callback_t)(void *object);
 
-		Task(GPXApplication &app)
-			: app_(app) {
+		Task(GPXApplication &app, const std::string &name)
+			: app_(app) 
+			, name_(name) {
+			is_running_ = false;
 		}
 
 		virtual ~Task() {
 		}
 
-		virtual bool start(void) {
-			return true;
-		};
+		const std::string& name(void) {
+			return name_;
+		}
 
+		virtual bool start(void);
 		virtual bool run(void) = 0;
+		virtual bool stop(void);
 
-		virtual bool stop(void) {
-			return true;
-		};
-
-		void go(void) {
-			app_.perform(ActionStart);
-		}
-
-		void schedule(void) {
-			app_.perform(ActionPerform);
-		}
-
-		void complete(void) {
-			app_.perform(ActionStop);
-		}
-
-		void finish(void) {
-			app_.perform(Task::ActionExit);
-		}
+		void go(void);
+		void schedule(void);
+		void complete(void);
+		void finish(void);
+		void reset(void);
 
 	private:
 		GPXApplication &app_;
+
+		std::string name_;
+
+		bool is_running_;
 	};
 
 	enum Command {
@@ -149,6 +143,8 @@ public:
 	}
 
 	void append(Task *task) {
+		task->reset();
+
 		tasks_.push_back(task);
 	}
 

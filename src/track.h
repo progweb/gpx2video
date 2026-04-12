@@ -33,6 +33,8 @@ public:
 	void setSize(int width, int height);
 
 	bool start(void) {
+		VideoWidget::start();
+
 		init();
 
 		return true;

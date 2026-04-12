@@ -346,7 +346,7 @@ void TelemetrySettings::dump(void) const {
 //---------------
 
 Telemetry::Telemetry(GPXApplication &app, TelemetrySettings &settings) 
-	: Task(app)
+	: Task(app, "telemetry")
 	, app_(app) 
 	, settings_(settings) {
 }
@@ -398,6 +398,8 @@ bool Telemetry::start(void) {
 	std::string filename = app_.settings().outputfile();
 
 	log_call();
+
+	Task::start();
 
 	// Input valid
 	if (!source_) {

@@ -104,6 +104,8 @@ bool ImageRenderer::start(void) {
 
 	log_call();
 
+	Task::start();
+
 	log_notice("Rendering...");
 
 	// Start

@@ -11,7 +11,7 @@
 //----------
 
 Test::Test(GPXApplication &app) 
-	: Task(app) 
+	: Task(app, "test") 
 	, app_(app) {
 }
 
@@ -36,6 +36,8 @@ void Test::init(void) {
 
 bool Test::start(void) {
 	bool result = true;
+
+	Task::start();
 
 	log_notice("Test initialization");
 
