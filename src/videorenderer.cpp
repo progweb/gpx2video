@@ -275,15 +275,13 @@ bool VideoRenderer::start(void) {
 
 	log_call();
 
-	Task::start();
-
 	log_notice("Rendering...");
 
 	// Start
 	Renderer::start();
 
 	// Compute video start time
-	start_time = container_->startTime() + container_->timeOffset();
+	start_time = container_->startTime();
 
 	log_info("Video: start at '%s'", Datetime::timestamp2string(start_time).c_str());
 
@@ -357,7 +355,7 @@ bool VideoRenderer::run(void) {
 
 	time_factor = rendererSettings().timeFactor();
 
-	start_time = container_->startTime() + container_->timeOffset();
+	start_time = container_->startTime();
 
 	video_time = av_div_q(av_make_q(1000 * frame_time_, 1), encoder_->settings().videoParams().frameRate());
 
@@ -559,6 +557,9 @@ bool VideoRenderer::stop(void) {
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
 	overlay_ = NULL;
+
+	// Register task status
+	Renderer::stop();
 
 	return true;
 }

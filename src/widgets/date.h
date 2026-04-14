@@ -165,6 +165,8 @@ protected:
 		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
+
+		os << "<format>" << format() << "</format>" << std::endl;
 	}
 
 private:

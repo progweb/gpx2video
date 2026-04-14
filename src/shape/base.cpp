@@ -287,7 +287,7 @@ void ShapeBase::drawText(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 
 	// Draw text border
 	if (font.border > 0) {
-		cairo_set_line_width(cr, font.border);
+		cairo_set_line_width(cr, font.border / 10.0);
 		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
 	}
 	cairo_stroke(cr);
@@ -369,7 +369,7 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<value-font-weight>" << VideoWidget::fontweight2string(theme_.valueFontWeight()) << "</value-font-weight>" << std::endl;
 	os << "<value-align>" << VideoWidget::align2string(theme_.valueAlign()) << "</value-align>" << std::endl;
 	os << "<value-color>" << theme_.color2hex(theme_.valueColor()) << "</value-color>" << std::endl;
-	os << "<value-shadow-opactiy>" << theme_.valueShadowOpacity() << "</value-shadow-opacity>" << std::endl;
+	os << "<value-shadow-opacity>" << theme_.valueShadowOpacity() << "</value-shadow-opacity>" << std::endl;
 	os << "<value-shadow-distance>" << theme_.valueShadowDistance() << "</value-shadow-distance>" << std::endl;
 	os << "<value-border-width>" << theme_.valueBorderWidth() << "</value-border-width>" << std::endl;
 	os << "<value-border-color>" << theme_.color2hex(theme_.valueBorderColor()) << "</value-border-color>" << std::endl;

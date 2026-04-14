@@ -807,6 +807,32 @@
 												<property name="hexpand">True</property>
 												<property name="valign">start</property>
 												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Label text:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkEntry" id="label_text_entry">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
 												<child>
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>

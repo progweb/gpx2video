@@ -164,6 +164,7 @@ set(GPX2VIDEO_SOURCES
 	src/videoframe.cpp
 	src/widgetframe.cpp
 	src/telemetryframe.cpp
+	src/timesync.cpp
 	src/videowidget.cpp
 	src/shape/base.cpp
 	src/shape/arc.cpp

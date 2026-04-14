@@ -143,11 +143,12 @@ void BarShape::xmlwrite(std::ostream &os) {
 
 	ShapeBase::xmlwrite(os);
 
-	os << "<shape>arc</shape>" << std::endl;
+	os << "<shape>bar</shape>" << std::endl;
 
 	os << "<value-background-color>" << theme_.color2hex(theme_.valueBackgroundColor()) << "</value-background-color>" << std::endl;
 
 	os << "<with-tick>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTick)) << "</with-tick>" << std::endl;
+	os << "<with-tick-label>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) << "</with-tick-label>" << std::endl;
 	os << "<tick-color>" << theme().color2hex(theme().tickColor()) << "</tick-color>" << std::endl;
 	os << "<tick-label-color>" << theme().color2hex(theme().tickLabelColor()) << "</tick-label-color>" << std::endl;
 

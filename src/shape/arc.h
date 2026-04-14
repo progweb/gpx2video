@@ -86,7 +86,7 @@ public:
 
 	void arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 	void pieslice(cairo_t *cr, double a1, double a2, double border);
-	void line(cairo_t *cr, double a, double d1, double d2, const float *fill);
+	void line(cairo_t *cr, double a, double d1, double d2, double width, const float *fill);
 	void text(cairo_t *cr, double a, double d, const float *fill, std::string str);
 
 	void xmlwrite(std::ostream &os);

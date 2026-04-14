@@ -16,6 +16,7 @@
 #include <giomm/liststore.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/eventcontrollerkey.h>
+#include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/stackpage.h>
 #include <gtkmm/frame.h>
@@ -33,6 +34,7 @@ extern "C" {
 #include "utils.h"
 #include "compat.h"
 #include "datetime.h"
+#include "timesync.h"
 #include "window.h"
 
 
@@ -134,6 +136,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	// Video, telemetry & widget frame listener
 	video_frame_->signal_video_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_changed));
+	video_frame_->signal_timesync_requested().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_timesync_requested));
 	widget_frame_->signal_widget_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_changed));
 
 	// Connect signals
@@ -152,11 +155,18 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	gesture->signal_released().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_scale_released), false);
 
 	// Key listener
-	auto controller = Gtk::EventControllerKey::create();
-	controller->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
-	add_controller(controller);
+	auto keycontroller = Gtk::EventControllerKey::create();
+	keycontroller->set_propagation_phase(Gtk::PropagationPhase::CAPTURE);
+	video_area_->add_controller(keycontroller);
 
-	controller->signal_key_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_key_pressed), false);
+	keycontroller->signal_key_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_key_pressed), false);
+
+	// Motion listener
+	auto motioncontroller = Gtk::EventControllerMotion::create();
+	video_area_->add_controller(motioncontroller);
+	
+	motioncontroller->signal_enter().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_enter), false);
+	motioncontroller->signal_leave().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_leave), false);
 
 //	// Register application handle
 //	video_area_->set_application(this);
@@ -341,8 +351,18 @@ void GPX2VideoApplicationWindow::bind_settings(void) {
  */
 void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
+	
+	Glib::ustring layout_file = file->get_parse_name();
 
-	layout_file_ = file->get_parse_name();
+	if (layout_file.empty())
+		return;
+
+	// Save name
+	layout_file_ = layout_file;
+
+	// Check if media file is already opened
+	if (media_ == NULL)
+		return;
 
 	// Widgets list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
@@ -462,6 +482,9 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 
 	// Update video area widget
 	video_area_->open_stream(media_);
+
+	// At last, load layout file if already opened
+	open_layout_file(Gio::File::create_for_path(layout_file_));
 }
 
 
@@ -719,6 +742,53 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 
 
 /**
+ * Notification timesync changed
+ *
+ * Start time synchronization from GPMS stream changed.
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::on_timesync_changed(void) {
+	log_call();
+
+	// Update ui
+	video_frame_->refresh();
+
+	// Timestamp updated
+	renderer_->reset_timestamp();
+
+	// Video refresh
+	video_area_->refresh();
+}
+
+
+/**
+ * Notification timesync requested
+ *
+ * User whish set video start time from GPMF stream.
+ * So exec timesync task is required.
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::on_timesync_requested(void) {
+	log_call();
+
+	GPX2VideoTimeSync *timesync = NULL;
+
+	log_info("Start video timesync task");
+
+	// Create timesync task
+	timesync = GPX2VideoTimeSync::create(*this, media_);
+
+	// Listen event
+	timesync->signal_timesync_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_timesync_changed));
+
+	// Exec task
+	timesync->exec();
+}
+
+
+/**
  * Notification video change
  *
  * User has changed video properties as start time.
@@ -898,6 +968,24 @@ bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, 
 	}
 
 	return true;
+}
+
+
+void GPX2VideoApplicationWindow::on_video_area_mouse_enter(double x, double y) {
+	log_call();
+
+	(void) x;
+	(void) y;
+
+	video_area_->set_focusable(true);
+	video_area_->grab_focus();
+}
+
+
+void GPX2VideoApplicationWindow::on_video_area_mouse_leave(void) {
+	log_call();
+
+	unset_focus();
 }
 
 

@@ -9,11 +9,35 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	log_call();
 
 	Gtk::Switch *sw;
-//		Gtk::ComboBox *combobox;
+	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
 	loading_ = false;
+
+	// Populate models
+	//-----------------
+
+	needle_type_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = needle_type_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = VideoWidget::Theme::NeedleTypeThin;
+		row[model_.m_name] = "Thin";
+
+		row = *(needle_type_model_->append());
+		row[model_.m_id] = VideoWidget::Theme::NeedleTypeLight;
+		row[model_.m_name] = "Light";
+
+		row = *(needle_type_model_->append());
+		row[model_.m_id] = VideoWidget::Theme::NeedleTypeBasic;
+		row[model_.m_name] = "Basic";
+
+		row = *(needle_type_model_->append());
+		row[model_.m_id] = VideoWidget::Theme::NeedleTypeDesign;
+		row[model_.m_name] = "Design";
+	}
 
 	// Tick enable
 	sw = ref_builder_->get_widget<Gtk::Switch>("tick_enable_switch");
@@ -39,7 +63,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' tick color changed to '%s'", 
+						log_info("Widget %s: tick color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickColor(color);
@@ -73,7 +97,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' tick label color changed to '%s'", 
+						log_info("Widget %s: tick label color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickLabelColor(color);
@@ -107,17 +131,54 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 					} 
 			), false);
 
-	// Needle color
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_color_button");
+	// Needle type
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("needle_type_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"needle_type_combobox\" object in " + resource_file_);
+	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_info("Widget %s: needle type changed to '%s'", 
+								widget_->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_->theme().setNeedleType((VideoWidget::Theme::NeedleType) value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Needle primary color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_primary_color_button");
 	if (!colorbutton)
-		throw std::runtime_error("No \"needle_color_button\" object in " + resource_file_);
+		throw std::runtime_error("No \"needle_primary_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' neelde color changed to '%s'", 
+						log_info("Widget %s: needle primary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
-						widget_->theme().setNeedleColor(color);
+						widget_->theme().setNeedlePrimaryColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Needle secondary color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_secondary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"needle_secondary_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_info("Widget %s: needle secondary color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setNeedleSecondaryColor(color);
 
 						// Broadcast widget change
 						widget_->dispatchEvent();
@@ -148,7 +209,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge color changed to '%s'", 
+						log_info("Widget %s: gauge color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeColor(0, color);
@@ -182,7 +243,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge border color changed to '%s'", 
+						log_info("Widget %s: gauge border color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBorderColor(color);
@@ -199,7 +260,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge background color changed to '%s'", 
+						log_info("Widget %s: gauge background color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBackgroundColor(color);
@@ -211,6 +272,22 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 }
 
 
+bool GPX2VideoArcSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result) {
+	log_call();
+
+	for (auto iter = store->children().begin(); iter != store->children().end(); iter++) {
+		if (iter->get_value(model_.m_id) != value)
+			continue;
+
+		result = iter;
+
+		return true;
+	}
+
+	return false;
+}
+
+
 void GPX2VideoArcSettingsBox::update_content(void) {
 	log_call();
 
@@ -219,11 +296,11 @@ void GPX2VideoArcSettingsBox::update_content(void) {
 	const float *color;
 
 	Gtk::Switch *sw;
-//		Gtk::ComboBox *combobox;
+	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
-//		Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::iterator iter;
 
 	// Mask value changed
 	loading_ = true;
@@ -281,12 +358,33 @@ void GPX2VideoArcSettingsBox::update_content(void) {
 
 	sw->set_active(widget_->theme().hasFlag(VideoWidget::Theme::FlagNeedle));
 
-	// Widget needle color button
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"needle_color_button\" object in " + resource_file_);
+	// Widget needle type combobox
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("needle_type_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"needle_type_combobox\" object in " + resource_file_);
 
-	color = widget_->theme().needleColor();
+	combobox->set_model(needle_type_model_);
+
+	if (find_in_listtore(needle_type_model_, widget_->theme().needleType(), iter))
+		combobox->set_active(iter);
+
+	// Widget needle primary color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_primary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"needle_primary_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().needlePrimaryColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Widget needle secondary color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_secondary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"needle_secondary_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().needleSecondaryColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 

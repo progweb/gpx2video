@@ -80,6 +80,9 @@ protected:
 	void on_action_save(void);
 	void on_action_append(void);
 
+	void on_timesync_changed(void);
+	void on_timesync_requested(void);
+
 	void on_video_changed(void);
 	void on_widget_changed(void);
 	void on_widget_position_changed(void);
@@ -89,7 +92,11 @@ protected:
 	bool on_progress_change_value(Gtk::ScrollType type, double value, const Glib::RefPtr<Gtk::Adjustment> &adjustment);
 	void on_progress_scale_pressed(guint n, double x, double y);
 	void on_progress_scale_released(guint n, double x, double y);
+
 	bool on_key_pressed(guint, guint, Gdk::ModifierType);
+
+	void on_video_area_mouse_enter(double x, double y);
+	void on_video_area_mouse_leave(void);
 
 	void on_stack_changed(void);
 

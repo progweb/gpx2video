@@ -104,8 +104,6 @@ bool ImageRenderer::start(void) {
 
 	log_call();
 
-	Task::start();
-
 	log_notice("Rendering...");
 
 	// Start
@@ -166,7 +164,7 @@ bool ImageRenderer::run(void) {
 	// Compute start time
 	time_factor = rendererSettings().timeFactor();
 
-	start_time = container_->startTime() + container_->timeOffset();
+	start_time = container_->startTime();
 
 	// Render image each 'x' ms (by default each second)
 	timecode_ms = timecode_ * telemetrySettings().telemetryRate();
@@ -340,6 +338,9 @@ bool ImageRenderer::stop(void) {
 		delete overlay_;
 
 	overlay_ = NULL;
+
+	// Done
+	Renderer::stop();
 
 	return true;
 }

@@ -82,6 +82,10 @@ namespace layout
 	_value_borderwidth(this, "value-border-width", Node::ELEMENT, false),
 	_value_bordercolor(this, "value-border-color", Node::ELEMENT, false),
 
+	_needle_type(this, "needle-type", Node::ELEMENT, false),
+	_needle_primary_color(this, "needle-primary-color", Node::ELEMENT, false),
+	_needle_secondary_color(this, "needle-secondary-color", Node::ELEMENT, false),
+
     _unit(this, "unit",   Node::ELEMENT, false),
     _zoom(this, "zoom",   Node::ELEMENT, false),
     _format(this, "format",   Node::ELEMENT, false),
@@ -91,7 +95,10 @@ namespace layout
 	_with_label(this, "with-label", Node::ELEMENT, false),
 	_with_value(this, "with-value", Node::ELEMENT, false),
 	_with_icon(this, "with-icon", Node::ELEMENT, false),
-	_with_unit(this, "with-unit", Node::ELEMENT, false)
+	_with_unit(this, "with-unit", Node::ELEMENT, false),
+	_with_tick(this, "with-tick", Node::ELEMENT, false),
+	_with_tick_label(this, "with-tick-label", Node::ELEMENT, false),
+	_with_needle(this, "with-needle", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
     getInterfaces().push_back(&_type);
@@ -143,6 +150,10 @@ namespace layout
     getInterfaces().push_back(&_value_borderwidth);
     getInterfaces().push_back(&_value_bordercolor);
 
+    getInterfaces().push_back(&_needle_type);
+    getInterfaces().push_back(&_needle_primary_color);
+    getInterfaces().push_back(&_needle_secondary_color);
+
     getInterfaces().push_back(&_unit);
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_format);
@@ -153,6 +164,9 @@ namespace layout
     getInterfaces().push_back(&_with_value);
     getInterfaces().push_back(&_with_icon);
     getInterfaces().push_back(&_with_unit);
+    getInterfaces().push_back(&_with_tick);
+    getInterfaces().push_back(&_with_tick_label);
+    getInterfaces().push_back(&_with_needle);
 
 	_shape.setValue("text");
 
@@ -182,6 +196,9 @@ namespace layout
 	_with_value.setValue("true");
 	_with_icon.setValue("true");
 	_with_unit.setValue("true");
+	_with_tick.setValue("true");
+	_with_tick_label.setValue("true");
+	_with_needle.setValue("true");
   }
 
   Widget::~Widget()

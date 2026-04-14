@@ -148,6 +148,12 @@ public:
 		tasks_.push_back(task);
 	}
 
+	void insert(Task *task) {
+		task->reset();
+
+		tasks_.push_front(task);
+	}
+
 	void remove(Task *task) {
 		tasks_.remove(task);
 	}

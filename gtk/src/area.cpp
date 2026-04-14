@@ -8,6 +8,7 @@
 
 #include <epoxy/gl.h>
 #include <gdkmm/general.h>
+#include <gtkmm/eventcontrollermotion.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -75,6 +76,11 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 //	set_size_request(320, 240);
 	set_auto_render(false);
 
+	// Motion listener
+	auto controller = Gtk::EventControllerMotion::create();
+	add_controller(controller);
+	
+	// Signal connect
 	stream_.video().data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
 
 	// Creation of a new object prevents long lines and shows us a little
@@ -679,9 +685,6 @@ retry:
 void GPX2VideoArea::video_display(void) {
 	log_call();
 
-	uint64_t datetime;
-	uint64_t start_time;
-
 	uint64_t timecode_ms;
 
 	double time_factor;
@@ -691,8 +694,6 @@ void GPX2VideoArea::video_display(void) {
 //	log_info("D: %7.3f", stream_.get_master_clock());
 
 	time_factor = 1.0;
-
-	start_time = stream_.media()->startTime() + stream_.media()->timeOffset();
 
 	// OpenGL context
 	make_current();
@@ -711,22 +712,8 @@ void GPX2VideoArea::video_display(void) {
 	// todo: fix later since time_factor is variable
 	real_duration_ms = time_factor * timecode_ms;
 
-	// Update video real time 
-	datetime = start_time + real_duration_ms;
-
-//	if (source_) {
-//		uint64_t timestamp = start_time + real_duration_ms;
-//
-//		// Read GPX data
-//		timestamp -= (timestamp % renderer_->telemetrySettings().telemetryRate());
-//		source_->retrieveNext(data_, timestamp);
-//	}
-
 	// Notify renderer
-	renderer_->update(datetime);
-
-//	// Draw widgets
-//	renderer_->draw();
+	renderer_->update(real_duration_ms);
 
 	// Create & load OpenGL texture
 	load_video_texture(frame);
@@ -734,17 +721,10 @@ void GPX2VideoArea::video_display(void) {
 
 	// OpenGL context redraw
 //	log_info("Q: %7.3f", stream_.get_master_clock());
-//	queue_draw();
 	queue_render();
 
 	// Refresh adjustment
 	update_adjustment(frame->time());
-
-//	// Compute real time by step, since time_factor is variable
-//	real_duration_ms = timecode_ms - last_timecode_ms_;
-//	real_duration_ms_ += time_factor * real_duration_ms;
-
-//	last_timecode_ms_ = timecode_ms;
 }
 
 
@@ -793,81 +773,9 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 void GPX2VideoArea::load_widgets_texture(FramePtr frame) {
 	log_call();
 
-	renderer_->load_texture();
+	(void) frame;
 
-//	log_call();
-//
-//	if (!frame)
-//		return;
-//
-//	// 
-//	int nchannels = 4;
-//	static std::vector<unsigned char> m_tex_buffer;
-//
-//	if (!widgets_texture_) {
-//		m_tex_buffer.resize(overlay_->spec().width * overlay_->spec().height * nchannels
-//							* overlay_->spec().channel_bytes());
-//	}
-//
-//	overlay_->get_pixels(OIIO::ROI(), 
-//			overlay_->spec().format, 
-//			reinterpret_cast<char*>(m_tex_buffer.data()));
-//
-//	// texture
-//	if (!widgets_texture_) {
-//		glGenTextures(1, &widgets_texture_);
-////		glBindTexture(GL_UNPACK_ALIGNMENT, 1);
-//		glActiveTexture(GL_TEXTURE1);
-//		glBindTexture(GL_TEXTURE_2D, widgets_texture_);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_LINEAR_MIPMAP_LINEAR); //GL_LINEAR);
-//		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-//
-////		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-////		glTexImage2D(GL_TEXTURE_2D, 
-////				0, 
-////				GL_RGBA, 
-////				frame->width(),
-////				frame->height(),
-////				0, GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
-//		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); //frame->linesizeBytes() / 4);
-//		glTexImage2D(GL_TEXTURE_2D, 
-//				0, 
-//				GL_RGBA, 
-//				overlay_->spec().width,
-//				overlay_->spec().height,
-//				0, GL_RGBA, GL_UNSIGNED_BYTE, m_tex_buffer.data());
-//
-//		shader_->use();
-//		shader_->set("inputTexture2", 1);
-//	}
-//	else {
-//		glActiveTexture(GL_TEXTURE1);
-//		glBindTexture(GL_TEXTURE_2D, widgets_texture_);
-////		glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-////		glPixelStorei(GL_UNPACK_LSB_FIRST, GL_TRUE);
-//		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-//		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-//		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-//
-////		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-////		glTexSubImage2D(GL_TEXTURE_2D, 
-////				0,
-////				0, 0, 
-////				frame->width(),
-////				frame->height(),
-////				GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
-//		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-//		glTexSubImage2D(GL_TEXTURE_2D, 
-//				0, 
-//				0, 0,
-//				overlay_->spec().width,
-//				overlay_->spec().height,
-//				GL_RGBA, GL_UNSIGNED_BYTE, m_tex_buffer.data());
-//	}
-//
-//	check_gl_error();
+	renderer_->load_texture();
 }
 
 

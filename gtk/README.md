@@ -19,8 +19,11 @@ GTK interface for gpx2video tool.
 TODO:
 
 - Video start time from GPMF (for GoPro)
-- Widget full settings
-- Telemetry settings
+- Edit label name
+- Append new widget
+- Translate text application
+- Redraw each icon (in real svg)
+- Telemetry & widgets settings
 - Optimization & fix cpu usage
 
 ## Data installation

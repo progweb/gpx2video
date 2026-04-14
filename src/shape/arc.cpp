@@ -45,11 +45,13 @@ void ArcShape::pieslice(cairo_t *cr, double a1, double a2, double border) {
 }
 
 
-void ArcShape::line(cairo_t *cr, double a, double d1, double d2, const float *fill) {
+void ArcShape::line(cairo_t *cr, double a, double d1, double d2, double width, const float *fill) {
 	struct point p1 = locate(a, d1);
 	struct point p2 = locate(a, d2);
 
 	cairo_save(cr);
+	cairo_set_line_width(cr, width);
+	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
 	cairo_move_to(cr, p1.x, p1.y);
 	cairo_line_to(cr, p2.x, p2.y);
 	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
@@ -84,6 +86,7 @@ void ArcShape::xmlwrite(std::ostream &os) {
 	os << "<shape>arc</shape>" << std::endl;
 
 	os << "<with-tick>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTick)) << "</with-tick>" << std::endl;
+	os << "<with-tick-label>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) << "</with-tick-label>" << std::endl;
 	os << "<tick-color>" << theme().color2hex(theme().tickColor()) << "</tick-color>" << std::endl;
 	os << "<tick-label-color>" << theme().color2hex(theme().tickLabelColor()) << "</tick-label-color>" << std::endl;
 
@@ -94,6 +97,8 @@ void ArcShape::xmlwrite(std::ostream &os) {
 	os << "<gauge-background-color>" << theme().color2hex(theme().gaugeBackgroundColor()) << "</gauge-background-color>" << std::endl;
 
 	os << "<with-needle>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagNeedle)) << "</with-needle>" << std::endl;
-	os << "<needle-color>" << theme().color2hex(theme().needleColor()) << "</needle-color>" << std::endl;
+	os << "<needle-type>" << VideoWidget::needletype2string(theme().needleType()) << "</needle-type>" << std::endl;
+	os << "<needle-primary-color>" << theme().color2hex(theme().needlePrimaryColor()) << "</needle-primary-color>" << std::endl;
+	os << "<needle-secondary-color>" << theme().color2hex(theme().needleSecondaryColor()) << "</needle-secondary-color>" << std::endl;
 }
 

@@ -255,7 +255,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			ticklenwidth(value, &ticklen, &tickwidth);
 
-			line(cr, xa, 0, ticklen, theme().tickColor());
+			line(cr, xa, 0, ticklen, tickwidth, theme().tickColor());
 		}
 	}
 
@@ -279,7 +279,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		struct ArcShape::point p;
 	   
-		const float *fill = theme().needleColor();
+		const float *fill = theme().needlePrimaryColor();
 
 		cairo_save(cr);
 		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);

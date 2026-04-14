@@ -19,6 +19,9 @@ GPX2VideoRenderer::GPX2VideoRenderer(GPXApplication &app,
 	seek_pos_ = 0.0;
 	seek_req_ = false;
 
+	timestamp_ = 0;
+	player_timestamp_ = 0;
+
 	app.append(this);
 }
 
@@ -180,8 +183,17 @@ void GPX2VideoRenderer::set_timestamp(uint64_t timestamp) {
 }
 
 
+/**
+ * Called as the video starttime is changed
+ */
 void GPX2VideoRenderer::reset_timestamp(void) {
 	log_call();
+
+	// Update each with the new timestamp
+	if (container_->startTime() != 0)
+		set_timestamp(container_->startTime() + player_timestamp_);
+	else 
+		set_timestamp(0);
 
 	// Widget refresh
 	refresh();
@@ -410,13 +422,24 @@ void GPX2VideoRenderer::render(GPX2VideoShader *shader) {
 }
 
 
+/**
+ * Called from video player.
+ * timestamp is the progress time in the video stream (in ms)
+ */
 void GPX2VideoRenderer::update(uint64_t timestamp) {
 	log_call();
 
-	// Update each widget
-	set_timestamp(timestamp);
+	// Save video player timestamp
+	player_timestamp_ = timestamp;
 
-	schedule();
+	// Update each widget with the new timestamp
+	if (container_->startTime() != 0) {
+		timestamp += container_->startTime();
+	
+		set_timestamp(timestamp);
+
+		schedule();
+	}
 }
 
 

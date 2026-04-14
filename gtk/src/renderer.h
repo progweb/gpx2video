@@ -69,6 +69,7 @@ private:
 	bool is_ready_;
 
 	uint64_t timestamp_;
+	uint64_t player_timestamp_;
 
 	TelemetryData data_;
 	TelemetrySource *source_;

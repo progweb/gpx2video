@@ -386,6 +386,24 @@ namespace layout
     ///
     String &valueBorderColor() { return _value_bordercolor; }
 
+	///
+	/// Get needle type
+	/// @return the needle type element
+	///
+    String &needleType() { return _needle_type; }
+
+	///
+	/// Get needle primary color
+	/// @return the needle primary color element
+	///
+    String &needlePrimaryColor() { return _needle_primary_color; }
+
+	///
+	/// Get needle secondary color
+	/// @return the needle secondary color element
+	///
+    String &needleSecondaryColor() { return _needle_secondary_color; }
+
     ///
     /// Get border
     ///
@@ -442,6 +460,27 @@ namespace layout
 	///
 	Boolean  &withUnit() { return _with_unit; }
 
+	/// 
+	/// Get tick flag
+	///
+	/// @return the tick flag element
+	///
+	Boolean  &withTick() { return _with_tick; }
+
+	/// 
+	/// Get tick label flag
+	///
+	/// @return the tick label flag element
+	///
+	Boolean  &withTickLabel() { return _with_tick_label; }
+
+	/// 
+	/// Get needle flag
+	///
+	/// @return the needle flag element
+	///
+	Boolean  &withNeedle() { return _with_needle; }
+
     // Methods
 
     private:
@@ -494,6 +533,10 @@ namespace layout
 	Decimal      _value_borderwidth;
 	String       _value_bordercolor;
 
+	String       _needle_type;
+	String       _needle_primary_color;
+	String       _needle_secondary_color;
+
     String       _unit;
     String       _zoom;
     String       _format;
@@ -504,6 +547,9 @@ namespace layout
 	Boolean      _with_value;
 	Boolean      _with_icon;
 	Boolean      _with_unit;
+	Boolean      _with_tick;
+	Boolean      _with_tick_label;
+	Boolean      _with_needle;
     
     // Disable copy constructors
     Widget(const Widget &);

@@ -1,4 +1,5 @@
 #include <gtkmm/box.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/switch.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/spinbutton.h>
@@ -35,6 +36,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	, child_box_(NULL) {
 	log_call();
 
+	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
@@ -451,6 +453,20 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 					} 
 			), false);
 
+	// Label text entry
+	entry = ref_builder_->get_widget<Gtk::Entry>("label_text_entry");
+	if (!entry)
+		throw std::runtime_error("No \"label_text_entry\" object in widget_frame.ui");
+	entry->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_entry_changed), entry, 
+					[this](const Glib::ustring &value) {
+						log_info("Widget %s: label text changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), value.c_str());
+
+						widget_selected_->widget()->setLabel(value);
+					}
+			));
+
 	// Label font size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
 	if (!spinbutton)
@@ -554,7 +570,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' label color changed to '%s'", 
+						log_info("Widget %s: label color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelColor(color);
@@ -582,7 +598,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' label border color changed to '%s'", 
+						log_info("Widget %s: label border color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelBorderColor(color);
@@ -706,7 +722,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' value color changed to '%s'", 
+						log_info("Widget %s: value color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueColor(color);
@@ -734,7 +750,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' value border color changed to '%s'", 
+						log_info("Widget %s: value border color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueBorderColor(color);
@@ -894,6 +910,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	const float *color;
 
+	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
@@ -1081,6 +1098,13 @@ void GPX2VideoWidgetFrame::update_content(void) {
 		throw std::runtime_error("No \"label_enable_switch\" object in widget_frame.ui");
 
 	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagLabel));
+
+	// Widget label text entry
+	entry = ref_builder_->get_widget<Gtk::Entry>("label_text_entry");
+	if (!entry)
+		throw std::runtime_error("No \"label_text_entry\" object in widget_frame.ui");
+
+	entry->set_text(widget_selected_->widget()->label());
 
 	// Widget label size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
@@ -1436,6 +1460,23 @@ void GPX2VideoWidgetFrame::on_widget_color_changed(Gtk::ColorButton *button, std
 
 	// Set color
 	set(color);
+
+	// Refresh widget
+	renderer_->refresh(widget_selected_);
+
+	// Refresh video preview
+	dispatcher_.emit();
+}
+
+
+void GPX2VideoWidgetFrame::on_widget_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set) {
+	log_call();
+
+	if (loading_)
+		return;
+
+	// Set entry
+	set(entry->get_text());
 
 	// Refresh widget
 	renderer_->refresh(widget_selected_);

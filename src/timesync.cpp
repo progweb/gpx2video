@@ -39,8 +39,10 @@ bool TimeSync::start(void) {
 
 	log_call();
 
+	// Register task status
 	Task::start();
 
+	// Init
 	n_ = 0;
 	ok_ = false;
 	offset_ = 0;
@@ -161,16 +163,20 @@ bool TimeSync::stop(void) {
 	if (ok_) {
 		log_notice("Video stream synchronized with success (offset: %d ms)", offset_);
 
+		// Compute start time
+		timestamp = container_->startTime() + offset_;
+
 		// Apply offset
-		container_->setTimeOffset(offset_);
+		container_->setStartTime(timestamp);
 
 		// Compute start time
-		timestamp = container_->startTime() + container_->timeOffset();
-
 		log_info("Video start time: %s", Datetime::timestamp2string(timestamp).c_str());
 	}
 
 	close();
+
+	// Register task status
+	Task::stop();
 
 	return true;
 }

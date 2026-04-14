@@ -16,6 +16,7 @@ public:
 
 	enum Type {
 		TypeUnknown,
+		TypeDummy,
 		TypeMeasured,
 		TypeFixed,
 		TypePredicted,
@@ -71,6 +72,7 @@ public:
 	const char * type2string(void) const {
 		const char *types[] = {
 			"U", // Unknown
+			"D", // Dummy
 			"M", // Measured
 			"F", // Fix
 			"P", // Predict
@@ -90,6 +92,9 @@ public:
 	}
 
 	void setDatetime(const uint64_t &datetime) {
+		if (type_ == TypeUnknown)
+			type_ = TypeDummy;
+
 		datetime_ = datetime;
 	}
 

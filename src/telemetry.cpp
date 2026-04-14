@@ -399,6 +399,7 @@ bool Telemetry::start(void) {
 
 	log_call();
 
+	// Register task status
 	Task::start();
 
 	// Input valid
@@ -588,6 +589,9 @@ bool Telemetry::stop(void) {
 
 	if (out_.is_open())
 		out_.close();
+
+	// Register task status
+	Task::stop();
 
 	return true;
 }

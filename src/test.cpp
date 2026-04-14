@@ -37,6 +37,7 @@ void Test::init(void) {
 bool Test::start(void) {
 	bool result = true;
 
+	// Register task status
 	Task::start();
 
 	log_notice("Test initialization");
@@ -167,6 +168,9 @@ bool Test::run(void) {
 
 bool Test::stop(void) {
 	log_notice("Test completed");
+
+	// Register task status
+	Task::stop();
 
 	return true;
 }

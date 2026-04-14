@@ -7,8 +7,7 @@
 
 
 MediaContainer::MediaContainer() 
-	: offset_(0) 
-	, start_time_(0)
+	: start_time_(0)
 	, creation_time_(0) 
 	, max_frame_duration_(0) {
 }
@@ -64,12 +63,7 @@ void MediaContainer::setStartTime(const std::string &start_time) {
 
 
 int MediaContainer::timeOffset(void) const {
-	return offset_;
-}
-
-
-void MediaContainer::setTimeOffset(const int& offset) {
-	offset_ = offset;
+	return start_time_ - creation_time_;
 }
 
 

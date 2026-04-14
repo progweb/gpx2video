@@ -138,6 +138,14 @@ public:
 			FontWeightUnknown
 		};
 
+		enum NeedleType {
+			NeedleTypeThin,
+			NeedleTypeLight,
+			NeedleTypeBasic,
+			NeedleTypeDesign,
+			NeedleTypeUnknown
+		};
+
 		Theme();
 
 		void setSize(int width, int height) {
@@ -441,19 +449,43 @@ public:
 //			text_linespace_ = linespace;
 //		}
 
-		const float * needleColor(void) const {
-			return needle_color_;
+		NeedleType needleType(void) const {
+			return needle_type_;
 		}
 
-		bool setNeedleColor(std::string color) {
-			return hex2color(needle_color_, color);
+		void setNeedleType(NeedleType type) {
+			needle_type_ = type;
 		}
 
-		bool setNeedleColor(double r, double g, double b, double a) {
-			needle_color_[0] = r;
-			needle_color_[1] = g;
-			needle_color_[2] = b;
-			needle_color_[3] = a;
+		const float * needlePrimaryColor(void) const {
+			return needle_primary_color_;
+		}
+
+		bool setNeedlePrimaryColor(std::string color) {
+			return hex2color(needle_primary_color_, color);
+		}
+
+		bool setNeedlePrimaryColor(double r, double g, double b, double a) {
+			needle_primary_color_[0] = r;
+			needle_primary_color_[1] = g;
+			needle_primary_color_[2] = b;
+			needle_primary_color_[3] = a;
+			return true;
+		}
+
+		const float * needleSecondaryColor(void) const {
+			return needle_secondary_color_;
+		}
+
+		bool setNeedleSecondaryColor(std::string color) {
+			return hex2color(needle_secondary_color_, color);
+		}
+
+		bool setNeedleSecondaryColor(double r, double g, double b, double a) {
+			needle_secondary_color_[0] = r;
+			needle_secondary_color_[1] = g;
+			needle_secondary_color_[2] = b;
+			needle_secondary_color_[3] = a;
 			return true;
 		}
 
@@ -698,7 +730,9 @@ public:
 		float label_color_[4];
 		float label_border_color_[4];
 
-		float needle_color_[4];
+		NeedleType needle_type_;
+		float needle_primary_color_[4];
+		float needle_secondary_color_[4];
 
 		int value_min_;
 		int value_max_;
@@ -897,6 +931,7 @@ public:
 	static Theme::Align string2align(std::string &s);
 	static Theme::FontStyle string2fontstyle(std::string &s);
 	static Theme::FontWeight string2fontweight(std::string &s);
+	static Theme::NeedleType string2needletype(std::string &);
 	static Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
 
@@ -906,6 +941,7 @@ public:
 	static std::string align2string(Theme::Align align);
 	static std::string fontstyle2string(Theme::FontStyle style);
 	static std::string fontweight2string(Theme::FontWeight weight);
+	static std::string needletype2string(Theme::NeedleType type);
 	static std::string unit2string(Unit unit, bool label=true);
 
 protected:
