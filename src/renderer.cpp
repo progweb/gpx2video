@@ -74,6 +74,7 @@ bool Renderer::init(MediaContainer *container) {
 bool Renderer::start(void) {
 	log_call();
 
+	// Register task status
 	Task::start();
 
 	if (source_)
@@ -394,6 +395,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Theme::FontWeight label_font_weight = VideoWidget::Theme::FontWeightNormal;
 	VideoWidget::Theme::FontWeight value_font_weight = VideoWidget::Theme::FontWeightNormal;
 
+	VideoWidget::Theme::NeedleType needle_type = VideoWidget::Theme::NeedleTypeBasic;
+
 	// Display
 	if ((bool) w->display() == false) {
 		log_info("Skip widget '%s'", (const char *) w->type());
@@ -537,7 +540,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Font weight for value
 	s = (const char *) w->valueFontWeight();
-	label_font_weight = VideoWidget::string2fontweight(s);
+	value_font_weight = VideoWidget::string2fontweight(s);
 
 	if (value_font_weight == VideoWidget::Theme::FontWeightUnknown) {
 		log_error("Widget loading error, value font weight value '%s' unknown", s.c_str());
@@ -553,6 +556,15 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Needle type
+	s = (const char *) w->needleType();
+	needle_type = VideoWidget::string2needletype(s);
+
+	if (needle_type == VideoWidget::Theme::NeedleTypeUnknown) {
+		log_error("Widget loading error, needle type value '%s' unknown", s.c_str());
+		goto error;
+	}
+
 	// Flags
 	if (w->withLabel())
 		flags |= VideoWidget::Theme::FlagLabel;
@@ -562,11 +574,14 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		flags |= VideoWidget::Theme::FlagIcon;
 	if (w->withUnit())
 		flags |= VideoWidget::Theme::FlagUnit;
+	if (w->withTick())
+		flags |= VideoWidget::Theme::FlagTick;
+	if (w->withTickLabel())
+		flags |= VideoWidget::Theme::FlagTickLabel;
+	if (w->withNeedle())
+		flags |= VideoWidget::Theme::FlagNeedle;
 
 	// TODO
-	flags |= VideoWidget::Theme::FlagNeedle;
-	flags |= VideoWidget::Theme::FlagTick;
-	flags |= VideoWidget::Theme::FlagTickLabel;
 	flags |= VideoWidget::Theme::FlagCursor;
 	flags |= VideoWidget::Theme::FlagGauge;
 
@@ -617,6 +632,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueShadowDistance(w->valueShadowDistance());
 	widget->theme().setValueBorderWidth(w->valueBorderWidth());
 	widget->theme().setValueBorderColor((const char *) w->valueBorderColor());
+
+	// Widget needle settings
+	widget->theme().setNeedleType(needle_type);
+	widget->theme().setNeedlePrimaryColor((const char *) w->needlePrimaryColor());
+	widget->theme().setNeedleSecondaryColor((const char *) w->needleSecondaryColor());
 
 	// Widget misc. settings
 //	widget->theme().setTextShadow(w->textShadow());

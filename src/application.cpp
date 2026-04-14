@@ -40,10 +40,10 @@ bool GPXApplication::Task::stop(void) {
 void GPXApplication::Task::go(void) {
 //	printf("Task '%s' exec requested\n", name().c_str());
 
-	if (!is_running_)
+//	if (!is_running_)
 		app_.perform(ActionStart);
-	else
-		log_warn("Task is yet running!");
+//	else
+//		log_warn("Task is yet running!");
 }
 
 

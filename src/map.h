@@ -69,6 +69,7 @@ public:
 	void setSize(int width, int height);
 
 	bool start(void) {
+		// Register task status
 		VideoWidget::start();
 
 		init();

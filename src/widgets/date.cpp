@@ -34,6 +34,13 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	strftime(s, sizeof(s), widget_->format().c_str(), &time);
 
+	// Format data
+	if (data.datetime() == 0) {
+		for (size_t i=0; i<strlen(s); i++) 
+			if (std::isdigit(static_cast<unsigned char>(s[i])))
+				s[i] = '-';
+	}
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
 		icon(cr, "./assets/picto/DataOverlay_icn_date.svg");

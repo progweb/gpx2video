@@ -32,7 +32,9 @@ VideoWidget::Theme::Theme() {
 	setTickColor(1.0, 1.0, 1.0, 1.0);
 	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
 
-	setNeedleColor(1.0, 1.0, 1.0, 1.0);
+	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
+	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
+	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);
 
 	setGaugeBorder(0);
 	setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
@@ -258,6 +260,24 @@ VideoWidget::Theme::FontWeight VideoWidget::string2fontweight(std::string &s) {
 }
 
 
+VideoWidget::Theme::NeedleType VideoWidget::string2needletype(std::string &s) {
+	VideoWidget::Theme::NeedleType type;
+
+	if (s.empty() || (s == "none") || (s == "baisc"))
+		type = VideoWidget::Theme::NeedleTypeBasic;
+	else if (s == "thin")
+		type = VideoWidget::Theme::NeedleTypeThin;
+	else if (s == "light")
+		type = VideoWidget::Theme::NeedleTypeLight;
+	else if (s == "design")
+		type = VideoWidget::Theme::NeedleTypeDesign;
+	else
+		type = VideoWidget::Theme::NeedleTypeUnknown;
+
+	return type;
+}
+
+
 VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 	VideoWidget::Unit unit;
 
@@ -411,6 +431,21 @@ std::string VideoWidget::fontweight2string(Theme::FontWeight weight) {
 		return "heavy";
 	case Theme::FontWeightUltraHeavy:
 		return "ultraheavy";
+	default:
+		return "";
+	}
+}
+
+std::string VideoWidget::needletype2string(Theme::NeedleType type) {
+	switch (type) {
+	case Theme::NeedleTypeThin:
+		return "thin";
+	case Theme::NeedleTypeLight:
+		return "light";
+	case Theme::NeedleTypeBasic:
+		return "basic";
+	case Theme::NeedleTypeDesign:
+		return "design";
 	default:
 		return "";
 	}

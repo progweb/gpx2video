@@ -31,7 +31,6 @@ public:
 	void setStartTime(const std::string &start_time);
 
 	int timeOffset(void) const;
-	void setTimeOffset(const int& offset);
 
 	double maxFrameDuration(void) const;
 	void setMaxFrameDuration(double duration);
@@ -46,8 +45,6 @@ public:
 	VideoStreamPtr getVideoStream(void);
 
 private:
-	int offset_;
-
 	uint64_t start_time_;
 	uint64_t creation_time_;
 

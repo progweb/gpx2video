@@ -105,6 +105,7 @@ bool Extractor::start(void) {
 
 	log_call();
 
+	// Register task status
 	Task::start();
 
 	n_ = 0;
@@ -262,6 +263,9 @@ bool Extractor::stop(void) {
 		log_notice("GPMD data extracted with success");
 	else
 		log_error("GPMD data extraction failure");
+
+	// Register task status
+	Task::stop();
 
 	return true;
 }

@@ -34,6 +34,7 @@ void Cache::init(void) {
 bool Cache::start(void) {
 	log_call();
 
+	// Register task status
 	Task::start();
 
 	log_notice("Cache initialization...");

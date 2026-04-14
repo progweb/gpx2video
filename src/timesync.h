@@ -17,13 +17,14 @@ public:
 
 	virtual ~TimeSync();
 
-	bool start(void);
-	bool run(void);
-	bool stop(void);
+	virtual bool start(void);
+	virtual bool run(void);
+	virtual bool stop(void);
 
-private:
+protected:
 	TimeSync(GPXApplication &app, const ExtractorSettings &settings);
 
+private:
 	bool ok_;
 
 	int n_;

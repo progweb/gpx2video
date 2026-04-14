@@ -55,7 +55,9 @@ private:
 	};
 
 	Model model_;
-//	Glib::RefPtr<Gtk::ListStore> tick_align_model_;
+	Glib::RefPtr<Gtk::ListStore> needle_type_model_;
+
+	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
 };
 
 #endif

@@ -13,7 +13,8 @@
 GPX2VideoVideoFrame::GPX2VideoVideoFrame()
 	: Glib::ObjectBase("GPX2VideoVideoFrame")
 	, ref_builder_(NULL)
-	, dispatcher_()
+	, video_dispatcher_()
+	, timesync_dispatcher_()
 	, media_(NULL)
 	, source_(NULL) {
 	log_call();
@@ -24,7 +25,8 @@ GPX2VideoVideoFrame::GPX2VideoVideoFrame(BaseObjectType *cobject, const Glib::Re
 	: Glib::ObjectBase("GPX2VideoVideoFrame")
 	, Gtk::Frame(cobject)
 	, ref_builder_(ref_builder)
-	, dispatcher_()
+	, video_dispatcher_()
+	, timesync_dispatcher_()
 	, media_(NULL) 
 	, source_(NULL) {
 	log_call();
@@ -76,61 +78,13 @@ void GPX2VideoVideoFrame::set_telemetry(TelemetrySource *source) {
 
 	// Save telemetry source
 	source_ = source;
+
+	// By default, use the first GPX point
+	set_starttime_from_gpx_data();
 }
 
 
-
-void GPX2VideoVideoFrame::on_action_use_creation_time(void) {
-	log_call();
-
-	Glib::DateTime creationtime;
-
-	if (media_ == NULL)
-		return;
-
-	// Video creation time
-//#if GLIBMM_CHECK_VERSION(2, 80, 0)
-//	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
-//#else
-//	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
-//#endif
-//	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
-	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000).to_local();
-
-	if (!media_->creationTime())
-		return;
-
-	log_info("Sync video starttime with creation time video metadata");
-
-	// Set video start time
-	media_->setStartTime(media_->creationTime());
-
-	// Update datetime start entry
-	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
-	if (!entry)
-		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
-
-#if GLIBMM_CHECK_VERSION(2, 80, 0)
-	entry->get_buffer()->set_text(creationtime.format("%Ex %EX").c_str());
-#else
-	entry->get_buffer()->set_text(creationtime.format("%x %X").c_str());
-#endif
-
-	// Refresh video preview
-	dispatcher_.emit();
-}
-
-
-void GPX2VideoVideoFrame::on_action_use_gpmf_stream(void) {
-	log_call();
-
-	log_info("Sync video starttime with GPMF video stream");
-
-	log_warn("NOT YET IMPLEMENTED");
-}
-
-
-void GPX2VideoVideoFrame::on_action_use_gpx_data(void) {
+bool GPX2VideoVideoFrame::set_starttime_from_gpx_data(void) {
 	log_call();
 
 	TelemetryData data;
@@ -138,7 +92,7 @@ void GPX2VideoVideoFrame::on_action_use_gpx_data(void) {
 	Glib::DateTime starttime;
 
 	if ((media_ == NULL) || (source_ == NULL))
-		return;
+		return false;
 
 	log_info("Sync video starttime with the GPX first point");
 
@@ -166,15 +120,86 @@ void GPX2VideoVideoFrame::on_action_use_gpx_data(void) {
 	entry->get_buffer()->set_text(starttime.format("%x %X").c_str());
 #endif
 
+	return true;
+}
+
+
+bool GPX2VideoVideoFrame::set_starttime_from_creation_time(void) {
+	log_call();
+
+	Glib::DateTime creationtime;
+
+	if (media_ == NULL)
+		return false;
+
+	// Video creation time
+//#if GLIBMM_CHECK_VERSION(2, 80, 0)
+//	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
+//#else
+//	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
+//#endif
+//	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
+	creationtime = Glib::DateTime::create_now_utc(media_->creationTime() / 1000).to_local();
+
+	if (!media_->creationTime())
+		return false;
+
+	log_info("Sync video starttime with creation time video metadata");
+
+	// Set video start time
+	media_->setStartTime(media_->creationTime());
+
+	// Update datetime start entry
+	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
+	if (!entry)
+		throw std::runtime_error("No \"datetimestart_entry\" object in window.ui");
+
+#if GLIBMM_CHECK_VERSION(2, 80, 0)
+	entry->get_buffer()->set_text(creationtime.format("%Ex %EX").c_str());
+#else
+	entry->get_buffer()->set_text(creationtime.format("%x %X").c_str());
+#endif
+
+	return true;
+}
+
+
+void GPX2VideoVideoFrame::on_action_use_creation_time(void) {
+	// Set starttime value from media metadata
+	if (set_starttime_from_creation_time() == false)
+		return;
+
 	// Refresh video preview
-	dispatcher_.emit();
+	video_dispatcher_.emit();
+}
+
+
+void GPX2VideoVideoFrame::on_action_use_gpmf_stream(void) {
+	log_call();
+
+	log_info("Sync video starttime with GPMF video stream");
+
+	// Request timesync action
+	timesync_dispatcher_.emit();
+}
+
+
+void GPX2VideoVideoFrame::on_action_use_gpx_data(void) {
+	log_call();
+
+	// Set starttime value from GPX data
+	if (set_starttime_from_gpx_data() == false)
+		return;
+
+	// Refresh video preview
+	video_dispatcher_.emit();
 }
 
 
 void GPX2VideoVideoFrame::update_content(void) {
 	log_call();
 
-	Glib::DateTime creationtime;
+	Glib::DateTime starttime;
 
 	// Frame is visible only as video is selected
 	set_visible((media_ != NULL));
@@ -183,13 +208,13 @@ void GPX2VideoVideoFrame::update_content(void) {
 	if (media_ == NULL)
 		return;
 
-	// Video creation time
+	// Video start time
 //#if GLIBMM_CHECK_VERSION(2, 80, 0)
-//	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
+//	starttime = Glib::DateTime::create_from_utc_usec(media_->startTime() * 1000);
 //#else
-//	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
+//	starttime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->startTime()));
 //#endif
-	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
+	starttime = Glib::DateTime::create_now_local(media_->startTime() / 1000);
 
 	// Update datetime start entry
 	auto entry = ref_builder_->get_widget<Gtk::Entry>("datetimestart_entry");
@@ -197,9 +222,9 @@ void GPX2VideoVideoFrame::update_content(void) {
 		throw std::runtime_error("No \"datetimestart_entry\" object in video_frame.ui");
 
 #if GLIBMM_CHECK_VERSION(2, 80, 0)
-	entry->get_buffer()->set_text(media_->creationTime() ? creationtime.format("%Ex %EX").c_str() : "");
+	entry->get_buffer()->set_text(media_->startTime() ? starttime.format("%Ex %EX").c_str() : "");
 #else
-	entry->get_buffer()->set_text(media_->creationTime() ? creationtime.format("%x %X").c_str() : "");
+	entry->get_buffer()->set_text(media_->startTime() ? starttime.format("%x %X").c_str() : "");
 #endif
 }
 
@@ -278,10 +303,7 @@ void GPX2VideoVideoFrame::on_datetimestart_clicked(void) {
 	// Extract calendar date
 	gint64 date = calendar->get_date().to_unix();
 
-//	date = date - (date % (24 * 60 * 60));
-//	date += 24 * 60 * 60;
-
-	datetimestart = Glib::DateTime::create_now_utc(date);
+	datetimestart = Glib::DateTime::create_now_local(date);
 
 	// Get hour start popover
    	spin = ref_builder_->get_widget<Gtk::SpinButton>("hourstart_spinbutton");
@@ -329,7 +351,7 @@ void GPX2VideoVideoFrame::on_datetimestart_clicked(void) {
 #endif
 
 	// Refresh video preview
-	dispatcher_.emit();
+	video_dispatcher_.emit();
 }
 
 
