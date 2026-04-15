@@ -2,9 +2,9 @@
 #include "arc.h"
 
 
-GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
+GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, GPX2VideoWidget *widget) 
-	: GPX2VideoBaseSettingsBox(cobject, ref_builder, "GPX2VideoArcSettingsBox", resource_file) 
+	: GPX2VideoShapeBaseSettingsBox(cobject, ref_builder, "GPX2VideoArcShapeSettingsBox", resource_file) 
 	, widget_(widget) {
 	log_call();
 
@@ -44,7 +44,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!sw)
 		throw std::runtime_error("No \"tick_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_switch_changed), sw, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTick);
@@ -61,7 +61,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"tick_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: tick color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -78,7 +78,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!sw)
 		throw std::runtime_error("No \"tick_label_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_switch_changed), sw, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTickLabel);
@@ -95,7 +95,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"tick_label_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: tick label color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -119,7 +119,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!sw)
 		throw std::runtime_error("No \"needle_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_switch_changed), sw, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagNeedle);
@@ -137,7 +137,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 		throw std::runtime_error("No \"needle_type_combobox\" object in " + resource_file_);
 	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_combobox_changed), combobox, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
@@ -156,7 +156,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"needle_primary_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: needle primary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -173,7 +173,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"needle_secondary_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: needle secondary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -190,7 +190,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!sw)
 		throw std::runtime_error("No \"gauge_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_switch_changed), sw, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagGauge);
@@ -207,7 +207,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"gauge_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: gauge color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -224,7 +224,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!spinbutton)
 		throw std::runtime_error("No \"gauge_border_width_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
 						log_info("Widget %s: gauge border changed to '%d'",
 							   widget_->name().c_str(), value);
@@ -241,7 +241,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"gauge_border_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: gauge border color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -258,7 +258,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 	if (!colorbutton)
 		throw std::runtime_error("No \"gauge_background_color_button\" object in " + resource_file_);
 	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcSettingsBox::on_widget_color_changed), colorbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
 						log_info("Widget %s: gauge background color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
@@ -272,7 +272,7 @@ GPX2VideoArcSettingsBox::GPX2VideoArcSettingsBox(BaseObjectType *cobject,
 }
 
 
-bool GPX2VideoArcSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result) {
+bool GPX2VideoArcShapeSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result) {
 	log_call();
 
 	for (auto iter = store->children().begin(); iter != store->children().end(); iter++) {
@@ -288,7 +288,7 @@ bool GPX2VideoArcSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore
 }
 
 
-void GPX2VideoArcSettingsBox::update_content(void) {
+void GPX2VideoArcShapeSettingsBox::update_content(void) {
 	log_call();
 
 	Gdk::RGBA rgba;

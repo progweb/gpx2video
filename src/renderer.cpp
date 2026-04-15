@@ -612,6 +612,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setText((const char *) w->text());
 
 	// Widget label settings
+	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());
 	widget->theme().setLabelFontSize(w->labelFontSize());
 	widget->theme().setLabelFontStyle(label_font_style);
 	widget->theme().setLabelFontWeight(label_font_weight);
@@ -623,6 +624,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setLabelBorderColor((const char *) w->labelBorderColor());
 
 	// Widget value settings
+	widget->theme().setValueFontFamily((const char *) w->valueFontFamily());
 	widget->theme().setValueFontSize(w->valueFontSize());
 	widget->theme().setValueFontStyle(value_font_style);
 	widget->theme().setValueFontWeight(value_font_weight);

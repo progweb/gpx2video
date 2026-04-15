@@ -13,13 +13,11 @@ GTK interface for gpx2video tool.
 - Load video
 - Load & export layout file
 - Load telemetry file
-- Video start time (from video metadata or GPX)
+- Video start time (from video metadata, GPMF or GPX)
 - Widget settings (in progress)
 
 TODO:
 
-- Video start time from GPMF (for GoPro)
-- Edit label name
 - Append new widget
 - Translate text application
 - Redraw each icon (in real svg)

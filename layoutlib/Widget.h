@@ -261,6 +261,13 @@ namespace layout
     String &text() { return _text; }
 
     ///
+    /// Get label font family
+    ///
+    /// @return the label font family element
+    ///
+    String &labelFontFamily() { return _label_fontfamily; }
+
+    ///
     /// Get label font size
     ///
     /// @return the label font size element
@@ -322,6 +329,13 @@ namespace layout
     /// @return the label border color element
     ///
     String &labelBorderColor() { return _label_bordercolor; }
+
+    ///
+    /// Get value font family
+    ///
+    /// @return the value font family element
+    ///
+    String &valueFontFamily() { return _value_fontfamily; }
 
     ///
     /// Get value font size
@@ -513,6 +527,7 @@ namespace layout
 	String       _font;
 	String       _text;
 
+	String       _label_fontfamily;
 	Decimal      _label_fontsize;
 	String       _label_fontstyle;
 	String       _label_fontweight;
@@ -523,6 +538,7 @@ namespace layout
 	Decimal      _label_borderwidth;
 	String       _label_bordercolor;
 
+	String       _value_fontfamily;
 	Decimal      _value_fontsize;
 	String       _value_fontstyle;
 	String       _value_fontweight;

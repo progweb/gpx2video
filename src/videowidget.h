@@ -327,6 +327,17 @@ public:
 			label_align_ = align;
 		}
 
+		const std::string& labelFontFamily(void) const {
+			return label_font_family_;
+		}
+
+		virtual void setLabelFontFamily(std::string family) {
+			if (family.empty())
+				return;
+
+			label_font_family_ = family;
+		};
+
 		int labelFontSize(void) const {
 			return label_font_size_;
 		}
@@ -577,6 +588,17 @@ public:
 			value_align_ = align;
 		}
 
+		const std::string& valueFontFamily(void) const {
+			return value_font_family_;
+		}
+
+		virtual void setValueFontFamily(std::string family) {
+			if (family.empty())
+				return;
+
+			value_font_family_ = family;
+		};
+
 		int valueFontSize(void) const {
 			return value_font_size_;
 		}
@@ -721,6 +743,7 @@ public:
 		std::string font_;
 
 		Align label_align_;
+		std::string label_font_family_;
 		int label_font_size_;
 		FontStyle label_font_style_;
 		FontWeight label_font_weight_;
@@ -737,6 +760,7 @@ public:
 		int value_min_;
 		int value_max_;
 		Align value_align_;
+		std::string value_font_family_;
 		int value_font_size_;
 		FontStyle value_font_style_;
 		FontWeight value_font_weight_;
@@ -762,6 +786,15 @@ public:
 
 	virtual void setShape(Shape shape) {
 		shape_ = shape;
+	}
+
+	virtual bool isShapeSupported(Shape type) {
+		switch (type) {
+		case VideoWidget::ShapeText:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	uint64_t& atBeginTime(void) {

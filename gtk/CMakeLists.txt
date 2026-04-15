@@ -30,7 +30,7 @@ include_directories(${LIBGLM_INCLUDE_DIRS})
 PKG_CHECK_MODULES(LIBEPOXY REQUIRED epoxy)
 include_directories(${LIBEPOXY_INCLUDE_DIRS})
 
-PKG_CHECK_MODULES(LIBGTKMM4 REQUIRED IMPORTED_TARGET gtkmm-4.0 glibmm-2.68)
+PKG_CHECK_MODULES(LIBGTKMM4 REQUIRED IMPORTED_TARGET gtkmm-4.0 glibmm-2.68 pangomm-2.48)
 include_directories(${LIBGTKMM4_INCLUDE_DIRS})
 
 PKG_CHECK_MODULES(LIBAVUTIL REQUIRED libavutil>=3.0.0)
@@ -170,6 +170,7 @@ set(GPX2VIDEO_SOURCES
 	src/shape/arc.cpp
 	src/shape/bar.cpp
 	src/shape/text.cpp
+	src/widgets/base.cpp
 )
 
 # Subdirectories

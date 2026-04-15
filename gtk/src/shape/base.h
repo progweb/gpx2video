@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__GTK__BASESETTINGSBOX_H__
-#define __GPX2VIDEO__GTK__BASESETTINGSBOX_H__
+#ifndef __GPX2VIDEO__GTK__SHAPEBASESETTINGSBOX_H__
+#define __GPX2VIDEO__GTK__SHAPEBASESETTINGSBOX_H__
 
 #include <gtkmm/builder.h>
 #include <gtkmm/box.h>
@@ -11,15 +11,15 @@
 #include "../log.h"
 
 
-class GPX2VideoBaseSettingsBox : public Gtk::Box {
+class GPX2VideoShapeBaseSettingsBox : public Gtk::Box {
 public:
-	GPX2VideoBaseSettingsBox(const std::string &name)
+	GPX2VideoShapeBaseSettingsBox(const std::string &name)
 		: Glib::ObjectBase(name)
 		, ref_builder_(NULL) {
 		loading_ = false;
 	}
 
-	GPX2VideoBaseSettingsBox(BaseObjectType *cobject,
+	GPX2VideoShapeBaseSettingsBox(BaseObjectType *cobject,
 			const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string name, std::string resource_file)
 		: Glib::ObjectBase(name)
 		, Gtk::Box(cobject)
@@ -28,7 +28,7 @@ public:
 		loading_ = false;
 	}
 
-	virtual ~GPX2VideoBaseSettingsBox() {
+	virtual ~GPX2VideoShapeBaseSettingsBox() {
 		ref_builder_ = NULL;
 	}
 

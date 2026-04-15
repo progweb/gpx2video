@@ -2,9 +2,9 @@
 #include "text.h"
 
 
-GPX2VideoTextSettingsBox::GPX2VideoTextSettingsBox(BaseObjectType *cobject,
+GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, GPX2VideoWidget *widget) 
-	: GPX2VideoBaseSettingsBox(cobject, ref_builder, "GPX2VideoTextSettingsBox", resource_file) 
+	: GPX2VideoShapeBaseSettingsBox(cobject, ref_builder, "GPX2VideoTextShapeSettingsBox", resource_file) 
 	, widget_(widget) {
 	log_call();
 
@@ -40,7 +40,7 @@ GPX2VideoTextSettingsBox::GPX2VideoTextSettingsBox(BaseObjectType *cobject,
 	if (!sw)
 		throw std::runtime_error("No \"icon_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoTextSettingsBox::on_widget_switch_changed), sw, 
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagIcon);
@@ -54,7 +54,7 @@ GPX2VideoTextSettingsBox::GPX2VideoTextSettingsBox(BaseObjectType *cobject,
 }
 
 
-void GPX2VideoTextSettingsBox::update_content(void) {
+void GPX2VideoTextShapeSettingsBox::update_content(void) {
 	log_call();
 
 //	Gdk::RGBA rgba;

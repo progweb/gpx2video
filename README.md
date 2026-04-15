@@ -16,6 +16,15 @@ gpx2video is **only a test tool and isn't yet a final release!**
 *Please test and report issues. Tested with GoPro 5, 6, 7, 8 and 9 (with last firmware).*
 
 
+## User interface (new)
+
+User interface is built in C++ and uses GTK4++ API. It intends to edit and export your layout file.
+Then view renderer result.
+
+![gtk-overview](./gtk/data/gpx2video-gtk.png)
+
+*Please follow documentation to build gpx2video with gtk interface.*
+
 ## Features
 
 gpx2video should work with any video. Orientation, SAR & DAR video parameters are supported.
