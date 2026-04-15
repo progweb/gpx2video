@@ -2,28 +2,28 @@
 <interface domain="gtk40">
 	<object class="GtkAdjustment" id="x_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100000</property>
 		<property name="value">0</property>
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
 	<object class="GtkAdjustment" id="y_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100000</property>
 		<property name="value">0</property>
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
 	<object class="GtkAdjustment" id="width_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100000</property>
 		<property name="value">0</property>
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
 	<object class="GtkAdjustment" id="height_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100000</property>
 		<property name="value">0</property>
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
@@ -837,6 +837,32 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
+														<property name="label">Label font family:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkFontButton" id="label_font_family_fontbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+														<property name="use_font">true</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
 														<property name="label">Label font size:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
@@ -1134,6 +1160,32 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
+														<property name="label">Value font family:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkFontButton" id="value_font_family_fontbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+														<property name="use_font">true</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
 														<property name="label">Value font size:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
@@ -1315,7 +1367,7 @@
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
-														<property name="adjustment">label_shadow_distance_adjustment</property>
+														<property name="adjustment">value_shadow_distance_adjustment</property>
 													</object>
 												</child>
 											</object>

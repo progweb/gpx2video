@@ -1,7 +1,7 @@
 #include "base.h"
 
 
-void GPX2VideoBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
+void GPX2VideoShapeBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
 	log_call();
 
 	int value;
@@ -16,7 +16,7 @@ void GPX2VideoBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *button, s
 }
 
 
-void GPX2VideoBaseSettingsBox::on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set) {
+void GPX2VideoShapeBaseSettingsBox::on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set) {
 	log_call();
 
 	Gdk::RGBA rgba;
@@ -41,7 +41,7 @@ void GPX2VideoBaseSettingsBox::on_widget_color_changed(Gtk::ColorButton *button,
 }
 
 
-void GPX2VideoBaseSettingsBox::on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set) {
+void GPX2VideoShapeBaseSettingsBox::on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set) {
 	log_call();
 
 	if (loading_)
@@ -52,7 +52,7 @@ void GPX2VideoBaseSettingsBox::on_widget_combobox_changed(Gtk::ComboBox *combobo
 }
 
 
-bool GPX2VideoBaseSettingsBox::on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set) {
+bool GPX2VideoShapeBaseSettingsBox::on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set) {
 	log_call();
 
 	if (loading_)

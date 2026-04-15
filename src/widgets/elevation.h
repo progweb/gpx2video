@@ -291,6 +291,16 @@ public:
 		}
 	}
 
+	bool isShapeSupported(VideoWidget::Shape type) {
+		switch (type) {
+		case VideoWidget::ShapeBar:
+		case VideoWidget::ShapeText:
+			return true;
+		default:
+			return false;
+		}
+	}
+
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		return shape_->prepare(is_update);
 	}

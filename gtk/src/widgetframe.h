@@ -6,14 +6,18 @@
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/switch.h>
+#include <gtkmm/fontbutton.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/colorbutton.h>
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/liststore.h>
 
+#include <pangomm/fontdescription.h>
+
 #include "renderer.h"
 #include "videowidget.h"
 #include "shape/base.h"
+#include "widgets/base.h"
 
 
 class GPX2VideoWidgetFrame : public Gtk::Frame {
@@ -43,10 +47,12 @@ protected:
 		Model() { 
 			add(m_id); 
 			add(m_name);
+			add(m_enable);
 		}
 
 		Gtk::TreeModelColumn<int> m_id;
 		Gtk::TreeModelColumn<Glib::ustring> m_name;
+		Gtk::TreeModelColumn<bool> m_enable;
 	};
 
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
@@ -64,15 +70,18 @@ protected:
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
 
 	void build_shape_settings(void);
+	void build_widget_settings(void);
 
 	void update_content(void);
 	void update_boundaries(void);
 
 	void update_shape_content(void);
+	void update_widget_content(void);
 
 	void on_widget_margin_value_changed(const VideoWidget::Margin &margin);
 	void on_widget_padding_value_changed(const VideoWidget::Theme::Padding &padding);
 
+	void on_widget_font_changed(Gtk::FontButton *button, std::function<void(const Pango::FontDescription&)> set);
 	void on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
 	void on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set);
 	void on_widget_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set);
@@ -86,8 +95,8 @@ private:
 
 	GPX2VideoWidget *widget_selected_;
 
-//	Glib::RefPtr<Gtk::Box> child_box_;
-	GPX2VideoBaseSettingsBox *child_box_;
+	GPX2VideoShapeBaseSettingsBox *shape_child_box_;
+	GPX2VideoWidgetBaseSettingsBox *widget_child_box_;
 
 	sigc::connection sigc_connection_;
 

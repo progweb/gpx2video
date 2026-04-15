@@ -46,6 +46,7 @@ VideoWidget::Theme::Theme() {
 
 	setFont("./assets/fonts/Helvetica.ttf");
 
+	setLabelFontFamily("Sans");
 	setLabelFontSize(30);
 	setLabelFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setLabelFontWeight(VideoWidget::Theme::FontWeightNormal);
@@ -53,11 +54,12 @@ VideoWidget::Theme::Theme() {
 	setLabelShadowDistance(3);
 	setLabelAlign(VideoWidget::Theme::AlignLeft);
 	setLabelColor(1.0, 1.0, 1.0, 1.0);
-	setLabelBorderWidth(0);
+	setLabelBorderWidth(1);
 	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setValueMin(0);
 	setValueMax(1000);
+	setValueFontFamily("Sans");
 	setValueFontSize(60);
 	setValueFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setValueFontWeight(VideoWidget::Theme::FontWeightNormal);
@@ -65,12 +67,10 @@ VideoWidget::Theme::Theme() {
 	setValueShadowDistance(3);
 	setValueAlign(VideoWidget::Theme::AlignLeft);
 	setValueColor(1.0, 1.0, 1.0, 1.0);
-	setValueBorderWidth(0);
+	setValueBorderWidth(1);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 	setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
-//	setTextShadow(0);
-//	setTextRatio(2.0);
 //	setTextLineSpace(10);
 }
 
@@ -490,6 +490,8 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit, bool label) {
 
 void VideoWidget::save(std::ostream &os) {
 	log_call();
+
+	os.imbue(std::locale::classic());
 
 	xmlopen(os);
 	xmlwrite(os);

@@ -15,6 +15,7 @@ public:
 		int border;
 		int shadow_opacity;
 		int shadow_distance;
+		std::string family;
 		VideoWidget::Theme::FontStyle style;
 		VideoWidget::Theme::FontWeight weight;
 	};

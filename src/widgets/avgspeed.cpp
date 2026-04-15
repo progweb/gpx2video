@@ -74,6 +74,7 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.border = theme().labelBorderWidth(),
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -88,6 +89,7 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.border = theme().valueBorderWidth(),
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};

@@ -24,12 +24,20 @@ public:
 		return widget;
 	}
 
+	void setPadding(int left, int right, int top, int bottom) {
+		padding_left_ = left;
+		padding_right_ = right;
+		padding_top_ = top;
+		padding_bottom_ = bottom;
+	}
+
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		if (bg_buf_ != NULL) {
 			is_update = false;
 			goto skip;
 		}
 
+		this->initialize();
 		this->createBox(&bg_buf_, theme().width(), theme().height());
 		this->drawBorder(bg_buf_);
 		this->drawBackground(bg_buf_);
@@ -150,6 +158,11 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
+	int padding_left_;
+	int padding_right_;
+	int padding_top_;
+	int padding_bottom_;
+
 	TextWidget(GPXApplication &app, std::string name)
 		: VideoWidget(app, name) 
 		, ShapeBase(theme())
@@ -160,6 +173,10 @@ private:
 
 	void initialize(void);
 	void draw(cairo_t *cr, const TelemetryData &data);
+	void label(cairo_t *cr, ShapeBase::Font &font, 
+			const float *fill, const float *outline, const char *text);
+	void value(cairo_t *cr, ShapeBase::Font &font, 
+			const float *fill, const float *outline, const char *text);
 };
 
 #endif

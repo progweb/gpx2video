@@ -255,7 +255,7 @@ void ShapeBase::drawText(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 
 	// Font loading
 	desc = pango_font_description_new();
-	pango_font_description_set_family(desc, "Sans");
+	pango_font_description_set_family(desc, font.family.c_str());
 	pango_font_description_set_style(desc, (PangoStyle) font.style);
 	pango_font_description_set_variant(desc, PANGO_VARIANT_NORMAL);
 	pango_font_description_set_weight(desc, (PangoWeight) font.weight);
@@ -312,7 +312,7 @@ void ShapeBase::textSize(cairo_t *cr, ShapeBase::Font &font, const char *text,
 
 	// Font loading
 	desc = pango_font_description_new();
-	pango_font_description_set_family(desc, "Sans");
+	pango_font_description_set_family(desc, font.family.c_str());
 	pango_font_description_set_style(desc, (PangoStyle) font.style);
 	pango_font_description_set_variant(desc, PANGO_VARIANT_NORMAL);
 	pango_font_description_set_weight(desc, (PangoWeight) font.weight);
@@ -354,6 +354,7 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 
 	os << "<with-label>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagLabel)) << "</with-label>" << std::endl;
 	os << "<label-font-size>" << theme_.labelFontSize() << "</label-font-size>" << std::endl;
+	os << "<label-font-family>" << theme_.labelFontFamily() << "</label-font-family>" << std::endl;
 	os << "<label-font-style>" << VideoWidget::fontstyle2string(theme_.labelFontStyle()) << "</label-font-style>" << std::endl;
 	os << "<label-font-weight>" << VideoWidget::fontweight2string(theme_.labelFontWeight()) << "</label-font-weight>" << std::endl;
 	os << "<label-align>" << VideoWidget::align2string(theme_.labelAlign()) << "</label-align>" << std::endl;
@@ -364,6 +365,7 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<label-border-color>" << theme_.color2hex(theme_.labelBorderColor()) << "</label-border-color>" << std::endl;
 
 	os << "<with-value>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagValue)) << "</with-value>" << std::endl;
+	os << "<value-font-family>" << theme_.valueFontFamily() << "</value-font-family>" << std::endl;
 	os << "<value-font-size>" << theme_.valueFontSize() << "</value-font-size>" << std::endl;
 	os << "<value-font-style>" << VideoWidget::fontstyle2string(theme_.valueFontStyle()) << "</value-font-style>" << std::endl;
 	os << "<value-font-weight>" << VideoWidget::fontweight2string(theme_.valueFontWeight()) << "</value-font-weight>" << std::endl;

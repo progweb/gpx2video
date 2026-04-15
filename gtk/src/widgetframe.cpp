@@ -2,8 +2,11 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/switch.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/fontbutton.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/colorbutton.h>
+
+#include <pangomm/fontdescription.h>
 
 #include "log.h"
 #include "shape/arc.h"
@@ -19,7 +22,8 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame()
 	, dispatcher_()
 	, renderer_(NULL)
 	, widget_selected_(NULL)
-	, child_box_(NULL) {
+	, shape_child_box_(NULL)
+	, widget_child_box_(NULL) {
 	log_call();
 
 	loading_ = false;
@@ -33,12 +37,14 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	, dispatcher_()
 	, renderer_(NULL)
 	, widget_selected_(NULL)
-	, child_box_(NULL) {
+	, shape_child_box_(NULL)
+	, widget_child_box_(NULL) {
 	log_call();
 
 	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
+	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
@@ -54,14 +60,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = 0;
 		row[model_.m_name] = "None";
+		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
 		row[model_.m_id] = 1;
 		row[model_.m_name] = "Horizontal";
+		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
 		row[model_.m_id] = 2;
 		row[model_.m_name] = "Vertical";
+		row[model_.m_enable] = true;
 	}
 
 	shape_model_ = Gtk::ListStore::create(model_);
@@ -71,14 +80,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::ShapeText;
 		row[model_.m_name] = "Text";
+		row[model_.m_enable] = true;
 
 		row = *(shape_model_->append());
 		row[model_.m_id] = VideoWidget::ShapeArc;
 		row[model_.m_name] = "Arc";
+		row[model_.m_enable] = true;
 
 		row = *(shape_model_->append());
 		row[model_.m_id] = VideoWidget::ShapeBar;
 		row[model_.m_name] = "Bar";
+		row[model_.m_enable] = true;
 	}
 
 	position_model_ = Gtk::ListStore::create(model_);
@@ -88,38 +100,47 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = 0;
 		row[model_.m_name] = "None";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 1;
 		row[model_.m_name] = "Left";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 2;
 		row[model_.m_name] = "Right";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 3;
 		row[model_.m_name] = "Bottom";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 4;
 		row[model_.m_name] = "Top";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 5;
 		row[model_.m_name] = "Bottom - Left";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 6;
 		row[model_.m_name] = "Bottom - Right";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 7;
 		row[model_.m_name] = "Top - Left";
+		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 8;
 		row[model_.m_name] = "Top - Right";
+		row[model_.m_enable] = true;
 	}
 
 	font_style_model_ = Gtk::ListStore::create(model_);
@@ -129,10 +150,12 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::FontStyleNormal;
 		row[model_.m_name] = "Normal";
+		row[model_.m_enable] = true;
 
 		row = *(font_style_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontStyleItalic;
 		row[model_.m_name] = "Italic";
+		row[model_.m_enable] = true;
 	}
 
 	font_weight_model_ = Gtk::ListStore::create(model_);
@@ -142,46 +165,57 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::FontWeightThin;
 		row[model_.m_name] = "Thin (100)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraLight;
 		row[model_.m_name] = "Ultra light (200)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightLight;
 		row[model_.m_name] = "Light (300)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightSemiLight;
 		row[model_.m_name] = "Semi light (350)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightBook;
 		row[model_.m_name] = "Book (380)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightNormal;
 		row[model_.m_name] = "Normal (400)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightMedium;
 		row[model_.m_name] = "Medium (500)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightSemiBold;
 		row[model_.m_name] = "Semi bold (600)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraBold;
 		row[model_.m_name] = "Ultra bold (800)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightHeavy;
 		row[model_.m_name] = "Heavy (900)";
+		row[model_.m_enable] = true;
 
 		row = *(font_weight_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraHeavy;
 		row[model_.m_name] = "Ultra heavy (1000)";
+		row[model_.m_enable] = true;
 	}
 
 	text_align_model_ = Gtk::ListStore::create(model_);
@@ -191,15 +225,20 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::AlignLeft;
 		row[model_.m_name] = "Left";
+		row[model_.m_enable] = true;
 
 		row = *(text_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignCenter;
 		row[model_.m_name] = "Center";
+		row[model_.m_enable] = true;
 
 		row = *(text_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignRight;
 		row[model_.m_name] = "Right";
+		row[model_.m_enable] = true;
 	}
+
+	auto renderer = Gtk::make_managed<Gtk::CellRendererText>();
 
 	// Connect widgets button
 	//------------------------
@@ -208,8 +247,13 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
 //	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -272,8 +316,13 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("position_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"position_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
 //	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -293,8 +342,13 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("orientation_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"orientationn_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
 //	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -460,10 +514,34 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	entry->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_entry_changed), entry, 
 					[this](const Glib::ustring &value) {
+						Gtk::FontButton *button;
+
 						log_info("Widget %s: label text changed to '%s'",
 							   widget_selected_->widget()->name().c_str(), value.c_str());
 
+						// Update label font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+
+						button->set_preview_text(value);
+
 						widget_selected_->widget()->setLabel(value);
+					}
+			));
+
+	// Label font family
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+	if (!fontbutton)
+		throw std::runtime_error("No \"label_font_family_fontbutton\" object in widget_frame.ui");
+
+	fontbutton->signal_font_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_font_changed), fontbutton, 
+					[this](const Pango::FontDescription &description) {
+						std::string value = description.get_family();
+
+						log_info("Widget %s: label font family changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), value.c_str());
+
+						widget_selected_->widget()->theme().setLabelFontFamily(value);
 					}
 			));
 
@@ -474,8 +552,25 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						log_info("Widget %s: label font size changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
+
+						// Update label font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"label_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+//						description.set_size(value * Pango::SCALE);
+						description.set_absolute_size(value * Pango::SCALE);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontSize(value);
 					}
@@ -513,15 +608,35 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_fontstyle_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_fontstyle_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						int value = iter->get_value(model_.m_id);
 
 						log_info("Widget %s: label style changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update label font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"label_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_style((Pango::Style) value);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontStyle((VideoWidget::Theme::FontStyle) value);
 					}
@@ -531,15 +646,35 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_fontweight_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_fontweight_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						int value = iter->get_value(model_.m_id);
 
 						log_info("Widget %s: label weight changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update label font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"label_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_weight((Pango::Weight) value);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontWeight((VideoWidget::Theme::FontWeight) value);
 					}
@@ -549,8 +684,12 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_align_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -619,6 +758,23 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 					} 
 			), false);
 
+	// Value font family
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("value_font_family_fontbutton");
+	if (!fontbutton)
+		throw std::runtime_error("No \"value_font_family_fontbutton\" object in widget_frame.ui");
+
+	fontbutton->signal_font_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_font_changed), fontbutton, 
+					[this](const Pango::FontDescription &description) {
+						std::string value = description.get_family();
+
+						log_info("Widget %s: value font family changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), value.c_str());
+
+						widget_selected_->widget()->theme().setValueFontFamily(value);
+					}
+			));
+
 	// Value font size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
 	if (!spinbutton)
@@ -626,8 +782,25 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						log_info("Widget %s: value font size changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
+
+						// Update value font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("value_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"value_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+//						description.set_size(value * Pango::SCALE);
+						description.set_absolute_size(value * Pango::SCALE);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontSize(value);
 					}
@@ -665,15 +838,35 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_fontstyle_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_fontstyle_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						int value = iter->get_value(model_.m_id);
 
 						log_info("Widget %s: value style changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update value font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("value_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"value_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_style((Pango::Style) value);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontStyle((VideoWidget::Theme::FontStyle) value);
 					}
@@ -683,15 +876,35 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_fontweight_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_fontweight_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						int value = iter->get_value(model_.m_id);
 
 						log_info("Widget %s: value weight changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update value font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("value_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"value_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_weight((Pango::Weight) value);
+
+						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontWeight((VideoWidget::Theme::FontWeight) value);
 					}
@@ -701,8 +914,12 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_align_combobox\" object in widget_frame.ui");
-//	combobox->pack_start(model_.m_id);
-	combobox->pack_start(model_.m_name);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -832,6 +1049,7 @@ void GPX2VideoWidgetFrame::set_widget_selected(GPX2VideoWidget *widget) {
 
 	// Build extension settings ui component
 	build_shape_settings();
+	build_widget_settings();
 
 	// Update ui content
 	update_content();
@@ -843,34 +1061,34 @@ void GPX2VideoWidgetFrame::build_shape_settings(void) {
 
 	Gtk::Box *box;
 
-	// Get shape settings box child
+	// Get settings box
 	box = ref_builder_->get_widget<Gtk::Box>("settings_box");
 	if (!box)
 		throw std::runtime_error("No \"settings_box\" object in widget_frame.ui");
 
 	// Remove previous shape settings box
-	if (child_box_) {
-		box->remove(*child_box_);
+	if (shape_child_box_) {
+		box->remove(*shape_child_box_);
 
-		child_box_->release();
+		shape_child_box_->release();
 	}
 
 	// Child box deleted
-	child_box_ = NULL;
+	shape_child_box_ = NULL;
 
 	if (widget_selected_) {
 		// Build shape settings box child
 		switch (widget_selected_->widget()->shape()) {
 		case VideoWidget::ShapeArc:
-			child_box_ = GPX2VideoArcSettingsBox::create(widget_selected_);
+			shape_child_box_ = GPX2VideoArcShapeSettingsBox::create(widget_selected_);
 			break;
 
 		case VideoWidget::ShapeBar:
-			child_box_ = GPX2VideoBarSettingsBox::create(widget_selected_);
+			shape_child_box_ = GPX2VideoBarShapeSettingsBox::create(widget_selected_);
 			break;
 
 		case VideoWidget::ShapeText:
-			child_box_ = GPX2VideoTextSettingsBox::create(widget_selected_);
+			shape_child_box_ = GPX2VideoTextShapeSettingsBox::create(widget_selected_);
 			break;
 
 		default:
@@ -879,8 +1097,40 @@ void GPX2VideoWidgetFrame::build_shape_settings(void) {
 	}
 
 	// Append extension settings to ui
-	if (child_box_) {
-		box->append(*child_box_);
+	if (shape_child_box_) {
+		box->append(*shape_child_box_);
+	}
+}
+
+
+void GPX2VideoWidgetFrame::build_widget_settings(void) {
+	log_call();
+
+	Gtk::Box *box;
+
+	// Get settings box
+	box = ref_builder_->get_widget<Gtk::Box>("settings_box");
+	if (!box)
+		throw std::runtime_error("No \"settings_box\" object in widget_frame.ui");
+
+	// Remove previous widget settings box
+	if (widget_child_box_) {
+		box->remove(*widget_child_box_);
+
+		widget_child_box_->release();
+	}
+
+	// Child box deleted
+	widget_child_box_ = NULL;
+
+	if (widget_selected_) {
+		// Build widget settings box child
+//		widget_child_box_ = widget_selected_->build_box();
+	}
+
+	// Append extension settings to ui
+	if (widget_child_box_) {
+		box->append(*widget_child_box_);
 	}
 }
 
@@ -913,8 +1163,11 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
+	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
+
+	Pango::FontDescription description;
 
 	Gtk::TreeModel::iterator iter;
 
@@ -938,6 +1191,12 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
+
+	for (auto iter = shape_model_->children().begin(); iter != shape_model_->children().end(); iter++) {
+		bool enable = widget_selected_->widget()->isShapeSupported((VideoWidget::Shape) iter->get_value(model_.m_id));
+
+		iter->set_value(model_.m_enable, enable);
+	}
 
 	combobox->set_model(shape_model_);
 
@@ -1105,6 +1364,24 @@ void GPX2VideoWidgetFrame::update_content(void) {
 		throw std::runtime_error("No \"label_text_entry\" object in widget_frame.ui");
 
 	entry->set_text(widget_selected_->widget()->label());
+
+	// Label font family
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+	if (!fontbutton)
+		throw std::runtime_error("No \"label_font_family_fontbutton\" object in widget_frame.ui");
+
+	description.set_family(widget_selected_->widget()->theme().labelFontFamily());
+	description.set_style((Pango::Style) widget_selected_->widget()->theme().labelFontStyle());
+	description.set_variant(Pango::Variant::NORMAL);
+	description.set_weight((Pango::Weight) widget_selected_->widget()->theme().labelFontWeight());
+	description.set_stretch(Pango::Stretch::NORMAL);
+//	description.set_size(widget_selected_->widget()->theme().labelFontSize() * Pango::SCALE);
+	description.set_absolute_size(widget_selected_->widget()->theme().labelFontSize() * Pango::SCALE);
+
+	fontbutton->set_language("fr");
+	fontbutton->set_level(Gtk::FontButton::Level::FAMILY);
+	fontbutton->set_preview_text(widget_selected_->widget()->label());
+	fontbutton->set_font_desc(description);
 
 	// Widget label size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
@@ -1287,8 +1564,9 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
 
-	// Widget shape settings
+	// Widget settings
 	update_shape_content();
+	update_widget_content();
 
 	log_info("Widget settings loaded");
 
@@ -1334,8 +1612,16 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 void GPX2VideoWidgetFrame::update_shape_content(void) {
 	log_call();
 
-	if (child_box_)
-		child_box_->update_content();
+	if (shape_child_box_)
+		shape_child_box_->update_content();
+}
+
+
+void GPX2VideoWidgetFrame::update_widget_content(void) {
+	log_call();
+
+	if (widget_child_box_)
+		widget_child_box_->update_content();
 }
 
 
@@ -1410,6 +1696,27 @@ void GPX2VideoWidgetFrame::on_widget_padding_value_changed(const VideoWidget::Th
 			widget_selected_->widget()->name().c_str(), value);
 
 	widget_selected_->widget()->theme().setPadding(padding, value);
+	renderer_->refresh(widget_selected_);
+
+	// Refresh video preview
+	dispatcher_.emit();
+}
+
+
+void GPX2VideoWidgetFrame::on_widget_font_changed(Gtk::FontButton *button, std::function<void(const Pango::FontDescription&)> set) {
+	log_call();
+
+	Pango::FontDescription description;
+
+	if (loading_)
+		return;
+
+	description = button->get_font_desc();
+
+	// Set description
+	set(description);
+
+	// Refresh widget
 	renderer_->refresh(widget_selected_);
 
 	// Refresh video preview

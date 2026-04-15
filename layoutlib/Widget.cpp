@@ -62,6 +62,7 @@ namespace layout
 	_font(this, "font", Node::ELEMENT, false),
 	_text(this, "text", Node::ELEMENT, false),
 
+	_label_fontfamily(this, "label-font-family", Node::ELEMENT, false),
 	_label_fontsize(this, "label-font-size", Node::ELEMENT, false),
 	_label_fontstyle(this, "label-font-style", Node::ELEMENT, false),
 	_label_fontweight(this, "label-font-weight", Node::ELEMENT, false),
@@ -72,6 +73,7 @@ namespace layout
 	_label_borderwidth(this, "label-border-width", Node::ELEMENT, false),
 	_label_bordercolor(this, "label-border-color", Node::ELEMENT, false),
 
+	_value_fontfamily(this, "value-font-family", Node::ELEMENT, false),
 	_value_fontsize(this, "value-font-size", Node::ELEMENT, false),
 	_value_fontstyle(this, "value-font-style", Node::ELEMENT, false),
 	_value_fontweight(this, "value-font-weight", Node::ELEMENT, false),
@@ -130,6 +132,7 @@ namespace layout
     getInterfaces().push_back(&_font);
     getInterfaces().push_back(&_text);
 
+    getInterfaces().push_back(&_label_fontfamily);
     getInterfaces().push_back(&_label_fontsize);
     getInterfaces().push_back(&_label_fontstyle);
     getInterfaces().push_back(&_label_fontweight);
@@ -140,6 +143,7 @@ namespace layout
     getInterfaces().push_back(&_label_borderwidth);
     getInterfaces().push_back(&_label_bordercolor);
 
+    getInterfaces().push_back(&_value_fontfamily);
     getInterfaces().push_back(&_value_fontsize);
     getInterfaces().push_back(&_value_fontstyle);
     getInterfaces().push_back(&_value_fontweight);
