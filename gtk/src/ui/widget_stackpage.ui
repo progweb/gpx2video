@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface domain="gtk40">
+	<object class="GtkScrolledWindow" id="widget_stackpage">
+		<property name="hscrollbar-policy">2</property>
+		<property name="vexpand">1</property>
+		<property name="has-frame">1</property>
+		<property name="child">
+			<object class="GtkListBox" id="widgets_listbox">
+				<property name="selection-mode">single</property>
+				<property name="activate-on-single-click">True</property>
+				<property name="vexpand">True</property>
+				<!--
+				<child>
+					<object class="GtkListBoxRow">
+						<child>
+							<object class="GtkBox">
+								<property name="hexpand">True</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="halign">start</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="label">widget-1</property>
+										<property name="xalign">0.0</property>
+										<property name="yalign">1.0</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkButton">
+										<property name="halign">end</property>
+										<property name="icon-name">user-trash-symbolic</property>
+										<property name="valign">center</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+				-->
+			</object>
+		</property>
+	</object>
+</interface>

@@ -85,6 +85,9 @@ set(RESOURCE_UI_LIST
 	video_frame.ui
 	widget_frame.ui
 	telemetry_frame.ui
+	video_stackpage.ui
+	widget_stackpage.ui
+	telemetry_stackpage.ui
 	shape/arc_box.ui
 	shape/bar_box.ui
 	shape/text_box.ui
@@ -166,6 +169,9 @@ set(GPX2VIDEO_SOURCES
 	src/telemetryframe.cpp
 	src/timesync.cpp
 	src/videowidget.cpp
+	src/videostackpage.cpp
+	src/widgetstackpage.cpp
+	src/telemetrystackpage.cpp
 	src/shape/base.cpp
 	src/shape/arc.cpp
 	src/shape/bar.cpp

@@ -12,6 +12,7 @@
 #include <gtkmm/listboxrow.h>
 #include <gtkmm/scale.h>
 #include <gtkmm/stack.h>
+#include <gtkmm/stackpage.h>
 #include <gtkmm/stackswitcher.h>
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 #include <gtkmm/filedialog.h>
@@ -29,6 +30,9 @@
 #include "videoframe.h"
 #include "widgetframe.h"
 #include "telemetryframe.h"
+#include "videostackpage.h"
+#include "widgetstackpage.h"
+#include "telemetrystackpage.h"
 
 
 class GPX2VideoApplicationWindow : public Gtk::ApplicationWindow, public GPXApplication {
@@ -65,7 +69,12 @@ protected:
 
 	Gtk::Stack *info_stack_ = NULL;
 
+	GPX2VideoVideoStackPage *video_stackpage_ = NULL;
+	GPX2VideoWidgetStackPage *widget_stackpage_ = NULL;
+	GPX2VideoTelemetryStackPage *telemetry_stackpage_ = NULL;
+
 	GPX2VideoArea *video_area_ = NULL;
+
 	GPX2VideoVideoFrame *video_frame_ = NULL;
 	GPX2VideoWidgetFrame *widget_frame_ = NULL;
 	GPX2VideoTelemetryFrame *telemetry_frame_ = NULL;
@@ -75,6 +84,7 @@ protected:
 	void bind_settings(void);
 
 	void update_stack(void);
+	void update_headerbar(void);
 
 	void on_action_open(void);
 	void on_action_save(void);
@@ -100,9 +110,7 @@ protected:
 
 	void on_stack_changed(void);
 
-	void on_widget_selected(Gtk::ListBoxRow *row);
-
-	void on_widget_append_clicked(void);
+	void on_widget_selected(GPX2VideoWidget *widget);
 	void on_widget_remove_clicked(GPX2VideoWidget *widget);
 
 #if GTKMM_CHECK_VERSION(4, 10, 0)

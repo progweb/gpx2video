@@ -131,7 +131,8 @@ double TelemetrySource::Point::headingTo(const Point &to) {
 
 
 TelemetrySource::TelemetrySource(const std::string &filename) 
-	: quiet_(true)
+	: filename_(filename)
+	, quiet_(true)
 	, eof_(false)
 	, offset_(0) 
 	, begin_(0)
@@ -169,6 +170,11 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 
 
 TelemetrySource::~TelemetrySource() {
+}
+
+
+const std::string& TelemetrySource::filename(void) const {
+	return filename_;
 }
 
 
@@ -360,6 +366,11 @@ int64_t TelemetrySource::timeOffset(void) const {
 
 void TelemetrySource::setTimeOffset(const int64_t& offset) {
 	offset_ = offset;
+}
+
+
+size_t TelemetrySource::numberOfPoints(void) const {
+	return pool_.count();
 }
 
 

@@ -64,19 +64,25 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> position_model_;
 	Glib::RefPtr<Gtk::ListStore> orientation_model_;
 	Glib::RefPtr<Gtk::ListStore> font_style_model_;
-	Glib::RefPtr<Gtk::ListStore> font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> text_align_model_;
+	Glib::RefPtr<Gtk::ListStore> label_font_weight_model_;
+	Glib::RefPtr<Gtk::ListStore> value_font_weight_model_;
 
+	Glib::RefPtr<Gtk::ListStore> duplicate_liststore(const Glib::RefPtr<Gtk::ListStore> &source, class Model &columns);
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
 
 	void build_shape_settings(void);
 	void build_widget_settings(void);
+
+	void bind_content(void);
 
 	void update_content(void);
 	void update_boundaries(void);
 
 	void update_shape_content(void);
 	void update_widget_content(void);
+
+	void update_font_weight_model(const Glib::RefPtr<Gtk::ListStore> &store, const std::string &value);
 
 	void on_widget_margin_value_changed(const VideoWidget::Margin &margin);
 	void on_widget_padding_value_changed(const VideoWidget::Theme::Padding &padding);

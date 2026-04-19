@@ -121,6 +121,8 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 	, evbase_(evbase) {
 	log_call();
 
+	setShape(VideoWidget::ShapeNone);
+
 	theme().setFlags(VideoWidget::Theme::FlagNone);
 	theme().setSize(settings().width(), settings().height());
 

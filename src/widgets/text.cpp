@@ -47,6 +47,8 @@ void TextWidget::initialize(void) {
 void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	ShapeBase::Font font;
 
+	(void) data;
+
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
 		std::string s = ((VideoWidget *) this)->label();
