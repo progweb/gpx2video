@@ -15,6 +15,7 @@
 #include <gtkmm/filefilter.h>
 #include <giomm/liststore.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/headerbar.h>
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/eventcontrollermotion.h>
 #include <gtkmm/gestureclick.h>
@@ -35,6 +36,7 @@ extern "C" {
 #include "compat.h"
 #include "datetime.h"
 #include "timesync.h"
+#include "widgetstackpage.h"
 #include "window.h"
 
 
@@ -93,6 +95,19 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	gears_->set_menu_model(menu);
 
+	// Append video stack page
+	video_stackpage_ = GPX2VideoVideoStackPage::create();
+	widget_stackpage_ = GPX2VideoWidgetStackPage::create();
+	telemetry_stackpage_ = GPX2VideoTelemetryStackPage::create();
+
+	// Append video, widget & telemetry stackpage objects to stack
+	info_stack_ = ref_builder_->get_widget<Gtk::Stack>("info_stack");
+	if (!info_stack_)
+		throw std::runtime_error("No \"info_stack\" object in window.ui");
+	info_stack_->add(*(video_stackpage_), video_stackpage_->name(), video_stackpage_->title());
+	info_stack_->add(*(telemetry_stackpage_), telemetry_stackpage_->name(), telemetry_stackpage_->title());
+	info_stack_->add(*(widget_stackpage_), widget_stackpage_->name(), widget_stackpage_->title());
+
 	// Video frame object
 	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/video_frame.ui");
 	video_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoVideoFrame>(builder, "video_frame");
@@ -147,6 +162,13 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_change_value), adjustment), false);
 	video_area_->set_adjustment(adjustment);
 
+	// Connect widgets button
+	button = ref_builder_->get_widget<Gtk::Button>("widget_append_button");
+	if (!button)
+		throw std::runtime_error("No \"widget_append_button\" object in window.ui");
+
+	button->signal_clicked().connect(sigc::mem_fun(*widget_stackpage_, &GPX2VideoWidgetStackPage::on_widget_append_clicked));
+
 	// Click listener
 	auto gesture = Gtk::GestureClick::create();
 	progress_scale_->add_controller(gesture);
@@ -179,6 +201,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	renderer_ = GPX2VideoRenderer::create(*this, renderer_settings_, telemetry_settings_);
 	video_area_->set_renderer(renderer_);
 	widget_frame_->set_renderer(renderer_);
+	widget_stackpage_->set_renderer(renderer_);
 
 	renderer_->widget_position_change().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
 
@@ -186,24 +209,10 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	start();
 
 	// Connect widget list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
-	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
-
-	list->signal_row_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_selected));
-
-	// Connect widgets button
-	button = ref_builder_->get_widget<Gtk::Button>("widget_append_button");
-	if (!button)
-		throw std::runtime_error("No \"widget_append_button\" object in window.ui");
-
-	button->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_append_clicked));
+	widget_stackpage_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_selected));
+	widget_stackpage_->signal_widget_remove_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_remove_clicked));
 
 	// Listen stack changes
-	info_stack_ = ref_builder_->get_widget<Gtk::Stack>("info_stack");
-	if (!info_stack_)
-		throw std::runtime_error("No \"info_stack\" object in window.ui");
-
 	info_stack_->property_visible_child().signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_stack_changed));
 }
 
@@ -364,17 +373,11 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 	if (media_ == NULL)
 		return;
 
-	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
-	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+	// Unselect widget
+	widget_frame_->set_widget_selected(NULL);
 
 	// Clear widgets list
-	for (auto child = list->get_first_child(); child;) {
-		auto next = child->get_next_sibling();
-		list->remove(*child);
-		child = next;
-	}
+	widget_stackpage_->purge();
 
 	// Video renderer
 	renderer_->setLayoutFile(layout_file_);
@@ -384,28 +387,7 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 
 	// Populate widgets list
 	for (GPX2VideoWidget *item : renderer_->widgets()) {
-		auto box = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
-		auto label = Gtk::Label(item->widget()->name());
-		auto button = Gtk::make_managed<Gtk::Button>(); //(new Gtk::Button());
-
-		label.set_halign(Gtk::Align::START);
-		label.set_hexpand(true);
-		label.set_valign(Gtk::Align::CENTER);
-		label.set_xalign(0.0);
-		label.set_yalign(1.0);
-	
-		button->set_halign(Gtk::Align::END);
-		button->set_valign(Gtk::Align::CENTER);
-		button->set_icon_name("user-trash-symbolic");
-
-		button->signal_clicked().connect(sigc::bind(
-					sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_remove_clicked), item), true);
-
-		box.set_hexpand(true);
-		box.append(label);
-		box.append(*button);
-
-		list->append(box);
+		widget_stackpage_->append(item);
 	}
 
 	// Refresh video preview
@@ -427,11 +409,8 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::File> &file) {
 	log_call();
 
-	Gtk::Label *label;
 	VideoStreamPtr stream;
 	Glib::DateTime creationtime;
-
-	auto info = file->query_info();
 
 	media_file_ = file->get_parse_name();
 
@@ -453,25 +432,7 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 	creationtime = Glib::DateTime::create_now_local(media_->creationTime() / 1000);
 
 	// Populate video properties
-	label = ref_builder_->get_widget<Gtk::Label>("date_label");
-#if GLIBMM_CHECK_VERSION(2, 80, 0)
-	label->set_label(media_->creationTime() ? creationtime.format("%Ex").c_str() : "-");
-#else
-	label->set_label(media_->creationTime() ? creationtime.format("%x").c_str() : "-");
-#endif
-	
-	label = ref_builder_->get_widget<Gtk::Label>("time_label");
-#if GLIBMM_CHECK_VERSION(2, 80, 0)
-	label->set_label(media_->creationTime() ? creationtime.format("%EX").c_str() : "-");
-#else
-	label->set_label(media_->creationTime() ? creationtime.format("%X").c_str() : "-");
-#endif
-	
-	label = ref_builder_->get_widget<Gtk::Label>("size_label");
-	label->set_label(Glib::ustring::sprintf("%d × %d pixels", stream->width(), stream->height()));
-	
-	label = ref_builder_->get_widget<Gtk::Label>("filesize_label");
-	label->set_label(Glib::format_size(info->get_size()));
+	video_stackpage_->set_media(media_);
 
 	// Update actions
 	use_creation_time_action_->set_enabled(media_->creationTime() != 0);
@@ -485,6 +446,9 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 
 	// At last, load layout file if already opened
 	open_layout_file(Gio::File::create_for_path(layout_file_));
+
+	// Update headerbar with media name
+	update_headerbar();
 }
 
 
@@ -518,14 +482,17 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 	// Update actions
 	use_gpx_data_action_->set_enabled(true);
 
-	// Update ui components
+	// Use telemetry data for rendering
 	renderer_->set_telemetry(source);
 
+	// Update ui components
 	video_frame_->set_telemetry(source);
+	telemetry_stackpage_->set_telemetry(source);
 }
 
 
 /**
+ *
  */
 void GPX2VideoApplicationWindow::update_stack(void) {
 	log_call();
@@ -540,6 +507,49 @@ void GPX2VideoApplicationWindow::update_stack(void) {
 //    std::cout << "ExampleAppWindow::update_words(): No visible text view." << std::endl;
 //    return;
 //  }
+}
+
+
+/**
+ *
+ */
+void GPX2VideoApplicationWindow::update_headerbar(void) {
+	log_call();
+
+	Gtk::Box *vbox = NULL;
+
+	auto headerbar = ref_builder_->get_widget<Gtk::HeaderBar>("header_headerbar");
+	if (!headerbar)
+		throw std::runtime_error("No \"header_headerbar\" object in window.ui");
+
+	if (media_ != NULL) {
+		size_t pos;
+
+		std::string home = Glib::get_home_dir();
+		std::string name = Glib::path_get_basename(Glib::StdStringView(media_file_));
+		std::string path = Glib::path_get_dirname(Glib::StdStringView(media_file_));
+
+		if ((pos = path.find(home)) != std::string::npos) {
+			path.replace(pos, home.length(), "~");
+		}
+
+		// 
+		auto title_label = Gtk::make_managed<Gtk::Label>();
+		title_label->set_markup("<b>" + name + "</b>");
+		title_label->set_halign(Gtk::Align::CENTER);
+
+		auto subtitle_label = Gtk::make_managed<Gtk::Label>();
+		subtitle_label->set_markup(path);
+		subtitle_label->set_halign(Gtk::Align::CENTER);
+		subtitle_label->add_css_class("dim-label");
+
+		vbox = Gtk::make_managed<Gtk::Box>(Gtk::Orientation::VERTICAL, 0);
+		vbox->set_valign(Gtk::Align::CENTER);
+		vbox->append(*title_label);
+		vbox->append(*subtitle_label);
+	}
+
+	headerbar->set_title_widget(*vbox);
 }
 
 
@@ -1023,64 +1033,24 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
  *
  * Update the UI from the selected widget
  *
- * Called from GTK main thread
+ * Called from GTK main thread by GPX2VideoWidgetStackPage
  */
-void GPX2VideoApplicationWindow::on_widget_selected(Gtk::ListBoxRow *row) {
+void GPX2VideoApplicationWindow::on_widget_selected(GPX2VideoWidget *widget) {
 	log_call();
 
-	int index;
-
-	if (row == NULL) {
-		widget_frame_->set_widget_selected(NULL);
-		return;
-	}
-   
-	// Get selected row
-	index = row->get_index();
-
-	log_info("Widget selected at index: %d", index);
-
-	// Widget item
-	int i = 0;
-
-	for (GPX2VideoWidget *item : renderer_->widgets()) {
-		if (i++ != index)
-			continue;
-
-		widget_frame_->set_widget_selected(item);
-
-		break;
-	}
+	widget_frame_->set_widget_selected(widget);
 }
 
 
 /**
- * Append new widget
+ * Notification widget selected
  *
- * User appends a new widget.
+ * Update the UI from the selected widget
  *
- * Called from GTK main thread
- */
-void GPX2VideoApplicationWindow::on_widget_append_clicked(void) {
-	log_call();
-
-	log_info("Append new widget");
-
-	log_warn("NOT YET IMPLEMENTED");
-}
-
-
-/**
- * Remove widget
- *
- * User removes a widget.
- *
- * Called from GTK main thread
+ * Called from GTK main thread by GPX2VideoWidgetStackPage
  */
 void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widget) {
 	log_call();
-
-	log_info("Remove widget '%s'", widget->widget()->name().c_str());
 
 	// Search widget item index
 	int index = 0;
@@ -1097,11 +1067,7 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 		widget_frame_->set_widget_selected(NULL);
 
 	// Remove widget from the widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
-	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
-	auto row = list->get_row_at_index(index);
-	list->remove(*row);
+	widget_stackpage_->remove(widget);
 
 	// At last, remove & destroy widget
 	renderer_->remove(widget);

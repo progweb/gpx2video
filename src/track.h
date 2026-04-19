@@ -30,6 +30,12 @@ public:
 
 	const TrackSettings& settings() const;
 
+	virtual bool isShapeSupported(Shape type) {
+		(void) type;
+
+		return false;
+	}
+
 	void setSize(int width, int height);
 
 	bool start(void) {
@@ -95,6 +101,16 @@ protected:
 		os << "<margin-right>" << margin(Margin::MarginRight) << "</margin-right>" << std::endl;
 		os << "<margin-top>" << margin(Margin::MarginTop) << "</margin-top>" << std::endl;
 		os << "<margin-bottom>" << margin(Margin::MarginBottom) << "</margin-bottom>" << std::endl;
+
+		os << "<border>" << theme().border() << "</border>" << std::endl;
+		os << "<border-color>" << VideoWidget::Theme::color2hex(theme().borderColor()) << "</border-color>" << std::endl;
+
+		os << "<background-color>" << VideoWidget::Theme::color2hex(theme().backgroundColor()) << "</background-color>" << std::endl;
+
+		os << "<marker>" << settings().markerSize() << "</marker>" << std::endl;
+
+		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
+		os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;
 	}
 
 	GPXApplication &app_;

@@ -339,7 +339,7 @@ public:
 			return (index_ == (int) points_.size());
 		}
 
-		size_t count(void) {
+		size_t count(void) const {
 			return points_.size();
 		}
 
@@ -490,6 +490,8 @@ public:
 	TelemetrySource(const std::string &filename);
 	virtual ~TelemetrySource();
 
+	const std::string& filename(void) const;
+
 	// Setter
 	void setQuiet(const bool quiet);
 
@@ -512,6 +514,8 @@ public:
 	void setTimeOffset(const int64_t& offset);
 
 	// Getter
+	size_t numberOfPoints(void) const;
+
 	bool inRange(uint64_t timestamp) const;
 
 	uint64_t beginTimestamp(void) const;
@@ -559,6 +563,8 @@ private:
 	void cleanData(TelemetryData &data, uint64_t timestamp);
 
 protected:
+	std::string filename_;
+
 	std::ifstream stream_;
 
 	Point start_;

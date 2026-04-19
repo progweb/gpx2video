@@ -314,6 +314,8 @@ void GPX2VideoArea::seek(double incr) {
 void GPX2VideoArea::seeking(bool status) {
 	log_call();
 
+	(void) status;
+
 //	is_seeking_ = status;
 }
 
@@ -602,8 +604,6 @@ retry:
 
 			// Drop frame
 			if (stream_.video().getFrameNbRemaining() > 1) {
-				double duration;
-
 				FramePtr nextFrame = stream_.video().getNextFrame();
 
 				duration = stream_.vp_duration(frame, nextFrame);

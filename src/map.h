@@ -134,6 +134,7 @@ protected:
 
 		os << "<source>" << settings().source() << "</source>" << std::endl;
 		os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
+		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
 	}
 
 private:
