@@ -91,6 +91,7 @@ set(RESOURCE_UI_LIST
 	shape/arc_box.ui
 	shape/bar_box.ui
 	shape/text_box.ui
+	widgets/map_box.ui
 )
 
 set(RESOURCE_GL_LIST
@@ -177,6 +178,7 @@ set(GPX2VIDEO_SOURCES
 	src/shape/bar.cpp
 	src/shape/text.cpp
 	src/widgets/base.cpp
+	src/widgets/map.cpp
 )
 
 # Subdirectories

@@ -148,6 +148,7 @@ bool ImageRenderer::run(void) {
 	size_t len = 0;
 
 	uint64_t datetime;
+	uint64_t timestamp;
 	uint64_t start_time;
 
 	uint64_t timecode_ms;
@@ -155,6 +156,8 @@ bool ImageRenderer::run(void) {
 	double time_factor;
 
 	bool is_update = false;
+
+	std::unique_ptr<OIIO::ImageOutput> out;
 
 	std::string filename = app_.settings().outputfile();
 
@@ -202,68 +205,66 @@ bool ImageRenderer::run(void) {
 
 	// Compute video time
 	datetime = start_time + (time_factor * timecode_ms);
+	timestamp = start_time + (time_factor * timecode_ms);
 
-	if (source_) {
-		uint64_t timestamp = start_time + (time_factor * timecode_ms);
+	// Save image
+	out = OIIO::ImageOutput::create(filename);
 
-		// Save image
-		std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
-
-		// Read GPX data
-		timestamp -= (timestamp % telemetrySettings().telemetryRate());
+	// Read GPX data
+	timestamp -= (timestamp % telemetrySettings().telemetryRate());
+	if (source_)
 		source_->retrieveNext(data_, timestamp);
 
-		// Set current datetime
-		data_.setDatetime(datetime);
+	// Set current datetime
+	data_.setDatetime(datetime);
 
-		// Draw overlay
-		OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());
+	// Draw overlay
+	OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());
 
-		// Draw each widget, map...
-		for (VideoWidget *widget : widgets_) {
-			OIIO::ImageBuf *buf = NULL;
+	// Draw each widget, map...
+	for (VideoWidget *widget : widgets_) {
+		OIIO::ImageBuf *buf = NULL;
 
-			uint64_t begin = widget->atBeginTime();
-			uint64_t end = widget->atEndTime();
+		uint64_t begin = widget->atBeginTime();
+		uint64_t end = widget->atEndTime();
 
-			if ((begin != 0) && (timecode_ms < begin))
-				continue;
+		if ((begin != 0) && (timecode_ms < begin))
+			continue;
 
-			if ((end != 0) && (end < timecode_ms))
-				continue;
+		if ((end != 0) && (end < timecode_ms))
+			continue;
 
-			if ((begin != 0) || (end != 0)) {
-				buf = widget->prepare(is_update);
+		if ((begin != 0) || (end != 0)) {
+			buf = widget->prepare(is_update);
 
-				if (buf != NULL) {
-					// Image over
-					buf->specmod().x = widget->x();
-					buf->specmod().y = widget->y();
-					OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
-				}
+			if (buf != NULL) {
+				// Image over
+				buf->specmod().x = widget->x();
+				buf->specmod().y = widget->y();
+				OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
 			}
-
-			// Render dynamic widget
-			buf = widget->render(data_, is_update);
-
-			if (buf == NULL)
-				continue;
-
-			// Image over
-			buf->specmod().x = widget->x();
-			buf->specmod().y = widget->y();
-			OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
 		}
 
-		// Write image file
-		if (out->open(filename, image_buffer.spec()) == false) {
-			log_error("Draw track failure, can't open '%s' file", filename.c_str());
-			goto error;
-		}
+		// Render dynamic widget
+		buf = widget->render(data_, is_update);
 
-		out->write_image(image_buffer.spec().format, image_buffer.localpixels());
-		out->close();
+		if (buf == NULL)
+			continue;
+
+		// Image over
+		buf->specmod().x = widget->x();
+		buf->specmod().y = widget->y();
+		OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
 	}
+
+	// Write image file
+	if (out->open(filename, image_buffer.spec()) == false) {
+		log_error("Draw track failure, can't open '%s' file", filename.c_str());
+		goto error;
+	}
+
+	out->write_image(image_buffer.spec().format, image_buffer.localpixels());
+	out->close();
 
 error:
 //	// Max rendering duration

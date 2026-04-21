@@ -870,17 +870,14 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		else if (!strcmp(argv[0], "image")) {
 			setCommand(GPX2Video::CommandImage);
 			
-			gpxfile_required = true;
 			mediafile_required = true;
 			outputfile_required = true;
 		}
 		else if (!strcmp(argv[0], "video")) {
 			setCommand(GPX2Video::CommandVideo);
 			
-			gpxfile_required = true;
 			mediafile_required = true;
 			outputfile_required = true;
-
 		}
 		else {
 			std::cout << name << ": command '" << argv[0] << "' unknown" << std::endl;
@@ -890,7 +887,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	else {
 		setCommand(GPX2Video::CommandVideo);
 			
-		gpxfile_required = true;
 		mediafile_required = true;
 		outputfile_required = true;
 	}
@@ -1153,7 +1149,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings.setComputeRange(
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
-			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
@@ -1197,7 +1194,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings.setComputeRange(
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
-			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
@@ -1262,7 +1260,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings.setComputeRange(
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
-			telemetrySettings.setFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));

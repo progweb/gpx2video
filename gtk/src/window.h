@@ -96,6 +96,7 @@ protected:
 	void on_video_changed(void);
 	void on_widget_changed(void);
 	void on_widget_position_changed(void);
+	void on_telemetry_changed(void);
 
 	void on_play_clicked(void);
 

@@ -131,7 +131,7 @@ public:
 	static HeadingWidget * create(GPXApplication &app) {
 		HeadingWidget *widget;
 
-		widget = new HeadingWidget(app, "heading");
+		widget = new HeadingWidget(app);
 
 		return widget;
 	}
@@ -175,8 +175,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	HeadingWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	HeadingWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetHeading) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

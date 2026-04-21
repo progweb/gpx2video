@@ -128,7 +128,7 @@ public:
 	static PositionWidget * create(GPXApplication &app) {
 		PositionWidget *widget;
 
-		widget = new PositionWidget(app, "position");
+		widget = new PositionWidget(app);
 
 		return widget;
 	}
@@ -172,8 +172,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	PositionWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name)
+	PositionWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetPosition)
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

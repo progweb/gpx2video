@@ -28,6 +28,7 @@ public:
 
 	static Track * create(GPXApplication &app, const TelemetrySettings& telemetry_settings, const TrackSettings& track_settings);
 
+	TrackSettings& settings();
 	const TrackSettings& settings() const;
 
 	virtual bool isShapeSupported(Shape type) {
@@ -68,7 +69,7 @@ protected:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, std::string name, struct event_base *evbase);
+	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase);
 
 	bool preinit(void);
 	void init(bool zoomfit=true);

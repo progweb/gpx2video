@@ -71,6 +71,34 @@ public:
 		ShapeUnknown
 	};
 
+	enum Widget {
+		WidgetAverageSpeed,
+		WidgetAverageRideSpeed,
+		WidgetCadence,
+		WidgetDate,
+		WidgetDistance,
+		WidgetDuration,
+		WidgetElevation,
+		WidgetGForce,
+		WidgetGPX,
+		WidgetGrade,
+		WidgetHeading,
+		WidgetHeartRate,
+		WidgetImage,
+		WidgetLap,
+		WidgetMap,
+		WidgetMaxSpeed,
+		WidgetPosition,
+		WidgetPower,
+		WidgetSpeed,
+		WidgetTemperature,
+		WidgetText,
+		WidgetTime,
+		WidgetTrack,
+		WidgetVerticalSpeed,
+		WidgetUnknown
+	};
+
 	enum Zoom {
 		ZoomNone,
 		ZoomFit,
@@ -920,7 +948,11 @@ public:
 		}
 	}
 
-	const std::string& name(void) const {
+	const Widget& type(void) const {
+		return type_;
+	}
+
+	const std::string& name(void) {
 		return name_;
 	}
 
@@ -958,6 +990,7 @@ public:
 
 	virtual void save(std::ostream &os);
 
+	static Widget string2widget(std::string &s);
 	static Shape string2shape(std::string &s);
 	static Position string2position(std::string &s);
 	static Orientation string2orientation(std::string &s);
@@ -969,6 +1002,7 @@ public:
 	static Zoom string2zoom(std::string &s);
 
 	static std::string bool2string(bool value);
+	static std::string widget2string(Widget type);
 	static std::string position2string(Position position);
 	static std::string orientation2string(Orientation orientation);
 	static std::string align2string(Theme::Align align);
@@ -978,8 +1012,8 @@ public:
 	static std::string unit2string(Unit unit, bool label=true);
 
 protected:
-	VideoWidget(GPXApplication &app, std::string name)  
-		: GPXApplication::Task(app, name)
+	VideoWidget(GPXApplication &app, Widget type)  
+		: GPXApplication::Task(app, widget2string(type))
 		, app_(app) 
 		, at_begin_time_(0)
 		, at_end_time_(0)
@@ -988,14 +1022,15 @@ protected:
 //		, value_px_(0)
 //   		, value_size_(0)
 //		, value_offset_(0)
-		, name_(name) {
+		, name_(widget2string(type))
+		, type_(type) {
 		setShape(ShapeText),
 		setPosition(PositionNone);
 		setOrientation(OrientationNone);
 		setAtTime(0, 0);
 		setPosition(0, 0);
 		setMargin(MarginAll, 10);
-		setLabel(name);
+		setLabel(widget2string(type));
 		setUnit(VideoWidget::UnitNone);
 	}
 
@@ -1044,6 +1079,7 @@ protected:
 //	int value_offset_;
 	std::string text_;
 
+	std::string name_;
 	std::string label_;
 
 //	int flags_;
@@ -1051,7 +1087,7 @@ protected:
 	Theme theme_;
 
 private:
-	std::string name_;
+	Widget type_;
 };
 
 #endif

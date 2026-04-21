@@ -128,7 +128,7 @@ public:
 	static MaxSpeedWidget * create(GPXApplication &app) {
 		MaxSpeedWidget *widget;
 
-		widget = new MaxSpeedWidget(app, "maxspeed");
+		widget = new MaxSpeedWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMPH);
 
@@ -176,8 +176,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	MaxSpeedWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	MaxSpeedWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetMaxSpeed) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

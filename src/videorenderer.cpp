@@ -336,6 +336,7 @@ bool VideoRenderer::run(void) {
 	int orientation;
 
 	uint64_t datetime;
+	uint64_t timestamp;
 	uint64_t start_time;
 
 	int64_t timecode;
@@ -349,6 +350,8 @@ bool VideoRenderer::run(void) {
 	AVRational video_time;
 
 	bool is_update = false;
+
+	OIIO::ImageBuf frame_buffer;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 //	AudioStreamPtr audio_stream = container_->getAudioStream();
@@ -395,72 +398,72 @@ bool VideoRenderer::run(void) {
 
 	// Update video real time 
 	datetime = start_time + real_duration_ms_;
+	timestamp = start_time + real_duration_ms_;
 
-	if (source_) {
-		uint64_t timestamp = start_time + real_duration_ms_;
+	// Convert video frame to image
+	frame_buffer = frame->toImageBuf();
 
-		OIIO::ImageBuf frame_buffer = frame->toImageBuf();
-
-		// Read GPX data
-		timestamp -= (timestamp % telemetrySettings().telemetryRate());
+	// Read GPX data
+	timestamp -= (timestamp % telemetrySettings().telemetryRate());
+	if (source_)
 		source_->retrieveNext(data_, timestamp);
 
-		// Set current datetime
-		data_.setDatetime(datetime);
+	// Set current datetime
+	data_.setDatetime(datetime);
 
-		// Draw overlay
-		OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
+	// Draw overlay
+	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
 
-		// Draw each widget, map...
-		for (VideoWidget *widget : widgets_) {
-			OIIO::ImageBuf *buf = NULL;
+	// Draw each widget, map...
+	for (VideoWidget *widget : widgets_) {
+		OIIO::ImageBuf *buf = NULL;
 
-			uint64_t begin = widget->atBeginTime();
-			uint64_t end = widget->atEndTime();
+		uint64_t begin = widget->atBeginTime();
+		uint64_t end = widget->atEndTime();
 
-			if ((begin != 0) && (timecode_ms < begin))
-				continue;
+		if ((begin != 0) && (timecode_ms < begin))
+			continue;
 
-			if ((end != 0) && (end < timecode_ms))
-				continue;
+		if ((end != 0) && (end < timecode_ms))
+			continue;
 
-			if ((begin != 0) || (end != 0)) {
-				buf = widget->prepare(is_update);
+		if ((begin != 0) || (end != 0)) {
+			buf = widget->prepare(is_update);
 
-				if (buf != NULL) {
-					// Rotate & resize
-					if (is_update) {
-						this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
-						this->rotate(buf, orientation);
-					}
-
-					// Image over
-					buf->specmod().x = widget->x();
-					buf->specmod().y = widget->y();
-					OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
+			if (buf != NULL) {
+				// Rotate & resize
+				if (is_update) {
+					this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
+					this->rotate(buf, orientation);
 				}
+
+				// Image over
+				buf->specmod().x = widget->x();
+				buf->specmod().y = widget->y();
+				OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
 			}
-
-			// Render dynamic widget
-			buf = widget->render(data_, is_update);
-
-			if (buf == NULL)
-				continue;
-
-			// Rotate & resize
-			if (is_update) {
-				this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
-				this->rotate(buf, orientation);
-			}
-
-			// Image over
-			buf->specmod().x = widget->x();
-			buf->specmod().y = widget->y();
-			OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
 		}
 
-		frame->fromImageBuf(frame_buffer);
+		// Render dynamic widget
+		buf = widget->render(data_, is_update);
+
+		if (buf == NULL)
+			continue;
+
+		// Rotate & resize
+		if (is_update) {
+			this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
+			this->rotate(buf, orientation);
+		}
+
+		// Image over
+		buf->specmod().x = widget->x();
+		buf->specmod().y = widget->y();
+		OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
 	}
+
+	// Upate video frame
+	frame->fromImageBuf(frame_buffer);
 
 	// Max rendering duration
 	if (app_.settings().maxDuration() > 0) {

@@ -80,9 +80,9 @@ void GPX2VideoWidgetStackPage::append(GPX2VideoWidget *widget) {
 void GPX2VideoWidgetStackPage::remove(GPX2VideoWidget *widget) {
 	log_call();
 
-	// Search widget item index
-	int index = -1;
+	size_t index = 0;
 
+	// Search widget item index
 	for (GPX2VideoWidget *item : renderer_->widgets()) {
 		if (item == widget)
 			break;
@@ -90,7 +90,8 @@ void GPX2VideoWidgetStackPage::remove(GPX2VideoWidget *widget) {
 		index++;
 	}
 
-	if (index == -1)
+	// Widget not found!
+	if (index >= renderer_->widgets().size())
 		return;
 
 	// Widgets list

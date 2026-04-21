@@ -145,7 +145,7 @@ public:
 	static DurationWidget * create(GPXApplication &app) {
 		DurationWidget *widget;
 
-		widget = new DurationWidget(app, "duration");
+		widget = new DurationWidget(app);
 
 		return widget;
 	}
@@ -189,8 +189,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DurationWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	DurationWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetDuration) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

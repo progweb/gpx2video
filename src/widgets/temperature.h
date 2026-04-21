@@ -128,7 +128,7 @@ public:
 	static TemperatureWidget * create(GPXApplication &app) {
 		TemperatureWidget *widget;
 
-		widget = new TemperatureWidget(app, "temperature");
+		widget = new TemperatureWidget(app);
 
 		widget->setUnit(VideoWidget::UnitCelsius);
 
@@ -176,8 +176,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	TemperatureWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	TemperatureWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetTemperature) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

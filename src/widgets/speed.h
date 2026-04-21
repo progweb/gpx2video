@@ -256,7 +256,7 @@ public:
 	static SpeedWidget * create(GPXApplication &app) {
 		SpeedWidget *widget;
 
-		widget = new SpeedWidget(app, "speed");
+		widget = new SpeedWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMPH);
 
@@ -320,8 +320,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	SpeedWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	SpeedWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetSpeed) 
 		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

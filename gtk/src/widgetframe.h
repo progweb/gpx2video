@@ -1,8 +1,9 @@
 #ifndef __GPX2VIDEO__GTK__WIDGETFRAME_H__
 #define __GPX2VIDEO__GTK__WIDGETFRAME_H__
 
-#include <gtkmm/builder.h>
 #include <glibmm/dispatcher.h>
+
+#include <gtkmm/builder.h>
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/switch.h>
@@ -107,6 +108,7 @@ private:
 	sigc::connection sigc_connection_;
 
 	bool loading_;
+	bool is_visible_;
 };
 
 #endif

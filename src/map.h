@@ -64,7 +64,8 @@ public:
 
 	static Map * create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings& map_settings);
 
-	const MapSettings& settings() const;
+	MapSettings& settings(void);
+	const MapSettings& settings(void) const;
 
 	void setSize(int width, int height);
 

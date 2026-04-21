@@ -128,7 +128,7 @@ public:
 	static GradeWidget * create(GPXApplication &app) {
 		GradeWidget *widget;
 
-		widget = new GradeWidget(app, "grade");
+		widget = new GradeWidget(app);
 
 		return widget;
 	}
@@ -169,8 +169,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	GradeWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	GradeWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetGrade) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

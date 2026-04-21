@@ -26,10 +26,10 @@ TelemetrySettings::TelemetrySettings(
 //		int smooth_acceleration_points,
 		TelemetrySettings::Format format)
 		: telemetry_offset_(offset)
-		, telemetry_begin_("")
-		, telemetry_end_("")
-		, telemetry_from_("")
-		, telemetry_to_("")
+		, telemetry_begin_(0)
+		, telemetry_end_(0)
+		, telemetry_from_(0)
+		, telemetry_to_(0)
 		, telemetry_format_(format)
 		, telemetry_check_(check)
 		, telemetry_pause_detection_(pause_detection)
@@ -58,20 +58,87 @@ TelemetrySettings::~TelemetrySettings() {
 }
 
 
-void TelemetrySettings::setDataRange(const std::string &begin, const std::string &end) {
-	telemetry_begin_ = begin;
+bool TelemetrySettings::setDataRange(const uint64_t &begin, const uint64_t &end) {
+	log_call();
+
+	if (end < begin) {
+		log_error("'begin-end' data range values invalid");
+		return false;
+	}
+
+	// save
 	telemetry_end_ = end;
+	telemetry_begin_ = begin;
+
+	return true;
+}
+
+bool TelemetrySettings::setDataRange(const std::string &strbegin, const std::string &strend) {
+	uint64_t end = 0;
+	uint64_t begin = 0;
+
+	log_call();
+
+	if (!strbegin.empty()) {
+		// Convert begin range time to timestamp
+		if ((begin = Datetime::string2timestamp(strbegin)) == 0) {
+			log_error("Parse 'begin' date range failure");
+			return false;
+		}
+	}
+
+	if (!strend.empty()) {
+		// Convert end range time to timestamp
+		if ((end = Datetime::string2timestamp(strend)) == 0) {
+			log_error("Parse 'end' date range failure");
+			return false;
+		}
+
+	}
+
+	return setDataRange(begin, end);
 }
 
 
-void TelemetrySettings::setComputeRange(const std::string &from, const std::string &to) {
-	telemetry_from_ = from;
+bool TelemetrySettings::setComputeRange(const uint64_t &from, const uint64_t &to) {
+	log_call();
+
+	if (to < from) {
+		log_error("'[from:to]' compute range values invalid");
+		return false;
+	}
+
+	// Save
 	telemetry_to_ = to;
+	telemetry_from_ = from;
+
+	return true;
 }
 
 
-void TelemetrySettings::setFilter(enum TelemetrySettings::Filter filter) {
-	telemetry_filter_ = filter;
+bool TelemetrySettings::setComputeRange(const std::string &strfrom, const std::string &strto) {
+	uint64_t to = 0;
+	uint64_t from = 0;
+
+	log_call();
+
+	if (!strfrom.empty()) {
+		// Convert race start time to timestamp
+		if ((from = Datetime::string2timestamp(strfrom)) == 0) {
+			log_error("Parse 'from' date range failure");
+			return false;
+		}
+	}
+
+	if (!strto.empty()) {
+		// Convert race start time to timestamp
+		if ((to = Datetime::string2timestamp(strto)) == 0) {
+			log_error("Parse 'to' date range failure");
+			return false;
+		}
+	}
+
+	return setComputeRange(from, to);
 }
 
 
@@ -85,22 +152,22 @@ void TelemetrySettings::setTelemetryOffset(const int64_t &offset) {
 }
 
 
-const std::string& TelemetrySettings::telemetryBegin(void) const {
+const uint64_t& TelemetrySettings::telemetryBegin(void) const {
 	return telemetry_begin_;
 }
 
 
-const std::string& TelemetrySettings::telemetryEnd(void) const {
+const uint64_t& TelemetrySettings::telemetryEnd(void) const {
 	return telemetry_end_;
 }
 
 
-const std::string& TelemetrySettings::telemetryFrom(void) const {
+const uint64_t& TelemetrySettings::telemetryFrom(void) const {
 	return telemetry_from_;
 }
 
 
-const std::string& TelemetrySettings::telemetryTo(void) const {
+const uint64_t& TelemetrySettings::telemetryTo(void) const {
 	return telemetry_to_;
 }
 
@@ -115,13 +182,28 @@ const bool& TelemetrySettings::telemetryCheck(void) const {
 }
 
 
+void TelemetrySettings::setTelemetryCheck(bool check) {
+	telemetry_check_ = check;
+}
+
+
 const bool& TelemetrySettings::telemetryPauseDetection(void) const {
 	return telemetry_pause_detection_;
 }
 
 
+void TelemetrySettings::setTelemetryPauseDetection(bool pause_detection) {
+	telemetry_pause_detection_ = pause_detection;
+}
+
+
 const TelemetrySettings::Filter& TelemetrySettings::telemetryFilter(void) const {
 	return telemetry_filter_;
+}
+
+
+void TelemetrySettings::setTelemetryFilter(enum TelemetrySettings::Filter filter) {
+	telemetry_filter_ = filter;
 }
 
 

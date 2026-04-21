@@ -265,7 +265,7 @@ public:
 	static VerticalSpeedWidget * create(GPXApplication &app) {
 		VerticalSpeedWidget *widget;
 
-		widget = new VerticalSpeedWidget(app, "vspeed");
+		widget = new VerticalSpeedWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMPS);
 
@@ -329,8 +329,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	VerticalSpeedWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	VerticalSpeedWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetVerticalSpeed) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}
