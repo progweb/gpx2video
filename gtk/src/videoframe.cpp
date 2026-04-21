@@ -18,6 +18,8 @@ GPX2VideoVideoFrame::GPX2VideoVideoFrame()
 	, media_(NULL)
 	, source_(NULL) {
 	log_call();
+
+	is_visible_ = false;
 }
 
 
@@ -30,6 +32,8 @@ GPX2VideoVideoFrame::GPX2VideoVideoFrame(BaseObjectType *cobject, const Glib::Re
 	, media_(NULL) 
 	, source_(NULL) {
 	log_call();
+
+	is_visible_ = false;
 
 	// Connect datetimestart popover
 	auto popover = ref_builder_->get_widget<Gtk::Popover>("datetimestart_popover");
@@ -58,7 +62,9 @@ GPX2VideoVideoFrame::~GPX2VideoVideoFrame() {
 void GPX2VideoVideoFrame::set_visible(bool visible) {
 	log_call();
 
-	Gtk::Frame::set_visible(visible && (media_ != NULL));
+	is_visible_ = visible;
+
+	update_content();
 }
 
 
@@ -202,7 +208,7 @@ void GPX2VideoVideoFrame::update_content(void) {
 	Glib::DateTime starttime;
 
 	// Frame is visible only as video is selected
-	set_visible((media_ != NULL));
+	Gtk::Frame::set_visible(is_visible_ && (media_ != NULL));
 
 	// No widget
 	if (media_ == NULL)

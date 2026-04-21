@@ -115,7 +115,7 @@ public:
 	static GPXWidget * create(GPXApplication &app) {
 		GPXWidget *widget;
 
-		widget = new GPXWidget(app, "gpx");
+		widget = new GPXWidget(app);
 
 		return widget;
 	}
@@ -159,8 +159,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	GPXWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name)
+	GPXWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetGPX)
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

@@ -136,7 +136,7 @@ public:
 	static LapWidget * create(GPXApplication &app) {
 		LapWidget *widget;
 
-		widget = new LapWidget(app, "lap");
+		widget = new LapWidget(app);
 
 		return widget;
 	}
@@ -182,8 +182,8 @@ private:
 
 	int nbr_target_lap_;
 
-	LapWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name)
+	LapWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetLap)
    		, shape_(NULL)
    		, nbr_target_lap_(1) {
 		setShape(VideoWidget::ShapeText);

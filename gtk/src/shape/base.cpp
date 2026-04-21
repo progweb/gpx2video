@@ -1,4 +1,21 @@
+#include "../log.h"
 #include "base.h"
+
+
+bool GPX2VideoShapeBaseSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result) {
+	log_call();
+
+	for (auto iter = store->children().begin(); iter != store->children().end(); iter++) {
+		if (iter->get_value(model_.m_id) != value)
+			continue;
+
+		result = iter;
+
+		return true;
+	}
+
+	return false;
+}
 
 
 void GPX2VideoShapeBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {

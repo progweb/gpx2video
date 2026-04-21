@@ -263,7 +263,7 @@ public:
 	static ElevationWidget * create(GPXApplication &app) {
 		ElevationWidget *widget;
 
-		widget = new ElevationWidget(app, "elevation");
+		widget = new ElevationWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMiles);
 
@@ -327,8 +327,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	ElevationWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	ElevationWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetElevation) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

@@ -54,6 +54,8 @@ private:
 	MediaContainer *media_;
 
 	TelemetrySource *source_;
+
+	bool is_visible_;
 };
 
 #endif

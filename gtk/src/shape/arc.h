@@ -43,21 +43,7 @@ protected:
 	GPX2VideoWidget *widget_;
 
 private:
-	class Model : public Gtk::TreeModel::ColumnRecord {
-	public:
-		Model() { 
-			add(m_id); 
-			add(m_name);
-		}
-
-		Gtk::TreeModelColumn<int> m_id;
-		Gtk::TreeModelColumn<Glib::ustring> m_name;
-	};
-
-	Model model_;
 	Glib::RefPtr<Gtk::ListStore> needle_type_model_;
-
-	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
 };
 
 #endif

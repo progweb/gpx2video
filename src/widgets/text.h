@@ -19,7 +19,7 @@ public:
 	static TextWidget * create(GPXApplication &app) {
 		TextWidget *widget;
 
-		widget = new TextWidget(app, "text");
+		widget = new TextWidget(app);
 
 		return widget;
 	}
@@ -163,8 +163,8 @@ private:
 	int padding_top_;
 	int padding_bottom_;
 
-	TextWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	TextWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetText) 
 		, ShapeBase(theme())
 		, bg_buf_(NULL)
 		, fg_buf_(NULL) {

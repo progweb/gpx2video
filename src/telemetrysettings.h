@@ -58,26 +58,31 @@ public:
 	);
 	virtual ~TelemetrySettings();
 
-	void setDataRange(const std::string &begin, const std::string &end);
-	void setComputeRange(const std::string &from, const std::string &to);
+	bool setDataRange(const uint64_t &begin, const uint64_t &end);
+	bool setDataRange(const std::string &begin, const std::string &end);
 
-	void setFilter(enum Filter filter);
+	bool setComputeRange(const uint64_t &from, const uint64_t &to);
+	bool setComputeRange(const std::string &from, const std::string &to);
 
 	const int64_t& telemetryOffset(void) const;
 	void setTelemetryOffset(const int64_t &offset);
 
-	const std::string& telemetryBegin(void) const;
-	const std::string& telemetryEnd(void) const;
+	const uint64_t& telemetryBegin(void) const;
+	const uint64_t& telemetryEnd(void) const;
 
-	const std::string& telemetryFrom(void) const;
-	const std::string& telemetryTo(void) const;
+	const uint64_t& telemetryFrom(void) const;
+	const uint64_t& telemetryTo(void) const;
 
 	const Format& telemetryFormat(void) const;
 
 	const bool& telemetryCheck(void) const;
+	void setTelemetryCheck(bool check);
+
 	const bool& telemetryPauseDetection(void) const;
+	void setTelemetryPauseDetection(bool pause_detection);
 
 	const Filter& telemetryFilter(void) const;
+	void setTelemetryFilter(enum Filter filter);
 
 	const Method& telemetryMethod(void) const;
 	const int& telemetryRate(void) const;
@@ -98,11 +103,11 @@ public:
 private:
 	int64_t telemetry_offset_;
 
-	std::string telemetry_begin_;
-	std::string telemetry_end_;
+	uint64_t telemetry_begin_;
+	uint64_t telemetry_end_;
 
-	std::string telemetry_from_;
-	std::string telemetry_to_;
+	uint64_t telemetry_from_;
+	uint64_t telemetry_to_;
 
 	enum Format telemetry_format_;
 

@@ -124,7 +124,7 @@ public:
 	static DateWidget * create(GPXApplication &app) {
 		DateWidget *widget;
 
-		widget = new DateWidget(app, "date");
+		widget = new DateWidget(app);
 
 		widget->setFormat("%Y-%m-%d");
 
@@ -172,8 +172,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DateWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	DateWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetDate) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

@@ -128,7 +128,7 @@ public:
 	static GForceWidget * create(GPXApplication &app) {
 		GForceWidget *widget;
 
-		widget = new GForceWidget(app, "gforce");
+		widget = new GForceWidget(app);
 
 		widget->setUnit(VideoWidget::UnitG);
 
@@ -174,8 +174,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	GForceWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	GForceWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetGForce) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

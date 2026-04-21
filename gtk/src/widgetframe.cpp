@@ -13,6 +13,7 @@
 #include "shape/arc.h"
 #include "shape/bar.h"
 #include "shape/text.h"
+#include "widgets/map.h"
 #include "widgetframe.h"
 
 
@@ -28,6 +29,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame()
 	log_call();
 
 	loading_ = false;
+	is_visible_ = false;
 }
 
 
@@ -45,6 +47,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	Glib::RefPtr<Gtk::ListStore> font_weight_model;
 
 	loading_ = false;
+	is_visible_ = false;
 
 	// Populate models
 	//-----------------
@@ -54,17 +57,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	{
 		auto iter = orientation_model_->append();
 		auto row = *iter;
-		row[model_.m_id] = 0;
+		row[model_.m_id] = VideoWidget::OrientationNone;
 		row[model_.m_name] = "None";
 		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
-		row[model_.m_id] = 1;
+		row[model_.m_id] = VideoWidget::OrientationHorizontal;
 		row[model_.m_name] = "Horizontal";
 		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
-		row[model_.m_id] = 2;
+		row[model_.m_id] = VideoWidget::OrientationVertical;
 		row[model_.m_name] = "Vertical";
 		row[model_.m_enable] = true;
 	}
@@ -260,7 +263,9 @@ void GPX2VideoWidgetFrame::set_renderer(GPX2VideoRenderer *renderer) {
 void GPX2VideoWidgetFrame::set_visible(bool visible) {
 	log_call();
 
-	Gtk::Frame::set_visible(visible && (widget_selected_ != NULL));
+	is_visible_ = visible;
+
+	update_content();
 }
 
 
@@ -363,7 +368,14 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 
 	if (widget_selected_) {
 		// Build widget settings box child
-//		widget_child_box_ = widget_selected_->build_box();
+		switch (widget_selected_->widget()->type()) {
+		case VideoWidget::WidgetMap:
+			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_);
+			break;
+
+		default:
+			break;
+		}
 	}
 
 	// Append extension settings to ui
@@ -1209,7 +1221,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	Gtk::TreeModel::iterator iter;
 
 	// Frame is visible only as widget is selected
-	set_visible((widget_selected_ != NULL));
+	Gtk::Frame::set_visible(is_visible_ && (widget_selected_ != NULL));
 
 	// No widget
 	if (widget_selected_ == NULL)
@@ -1507,7 +1519,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagValue));
 
 	// Value font family
-	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("label_font_family_fontbutton");
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("value_font_family_fontbutton");
 	if (!fontbutton)
 		throw std::runtime_error("No \"value_font_family_fontbutton\" object in widget_frame.ui");
 

@@ -128,7 +128,7 @@ public:
 	static PowerWidget * create(GPXApplication &app) {
 		PowerWidget *widget;
 
-		widget = new PowerWidget(app, "power");
+		widget = new PowerWidget(app);
 
 		return widget;
 	}
@@ -174,8 +174,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	PowerWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	PowerWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetPower) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

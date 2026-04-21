@@ -112,8 +112,8 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 }
 
 
-Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, std::string name, struct event_base *evbase)
-	: VideoWidget(app, name)
+Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase)
+	: VideoWidget(app, type)
 	, ShapeBase(VideoWidget::theme())
 	, app_(app)
 	, track_settings_(track_settings)
@@ -153,6 +153,13 @@ Track::~Track() {
 }
 
 
+TrackSettings& Track::settings() {
+	log_call();
+
+	return track_settings_;
+}
+
+
 const TrackSettings& Track::settings() const {
 	log_call();
 
@@ -165,7 +172,7 @@ Track * Track::create(GPXApplication &app, const TelemetrySettings &telemetry_se
 
 	log_call();
 
-	track = new Track(app, telemetry_settings, track_settings, "track", app.evbase());
+	track = new Track(app, telemetry_settings, track_settings, VideoWidget::WidgetTrack, app.evbase());
 
 	return track;
 }

@@ -128,7 +128,7 @@ public:
 	static CadenceWidget * create(GPXApplication &app) {
 		CadenceWidget *widget;
 
-		widget = new CadenceWidget(app, "cadence");
+		widget = new CadenceWidget(app);
 
 		return widget;
 	}
@@ -172,8 +172,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	CadenceWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	CadenceWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetCadence) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

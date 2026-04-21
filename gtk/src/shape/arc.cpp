@@ -272,22 +272,6 @@ GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobje
 }
 
 
-bool GPX2VideoArcShapeSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result) {
-	log_call();
-
-	for (auto iter = store->children().begin(); iter != store->children().end(); iter++) {
-		if (iter->get_value(model_.m_id) != value)
-			continue;
-
-		result = iter;
-
-		return true;
-	}
-
-	return false;
-}
-
-
 void GPX2VideoArcShapeSettingsBox::update_content(void) {
 	log_call();
 

@@ -250,7 +250,7 @@ public:
 	static TimeWidget * create(GPXApplication &app) {
 		TimeWidget *widget;
 
-		widget = new TimeWidget(app, "time");
+		widget = new TimeWidget(app);
 
 		return widget;
 	}
@@ -310,8 +310,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	TimeWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	TimeWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetTime) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

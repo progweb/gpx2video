@@ -560,7 +560,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings.setDataRange(
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
-			settings.setFilter(TelemetrySettings::FilterNone);
+
+			settings.setTelemetryFilter(TelemetrySettings::FilterNone);
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);
@@ -584,7 +585,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			settings.setComputeRange(
 					app.settings().telemetryFrom(),
 					app.settings().telemetryTo());
-			settings.setFilter(app.settings().telemetryFilter());
+
+			settings.setTelemetryFilter(app.settings().telemetryFilter());
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));

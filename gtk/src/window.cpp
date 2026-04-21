@@ -25,6 +25,7 @@
 #include <gtkmm/listbox.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/label.h>
+#include <gtkmm/stackpage.h>
 
 extern "C" {
 #include <event2/event.h>
@@ -57,6 +58,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	log_call();
 
 	Gtk::Button *button;
+
+	Glib::RefPtr<Gtk::StackPage> stackpage;
 
 	// Set the window icon.
 	Gtk::IconTheme::get_for_display(get_display())->add_resource_path("/com/progweb/gpx2video/icons");
@@ -104,9 +107,12 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	info_stack_ = ref_builder_->get_widget<Gtk::Stack>("info_stack");
 	if (!info_stack_)
 		throw std::runtime_error("No \"info_stack\" object in window.ui");
-	info_stack_->add(*(video_stackpage_), video_stackpage_->name(), video_stackpage_->title());
-	info_stack_->add(*(telemetry_stackpage_), telemetry_stackpage_->name(), telemetry_stackpage_->title());
-	info_stack_->add(*(widget_stackpage_), widget_stackpage_->name(), widget_stackpage_->title());
+	stackpage = info_stack_->add(*(video_stackpage_), video_stackpage_->name(), video_stackpage_->title());
+	stackpage->set_icon_name(video_stackpage_->icon_name());
+	stackpage = info_stack_->add(*(telemetry_stackpage_), telemetry_stackpage_->name(), telemetry_stackpage_->title());
+	stackpage->set_icon_name(telemetry_stackpage_->icon_name());
+	stackpage = info_stack_->add(*(widget_stackpage_), widget_stackpage_->name(), widget_stackpage_->title());
+	stackpage->set_icon_name(widget_stackpage_->icon_name());
 
 	// Video frame object
 	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/video_frame.ui");
@@ -135,6 +141,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	box->append(*telemetry_frame_);
 	box->append(*widget_frame_);
 
+	// By default
+	video_frame_->set_visible(true);
+
 	// Add actions and keyboard accelerators for the headerbar actions
 	add_action("open", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_open));
 	add_action("save", sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_action_save));
@@ -153,6 +162,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	video_frame_->signal_video_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_changed));
 	video_frame_->signal_timesync_requested().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_timesync_requested));
 	widget_frame_->signal_widget_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_changed));
+	telemetry_frame_->signal_telemetry_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_telemetry_changed));
 
 	// Connect signals
 	play_button_->signal_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_play_clicked));
@@ -472,12 +482,13 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 	settings().setInputfile(filename);
 
 	// Update telemetry settings
+	// TODO load user preferences...
 	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
 //	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
 //	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 2000);
 
 	// Load telemetry data
-	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, false); //true);
 
 	// Update actions
 	use_gpx_data_action_->set_enabled(true);
@@ -487,6 +498,7 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 
 	// Update ui components
 	video_frame_->set_telemetry(source);
+	telemetry_frame_->set_telemetry(source);
 	telemetry_stackpage_->set_telemetry(source);
 }
 
@@ -837,6 +849,23 @@ void GPX2VideoApplicationWindow::on_widget_changed(void) {
 
 
 /**
+ * Notification telemetry settings change
+ *
+ * User has changed telemetry settings (filter, pause detection, prediction...)
+ * So refresh widgets is required.
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::on_telemetry_changed(void) {
+	log_call();
+
+	log_info("Telemetry settings changed");
+
+	renderer_->refresh();
+}
+
+
+/**
  * Notification widgets position computed
  *
  * Update the UI
@@ -1019,12 +1048,12 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 	if (!button)
 		throw std::runtime_error("No \"widget_append_button\" object in window.ui");
 
-	button->set_visible((name == "widgets_page"));
+	button->set_visible((name == "widget_page"));
 
 	// Update visible frame
 	video_frame_->set_visible((name == "video_page"));
 	telemetry_frame_->set_visible((name == "telemetry_page"));
-	widget_frame_->set_visible((name == "widgets_page"));
+	widget_frame_->set_visible((name == "widget_page"));
 }
 
 
@@ -1051,16 +1080,6 @@ void GPX2VideoApplicationWindow::on_widget_selected(GPX2VideoWidget *widget) {
  */
 void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widget) {
 	log_call();
-
-	// Search widget item index
-	int index = 0;
-
-	for (GPX2VideoWidget *item : renderer_->widgets()) {
-		if (item == widget)
-			break;
-
-		index++;
-	}
 
 	// Unselect widget
 	if (widget_frame_->widget_selected() == widget)

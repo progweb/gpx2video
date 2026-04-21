@@ -128,7 +128,7 @@ public:
 	static AvgRideSpeedWidget * create(GPXApplication &app) {
 		AvgRideSpeedWidget *widget;
 
-		widget = new AvgRideSpeedWidget(app, "avgridespeed");
+		widget = new AvgRideSpeedWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMPH);
 
@@ -176,8 +176,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	AvgRideSpeedWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	AvgRideSpeedWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetAverageRideSpeed) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

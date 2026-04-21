@@ -52,9 +52,10 @@ public:
 					telemetry_method, 
 					telemetry_rate,
 					telemetry_format) {
-			TelemetrySettings::setFilter(telemetry_filter);
 			TelemetrySettings::setDataRange(begin, end);
 			TelemetrySettings::setComputeRange(from, to);
+
+			TelemetrySettings::setTelemetryFilter(telemetry_filter);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataGrade, telemetry_smooth_grade_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataGrade, telemetry_smooth_grade_points);

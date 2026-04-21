@@ -128,7 +128,7 @@ public:
 	static HeartRateWidget * create(GPXApplication &app) {
 		HeartRateWidget *widget;
 
-		widget = new HeartRateWidget(app, "heartrate");
+		widget = new HeartRateWidget(app);
 
 		return widget;
 	}
@@ -172,8 +172,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	HeartRateWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	HeartRateWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetHeartRate) 
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

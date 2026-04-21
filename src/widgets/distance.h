@@ -128,7 +128,7 @@ public:
 	static DistanceWidget * create(GPXApplication &app) {
 		DistanceWidget *widget;
 
-		widget = new DistanceWidget(app, "distance");
+		widget = new DistanceWidget(app);
 
 		widget->setUnit(VideoWidget::UnitMiles);
 
@@ -176,8 +176,8 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DistanceWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name)
+	DistanceWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetDistance)
    		, shape_(NULL) {
 		setShape(VideoWidget::ShapeText);
 	}

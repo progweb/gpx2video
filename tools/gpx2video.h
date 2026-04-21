@@ -95,9 +95,10 @@ public:
 			, path_thick_(path_thick)
 			, path_border_(path_border)
 	   		, extract_format_(extract_format) {
-			TelemetrySettings::setFilter(telemetry_filter);
 			TelemetrySettings::setDataRange(begin, end);
 			TelemetrySettings::setComputeRange(from, to);
+
+			TelemetrySettings::setTelemetryFilter(telemetry_filter);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataGrade, telemetry_smooth_grade_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataGrade, telemetry_smooth_grade_points);

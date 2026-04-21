@@ -16,7 +16,7 @@ public:
 	static ImageWidget * create(GPXApplication &app) {
 		ImageWidget *widget;
 
-		widget = new ImageWidget(app, "image");
+		widget = new ImageWidget(app);
 
 		return widget;
 	}
@@ -70,8 +70,8 @@ protected:
 private:
 	OIIO::ImageBuf *bg_buf_;
 
-	ImageWidget(GPXApplication &app, std::string name)
-		: VideoWidget(app, name) 
+	ImageWidget(GPXApplication &app)
+		: VideoWidget(app, VideoWidget::WidgetImage) 
 		, ShapeBase(theme()) {
 		setShape(VideoWidget::ShapeNone);
 	}

@@ -117,6 +117,64 @@ std::string VideoWidget::Theme::color2hex(const float color[4]) {
  * VideoWidget
  */
 
+VideoWidget::Widget VideoWidget::string2widget(std::string &s) {
+	VideoWidget::Widget type;
+
+	if (s == "avgspeed")
+		type = VideoWidget::WidgetAverageSpeed;
+	else if (s == "avgridespeed")
+		type = VideoWidget::WidgetAverageRideSpeed;
+	else if (s == "cadence")
+		type = VideoWidget::WidgetCadence;
+	else if (s == "date")
+		type = VideoWidget::WidgetDate;
+	else if (s == "distance")
+		type = VideoWidget::WidgetDistance;
+	else if (s == "duration")
+		type = VideoWidget::WidgetDuration;
+	else if (s == "elevation")
+		type = VideoWidget::WidgetElevation;
+	else if (s == "gforce")
+		type = VideoWidget::WidgetGForce;
+	else if (s == "gpx")
+		type = VideoWidget::WidgetGPX;
+	else if (s == "grade")
+		type = VideoWidget::WidgetGrade;
+	else if (s == "heading")
+		type = VideoWidget::WidgetHeading;
+	else if (s == "heartrate")
+		type = VideoWidget::WidgetHeartRate;
+	else if (s == "image")
+		type = VideoWidget::WidgetImage;
+	else if (s == "lap")
+		type = VideoWidget::WidgetLap;
+	else if (s == "map")
+		type = VideoWidget::WidgetMap;
+	else if (s == "maxspeed")
+		type = VideoWidget::WidgetMaxSpeed;
+	else if (s == "position")
+		type = VideoWidget::WidgetPosition;
+	else if (s == "power")
+		type = VideoWidget::WidgetPower;
+	else if (s == "speed")
+		type = VideoWidget::WidgetSpeed;
+	else if (s == "temperature")
+		type = VideoWidget::WidgetTemperature;
+	else if (s == "text")
+		type = VideoWidget::WidgetText;
+	else if (s == "time")
+		type = VideoWidget::WidgetTime;
+	else if (s == "track")
+		type = VideoWidget::WidgetTrack;
+	else if (s == "verticalspeed")
+		type = VideoWidget::WidgetVerticalSpeed;
+	else
+		type = VideoWidget::WidgetUnknown;
+
+	return type;
+}
+
+
 VideoWidget::Shape VideoWidget::string2shape(std::string &s) {
 	VideoWidget::Shape shape;
 
@@ -338,6 +396,62 @@ VideoWidget::Zoom VideoWidget::string2zoom(std::string &s) {
 
 std::string VideoWidget::bool2string(bool value) {
 	return value ? "true" : "false";
+}
+
+
+std::string VideoWidget::widget2string(VideoWidget::Widget type) {
+	switch (type) {
+	case VideoWidget::WidgetAverageSpeed:
+		return "avgspeed";
+	case VideoWidget::WidgetAverageRideSpeed:
+		return "avgridespeed";
+	case VideoWidget::WidgetCadence:
+		return "cadence";
+	case VideoWidget::WidgetDate:
+		return "date";
+	case VideoWidget::WidgetDistance:
+		return "distance";
+	case VideoWidget::WidgetDuration:
+		return "duration";
+	case VideoWidget::WidgetElevation:
+		return "elevation";
+	case VideoWidget::WidgetGForce:
+		return "gforce";
+	case VideoWidget::WidgetGPX:
+		return "gpx";
+	case VideoWidget::WidgetGrade:
+		return "grade";
+	case VideoWidget::WidgetHeading:
+		return "heading";
+	case VideoWidget::WidgetHeartRate:
+		return "heartrate";
+	case VideoWidget::WidgetImage:
+		return "image";
+	case VideoWidget::WidgetLap:
+		return "lap";
+	case VideoWidget::WidgetMap:
+		return "map";
+	case VideoWidget::WidgetMaxSpeed:
+		return "maxspeed";
+	case VideoWidget::WidgetPosition:
+		return "position";
+	case VideoWidget::WidgetPower:
+		return "power";
+	case VideoWidget::WidgetSpeed:
+		return "speed";
+	case VideoWidget::WidgetTemperature:
+		return "temperature";
+	case VideoWidget::WidgetText:
+		return "text";
+	case VideoWidget::WidgetTime:
+		return "time";
+	case VideoWidget::WidgetTrack:
+		return "track";
+	case VideoWidget::WidgetVerticalSpeed:
+		return "verticalspeed";
+	default:
+		return "";
+	}
 }
 
 

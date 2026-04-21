@@ -1,5 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface domain="gtk40">
+	<object class="GtkAdjustment" id="rate_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">9999</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="grade_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="elevation_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="speed_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="acceleration_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="gtkmm__CustomObject_GPX2VideoTelemetryFrame" id="telemetry_frame">
 		<property name="halign">fill</property>
 		<property name="valign">fill</property>
@@ -11,26 +46,474 @@
 		<property name="margin-top">10</property>
 		<property name="visible">False</property>
 		<child>
-			<object class="GtkBox">
-				<property name="orientation">vertical</property>
-				<property name="halign">fill</property>
-				<property name="hexpand">True</property>
-				<property name="valign">start</property>
-				<property name="vexpand">True</property>
-				<property name="margin-bottom">6</property>
-				<property name="margin-end">6</property>
-				<property name="margin-start">6</property>
-				<property name="margin-top">6</property>
-				<property name="spacing">6</property>
-				<child>
-					<object class="GtkLabel">
-						<property name="can-focus">False</property>
-						<property name="justify">center</property>
-						<property name="label">Telemetry properties</property>
-						<property name="valign">baseline</property>
+			<object class="GtkScrolledWindow">
+				<property name="hscrollbar-policy">2</property>
+				<property name="vexpand">1</property>
+				<property name="has-frame">1</property>
+				<property name="child">
+
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
 						<property name="margin-bottom">6</property>
+						<property name="margin-end">6</property>
+						<property name="margin-start">6</property>
+						<property name="margin-top">6</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkLabel">
+								<property name="can-focus">False</property>
+								<property name="justify">center</property>
+								<property name="label">Telemetry properties</property>
+								<property name="valign">baseline</property>
+								<property name="margin-bottom">6</property>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="common_expander">
+								<property name="label">Filter</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkCheckButton" id="dropinvalid_checkbutton">
+														<property name="halign">start</property>
+														<property name="hexpand">False</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Check &amp; drop invalid points</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkCheckButton" id="pausedetection_checkbutton">
+														<property name="halign">start</property>
+														<property name="hexpand">False</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Enable pause detection</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkCheckButton" id="zscorefilter_checkbutton">
+														<property name="halign">start</property>
+														<property name="hexpand">False</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Apply 'Iglewicz &amp; Hoaglin' modified z-scores</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Prediction method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="prediction_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Rate (in ms):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="rate_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">rate_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="grade_smooth_expander">
+								<property name="label">Grade filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="grade_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="grade_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">grade_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="elevation_smooth_expander">
+								<property name="label">Elevation filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="elevation_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="elevation_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">elevation_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="speed_smooth_expander">
+								<property name="label">Speed filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="speed_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="speed_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">speed_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="acceleration_smooth_expander">
+								<property name="label">Acceleration filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="acceleration_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="acceleration_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">acceleration_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
 					</object>
-				</child>
+
+				</property>
 			</object>
 		</child>
 	</object>
