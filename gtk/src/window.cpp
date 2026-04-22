@@ -675,10 +675,12 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	auto dialog = Gtk::FileDialog::create(); 
 
+	std::string name = Glib::path_get_basename(Glib::StdStringView(layout_file_));
+
 	dialog->set_title("Export layout");
 	dialog->set_modal(true);
 	dialog->set_initial_folder(working_layout_);
-	dialog->set_initial_name(working_layout_->get_basename());
+	dialog->set_initial_name(name.empty() ? "layout.xml" : name);
 
 	// Add filters, so that only certain file types can be selected:
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
@@ -687,7 +689,6 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 
 	dialog->set_default_filter(filter);
 	dialog->set_filters(filters);
-	dialog->set_initial_name(layout_file_.empty() ? "layout.xml" : layout_file_);
 
 	// Bind open file signal
 	dialog->save(*this, sigc::bind(
