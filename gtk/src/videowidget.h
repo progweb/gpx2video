@@ -1,7 +1,6 @@
 #ifndef __GPX2VIDEO__GTK__VIDEOWIDGET_H__
 #define __GPX2VIDEO__GTK__VIDEOWIDGET_H__
 
-#include <glibmm/dispatcher.h>
 #include <gtkmm/box.h>
 
 #include <OpenImageIO/imageio.h>
@@ -58,13 +57,13 @@ public:
 		return data_;
 	}
 
-	void dispatchEvent(void) {
-		dispatcher_.emit();
+	void dispatchEvent(bool schedule=false) {
+		signal_changed_.emit(schedule);
 	}
 
-	Glib::Dispatcher& signal_changed(void) {
-		return dispatcher_;
-	}
+	// signal accessor:
+	using type_signal_changed = sigc::signal<void(bool)>;
+	type_signal_changed signal_changed();
 
 	double glX(void) const;
 	double glY(void) const;
@@ -92,6 +91,8 @@ public:
 	void check_gl_error(void);
 
 protected:
+	type_signal_changed signal_changed_;
+
 	GPX2VideoWidget(VideoWidget *widget);
 
 	bool draw(const TelemetryData &data);
@@ -108,8 +109,6 @@ private:
 	int layout_height_;
 
 	VideoWidget *widget_;
-
-	Glib::Dispatcher dispatcher_;
 
 	OIIO::ImageBuf *overlay_;
 

@@ -38,8 +38,6 @@ public:
 	const Source& source(void) const;
 	void setSource(const Source &source);
 
-	void setZoom(const int &zoom);
-
 	const double& divider(void) const;
 	void setDivider(const double &divier);
 

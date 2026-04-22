@@ -66,11 +66,6 @@ void MapSettings::setSource(const MapSettings::Source &source) {
 }
 
 
-void MapSettings::setZoom(const int &zoom) {
-	zoom_ = zoom;
-}
-
-
 const double& MapSettings::divider(void) const {
 	return divider_;
 }
@@ -203,10 +198,12 @@ const std::string MapSettings::getRepoURI(const MapSettings::Source &source) {
 		return "http://a#R.ortho.tiles.virtualearth.net/tiles/h#W.jpeg?g=50";
 	case MapSettings::SourceIGNEssentielMap:
 //		return "https://wxs.ign.fr/essentiels/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&TILEMATRIXSET=PM&TILEMATRIX=#Z&TILECOL=#X&TILEROW=#Y&STYLE=normal&FORMAT=image/png";
-		return "https://wmts.geopf.fr/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
+//		return "https://wmts.geopf.fr/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
+		return "https://data.geopf.fr/wmts?layer=GEOGRAPHICALGRIDSYSTEMS.PLANIGNV2&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fpng&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
 	case MapSettings::SourceIGNEssentielPhoto:
 //		return "https://wxs.ign.fr/essentiels/geoportail/wmts?SERVICE=WMTS&REQUEST=GetTile&VERSION=1.0.0&LAYER=ORTHOIMAGERY.ORTHOPHOTOS&TILEMATRIXSET=PM&TILEMATRIX=#Z&TILECOL=#X&TILEROW=#Y&STYLE=normal&FORMAT=image/jpeg";
-		return "https://wmts.geopf.fr/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
+//		return "https://wmts.geopf.fr/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
+		return "https://data.geopf.fr/wmts?layer=ORTHOIMAGERY.ORTHOPHOTOS&style=normal&tilematrixset=PM&Service=WMTS&Request=GetTile&Version=1.0.0&Format=image%2Fjpeg&TileMatrix=#Z&TileCol=#X&TileRow=#Y";
 	// TODO
 	// Add more IGN map
 	// Add user key param #K
@@ -442,8 +439,18 @@ void Map::init(bool zoomfit) {
 	zoom = settings().zoom();
 	divider_ = settings().divider();
 
+	// Update track settings
+	Track::setSettings(settings());
+
 	// Track compute
 	Track::init(zoomfit);
+
+	// Drop old tiles
+	while (!tiles_.empty()) {
+		Tile *tile = tiles_.front();
+		tiles_.pop_front();
+		delete tile;
+	}
 
 	// Build each tile
 	for (int y=y1_; y<y2_; y++) {

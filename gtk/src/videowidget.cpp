@@ -85,7 +85,6 @@ void GPX2VideoWidget::Buffer::setData(int index, uint8_t *data) {
 
 GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget) 
 	: widget_(widget)
-	, dispatcher_()
 	, mutex_() {
 	log_call();
 
@@ -131,6 +130,11 @@ VideoWidget * GPX2VideoWidget::widget(void) {
 	log_call();
 
 	return widget_;
+}
+
+
+GPX2VideoWidget::type_signal_changed GPX2VideoWidget::signal_changed() {
+	return signal_changed_;
 }
 
 

@@ -40,7 +40,7 @@ public:
 	void draw(void);
 	void clear(GPX2VideoWidget *widget=NULL);
 	void compute(void);
-	void refresh(GPX2VideoWidget *widget=NULL);
+	void refresh(GPX2VideoWidget *widget=NULL, bool schedule=false);
 
 	Glib::Dispatcher& ready(void) {
 		return dispatcher_;

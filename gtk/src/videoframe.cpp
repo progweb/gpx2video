@@ -74,6 +74,10 @@ void GPX2VideoVideoFrame::set_video_selected(MediaContainer *media) {
 	// Save selected video
 	media_ = media;
 
+	// By default, use the first GPX point
+	if (source_ && !media_->startTime())
+		set_starttime_from_gpx_data();
+
 	// Update ui content
 	update_content();
 }
@@ -86,7 +90,11 @@ void GPX2VideoVideoFrame::set_telemetry(TelemetrySource *source) {
 	source_ = source;
 
 	// By default, use the first GPX point
-	set_starttime_from_gpx_data();
+	if (media_ && !media_->startTime())
+		set_starttime_from_gpx_data();
+
+	// Update ui content
+	update_content();
 }
 
 

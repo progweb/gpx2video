@@ -95,7 +95,7 @@ protected:
 	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
 	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);
 
-	void on_widget_changed(void);
+	void on_widget_changed(bool schedule);
 
 private:
 	GPX2VideoRenderer *renderer_;

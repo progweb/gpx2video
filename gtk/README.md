@@ -10,19 +10,29 @@ GTK interface for gpx2video tool.
 
 *Dev in progress*
 
-- Load video
-- Load & export layout file
-- Load telemetry file
-- Video start time (from video metadata, GPMF or GPX)
-- Widget settings (in progress)
+User interface feature:
+- video loading
+- video start time setting (from video metadata, GPMF or GPX and from calendar)
+- layout file loading & exporting
+- telemetry file loading
+- telemetry settings 
+- widget settings
 
-TODO:
+To fix:
+- reload map tile as user changes the widget size
+- sound player (issue on some device)
 
-- Append new widget
-- Translate text application
-- Redraw each icon (in real svg)
-- Telemetry & widgets settings
-- Optimization & fix cpu usage
+To do:
+- append new widget
+- translate user application
+- redraw each icon (in real svg)
+- path thick, border and color settings
+- marker size for 'track' & 'map' widget
+- arc & bar settings customization
+- add more widget shapes (ramp & curve)
+- add chart support
+- text editable for the 'text' widget
+- optimization & fix cpu usage
 
 ## Data installation
 

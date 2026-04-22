@@ -370,15 +370,15 @@ void GPX2VideoRenderer::compute(void) {
 }
 
 
-void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget) {
+void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget, bool schedule) {
 	log_call();
 
 	// Widget drawing...
 	is_ready_ = false;
 
-//	// Widget settings has changed & need to be scheduled
-//	if (widget)
-//		app_.insert(widget->widget());
+	// Widget settings has changed & need to be scheduled
+	if (widget && schedule)
+		app_.insert(widget->widget());
 
 	// Force widgets draw
 	clear(widget);

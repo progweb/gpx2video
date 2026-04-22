@@ -64,6 +64,11 @@ const int& TrackSettings::zoom(void) const {
 }
 
 
+void TrackSettings::setZoom(const int &zoom) {
+	zoom_ = zoom;
+}
+
+
 const int& TrackSettings::markerSize(void) const {
 	return marker_size_;
 }
@@ -167,6 +172,13 @@ const TrackSettings& Track::settings() const {
 }
 
 
+void Track::setSettings(const TrackSettings &settings) {
+	log_call();
+
+	track_settings_ = settings;
+}
+
+
 Track * Track::create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings) {
 	Track *track;
 
@@ -242,6 +254,12 @@ bool Track::preinit(void) {
 
 	// Track settings
 	track_settings_.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+
+	// Delete previous track buffer
+	if (trackbuf_ != NULL) {
+		delete trackbuf_;
+		trackbuf_ = NULL;
+	}
 
 	return true;
 }
