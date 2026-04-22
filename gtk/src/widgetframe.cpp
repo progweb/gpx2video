@@ -1921,13 +1921,13 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 }
 
 
-void GPX2VideoWidgetFrame::on_widget_changed(void) {
+void GPX2VideoWidgetFrame::on_widget_changed(bool schedule) {
 	log_call();
 
 	log_info("Widget extension properties changed");
 
 	// Refresh widget required
-	renderer_->refresh(widget_selected_);
+	renderer_->refresh(widget_selected_, schedule);
 
 	// Refresh video preview
 	dispatcher_.emit();

@@ -196,7 +196,7 @@ public:
 
 	void reset(bool all = false);
 
-	void dump(void);
+	void dump(void) const;
 
 	static void writeHeader(void);
 	void writeData(size_t index) const;

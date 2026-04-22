@@ -30,26 +30,6 @@ GPX2VideoMapWidgetSettingsBox::GPX2VideoMapWidgetSettingsBox(BaseObjectType *cob
 		row[model_.m_enable] = true;
 	}
 
-//	{
-//		auto iter = source_model_->append();
-//		auto row = *iter;
-//
-//		row = *(source_model_->append());
-//		row[model_.m_id] = MapSettings::SourceOpenStreetMapRenderer;
-//		row[model_.m_name] = MapSettings::getFriendlyName(MapSettings::SourceOpenStreetMapRenderer);
-//		row[model_.m_enable] = true;
-//
-//		row = *(source_model_->append());
-//		row[model_.m_id] = MapSettings::SourceOpenAerialMap;
-//		row[model_.m_name] = MapSettings::getFriendlyName(MapSettings::SourceOpenAerialMap);
-//		row[model_.m_enable] = true;
-//
-//		row = *(source_model_->append());
-//		row[model_.m_id] = MapSettings::SourceOpenAerialMap;
-//		row[model_.m_name] = MapSettings::getFriendlyName(MapSettings::SourceOpenAerialMap);
-//		row[model_.m_enable] = true;
-//	}
-
 	// Binding
 	bind_content();
 
@@ -93,7 +73,7 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 						update_boundaries();
 
 						// Broadcast widget change
-						widget_->dispatchEvent();
+						widget_->dispatchEvent(true);
 					}
 			));
 	// Zoom
@@ -109,7 +89,7 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 						((Map *) widget_->widget())->settings().setZoom(value);
 
 						// Broadcast widget change
-						widget_->dispatchEvent();
+						widget_->dispatchEvent(true);
 					}
 			));
 
@@ -126,7 +106,7 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 						((Map *) widget_->widget())->settings().setDivider(value);
 
 						// Broadcast widget change
-						widget_->dispatchEvent();
+						widget_->dispatchEvent(true);
 					}
 			));
 }

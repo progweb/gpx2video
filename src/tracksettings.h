@@ -15,6 +15,7 @@ public:
 	void setSize(const int &width, const int &height);
 
 	const int& zoom(void) const;
+	void setZoom(const int &zoom);
 
 	const int& markerSize(void) const;
 	void setMarkerSize(const int &size);

@@ -31,6 +31,8 @@ public:
 	TrackSettings& settings();
 	const TrackSettings& settings() const;
 
+	void setSettings(const TrackSettings &settings);
+
 	virtual bool isShapeSupported(Shape type) {
 		(void) type;
 

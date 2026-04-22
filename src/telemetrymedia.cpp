@@ -71,7 +71,7 @@ void TelemetryData::reset(bool all) {
 }
 
 
-void TelemetryData::dump(void) {
+void TelemetryData::dump(void) const {
 	printf("  [%d] '%s' (Fix: %c) Time: %s [%f, %f] Distance: %.3f km in %d seconds, current speed is %.3f (pause: %s) - Altitude: %.1f (%.1f%%)\n",
 			line_,
 			type2string(),
