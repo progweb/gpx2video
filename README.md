@@ -433,7 +433,7 @@ Label or value node elements are:
 
 **type** gauges supported are:
   - speed, maxspeed, avgspeed, avgridespeed
-  - heading, vspeed
+  - heading, verticalspeed
   - grade, elevation
   - date, time, duration
   - position
