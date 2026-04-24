@@ -163,6 +163,20 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	// Connect widgets button
 	//------------------------
 
+	// Time offset
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("timeoffset_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"timeoffset_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_info("Telemetry time offset changed to '%d' ms", value);
+
+						source_->settings().setTelemetryOffset(value);
+					}
+			));
+
 	// Drop invalid point
 	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("dropinvalid_checkbutton");
 	if (!checkbutton)
@@ -407,6 +421,13 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	// Mask value changed
 	loading_ = true;
+
+	// Time offset
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("timeoffset_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"timeoffset_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetryOffset());
 
 	// Drop invalid point
 	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("dropinvalid_checkbutton");
