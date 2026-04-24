@@ -208,8 +208,8 @@
 													<object class="GtkSpinButton" id="rate_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">3</property>
-														<property name="max-width-chars">3</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>

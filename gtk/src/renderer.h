@@ -1,6 +1,8 @@
 #ifndef __GPX2VIDEO__GTK__RENDERER_H__
 #define __GPX2VIDEO__GTK__RENDERER_H__
 
+#include <chrono>
+
 #include <glibmm/ustring.h>
 #include <glibmm/dispatcher.h>
 
@@ -23,6 +25,8 @@ public:
 
 	void set_telemetry(TelemetrySource *source);
 	void set_layout_size(int width, int heigth);
+
+	void update_telemetry_settings(void);
 
 	const uint64_t& time(void) const;
 	void set_timestamp(uint64_t timestamp);
@@ -63,6 +67,12 @@ protected:
 
 	bool init(MediaContainer *container);
 	void restart(void);
+
+	uint64_t get_system_clock() {
+		using namespace std::chrono;
+		return duration_cast<microseconds>(system_clock::now().time_since_epoch()).count();
+	}
+
 
 private:
 //public:

@@ -272,6 +272,11 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 
 		queue_.push_back(buffer);
 	}
+	else {
+		buffer = queue_.back();
+		buffer->setTimestamp(data.timestamp());
+		queue_.back() = buffer;
+	}
 
 	return is_update;
 }
@@ -409,7 +414,7 @@ void GPX2VideoWidget::write_buffers(const TelemetryData &data, bool &loop) {
 	bool clear_req = clear_req_;
 
 #ifdef WIDGET_DEBUG
-printf("WIDGET::WRITE BUFFERS %s\n", widget()->name().c_str());
+printf("WIDGET::WRITE BUFFERS %s (ts: %ld)\n", widget()->name().c_str(), data.timestamp());
 #endif
 
 	// By default continue to buffering
@@ -475,7 +480,7 @@ printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
  * Load new texture
  * (Called from video thread)
  */
-void GPX2VideoWidget::load_texture(void) {
+uint64_t GPX2VideoWidget::load_texture(void) {
 	log_call();
 
 #ifdef WIDGET_DEBUG
@@ -484,6 +489,8 @@ printf("WIDGET::LOAD TEXTURE %s - updated: %s\n",
 		is_update_ ? "true" : "false");
 #endif
 
+	GPX2VideoWidget::BufferPtr buffer;
+
 	std::lock_guard<std::mutex> lock(mutex_);
 
 	// 
@@ -491,16 +498,16 @@ printf("WIDGET::LOAD TEXTURE %s - updated: %s\n",
 //	static std::vector<unsigned char> m_tex_buffer;
 
 	if (queue_.empty())
-		return;
+		return 0;
+
+	buffer = queue_.front();
 
 	if (texture_ && !is_update_)
-		return;
+		return !widget()->isStatic() ? buffer->timestamp() : 0;
 
 #ifdef WIDGET_DEBUG
 printf("WIDGET::LOADING TEXTURE...\n");
 #endif
-
-	GPX2VideoWidget::BufferPtr buffer = queue_.front();
 
 //	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
 //						* overlay_->spec().channel_bytes();
@@ -587,6 +594,8 @@ printf("WIDGET::LOADING TEXTURE...\n");
 
 	// Texture updated
 	is_update_ = false;
+
+	return !widget()->isStatic() ? buffer->timestamp() : 0;
 }
 
 
@@ -688,8 +697,6 @@ printf("WIDGET::RENDERING...\n");
 	glBindVertexArray(vao_);
 //	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo_);
 	glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-	log_debug("DONE");
 }
 
 

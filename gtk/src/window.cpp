@@ -868,6 +868,7 @@ void GPX2VideoApplicationWindow::on_telemetry_changed(void) {
 
 	log_info("Telemetry settings changed");
 
+	renderer_->update_telemetry_settings();
 	renderer_->refresh();
 }
 

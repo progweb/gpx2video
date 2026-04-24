@@ -84,7 +84,7 @@ public:
 	void resize_buffers(void);
 	void write_buffers(const TelemetryData &data, bool &loop);
 	void clear_buffers(void);
-	void load_texture(void);
+	uint64_t load_texture(void);
 	void unload_texture(void);
 	void render(GPX2VideoShader *shader);
 
