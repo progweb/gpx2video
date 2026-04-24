@@ -58,6 +58,8 @@ public:
 	);
 	virtual ~TelemetrySettings();
 
+	void copy(const TelemetrySettings &settings);
+
 	bool setDataRange(const uint64_t &begin, const uint64_t &end);
 	bool setDataRange(const std::string &begin, const std::string &end);
 

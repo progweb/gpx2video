@@ -123,11 +123,19 @@ class Renderer : public GPXApplication::Task {
 public:
 	virtual ~Renderer();
 
-	const RendererSettings& rendererSettings(void) {
+	RendererSettings& rendererSettings(void) {
 		return renderer_settings_;
 	}
 
-	const TelemetrySettings& telemetrySettings(void) {
+	const RendererSettings& rendererSettings(void) const {
+		return renderer_settings_;
+	}
+
+	TelemetrySettings& telemetrySettings(void) {
+		return telemetry_settings_;
+	}
+
+	const TelemetrySettings& telemetrySettings(void) const {
 		return telemetry_settings_;
 	}
 

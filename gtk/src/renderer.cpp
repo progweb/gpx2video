@@ -150,6 +150,13 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 }
 
 
+void GPX2VideoRenderer::update_telemetry_settings(void) {
+	log_call();
+
+	telemetrySettings().copy(source_->settings());
+}
+
+
 void GPX2VideoRenderer::set_layout_size(int width, int height) {
 	log_call();
 
@@ -294,6 +301,8 @@ void GPX2VideoRenderer::draw(void) {
 		return;
 
 	if (source_) {
+//		uint64_t clock = get_system_clock();
+
 		TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
 		for (GPX2VideoWidget *item : widgets_) {
@@ -313,8 +322,9 @@ void GPX2VideoRenderer::draw(void) {
 					data.setDatetime(timestamp_);
 				}
 				else {
-					// Continue from the last datetime requested
-					timestamp = data.datetime() + rate;
+					// Continue from the previous point 
+//					timestamp = data.datetime() + rate;
+					timestamp = data.timestamp() + rate;
 				}
 
 				type = source_->retrieveNext(data, timestamp);
@@ -331,6 +341,8 @@ void GPX2VideoRenderer::draw(void) {
 				(void) type;
 			}
 		}
+
+//		printf("RENDERING DURATION: %ld\n", get_system_clock() - clock);
 	}
 	else {
 		bool loop;
@@ -408,8 +420,18 @@ void GPX2VideoRenderer::init_buffers(void) {
 void GPX2VideoRenderer::load_texture(void) {
 	log_call();
 
-	for (GPX2VideoWidget *item : widgets_)
-		item->load_texture();
+	uint64_t timestamp;
+
+	uint64_t rate = telemetrySettings().telemetryRate();
+
+	for (GPX2VideoWidget *item : widgets_) {
+		timestamp = item->load_texture();
+
+		if ((timestamp > 0) && (timestamp_ > (timestamp + rate)))
+			log_warn("Widget '%s' texture delayed: %ld ms (rate: %ld ms)!", 
+					item->name().c_str(),
+					timestamp_ - timestamp, rate);
+	}
 }
 
 

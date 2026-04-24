@@ -58,6 +58,24 @@ TelemetrySettings::~TelemetrySettings() {
 }
 
 
+void TelemetrySettings::copy(const TelemetrySettings &settings) {
+	telemetry_offset_ = settings.telemetryOffset();
+
+	telemetry_begin_ = settings.telemetryBegin();
+	telemetry_end_ = settings.telemetryEnd();
+
+	telemetry_from_ = settings.telemetryFrom();
+	telemetry_to_ = settings.telemetryTo();
+
+	telemetry_format_ = settings.telemetryFormat();
+
+	telemetry_check_ = settings.telemetryCheck();
+	telemetry_pause_detection_ = settings.telemetryPauseDetection();
+
+	telemetry_rate_ = settings.telemetryRate();
+}
+
+
 bool TelemetrySettings::setDataRange(const uint64_t &begin, const uint64_t &end) {
 	log_call();
 
