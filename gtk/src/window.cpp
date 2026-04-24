@@ -729,6 +729,10 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 //	filter_gpx->add_suffix("gpx");
 //	filter_gpx->add_suffix("GPX");
 
+	auto filter_csv = Gtk::FileFilter::create();
+	filter_csv->set_name("All CSV files");
+	filter_csv->add_mime_type("text/csv");
+
 	// Create file chooser dialog
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	auto dialog = Gtk::FileDialog::create(); 
@@ -741,6 +745,7 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 	auto filters = Gio::ListStore<Gtk::FileFilter>::create();
 
 	filters->append(filter_gpx);
+	filters->append(filter_csv);
 
 	dialog->set_filters(filters);
 
@@ -755,6 +760,7 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 	dialog->set_current_folder(working_folder_);
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_gpx);
+	dialog->add_filter(filter_csv);
 	dialog->add_button("Ok", Gtk::ResponseType::OK);
 	dialog->show();
 
@@ -1125,7 +1131,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 
 		working_layout_ = file;
 	}
-	else if (type == "application/gpx+xml")
+	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
 		open_telemetry_file(file);
 	else
 		open_media_file(file);
@@ -1170,7 +1176,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 
 		working_layout_ = file;
 	}
-	else if (type == "application/gpx+xml")
+	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
 		open_telemetry_file(file);
 	else
 		open_media_file(file);
