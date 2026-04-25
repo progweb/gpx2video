@@ -86,6 +86,8 @@ protected:
 	void update_stack(void);
 	void update_headerbar(void);
 
+	void toggle_fullscreen(void);
+
 	void on_action_open(void);
 	void on_action_save(void);
 	void on_action_append(void);

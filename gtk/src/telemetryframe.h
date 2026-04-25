@@ -53,8 +53,9 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> prediction_method_model_;
 	Glib::RefPtr<Gtk::ListStore> grade_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> elevation_smooth_method_model_;
-	Glib::RefPtr<Gtk::ListStore> speed_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> acceleration_smooth_method_model_;
+	Glib::RefPtr<Gtk::ListStore> speed_smooth_method_model_;
+	Glib::RefPtr<Gtk::ListStore> verticalspeed_smooth_method_model_;
 
 	Glib::RefPtr<Gtk::ListStore> duplicate_liststore(const Glib::RefPtr<Gtk::ListStore> &source, class Model &columns);
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);

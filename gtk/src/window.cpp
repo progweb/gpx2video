@@ -21,6 +21,7 @@
 #include <gtkmm/gestureclick.h>
 #include <gtkmm/stackpage.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/paned.h>
 #include <gtkmm/box.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/entry.h>
@@ -566,6 +567,27 @@ void GPX2VideoApplicationWindow::update_headerbar(void) {
 
 
 /**
+ *
+ */
+void GPX2VideoApplicationWindow::toggle_fullscreen(void) {
+	log_call();
+
+	auto paned = ref_builder_->get_widget<Gtk::Paned>("info_paned");
+	if (!paned)
+		throw std::runtime_error("No \"info_paned\" object in window.ui");
+
+	if (is_fullscreen()) {
+		paned->set_visible(true);
+		unfullscreen();
+	}
+	else {
+		paned->set_visible(false);
+		fullscreen();
+	}
+}
+
+
+/**
  * Save XML layout file
  *
  *  - serialize layout description
@@ -984,6 +1006,11 @@ bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, 
 	(void) modifier;
 
 	switch (keyvalue) {
+	case GDK_KEY_f:
+		log_notice("Toggle fullscreen / unfullscreen (key 'f')");
+		toggle_fullscreen();
+		break;
+
 	case GDK_KEY_s:
 		log_notice("Move to next frame (key 's')");
 		video_area_->step_to_next_frame();
