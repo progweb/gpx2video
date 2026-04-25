@@ -245,6 +245,9 @@ bool Renderer::loadMap(layout::Map *m) {
 //	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
+	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
+	mapSettings.setPathPrimaryColor((const char *) m->pathPrimaryColor());
+	mapSettings.setPathSecondaryColor((const char *) m->pathSecondaryColor());
 
 	Map *map = Map::create(app_, telemetrySettings(), mapSettings);
 
@@ -342,6 +345,10 @@ bool Renderer::loadTrack(layout::Track *t) {
 //	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
+	trackSettings.setPathBorder((double) t->pathBorder());
+	trackSettings.setPathBorderColor((const char *) t->pathBorderColor());
+	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
+	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
 
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 

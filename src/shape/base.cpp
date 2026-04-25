@@ -346,9 +346,9 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<padding-bottom>" << theme_.padding(VideoWidget::Theme::PaddingBottom) << "</padding-bottom>" << std::endl;
 
 	os << "<border>" << theme_.border() << "</border>" << std::endl;
-	os << "<border-color>" << theme_.color2hex(theme_.borderColor()) << "</border-color>" << std::endl;
+	os << "<border-color>" << VideoWidget::Theme::color2hex(theme_.borderColor()) << "</border-color>" << std::endl;
 
-	os << "<background-color>" << theme_.color2hex(theme_.backgroundColor()) << "</background-color>" << std::endl;
+	os << "<background-color>" << VideoWidget::Theme::color2hex(theme_.backgroundColor()) << "</background-color>" << std::endl;
 
 	os << "<font>" << theme_.font() << "</font>" << std::endl;
 
@@ -358,11 +358,11 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<label-font-style>" << VideoWidget::fontstyle2string(theme_.labelFontStyle()) << "</label-font-style>" << std::endl;
 	os << "<label-font-weight>" << VideoWidget::fontweight2string(theme_.labelFontWeight()) << "</label-font-weight>" << std::endl;
 	os << "<label-align>" << VideoWidget::align2string(theme_.labelAlign()) << "</label-align>" << std::endl;
-	os << "<label-color>" << theme_.color2hex(theme_.labelColor()) << "</label-color>" << std::endl;
+	os << "<label-color>" << VideoWidget::Theme::color2hex(theme_.labelColor()) << "</label-color>" << std::endl;
 	os << "<label-shadow-opacity>" << theme_.labelShadowOpacity() << "</label-shadow-opacity>" << std::endl;
 	os << "<label-shadow-distance>" << theme_.labelShadowDistance() << "</label-shadow-distance>" << std::endl;
 	os << "<label-border-width>" << theme_.labelBorderWidth() << "</label-border-width>" << std::endl;
-	os << "<label-border-color>" << theme_.color2hex(theme_.labelBorderColor()) << "</label-border-color>" << std::endl;
+	os << "<label-border-color>" << VideoWidget::Theme::color2hex(theme_.labelBorderColor()) << "</label-border-color>" << std::endl;
 
 	os << "<with-value>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagValue)) << "</with-value>" << std::endl;
 	os << "<value-font-family>" << theme_.valueFontFamily() << "</value-font-family>" << std::endl;
@@ -370,11 +370,11 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<value-font-style>" << VideoWidget::fontstyle2string(theme_.valueFontStyle()) << "</value-font-style>" << std::endl;
 	os << "<value-font-weight>" << VideoWidget::fontweight2string(theme_.valueFontWeight()) << "</value-font-weight>" << std::endl;
 	os << "<value-align>" << VideoWidget::align2string(theme_.valueAlign()) << "</value-align>" << std::endl;
-	os << "<value-color>" << theme_.color2hex(theme_.valueColor()) << "</value-color>" << std::endl;
+	os << "<value-color>" << VideoWidget::Theme::color2hex(theme_.valueColor()) << "</value-color>" << std::endl;
 	os << "<value-shadow-opacity>" << theme_.valueShadowOpacity() << "</value-shadow-opacity>" << std::endl;
 	os << "<value-shadow-distance>" << theme_.valueShadowDistance() << "</value-shadow-distance>" << std::endl;
 	os << "<value-border-width>" << theme_.valueBorderWidth() << "</value-border-width>" << std::endl;
-	os << "<value-border-color>" << theme_.color2hex(theme_.valueBorderColor()) << "</value-border-color>" << std::endl;
+	os << "<value-border-color>" << VideoWidget::Theme::color2hex(theme_.valueBorderColor()) << "</value-border-color>" << std::endl;
 	os << "<value-min>" << theme_.valueMin() << "</value-min>" << std::endl;
 	os << "<value-max>" << theme_.valueMax() << "</value-max>" << std::endl;
 }

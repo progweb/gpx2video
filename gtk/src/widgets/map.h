@@ -4,6 +4,7 @@
 #include "../videowidget.h"
 #include "base.h"
 
+
 class GPX2VideoMapWidgetSettingsBox : public GPX2VideoWidgetBaseSettingsBox {
 public:
 	GPX2VideoMapWidgetSettingsBox()

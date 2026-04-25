@@ -37,6 +37,7 @@ public:
 		log_call();
 	}
 
+	void bind_content(void);
 	void update_content(void);
 
 protected:

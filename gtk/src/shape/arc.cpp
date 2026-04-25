@@ -8,11 +8,6 @@ GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobje
 	, widget_(widget) {
 	log_call();
 
-	Gtk::Switch *sw;
-	Gtk::ComboBox *combobox;
-	Gtk::SpinButton *spinbutton;
-	Gtk::ColorButton *colorbutton;
-
 	loading_ = false;
 
 	// Populate models
@@ -38,6 +33,19 @@ GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobje
 		row[model_.m_id] = VideoWidget::Theme::NeedleTypeDesign;
 		row[model_.m_name] = "Design";
 	}
+
+	// Binding
+	bind_content();
+}
+
+
+void GPX2VideoArcShapeSettingsBox::bind_content(void) {
+	log_call();
+
+	Gtk::Switch *sw;
+	Gtk::ComboBox *combobox;
+	Gtk::SpinButton *spinbutton;
+	Gtk::ColorButton *colorbutton;
 
 	// Tick enable
 	sw = ref_builder_->get_widget<Gtk::Switch>("tick_enable_switch");

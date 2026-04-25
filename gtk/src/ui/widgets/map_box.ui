@@ -14,6 +14,20 @@
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
+	<object class="GtkAdjustment" id="path_thick_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">99</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="path_border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">99</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
 	<object class="GtkBox" id="settings_box">
 		<property name="orientation">vertical</property>
 		<property name="halign">fill</property>
@@ -131,6 +145,157 @@
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
 										<property name="adjustment">factor_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Path thick:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="path_thick_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">path_thick_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Path border:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="path_border_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">path_border_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Path border color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="path_border_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="1">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Path primary color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="path_primary_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="1">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label">Path secondary color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="path_secondary_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="1">Select a color</property>
 									</object>
 								</child>
 							</object>

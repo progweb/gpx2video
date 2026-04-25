@@ -26,6 +26,18 @@ public:
 	const double& pathBorder(void) const;
 	void setPathBorder(const double &border);
 
+	const float * pathBorderColor(void) const;
+	bool setPathBorderColor(std::string color);
+	bool setPathBorderColor(double r, double g, double b, double a);
+
+	const float * pathPrimaryColor(void) const;
+	bool setPathPrimaryColor(std::string color);
+	bool setPathPrimaryColor(double r, double g, double b, double a);
+
+	const float * pathSecondaryColor(void) const;
+	bool setPathSecondaryColor(std::string color);
+	bool setPathSecondaryColor(double r, double g, double b, double a);
+
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
@@ -36,6 +48,10 @@ protected:
 
 	double path_thick_;
 	double path_border_;
+
+	float path_border_color_[4];
+	float path_primary_color_[4];
+	float path_secondary_color_[4];
 
 private:
 	int width_, height_;

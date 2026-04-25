@@ -60,7 +60,7 @@ public:
 	static int lon2pixel(int zoom, float lon);
 
 	// Draw track path
-	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider=1.0);
+	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, const TelemetryData &data, double divider=1.0);
 
 	// Render track
 	OIIO::ImageBuf * prepare(bool &is_update);
@@ -75,7 +75,7 @@ protected:
 
 	bool preinit(void);
 	void init(bool zoomfit=true);
-	bool load(void);
+	bool load(const TelemetryData &data);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
@@ -114,6 +114,9 @@ protected:
 
 		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
 		os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;
+		os << "<path-border-color>" << VideoWidget::Theme::color2hex(settings().pathBorderColor()) << "</path-border-color>" << std::endl;
+		os << "<path-primary-color>" << VideoWidget::Theme::color2hex(settings().pathPrimaryColor()) << "</path-primary-color>" << std::endl;
+		os << "<path-secondary-color>" << VideoWidget::Theme::color2hex(settings().pathSecondaryColor()) << "</path-secondary-color>" << std::endl;
 	}
 
 	GPXApplication &app_;
