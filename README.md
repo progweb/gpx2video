@@ -487,7 +487,7 @@ You can specify units for some widgets.
 
 ```xml
 <widget>
-	<type>vspeed</type>
+	<type>verticalspeed</type>
 	<unit>mps</unit>
 </widget>		
 ```

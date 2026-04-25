@@ -115,7 +115,7 @@
 				</property>
 				<property name="end-child">
 
-					<object class="GtkPaned" id="info_box">
+					<object class="GtkPaned" id="info_paned">
 						<property name="hexpand">True</property>
 						<property name="vexpand">True</property>
 						<property name="orientation">vertical</property>

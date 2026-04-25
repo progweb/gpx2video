@@ -82,8 +82,9 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 
 	grade_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	elevation_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
-	speed_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	acceleration_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
+	speed_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
+	verticalspeed_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 
 	// Binding
 	bind_content();
@@ -329,6 +330,41 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					}
 			));
 
+	// Acceleration smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("acceleration_method_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"acceleration_method_combobox\" object in telemetry_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_info("Telemetry smooth method changed to '%s' for acceleration data", 
+								iter->get_value(model_.m_name).c_str());
+
+						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataAcceleration, (TelemetrySettings::Smooth) value);
+					}
+			));
+
+	// Acceleration window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"acceleration_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_info("Telemetry window size value changed to '%d' for acceleration data", value);
+
+						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataAcceleration, value);
+					}
+			));
+
 	// Speed smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("speed_method_combobox");
 	if (!combobox)
@@ -364,10 +400,10 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					}
 			));
 
-	// Acceleration smooth method
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("acceleration_method_combobox");
+	// Vertical speed smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("verticalspeed_method_combobox");
 	if (!combobox)
-		throw std::runtime_error("No \"acceleration_method_combobox\" object in telemetry_frame.ui");
+		throw std::runtime_error("No \"verticalspeed_method_combobox\" object in telemetry_frame.ui");
 
 	combobox->pack_start(*renderer, true);
 	combobox->add_attribute(renderer->property_text(), model_.m_name);
@@ -378,26 +414,27 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for acceleration data", 
+						log_info("Telemetry smooth method changed to '%s' for vertical speed data", 
 								iter->get_value(model_.m_name).c_str());
 
-						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataAcceleration, (TelemetrySettings::Smooth) value);
+						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, (TelemetrySettings::Smooth) value);
 					}
 			));
 
-	// Acceleration window size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_winsize_spinbutton");
+	// Vertical speed window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_winsize_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"acceleration_winsize_spinbutton\" object in telemetry_frame.ui");
+		throw std::runtime_error("No \"verticalspeed_winsize_spinbutton\" object in telemetry_frame.ui");
 
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for acceleration data", value);
+						log_info("Telemetry window size value changed to '%d' for vertical speed data", value);
 
-						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataAcceleration, value);
+						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, value);
 					}
 			));
+
 }
 
 
@@ -501,23 +538,6 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataElevation));
 
-	// Speed smooth method
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("speed_method_combobox");
-	if (!combobox)
-		throw std::runtime_error("No \"speed_method_combobox\" object in telemetry_frame.ui");
-
-	combobox->set_model(speed_smooth_method_model_);
-
-	if (find_in_listtore(speed_smooth_method_model_, source_->settings().telemetrySmoothMethod(TelemetryData::DataSpeed), iter))
-		combobox->set_active(iter);
-
-	// Speed window size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_winsize_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"speed_winsize_spinbutton\" object in telemetry_frame.ui");
-
-	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
-
 	// Acceleration smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("acceleration_method_combobox");
 	if (!combobox)
@@ -536,6 +556,40 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
 	log_info("Telemetry settings loaded");
+
+	// Speed smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("speed_method_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"speed_method_combobox\" object in telemetry_frame.ui");
+
+	combobox->set_model(speed_smooth_method_model_);
+
+	if (find_in_listtore(speed_smooth_method_model_, source_->settings().telemetrySmoothMethod(TelemetryData::DataSpeed), iter))
+		combobox->set_active(iter);
+
+	// Speed window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"speed_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+	// Vertical speed smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("verticalspeed_method_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"verticalspeed_method_combobox\" object in telemetry_frame.ui");
+
+	combobox->set_model(verticalspeed_smooth_method_model_);
+
+	if (find_in_listtore(verticalspeed_smooth_method_model_, source_->settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed), iter))
+		combobox->set_active(iter);
+
+	// Vertical speed window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"verticalspeed_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 	// Unmask value changed
 	loading_ = false;
