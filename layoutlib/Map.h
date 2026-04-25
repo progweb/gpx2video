@@ -225,6 +225,27 @@ namespace layout
     ///
     Decimal  &pathBorder() { return _path_border; }
 
+    ///
+    /// Get path border color
+    ///
+    /// @return the path border color element
+    ///
+    String  &pathBorderColor() { return _path_border_color; }
+
+    ///
+    /// Get path primary color
+    ///
+    /// @return the path primary color element
+    ///
+    String  &pathPrimaryColor() { return _path_primary_color; }
+
+    ///
+    /// Get path secondary color
+    ///
+    /// @return the path secondary color element
+    ///
+    String  &pathSecondaryColor() { return _path_secondary_color; }
+
     // Methods
 
     private:
@@ -250,6 +271,9 @@ namespace layout
 	String       _bgcolor;
 	Decimal      _path_thick;
 	Decimal      _path_border;
+	String       _path_border_color;
+	String       _path_primary_color;
+	String       _path_secondary_color;
     
     // Disable copy constructors
     Map(const Map &);

@@ -36,6 +36,10 @@ TrackSettings::TrackSettings() {
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
+
+	setPathBorderColor(0.0, 0.0, 0.0, 1.0);
+	setPathPrimaryColor(0.9, 0.4, 0.2, 1.0);
+	setPathSecondaryColor(1.0, 1.0, 1.0, 1.0);
 }
 
 
@@ -96,6 +100,63 @@ const double& TrackSettings::pathBorder(void) const {
 
 void TrackSettings::setPathBorder(const double &border) {
 	path_border_ = border;
+}
+
+
+const float * TrackSettings::pathBorderColor(void) const {
+	return path_border_color_;
+}
+
+
+bool TrackSettings::setPathBorderColor(std::string color) {
+	return VideoWidget::Theme::hex2color(path_border_color_, color);
+}
+
+
+bool TrackSettings::setPathBorderColor(double r, double g, double b, double a) {
+	path_border_color_[0] = r;
+	path_border_color_[1] = g;
+	path_border_color_[2] = b;
+	path_border_color_[3] = a;
+	return true;
+}
+
+
+const float * TrackSettings::pathPrimaryColor(void) const {
+	return path_primary_color_;
+}
+
+
+bool TrackSettings::setPathPrimaryColor(std::string color) {
+	return VideoWidget::Theme::hex2color(path_primary_color_, color);
+}
+
+
+bool TrackSettings::setPathPrimaryColor(double r, double g, double b, double a) {
+	path_primary_color_[0] = r;
+	path_primary_color_[1] = g;
+	path_primary_color_[2] = b;
+	path_primary_color_[3] = a;
+	return true;
+}
+
+
+const float * TrackSettings::pathSecondaryColor(void) const {
+	return path_secondary_color_;
+}
+
+
+bool TrackSettings::setPathSecondaryColor(std::string color) {
+	return VideoWidget::Theme::hex2color(path_secondary_color_, color);
+}
+
+
+bool TrackSettings::setPathSecondaryColor(double r, double g, double b, double a) {
+	path_secondary_color_[0] = r;
+	path_secondary_color_[1] = g;
+	path_secondary_color_[2] = b;
+	path_secondary_color_[3] = a;
+	return true;
 }
 
 
@@ -361,12 +422,16 @@ void Track::init(bool zoomfit) {
 }
 
 
-void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider) {
+void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, const TelemetryData &data, double divider) {
 	int zoom;
 	int stride;
 	double path_thick;
 	double path_border;
-	unsigned char *data;
+	unsigned char *bytes;
+
+	const float *outline;
+	const float *primary;
+	const float *secondary;
 
 	int x = 0, y = 0;
 
@@ -380,6 +445,10 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	path_thick = settings().pathThick();
 	path_border = settings().pathBorder();
 
+	outline = settings().pathBorderColor();
+	primary = settings().pathPrimaryColor();
+	secondary = settings().pathSecondaryColor();
+
 	// Cairo buffer
 	OIIO::ImageBuf buf(outbuf.spec());
 
@@ -391,7 +460,8 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 
 	// Path border
 	if (path_border > 0) {
-		cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
+//		cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
+		cairo_set_source_rgba(cairo, outline[0], outline[1], outline[2], outline[3]); // BGR #0000000
 		cairo_set_line_width(cairo, path_border + path_thick); //4.4); //40.96);
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
@@ -411,12 +481,18 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	}
 
 	// Path color
-	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
+	result = source->retrieveFirst(wpt);
+
+	// 1°/ Draw each primary color WPT
+//	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
+	cairo_set_source_rgba(cairo, primary[0], primary[1], primary[2], primary[3]); // BGR #669df600
 	cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
-	// Draw each WPT
-	for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+	for (; result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		if ((data.type() != TelemetryData::TypeUnknown) && (wpt.timestamp() > data.timestamp()))
+			break;
+
 		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
 		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
@@ -426,18 +502,43 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 		cairo_line_to(cairo, x, y);
 	}
 
-	// Cairo draw
 	cairo_stroke(cairo);
 
-	data = cairo_image_surface_get_data(surface);
+	// 2°/ Draw each secondary color WPT
+//	cairo_set_source_rgb(cairo, 1.0, 1.0, 1.0); // BGR #ffffff
+	cairo_set_source_rgba(cairo, secondary[0], secondary[1], secondary[2], secondary[3]); // BGR #ffffff00
+	cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
+	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
+
+	for (; result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+
+		x *= divider;
+		y *= divider;
+
+		cairo_line_to(cairo, x, y);
+	}
+
+	cairo_stroke(cairo);
+
+	// Convert to image
+	bytes = cairo_image_surface_get_data(surface);
 	stride = cairo_image_surface_get_stride(surface);
 
 	// Cairo to OIIO
 	buf.set_pixels(OIIO::ROI(),
 		buf.spec().format,
-		data, 
+		bytes, 
 		OIIO::AutoStride,
 		stride);
+
+	// BGRA => RGBA
+	int channelorder[] = { 2, 1, 0, 3 };
+	float channelvalues[] = { };
+	std::string channelnames[] = { "B", "G", "R", "A" };
+
+	OIIO::ImageBufAlgo::channels(buf, buf, 4, channelorder, channelvalues, channelnames);
 
 	// Cairo over
 	OIIO::ImageBufAlgo::over(outbuf, buf, outbuf);
@@ -448,9 +549,9 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 }
 
 
-bool Track::load(void) {
-	if (trackbuf_)
-		return true;
+bool Track::load(const TelemetryData &data) {
+//	if (trackbuf_)
+//		return true;
 
 	int width = settings().width();
 	int height = settings().height();
@@ -463,13 +564,17 @@ bool Track::load(void) {
 
 	log_call();
 
+	if (trackbuf_ != NULL) {
+		delete trackbuf_;
+		trackbuf_ = NULL;
+	}
+
 	// Compute track size
 	width = (x2_ - x1_) * TILESIZE;
 	height = (y2_ - y1_) * TILESIZE;
 
 	if ((width == 0) || (height == 0))
 		return true;
-
 	// Create track buffer
 	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
@@ -482,7 +587,7 @@ bool Track::load(void) {
 		//gpx->setTimeOffset(app_.settings().offset());
 
 		// Draw path
-		path(*trackbuf_, source, divider_);
+		path(*trackbuf_, source, data, divider_);
 
 		// Compute begin
 		source->retrieveFirst(wpt);
@@ -525,8 +630,8 @@ OIIO::ImageBuf * Track::prepare(bool &is_update) {
 	this->drawBorder(bg_buf_);
 	this->drawBackground(bg_buf_);
 
-	if (this->load() == false)
-		log_warn("Track renderer failure");
+//	if (this->load() == false)
+//		log_warn("Track renderer failure");
 
 	is_update = true;
 
@@ -546,6 +651,9 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 
 	int zoom = settings().zoom();
 	int marker_size = settings().markerSize();
+
+	// Load track
+	this->load(data);
 
 	// Check track buffer
 	if (trackbuf_ == NULL) {
@@ -596,7 +704,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
-	// Image over
+	// Track image over
 	trackbuf_->specmod().x = x - offsetX;
 	trackbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));

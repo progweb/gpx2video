@@ -87,18 +87,18 @@ void ArcShape::xmlwrite(std::ostream &os) {
 
 	os << "<with-tick>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTick)) << "</with-tick>" << std::endl;
 	os << "<with-tick-label>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) << "</with-tick-label>" << std::endl;
-	os << "<tick-color>" << theme().color2hex(theme().tickColor()) << "</tick-color>" << std::endl;
-	os << "<tick-label-color>" << theme().color2hex(theme().tickLabelColor()) << "</tick-label-color>" << std::endl;
+	os << "<tick-color>" << VideoWidget::Theme::color2hex(theme().tickColor()) << "</tick-color>" << std::endl;
+	os << "<tick-label-color>" << VideoWidget::Theme::color2hex(theme().tickLabelColor()) << "</tick-label-color>" << std::endl;
 
 	os << "<with-gauge>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagGauge)) << "</with-gauge>" << std::endl;
-	os << "<gauge-color>" << theme().color2hex(theme().gaugeColor(0)) << "</gauge-color>" << std::endl;
+	os << "<gauge-color>" << VideoWidget::Theme::color2hex(theme().gaugeColor(0)) << "</gauge-color>" << std::endl;
 	os << "<gauge-border>" << theme().gaugeBorder() << "</gauge-border>" << std::endl;
-	os << "<gauge-border-color>" << theme().color2hex(theme().gaugeBorderColor()) << "</gauge-border-color>" << std::endl;
-	os << "<gauge-background-color>" << theme().color2hex(theme().gaugeBackgroundColor()) << "</gauge-background-color>" << std::endl;
+	os << "<gauge-border-color>" << VideoWidget::Theme::color2hex(theme().gaugeBorderColor()) << "</gauge-border-color>" << std::endl;
+	os << "<gauge-background-color>" << VideoWidget::Theme::color2hex(theme().gaugeBackgroundColor()) << "</gauge-background-color>" << std::endl;
 
 	os << "<with-needle>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagNeedle)) << "</with-needle>" << std::endl;
 	os << "<needle-type>" << VideoWidget::needletype2string(theme().needleType()) << "</needle-type>" << std::endl;
-	os << "<needle-primary-color>" << theme().color2hex(theme().needlePrimaryColor()) << "</needle-primary-color>" << std::endl;
-	os << "<needle-secondary-color>" << theme().color2hex(theme().needleSecondaryColor()) << "</needle-secondary-color>" << std::endl;
+	os << "<needle-primary-color>" << VideoWidget::Theme::color2hex(theme().needlePrimaryColor()) << "</needle-primary-color>" << std::endl;
+	os << "<needle-secondary-color>" << VideoWidget::Theme::color2hex(theme().needleSecondaryColor()) << "</needle-secondary-color>" << std::endl;
 }
 

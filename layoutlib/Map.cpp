@@ -54,7 +54,10 @@ namespace layout
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
 	_path_thick(this, "path-thick", Node::ELEMENT, false),
-	_path_border(this, "path-border", Node::ELEMENT, false)
+	_path_border(this, "path-border", Node::ELEMENT, false),
+	_path_border_color(this, "path-border-color", Node::ELEMENT, false),
+	_path_primary_color(this, "path-primary-color", Node::ELEMENT, false),
+	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);
@@ -79,6 +82,9 @@ namespace layout
     getInterfaces().push_back(&_bgcolor);
     getInterfaces().push_back(&_path_thick);
     getInterfaces().push_back(&_path_border);
+    getInterfaces().push_back(&_path_border_color);
+    getInterfaces().push_back(&_path_primary_color);
+    getInterfaces().push_back(&_path_secondary_color);
 
 	_display.setValue("true");
 
@@ -92,6 +98,9 @@ namespace layout
 
 	_path_thick.setValue("3.0");
 	_path_border.setValue("1.4");
+	_path_border_color.setValue("#000000ff");
+	_path_primary_color.setValue("#669df6ff");
+	_path_secondary_color.setValue("#ffffffff");
   }
 
   Map::~Map()

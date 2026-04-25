@@ -656,6 +656,8 @@ error:
 void Map::draw(void) {
 	int marker_size = settings().markerSize();
 
+	TelemetryData data;
+
 	std::string filename = "track.png";
 
 	log_call();
@@ -669,6 +671,9 @@ void Map::draw(void) {
 
 	// Load map
 	load();
+
+	// Load track
+	Track::load(data);
 
 	// Create output image buffer
 	OIIO::ImageBuf buf(mapbuf_->spec());
@@ -699,8 +704,8 @@ error:
 
 
 bool Map::load(void) {
-	if (Track::load() == false)
-		return false;
+//	if (Track::load() == false)
+//		return false;
 
 	if (mapbuf_)
 		return true;
@@ -774,7 +779,8 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int border = theme().border();
 
 	// Check map & track buffers
-	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
+//	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
+	if (mapbuf_ == NULL) {
 		is_update = false;
 		return NULL;
 	}
@@ -790,6 +796,9 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	y += border;
 	width -= 2 * border;
 	height -= 2 * border;
+
+	// Load track
+	Track::load(data);
 
 	// Center map on current position
 	if (data.timestamp() > ts_end_) {
@@ -835,9 +844,6 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	trackbuf_->specmod().x = x - offsetX;
 	trackbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-
-	// Draw track
-	// ...
 
 	// Draw picto
 	if (marker_size > 0) {
