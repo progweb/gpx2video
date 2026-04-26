@@ -569,6 +569,21 @@ void GPX2VideoApplicationWindow::update_headerbar(void) {
 /**
  *
  */
+void GPX2VideoApplicationWindow::toggle_pause(void) {
+	log_call();
+
+	video_area_->toggle_pause();
+
+	if (video_area_->is_playing())
+		play_button_->set_icon_name("media-playback-pause-symbolic");
+	else
+		play_button_->set_icon_name("media-playback-start-symbolic");
+}
+
+
+/**
+ *
+ */
 void GPX2VideoApplicationWindow::toggle_fullscreen(void) {
 	log_call();
 
@@ -919,12 +934,7 @@ void GPX2VideoApplicationWindow::on_widget_position_changed(void) {
 void GPX2VideoApplicationWindow::on_play_clicked(void) {
 	log_call();
 
-	video_area_->toggle_pause();
-
-	if (video_area_->is_playing())
-		play_button_->set_icon_name("media-playback-pause-symbolic");
-	else
-		play_button_->set_icon_name("media-playback-start-symbolic");
+	this->toggle_pause();
 }
 
 
@@ -1014,6 +1024,11 @@ bool GPX2VideoApplicationWindow::on_key_pressed(guint keyvalue, guint rawvalue, 
 	case GDK_KEY_s:
 		log_notice("Move to next frame (key 's')");
 		video_area_->step_to_next_frame();
+		break;
+
+	case GDK_KEY_space:
+		log_notice("Toggle play / pause (key 'space')");
+		this->toggle_pause();
 		break;
 
 	case GDK_KEY_Left:

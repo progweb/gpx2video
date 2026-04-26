@@ -454,7 +454,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		widget = PowerWidget::create(app_);
 	else if (s == "gforce")
 		widget = GForceWidget::create(app_);
-	else if (s == "verticalspeed")
+	else if ((s == "vspeed") || (s == "verticalspeed"))
 		widget = VerticalSpeedWidget::create(app_);
 	else if (s == "lap") {
 		LapWidget *lap = LapWidget::create(app_);
