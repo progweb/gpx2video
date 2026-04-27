@@ -60,7 +60,8 @@ public:
 	static int lon2pixel(int zoom, float lon);
 
 	// Draw track path
-	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, const TelemetryData &data, double divider=1.0);
+	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider=1.0);
+	void path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divider=1.0);
 
 	// Render track
 	OIIO::ImageBuf * prepare(bool &is_update);
@@ -75,7 +76,7 @@ protected:
 
 	bool preinit(void);
 	void init(bool zoomfit=true);
-	bool load(const TelemetryData &data);
+	bool load(void);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
 
@@ -125,7 +126,10 @@ protected:
 
 	struct event_base *evbase_;
 
-	OIIO::ImageBuf *trackbuf_;
+	OIIO::ImageBuf *trackbgbuf_;
+	OIIO::ImageBuf *trackfgbuf_;
+
+	TelemetryData last_data_;
 
 	double divider_;
 

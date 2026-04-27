@@ -656,8 +656,6 @@ error:
 void Map::draw(void) {
 	int marker_size = settings().markerSize();
 
-	TelemetryData data;
-
 	std::string filename = "track.png";
 
 	log_call();
@@ -672,16 +670,14 @@ void Map::draw(void) {
 	// Load map
 	load();
 
-	// Load track
-	Track::load(data);
-
 	// Create output image buffer
 	OIIO::ImageBuf buf(mapbuf_->spec());
 
 	// Draw map
 	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
+
 	// Draw track
-	OIIO::ImageBufAlgo::over(buf, *trackbuf_, buf);
+	OIIO::ImageBufAlgo::over(buf, *trackbgbuf_, buf);
 
 	// Draw markers
 	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", marker_size);
@@ -704,8 +700,8 @@ error:
 
 
 bool Map::load(void) {
-//	if (Track::load() == false)
-//		return false;
+	if (Track::load() == false)
+		return false;
 
 	if (mapbuf_)
 		return true;
@@ -779,8 +775,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int border = theme().border();
 
 	// Check map & track buffers
-//	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
-	if (mapbuf_ == NULL) {
+	if ((mapbuf_ == NULL) || (trackbgbuf_ == NULL) || (trackfgbuf_ == NULL)) {
 		is_update = false;
 		return NULL;
 	}
@@ -796,9 +791,6 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	y += border;
 	width -= 2 * border;
 	height -= 2 * border;
-
-	// Load track
-	Track::load(data);
 
 	// Center map on current position
 	if (data.timestamp() > ts_end_) {
@@ -829,10 +821,16 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	if (offsetY > lim_y2_)
 		offsetY = lim_y2_;
 
+	// Update path progress
+	trackfgbuf_->specmod().x = 0;
+	trackfgbuf_->specmod().y = 0;
+	path(*trackfgbuf_, data, divider_);
+
 	// Image buffer
 	if (fg_buf_ != NULL)
 		delete fg_buf_;
 
+	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
 	// Map image over
@@ -840,10 +838,15 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	mapbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
-	// Track image over
-	trackbuf_->specmod().x = x - offsetX;
-	trackbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+	// Background track image over
+	trackbgbuf_->specmod().x = x - offsetX;
+	trackbgbuf_->specmod().y = y - offsetY;
+	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+
+	// Foreground track image over
+	trackfgbuf_->specmod().x = x - offsetX;
+	trackfgbuf_->specmod().y = y - offsetY;
+	OIIO::ImageBufAlgo::over(*fg_buf_, *trackfgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
 	if (marker_size > 0) {

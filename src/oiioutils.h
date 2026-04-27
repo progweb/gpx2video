@@ -24,6 +24,8 @@ public:
 
 	static void frameToBuffer(const Frame* frame, OIIO::ImageBuf *buf);
 	static void bufferToFrame(OIIO::ImageBuf *buf, const Frame *frame);
+
+	static void bufferToFile(const OIIO::ImageBuf &buf, const std::string &filename);
 };
 
 #endif

@@ -1,3 +1,4 @@
+#include "log.h"
 #include "oiioutils.h"
 
 
@@ -71,5 +72,21 @@ void OIIOUtils::bufferToFrame(OIIO::ImageBuf *buf, const Frame *frame) {
 			frame->data(), 
 			OIIO::AutoStride, 
 			frame->linesizeBytes());
+}
+
+
+void OIIOUtils::bufferToFile(const OIIO::ImageBuf &buf, const std::string &filename) {
+	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
+
+	if (out->open("/tmp/track.png", buf.spec()) == false) {
+		log_error("Save OIIO buffer to file failure, can't open '%s' file", filename.c_str());
+		goto error;
+	}
+
+	out->write_image(buf.spec().format, buf.localpixels());
+	out->close();
+
+error:
+	return;
 }
 
