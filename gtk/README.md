@@ -21,18 +21,21 @@ User interface feature:
 To fix:
 - reload map tile as user changes the widget size
 - sound player (issue on some device)
+- build map from viewport (and not whole map)
 
 To do:
 - append new widget
 - translate user application
 - redraw each icon (in real svg)
-- path thick, border and color settings
 - marker size for 'track' & 'map' widget
 - arc & bar settings customization
 - add more widget shapes (ramp & curve)
 - add chart support
 - text editable for the 'text' widget
+- option to enable / disable sound
 - optimization & fix cpu usage
+- add progress bar, bufferization information...
+- add video timer
 
 ## Data installation
 
@@ -106,6 +109,8 @@ Shortkey:
   - Key 'down arrow': -60.0 seconds
   - Key 'up arrow': 60.0 seconds
   - Key 's': step one frame
+  - Key 'f': fullscreen mode
+  - Key 'space': play/pause
 
 
 ## Software thread architecture
