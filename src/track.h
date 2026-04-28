@@ -126,8 +126,7 @@ protected:
 
 	struct event_base *evbase_;
 
-	OIIO::ImageBuf *trackbgbuf_;
-	OIIO::ImageBuf *trackfgbuf_;
+	OIIO::ImageBuf *trackbuf_;
 
 	TelemetryData last_data_;
 
