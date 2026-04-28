@@ -194,8 +194,7 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
-	trackbgbuf_ = NULL;
-	trackfgbuf_ = NULL;
+	trackbuf_ = NULL;
 
 	divider_ = 1.0;
 
@@ -211,10 +210,8 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 Track::~Track() {
 	log_call();
 
-	if (trackfgbuf_ != NULL)
-		delete trackfgbuf_;
-	if (trackbgbuf_ != NULL)
-		delete trackbgbuf_;
+	if (trackbuf_ != NULL)
+		delete trackbuf_;
 	if (bg_buf_)
 		delete bg_buf_;
 	if (fg_buf_)
@@ -322,13 +319,9 @@ bool Track::preinit(void) {
 	track_settings_.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 
 	// Delete previous track buffer
-	if (trackbgbuf_ != NULL) {
-		delete trackbgbuf_;
-		trackbgbuf_ = NULL;
-	}
-	if (trackfgbuf_ != NULL) {
-		delete trackfgbuf_;
-		trackfgbuf_ = NULL;
+	if (trackbuf_ != NULL) {
+		delete trackbuf_;
+		trackbuf_ = NULL;
 	}
 
 	return true;
@@ -690,14 +683,16 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 	cairo_surface_destroy(surface);
 	cairo_destroy(cairo);
 
-skip:
 	// Save current position
 	last_data_ = data;
+
+skip:
+	return;
 }
 
 
 bool Track::load(void) {
-	if (trackbgbuf_ && trackfgbuf_)
+	if (trackbuf_)
 		return true;
 
 	int width = settings().width();
@@ -719,56 +714,50 @@ bool Track::load(void) {
 		return true;
 
 	// Create background track buffer
-	if (trackbgbuf_ == NULL) {
-		trackbgbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
+	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
-		TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
 
-		if (source != NULL) {
-//			// Telemetry data limits
-//			source->setFrom(app_.settings().from());
-//			source->setTo(app_.settings().to());
-			//gpx->setTimeOffset(app_.settings().offset());
+	if (source != NULL) {
+//		// Telemetry data limits
+//		source->setFrom(app_.settings().from());
+//		source->setTo(app_.settings().to());
+		//gpx->setTimeOffset(app_.settings().offset());
 
-			// Draw background path
-			path(*trackbgbuf_, source, divider_);
+		// Draw background path
+		path(*trackbuf_, source, divider_);
 
-			// Compute begin
-			source->retrieveFirst(wpt);
+		// Compute begin
+		source->retrieveFirst(wpt);
 
-			x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-			y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
-			x_start_ *= divider_;
-			y_start_ *= divider_;
-			ts_start_ = source->beginTimestamp();
+		x_start_ *= divider_;
+		y_start_ *= divider_;
+		ts_start_ = source->beginTimestamp();
 
-			// Compute end
-			source->retrieveLast(wpt);
+		// Compute end
+		source->retrieveLast(wpt);
 
-			x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-			y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
+		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
 
-			x_end_ *= divider_;
-			y_end_ *= divider_;
-			ts_end_ = source->endTimestamp();
-		}
-		else {
-			log_warn("Can't open '%s' telemetry data file", filename.c_str());
-		}
-
-		if (source != NULL)
-			delete source;
+		x_end_ *= divider_;
+		y_end_ *= divider_;
+		ts_end_ = source->endTimestamp();
+	}
+	else {
+		log_warn("Can't open '%s' telemetry data file", filename.c_str());
 	}
 
-	// Create foreground track buffer
-	if (trackfgbuf_ == NULL) {
-		trackfgbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
-	
-		last_data_ = TelemetryData();
-	}
+	if (source != NULL)
+		delete source;
 
-	return (trackbgbuf_ && trackfgbuf_);
+	// Init
+	last_data_ = TelemetryData();
+
+	return (trackbuf_ != NULL);
 }
 
 
@@ -805,7 +794,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int marker_size = settings().markerSize();
 
 	// Check track buffer
-	if ((trackbgbuf_ == NULL) || (trackfgbuf_ == NULL)) {
+	if (trackbuf_ == NULL) {
 		is_update = false;
 		return NULL;
 	}
@@ -847,7 +836,9 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	offsetY -= (height - h) / 2;
 
 	// Update path progress
-	path(*trackfgbuf_, data, divider_);
+	trackbuf_->specmod().x = 0;
+	trackbuf_->specmod().y = 0;
+	path(*trackbuf_, data, divider_);
 
 	// Image buffer
 	if (fg_buf_ != NULL)
@@ -856,15 +847,10 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
-	// Draw background track image over
-	trackbgbuf_->specmod().x = x - offsetX;
-	trackbgbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-
-	// Draw foreground track image over
-	trackfgbuf_->specmod().x = x - offsetX;
-	trackfgbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackfgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+	// Draw track image over
+	trackbuf_->specmod().x = x - offsetX;
+	trackbuf_->specmod().y = y - offsetY;
+	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
 	if (marker_size > 0) {
@@ -883,11 +869,8 @@ skip:
 
 
 void Track::clear(void) {
-	if (trackbgbuf_)
-		delete trackbgbuf_;
-
-	if (trackfgbuf_)
-		delete trackfgbuf_;
+	if (trackbuf_)
+		delete trackbuf_;
 
 	if (bg_buf_)
 		delete bg_buf_;
@@ -897,8 +880,7 @@ void Track::clear(void) {
 
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
-	trackbgbuf_ = NULL;
-	trackfgbuf_ = NULL;
+	trackbuf_ = NULL;
 }
 
 

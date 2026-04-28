@@ -677,7 +677,7 @@ void Map::draw(void) {
 	OIIO::ImageBufAlgo::over(buf, *mapbuf_, buf);
 
 	// Draw track
-	OIIO::ImageBufAlgo::over(buf, *trackbgbuf_, buf);
+	OIIO::ImageBufAlgo::over(buf, *trackbuf_, buf);
 
 	// Draw markers
 	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", marker_size);
@@ -734,6 +734,9 @@ bool Map::load(void) {
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
 
+	// Background track image over
+	OIIO::ImageBufAlgo::over(*mapbuf_, *trackbuf_, *mapbuf_);
+
 	return (mapbuf_ != NULL);
 }
 
@@ -748,7 +751,7 @@ OIIO::ImageBuf * Map::prepare(bool &is_update) {
 	this->drawBorder(bg_buf_);
 	this->drawBackground(bg_buf_);
 
-	// Load map
+	// Load map & track
 	if (this->load() == false)
 		log_warn("Map renderer failure");
 
@@ -775,7 +778,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int border = theme().border();
 
 	// Check map & track buffers
-	if ((mapbuf_ == NULL) || (trackbgbuf_ == NULL) || (trackfgbuf_ == NULL)) {
+	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
 		is_update = false;
 		return NULL;
 	}
@@ -822,9 +825,9 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		offsetY = lim_y2_;
 
 	// Update path progress
-	trackfgbuf_->specmod().x = 0;
-	trackfgbuf_->specmod().y = 0;
-	path(*trackfgbuf_, data, divider_);
+	mapbuf_->specmod().x = 0;
+	mapbuf_->specmod().y = 0;
+	path(*mapbuf_, data, divider_);
 
 	// Image buffer
 	if (fg_buf_ != NULL)
@@ -833,20 +836,10 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
-	// Map image over
+	// Map & track image over
 	mapbuf_->specmod().x = x - offsetX;
 	mapbuf_->specmod().y = y - offsetY;
 	OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-
-	// Background track image over
-	trackbgbuf_->specmod().x = x - offsetX;
-	trackbgbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-
-	// Foreground track image over
-	trackfgbuf_->specmod().x = x - offsetX;
-	trackfgbuf_->specmod().y = y - offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackfgbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
 	if (marker_size > 0) {
@@ -864,6 +857,8 @@ skip:
 
 
 void Map::clear(void) {
+	Track::clear();
+
 	if (bg_buf_)
 		delete bg_buf_;
 
