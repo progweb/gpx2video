@@ -43,6 +43,9 @@ void TelemetryData::reset(bool all) {
 		lon_ = 0.0;
 		ele_ = 0.0;
 
+		raw_lat_ = 0;
+		raw_lon_ = 0;
+
 		cadence_ = 0;
 		heartrate_ = 0;
 		temperature_ = 0;
@@ -134,6 +137,7 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 	: filename_(filename)
 	, quiet_(true)
 	, eof_(false)
+	, check_(false)
 	, offset_(0) 
 	, begin_(0)
 	, end_(0)
