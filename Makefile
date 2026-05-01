@@ -7,21 +7,25 @@ VIDEO_DIR?=$(PWD)
 
 # 11: bullseye
 config-debian-bullseye:
+	$(eval GTK=ON)
 	$(eval BASE_IMAGE=debian:bullseye)
 	$(eval BUILD_DIR=build-debian-bullseye)
 
 # 12: bookworm
 config-debian-bookworm:
+	$(eval GTK=ON)
 	$(eval BASE_IMAGE=debian:bookworm)
 	$(eval BUILD_DIR=build-debian-bookworm)
 
 # 22.04: jammy
 config-ubuntu-jammy: 
+	$(eval GTK=OFF)
 	$(eval BASE_IMAGE=ubuntu:22.04)
 	$(eval BUILD_DIR=build-ubuntu-jammy)
 
 # 24.04: noble
 config-ubuntu-noble:
+	$(eval GTK=ON)
 	$(eval BASE_IMAGE=ubuntu:24.04)
 	$(eval BUILD_DIR=build-ubuntu-noble)
 
@@ -60,11 +64,18 @@ run-ubuntu-jammy: config-ubuntu-jammy run-gpx2video
 run-ubuntu-noble: config-ubuntu-noble run-gpx2video
 
 
+# Dev
+dev-debian-bullseye: config-debian-bullseye dev-gpx2video
+dev-debian-bookworm: config-debian-bookworm dev-gpx2video
+dev-ubuntu-jammy: config-ubuntu-jammy dev-gpx2video
+dev-ubuntu-noble: config-ubuntu-noble dev-gpx2video
+
+
 build-docker:
 	-cp /etc/locale.gen docker
 	docker build --build-arg BASE_IMAGE=$(BASE_IMAGE) \
 		-t "gpx2video-$(BASE_IMAGE)" \
-		-f docker/Dockerfile .
+		-f docker/$(if $(patsubst ON,,$(GTK)),DockerfileWithoutGTK,DockerfileWithGTK) .
 	-rm docker/locale.gen
 
 
@@ -98,7 +109,7 @@ build-gpx2video:
 		--workdir=/app/build \
 		gpx2video-$(BASE_IMAGE) \
 		/bin/bash -c \
-		"cmake -DBUILD_GTK=ON .. \
+		"cmake -DBUILD_GTK=$(GTK) .. \
 		&& $(MAKE) -j"
 
 

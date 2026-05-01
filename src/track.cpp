@@ -594,6 +594,15 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 
 		cairo_stroke(cairo);
 	}
+	else if (!data.hasValue(TelemetryData::DataFix)) {
+		goto skip;
+	}
+	else if (!last_data_.hasValue(TelemetryData::DataFix)) {
+		// Save current position
+		last_data_ = data;
+
+		goto skip;
+	}
 	else {
 		int x1, y1;
 		int x2, y2;
