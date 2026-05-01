@@ -37,6 +37,8 @@ public:
 	void append(GPX2VideoWidget *widget);
 	void remove(GPX2VideoWidget *widget);
 
+	GPX2VideoWidget * get_at(const double &x, const double &y);
+
 	void seek(double pos);
 	void load(void);
 	void reset(void);

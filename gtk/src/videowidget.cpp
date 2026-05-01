@@ -133,6 +133,22 @@ VideoWidget * GPX2VideoWidget::widget(void) {
 }
 
 
+bool GPX2VideoWidget::is_over(const double &x, const double &y) {
+	log_call();
+
+	double width = glWidth() / 2.0;
+	double height = glHeight() / 2.0;
+
+	if ((x < (glX() - width)) || (x > (glX() + width)))
+		return false;
+
+	if ((y < (glY() - height)) || (y > (glY() + height)))
+		return false;
+
+	return true;
+}
+
+
 GPX2VideoWidget::type_signal_changed GPX2VideoWidget::signal_changed() {
 	return signal_changed_;
 }

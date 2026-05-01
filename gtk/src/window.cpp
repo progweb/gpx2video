@@ -201,6 +201,12 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	motioncontroller->signal_enter().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_enter), false);
 	motioncontroller->signal_leave().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_leave), false);
 
+	// Gesture listener
+	auto gestureclick = Gtk::GestureClick::create();
+	video_area_->add_controller(gestureclick);
+
+	gestureclick->signal_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_pressed), false);
+
 //	// Register application handle
 //	video_area_->set_application(this);
 
@@ -1075,6 +1081,22 @@ void GPX2VideoApplicationWindow::on_video_area_mouse_leave(void) {
 	log_call();
 
 	unset_focus();
+}
+
+
+void GPX2VideoApplicationWindow::on_video_area_mouse_pressed(int n_press, double x, double y) {
+	log_call();
+
+	GPX2VideoWidget *widget;
+
+	(void) n_press;
+
+	// Get widget
+	widget = video_area_->get_widget_at(x, y);
+
+	// Select / unselect the widget
+	widget_stackpage_->set_widget_selected(widget);
+//	widget_frame_->set_widget_selected(widget);
 }
 
 

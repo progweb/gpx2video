@@ -111,6 +111,7 @@ protected:
 
 	void on_video_area_mouse_enter(double x, double y);
 	void on_video_area_mouse_leave(void);
+	void on_video_area_mouse_pressed(int n_press, double x, double y);
 
 	void on_stack_changed(void);
 

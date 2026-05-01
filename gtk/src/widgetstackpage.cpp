@@ -122,6 +122,38 @@ void GPX2VideoWidgetStackPage::purge(void) {
 }
 
 
+void GPX2VideoWidgetStackPage::set_widget_selected(GPX2VideoWidget *widget) {
+	log_call();
+
+	size_t index = 0;
+
+	// Widgets list
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	if (!list)
+		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+
+	if (widget) {
+		// Search widget item index
+		for (GPX2VideoWidget *item : renderer_->widgets()) {
+			if (item == widget)
+				break;
+
+			index++;
+		}
+
+		// Select item if found
+		if (index < renderer_->widgets().size()) {
+			auto row = list->get_row_at_index(index);
+			list->select_row(*row);
+		}
+		else
+			list->unselect_row();
+	}
+	else
+		list->unselect_row();
+}
+
+
 /**
  * Select a widget from the list
  *

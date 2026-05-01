@@ -41,6 +41,8 @@ public:
 	void remove(GPX2VideoWidget *widget);
 	void purge(void);
 
+	void set_widget_selected(GPX2VideoWidget *widget);
+
 	void on_widget_append_clicked(void);
 
 //	Glib::SignalProxy<void()> signal_widget_selected() {

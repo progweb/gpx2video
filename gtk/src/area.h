@@ -64,6 +64,8 @@ public:
 	void video_render(void);
 	void widgets_render(void);
 
+	GPX2VideoWidget * get_widget_at(const double &x, const double &y);
+
 //	void widget_append(VideoWidget *widget);
 
 protected:
@@ -97,6 +99,8 @@ protected:
 	void load_video_texture(FramePtr frame);
 	void load_widgets_texture(FramePtr frame);
 	void resize_viewport(gint width, gint height);
+
+	void get_gl_position(const double &x, const double &y, double &glX, double &glY);
 
 	void check_gl_error(void);
 

@@ -61,6 +61,8 @@ public:
 		signal_changed_.emit(schedule);
 	}
 
+	bool is_over(const double &x, const double &y);
+
 	// signal accessor:
 	using type_signal_changed = sigc::signal<void(bool)>;
 	type_signal_changed signal_changed();

@@ -336,6 +336,18 @@ void GPX2VideoArea::widgets_render(void) {
 }
 
 
+GPX2VideoWidget * GPX2VideoArea::get_widget_at(const double &x, const double &y) {
+	log_call();
+
+	double glX, glY;
+
+	// Convert x and y in the layout coordinates
+	get_gl_position(x, y, glX, glY);
+
+	return renderer_->get_at(glX, glY);
+}
+
+
 //void GPX2VideoArea::widget_append(VideoWidget *widget) {
 //	log_call();
 //
@@ -792,7 +804,7 @@ void GPX2VideoArea::resize_viewport(gint width, gint height) {
 	make_current();
 
 	// Compute ratio
-	if ((stream_.width() > 0) && (stream_.height())) {
+	if ((stream_.width() > 0) && (stream_.height() > 0)) {
 		desiredAspectRatio = (double) stream_.width() / (double) stream_.height();
 	}
 
@@ -823,6 +835,18 @@ void GPX2VideoArea::resize_viewport(gint width, gint height) {
 
 	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY,
 			widthOfViewport, heightOfViewport);
+}
+
+
+void GPX2VideoArea::get_gl_position(const double &x, const double &y, double &glX, double &glY) {
+	log_call();
+
+	GLint vp[4];
+	
+	glGetIntegerv(GL_VIEWPORT, vp);
+
+	glX = 2.0 * ((x - vp[0]) - (vp[2] / 2.0)) / vp[2];
+	glY = -2.0 * ((y - vp[1]) - (vp[3] / 2.0)) / vp[3];
 }
 
 

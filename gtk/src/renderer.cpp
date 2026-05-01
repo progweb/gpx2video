@@ -237,6 +237,20 @@ void GPX2VideoRenderer::remove(GPX2VideoWidget *widget) {
 }
 
 
+GPX2VideoWidget * GPX2VideoRenderer::get_at(const double &x, const double &y) {
+	log_call();
+
+	for (GPX2VideoWidget *item : widgets_) {
+		if (!item->is_over(x, y))
+			continue;
+
+		return item;
+	}
+
+	return NULL;
+}
+
+
 void GPX2VideoRenderer::seek(double pos) {
 	log_call();
 
