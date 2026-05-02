@@ -26,6 +26,7 @@ public:
 	void set_telemetry(TelemetrySource *source);
 	void set_layout_size(int width, int heigth);
 
+	void compute_telemetry_rate(void);
 	void update_telemetry_settings(void);
 
 	const uint64_t& time(void) const;
@@ -80,6 +81,7 @@ private:
 //public:
 	bool is_ready_;
 
+	uint64_t rate_;
 	uint64_t timestamp_;
 	uint64_t player_timestamp_;
 
@@ -93,7 +95,6 @@ private:
 
 	bool seek_req_;
 	double seek_pos_;
-
 };
 
 #endif

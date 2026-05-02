@@ -16,6 +16,8 @@ GPX2VideoRenderer::GPX2VideoRenderer(GPXApplication &app,
 
 	is_ready_ = false;
 
+	rate_ = 1;
+
 	seek_pos_ = 0.0;
 	seek_req_ = false;
 
@@ -103,6 +105,8 @@ void GPX2VideoRenderer::setMediaContainer(MediaContainer *container) {
 	if (init(container) == false)
 		return;
 
+	compute_telemetry_rate();
+
 //	// TOREMOVE !!!
 //	container_->setTimeOffset(-139000);
 }
@@ -139,6 +143,9 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	// Save telemetry source
 	source_ = source;
 
+	// Update settings
+	update_telemetry_settings();
+
 	// Reset telemetry data
 	data_ = TelemetryData();
 
@@ -150,10 +157,36 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 }
 
 
+void GPX2VideoRenderer::compute_telemetry_rate(void) {
+	log_call();
+
+	int video_framerate;
+
+	if ((container_ == NULL) || (source_ == NULL))
+		return;
+	
+	// Retrieve video streams
+	VideoStreamPtr video_stream = container_->getVideoStream();
+
+	// Video framerate
+	video_framerate = round(1000.0 * av_q2d(av_inv_q(video_stream->frameRate())));
+
+	// Telemetry rate can be less video framerate
+	rate_ = std::max(video_framerate, telemetrySettings().telemetryRate());
+
+	if (rate_ > (uint64_t) telemetrySettings().telemetryRate())
+		log_info("Telemetry rate set to match video framerate %ld ms", rate_);
+	else
+		log_info("Telemetry rate set to %ld ms", rate_);
+}
+
+
 void GPX2VideoRenderer::update_telemetry_settings(void) {
 	log_call();
 
 	telemetrySettings().copy(source_->settings());
+
+	compute_telemetry_rate();
 }
 
 
@@ -177,13 +210,11 @@ const uint64_t& GPX2VideoRenderer::time(void) const {
 void GPX2VideoRenderer::set_timestamp(uint64_t timestamp) {
 	log_call();
 
-	int rate = telemetrySettings().telemetryRate();
-
 	// Save current timestamp
 	timestamp_ = timestamp;
 
 	// Set timestamp for each widget
-	timestamp -= (timestamp % rate);
+	timestamp -= (timestamp % rate_);
 
 	for (GPX2VideoWidget *item : widgets_)
 		item->set_timestamp(timestamp);
@@ -309,8 +340,6 @@ void GPX2VideoRenderer::draw(void) {
 
 	uint64_t timestamp;
 
-	int rate = telemetrySettings().telemetryRate();
-
 	if (widgets_.empty())
 		return;
 
@@ -327,7 +356,7 @@ void GPX2VideoRenderer::draw(void) {
 
 				if (!item->ready() || (data.type() == TelemetryData::TypeUnknown)) {
 					timestamp = timestamp_;
-					timestamp -= (timestamp_ % rate);
+					timestamp -= (timestamp_ % rate_);
 
 					// Retrieve first point
 					source_->retrieveFrom(data);
@@ -337,15 +366,14 @@ void GPX2VideoRenderer::draw(void) {
 				}
 				else {
 					// Continue from the previous point 
-//					timestamp = data.datetime() + rate;
-					timestamp = data.timestamp() + rate;
+					timestamp = data.timestamp() + rate_;
 				}
 
 				type = source_->retrieveNext(data, timestamp);
 
 				// Optimize timestamp
 				timestamp = data.timestamp();
-				timestamp -= (timestamp_ % rate);
+				timestamp -= (timestamp_ % rate_);
 
 				// Save timestamp requested
 				data.setDatetime(timestamp);
@@ -439,15 +467,13 @@ void GPX2VideoRenderer::load_texture(void) {
 
 	uint64_t timestamp;
 
-	uint64_t rate = telemetrySettings().telemetryRate();
-
 	for (GPX2VideoWidget *item : widgets_) {
 		timestamp = item->load_texture();
 
-		if ((timestamp > 0) && (timestamp_ > (timestamp + rate)))
+		if ((timestamp > 0) && (timestamp_ > (timestamp + rate_)))
 			log_warn("Widget '%s' texture delayed: %ld ms (rate: %ld ms)!", 
 					item->name().c_str(),
-					timestamp_ - timestamp, rate);
+					timestamp_ - timestamp, rate_);
 	}
 }
 

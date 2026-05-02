@@ -649,12 +649,8 @@ bool Telemetry::run(void) {
 	};
 
 	// Next point
-	if (settings().telemetryMethod() != TelemetrySettings::MethodNone) {
-		if (rate != 0)
-			timecode_ms_ += rate;
-		else
-			timecode_ms_ += 1000;
-	}
+	if (rate != 0)
+		timecode_ms_ += rate;
 	else
 		timecode_ms_ = -1;
 

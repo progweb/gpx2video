@@ -1950,8 +1950,6 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 	case TelemetrySettings::MethodNone:
 	default:
-//		data.type_ = TelemetryData::TypeUnchanged;
-
 		data.ts_ = timestamp;
 		break;
 	}
@@ -2095,6 +2093,9 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 
 //	printf(" <ts %lu> ", timestamp);
 
+	// By default no change
+	data.type_ = TelemetryData::TypeUnchanged;
+
 	// Read next points if need
 	do {
 		if (timestamp == (uint64_t) -1) {
@@ -2104,7 +2105,6 @@ enum TelemetrySource::Data TelemetrySource::retrieveNext(TelemetryData &data, ui
 		else {
 			if (timestamp <= data.timestamp()) {
 //				printf(" <unchanged> ");
-				data.type_ = TelemetryData::TypeUnchanged;
 			}
 			else if (timestamp < nextPoint.timestamp()) {
 //				printf(" <predict %lu %lu> ", timestamp, nextPoint.timestamp());

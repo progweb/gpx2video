@@ -603,18 +603,9 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 void GPX2VideoTelemetryFrame::update_boundaries(void) {
 	log_call();
 
-	Gtk::SpinButton *spinbutton;
-
 	// No telemetry source
 	if (source_ == NULL)
 		return;
-
-	// Rate
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("rate_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"rate_spinbutton\" object in telemetry_frame.ui");
-
-	spinbutton->set_sensitive((source_->settings().telemetryMethod() != TelemetrySettings::MethodNone));
 }
 
 
