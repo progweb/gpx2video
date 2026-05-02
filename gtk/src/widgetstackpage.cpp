@@ -1,3 +1,5 @@
+#include <gtkmm/adjustment.h>
+
 #include "log.h"
 #include "widgetstackpage.h"
 
@@ -143,8 +145,19 @@ void GPX2VideoWidgetStackPage::set_widget_selected(GPX2VideoWidget *widget) {
 
 		// Select item if found
 		if (index < renderer_->widgets().size()) {
+			auto adjustment = this->get_vadjustment();
+
 			auto row = list->get_row_at_index(index);
 			list->select_row(*row);
+
+			// Scroll to row
+			if (adjustment) {
+				int y = row->get_allocation().get_y();
+				int height = row->get_allocation().get_height();
+
+				double value = y - (adjustment->get_page_size() - height) / 2.0;
+				adjustment->set_value(std::max(0.0, value));
+			}
 		}
 		else
 			list->unselect_row();
