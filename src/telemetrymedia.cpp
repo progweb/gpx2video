@@ -1950,7 +1950,7 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 	case TelemetrySettings::MethodNone:
 	default:
-		data.type_ = TelemetryData::TypeUnchanged;
+//		data.type_ = TelemetryData::TypeUnchanged;
 
 		data.ts_ = timestamp;
 		break;
