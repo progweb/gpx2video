@@ -91,6 +91,7 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 
 	// Update ui
 	update_content();
+	update_boundaries();
 }
 
 
@@ -241,6 +242,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetryMethod((TelemetrySettings::Method) value, rate);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -593,6 +597,24 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	// Unmask value changed
 	loading_ = false;
+}
+
+
+void GPX2VideoTelemetryFrame::update_boundaries(void) {
+	log_call();
+
+	Gtk::SpinButton *spinbutton;
+
+	// No telemetry source
+	if (source_ == NULL)
+		return;
+
+	// Rate
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("rate_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"rate_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_sensitive((source_->settings().telemetryMethod() != TelemetrySettings::MethodNone));
 }
 
 

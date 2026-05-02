@@ -347,7 +347,6 @@ void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Map *) widget_->widget())->settings().divider());
 	spinbutton->set_sensitive(((Map *) widget_->widget())->settings().zoomfit() == false);
 }
 

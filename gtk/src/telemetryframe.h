@@ -63,6 +63,7 @@ protected:
 	void bind_content(void);
 
 	void update_content(void);
+	void update_boundaries(void);
 
 	void on_telemetry_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
 	void on_telemetry_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
