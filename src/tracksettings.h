@@ -17,6 +17,12 @@ public:
 	const int& zoom(void) const;
 	void setZoom(const int &zoom);
 
+	const bool& zoomfit(void) const;
+	void setZoomfit(const bool &enable);
+
+	const double& divider(void) const;
+	void setDivider(const double &divier);
+
 	const int& markerSize(void) const;
 	void setMarkerSize(const int &size);
 
@@ -43,6 +49,9 @@ public:
 
 protected:
 	int zoom_;
+	bool zoomfit_;
+
+	double divider_;
 
 	int marker_size_;
 

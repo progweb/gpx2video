@@ -240,6 +240,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setSize(width, height);
 	mapSettings.setSource((MapSettings::Source) mapsource);
 	mapSettings.setZoom(m->zoom());
+	mapSettings.setZoomfit(m->zoomfit());
 	mapSettings.setDivider(m->factor());
 	mapSettings.setMarkerSize(marker_size);
 //	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
@@ -343,6 +344,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
 //	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+	trackSettings.setZoomfit(t->zoomfit());
+	trackSettings.setDivider(t->factor());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 	trackSettings.setPathBorder((double) t->pathBorder());

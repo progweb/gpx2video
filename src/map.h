@@ -101,7 +101,7 @@ protected:
 		return evcurl_;
 	}
 
-	void init(bool zoomfit=false);
+	void init(void);
 	void limits(void);
 	bool load(void);
 
@@ -135,7 +135,6 @@ protected:
 
 		os << "<source>" << settings().source() << "</source>" << std::endl;
 		os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
-		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
 	}
 
 private:

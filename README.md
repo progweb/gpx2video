@@ -621,6 +621,7 @@ Map settings:
 <map x="250" y="450" width="600" height="120" position="left" display="true">
 	<source>1</source>
 	<zoom>11</zoom>
+	<zoomfit>false</zoomfit>
 	<factor>1.2</factor>
 	<marker>60</marker>
 	<border>5</border>
@@ -638,6 +639,8 @@ Map settings:
 **path-thick** path thick.
 **path-border** border size of path.
 
+**zoomfit** computes **factor** value to fit map in the widget area. In this case, **factor** value is ignored.
+
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. 
 At last, you can define several map widgets.
 
@@ -653,6 +656,8 @@ Track settings:
 ```xml
 <track x="250" y="450" width="600" height="120" position="left" display="true">
 	<marker>60</marker>
+	<zoomfit>true</zoomfit>
+	<factor>1.2</factor>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -660,6 +665,8 @@ Track settings:
 	<path-border>1.4</path-border>
 </widget>		
 ```
+
+**zoomfit** computes **factor** value to fit track in the widget area. In this case, **factor** value is ignored.
 
 *Track widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 

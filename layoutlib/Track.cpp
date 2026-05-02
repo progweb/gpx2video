@@ -47,6 +47,8 @@ namespace layout
     _margin_right(this, "margin-right", Node::ELEMENT, false),
     _margin_top(this, "margin-top", Node::ELEMENT, false),
     _margin_bottom(this, "margin-bottom", Node::ELEMENT, false),
+    _zoomfit(this, "zoomfit", Node::ELEMENT, false),
+    _factor(this, "factor", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
@@ -71,6 +73,8 @@ namespace layout
     getInterfaces().push_back(&_margin_right);
     getInterfaces().push_back(&_margin_top);
     getInterfaces().push_back(&_margin_bottom);
+    getInterfaces().push_back(&_zoomfit);
+    getInterfaces().push_back(&_factor);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
@@ -86,6 +90,9 @@ namespace layout
 	_margin_right.setValue("-1");
 	_margin_top.setValue("-1");
 	_margin_bottom.setValue("-1");
+
+	_zoomfit.setValue("true");
+	_factor.setValue("1.0");
 
 	_path_thick.setValue("3.0");
 	_path_border.setValue("1.4");

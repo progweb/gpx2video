@@ -495,7 +495,7 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 //	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 2000);
 
 	// Load telemetry data
-	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, false); //true);
+	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
 
 	// Update actions
 	use_gpx_data_action_->set_enabled(true);

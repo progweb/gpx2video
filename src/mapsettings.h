@@ -38,9 +38,6 @@ public:
 	const Source& source(void) const;
 	void setSource(const Source &source);
 
-	const double& divider(void) const;
-	void setDivider(const double &divier);
-
 	static const std::string getFriendlyName(const Source &source);
 	static const std::string getCopyright(const Source &source);
 	static int getMinZoom(const Source &source);
@@ -48,8 +45,6 @@ public:
 	static const std::string getRepoURI(const Source &source);
 
 private:
-	double divider_;
-
 	enum Source source_;
 };
 

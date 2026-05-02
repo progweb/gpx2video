@@ -52,8 +52,8 @@ void GPXApplication::Task::schedule(void) {
 
 	if (is_running_)
 		app_.perform(ActionPerform);
-	else
-		log_warn("Task isn't running!");
+//	else
+//		log_warn("Task '%s' isn't running!", name().c_str());
 }
 
 
@@ -63,7 +63,7 @@ void GPXApplication::Task::complete(void) {
 	if (is_running_)
 		app_.perform(ActionStop);
 	else
-		log_warn("Task isn't running!");
+		log_warn("Task '%s' isn't running!", name().c_str());
 }
 
 void GPXApplication::Task::finish(void) {
@@ -72,7 +72,7 @@ void GPXApplication::Task::finish(void) {
 	if (is_running_)
 		app_.perform(Task::ActionExit);
 	else
-		log_warn("Task isn't running!");
+		log_warn("Task '%s' isn't running!", name().c_str());
 }
 
 void GPXApplication::Task::reset(void) {

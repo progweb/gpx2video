@@ -170,6 +170,20 @@ namespace layout
     Decimal  &marginBottom() { return _margin_bottom; }
 
     ///
+    /// Get zoomfit
+    ///
+    /// @return the zoom element
+    ///
+    Boolean  &zoomfit() { return _zoomfit; }
+
+	///
+	/// Get factor
+	/// 
+	/// @return the factor elememnt
+	///
+	Decimal &factor() { return _factor; }
+
+    ///
     /// Get border
     ///
     /// @return the border attribute
@@ -242,6 +256,8 @@ namespace layout
 	Decimal      _margin_right;
 	Decimal      _margin_top;
 	Decimal      _margin_bottom;
+	Boolean      _zoomfit;
+	Decimal      _factor;
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;

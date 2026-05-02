@@ -80,6 +80,10 @@ public:
 			return name_;
 		}
 
+		const bool& is_running(void) const {
+			return is_running_;
+		}
+
 		virtual bool start(void);
 		virtual bool run(void) = 0;
 		virtual bool stop(void);

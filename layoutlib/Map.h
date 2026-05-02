@@ -170,6 +170,13 @@ namespace layout
     Decimal  &marginBottom() { return _margin_bottom; }
 
     ///
+    /// Get zoomfit
+    ///
+    /// @return the zoom element
+    ///
+    Boolean  &zoomfit() { return _zoomfit; }
+
+    ///
     /// Get zoom
     ///
     /// @return the zoom element
@@ -263,6 +270,7 @@ namespace layout
 	Decimal      _margin_right;
 	Decimal      _margin_top;
 	Decimal      _margin_bottom;
+	Boolean      _zoomfit;
 	Unsigned     _zoom;
 	Decimal      _factor;
 	Unsigned     _marker;

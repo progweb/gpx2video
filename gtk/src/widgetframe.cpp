@@ -14,6 +14,7 @@
 #include "shape/bar.h"
 #include "shape/text.h"
 #include "widgets/map.h"
+#include "widgets/track.h"
 #include "widgetframe.h"
 
 
@@ -371,6 +372,10 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 		switch (widget_selected_->widget()->type()) {
 		case VideoWidget::WidgetMap:
 			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_);
+			break;
+
+		case VideoWidget::WidgetTrack:
+			widget_child_box_ = GPX2VideoTrackWidgetSettingsBox::create(widget_selected_);
 			break;
 
 		default:

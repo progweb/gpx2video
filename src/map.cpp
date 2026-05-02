@@ -47,7 +47,10 @@
 
 
 MapSettings::MapSettings() {
+	zoomfit_ = false;
+
 	divider_ = 2.0;
+
 	source_ = MapSettings::SourceNull;
 }
 
@@ -63,16 +66,6 @@ const MapSettings::Source& MapSettings::source(void) const {
 
 void MapSettings::setSource(const MapSettings::Source &source) {
 	source_ = source;
-}
-
-
-const double& MapSettings::divider(void) const {
-	return divider_;
-}
-
-
-void MapSettings::setDivider(const double &divider) {
-	divider_ = divider;
 }
 
 
@@ -427,7 +420,7 @@ std::string Map::buildFilename(int zoom, int x, int y) {
 }
 
 
-void Map::init(bool zoomfit) {
+void Map::init(void) {
 	int zoom;
 
 	std::string uri;
@@ -443,7 +436,10 @@ void Map::init(bool zoomfit) {
 	Track::setSettings(settings());
 
 	// Track compute
-	Track::init(zoomfit);
+	Track::init();
+
+	// Track can change divider value as zoomfit is enabled
+	divider_ = Track::divider_;
 
 	// Drop old tiles
 	while (!tiles_.empty()) {
@@ -537,7 +533,9 @@ void Map::download(void) {
 		goto done;
 	}
 
-	log_notice("Download map from %s...", MapSettings::getFriendlyName(settings().source()).c_str());
+	log_notice("Download map from %s (zoom: %d)...", 
+			MapSettings::getFriendlyName(settings().source()).c_str(), 
+			settings().zoom());
 
 	nbr_downloads_ = 1;
 

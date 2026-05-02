@@ -75,7 +75,7 @@ protected:
 	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase);
 
 	bool preinit(void);
-	void init(bool zoomfit=true);
+	void init(void);
 	bool load(void);
 
 	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
@@ -112,6 +112,9 @@ protected:
 		os << "<background-color>" << VideoWidget::Theme::color2hex(theme().backgroundColor()) << "</background-color>" << std::endl;
 
 		os << "<marker>" << settings().markerSize() << "</marker>" << std::endl;
+
+		os << "<zoomfit>" << VideoWidget::bool2string(settings().zoomfit()) << "</zoomfit>" << std::endl;
+		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
 
 		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
 		os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;

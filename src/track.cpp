@@ -31,7 +31,12 @@
 TrackSettings::TrackSettings() {
 	width_ = 320;
 	height_ = 240;
+
 	zoom_ = 12;
+	zoomfit_ = true;
+
+	divider_ = 1.0;
+
 	marker_size_ = 60;
 
 	path_thick_ = 3.0;
@@ -70,6 +75,26 @@ const int& TrackSettings::zoom(void) const {
 
 void TrackSettings::setZoom(const int &zoom) {
 	zoom_ = zoom;
+}
+
+
+const bool& TrackSettings::zoomfit(void) const {
+	return zoomfit_;
+}
+
+
+void TrackSettings::setZoomfit(const bool &zoomfit) {
+	zoomfit_ = zoomfit;
+}
+
+
+const double& TrackSettings::divider(void) const {
+	return divider_;
+}
+
+
+void TrackSettings::setDivider(const double &divider) {
+	divider_ = divider;
 }
 
 
@@ -328,8 +353,10 @@ bool Track::preinit(void) {
 }
 
 
-void Track::init(bool zoomfit) {
+void Track::init(void) {
 	int zoom;
+	bool zoomfit;
+
 	int padding;
 
 	double lat1, lon1;
@@ -346,8 +373,11 @@ void Track::init(bool zoomfit) {
 		return;
 	}
 
-	// Compute track area
 	zoom = settings().zoom();
+	zoomfit = settings().zoomfit();
+	divider_ = settings().divider();
+
+	// Compute track area
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
 
 	// Tiles:
@@ -836,13 +866,19 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	h = (py2_ - py1_) * divider_; // floorf((float) Track::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
 
 	// Center track
-	offsetX = px1_ - (x1_ * TILESIZE);
-	offsetX *= divider_;
-	offsetX -= (width - w) / 2;
+	if (settings().zoomfit()) {
+		offsetX = px1_ - (x1_ * TILESIZE);
+		offsetX *= divider_;
+		offsetX -= (width - w) / 2;
 
-	offsetY = py1_ - (y1_ * TILESIZE);
-	offsetY *= divider_;
-	offsetY -= (height - h) / 2;
+		offsetY = py1_ - (y1_ * TILESIZE);
+		offsetY *= divider_;
+		offsetY -= (height - h) / 2;
+	}
+	else {
+		offsetX = posX - (width / 2);
+		offsetY = posY - (height / 2);
+	}
 
 	// Update path progress
 	trackbuf_->specmod().x = 0;
