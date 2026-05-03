@@ -1094,9 +1094,12 @@ void GPX2VideoApplicationWindow::on_video_area_mouse_pressed(int n_press, double
 	// Get widget
 	widget = video_area_->get_widget_at(x, y);
 
+	// Make widget stackpage visible
+	if (widget != NULL)
+		info_stack_->set_visible_child(*widget_stackpage_);
+
 	// Select / unselect the widget
 	widget_stackpage_->set_widget_selected(widget);
-//	widget_frame_->set_widget_selected(widget);
 }
 
 
