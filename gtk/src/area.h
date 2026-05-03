@@ -121,15 +121,11 @@ private:
 	sigc::connection timer_;
 
 	GPX2VideoStream stream_;
+	GPX2VideoRenderer *renderer_;
 
 	FramePtr frame;
 
 	double frame_timer_;
-
-
-
-
-	GPX2VideoRenderer *renderer_;
 };
 
 #endif

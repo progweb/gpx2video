@@ -833,6 +833,7 @@ void GPX2VideoArea::resize_viewport(gint width, gint height) {
 		lowerLeftCornerOfViewportY = static_cast<int>((height - heightOfViewport) / 2.0f);
 	}
 
+	// Apply viewport
 	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY,
 			widthOfViewport, heightOfViewport);
 }
@@ -842,11 +843,13 @@ void GPX2VideoArea::get_gl_position(const double &x, const double &y, double &gl
 	log_call();
 
 	GLint vp[4];
-	
+
+	make_current();
+
 	glGetIntegerv(GL_VIEWPORT, vp);
 
-	glX = 2.0 * ((x - vp[0]) - (vp[2] / 2.0)) / vp[2];
-	glY = -2.0 * ((y - vp[1]) - (vp[3] / 2.0)) / vp[3];
+	glX = 2.0 * ((x - vp[0]) / vp[2]) - 1.0;
+	glY = -2.0 * ((y - vp[1]) / vp[3]) + 1.0;
 }
 
 
