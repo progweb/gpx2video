@@ -626,6 +626,30 @@ void GPX2VideoWidget::unload_texture(void) {
 }
 
 
+void GPX2VideoWidget::move(double dx, double dy) {
+	log_call();
+
+	int x, y;
+
+	if (widget_->position() != VideoWidget::PositionNone)
+		return;
+
+	dx = dx / 2.0;
+	dy = dy / 2.0;
+
+	x = widget_->x() + (dx * layout_width_);
+	y = widget_->y() - (dy * layout_height_);
+
+	x = std::max(0, x);
+	x = std::min(x, layout_width_ - widget_->theme().width());
+
+	y = std::max(0, y);
+	y = std::min(y, layout_height_ - widget_->theme().height());
+
+	widget_->setPosition(x, y);
+}
+
+
 double GPX2VideoWidget::glX(void) const {
 	log_call();
 

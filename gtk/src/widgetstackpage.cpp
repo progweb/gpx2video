@@ -1,27 +1,29 @@
 #include <gtkmm/adjustment.h>
 
 #include "log.h"
+#include "append.h"
 #include "widgetstackpage.h"
 
 
 GPX2VideoWidgetStackPage::GPX2VideoWidgetStackPage(BaseObjectType *cobject,
-		const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file)
+		const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, Gtk::Window &parent)
 	: Glib::ObjectBase("GPX2VideoWidgetStackPage")
 	, Gtk::ScrolledWindow(cobject)
 	, ref_builder_(ref_builder) 
-	, resource_file_(resource_file) {
+	, resource_file_(resource_file) 
+	, parent_window_(parent) {
 
 	// Connect widget list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
 
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+		throw std::runtime_error("No \"widgets_listbox\" object in " + resource_file_);
 
-	list->signal_row_selected().connect(sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_widget_selected));
+	list->signal_row_selected().connect(sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_selected));
 }
 
 
-GPX2VideoWidgetStackPage * GPX2VideoWidgetStackPage::create(void) {
+GPX2VideoWidgetStackPage * GPX2VideoWidgetStackPage::create(Gtk::Window &parent) {
 	log_call();
 
 	const std::string resource_file = "widget_stackpage.ui";
@@ -29,7 +31,7 @@ GPX2VideoWidgetStackPage * GPX2VideoWidgetStackPage::create(void) {
 	// Load the Builder file and instantiate its widgets.
 	auto ref_builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/" + resource_file);
 
-	auto stackpage = Gtk::Builder::get_widget_derived<GPX2VideoWidgetStackPage>(ref_builder, "widget_stackpage", resource_file);
+	auto stackpage = Gtk::Builder::get_widget_derived<GPX2VideoWidgetStackPage>(ref_builder, "widget_stackpage", resource_file, parent);
 
 	if (!stackpage)
 		throw std::runtime_error("No \"widget_stackpage\" object in " + resource_file);
@@ -69,7 +71,7 @@ void GPX2VideoWidgetStackPage::append(GPX2VideoWidget *widget) {
 	button->set_icon_name("user-trash-symbolic");
 
 	button->signal_clicked().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_widget_remove_clicked), widget), true);
+				sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_remove_clicked), widget), true);
 
 	box.set_hexpand(true);
 	box.append(label);
@@ -174,7 +176,7 @@ void GPX2VideoWidgetStackPage::set_widget_selected(GPX2VideoWidget *widget) {
  *
  * Called from GTK main thread
  */
-void GPX2VideoWidgetStackPage::on_widget_selected(Gtk::ListBoxRow *row) {
+void GPX2VideoWidgetStackPage::on_selected(Gtk::ListBoxRow *row) {
 	int i = 0;
 
 	int index;
@@ -211,12 +213,27 @@ abort:
  *
  * Called from GTK main thread
  */
-void GPX2VideoWidgetStackPage::on_widget_append_clicked(void) {
+void GPX2VideoWidgetStackPage::on_append_clicked(void) {
 	log_call();
 
 	log_info("Append new widget");
 
-	log_warn("NOT YET IMPLEMENTED");
+	try {
+		auto append_dialog = GPX2VideoAppend::create(parent_window_, renderer_);
+
+		append_dialog->present();
+
+		// Delete the dialog when it is hidden.
+		append_dialog->signal_hide().connect([append_dialog]() { 
+			delete append_dialog; 
+		});
+	}
+	catch (const Glib::Error& ex) {
+		std::cerr << "GPX2VideoWidgetStackPage::on_append_clicked(): " << ex.what() << std::endl;
+	}
+	catch (const std::exception& ex) {
+		std::cerr << "GPX2VideoWidgetStackPage::on_append_clicked(): " << ex.what() << std::endl;
+	}
 }
 
 
@@ -227,7 +244,7 @@ void GPX2VideoWidgetStackPage::on_widget_append_clicked(void) {
  *
  * Called from GTK main thread
  */
-void GPX2VideoWidgetStackPage::on_widget_remove_clicked(GPX2VideoWidget *widget) {
+void GPX2VideoWidgetStackPage::on_remove_clicked(GPX2VideoWidget *widget) {
 	log_call();
 
 	log_info("Remove widget '%s'", widget->widget()->name().c_str());

@@ -2,6 +2,7 @@
 #include <gtkmm/entry.h>
 #include <gtkmm/switch.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/expander.h>
 #include <gtkmm/fontbutton.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/colorbutton.h>
@@ -246,6 +247,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 
 	// Update ui
 	update_content();
+	update_boundaries();
 }
 
 
@@ -297,6 +299,7 @@ void GPX2VideoWidgetFrame::set_widget_selected(GPX2VideoWidget *widget) {
 
 	// Update ui content
 	update_content();
+	update_boundaries();
 }
 
 
@@ -466,6 +469,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Compute new position
 						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -483,8 +489,11 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						widget_selected_->widget()->setPosition(value, y);
 
-						// Compute new position
-						renderer_->compute();
+//						// Compute new position
+//						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -501,8 +510,11 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						widget_selected_->widget()->setPosition(x, value);
 
-						// Compute new position
-						renderer_->compute();
+//						// Compute new position
+//						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -529,6 +541,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Compute new position
 						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -555,6 +570,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Compute new position
 						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -574,6 +592,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Compute new position
 						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(true);
 					}
 			));
 
@@ -592,6 +613,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Compute new position
 						renderer_->compute();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(true);
 					}
 			));
 
@@ -656,6 +680,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setBorder(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -670,6 +697,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setBorderColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -684,6 +714,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setBackgroundColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -698,6 +731,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagLabel);
 						else
 							widget_selected_->widget()->theme().removeFlag(VideoWidget::Theme::FlagLabel);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					} 
 			), false);
 
@@ -719,6 +755,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_preview_text(value);
 
 						widget_selected_->widget()->setLabel(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -739,6 +778,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						update_font_weight_model(label_font_weight_model_, value);
 
 						widget_selected_->widget()->theme().setLabelFontFamily(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -770,6 +812,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontSize(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -784,6 +829,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelShadowOpacity(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -798,6 +846,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelShadowDistance(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -836,6 +887,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontStyle((VideoWidget::Theme::FontStyle) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -874,6 +928,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setLabelFontWeight((VideoWidget::Theme::FontWeight) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -896,6 +953,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->theme().setLabelAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -910,6 +970,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -924,6 +987,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelBorderWidth(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -938,6 +1004,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelBorderColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -952,6 +1021,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagValue);
 						else
 							widget_selected_->widget()->theme().removeFlag(VideoWidget::Theme::FlagValue);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					} 
 			), false);
 
@@ -972,6 +1044,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						update_font_weight_model(value_font_weight_model_, value);
 
 						widget_selected_->widget()->theme().setValueFontFamily(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1003,6 +1078,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontSize(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1017,6 +1095,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueShadowOpacity(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1031,6 +1112,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueShadowDistance(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1069,6 +1153,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontStyle((VideoWidget::Theme::FontStyle) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1107,6 +1194,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						button->set_font_desc(description);
 
 						widget_selected_->widget()->theme().setValueFontWeight((VideoWidget::Theme::FontWeight) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1129,6 +1219,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->theme().setValueAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1143,6 +1236,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1157,6 +1253,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueBorderWidth(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1171,6 +1270,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueBorderColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1185,6 +1287,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueMin(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 
@@ -1199,6 +1304,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueMax(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
 					}
 			));
 }
@@ -1648,13 +1756,35 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	int margin;
 	int width, height;
 
+	VideoWidget::Widget type;
+
+	Gtk::Expander *expander;
 	Gtk::SpinButton *spinbutton;
 
 	log_call();
 
+	// No widget
+	if (widget_selected_ == NULL)
+		return;
+
+	// Widget type
+	type = widget_selected_->widget()->type();
+
 	// Layout size
 	width = renderer_->width();
 	height = renderer_->height();
+
+	// Label expander
+	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
+	if (!expander)
+		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
+	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+
+	// Value expander
+	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
+	if (!expander)
+		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
+	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
 
 	// Update UI range for widget width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("width_spinbutton");
@@ -1791,6 +1921,8 @@ void GPX2VideoWidgetFrame::on_widget_padding_value_changed(const VideoWidget::Th
 			widget_selected_->widget()->name().c_str(), value);
 
 	widget_selected_->widget()->theme().setPadding(padding, value);
+
+	// Refresh widget
 	renderer_->refresh(widget_selected_);
 
 	// Refresh video preview
@@ -1811,11 +1943,11 @@ void GPX2VideoWidgetFrame::on_widget_font_changed(Gtk::FontButton *button, std::
 	// Set description
 	set(description);
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 }
 
 
@@ -1832,11 +1964,11 @@ void GPX2VideoWidgetFrame::on_widget_spin_changed(Gtk::SpinButton *button, std::
 	// Set value
 	set(value);
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 }
 
 
@@ -1863,11 +1995,11 @@ void GPX2VideoWidgetFrame::on_widget_color_changed(Gtk::ColorButton *button, std
 	// Set color
 	set(color);
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 }
 
 
@@ -1880,11 +2012,11 @@ void GPX2VideoWidgetFrame::on_widget_entry_changed(Gtk::Entry *entry, std::funct
 	// Set entry
 	set(entry->get_text());
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 }
 
 
@@ -1897,11 +2029,11 @@ void GPX2VideoWidgetFrame::on_widget_combobox_changed(Gtk::ComboBox *combobox, s
 	// Set combobox
 	set(combobox->get_active());
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 }
 
 bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set) {
@@ -1916,11 +2048,11 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 	// Set state
 	set(state);
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
-
-	// Refresh video preview
-	dispatcher_.emit();
+//	// Refresh widget
+//	renderer_->refresh(widget_selected_);
+//
+//	// Refresh video preview
+//	dispatcher_.emit();
 
 	return true;
 }

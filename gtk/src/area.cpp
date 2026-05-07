@@ -8,6 +8,7 @@
 
 #include <epoxy/gl.h>
 #include <gdkmm/general.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/eventcontrollermotion.h>
 
 #include <glm/glm.hpp>
@@ -52,10 +53,13 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	, Gtk::GLArea(cobject)
 	, ref_builder_(ref_builder)
 	, adjustment_(NULL)
-	, shader_(NULL)
+	, cursor_shader_(NULL)
+	, widget_shader_(NULL)
 	, app_(app) 
 	, audio_device_(NULL)
-	, renderer_(NULL) {
+	, cursor_(NULL) 
+	, renderer_(NULL) 
+	, widget_selected_(NULL) {
 	log_call();
 
 	//
@@ -77,8 +81,17 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 	set_auto_render(false);
 
 	// Motion listener
-	auto controller = Gtk::EventControllerMotion::create();
-	add_controller(controller);
+	auto motioncontroller = Gtk::EventControllerMotion::create();
+	add_controller(motioncontroller);
+	
+	motioncontroller->signal_motion().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_mouse_motion), false);
+
+	// Gesture listener
+	auto gestureclick = Gtk::GestureClick::create();
+	add_controller(gestureclick);
+
+	gestureclick->signal_pressed().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_mouse_pressed), false);
+	gestureclick->signal_released().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_mouse_released), false);
 	
 	// Signal connect
 	stream_.video().data_ready().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_data_ready));
@@ -93,6 +106,9 @@ GPX2VideoArea::GPX2VideoArea(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Bu
 //	signal_unrealize().connect(sigc::mem_fun(*this, &GPX2VideoArea::unrealize), false);
 //	signal_render().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_render), false);
 	signal_resize().connect(sigc::mem_fun(*this, &GPX2VideoArea::on_resize), false);
+
+	// Create cursor component
+	cursor_ = GPX2VideoCursor::create();
 }
 
 
@@ -145,7 +161,7 @@ void GPX2VideoArea::update_adjustment(double value) {
 	if (is_seeking_)
 		return;
 
-	if (!is_playing_)
+	if (!is_playing_ && (value != adjustment_->get_value()))
 		log_info("Update scale position: %s", Datetime::timestamp2string(value, Datetime::FormatTime).c_str());
 
 	adjustment_->set_value(value);
@@ -320,11 +336,19 @@ void GPX2VideoArea::seeking(bool status) {
 }
 
 
+void GPX2VideoArea::cursor_render(void) {
+	log_call();
+
+	// Cursor render
+	cursor_->render(cursor_shader_);
+}
+
+
 void GPX2VideoArea::video_render(void) {
 	log_call();
 
 	// Video render
-	stream_.render(shader_);
+	stream_.render(widget_shader_);
 }
 
 
@@ -332,7 +356,7 @@ void GPX2VideoArea::widgets_render(void) {
 	log_call();
 
 	// Widgets rendering
-	renderer_->render(shader_);
+	renderer_->render(widget_shader_);
 }
 
 
@@ -369,14 +393,13 @@ void GPX2VideoArea::on_realize(void) {
 
 		const bool use_es = get_context()->get_use_es();
 
-		const std::string vertex_path = use_es ? "/com/progweb/gpx2video/gl/glarea-gles.vs.glsl" : "/com/progweb/gpx2video/gl/glarea-gl.vs.glsl";
-		const std::string fragment_path = use_es ? "/com/progweb/gpx2video/gl/glarea-gles.fs.glsl" : "/com/progweb/gpx2video/gl/glarea-gl.fs.glsl";
-
 		log_info("%s", use_es ? "Use OpenGL ES" : "Use OpenGL");
 
-		shader_ = GPX2VideoShader::create(vertex_path, fragment_path);
+		load_cursor_shaders();
+		load_widgets_shaders();
 
 		init_video_buffers();
+		init_cursor_buffers();
 		init_widgets_buffers();
 
 		// TODO
@@ -406,8 +429,11 @@ void GPX2VideoArea::on_unrealize(void) {
 //		glDeleteBuffers(1, &vbo_);
 //		glDeleteBuffers(1, &vao_);
 
-		if (shader_)
-			delete shader_;
+		if (cursor_shader_)
+			delete cursor_shader_;
+
+		if (widget_shader_)
+			delete widget_shader_;
 	}
 	catch(const Gdk::GLError &gle) {
 		std::cerr << "An error occured making the context current during unrealize" << std::endl;
@@ -438,6 +464,9 @@ bool GPX2VideoArea::on_render(const Glib::RefPtr<Gdk::GLContext> &context) {
 		widgets_render();
 
 		//
+		cursor_render();
+
+		//
 		glBindVertexArray(0);
 		glUseProgram(0);
 
@@ -460,6 +489,82 @@ void GPX2VideoArea::on_resize(gint width, gint height) {
 	log_call();
 
 	resize_viewport(width, height);
+}
+
+
+void GPX2VideoArea::on_mouse_pressed(int n_press, double x, double y) {
+	log_call();
+
+	(void) n_press;
+
+	// Get widget
+	widget_selected_ = get_widget_at(x, y);
+
+	// Set cursor position
+	if (widget_selected_)
+		cursor_->set_position(widget_selected_->glX(), widget_selected_->glY());
+
+	// Make cursor visible
+	cursor_->set_visible((widget_selected_ != NULL));
+
+	// Dispatch event
+	signal_widget_selected_.emit(widget_selected_);
+
+	// Refresh
+	refresh();
+
+	// Save mouse position
+	last_mouse_x_ = x;
+	last_mouse_y_ = y;
+}
+
+
+void GPX2VideoArea::on_mouse_motion(double x, double y) {
+	log_call();
+
+	double glX, glY;
+	double glLastX, glLastY;
+
+	if (!widget_selected_)
+		return;
+
+	// Convert x and y in the layout coordinates
+	get_gl_position(x, y, glX, glY);
+	get_gl_position(last_mouse_x_, last_mouse_y_, glLastX, glLastY);
+
+	// Move widget
+	widget_selected_->move(glX - glLastX, glY - glLastY);
+
+	// Update cursor position
+	cursor_->set_position(widget_selected_->glX(), widget_selected_->glY());
+
+	// Broadcast event
+	signal_widget_position_changed_.emit(widget_selected_);
+
+	// Refresh
+	refresh();
+
+	// Save mouse position
+	last_mouse_x_ = x;
+	last_mouse_y_ = y;
+}
+
+
+void GPX2VideoArea::on_mouse_released(int n_press, double x, double y) {
+	log_call();
+
+	(void) n_press;
+	(void) x;
+	(void) y;
+
+	// No widget
+	widget_selected_ = NULL;
+
+	// Hide cursor
+	cursor_->set_visible(false);
+
+	// Refresh
+	refresh();
 }
 
 
@@ -740,6 +845,34 @@ void GPX2VideoArea::video_display(void) {
 }
 
 
+void GPX2VideoArea::load_cursor_shaders(void) {
+	log_call();
+
+	const bool use_es = get_context()->get_use_es();
+
+	const std::string vertex_path = use_es ? "/com/progweb/gpx2video/gl/cursor-gles.vs.glsl" : "/com/progweb/gpx2video/gl/cursor-gl.vs.glsl";
+	const std::string fragment_path = use_es ? "/com/progweb/gpx2video/gl/cursor-gles.fs.glsl" : "/com/progweb/gpx2video/gl/cursor-gl.fs.glsl";
+
+	log_info("Load cursor shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
+
+	cursor_shader_ = GPX2VideoShader::create(vertex_path, fragment_path);
+}
+
+
+void GPX2VideoArea::load_widgets_shaders(void) {
+	log_call();
+
+	const bool use_es = get_context()->get_use_es();
+
+	const std::string vertex_path = use_es ? "/com/progweb/gpx2video/gl/widget-gles.vs.glsl" : "/com/progweb/gpx2video/gl/widget-gl.vs.glsl";
+	const std::string fragment_path = use_es ? "/com/progweb/gpx2video/gl/widget-gles.fs.glsl" : "/com/progweb/gpx2video/gl/widget-gl.fs.glsl";
+
+	log_info("Load widgets shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
+
+	widget_shader_ = GPX2VideoShader::create(vertex_path, fragment_path);
+}
+
+
 void GPX2VideoArea::init_video_buffers(void) {
 	log_call();
 
@@ -748,6 +881,17 @@ void GPX2VideoArea::init_video_buffers(void) {
 
 	// Play
 	stream_.init();
+}
+
+
+void GPX2VideoArea::init_cursor_buffers(void) {
+	log_call();
+
+	// OpenGL context
+	make_current();
+
+	// Cursor buffers initialization
+	cursor_->init_buffers();
 }
 
 
@@ -848,8 +992,15 @@ void GPX2VideoArea::get_gl_position(const double &x, const double &y, double &gl
 
 	glGetIntegerv(GL_VIEWPORT, vp);
 
-	glX = 2.0 * ((x - vp[0]) / vp[2]) - 1.0;
-	glY = -2.0 * ((y - vp[1]) / vp[3]) + 1.0;
+//	printf("VP: %d %d %d %d\n", vp[0], vp[1], vp[2], vp[3]);
+//	printf("MOUSE %f x %f\n", x, y);
+//	printf("SIZE %d x %d\n", get_width(), get_height());
+
+	double nx = (x * (2.0 * vp[0] + vp[2])) / get_width();
+	double ny = (y * (2.0 * vp[1] + vp[3])) / get_height();
+
+	glX = 2.0 * ((nx - vp[0]) / vp[2]) - 1.0;
+	glY = -2.0 * ((ny - vp[1]) / vp[3]) + 1.0;
 }
 
 

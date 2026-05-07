@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<object class="gtkmm__CustomObject_GPX2VideoAppend" id="append_dialog">
+		<property name="title" translatable="yes">Append widget</property>
+		<property name="resizable">True</property>
+		<property name="modal">True</property>
+		<property name="default-width">480</property>
+		<property name="default-height">360</property>
+		<property name="hide_on_close">True</property>
+		<property name="child">
+			<object class="GtkBox" id="append_box">
+				<property name="orientation">vertical</property>
+				<property name="halign">fill</property>
+				<property name="valign">fill</property>
+				<property name="hexpand">True</property>
+				<property name="vexpand">True</property>
+				<child>
+					<object class="GtkScrolledWindow" id="widget_scrollwindow">
+						<property name="hscrollbar-policy">2</property>
+						<property name="vexpand">1</property>
+						<property name="child">
+							<object class="GtkListBox" id="widgets_listbox">
+								<property name="selection-mode">single</property>
+								<property name="activate-on-single-click">True</property>
+								<property name="vexpand">True</property>
+							</object>
+						</property>
+					</object>
+				</child>
+				<child>
+					<object class="GtkBox" id="action_box">
+						<property name="orientation">horizontal</property>
+						<property name="halign">center</property>
+						<property name="valign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="margin-bottom">6</property>
+						<property name="margin-end">6</property>
+						<property name="margin-start">6</property>
+						<property name="margin-top">6</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkButton" id="ok_button">
+								<property name="sensitive">False</property>
+								<property name="label" translatable="yes">OK</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkButton" id="cancel_button">
+								<property name="sensitive">True</property>
+								<property name="label" translatable="yes">Cancel</property>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</property>
+	</object>
+</interface>

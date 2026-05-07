@@ -14,7 +14,21 @@
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
+	<object class="GtkAdjustment" id="position_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="GtkAdjustment" id="grade_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">10</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="heading_winsize_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">10</property>
 		<property name="value">0</property>
@@ -268,6 +282,78 @@
 						</child>
 
 						<child>
+							<object class="GtkExpander" id="position_smooth_expander">
+								<property name="label">Position filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="position_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="position_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">position_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
 							<object class="GtkExpander" id="grade_smooth_expander">
 								<property name="label">Grade filter &amp; smooth</property>
 								<child>
@@ -330,6 +416,78 @@
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
 														<property name="adjustment">grade_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+									</object>
+								</child>
+							</object>
+						</child>
+
+						<child>
+							<object class="GtkExpander" id="heading_smooth_expander">
+								<property name="label">Heading filter &amp; smooth</property>
+								<child>
+									<object class="GtkBox">
+										<property name="orientation">vertical</property>
+										<property name="halign">fill</property>
+										<property name="hexpand">True</property>
+										<property name="valign">start</property>
+										<property name="vexpand">True</property>
+										<property name="spacing">6</property>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Method:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="heading_method_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label">Window size (in points):</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="heading_winsize_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">3</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">heading_winsize_adjustment</property>
 													</object>
 												</child>
 											</object>

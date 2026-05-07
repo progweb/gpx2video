@@ -64,7 +64,7 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, "./assets/picto/DataOverlay_icn_avgspeed.svg");
+		icon(cr, "./assets/picto/" + iconName());
 	}
 
 	// Draw label

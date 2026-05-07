@@ -223,7 +223,7 @@
 
 
 
-void TextShape::icon(cairo_t *cr, const char *filename) {
+void TextShape::icon(cairo_t *cr, const std::string &filename) {
 	RsvgHandle *handle;
 
 	RsvgRectangle viewport = {
@@ -233,11 +233,13 @@ void TextShape::icon(cairo_t *cr, const char *filename) {
 		.height = (double) (size_ - 2 * theme().border())
 	};
 
-	if ((filename == NULL) || (filename[0] == '\0'))
+//	if ((filename == NULL) || (filename[0] == '\0'))
+//		return;
+	if (filename.empty())
 		return;
 
 	// load svg data
-	handle = rsvg_handle_new_from_file(filename, NULL);
+	handle = rsvg_handle_new_from_file(filename.c_str(), NULL);
 
 	rsvg_handle_render_document(handle, cr, &viewport, NULL);
 }

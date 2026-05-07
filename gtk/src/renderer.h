@@ -35,7 +35,7 @@ public:
 
 	const std::list<GPX2VideoWidget *>& widgets(void);
 
-	void append(GPX2VideoWidget *widget);
+	void append(VideoWidget::Widget type);
 	void remove(GPX2VideoWidget *widget);
 
 	GPX2VideoWidget * get_at(const double &x, const double &y);
@@ -53,8 +53,18 @@ public:
 		return dispatcher_;
 	}
 
-	Glib::Dispatcher& widget_position_change(void) {
-		return widget_position_dispatcher_;
+	// signal accessor
+	using type_signal_widget_appened = sigc::signal<void(GPX2VideoWidget *)>;
+
+	type_signal_widget_appened signal_widget_appened() {
+		return signal_widget_appened_;
+	}
+
+	// signal accessor
+	using type_signal_widget_position_changed = sigc::signal<void(GPX2VideoWidget *)>;
+
+	type_signal_widget_position_changed signal_widget_position_changed() {
+		return signal_widget_position_changed_;
 	}
 
 	void init_buffers(void);
@@ -89,7 +99,8 @@ private:
 	TelemetrySource *source_;
 
 	Glib::Dispatcher dispatcher_;
-	Glib::Dispatcher widget_position_dispatcher_;
+	type_signal_widget_appened signal_widget_appened_;
+	type_signal_widget_position_changed signal_widget_position_changed_;
 
 	std::list<GPX2VideoWidget *> widgets_;
 

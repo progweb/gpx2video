@@ -67,6 +67,8 @@ public:
 	using type_signal_changed = sigc::signal<void(bool)>;
 	type_signal_changed signal_changed();
 
+	void move(double dx, double dy);
+
 	double glX(void) const;
 	double glY(void) const;
 	double glWidth(void) const;

@@ -14,14 +14,14 @@
 class GPX2VideoWidgetStackPage : public Gtk::ScrolledWindow {
 public:
 	GPX2VideoWidgetStackPage(BaseObjectType *cobject,
-			const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file);
+			const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, Gtk::Window &parent);
 
 	virtual ~GPX2VideoWidgetStackPage() {
 	}
 
 	static void init(GPX2VideoWidgetStackPage *klass);
 
-	static GPX2VideoWidgetStackPage * create(void);
+	static GPX2VideoWidgetStackPage * create(Gtk::Window &parent);
 
 	std::string name(void) {
 		return "widget_page";
@@ -43,7 +43,7 @@ public:
 
 	void set_widget_selected(GPX2VideoWidget *widget);
 
-	void on_widget_append_clicked(void);
+	void on_append_clicked(void);
 
 //	Glib::SignalProxy<void()> signal_widget_selected() {
 //		return Glib::SignalProxy<void()>(this, &signal_info_);
@@ -67,14 +67,16 @@ protected:
 	type_signal_widget_remove_clicked m_signal_widget_remove_clicked;
 
 private:
+	Gtk::Window &parent_window_;
+
 	GPX2VideoRenderer *renderer_;
 
 //	sigc::signal<void(int)> widget_index_;
 //	sigc::signal<void()> signal_custom_;
 
-	void on_widget_selected(Gtk::ListBoxRow *row);
+	void on_selected(Gtk::ListBoxRow *row);
 
-	void on_widget_remove_clicked(GPX2VideoWidget *widget);
+	void on_remove_clicked(GPX2VideoWidget *widget);
 };
 
 #endif

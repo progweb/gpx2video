@@ -125,7 +125,7 @@ protected:
 
 	GPXApplication &app_;
 	TrackSettings track_settings_;
-	TelemetrySettings telemetry_settings_;
+	const TelemetrySettings &telemetry_settings_;
 
 	struct event_base *evbase_;
 

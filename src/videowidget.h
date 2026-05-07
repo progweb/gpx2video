@@ -458,36 +458,6 @@ public:
 			return true;
 		}
 
-//		int textShadow(void) const {
-//			return text_shadow_;
-//		}
-//
-//		virtual void setTextShadow(int shadow) {
-//			text_shadow_ = shadow;
-//		}
-//
-//		double textRatio(void) const {
-//			return text_ratio_;
-//		}
-//
-//		virtual void setTextRatio(double ratio) {
-//			if (ratio == 0.0)
-//				return;
-//
-//			text_ratio_ = ratio;
-//		}
-//
-//		int textLineSpace(void) const {
-//			return text_linespace_;
-//		}
-//
-//		virtual void setTextLineSpace(int linespace) {
-//			if (linespace < 0)
-//				return;
-//
-//			text_linespace_ = linespace;
-//		}
-
 		NeedleType needleType(void) const {
 			return needle_type_;
 		}
@@ -798,10 +768,6 @@ public:
 		float value_color_[4];
 		float value_bg_color_[4];
 		float value_border_color_[4];
-
-//		int text_shadow_;
-//		double text_ratio_;
-//		int text_linespace_;
 	};
 
 	Shape& shape(void) {

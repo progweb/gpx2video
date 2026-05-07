@@ -31,6 +31,7 @@
 #include "renderer.h"
 #include "shader.h"
 #include "stream.h"
+#include "cursor.h"
 
 
 class GPX2VideoArea : public Gtk::GLArea {
@@ -46,6 +47,7 @@ public:
 	void set_renderer(GPX2VideoRenderer *renderer);
 	void set_audio_device(GPX2VideoAudioDevice *audio_device);
 	void set_adjustment(Glib::RefPtr<Gtk::Adjustment> adjustment);
+
 	void configure_adjustment(void);
 	void update_adjustment(double value);
 	void update_layout(void);
@@ -61,12 +63,26 @@ public:
 
 	void refresh(void);
 
+	void cursor_render(void);
 	void video_render(void);
 	void widgets_render(void);
 
 	GPX2VideoWidget * get_widget_at(const double &x, const double &y);
 
 //	void widget_append(VideoWidget *widget);
+
+	// signal accessor
+	using type_signal_widget_selected = sigc::signal<void(GPX2VideoWidget *)>;
+
+	type_signal_widget_selected signal_widget_selected() {
+		return signal_widget_selected_;
+	}
+
+	using type_signal_widget_position_changed = sigc::signal<void(GPX2VideoWidget *)>;
+
+	type_signal_widget_position_changed signal_widget_position_changed() {
+		return signal_widget_position_changed_;
+	}
 
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
@@ -75,12 +91,16 @@ protected:
 
 	sigc::slot<bool()> refresh_slot_;
 
-	GPX2VideoShader *shader_;
+	GPX2VideoShader *cursor_shader_;
+	GPX2VideoShader *widget_shader_;
 
 	void on_realize(void);
 	void on_unrealize(void);
 	bool on_render(const Glib::RefPtr<Gdk::GLContext> &context);
 	void on_resize(gint width, gint height);
+	void on_mouse_motion(double x, double y);
+	void on_mouse_pressed(int n_press, double x, double y);
+	void on_mouse_released(int n_press, double x, double y);
 	void on_data_ready(void);
 	void on_renderer_ready(void);
 	bool on_timeout(void);
@@ -92,9 +112,12 @@ protected:
 
 	void init_shaders(const std::string& vertex_path, const std::string& fragment_path);
 
-	void init_video_buffers();
+	void load_cursor_shaders(void);
+	void load_widgets_shaders(void);
 
-	void init_widgets_buffers();
+	void init_video_buffers(void);
+	void init_cursor_buffers(void);
+	void init_widgets_buffers(void);
 
 	void load_video_texture(FramePtr frame);
 	void load_widgets_texture(FramePtr frame);
@@ -120,12 +143,21 @@ private:
 
 	sigc::connection timer_;
 
+	GPX2VideoCursor *cursor_;
+
 	GPX2VideoStream stream_;
 	GPX2VideoRenderer *renderer_;
+
+	GPX2VideoWidget *widget_selected_;
 
 	FramePtr frame;
 
 	double frame_timer_;
+
+	double last_mouse_x_, last_mouse_y_;
+
+	type_signal_widget_selected signal_widget_selected_;
+	type_signal_widget_position_changed signal_widget_position_changed_;
 };
 
 #endif

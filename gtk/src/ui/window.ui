@@ -19,6 +19,7 @@
 					<object class="GtkButton" id="open_button">
 						<property name="label" translatable="yes">Open</property>
 						<property name="action-name">win.open</property>
+						<property name="sensitive">True</property>
 					</object>
 				</child>
 				<child>
@@ -32,12 +33,12 @@
                         <property name="direction">none</property>
                     </object>
                 </child>
-        <child type="end">
-          <object class="GtkButton" id="save_button">
-            <property name="action-name">win.save</property>
-            <property name="label" translatable="yes">Save</property>
-          </object>
-        </child>
+				<child type="end">
+				  <object class="GtkButton" id="save_button">
+					<property name="action-name">win.save</property>
+					<property name="label" translatable="yes">Save</property>
+				  </object>
+				</child>
             </object>
         </child>
 		<child>

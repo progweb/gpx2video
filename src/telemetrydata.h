@@ -28,6 +28,7 @@ public:
 		DataNone = 0,
 
 		DataFix = 1,
+		DataPosition = 1,
 		DataElevation = (1 << 1),
 		DataCadence = (1 << 2),
 		DataHeartrate = (1 << 3),

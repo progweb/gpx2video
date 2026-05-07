@@ -98,7 +98,8 @@ protected:
 
 	void on_video_changed(void);
 	void on_widget_changed(void);
-	void on_widget_position_changed(void);
+	void on_widget_appened(GPX2VideoWidget *widget);
+	void on_widget_position_changed(GPX2VideoWidget *widget);
 	void on_telemetry_changed(void);
 
 	void on_play_clicked(void);
@@ -111,10 +112,10 @@ protected:
 
 	void on_video_area_mouse_enter(double x, double y);
 	void on_video_area_mouse_leave(void);
-	void on_video_area_mouse_pressed(int n_press, double x, double y);
 
 	void on_stack_changed(void);
 
+	void on_widget_clicked(GPX2VideoWidget *widget);
 	void on_widget_selected(GPX2VideoWidget *widget);
 	void on_widget_remove_clicked(GPX2VideoWidget *widget);
 

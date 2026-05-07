@@ -82,6 +82,7 @@ set(RESOURCE_UI_LIST
     gears_menu.ui
 	prefs.ui
 	window.ui
+	append.ui
 	video_frame.ui
 	widget_frame.ui
 	telemetry_frame.ui
@@ -96,10 +97,15 @@ set(RESOURCE_UI_LIST
 )
 
 set(RESOURCE_GL_LIST
-	glarea-gles.fs.glsl
-	glarea-gles.vs.glsl
-	glarea-gl.fs.glsl
-	glarea-gl.vs.glsl
+	cursor-gl.fs.glsl
+	cursor-gl.vs.glsl
+	cursor-gles.fs.glsl
+	cursor-gles.vs.glsl
+
+	widget-gles.fs.glsl
+	widget-gles.vs.glsl
+	widget-gl.fs.glsl
+	widget-gl.vs.glsl
 )
 
 # Compile the resources.
@@ -162,6 +168,8 @@ set(GPX2VIDEO_SOURCES
 	src/log.cpp
 	src/main.cpp
 	src/prefs.cpp
+	src/append.cpp
+	src/cursor.cpp
 	src/renderer.cpp
 	src/shader.cpp
 	src/stream.cpp

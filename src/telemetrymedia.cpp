@@ -149,26 +149,6 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 
     stream_ = std::ifstream(filename);
 
-//	skipBadPoint(false);
-//	setPauseDetection(false);
-//	setMethod(TelemetrySettings::MethodNone);
-//	setRate(1000);
-//
-//	setSmoothMethod(TelemetryData::DataGrade, TelemetrySettings::SmoothNone);
-//	setSmoothPoints(TelemetryData::DataGrade, 0);
-//
-//	setSmoothMethod(TelemetryData::DataSpeed, TelemetrySettings::SmoothNone);
-//	setSmoothPoints(TelemetryData::DataSpeed, 0);
-//
-//	setSmoothMethod(TelemetryData::DataElevation, TelemetrySettings::SmoothNone);
-//	setSmoothPoints(TelemetryData::DataElevation, 0);
-//
-//	setSmoothMethod(TelemetryData::DataAcceleration, TelemetrySettings::SmoothNone);
-//	setSmoothPoints(TelemetryData::DataAcceleration, 0);
-//
-//	setSmoothMethod(TelemetryData::DataVerticalSpeed, TelemetrySettings::SmoothNone);
-//	setSmoothPoints(TelemetryData::DataVerticalSpeed, 0);
-
 	kalman_ = alloc_filter_velocity2d(10.0);
 }
 
@@ -194,183 +174,6 @@ void TelemetrySource::setNumberOfPoints(const unsigned long number) {
 
 	pool_.setNumberOfPoints(number);
 }
-
-
-//void TelemetrySource::skipBadPoint(bool check) {
-//	log_call();
-//
-//	check_ = check;
-//}
-//
-//
-//void TelemetrySource::setPauseDetection(bool enable) {
-//	log_call();
-//
-//	pause_detection_ = enable;
-//}
-//
-//
-//void TelemetrySource::setFilter(enum TelemetrySettings::Filter filter) {
-//	log_call();
-//
-//	filter_ = filter;
-//}
-//
-//
-//void TelemetrySource::setMethod(enum TelemetrySettings::Method method) {
-//	log_call();
-//
-//	method_ = method;
-//}
-//
-//
-//void TelemetrySource::setRate(int rate) {
-//	log_call();
-//
-//	rate_ = rate;
-//}
-//
-//
-//void TelemetrySource::setSmoothMethod(enum TelemetryData::Data type, enum TelemetrySettings::Smooth method) {
-//	log_call();
-//
-//	switch (type) {
-//	case TelemetryData::DataGrade:
-//		smooth_grade_method_ = method;
-//		break;
-//
-//	case TelemetryData::DataSpeed:
-//		smooth_speed_method_ = method;
-//		break;
-//
-//	case TelemetryData::DataElevation:
-//		smooth_elevation_method_ = method;
-//		break;
-//
-//	case TelemetryData::DataAcceleration:
-//		smooth_acceleration_method_ = method;
-//		break;
-//
-//	case TelemetryData::DataVerticalSpeed:
-//		smooth_verticalspeed_method_ = method;
-//		break;
-//
-//	default:
-//		// Not yet supported
-//		break;
-//	}
-//}
-//
-//
-//void TelemetrySource::setSmoothPoints(enum TelemetryData::Data type, int number) {
-//	log_call();
-//
-//	switch (type) {
-//	case TelemetryData::DataGrade:
-//		smooth_grade_points_ = number;
-//		break;
-//
-//	case TelemetryData::DataSpeed:
-//		smooth_speed_points_ = number;
-//		break;
-//
-//	case TelemetryData::DataElevation:
-//		smooth_elevation_points_ = number;
-//		break;
-//
-//	case TelemetryData::DataAcceleration:
-//		smooth_acceleration_points_ = number;
-//		break;
-//
-//	case TelemetryData::DataVerticalSpeed:
-//		smooth_verticalspeed_points_ = number;
-//		break;
-//
-//	default:
-//		// Not yet supported
-//		break;
-//	}
-//}
-//
-//
-//bool TelemetrySource::setDataRange(std::string strbegin, std::string strend) {
-//	uint64_t end = 0;
-//	uint64_t begin = 0;
-//
-//	log_call();
-//
-//	if (!strbegin.empty()) {
-//		// Convert begin range time to timestamp
-//		if ((begin = Datetime::string2timestamp(strbegin)) == 0) {
-//			log_error("Parse 'begin' date range failure");
-//			return false;
-//		}
-//	}
-//
-//	if (!strend.empty()) {
-//		// Convert end range time to timestamp
-//		if ((end = Datetime::string2timestamp(strend)) == 0) {
-//			log_error("Parse 'end' date range failure");
-//			return false;
-//		}
-//
-//		if (end < begin) {
-//			log_error("'begin-end' data range values invalid");
-//			return false;
-//		}
-//	}
-//
-//	// save
-//	end_ = end;
-//	begin_ = begin;
-//
-//	return true;
-//}
-//
-//
-//bool TelemetrySource::setComputeRange(std::string strfrom, std::string strto) {
-//	uint64_t to = 0;
-//	uint64_t from = 0;
-//
-//	log_call();
-//
-//	if (!strfrom.empty()) {
-//		// Convert race start time to timestamp
-//		if ((from = Datetime::string2timestamp(strfrom)) == 0) {
-//			log_error("Parse 'from' date range failure");
-//			return false;
-//		}
-//	}
-//
-//	if (!strto.empty()) {
-//		// Convert race start time to timestamp
-//		if ((to = Datetime::string2timestamp(strto)) == 0) {
-//			log_error("Parse 'to' date range failure");
-//			return false;
-//		}
-//
-//		if (to < from) {
-//			log_error("'[from:to]' compute range values invalid");
-//			return false;
-//		}
-//	}
-//
-//	// Save
-//	to_ = to;
-//	from_ = from;
-//
-//	return true;
-//}
-//
-//
-//int64_t TelemetrySource::timeOffset(void) const {
-//	return offset_;
-//}
-//
-//
-//void TelemetrySource::setTimeOffset(const int64_t& offset) {
-//	offset_ = offset;
-//}
 
 
 size_t TelemetrySource::numberOfPoints(void) const {
@@ -961,10 +764,12 @@ void TelemetrySource::smooth_step_one(void) {
 	double dz = 0;
 
 	int speed_count = 0;
+	int heading_count = 0;
 	int elevation_count = 0;
 	int acceleration_count = 0;
 
 	size_t speed_window = 0;
+	size_t heading_window = 0;
 	size_t elevation_window = 0;
 	size_t acceleration_window = 0;
 
@@ -974,10 +779,12 @@ void TelemetrySource::smooth_step_one(void) {
 	double maxspeed = 0;
 
 	double speed_sum = 0;
+	double heading_sum = 0;
 	double elevation_sum = 0;
 	double acceleration_sum = 0;
 
 	std::deque<Point> speed_points;
+	std::deque<Point> heading_points;
 	std::deque<Point> elevation_points;
 	std::deque<Point> acceleration_points;
 
@@ -987,12 +794,14 @@ void TelemetrySource::smooth_step_one(void) {
 
 	speed_window = (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1 : 0;
+	heading_window = (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
+		(settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1 : 0;
 	elevation_window = (settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataElevation) * 2) + 1 : 0;
 	acceleration_window = (settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1 : 0;
 
-	if ((speed_window < 2) && (elevation_window < 2) && (acceleration_window < 2))
+	if ((speed_window < 2) && (elevation_window < 2) && (heading_window < 2) && (acceleration_window < 2))
 		return;
 
 	// Fill 'speed' window
@@ -1008,6 +817,22 @@ void TelemetrySource::smooth_step_one(void) {
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
 			speed_sum += nextPoint.speed();
 			speed_count += 1;
+		}
+	}
+
+	// Fill 'heading' window
+	for (size_t i=0; i<heading_window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		heading_points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			heading_sum += nextPoint.heading();
+			heading_count += 1;
 		}
 	}
 
@@ -1091,6 +916,42 @@ void TelemetrySource::smooth_step_one(void) {
 					// Don't update values in pause
 					else
 						pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+				}
+			}
+
+			// heading
+			//---------
+
+			if (heading_window > 1) {
+				// Add new point
+				nextPoint = pool_.next(heading_window/2 - 1);
+
+				// Save point
+				heading_points.emplace_back(nextPoint);
+
+				if (nextPoint.type() != TelemetryData::TypeUnknown) {
+					if (nextPoint.hasValue(TelemetryData::DataFix)) {
+						heading_sum += nextPoint.heading();
+						heading_count += 1;
+					}
+				}
+
+				// Remove old point
+				if (heading_points.size() > heading_window) {
+					previousPoint = heading_points.front();
+					heading_points.pop_front();
+
+					if (previousPoint.hasValue(TelemetryData::DataFix)) {
+						heading_sum -= previousPoint.heading();
+						heading_count -= 1;
+					}
+				}
+
+				// Compute 'heading' smooth values
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					if (!pool_.current().isPause()) {
+						pool_.current().setHeading(heading_sum / heading_count);
+					}
 				}
 			}
 
@@ -1218,21 +1079,28 @@ void TelemetrySource::smooth_step_one(void) {
 
 void TelemetrySource::smooth_step_two(void) {
 	int grade_count = 0;
+	int position_count = 0;
 	int verticalspeed_count = 0;
 
 	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
+	size_t position_window = 0;
 	size_t verticalspeed_window = 0;
 
 	double grade_sum = 0;
+	double latitude_sum = 0;
+	double longitude_sum = 0;
 	double verticalspeed_sum = 0;
 
 	std::deque<Point> grade_points;
+	std::deque<Point> position_points;
 	std::deque<Point> verticalspeed_points;
 
 	TelemetrySource::Point nextPoint, previousPoint;
 
 	log_call();
 
+	position_window = (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
+		(settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1 : 0;
 	verticalspeed_window = (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) 
 		? (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1 : 0;
 
@@ -1340,8 +1208,25 @@ void TelemetrySource::smooth_step_two(void) {
 
 	pool_.reset();
 
-	if (verticalspeed_window < 2)
+	if ((position_window < 2) && (verticalspeed_window < 2))
 		return;
+
+	// Fill 'position' window
+	for (size_t i=0; i<position_window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		position_points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			latitude_sum += nextPoint.latitude();
+			longitude_sum += nextPoint.longitude();
+			position_count += 1;
+		}
+	}
 
 	// Fill 'verticalspeed' window
 	for (size_t i=0; i<verticalspeed_window/2; i++) {
@@ -1365,6 +1250,46 @@ void TelemetrySource::smooth_step_two(void) {
 	// Compute average value for each point
 	while (!pool_.empty()) {
 		if (pool_.current().type() != TelemetryData::TypeError) {
+			// position
+			//--------------
+
+			if (position_window > 1) {
+				// Add new point
+				nextPoint = pool_.next(position_window/2 - 1);
+
+				// Save point
+				position_points.emplace_back(nextPoint);
+
+				if (nextPoint.type() != TelemetryData::TypeUnknown) {
+					if (nextPoint.hasValue(TelemetryData::DataFix)) {
+						latitude_sum += nextPoint.latitude();
+						longitude_sum += nextPoint.longitude();
+						position_count += 1;
+					}
+				}
+
+				// Remove old point
+				if (position_points.size() > position_window) {
+					previousPoint = position_points.front();
+					position_points.pop_front();
+
+					if (previousPoint.hasValue(TelemetryData::DataFix)) {
+						latitude_sum -= previousPoint.latitude();
+						longitude_sum -= previousPoint.longitude();
+						position_count -= 1;
+					}
+				}
+
+				// Compute 'position' smooth values
+				if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					if (!pool_.current().isPause()) {
+						pool_.current().setPosition(
+								latitude_sum / position_count,
+								longitude_sum / position_count);
+					}
+				}
+			}
+
 			// verticalspeed
 			//--------------
 
@@ -1412,8 +1337,10 @@ void TelemetrySource::smooth_step_two(void) {
 
 
 void TelemetrySource::smooth(void) {
+	size_t position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
 	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
 	size_t speed_window = (settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1;
+	size_t heading_window = (settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1;
 	size_t elevation_window = (settings().telemetrySmoothPoints(TelemetryData::DataElevation) * 2) + 1;
 	size_t acceleration_window = (settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1;
 	size_t verticalspeed_window = (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1;
@@ -1423,6 +1350,12 @@ void TelemetrySource::smooth(void) {
 	if (!quiet_) {
 		// 1/
 		log_info("%s: Smooth telemetry data using 'windowed moving average' filter ", name().c_str());
+
+		if ((settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) && (position_window > 1))
+			log_info("     - position: window size '%ld' (+/- %d points)", 
+					position_window, settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+		else
+			log_info("     - position: no");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) && (grade_window > 1))
 			log_info("     - grade: window size '%ld' (+/- %d points)", 
@@ -1435,6 +1368,12 @@ void TelemetrySource::smooth(void) {
 					speed_window, settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
 		else
 			log_info("     - speed: no");
+
+		if ((settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) && (heading_window > 1))
+			log_info("     - heading: window size '%ld' (+/- %d points)", 
+					heading_window, settings().telemetrySmoothPoints(TelemetryData::DataHeading));
+		else
+			log_info("     - heading: no");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothWindowedMovingAverage) && (elevation_window > 1))
 			log_info("     - elevation: window size '%ld' (+/- %d points)", 

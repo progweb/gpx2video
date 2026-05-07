@@ -15,28 +15,7 @@
 #include "audioparams.h"
 #include "videoparams.h"
 #include "encoder.h"
-#include "widgets/gpx.h"
-#include "widgets/date.h"
-#include "widgets/distance.h"
-#include "widgets/duration.h"
-#include "widgets/grade.h"
-#include "widgets/heading.h"
-#include "widgets/elevation.h"
-#include "widgets/cadence.h"
-#include "widgets/heartrate.h"
-#include "widgets/power.h"
-#include "widgets/lap.h"
-#include "widgets/position.h"
-#include "widgets/image.h"
-#include "widgets/speed.h"
-#include "widgets/maxspeed.h"
-#include "widgets/avgspeed.h"
-#include "widgets/avgridespeed.h"
-#include "widgets/text.h"
-#include "widgets/time.h"
-#include "widgets/gforce.h"
-#include "widgets/temperature.h"
-#include "widgets/verticalspeed.h"
+#include "widgets.h"
 #include "renderer.h"
 
 
@@ -388,6 +367,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	int flags = VideoWidget::Theme::FlagNone;
 
+	VideoWidget::Widget type = VideoWidget::WidgetUnknown;
+
 	VideoWidget::Shape shape = VideoWidget::ShapeNone;
 
 	VideoWidget::Unit unit = VideoWidget::UnitNone;
@@ -407,66 +388,19 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget::Theme::NeedleType needle_type = VideoWidget::Theme::NeedleTypeBasic;
 
+	// Type
+	s = (const char *) w->type();
+	type = VideoWidget::string2widget(s);
+
+	if (type == VideoWidget::WidgetUnknown) {
+		log_info("Widget '%s' unknown type", (const char *) w->type());
+		goto skip;
+	}
+
 	// Display
 	if ((bool) w->display() == false) {
 		log_info("Skip widget '%s'", (const char *) w->type());
 		goto skip;
-	}
-
-	// Type
-	s = (const char *) w->type();
-
-	// Create widget
-	if (s == "gpx") 
-		widget = GPXWidget::create(app_);
-	else if (s == "date") 
-		widget = DateWidget::create(app_);
-	else if (s == "time") 
-		widget = TimeWidget::create(app_);
-	else if (s == "text") 
-		widget = TextWidget::create(app_);
-	else if (s == "distance") 
-		widget = DistanceWidget::create(app_);
-	else if (s == "duration") 
-		widget = DurationWidget::create(app_);
-	else if (s == "position") 
-		widget = PositionWidget::create(app_);
-	else if (s == "speed") 
-		widget = SpeedWidget::create(app_);
-	else if (s == "maxspeed") 
-		widget = MaxSpeedWidget::create(app_);
-	else if (s == "avgspeed") 
-		widget = AvgSpeedWidget::create(app_);
-	else if (s == "avgridespeed") 
-		widget = AvgRideSpeedWidget::create(app_);
-	else if (s == "grade") 
-		widget = GradeWidget::create(app_);
-	else if (s == "heading") 
-		widget = HeadingWidget::create(app_);
-	else if (s == "image")
-		widget = ImageWidget::create(app_);
-	else if (s == "elevation") 
-		widget = ElevationWidget::create(app_);
-	else if (s == "cadence") 
-		widget = CadenceWidget::create(app_);
-	else if (s == "heartrate") 
-		widget = HeartRateWidget::create(app_);
-	else if (s == "temperature")
-		widget = TemperatureWidget::create(app_);
-	else if (s == "power") 
-		widget = PowerWidget::create(app_);
-	else if (s == "gforce")
-		widget = GForceWidget::create(app_);
-	else if ((s == "vspeed") || (s == "verticalspeed"))
-		widget = VerticalSpeedWidget::create(app_);
-	else if (s == "lap") {
-		LapWidget *lap = LapWidget::create(app_);
-		lap->setTargetLap(w->nbrLap());
-		widget = lap;
-	}
-	else {
-		log_error("Widget loading error, '%s' type unknown", s.c_str());
-		goto error;
 	}
 
 	// Shape 
@@ -507,7 +441,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Zoom
 	s = (const char *) w->zoom();
-
 	zoom = VideoWidget::string2zoom(s);
 
 	log_info("Load widget '%s' (shape: %s)", (const char *) w->type(), (const char *) w->shape());
@@ -575,6 +508,12 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Lap
+	if (type == VideoWidget::WidgetLap) {
+		LapWidget *lap = (LapWidget *) widget;
+		lap->setTargetLap(w->nbrLap());
+	}
+
 	// Flags
 	if (w->withLabel())
 		flags |= VideoWidget::Theme::FlagLabel;
@@ -594,6 +533,10 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// TODO
 	flags |= VideoWidget::Theme::FlagCursor;
 	flags |= VideoWidget::Theme::FlagGauge;
+
+	// Create widget
+	if ((widget = this->create(type)) == NULL)
+		goto skip;
 
 	// Widget common settings
 	widget->setShape(shape);
@@ -659,11 +602,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setZoom(zoom);
 	widget->setSource((const char *) w->source());
 	widget->theme().setFlags(flags);
-
-	// Append
-	app_.append(widget);
-
-	this->append(widget);
 
 skip:
 	return true;
@@ -1169,6 +1107,89 @@ void Renderer::computeWidgetsPosition(void) {
 
 		is_first = false;
 	}
+}
+
+
+VideoWidget * Renderer::create(VideoWidget::Widget type) {
+	VideoWidget *widget = NULL;
+
+	switch (type) {
+	case VideoWidget::WidgetGPX:
+		widget = GPXWidget::create(app_);
+		break;
+	case VideoWidget::WidgetDate:
+		widget = DateWidget::create(app_);
+		break;
+	case VideoWidget::WidgetTime:
+		widget = TimeWidget::create(app_);
+		break;
+	case VideoWidget::WidgetText:
+		widget = TextWidget::create(app_);
+		break;
+	case VideoWidget::WidgetDistance:
+		widget = DistanceWidget::create(app_);
+		break;
+	case VideoWidget::WidgetDuration: 
+		widget = DurationWidget::create(app_);
+		break;
+	case VideoWidget::WidgetSpeed: 
+		widget = SpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetMaxSpeed: 
+		widget = MaxSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetAverageSpeed: 
+		widget = AvgSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetAverageRideSpeed: 
+		widget = AvgRideSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetGrade:
+		widget = GradeWidget::create(app_);
+		break;
+	case VideoWidget::WidgetHeading:
+		widget = HeadingWidget::create(app_);
+		break;
+	case VideoWidget::WidgetImage:
+		widget = ImageWidget::create(app_);
+		break;
+	case VideoWidget::WidgetElevation:
+		widget = ElevationWidget::create(app_);
+		break;
+	case VideoWidget::WidgetCadence:
+		widget = CadenceWidget::create(app_);
+		break;
+	case VideoWidget::WidgetHeartRate:
+		widget = HeartRateWidget::create(app_);
+		break;
+	case VideoWidget::WidgetTemperature:
+		widget = TemperatureWidget::create(app_);
+		break;
+	case VideoWidget::WidgetPower: 
+		widget = PowerWidget::create(app_);
+		break;
+	case VideoWidget::WidgetGForce:
+		widget = GForceWidget::create(app_);
+		break;
+	case VideoWidget::WidgetVerticalSpeed:
+		widget = VerticalSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetLap:
+		widget = LapWidget::create(app_);
+		break;
+	default:
+		log_error("Widget unknown type, '%s' type unknown", VideoWidget::widget2string(type).c_str());
+		break;
+	}
+
+	// Append
+	if (widget != NULL) {
+		app_.append(widget);
+
+		this->append(widget);
+	}
+
+	return widget;
 }
 
 

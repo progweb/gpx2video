@@ -10,6 +10,10 @@
 
 class CadenceTextShape : public TextShape {
 public:
+	static std::string iconName(void) {
+		return "DataOverlay_icn_cadence.svg";
+	}
+
 	virtual ~CadenceTextShape() {
 		clear();
 	}

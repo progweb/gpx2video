@@ -10,6 +10,10 @@
 
 class AvgSpeedTextShape : public TextShape {
 public:
+	static std::string iconName(void) {
+		return "DataOverlay_icn_avgspeed.svg";
+	}
+
 	virtual ~AvgSpeedTextShape() {
 		clear();
 	}

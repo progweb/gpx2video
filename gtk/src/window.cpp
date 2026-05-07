@@ -16,9 +16,9 @@
 #include <giomm/liststore.h>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/headerbar.h>
+#include <gtkmm/gestureclick.h>
 #include <gtkmm/eventcontrollerkey.h>
 #include <gtkmm/eventcontrollermotion.h>
-#include <gtkmm/gestureclick.h>
 #include <gtkmm/stackpage.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/paned.h>
@@ -101,7 +101,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	// Append video stack page
 	video_stackpage_ = GPX2VideoVideoStackPage::create();
-	widget_stackpage_ = GPX2VideoWidgetStackPage::create();
+	widget_stackpage_ = GPX2VideoWidgetStackPage::create(*this);
 	telemetry_stackpage_ = GPX2VideoTelemetryStackPage::create();
 
 	// Append video, widget & telemetry stackpage objects to stack
@@ -178,7 +178,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	if (!button)
 		throw std::runtime_error("No \"widget_append_button\" object in window.ui");
 
-	button->signal_clicked().connect(sigc::mem_fun(*widget_stackpage_, &GPX2VideoWidgetStackPage::on_widget_append_clicked));
+	button->signal_clicked().connect(sigc::mem_fun(*widget_stackpage_, &GPX2VideoWidgetStackPage::on_append_clicked));
 
 	// Click listener
 	auto gesture = Gtk::GestureClick::create();
@@ -201,11 +201,12 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	motioncontroller->signal_enter().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_enter), false);
 	motioncontroller->signal_leave().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_leave), false);
 
-	// Gesture listener
-	auto gestureclick = Gtk::GestureClick::create();
-	video_area_->add_controller(gestureclick);
-
-	gestureclick->signal_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_pressed), false);
+//	// Gesture listener
+//	auto gestureclick = Gtk::GestureClick::create();
+//	video_area_->add_controller(gestureclick);
+//
+//	gestureclick->signal_pressed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_pressed), false);
+//	gestureclick->signal_released().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_area_mouse_released), false);
 
 //	// Register application handle
 //	video_area_->set_application(this);
@@ -220,10 +221,15 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	widget_frame_->set_renderer(renderer_);
 	widget_stackpage_->set_renderer(renderer_);
 
-	renderer_->widget_position_change().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
+	renderer_->signal_widget_appened().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_appened));
+	renderer_->signal_widget_position_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
 
 	// GPX2Video application thread 
 	start();
+
+	// Connect video area
+	video_area_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_clicked));
+	video_area_->signal_widget_position_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
 
 	// Connect widget list
 	widget_stackpage_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_selected));
@@ -898,6 +904,13 @@ void GPX2VideoApplicationWindow::on_widget_changed(void) {
 }
 
 
+void GPX2VideoApplicationWindow::on_widget_appened(GPX2VideoWidget *widget) {
+	log_call();
+
+	widget_stackpage_->append(widget);
+}
+
+
 /**
  * Notification telemetry settings change
  *
@@ -923,8 +936,10 @@ void GPX2VideoApplicationWindow::on_telemetry_changed(void) {
  *
  * Called from GTK main thread
  */
-void GPX2VideoApplicationWindow::on_widget_position_changed(void) {
+void GPX2VideoApplicationWindow::on_widget_position_changed(GPX2VideoWidget *widget) {
 	log_call();
+
+	(void) widget;
 
 	widget_frame_->update();
 }
@@ -1084,23 +1099,37 @@ void GPX2VideoApplicationWindow::on_video_area_mouse_leave(void) {
 }
 
 
-void GPX2VideoApplicationWindow::on_video_area_mouse_pressed(int n_press, double x, double y) {
-	log_call();
-
-	GPX2VideoWidget *widget;
-
-	(void) n_press;
-
-	// Get widget
-	widget = video_area_->get_widget_at(x, y);
-
-	// Make widget stackpage visible
-	if (widget != NULL)
-		info_stack_->set_visible_child(*widget_stackpage_);
-
-	// Select / unselect the widget
-	widget_stackpage_->set_widget_selected(widget);
-}
+//void GPX2VideoApplicationWindow::on_video_area_mouse_pressed(int n_press, double x, double y) {
+//	log_call();
+//
+//	GPX2VideoWidget *widget;
+//
+//	(void) n_press;
+//
+//	// Get widget
+//	widget = video_area_->get_widget_at(x, y);
+//
+//	if (widget != NULL) {
+//		// Make cursor visible
+//		video_area_->set_cursor_visible(true, x, y);
+//
+//		// Make widget stackpage visible
+//		info_stack_->set_visible_child(*widget_stackpage_);
+//	}
+//
+//	// Select / unselect the widget
+//	widget_stackpage_->set_widget_selected(widget);
+//}
+//
+//
+//void GPX2VideoApplicationWindow::on_video_area_mouse_released(int n_press, double x, double y) {
+//	log_call();
+//
+//	(void) n_press;
+//
+//	// Make cursor not visible
+//	video_area_->set_cursor_visible(false, x, y);
+//}
 
 
 /**
@@ -1129,6 +1158,19 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 	video_frame_->set_visible((name == "video_page"));
 	telemetry_frame_->set_visible((name == "telemetry_page"));
 	widget_frame_->set_visible((name == "widget_page"));
+}
+
+
+void GPX2VideoApplicationWindow::on_widget_clicked(GPX2VideoWidget *widget) {
+	log_call();
+
+	if (widget != NULL) {
+		// Make widget stackpage visible
+		info_stack_->set_visible_child(*widget_stackpage_);
+	}
+
+	// Select / unselect the widget
+	widget_stackpage_->set_widget_selected(widget);
 }
 
 

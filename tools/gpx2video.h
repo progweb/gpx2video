@@ -50,10 +50,14 @@ public:
 			TelemetrySettings::Filter telemetry_filter=TelemetrySettings::FilterNone,
 			TelemetrySettings::Method telemetry_method=TelemetrySettings::MethodNone,
 			int telemetry_rate=0,
+			TelemetrySettings::Smooth telemetry_smooth_position_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_position_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_grade_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_grade_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_speed_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_speed_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_heading_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_heading_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_elevation_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_elevation_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_acceleration_method=TelemetrySettings::SmoothNone,
@@ -100,11 +104,17 @@ public:
 
 			TelemetrySettings::setTelemetryFilter(telemetry_filter);
 
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataPosition, telemetry_smooth_position_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataPosition, telemetry_smooth_position_points);
+
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataGrade, telemetry_smooth_grade_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataGrade, telemetry_smooth_grade_points);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataSpeed, telemetry_smooth_speed_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataSpeed, telemetry_smooth_speed_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataHeading, telemetry_smooth_heading_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataHeading, telemetry_smooth_heading_points);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataElevation, telemetry_smooth_elevation_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataElevation, telemetry_smooth_elevation_points);

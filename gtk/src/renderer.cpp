@@ -245,8 +245,35 @@ const std::list<GPX2VideoWidget *>& GPX2VideoRenderer::widgets(void) {
 }
 
 
-void GPX2VideoRenderer::append(GPX2VideoWidget *widget) {
+void GPX2VideoRenderer::append(VideoWidget::Widget type) {
 	log_call();
+
+	VideoWidget *item;
+	GPX2VideoWidget *widget;
+
+	// Widget drawing...
+	app_.remove(this);
+
+	// Create widget from type
+	item = Renderer::create(type);
+
+	// Create gtk widget 
+	widget = GPX2VideoWidget::create(item);
+	widget->init_buffers();
+	widget->set_timestamp(timestamp_);
+	widget->setLayoutSize(layout_width_, layout_height_);
+
+	// Append
+	widgets_.push_back(widget);
+
+	// Register tasks
+	app_.append(this);
+
+	// Broadcast event
+	signal_widget_appened_.emit(widget);
+
+	// Force widget drawing
+	refresh();
 }
 
 
@@ -420,7 +447,7 @@ void GPX2VideoRenderer::compute(void) {
 	Renderer::computeWidgetsPosition();
 
 	// Broadcast event
-	widget_position_dispatcher_.emit();
+	signal_widget_position_changed_.emit(NULL);
 }
 
 

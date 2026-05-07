@@ -180,6 +180,8 @@ protected:
 	bool loadWidget(layout::Widget *w);
 	void computeWidgetsPosition(void);
 
+	VideoWidget * create(VideoWidget::Widget type);
+
 	void rotate(OIIO::ImageBuf *buf, int orientation);
 	void resize(OIIO::ImageBuf *buf, int width, int height);
 	void add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const char *label, const char *value, double divider=1.9);
