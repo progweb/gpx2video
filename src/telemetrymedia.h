@@ -221,6 +221,8 @@ public:
 			if (!hasValue(TelemetryData::DataFix)) {
 				lat_ = point.lat_;
 				lon_ = point.lon_;
+				raw_lat_ = point.raw_lat_;
+				raw_lon_ = point.raw_lon_;
 				mask |= (point.has_value_ & DataFix);
 			}
 
@@ -501,22 +503,6 @@ public:
 
 	void setNumberOfPoints(const unsigned long number);
 
-//	void skipBadPoint(bool check);
-//	void setPauseDetection(bool enable);
-//
-//	void setFilter(enum TelemetrySettings::Filter method=TelemetrySettings::FilterNone);
-//	void setMethod(enum TelemetrySettings::Method method=TelemetrySettings::MethodNone);
-//	void setRate(int rate);
-//
-//	void setSmoothMethod(enum TelemetryData::Data type, enum TelemetrySettings::Smooth method);
-//	void setSmoothPoints(enum TelemetryData::Data type, int number);
-//
-//	bool setDataRange(std::string begin, std::string end);
-//	bool setComputeRange(std::string from, std::string to);
-//
-//	int64_t timeOffset(void) const;
-//	void setTimeOffset(const int64_t& offset);
-
 	// Getter
 	TelemetrySettings& settings(void) {
 		return settings_;
@@ -600,21 +586,6 @@ protected:
 
 	enum TelemetrySettings::Filter filter_;
 	enum TelemetrySettings::Method method_;
-
-//	enum TelemetrySettings::Smooth smooth_grade_method_;
-//	int smooth_grade_points_;
-//
-//	enum TelemetrySettings::Smooth smooth_speed_method_;
-//	int smooth_speed_points_;
-//
-//	enum TelemetrySettings::Smooth smooth_elevation_method_;
-//	int smooth_elevation_points_;
-//
-//	enum TelemetrySettings::Smooth smooth_acceleration_method_;
-//	int smooth_acceleration_points_;
-//
-//	enum TelemetrySettings::Smooth smooth_verticalspeed_method_;
-//	int smooth_verticalspeed_points_;
 
 	KalmanFilter kalman_;
 };

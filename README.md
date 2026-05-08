@@ -779,8 +779,8 @@ $ ./gpxtools -i ACTIVITY.gpx \
 **--telemetry-filter** filter and update all incoherent points, then compute telemetry data.
 
 **--telemetry-smooth** to smooth telemetry data results on several points. Telemetry smooth argument 
-format value is: "data=type,method=<smooth method>,points=<number of points>". Data type can be "position", 
-"grade", "speed", "heading", "elevation" or "acceleration". 
+format value is: "data=type,method=<smooth method>,points=<number of points>". Data type can be
+"grade", "speed", "heading", "elevation", "acceleration" or "verticalspeed". 
 
 Smooth method is given by the option **--telemtry-smooth-list**.
 

@@ -191,8 +191,6 @@ int GPXTools::parseTelemetrySmoothArg(char *arg,
 
 			if (name == "all")
 				type = TelemetryData::DataAll;
-			else if (name == "position")
-				type = TelemetryData::DataPosition;
 			else if (name == "grade")
 				type = TelemetryData::DataGrade;
 			else if (name == "speed")
@@ -339,11 +337,6 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 				parseTelemetrySmoothArg(optarg, type, method, number);
 
 				switch (type) {
-				case TelemetryData::DataPosition:
-					telemetry_smooth_position_method = method;
-					telemetry_smooth_position_points = number;
-					break;
-
 				case TelemetryData::DataGrade:
 					telemetry_smooth_grade_method = method;
 					telemetry_smooth_grade_points = number;
@@ -617,9 +610,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryTo());
 
 			settings.setTelemetryFilter(app.settings().telemetryFilter());
-
-			settings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
-			settings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));

@@ -627,6 +627,8 @@ void TelemetrySource::compute(void) {
 	double dz = 0.0;
 
 	double sele = 0.0;
+	double sheading = 0.0;
+
 	double grade = 0.0;
 	double distance = 0.0;
 	double elevation = 0.0;
@@ -707,7 +709,10 @@ void TelemetrySource::compute(void) {
 			// In pause
 			ss++;
 
-			sele = pool_.current().elevation();
+			if (done == 0) {
+				sele = pool_.current().elevation();
+				sheading = pool_.current().heading();
+			}
 		}
 
 		// Pause detection
@@ -718,6 +723,7 @@ void TelemetrySource::compute(void) {
 					pool_.current().setPause(true);
 					pool_.current().setSpeed(0);
 					pool_.current().setAcceleration(0);
+					pool_.current().setHeading(sheading);
 					pool_.current().setElevation(sele);
 					pool_.current().setGrade(grade);
 
@@ -727,6 +733,7 @@ void TelemetrySource::compute(void) {
 						if (pool_.previous(k).hasValue(TelemetryData::DataFix)) {
 							pool_.previous(k).setSpeed(0);
 							pool_.previous(k).setAcceleration(0);
+							pool_.previous(k).setHeading(sheading);
 							pool_.previous(k).setElevation(sele);
 							pool_.previous(k).setGrade(grade);
 						}
@@ -783,6 +790,11 @@ void TelemetrySource::smooth_step_one(void) {
 	double elevation_sum = 0;
 	double acceleration_sum = 0;
 
+	TelemetrySettings::Smooth speed_method;
+	TelemetrySettings::Smooth heading_method;
+	TelemetrySettings::Smooth elevation_method;
+	TelemetrySettings::Smooth acceleration_method;
+
 	std::deque<Point> speed_points;
 	std::deque<Point> heading_points;
 	std::deque<Point> elevation_points;
@@ -792,6 +804,11 @@ void TelemetrySource::smooth_step_one(void) {
 
 	log_call();
 
+	speed_method = settings().telemetrySmoothMethod(TelemetryData::DataSpeed);
+	heading_method = settings().telemetrySmoothMethod(TelemetryData::DataHeading);
+	elevation_method = settings().telemetrySmoothMethod(TelemetryData::DataElevation);
+	acceleration_method = settings().telemetrySmoothMethod(TelemetryData::DataAcceleration);
+
 	speed_window = (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1 : 0;
 	heading_window = (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
@@ -800,9 +817,6 @@ void TelemetrySource::smooth_step_one(void) {
 		(settings().telemetrySmoothPoints(TelemetryData::DataElevation) * 2) + 1 : 0;
 	acceleration_window = (settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1 : 0;
-
-	if ((speed_window < 2) && (elevation_window < 2) && (heading_window < 2) && (acceleration_window < 2))
-		return;
 
 	// Fill 'speed' window
 	for (size_t i=0; i<speed_window/2; i++) {
@@ -877,80 +891,124 @@ void TelemetrySource::smooth_step_one(void) {
 			// speed
 			//-------
 
-			if (speed_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(speed_window/2 - 1);
+			if (speed_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (speed_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(speed_window/2 - 1);
 
-				// Save point
-				speed_points.emplace_back(nextPoint);
+					// Save point
+					speed_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						speed_sum += nextPoint.speed();
-						speed_count += 1;
-					}
-				}
-
-				// Remove old point
-				if (speed_points.size() > speed_window) {
-					previousPoint = speed_points.front();
-					speed_points.pop_front();
-
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						speed_sum -= previousPoint.speed();
-						speed_count -= 1;
-					}
-				}
-
-				// Compute 'speed' smooth values
-				if (pool_.current().hasValue(TelemetryData::DataFix)) {
-					if (!pool_.current().isPause()) {
-						pool_.current().setSpeed(speed_sum / speed_count);
-
-						if (pool_.current().hasValue(TelemetryData::DataMaxSpeed)) {
-							maxspeed = MAX(maxspeed, pool_.current().speed());
-
-							pool_.current().setMaxSpeed(maxspeed);
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							speed_sum += nextPoint.speed();
+							speed_count += 1;
 						}
 					}
-					// Don't update values in pause
-					else
-						pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+
+					// Remove old point
+					if (speed_points.size() > speed_window) {
+						previousPoint = speed_points.front();
+						speed_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							speed_sum -= previousPoint.speed();
+							speed_count -= 1;
+						}
+					}
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'speed' smooth values
+						if (!pool_.current().isPause()) {
+							pool_.current().setSpeed(speed_sum / speed_count);
+
+							if (pool_.current().hasValue(TelemetryData::DataMaxSpeed)) {
+								maxspeed = MAX(maxspeed, pool_.current().speed());
+
+								pool_.current().setMaxSpeed(maxspeed);
+							}
+						}
+						// Don't update values in pause
+						else
+							pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+					}
+				}
+			}
+			else if (speed_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'speed' smooth values
+						if (!pool_.current().isPause()) {
+							pool_.current().setSpeed(
+									(pool_.current().speed() + (pool_.previous().speed() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).speed() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+
+							if (pool_.current().hasValue(TelemetryData::DataMaxSpeed)) {
+								maxspeed = MAX(maxspeed, pool_.current().speed());
+
+								pool_.current().setMaxSpeed(maxspeed);
+							}
+						}
+						// Don't update values in pause
+						else
+							pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+					}
 				}
 			}
 
 			// heading
 			//---------
 
-			if (heading_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(heading_window/2 - 1);
+			if (heading_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (heading_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(heading_window/2 - 1);
 
-				// Save point
-				heading_points.emplace_back(nextPoint);
+					// Save point
+					heading_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						heading_sum += nextPoint.heading();
-						heading_count += 1;
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							heading_sum += nextPoint.heading();
+							heading_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (heading_points.size() > heading_window) {
+						previousPoint = heading_points.front();
+						heading_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							heading_sum -= previousPoint.heading();
+							heading_count -= 1;
+						}
+					}
+
+					// Compute 'heading' smooth values
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setHeading(heading_sum / heading_count);
+						}
 					}
 				}
+			}
+			else if (heading_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
 
-				// Remove old point
-				if (heading_points.size() > heading_window) {
-					previousPoint = heading_points.front();
-					heading_points.pop_front();
-
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						heading_sum -= previousPoint.heading();
-						heading_count -= 1;
-					}
-				}
-
-				// Compute 'heading' smooth values
-				if (pool_.current().hasValue(TelemetryData::DataFix)) {
-					if (!pool_.current().isPause()) {
-						pool_.current().setHeading(heading_sum / heading_count);
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setHeading(
+									(pool_.current().heading() + (pool_.previous().heading() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).heading() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
 					}
 				}
 			}
@@ -958,73 +1016,109 @@ void TelemetrySource::smooth_step_one(void) {
 			// elevation
 			//-----------
 
-			if (elevation_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(elevation_window/2 - 1);
+			if (elevation_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (elevation_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(elevation_window/2 - 1);
 
-				// Save point
-				elevation_points.emplace_back(nextPoint);
+					// Save point
+					elevation_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						elevation_sum += nextPoint.elevation();
-						elevation_count += 1;
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							elevation_sum += nextPoint.elevation();
+							elevation_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (elevation_points.size() > elevation_window) {
+						previousPoint = elevation_points.front();
+						elevation_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							elevation_sum -= previousPoint.elevation();
+							elevation_count -= 1;
+						}
+					}
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'elevation' smooth values
+						if (!pool_.current().isPause())
+							pool_.current().setElevation(elevation_sum / elevation_count);
+						// Don't update values in pause
+						else
+							pool_.current().setElevation(pool_.previous().elevation());
 					}
 				}
+			}
+			else if (elevation_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
 
-				// Remove old point
-				if (elevation_points.size() > elevation_window) {
-					previousPoint = elevation_points.front();
-					elevation_points.pop_front();
-
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						elevation_sum -= previousPoint.elevation();
-						elevation_count -= 1;
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'elevation' smooth values
+						if (!pool_.current().isPause()) {
+							pool_.current().setElevation(
+									(pool_.current().elevation() + (pool_.previous().elevation() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).elevation() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
 					}
-				}
-
-				// Compute 'elevation' smooth values
-				if (pool_.current().hasValue(TelemetryData::DataFix)) {
-					if (!pool_.current().isPause())
-						pool_.current().setElevation(elevation_sum / elevation_count);
-					// Don't update values in pause
-					else
-						pool_.current().setElevation(pool_.previous().elevation());
 				}
 			}
 
 			// acceleration
 			//--------------
 
-			if (acceleration_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(acceleration_window/2 - 1);
+			if (acceleration_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (acceleration_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(acceleration_window/2 - 1);
 
-				// Save point
-				acceleration_points.emplace_back(nextPoint);
+					// Save point
+					acceleration_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						acceleration_sum += nextPoint.acceleration();
-						acceleration_count +=1;
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							acceleration_sum += nextPoint.acceleration();
+							acceleration_count +=1;
+						}
 					}
-				}
 
-				// Remove old point
-				if (acceleration_points.size() > acceleration_window) {
-					previousPoint = acceleration_points.front();
-					acceleration_points.pop_front();
+					// Remove old point
+					if (acceleration_points.size() > acceleration_window) {
+						previousPoint = acceleration_points.front();
+						acceleration_points.pop_front();
 
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						acceleration_sum -= previousPoint.acceleration();
-						acceleration_count -= 1;
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							acceleration_sum -= previousPoint.acceleration();
+							acceleration_count -= 1;
+						}
 					}
-				}
 
-				// Compute 'acceleration' smooth values
-				if (!pool_.current().isPause()) {
+					// Compute 'acceleration' smooth values
 					if (pool_.current().hasValue(TelemetryData::DataFix)) {
-						pool_.current().setAcceleration(acceleration_sum / acceleration_count);
+						if (!pool_.current().isPause()) {
+							pool_.current().setAcceleration(acceleration_sum / acceleration_count);
+						}
+					}
+				}
+			}
+			else if (acceleration_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
+
+					// Compute 'acceleration' smooth values
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setAcceleration(
+									(pool_.current().acceleration() + (pool_.previous().acceleration() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).acceleration() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
 					}
 				}
 			}
@@ -1032,7 +1126,7 @@ void TelemetrySource::smooth_step_one(void) {
 			// slope (if elevation has changed)
 			//----------------------------------
 
-			if (elevation_window > 1) {
+			if (elevation_method != TelemetrySettings::SmoothNone) {
 				// Compute again slope with new smooth values
 				if (first) {
 					elevation = pool_.current().elevation();
@@ -1079,152 +1173,45 @@ void TelemetrySource::smooth_step_one(void) {
 
 void TelemetrySource::smooth_step_two(void) {
 	int grade_count = 0;
-	int position_count = 0;
 	int verticalspeed_count = 0;
 
-	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
-	size_t position_window = 0;
+	size_t grade_window = 0;
 	size_t verticalspeed_window = 0;
 
 	double grade_sum = 0;
-	double latitude_sum = 0;
-	double longitude_sum = 0;
 	double verticalspeed_sum = 0;
 
+	TelemetrySettings::Smooth grade_method;
+	TelemetrySettings::Smooth verticalspeed_method;
+
 	std::deque<Point> grade_points;
-	std::deque<Point> position_points;
 	std::deque<Point> verticalspeed_points;
 
 	TelemetrySource::Point nextPoint, previousPoint;
 
 	log_call();
 
-	position_window = (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
-		(settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1 : 0;
+	grade_method = settings().telemetrySmoothMethod(TelemetryData::DataGrade);
+	verticalspeed_method = settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed);
+
+	grade_window = (settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
+		(settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1 : 0;
 	verticalspeed_window = (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) 
 		? (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1 : 0;
 
-	switch (settings().telemetrySmoothMethod(TelemetryData::DataGrade)) {
-	case TelemetrySettings::SmoothWindowedMovingAverage:
-		if (grade_window < 2)
-			return;
-
-		// Fill 'grade' window
-		for (size_t i=0; i<grade_window/2; i++) {
-			nextPoint = pool_.next(i);
-
-			if (nextPoint.type() == TelemetryData::TypeUnknown)
-				break;
-
-			// Save point
-			grade_points.emplace_back(nextPoint);
-
-			if (nextPoint.hasValue(TelemetryData::DataFix)) {
-				grade_sum += nextPoint.grade();
-				grade_count += 1;
-			}
-		}
-
-		// Move to first point
-		pool_.seek(1);
-
-		// Compute average value for each point
-		while (!pool_.empty()) {
-			if (pool_.current().type() != TelemetryData::TypeError) {
-				// grade
-				//-------
-
-				if (grade_window > 1) {
-					// Add new point
-					nextPoint = pool_.next(grade_window/2 - 1);
-
-					// Save point
-					grade_points.emplace_back(nextPoint);
-
-					if (nextPoint.type() != TelemetryData::TypeUnknown) {
-						if (nextPoint.hasValue(TelemetryData::DataFix)) {
-							grade_sum += nextPoint.grade();
-							grade_count += 1;
-						}
-					}
-
-					// Remove old point
-					if (grade_points.size() > grade_window) {
-						previousPoint = grade_points.front();
-						grade_points.pop_front();
-
-						if (previousPoint.hasValue(TelemetryData::DataFix)) {
-							grade_sum -= previousPoint.grade();
-							grade_count -= 1;
-						}
-					}
-
-					// Compute smooth values: grade
-					if (!pool_.current().isPause()) {
-						if (pool_.current().hasValue(TelemetryData::DataFix)) {
-							pool_.current().setGrade(grade_sum / grade_count);
-						}
-					}
-					// Don't update values in pause
-					else {
-						if (pool_.current().hasValue(TelemetryData::DataFix)) {
-							pool_.current().setGrade(pool_.previous().grade());
-						}
-					}
-				}
-			}
-
-			// Move to next
-			pool_.seek(1);
-		}
-
-		break;
-
-	case TelemetrySettings::SmoothButterworth:
-		// Compute average value for each point
-		while (!pool_.empty()) {
-			if (pool_.tell() > 2) {
-				if (pool_.current().type() != TelemetryData::TypeError) {
-					double a = 4.0;
-					double z = 0.7;
-
-					pool_.current().setGrade(
-							(pool_.current().grade() + (pool_.previous().grade() * (a + ((a * a) / (2 * z * z)))) \
-							- (pool_.previous(1).grade() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
-					);
-				}
-			}
-
-			// Move to next
-			pool_.seek(1);
-		}
-
-		break;
-
-	default:
-		// No data smooth
-		break;
-	}
-
-	pool_.reset();
-
-	if ((position_window < 2) && (verticalspeed_window < 2))
-		return;
-
-	// Fill 'position' window
-	for (size_t i=0; i<position_window/2; i++) {
+	// Fill 'grade' window
+	for (size_t i=0; i<grade_window/2; i++) {
 		nextPoint = pool_.next(i);
 
 		if (nextPoint.type() == TelemetryData::TypeUnknown)
 			break;
 
 		// Save point
-		position_points.emplace_back(nextPoint);
+		grade_points.emplace_back(nextPoint);
 
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			latitude_sum += nextPoint.latitude();
-			longitude_sum += nextPoint.longitude();
-			position_count += 1;
+			grade_sum += nextPoint.grade();
+			grade_count += 1;
 		}
 	}
 
@@ -1250,42 +1237,64 @@ void TelemetrySource::smooth_step_two(void) {
 	// Compute average value for each point
 	while (!pool_.empty()) {
 		if (pool_.current().type() != TelemetryData::TypeError) {
-			// position
-			//--------------
+			// grade
+			//-------
 
-			if (position_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(position_window/2 - 1);
+			if (grade_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (grade_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(grade_window/2 - 1);
 
-				// Save point
-				position_points.emplace_back(nextPoint);
+					// Save point
+					grade_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						latitude_sum += nextPoint.latitude();
-						longitude_sum += nextPoint.longitude();
-						position_count += 1;
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							grade_sum += nextPoint.grade();
+							grade_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (grade_points.size() > grade_window) {
+						previousPoint = grade_points.front();
+						grade_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							grade_sum -= previousPoint.grade();
+							grade_count -= 1;
+						}
+					}
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute smooth values: grade
+						if (!pool_.current().isPause()) {
+							pool_.current().setGrade(grade_sum / grade_count);
+						}
+						// Don't update values in pause
+						else {
+							pool_.current().setGrade(pool_.previous().grade());
+						}
 					}
 				}
+			}
+			else if (grade_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
 
-				// Remove old point
-				if (position_points.size() > position_window) {
-					previousPoint = position_points.front();
-					position_points.pop_front();
-
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						latitude_sum -= previousPoint.latitude();
-						longitude_sum -= previousPoint.longitude();
-						position_count -= 1;
-					}
-				}
-
-				// Compute 'position' smooth values
-				if (pool_.current().hasValue(TelemetryData::DataFix)) {
-					if (!pool_.current().isPause()) {
-						pool_.current().setPosition(
-								latitude_sum / position_count,
-								longitude_sum / position_count);
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute smooth values: grade
+						if (!pool_.current().isPause()) {
+							pool_.current().setGrade(
+									(pool_.current().grade() + (pool_.previous().grade() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).grade() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
+						// Don't update values in pause
+						else {
+							pool_.current().setGrade(pool_.previous().grade());
+						}
 					}
 				}
 			}
@@ -1293,35 +1302,52 @@ void TelemetrySource::smooth_step_two(void) {
 			// verticalspeed
 			//--------------
 
-			if (verticalspeed_window > 1) {
-				// Add new point
-				nextPoint = pool_.next(verticalspeed_window/2 - 1);
+			if (verticalspeed_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (verticalspeed_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(verticalspeed_window/2 - 1);
 
-				// Save point
-				verticalspeed_points.emplace_back(nextPoint);
+					// Save point
+					verticalspeed_points.emplace_back(nextPoint);
 
-				if (nextPoint.type() != TelemetryData::TypeUnknown) {
-					if (nextPoint.hasValue(TelemetryData::DataFix)) {
-						verticalspeed_sum += nextPoint.verticalspeed();
-						verticalspeed_count += 1;
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							verticalspeed_sum += nextPoint.verticalspeed();
+							verticalspeed_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (verticalspeed_points.size() > verticalspeed_window) {
+						previousPoint = verticalspeed_points.front();
+						verticalspeed_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							verticalspeed_sum -= previousPoint.verticalspeed();
+							verticalspeed_count -= 1;
+						}
+					}
+
+					// Compute 'verticalspeed' smooth values
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setVerticalSpeed(verticalspeed_sum / verticalspeed_count);
+						}
 					}
 				}
+			}
+			else if (verticalspeed_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
 
-				// Remove old point
-				if (verticalspeed_points.size() > verticalspeed_window) {
-					previousPoint = verticalspeed_points.front();
-					verticalspeed_points.pop_front();
-
-					if (previousPoint.hasValue(TelemetryData::DataFix)) {
-						verticalspeed_sum -= previousPoint.verticalspeed();
-						verticalspeed_count -= 1;
-					}
-				}
-
-				// Compute 'verticalspeed' smooth values
-				if (pool_.current().hasValue(TelemetryData::DataFix)) {
-					if (!pool_.current().isPause()) {
-						pool_.current().setVerticalSpeed(verticalspeed_sum / verticalspeed_count);
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setVerticalSpeed(
+									(pool_.current().verticalspeed() + (pool_.previous().verticalspeed() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).verticalspeed() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
 					}
 				}
 			}
@@ -1337,7 +1363,6 @@ void TelemetrySource::smooth_step_two(void) {
 
 
 void TelemetrySource::smooth(void) {
-	size_t position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
 	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
 	size_t speed_window = (settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1;
 	size_t heading_window = (settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1;
@@ -1350,12 +1375,6 @@ void TelemetrySource::smooth(void) {
 	if (!quiet_) {
 		// 1/
 		log_info("%s: Smooth telemetry data using 'windowed moving average' filter ", name().c_str());
-
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) && (position_window > 1))
-			log_info("     - position: window size '%ld' (+/- %d points)", 
-					position_window, settings().telemetrySmoothPoints(TelemetryData::DataPosition));
-		else
-			log_info("     - position: no");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) && (grade_window > 1))
 			log_info("     - grade: window size '%ld' (+/- %d points)", 
@@ -1400,6 +1419,31 @@ void TelemetrySource::smooth(void) {
 			log_info("     - grade: a = 4.0 / z = 0.7");
 		else
 			log_info("     - grade: no");
+
+		if (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothButterworth)
+			log_info("     - speed: a = 4.0 / z = 0.7");
+		else
+			log_info("     - speed: no");
+
+		if (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothButterworth)
+			log_info("     - heading: a = 4.0 / z = 0.7");
+		else
+			log_info("     - heading: no");
+
+		if (settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothButterworth)
+			log_info("     - elevation: a = 4.0 / z = 0.7");
+		else
+			log_info("     - elevation: no");
+
+		if (settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothButterworth)
+			log_info("     - acceleration: a = 4.0 / z = 0.7");
+		else
+			log_info("     - acceleration: no");
+
+		if (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothButterworth)
+			log_info("     - verticalspeed: a = 4.0 / z = 0.7");
+		else
+			log_info("     - verticalspeed: no");
 	}
 
 	smooth_step_one();
@@ -2129,36 +2173,6 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 		// Telemetry settings
 		source->setSettings(settings);
-
-//		// Timestamp offset
-//		source->setTimeOffset(settings.telemetryOffset());
-//
-//		// Telemetry range
-//		ok &= source->setDataRange(settings.telemetryBegin(), settings.telemetryEnd());
-//		ok &= source->setComputeRange(settings.telemetryFrom(), settings.telemetryTo());
-//
-//		// Telemetry data filter
-//		source->skipBadPoint(settings.telemetryCheck());
-//		source->setPauseDetection(settings.telemetryPauseDetection());
-//		source->setFilter(settings.telemetryFilter());
-//		source->setMethod(settings.telemetryMethod());
-//		source->setRate(settings.telemetryRate());
-//
-//		// Telemetry data smooth
-//		source->setSmoothMethod(TelemetryData::DataGrade, settings.telemetrySmoothMethod(TelemetryData::DataGrade));
-//		source->setSmoothPoints(TelemetryData::DataGrade, settings.telemetrySmoothPoints(TelemetryData::DataGrade));
-//
-//		source->setSmoothMethod(TelemetryData::DataSpeed, settings.telemetrySmoothMethod(TelemetryData::DataSpeed));
-//		source->setSmoothPoints(TelemetryData::DataSpeed, settings.telemetrySmoothPoints(TelemetryData::DataSpeed));
-//
-//		source->setSmoothMethod(TelemetryData::DataElevation, settings.telemetrySmoothMethod(TelemetryData::DataElevation));
-//		source->setSmoothPoints(TelemetryData::DataElevation, settings.telemetrySmoothPoints(TelemetryData::DataElevation));
-//
-//		source->setSmoothMethod(TelemetryData::DataAcceleration, settings.telemetrySmoothMethod(TelemetryData::DataAcceleration));
-//		source->setSmoothPoints(TelemetryData::DataAcceleration, settings.telemetrySmoothPoints(TelemetryData::DataAcceleration));
-//
-//		source->setSmoothMethod(TelemetryData::DataVerticalSpeed, settings.telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
-//		source->setSmoothPoints(TelemetryData::DataVerticalSpeed, settings.telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
 		// Load telemetry data
 		source->loadData();

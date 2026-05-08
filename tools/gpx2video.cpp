@@ -407,8 +407,6 @@ int GPX2Video::parseTelemetrySmoothArg(char *arg,
 
 			if (name == "all")
 				type = TelemetryData::DataAll;
-			else if (name == "position")
-				type = TelemetryData::DataPosition;
 			else if (name == "grade")
 				type = TelemetryData::DataGrade;
 			else if (name == "speed")
@@ -631,11 +629,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				parseTelemetrySmoothArg(optarg, type, method, number);
 
 				switch (type) {
-				case TelemetryData::DataPosition:
-					telemetry_smooth_position_method = method;
-					telemetry_smooth_position_points = number;
-					break;
-
 				case TelemetryData::DataGrade:
 					telemetry_smooth_grade_method = method;
 					telemetry_smooth_grade_points = number;
@@ -1182,9 +1175,6 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
-			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
-			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
-
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
 
@@ -1232,9 +1222,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
-
-			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
-			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
@@ -1304,9 +1291,6 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
-
-			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
-			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
