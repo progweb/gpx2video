@@ -98,12 +98,16 @@ private:
 
 	VideoWidget *widget_;
 
+	std::string icon_filename_;
+
 	DateTextShape(VideoWidget *widget) 
 		: TextShape(widget->theme())
 		, bg_buf_(NULL)
 		, fg_buf_(NULL) 
 		, widget_(widget) {
 		last_time_ = 0;
+
+		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(void);

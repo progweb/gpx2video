@@ -110,6 +110,7 @@ public:
 		CommandFilter, 	// Dump telemetry filter supported
 		CommandMethod,  // Dump telemetry method supported
 		CommandSmooth,  // Dump telemetry smooth supported
+		CommandWidget,  // Dump widget supported
 		CommandSync,	// Auto sync video time with gps sensor
 		CommandExtract,	// Extract gps sensor data from video
 		CommandClear,	// Clear cache directories
@@ -145,6 +146,8 @@ public:
 	void setCommand(const Command &command) {
 		command_ = command;
 	}
+
+	static std::string assets(const std::string &path = "");
 
 	void append(Task *task) {
 		task->reset();

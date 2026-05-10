@@ -31,7 +31,7 @@ void PositionTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, "./assets/picto/DataOverlay_icn_position.svg");
+		icon(cr, icon_filename_);
 	}
 
 	// Draw label

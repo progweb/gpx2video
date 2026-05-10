@@ -1177,6 +1177,16 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	case VideoWidget::WidgetLap:
 		widget = LapWidget::create(app_);
 		break;
+	case VideoWidget::WidgetMap: {
+			MapSettings mapSettings;
+			widget = Map::create(app_, telemetrySettings(), mapSettings);
+		}
+		break;
+	case VideoWidget::WidgetTrack: {
+			TrackSettings trackSettings;
+			widget = Track::create(app_, telemetrySettings(), trackSettings);
+		}
+		break;
 	default:
 		log_error("Widget unknown type, '%s' type unknown", VideoWidget::widget2string(type).c_str());
 		break;

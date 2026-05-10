@@ -65,6 +65,7 @@ static const struct option options[] = {
 	{ "telemetry-rate",             required_argument, 0, 0 },
 	{ "telemetry-smooth",           required_argument, 0, 0 },
 	{ "telemetry-smooth-list",      no_argument,       0, 0 },
+	{ "widget-list",                no_argument,       0, 0 },
 	{ "video-codec",                optional_argument, 0, 0 },
 	{ "video-hwdevice",             optional_argument, 0, 0 },
 	{ "video-preset",               required_argument, 0, 0 },
@@ -115,9 +116,10 @@ static void print_usage(const std::string &name) {
 	std::cout << "Option format:" << std::endl;
 	std::cout << "\t-    --extract-format-list             : Dump extract format supported" << std::endl;
 	std::cout << "\t-    --map-source-list                 : Dump supported map providers list" << std::endl;
-	std::cout << "\t-    --telemetry-filter-list           : Dump telemetry filter supported" << std::endl;
-	std::cout << "\t-    --telemetry-method-list           : Dump telemetry method supported" << std::endl;
-	std::cout << "\t-    --telemetry-smooth-list           : Dump telemetry smooth supported" << std::endl;
+	std::cout << "\t-    --telemetry-filter-list           : Dump supported telemetry filter" << std::endl;
+	std::cout << "\t-    --telemetry-method-list           : Dump supported telemetry method" << std::endl;
+	std::cout << "\t-    --telemetry-smooth-list           : Dump supported telemetry smooth" << std::endl;
+	std::cout << "\t-    --widget-list                     : Dump supported widget" << std::endl;
 	std::cout << std::endl;
 	std::cout << "Encoder options:" << std::endl;
 	std::cout << "\t-    --video-codec                     : Video encoder codec name" << std::endl;
@@ -213,6 +215,22 @@ static void print_smooth_supported(const std::string &name) {
 		std::string name = TelemetrySettings::getFriendlySmoothName((TelemetrySettings::Smooth) i);
 
 		std::cout << "\t- " << i << ":\t" << name << std::endl;
+	}
+}
+
+static void print_widget_supported(const std::string &name) {
+	int i;
+
+	log_call();
+
+	std::cout << "Widget supported: " << name << std::endl;
+
+	for (i=0; i != VideoWidget::WidgetUnknown; i++) {
+		VideoWidget::Widget type = (VideoWidget::Widget) i;
+
+		std::string name = VideoWidget::getFriendlyName(type);
+
+		std::cout << "\t- " << VideoWidget::widget2string(type) << ":\t" << name << std::endl;
 	}
 }
 
@@ -691,6 +709,10 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				setCommand(GPX2Video::CommandSmooth);
 				return 0;
 			}
+			else if (s && !strcmp(s, "widget-list")) {
+				setCommand(GPX2Video::CommandWidget);
+				return 0;
+			}
 			else if (s && !strcmp(s, "video-codec")) {
 				if (optarg == NULL) {
 					std::cout << std::endl;
@@ -854,6 +876,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		}
 		else if (!strcmp(argv[0], "smooth")) {
 			setCommand(GPX2Video::CommandSmooth);
+		}
+		else if (!strcmp(argv[0], "widget")) {
+			setCommand(GPX2Video::CommandWidget);
 		}
 		else if (!strcmp(argv[0], "extract")) {
 			setCommand(GPX2Video::CommandExtract);
@@ -1050,7 +1075,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	// ::TMP:: Check assets directory 
 	{
-    	std::ifstream stream = std::ifstream("./assets/marker/position.png");
+    	std::ifstream stream = std::ifstream(GPXApplication::assets("marker") + "/position.png");
 
 		if (!stream.is_open()) {
 			log_error("Can't read assets directory");
@@ -1084,6 +1109,11 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	case GPX2Video::CommandSmooth:
 		gpx2video::print_smooth_supported(name);
+		goto exit;
+		break;
+
+	case GPX2Video::CommandWidget:
+		gpx2video::print_widget_supported(name);
 		goto exit;
 		break;
 

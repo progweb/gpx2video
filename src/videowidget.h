@@ -977,6 +977,9 @@ public:
 	static std::string needletype2string(Theme::NeedleType type);
 	static std::string unit2string(Unit unit, bool label=true);
 
+	static std::string getIconFilename(Widget type);
+	static std::string getFriendlyName(Widget type);
+
 protected:
 	VideoWidget(GPXApplication &app, Widget type)  
 		: GPXApplication::Task(app, widget2string(type))

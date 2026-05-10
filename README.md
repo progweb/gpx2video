@@ -219,6 +219,15 @@ $ ./gpx2video -h
 
 *Please execute gpx2video tool from the build path so as it finds assets data.*
 
+### Assets installation
+
+gpx2video searches assets path in the order:
+- <builddir>/assets
+- <sourcedir>/assets
+- /usr/share/gpx2video
+- $HOME/.local/share/gpx2video
+- ./assets
+
 
 ## Usage
 

@@ -19,14 +19,14 @@
  */
 
 VideoWidget::Theme::Theme() {
-	setSize(64, 64);
+	setSize(240, 50);
 	setFlags(VideoWidget::Theme::FlagAll);
 
-	setPadding(VideoWidget::Theme::PaddingAll, 0);
+	setPadding(VideoWidget::Theme::PaddingAll, 3);
 
-	setBorder(0);
-	setBorderColor(0.0, 0.0, 0.0, 0.0);
-	setBackgroundColor(0.0, 0.0, 0.0, 0.0);
+	setBorder(1);
+	setBorderColor(0.0, 0.0, 0.0, 1.0);
+	setBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
 	setTickAlign(VideoWidget::Theme::AlignCenter);
 	setTickColor(1.0, 1.0, 1.0, 1.0);
@@ -47,7 +47,7 @@ VideoWidget::Theme::Theme() {
 	setFont("./assets/fonts/Helvetica.ttf");
 
 	setLabelFontFamily("Sans");
-	setLabelFontSize(30);
+	setLabelFontSize(15);
 	setLabelFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setLabelFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setLabelShadowOpacity(80);
@@ -60,7 +60,7 @@ VideoWidget::Theme::Theme() {
 	setValueMin(0);
 	setValueMax(1000);
 	setValueFontFamily("Sans");
-	setValueFontSize(60);
+	setValueFontSize(25);
 	setValueFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setValueFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setValueShadowOpacity(80);
@@ -646,421 +646,125 @@ void VideoWidget::xmlwrite(std::ostream &os) {
 }
 
 
+std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
+	log_call();
+
+	std::string path = GPXApplication::assets("icons");
+
+	switch (type) {
+	case VideoWidget::WidgetAverageSpeed:
+	case VideoWidget::WidgetAverageRideSpeed:
+		return path + "/DataOverlay_icn_avgspeed.svg";
+	case VideoWidget::WidgetCadence:
+		return path + "/DataOverlay_icn_cadence.svg";
+	case VideoWidget::WidgetDate:
+		return path + "/DataOverlay_icn_date.svg";
+	case VideoWidget::WidgetDistance:
+		return path + "/DataOverlay_icn_distance.svg";
+	case VideoWidget::WidgetDuration:
+		return path + "/DataOverlay_icn_duration.svg";
+	case VideoWidget::WidgetElevation:
+		return path + "/DataOverlay_icn_elevation.svg";
+	case VideoWidget::WidgetGForce:
+		return path + "/DataOverlay_icn_gforce.svg";
+	case VideoWidget::WidgetGPX:
+		return path + "/DataOverlay_icn_position.svg";
+	case VideoWidget::WidgetGrade:
+		return path + "/DataOverlay_icn_grade.svg";
+	case VideoWidget::WidgetHeading:
+		return path + "/DataOverlay_icn_compass.svg";
+	case VideoWidget::WidgetHeartRate:
+		return path + "/DataOverlay_icn_heartrate.svg";
+	case VideoWidget::WidgetImage:
+		return "Image";
+	case VideoWidget::WidgetLap:
+		return path + "/DataOverlay_icn_laps.svg";
+	case VideoWidget::WidgetMap:
+		return "Map";
+	case VideoWidget::WidgetMaxSpeed:
+		return path + "/DataOverlay_icn_maxspeed.svg";
+	case VideoWidget::WidgetPosition:
+		return path + "/DataOverlay_icn_position.svg";
+	case VideoWidget::WidgetPower:
+		return path + "/DataOverlay_icn_power.svg";
+	case VideoWidget::WidgetSpeed:
+		return path + "/DataOverlay_icn_speed.svg";
+	case VideoWidget::WidgetTemperature:
+		return path + "/DataOverlay_icn_temperature.svg";
+	case VideoWidget::WidgetText:
+		return "Txt";
+	case VideoWidget::WidgetTime:
+		return path + "/DataOverlay_icn_time.svg";
+	case VideoWidget::WidgetTrack:
+		return "Track";
+	case VideoWidget::WidgetVerticalSpeed:
+		return path + "/DataOverlay_icn_aviationAltitude.svg";
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
+	switch (type) {
+	case VideoWidget::WidgetAverageSpeed:
+		return "Average speed";
+	case VideoWidget::WidgetAverageRideSpeed:
+		return "Average ride speed";
+	case VideoWidget::WidgetCadence:
+		return "Cadence";
+	case VideoWidget::WidgetDate:
+		return "Date";
+	case VideoWidget::WidgetDistance:
+		return "Distance";
+	case VideoWidget::WidgetDuration:
+		return "Duration";
+	case VideoWidget::WidgetElevation:
+		return "Elevation";
+	case VideoWidget::WidgetGForce:
+		return "GForce";
+	case VideoWidget::WidgetGPX:
+		return "GPX";
+	case VideoWidget::WidgetGrade:
+		return "Grade / Slope";
+	case VideoWidget::WidgetHeading:
+		return "Heading";
+	case VideoWidget::WidgetHeartRate:
+		return "Heart rate";
+	case VideoWidget::WidgetImage:
+		return "Image";
+	case VideoWidget::WidgetLap:
+		return "Lap";
+	case VideoWidget::WidgetMap:
+		return "Map";
+	case VideoWidget::WidgetMaxSpeed:
+		return "Maximum speed";
+	case VideoWidget::WidgetPosition:
+		return "Position";
+	case VideoWidget::WidgetPower:
+		return "Power";
+	case VideoWidget::WidgetSpeed:
+		return "Speed";
+	case VideoWidget::WidgetTemperature:
+		return "Temperature";
+	case VideoWidget::WidgetText:
+		return "Text";
+	case VideoWidget::WidgetTime:
+		return "Time";
+	case VideoWidget::WidgetTrack:
+		return "Track";
+	case VideoWidget::WidgetVerticalSpeed:
+		return "Vertical speed";
+	default:
+		return "";
+	}
+}
+
+
 void VideoWidget::dump(void) {
 	log_call();
 
 	printf("[%s] x: %d / y: %d - size: %dx%d\n", 
 			name().c_str(), x(), y(), theme().width(), theme().height());
 }
-
-
-//void VideoWidget::initialize(void) {
-//	bool ok;
-//
-//	int height;
-//
-//	int px;
-//	int x1, y1, x2, y2;
-//	int text_width, text_height;
-//
-//	double ratio = theme().textRatio();
-//
-//	int border = theme().border();
-//	int padding_yt = theme().padding(VideoWidget::Theme::PaddingTop);
-//	int padding_yb = theme().padding(VideoWidget::Theme::PaddingBottom);
-//
-//	bool with_label = theme().hasFlag(VideoWidget::Theme::FlagLabel);
-//	bool with_value = theme().hasFlag(VideoWidget::Theme::FlagValue);
-//
-//	const char *text = "0123456789/";
-//
-//	// Compute font size (1 pt = 1.333 px) for "label" text
-//	// +-----------------------+  /  no label:
-//	// |  Label    px          |  /  +-------------------+
-//	// |  Value    ratio * px  |  /  |  Value     px     |
-//	// +-----------------------+  /  +-------------------+
-//	//        h = px + ratio * px + padding_top + padding_bottom
-//	if (with_label && !label().empty()) {
-//		px = theme().height() - 2 * border - padding_yt - theme().textLineSpace() - padding_yb;
-//		px = (int) floor((double) px / (1.0 + ratio));
-//		// pt = 3 * px / 4;
-//
-//		for (height=px;; px += 1) {
-//			this->textSize(label().c_str(), px,
-//					x1, y1, x2, y2,
-//					text_width, text_height);
-//
-//			if (text_height > height)
-//				break;
-//
-//			label_px_ = px;
-//			label_size_ = text_height;
-//		}
-//	}
-//
-//	// Compute font size (1 pt = 1.333 px) for "value" text
-//	// +-------------------+  /  no label:
-//	// |  Label    px      |  /  +-------------------+
-//	// |  Value    2 * px  |  /  |  Value     px     |
-//	// +-------------------+  /  +-------------------+
-//	//        h = px + 2 * px + padding_top + padding_bottom
-//	if (with_value) {
-//		px = theme().height() - 2 * border - padding_yt - padding_yb;
-//		px = with_label ? (int) floor((double) (px - theme().textLineSpace()) * ratio / (1.0 + ratio)) : px;
-//		// pt = 3 * px / 4;
-//
-//		for (height=px;; px += 1) {
-//			ok = this->textSize(text, px,
-//					x1, y1, x2, y2,
-//					text_width, text_height);
-//
-//			if (!ok) {
-//				printf("ERROR: %s %d %d", text, height, px);
-//				sleep(2);
-//			}
-//
-//			if (text_height > height)
-//				break;
-//
-//			value_px_ = px;
-//			value_size_ = text_height;
-//			value_offset_ = y1;
-//		}
-//	}
-//}
-//
-//
-//void VideoWidget::createBox(OIIO::ImageBuf **buf, int width, int height) {
-//	// Create an image buffer with static render
-//	*buf = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8));
-//}
-//
-//
-//void VideoWidget::drawBorder(OIIO::ImageBuf *buf) {
-//	int i;
-//	int width, height;
-//
-//	int border;
-//	float bordercolor[4];
-//
-//	width = theme().width() - 1;
-//	height = theme().height() - 1;
-//
-//	border = theme().border();
-//	memcpy(bordercolor, theme().borderColor(), sizeof(bordercolor));
-//
-//	// Draw border
-//	if ((border > 0) && (bordercolor[3] != 0.0)) {
-//		for (i=0; i<border; i++)
-//			OIIO::ImageBufAlgo::render_box(*buf, i, i, width - i, height - i, bordercolor, false);
-//	}
-//}
-//
-//
-//void VideoWidget::drawBackground(OIIO::ImageBuf *buf) {
-//	int width, height;
-//
-//	int border;
-//	float bgcolor[4];
-//
-//	width = theme().width() - 1;
-//	height = theme().height() - 1;
-//
-//	border = theme().border();
-//	memcpy(bgcolor, theme().backgroundColor(), sizeof(bgcolor));
-//
-//	if (bgcolor[3] != 0.0)
-//		OIIO::ImageBufAlgo::render_box(*buf, border, border, width - border, height - border, bgcolor, true);
-//}
-//
-//
-//void VideoWidget::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, VideoWidget::Zoom zoom) {
-//	bool ok;
-//
-//	double ratio;
-//
-//	int width, height;
-//	int max_width, max_height;
-//
-//	if ((name == NULL) || (name[0] == '\0'))
-//		return;
-//
-//	// Open image
-//	auto img = OIIO::ImageInput::open(name);
-//	const OIIO::ImageSpec& spec = img->spec();
-//	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
-//	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
-//
-//	OIIO::ImageBuf *inbuf = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-//	ok = img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, inbuf->localpixels());
-//
-//	if (!ok)
-//		log_warn("Read '%s' image (%dx%d) failure!", name, spec.width, spec.height);
-//
-//	// Input image ratio
-//	ratio = (double) spec.width / (double) spec.height;
-//
-//	// Compute new size
-//	switch (zoom) {
-//	case ZoomFit:
-//		width = theme().width() - theme().border() - x;
-//		height = theme().height() - theme().border() - y;
-//
-//		if (width * spec.height > spec.width * height)
-//			width = height * ratio;
-//		else
-//			height = width / ratio;
-//		break;
-//
-//	case ZoomFill:
-//		width = theme().width() - theme().border() - x;
-//		height = theme().height() - theme().border() - y;
-//
-//		if (width * spec.height < spec.width * height)
-//			width = height * ratio;
-//		else
-//			height = width / ratio;
-//		break;
-//
-//	case ZoomStretch:
-//		width = theme().width() - theme().border() - x;
-//		height = theme().height() - theme().border() - y;
-//		break;
-//
-//	case ZoomCrop:
-//	default:
-//		width = spec.width;
-//		height = spec.height;
-//		break;
-//	}
-//
-//	// Max width & height
-//	max_width = theme().width() - (2 * theme().border());
-//	max_height = theme().height() - (2 * theme().border());
-//
-//	// Resize picto
-//	OIIO::ImageBuf outbuf(OIIO::ImageSpec(width, height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-//	OIIO::ImageBufAlgo::resize(outbuf, *inbuf);
-//
-//	// Add alpha channel
-//	if (spec.nchannels != 4) {
-//		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
-//		float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
-//		std::string channelnames[] = { "", "", "", "A" };
-//
-//		outbuf = OIIO::ImageBufAlgo::channels(outbuf, 4, channelorder, channelvalues, channelnames);
-//	}
-//
-//	// Image over
-//	outbuf.specmod().x = x;
-//	outbuf.specmod().y = y;
-//	OIIO::ImageBufAlgo::over(*buf, outbuf, *buf, OIIO::ROI(x, x + max_width, y, y + max_height));
-//
-//	delete inbuf;
-//}
-//
-//
-//void VideoWidget::drawText(OIIO::ImageBuf *buf, int x, int y, int px, const char *label) {
-//	bool result;
-//
-//	int x1, y1, x2, y2;
-//	int text_width, text_height;
-//
-//	int border = theme().border();
-//	int padding_xl = theme().padding(VideoWidget::Theme::PaddingLeft);
-////	int padding_xr = theme().padding(VideoWidget::Theme::PaddingRight);
-//	int padding_yt = theme().padding(VideoWidget::Theme::PaddingTop);
-////	int padding_yb = theme().padding(VideoWidget::Theme::PaddingBottom);
-//
-//	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-//
-//	// Compute text size
-//	this->textSize(label, px,
-//			x1, y1, x2, y2,
-//			text_width, text_height);
-//
-//	// Text color
-//	memcpy(color, theme().labelColor(), sizeof(color));
-//
-//	// Text offset
-//	x += -x1;
-//	y += -y1 + theme().textShadow();
-//
-//	// Text position
-//	x += padding_xl;
-//	x += border + theme().textShadow();
-//
-//	y += border + padding_yt;
-//
-//	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-//		x, 
-//		y, 
-//		label, 
-//		px, theme().font(), color, 
-//		OIIO::ImageBufAlgo::TextAlignX::Left, 
-//		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
-//		theme().textShadow());
-//
-//	if (result == false)
-//		fprintf(stderr, "render text error\n");
-//}
-//
-//
-//void VideoWidget::drawLabel(OIIO::ImageBuf *buf, const char *label) {
-//	bool result;
-//
-//	int x, y;
-//
-//	int x1, y1, x2, y2;
-//	int text_width, text_height;
-//
-//	int border = theme().border();
-//	int padding_xl = theme().padding(VideoWidget::Theme::PaddingLeft);
-//	int padding_xr = theme().padding(VideoWidget::Theme::PaddingRight);
-//	int padding_yt = theme().padding(VideoWidget::Theme::PaddingTop);
-////	int padding_yb = theme().padding(VideoWidget::Theme::PaddingBottom);
-//
-//	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-//
-//	bool with_label = theme().hasFlag(VideoWidget::Theme::FlagLabel);
-//	bool with_picto = theme().hasFlag(VideoWidget::Theme::FlagIcon);
-//
-//	enum VideoWidget::Theme::Align textAlign = theme().labelAlign();
-//
-//	if (!with_label)
-//		return;
-//
-//	// Compute text size
-//	this->textSize(label, label_px_,
-//			x1, y1, x2, y2,
-//			text_width, text_height);
-//
-//	// Text color
-//	memcpy(color, theme().labelColor(), sizeof(color));
-//
-//	// Text offset
-//	x = -x1;
-//	y = -y1 + theme().textShadow();
-//
-//	// Text position
-//	if (textAlign == VideoWidget::Theme::AlignLeft) {
-//		x += padding_xl;
-//		x += (with_picto) ? theme().height() + padding_xl : 0;
-//		x += border + theme().textShadow();
-//	}
-//	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-//		x += (with_picto) ? (theme().width() - theme().height())/2 : theme().width()/2;
-//		x += (with_picto) ? theme().height() : 0;
-//		x -= text_width / 2;
-//	}
-//	else if (textAlign == VideoWidget::Theme::AlignRight) {
-//		x += theme().width() - padding_xr;
-//		x -= text_width + border + theme().textShadow();
-//	}
-//
-//	y += border + padding_yt;
-//
-//	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-//		x, 
-//		y, 
-//		label, 
-//		label_px_, theme().font(), color, 
-//		OIIO::ImageBufAlgo::TextAlignX::Left, 
-//		OIIO::ImageBufAlgo::TextAlignY::Baseline,
-//		theme().textShadow());
-//
-//	if (result == false)
-//		fprintf(stderr, "render label text error\n");
-//}
-//
-//
-//void VideoWidget::drawValue(OIIO::ImageBuf *buf, const char *value) {
-//	bool result;
-//	
-//	int x, y;
-//
-//	int x1, y1, x2, y2;
-//	int text_width, text_height;
-//
-//	int border = theme().border();
-//	int padding_xl = theme().padding(VideoWidget::Theme::PaddingLeft);
-//	int padding_xr = theme().padding(VideoWidget::Theme::PaddingRight);
-//	int padding_yt = theme().padding(VideoWidget::Theme::PaddingTop);
-//	int padding_yb = theme().padding(VideoWidget::Theme::PaddingBottom);
-//
-//	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-//
-//	bool with_picto = theme().hasFlag(VideoWidget::Theme::FlagIcon);
-//	bool with_label = theme().hasFlag(VideoWidget::Theme::FlagLabel);
-//	bool with_value = theme().hasFlag(VideoWidget::Theme::FlagValue);
-//
-//	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
-//
-//	if (!with_value)
-//		return;
-//
-//	// Compute text size
-//	this->textSize(value, value_px_,
-//			x1, y1, x2, y2,
-//			text_width, text_height);
-//
-//	// Text color
-//	memcpy(color, theme().valueColor(), sizeof(color));
-//
-//	// Text offset
-//	x = 0;
-//	y = -value_offset_ + theme().textShadow();
-//
-//	// Text position
-//	if (textAlign == VideoWidget::Theme::AlignLeft) {
-//		x += padding_xl;
-//		x += (with_picto) ? theme().height() + padding_xl : 0;
-//		x += border + theme().textShadow();
-//	}
-//	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-//		x += (with_picto) ? (theme().width() - theme().height())/2 : theme().width()/2;
-//		x += (with_picto) ? theme().height() : 0;
-//		x -= text_width / 2;
-//	}
-//	else if (textAlign == VideoWidget::Theme::AlignRight) {
-//		x += theme().width() - padding_xr;
-//		x -= text_width + border + theme().textShadow();
-//	}
-//
-//	if (with_label)
-//		y += theme().height() - border - theme().textShadow() - padding_yb - value_size_;
-//	else
-//		y += border + padding_yt;
-//
-//	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-//		x, 
-//		y, 
-//		value, 
-//		value_px_, theme().font(), color, 
-//		OIIO::ImageBufAlgo::TextAlignX::Left, 
-//		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
-//		theme().textShadow());
-//
-//	if (result == false)
-//		fprintf(stderr, "render value text error\n");
-//}
-//
-//
-//bool VideoWidget::textSize(std::string text, int fontsize, 
-//	int &x1, int &y1, int &x2, int &y2,
-//	int &width, int &height) {
-//
-//	OIIO::ROI roi = OIIO::ImageBufAlgo::text_size(text, fontsize, theme().font());
-//
-//	x1 = roi.xbegin;
-//	x2 = roi.xend;
-//	y1 = roi.ybegin;
-//	y2 = roi.yend;
-//
-//	width = roi.width();
-//	height = roi.height();
-//
-//	return roi.defined();
-//}
-
 

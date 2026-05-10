@@ -2,6 +2,7 @@
 #include <string.h>
 #include <getopt.h>
 #include <errno.h>
+#include <limits.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/wait.h>
@@ -10,6 +11,7 @@
 #include <sys/types.h>
 #include <sys/resource.h>
 #include <sys/signalfd.h>
+#include <filesystem>
 
 extern "C" {
 #include <event2/event.h>
@@ -148,6 +150,60 @@ GPXApplication::Settings& GPXApplication::settings(void) {
 
 void GPXApplication::setSettings(const GPXApplication::Settings &settings) {
 	settings_ = settings;
+}
+
+
+std::string GPXApplication::assets(const std::string &path) {
+	log_call();
+
+	ssize_t len;
+
+	struct stat sb;
+
+	std::string exepath;
+	std::string fullpath;
+	std::string assets = "/assets/" + path;
+
+	char buff[PATH_MAX];
+
+	len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
+	if (len != -1) {
+		buff[len] = '\0';
+
+		exepath = std::filesystem::path(buff).parent_path();
+
+		// <builddir>/assets/<path>
+		fullpath = exepath + assets;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+
+		// gpx2video: <sourcedir>/assets/<path>
+		exepath = std::filesystem::path(exepath).parent_path();
+		fullpath = exepath + assets;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+
+		// gpx2video-gtk <sourcedir>/assets/<path>
+		exepath = std::filesystem::path(exepath).parent_path();
+		fullpath = exepath + assets;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+	}
+
+	// /usr/share/gpx2video/<path>
+	fullpath = "/usr/share/gpx2video/" + path;
+	if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+		return fullpath;
+
+	// $HOME/.local/share/gpx2video/<path>
+	fullpath = std::getenv("HOME") + std::string("/.gpx2video/" + path);
+	if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+		return fullpath;
+
+	log_warn("Assets path not found!");
+
+	// Default
+	return "." + assets;
 }
 
 

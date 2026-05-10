@@ -117,6 +117,8 @@ private:
 
 	int last_duration_;
 
+	std::string icon_filename_;
+
 	DurationTextShape(VideoWidget *widget) 
 		: TextShape(widget->theme())
 		, bg_buf_(NULL)
@@ -125,6 +127,8 @@ private:
 		no_value_ = false;
 
 		last_duration_ = 0;
+
+		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(void);

@@ -110,12 +110,18 @@ private:
 
 	int nbr_target_lap_;
 
+	std::string icon_filename_;
+
 	LapTextShape(VideoWidget *widget)
 		: TextShape(widget->theme())
 		, bg_buf_(NULL)
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
+
+		nbr_target_lap_ = 1;
+
+		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(void);

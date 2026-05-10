@@ -84,26 +84,16 @@ void GPX2VideoAppend::build(void) {
 
 	widget_model_ = Gio::ListStore<GPX2VideoAppend::Widget>::create();
 
-	widget_model_->append(Widget::create(
-			VideoWidget::Widget::WidgetAverageSpeed,
-			"../assets/picto/" + AvgSpeedTextShape::iconName(),
-			VideoWidget::widget2string(VideoWidget::Widget::WidgetAverageSpeed)
-		)
-	);
+	for (int i=0; i != VideoWidget::WidgetUnknown; i++) {
+		VideoWidget::Widget type = (VideoWidget::Widget) i;
 
-	widget_model_->append(Widget::create(
-			VideoWidget::Widget::WidgetAverageRideSpeed,
-			"../assets/picto/" + AvgRideSpeedTextShape::iconName(),
-			VideoWidget::widget2string(VideoWidget::Widget::WidgetAverageRideSpeed)
-		)
-	);
-
-	widget_model_->append(Widget::create(
-			VideoWidget::Widget::WidgetCadence,
-			"../assets/picto/" + CadenceTextShape::iconName(),
-			VideoWidget::widget2string(VideoWidget::Widget::WidgetCadence)
-		)
-	);
+		widget_model_->append(Widget::create(
+				type,
+				VideoWidget::getIconFilename(type),
+				VideoWidget::getFriendlyName(type)
+			)
+		);
+	}
 
 	// Widgets list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");

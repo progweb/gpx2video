@@ -259,6 +259,14 @@ void GPX2VideoRenderer::append(VideoWidget::Widget type) {
 
 	// Create gtk widget 
 	widget = GPX2VideoWidget::create(item);
+
+	// Center
+	widget->widget()->setPosition(
+		(layout_width_ - widget->theme().width()) / 2, 
+		(layout_height_ - widget->theme().height()) / 2
+	);
+
+	// Initialize
 	widget->init_buffers();
 	widget->set_timestamp(timestamp_);
 	widget->setLayoutSize(layout_width_, layout_height_);

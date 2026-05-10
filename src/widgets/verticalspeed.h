@@ -103,12 +103,16 @@ private:
 
 	VideoWidget *widget_;
 
+	std::string icon_filename_;
+
 	VerticalSpeedTextShape(VideoWidget *widget) 
 		: TextShape(widget->theme())
 		, bg_buf_(NULL)
 		, fg_buf_(NULL) 
 		, widget_(widget) {
 		no_value_ = false;
+
+		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(void);
