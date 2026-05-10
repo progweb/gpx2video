@@ -50,11 +50,12 @@ void TelemetryData::reset(bool all) {
 		heartrate_ = 0;
 		temperature_ = 0;
 		power_ = 0;
-
+		batterylevel_ = 0.0;
+	
 		grade_ = 0.0;
 		speed_ = 0.0;
 		acceleration_ = 0.0;
-	
+
 		in_range_ = false;
 		is_pause_ = false;
 		has_value_ = TelemetryData::DataNone;
@@ -68,6 +69,7 @@ void TelemetryData::reset(bool all) {
 	avgspeed_ = 0.0;
 	avgridespeed_ = 0.0;
 	verticalspeed_ = 0.0;
+	homedistance_ = 0.0;
 
 	lap_ = 1;
 	in_lap_ = false;
@@ -75,7 +77,7 @@ void TelemetryData::reset(bool all) {
 
 
 void TelemetryData::dump(void) const {
-	printf("  [%d] '%s' (Fix: %c) Time: %s [%f, %f] Distance: %.3f km in %d seconds, current speed is %.3f (pause: %s) - Altitude: %.1f (%.1f%%)\n",
+	printf("  [%d] '%s' (Fix: %c) Time: %s [%f, %f] Distance: %.3f km in %d sec, speed: %.3f (pause: %s) - Altitude: %.1f (%.1f%%)\n",
 			line_,
 			type2string(),
 			hasValue(TelemetryData::DataFix) ? 'Y' : 'N',
@@ -88,8 +90,8 @@ void TelemetryData::dump(void) const {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Head | Grade \n");
-	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+------+-------\n");
+	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Head | Grade   \n");
+	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+------+---------\n");
 }
 
 
@@ -231,12 +233,17 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	double maxspeed = 0;
 	double acceleration = 0;
 	double verticalspeed = 0;
+	double homedistance = 0;
 
 	GeographicLib::Math::real d, h;
 
+	TelemetrySource::Point firstPoint;
 	TelemetrySource::Point prevPoint, curPoint;
 
 	log_call();
+
+	// First point
+	firstPoint = pool_.first();
 
 	// Compute data for current point
 	curPoint = pool_.current();
@@ -268,6 +275,12 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		}
 		else
 			distance = curPoint.distance();
+
+		// Home distance
+		if (force || !curPoint.hasValue(TelemetryData::DataHomeDistance))
+			homedistance = curPoint.distanceTo(firstPoint);
+		else
+			homedistance = curPoint.homedistance();
 
 		// Heading
 		if (force || !curPoint.hasValue(TelemetryData::DataHeading))
@@ -361,6 +374,9 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		// Distance
 		curPoint.setDistance(distance);
 
+		// Home distance
+		curPoint.setHomeDistance(homedistance);
+
 		// Heading
 		curPoint.setHeading(heading);
 
@@ -431,6 +447,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		// Set default value & flags
 		if (enable) {
 			curPoint.setDistance(0);
+			curPoint.setHomeDistance(0);
 			curPoint.setDuration(0);
 			curPoint.setRideTime(0);
 			curPoint.setHeading(pool_.next().heading());
@@ -1548,6 +1565,11 @@ void TelemetrySource::fix(void) {
 				currentPoint.setVerticalSpeed(verticalspeed);
 			}
 
+			if (currentPoint.hasValue(TelemetryData::DataHomeDistance)) {
+				double distance = prevPoint.homedistance_ + k * (nextPoint.homedistance_ - prevPoint.homedistance_);
+				currentPoint.setHomeDistance(distance);
+			}
+
 			// Compute if we are in the range defined by the user
 			if (currentPoint.hasValue(TelemetryData::DataDistance)) {
 				double distance = in_range ? prevPoint.distance_ + k * (nextPoint.distance_ - prevPoint.distance_) : prevPoint.distance_;
@@ -1711,6 +1733,7 @@ void TelemetrySource::insertData(uint64_t timestamp) {
 	point.setCadence(data.cadence());
 	point.setHeartrate(data.heartrate());
 	point.setTemperature(data.temperature());
+	point.setBatteryLevel(data.batterylevel());
 
 	// Set values flag
 	flags = data.has_value_ & (
@@ -1719,7 +1742,8 @@ void TelemetrySource::insertData(uint64_t timestamp) {
 			| TelemetryData::DataPower
 			| TelemetryData::DataCadence
 			| TelemetryData::DataHeartrate
-			| TelemetryData::DataTemperature);
+			| TelemetryData::DataTemperature
+			| TelemetryData::DataBatteryLevel);
 	point.setValue(flags);
 
 	// Insert point
@@ -1736,6 +1760,7 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 	TelemetrySource::Point point;
 
+	TelemetrySource::Point firstPoint;
 	TelemetrySource::Point prevPoint, curPoint, nextPoint;
 
 	log_call();
@@ -1822,6 +1847,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataPower) && nextPoint.hasValue(TelemetryData::DataPower))
 			point.setPower(prevPoint.power_ + k * (nextPoint.power_ - prevPoint.power_));
 
+		if (prevPoint.hasValue(TelemetryData::DataBatteryLevel) && nextPoint.hasValue(TelemetryData::DataBatteryLevel))
+			point.setBatteryLevel(prevPoint.batterylevel_ + k * (nextPoint.batterylevel_ - prevPoint.batterylevel_));
+
 		// Computed data
 		if (prevPoint.hasValue(TelemetryData::DataSpeed) && nextPoint.hasValue(TelemetryData::DataSpeed))
 			point.setSpeed(prevPoint.speed_ + k * (nextPoint.speed_ - prevPoint.speed_));
@@ -1837,6 +1865,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 		if (prevPoint.hasValue(TelemetryData::DataHeading) && nextPoint.hasValue(TelemetryData::DataHeading))
 			point.setHeading(prevPoint.heading_ + k * (nextPoint.heading_ - prevPoint.heading_));
+
+		if (prevPoint.hasValue(TelemetryData::DataHomeDistance) && nextPoint.hasValue(TelemetryData::DataHomeDistance))
+			point.setHomeDistance(prevPoint.homedistance_ + k * (nextPoint.homedistance_ - prevPoint.homedistance_));
 
 		// Computed data in range
 		if (prevPoint.hasValue(TelemetryData::DataDistance) && nextPoint.hasValue(TelemetryData::DataDistance)) {
@@ -1888,6 +1919,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataPower) && curPoint.hasValue(TelemetryData::DataPower))
 			point.setPower(curPoint.power_ + k * (curPoint.power_ - prevPoint.power_));
 
+		if (prevPoint.hasValue(TelemetryData::DataBatteryLevel) && curPoint.hasValue(TelemetryData::DataBatteryLevel))
+			point.setBatteryLevel(curPoint.batterylevel_ + k * (curPoint.batterylevel_ - prevPoint.batterylevel_));
+
 		// Computed data
 		if (prevPoint.hasValue(TelemetryData::DataSpeed) && curPoint.hasValue(TelemetryData::DataSpeed))
 			point.setSpeed(curPoint.speed_ + k * (curPoint.speed_ - prevPoint.speed_));
@@ -1903,6 +1937,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 		if (prevPoint.hasValue(TelemetryData::DataHeading) && curPoint.hasValue(TelemetryData::DataHeading))
 			point.setHeading(curPoint.heading_ + k * (curPoint.heading_ - prevPoint.heading_));
+
+		if (prevPoint.hasValue(TelemetryData::DataHomeDistance) && curPoint.hasValue(TelemetryData::DataHomeDistance))
+			point.setHomeDistance(curPoint.homedistance_ + k * (curPoint.homedistance_ - prevPoint.homedistance_));
 
 		// Computed data in range
 		if (prevPoint.hasValue(TelemetryData::DataDistance) && curPoint.hasValue(TelemetryData::DataDistance)) {
@@ -1992,6 +2029,7 @@ void TelemetrySource::cleanData(TelemetryData &data, uint64_t timestamp) {
 			| TelemetryData::DataHeartrate
 			| TelemetryData::DataTemperature
 			| TelemetryData::DataPower
+			| TelemetryData::DataBatteryLevel
 
 			| TelemetryData::DataSpeed
 			| TelemetryData::DataGrade

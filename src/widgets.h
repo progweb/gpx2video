@@ -3,6 +3,7 @@
 
 #include "widgets/avgridespeed.h"
 #include "widgets/avgspeed.h"
+#include "widgets/batterylevel.h"
 #include "widgets/cadence.h"
 #include "widgets/date.h"
 #include "widgets/distance.h"
@@ -13,6 +14,7 @@
 #include "widgets/grade.h"
 #include "widgets/heading.h"
 #include "widgets/heartrate.h"
+#include "widgets/homedistance.h"
 #include "widgets/image.h"
 #include "widgets/lap.h"
 #include "widgets/maxspeed.h"

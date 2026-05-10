@@ -198,6 +198,18 @@ public:
 			lap_ = lap;
 		}
 
+		void setHomeDistance(double distance) {
+			homedistance_ = distance;
+
+			addValue(Data::DataHomeDistance);
+		}
+
+		void setBatteryLevel(double level) {
+			batterylevel_ = level;
+
+			addValue(Data::DataBatteryLevel);
+		}
+
 		void setValue(int type) {
 			has_value_ = type;
 		}
@@ -309,6 +321,16 @@ public:
 			if (!hasValue(TelemetryData::DataVerticalSpeed)) {
 				verticalspeed_ = point.verticalspeed_;
 				mask |= (point.has_value_ & DataVerticalSpeed);
+			}
+
+			if (!hasValue(TelemetryData::DataHomeDistance)) {
+				homedistance_ = point.homedistance_;
+				mask |= (point.has_value_ & DataHomeDistance);
+			}
+
+			if (!hasValue(TelemetryData::DataBatteryLevel)) {
+				batterylevel_ = point.batterylevel_;
+				mask |= (point.has_value_ & DataBatteryLevel);
 			}
 
 			lap_ = point.lap_;

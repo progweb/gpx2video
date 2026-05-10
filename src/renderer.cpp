@@ -1177,6 +1177,12 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	case VideoWidget::WidgetLap:
 		widget = LapWidget::create(app_);
 		break;
+	case VideoWidget::WidgetHomeDistance:
+		widget = HomeDistanceWidget::create(app_);
+		break;
+	case VideoWidget::WidgetBatteryLevel:
+		widget = BatteryLevelWidget::create(app_);
+		break;
 	case VideoWidget::WidgetMap: {
 			MapSettings mapSettings;
 			widget = Map::create(app_, telemetrySettings(), mapSettings);

@@ -47,8 +47,10 @@ public:
 		DataAverageRideSpeed = (1 << 15), // average computed for ride time
 		DataVerticalSpeed = (1 << 16),
 		DataHeading = (1 << 17),
+		DataHomeDistance = (1 << 18),
+		DataBatteryLevel = (1 << 19),
 
-		DataAll = (1 << 17) -1
+		DataAll = (1 << 20) -1
 	};
 
 	TelemetryData();
@@ -179,6 +181,14 @@ public:
 		return verticalspeed_;
 	}
 
+	const double& homedistance(void) const {
+		return homedistance_;
+	}
+
+	const double& batterylevel(void) const {
+		return batterylevel_;
+	}
+
 	const int& lap(void) const {
 		return lap_;
 	}
@@ -236,6 +246,8 @@ protected:
 	double avgspeed_;
 	double avgridespeed_;
 	double verticalspeed_;
+	double homedistance_;
+	double batterylevel_;
 
 	int lap_;
 	bool in_lap_;

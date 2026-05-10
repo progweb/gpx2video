@@ -139,6 +139,7 @@ set(GPX2VIDEO_SOURCES
 
 	src/widgets/avgridespeed.cpp
 	src/widgets/avgspeed.cpp
+	src/widgets/batterylevel.cpp
 	src/widgets/cadence.cpp
 	src/widgets/date.cpp
 	src/widgets/distance.cpp
@@ -149,6 +150,7 @@ set(GPX2VIDEO_SOURCES
 	src/widgets/grade.cpp
 	src/widgets/heading.cpp
 	src/widgets/heartrate.cpp
+	src/widgets/homedistance.cpp
 	src/widgets/image.cpp
 	src/widgets/lap.cpp
 	src/widgets/maxspeed.cpp

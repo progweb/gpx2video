@@ -124,6 +124,8 @@ VideoWidget::Widget VideoWidget::string2widget(std::string &s) {
 		type = VideoWidget::WidgetAverageSpeed;
 	else if (s == "avgridespeed")
 		type = VideoWidget::WidgetAverageRideSpeed;
+	else if (s == "batterylevel")
+		type = VideoWidget::WidgetBatteryLevel;
 	else if (s == "cadence")
 		type = VideoWidget::WidgetCadence;
 	else if (s == "date")
@@ -144,6 +146,8 @@ VideoWidget::Widget VideoWidget::string2widget(std::string &s) {
 		type = VideoWidget::WidgetHeading;
 	else if (s == "heartrate")
 		type = VideoWidget::WidgetHeartRate;
+	else if (s == "homedistance")
+		type = VideoWidget::WidgetHomeDistance;
 	else if (s == "image")
 		type = VideoWidget::WidgetImage;
 	else if (s == "lap")
@@ -405,6 +409,8 @@ std::string VideoWidget::widget2string(VideoWidget::Widget type) {
 		return "avgspeed";
 	case VideoWidget::WidgetAverageRideSpeed:
 		return "avgridespeed";
+	case VideoWidget::WidgetBatteryLevel:
+		return "batterylevel";
 	case VideoWidget::WidgetCadence:
 		return "cadence";
 	case VideoWidget::WidgetDate:
@@ -425,6 +431,8 @@ std::string VideoWidget::widget2string(VideoWidget::Widget type) {
 		return "heading";
 	case VideoWidget::WidgetHeartRate:
 		return "heartrate";
+	case VideoWidget::WidgetHomeDistance:
+		return "homedistance";
 	case VideoWidget::WidgetImage:
 		return "image";
 	case VideoWidget::WidgetLap:
@@ -655,6 +663,8 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 	case VideoWidget::WidgetAverageSpeed:
 	case VideoWidget::WidgetAverageRideSpeed:
 		return path + "/DataOverlay_icn_avgspeed.svg";
+	case VideoWidget::WidgetBatteryLevel:
+		return path + "/DataOverlay_icn_battery.svg";
 	case VideoWidget::WidgetCadence:
 		return path + "/DataOverlay_icn_cadence.svg";
 	case VideoWidget::WidgetDate:
@@ -675,12 +685,14 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 		return path + "/DataOverlay_icn_compass.svg";
 	case VideoWidget::WidgetHeartRate:
 		return path + "/DataOverlay_icn_heartrate.svg";
+	case VideoWidget::WidgetHomeDistance:
+		return path + "/DataOverlay_icn_home.svg";
 	case VideoWidget::WidgetImage:
-		return "Image";
+		return path + "/DataOverlay_icn_image.svg";
 	case VideoWidget::WidgetLap:
 		return path + "/DataOverlay_icn_laps.svg";
 	case VideoWidget::WidgetMap:
-		return "Map";
+		return path + "/DataOverlay_icn_map.svg";
 	case VideoWidget::WidgetMaxSpeed:
 		return path + "/DataOverlay_icn_maxspeed.svg";
 	case VideoWidget::WidgetPosition:
@@ -692,11 +704,11 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 	case VideoWidget::WidgetTemperature:
 		return path + "/DataOverlay_icn_temperature.svg";
 	case VideoWidget::WidgetText:
-		return "Txt";
+		return path + "/DataOverlay_icn_text.svg";
 	case VideoWidget::WidgetTime:
 		return path + "/DataOverlay_icn_time.svg";
 	case VideoWidget::WidgetTrack:
-		return "Track";
+		return path + "/DataOverlay_icn_track.svg";
 	case VideoWidget::WidgetVerticalSpeed:
 		return path + "/DataOverlay_icn_aviationAltitude.svg";
 	default:
@@ -711,6 +723,8 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 		return "Average speed";
 	case VideoWidget::WidgetAverageRideSpeed:
 		return "Average ride speed";
+	case VideoWidget::WidgetBatteryLevel:
+		return "Battery level";
 	case VideoWidget::WidgetCadence:
 		return "Cadence";
 	case VideoWidget::WidgetDate:
@@ -731,6 +745,8 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 		return "Heading";
 	case VideoWidget::WidgetHeartRate:
 		return "Heart rate";
+	case VideoWidget::WidgetHomeDistance:
+		return "Home distance";
 	case VideoWidget::WidgetImage:
 		return "Image";
 	case VideoWidget::WidgetLap:

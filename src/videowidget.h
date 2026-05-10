@@ -74,6 +74,7 @@ public:
 	enum Widget {
 		WidgetAverageSpeed,
 		WidgetAverageRideSpeed,
+		WidgetBatteryLevel,
 		WidgetCadence,
 		WidgetDate,
 		WidgetDistance,
@@ -84,6 +85,7 @@ public:
 		WidgetGrade,
 		WidgetHeading,
 		WidgetHeartRate,
+		WidgetHomeDistance,
 		WidgetImage,
 		WidgetLap,
 		WidgetMap,

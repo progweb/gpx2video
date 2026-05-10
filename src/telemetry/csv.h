@@ -44,6 +44,8 @@ public:
 		index_temperature_ = -1;
 		index_power_ = -1;
 		index_lap_ = -1;
+		index_homedistance_ = -1;
+		index_batterylevel_ = -1;
 
 		if (!stream_.is_open()) {
 			log_error("Open '%s' CSV file failure, please check that file is readable", filename.c_str());
@@ -165,6 +167,10 @@ eof:
 				index_power_ = i;
 			else if (name == "Lap")
 				index_lap_ = i;
+			else if (name == "Home Distance")
+				index_homedistance_ = i;
+			else if (name == "Battery Level")
+				index_batterylevel_ = i;
 		}
 
 		return true;
@@ -267,42 +273,42 @@ eof:
 		if ((index_timestamp_ != -1) && (index_latitude_ != -1) && (index_longitude_ != -1))
 			point.setPosition(
 				strtoul(columns[index_timestamp_].c_str(), NULL, 0),
-				strtod(columns[index_latitude_].c_str(), NULL),
-				strtod(columns[index_longitude_].c_str(), NULL)
+				str2double(columns[index_latitude_]),
+				str2double(columns[index_longitude_])
 			);
 
 		if (index_elevation_ != -1)
 			point.setElevation(str2double(columns[index_elevation_]));
 
 		if (index_total_duration_ != -1)
-			point.setDuration(strtod(columns[index_total_duration_].c_str(), NULL));
+			point.setDuration(str2double(columns[index_total_duration_]));
 
 		if (index_partial_duration_ != -1)
-			point.setElapsedTime(strtod(columns[index_partial_duration_].c_str(), NULL));
+			point.setElapsedTime(str2double(columns[index_partial_duration_]));
 
 		if (index_grade_ != -1)
-			point.setGrade(strtod(columns[index_grade_].c_str(), NULL));
+			point.setGrade(str2double(columns[index_grade_]));
 
 		if (index_distance_ != -1)
-			point.setDistance(strtod(columns[index_distance_].c_str(), NULL));
+			point.setDistance(str2double(columns[index_distance_]));
 
 		if (index_heading_ != -1)
-			point.setHeading(strtod(columns[index_heading_].c_str(), NULL));
+			point.setHeading(str2double(columns[index_heading_]));
 
 		if (index_speed_ != -1)
-			point.setSpeed(strtod(columns[index_speed_].c_str(), NULL));
+			point.setSpeed(str2double(columns[index_speed_]));
 
 		if (index_maxspeed_ != -1)
-			point.setMaxSpeed(strtod(columns[index_maxspeed_].c_str(), NULL));
+			point.setMaxSpeed(str2double(columns[index_maxspeed_]));
 
 		if (index_avgspeed_ != -1)
-			point.setAverageSpeed(strtod(columns[index_avgspeed_].c_str(), NULL));
+			point.setAverageSpeed(str2double(columns[index_avgspeed_]));
 
 		if (index_avgridespeed_ != -1)
-			point.setAverageRideSpeed(strtod(columns[index_avgridespeed_].c_str(), NULL));
+			point.setAverageRideSpeed(str2double(columns[index_avgridespeed_]));
 
 		if (index_verticalspeed_ != -1)
-			point.setVerticalSpeed(strtod(columns[index_verticalspeed_].c_str(), NULL));
+			point.setVerticalSpeed(str2double(columns[index_verticalspeed_]));
 
 		if (index_cadence_ != -1)
 			point.setCadence(std::stoi(columns[index_cadence_]));
@@ -318,6 +324,12 @@ eof:
 
 		if (index_lap_ != -1)
 			point.setLap(std::stoi(columns[index_lap_]));
+
+		if (index_homedistance_ != -1)
+			point.setHomeDistance(str2double(columns[index_homedistance_]));
+
+		if (index_batterylevel_ != -1)
+			point.setBatteryLevel(str2double(columns[index_batterylevel_]));
 	}
 
 private:
@@ -350,6 +362,8 @@ private:
 	int index_temperature_;
 	int index_power_;
 	int index_lap_;
+	int index_homedistance_;
+	int index_batterylevel_;
 
 	std::string trim(std::string str) {
 		size_t position;
@@ -366,12 +380,17 @@ private:
 	}
 
 	double str2double(std::string str) {
-		auto pos = str.find(",");
+		double value;
 
-		if (pos < str.length())
-			str.replace(pos, 1, ".");
+		std::istringstream iss(str);
 
-		return strtod(str.c_str(), NULL);
+		iss.imbue(std::locale::classic()); // Force "C" locale
+
+		if (!(iss >> value)) {
+			throw std::invalid_argument("Invalid number: " + str);
+		}
+
+		return value;
 	}
 };
 
