@@ -115,8 +115,8 @@ this case, the `creation_time` value is computed form 'GoPro MET' stream.
 If the `creation_time` field and 'GoPro MET' stream can't be found, gpx2video assumes that the video starts in the
 same time that the GPX stream.
 
-At last, you can overwrite `creation_time` value in using --start-time option. As this option is used, gpx2video 
-doesn't 
+At last, you can overwrite `creation_time` value or just set the video start time (if `creation_time` doesn't exist)
+in using --start-time option.
 
 "sync" command permits to test the sychronization process:
 

@@ -558,6 +558,28 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				k += data->header.size / inputtypesize;
 			}
 		}
+//		else if (key == STR2FOURCC("ACCL")) {
+//			for (i=0, k=0; i<data->header.count; i++) {
+//				printf("ACCL[%d] = Z: %f X: %f Y: %f\n", 
+//						i, 
+//						(double) data->value.s16[k] / (double) scal[0],
+//						(double) data->value.s16[k+1] / (double) scal[0],
+//						(double) data->value.s16[k+2] / (double) scal[0]);
+//
+//				k += data->header.size / inputtypesize;
+//			}
+//		}
+//		else if (key == STR2FOURCC("GYRO")) {
+//			for (i=0, k=0; i<data->header.count; i++) {
+//				printf("GYRO[%d] = Z: %f X: %f Y: %f\n", 
+//						i, 
+//						(double) data->value.s16[k] / (double) scal[0],
+//						(double) data->value.s16[k+1] / (double) scal[0],
+//						(double) data->value.s16[k+2] / (double) scal[0]);
+//
+//				k += data->header.size / inputtypesize;
+//			}
+//		}
 
 		if (data->header.type != 0x00) { 
 			n += len;
