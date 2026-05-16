@@ -23,8 +23,10 @@ TelemetrySettings::TelemetrySettings(
 		: telemetry_offset_(offset)
 		, telemetry_begin_(0)
 		, telemetry_end_(0)
-		, telemetry_from_(0)
-		, telemetry_to_(0)
+		, telemetry_compute_start_(0)
+		, telemetry_compute_stop_(0)
+		, telemetry_view_start_(0)
+		, telemetry_view_stop_(0)
 		, telemetry_format_(format)
 		, telemetry_check_(check)
 		, telemetry_pause_detection_(pause_detection)
@@ -60,8 +62,11 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 	telemetry_begin_ = settings.telemetryBegin();
 	telemetry_end_ = settings.telemetryEnd();
 
-	telemetry_from_ = settings.telemetryFrom();
-	telemetry_to_ = settings.telemetryTo();
+	telemetry_compute_start_ = settings.telemetryComputeFrom();
+	telemetry_compute_stop_ = settings.telemetryComputeTo();
+
+	telemetry_view_start_ = settings.telemetryViewFrom();
+	telemetry_view_stop_ = settings.telemetryViewTo();
 
 	telemetry_format_ = settings.telemetryFormat();
 
@@ -86,87 +91,129 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 }
 
 
-bool TelemetrySettings::setDataRange(const uint64_t &begin, const uint64_t &end) {
+bool TelemetrySettings::setDataRange(const uint64_t &start, const uint64_t &stop) {
 	log_call();
 
-	if (end < begin) {
-		log_error("'begin-end' data range values invalid");
+	if (stop < start) {
+		log_error("'start-stop' data range values invalid");
 		return false;
 	}
 
 	// save
-	telemetry_end_ = end;
-	telemetry_begin_ = begin;
+	telemetry_end_ = stop;
+	telemetry_begin_ = start;
 
 	return true;
 }
 
-bool TelemetrySettings::setDataRange(const std::string &strbegin, const std::string &strend) {
-	uint64_t end = 0;
-	uint64_t begin = 0;
+bool TelemetrySettings::setDataRange(const std::string &strstart, const std::string &strstop) {
+	uint64_t stop = 0;
+	uint64_t start = 0;
 
 	log_call();
 
-	if (!strbegin.empty()) {
-		// Convert begin range time to timestamp
-		if ((begin = Datetime::string2timestamp(strbegin)) == 0) {
-			log_error("Parse 'begin' date range failure");
+	if (!strstart.empty()) {
+		// Convert start range time to timestamp
+		if ((start = Datetime::string2timestamp(strstart)) == 0) {
+			log_error("Parse 'start' date range failure");
 			return false;
 		}
 	}
 
-	if (!strend.empty()) {
-		// Convert end range time to timestamp
-		if ((end = Datetime::string2timestamp(strend)) == 0) {
-			log_error("Parse 'end' date range failure");
+	if (!strstop.empty()) {
+		// Convert stop range time to timestamp
+		if ((stop = Datetime::string2timestamp(strstop)) == 0) {
+			log_error("Parse 'stop' date range failure");
 			return false;
 		}
 
 	}
 
-	return setDataRange(begin, end);
+	return setDataRange(start, stop);
 }
 
 
-bool TelemetrySettings::setComputeRange(const uint64_t &from, const uint64_t &to) {
+bool TelemetrySettings::setComputeRange(const uint64_t &start, const uint64_t &stop) {
 	log_call();
 
-	if (to < from) {
-		log_error("'[from:to]' compute range values invalid");
+	if (stop < start) {
+		log_error("'[start:stop]' compute range values invalid");
 		return false;
 	}
 
 	// Save
-	telemetry_to_ = to;
-	telemetry_from_ = from;
+	telemetry_compute_stop_ = stop;
+	telemetry_compute_start_ = start;
 
 	return true;
 }
 
 
-bool TelemetrySettings::setComputeRange(const std::string &strfrom, const std::string &strto) {
-	uint64_t to = 0;
-	uint64_t from = 0;
+bool TelemetrySettings::setComputeRange(const std::string &strstart, const std::string &strstop) {
+	uint64_t stop = 0;
+	uint64_t start = 0;
 
 	log_call();
 
-	if (!strfrom.empty()) {
+	if (!strstart.empty()) {
 		// Convert race start time to timestamp
-		if ((from = Datetime::string2timestamp(strfrom)) == 0) {
-			log_error("Parse 'from' date range failure");
+		if ((start = Datetime::string2timestamp(strstart)) == 0) {
+			log_error("Parse 'start' compute date range failure");
 			return false;
 		}
 	}
 
-	if (!strto.empty()) {
+	if (!strstop.empty()) {
 		// Convert race start time to timestamp
-		if ((to = Datetime::string2timestamp(strto)) == 0) {
-			log_error("Parse 'to' date range failure");
+		if ((stop = Datetime::string2timestamp(strstop)) == 0) {
+			log_error("Parse 'stop' compute date range failure");
 			return false;
 		}
 	}
 
-	return setComputeRange(from, to);
+	return setComputeRange(start, stop);
+}
+
+
+bool TelemetrySettings::setViewRange(const uint64_t &start, const uint64_t &stop) {
+	log_call();
+
+	if (stop < start) {
+		log_error("'[start:stop]' view range values invalid");
+		return false;
+	}
+
+	// Save
+	telemetry_view_stop_ = stop;
+	telemetry_view_start_ = start;
+
+	return true;
+}
+
+
+bool TelemetrySettings::setViewRange(const std::string &strstart, const std::string &strstop) {
+	uint64_t stop = 0;
+	uint64_t start = 0;
+
+	log_call();
+
+	if (!strstart.empty()) {
+		// Convert view start time to timestamp
+		if ((start = Datetime::string2timestamp(strstart)) == 0) {
+			log_error("Parse 'start' view date range failure");
+			return false;
+		}
+	}
+
+	if (!strstop.empty()) {
+		// Convert view stop time to timestamp
+		if ((stop = Datetime::string2timestamp(strstop)) == 0) {
+			log_error("Parse 'stop' view date range failure");
+			return false;
+		}
+	}
+
+	return setViewRange(start, stop);
 }
 
 
@@ -190,13 +237,23 @@ const uint64_t& TelemetrySettings::telemetryEnd(void) const {
 }
 
 
-const uint64_t& TelemetrySettings::telemetryFrom(void) const {
-	return telemetry_from_;
+const uint64_t& TelemetrySettings::telemetryComputeFrom(void) const {
+	return telemetry_compute_start_;
 }
 
 
-const uint64_t& TelemetrySettings::telemetryTo(void) const {
-	return telemetry_to_;
+const uint64_t& TelemetrySettings::telemetryComputeTo(void) const {
+	return telemetry_compute_stop_;
+}
+
+
+const uint64_t& TelemetrySettings::telemetryViewFrom(void) const {
+	return telemetry_view_start_;
+}
+
+
+const uint64_t& TelemetrySettings::telemetryViewTo(void) const {
+	return telemetry_view_stop_;
 }
 
 
@@ -447,8 +504,10 @@ void TelemetrySettings::dump(void) const {
 	std::cout << "  pause detection:    " << (telemetry_pause_detection_ ? "true" : "false") << std::endl;
 	std::cout << "  begin data range:   " << telemetry_begin_ << std::endl;
 	std::cout << "  end data range:     " << telemetry_end_ << std::endl;
-	std::cout << "  from compute range: " << telemetry_from_ << std::endl;
-	std::cout << "  to compute range:   " << telemetry_to_ << std::endl;
+	std::cout << "  from compute range: " << telemetry_compute_start_ << std::endl;
+	std::cout << "  to compute range:   " << telemetry_compute_stop_ << std::endl;
+	std::cout << "  from view range:    " << telemetry_view_start_ << std::endl;
+	std::cout << "  to view range:      " << telemetry_view_stop_ << std::endl;
 }
 
 

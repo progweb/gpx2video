@@ -12,6 +12,26 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 	// Populate models
 	//-----------------
 
+	view_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = view_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = TrackSettings::ViewDefault;
+		row[model_.m_name] = "Default";
+		row[model_.m_enable] = true;
+
+		row = *(view_model_->append());
+		row[model_.m_id] = TrackSettings::ViewLockCenter;
+		row[model_.m_name] = "Center";
+		row[model_.m_enable] = true;
+
+		row = *(view_model_->append());
+		row[model_.m_id] = TrackSettings::ViewZoomFit;
+		row[model_.m_name] = "Zoom fit";
+		row[model_.m_enable] = true;
+	}
+
 	// Binding
 	bind_content();
 
@@ -24,32 +44,41 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	log_call();
 
-	Gtk::Switch *sw;
+	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
+
+	auto renderer = Gtk::make_managed<Gtk::CellRendererText>();
 
 	// Connect widgets button
 	//------------------------
 
-	// Zoomfit enable
-	sw = ref_builder_->get_widget<Gtk::Switch>("zoomfit_switch");
-	if (!sw)
-		throw std::runtime_error("No \"zoomfit_switch\" object in " + resource_file_);
-	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
-					[this](const bool &state) {
-						log_info("Widget %s: zoomfit changed to '%s'",
-							   widget_->name().c_str(), std::to_string(state).c_str());
+	// View
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("view_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"view_combobox\" object in" + resource_file_);
 
-						((Track *) widget_->widget())->settings().setZoomfit(state);
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_info("Widget %s: view changed to '%s'", 
+								widget_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						((Track *) widget_->widget())->settings().setView((TrackSettings::View) value);
 
 						// Update
 						update_boundaries();
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
-					} 
-			), false);
+					}
+			));
 
 	// Factor
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
@@ -167,7 +196,7 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 
 	const float *color;
 
-	Gtk::Switch *sw;
+	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
@@ -176,12 +205,15 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	// Mask value changed
 	loading_ = true;
 
-	// zoomfit
-	sw = ref_builder_->get_widget<Gtk::Switch>("zoomfit_switch");
-	if (!sw)
-		throw std::runtime_error("No \"zoomfit_switch\" object in " + resource_file_);
+	// view
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("view_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"view_combobox\" object in " + resource_file_);
 
-	sw->set_active(((Track *) widget_->widget())->settings().zoomfit());
+	combobox->set_model(view_model_);
+
+	if (find_in_listtore(view_model_, ((Track *) widget_->widget())->settings().view(), iter))
+		combobox->set_active(iter);
 
 	// factor
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
@@ -254,6 +286,6 @@ void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(((Track *) widget_->widget())->settings().divider());
-	spinbutton->set_sensitive(((Track *) widget_->widget())->settings().zoomfit() == false);
+	spinbutton->set_sensitive(((Track *) widget_->widget())->settings().view() != TrackSettings::ViewZoomFit);
 }
 

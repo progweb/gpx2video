@@ -60,11 +60,14 @@ public:
 
 	void copy(const TelemetrySettings &settings);
 
-	bool setDataRange(const uint64_t &begin, const uint64_t &end);
-	bool setDataRange(const std::string &begin, const std::string &end);
+	bool setDataRange(const uint64_t &start, const uint64_t &stop);
+	bool setDataRange(const std::string &start, const std::string &stop);
 
-	bool setComputeRange(const uint64_t &from, const uint64_t &to);
-	bool setComputeRange(const std::string &from, const std::string &to);
+	bool setComputeRange(const uint64_t &start, const uint64_t &stop);
+	bool setComputeRange(const std::string &start, const std::string &stop);
+
+	bool setViewRange(const uint64_t &start, const uint64_t &stop);
+	bool setViewRange(const std::string &start, const std::string &stop);
 
 	const int64_t& telemetryOffset(void) const;
 	void setTelemetryOffset(const int64_t &offset);
@@ -72,8 +75,11 @@ public:
 	const uint64_t& telemetryBegin(void) const;
 	const uint64_t& telemetryEnd(void) const;
 
-	const uint64_t& telemetryFrom(void) const;
-	const uint64_t& telemetryTo(void) const;
+	const uint64_t& telemetryComputeFrom(void) const;
+	const uint64_t& telemetryComputeTo(void) const;
+
+	const uint64_t& telemetryViewFrom(void) const;
+	const uint64_t& telemetryViewTo(void) const;
 
 	const Format& telemetryFormat(void) const;
 
@@ -105,11 +111,17 @@ public:
 private:
 	int64_t telemetry_offset_;
 
+	// First & last data from gpx, csv...
 	uint64_t telemetry_begin_;
 	uint64_t telemetry_end_;
 
-	uint64_t telemetry_from_;
-	uint64_t telemetry_to_;
+	// Compute telemetry data range [from:to] timestamp
+	uint64_t telemetry_compute_start_;
+	uint64_t telemetry_compute_stop_;
+
+	// View telemetry data range [start:stop] timestamp
+	uint64_t telemetry_view_start_;
+	uint64_t telemetry_view_stop_;
 
 	enum Format telemetry_format_;
 

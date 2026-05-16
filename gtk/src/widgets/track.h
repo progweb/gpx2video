@@ -41,6 +41,8 @@ public:
 
 protected:
 	GPX2VideoWidget *widget_;
+
+	Glib::RefPtr<Gtk::ListStore> view_model_;
 };
 
 #endif

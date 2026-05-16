@@ -360,7 +360,7 @@ Map * GPX2Video::buildMap(void) {
 
 	// Create map bounding box
 	TelemetryData p1, p2;
-	source->getBoundingBox(&p1, &p2);
+	source->getBoundingBox(TelemetrySource::RangeData, &p1, &p2);
 
 	// Free
 	delete source;
@@ -1200,8 +1200,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
 			telemetrySettings.setComputeRange(
-					app.settings().telemetryFrom(),
-					app.settings().telemetryTo());
+					app.settings().telemetryComputeFrom(),
+					app.settings().telemetryComputeTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
@@ -1248,8 +1248,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
 			telemetrySettings.setComputeRange(
-					app.settings().telemetryFrom(),
-					app.settings().telemetryTo());
+					app.settings().telemetryComputeFrom(),
+					app.settings().telemetryComputeTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
@@ -1317,8 +1317,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
 			telemetrySettings.setComputeRange(
-					app.settings().telemetryFrom(),
-					app.settings().telemetryTo());
+					app.settings().telemetryComputeFrom(),
+					app.settings().telemetryComputeTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 

@@ -84,6 +84,16 @@ void MediaContainer::addStream(StreamPtr stream) {
 }
 
 
+double MediaContainer::duration(void) {
+	const VideoStreamPtr stream = getVideoStream();
+
+	if (!stream)
+		return 0.0;
+
+	return stream->duration() * av_q2d(stream->timeBase()) * 1000.0;
+}
+
+
 bool MediaContainer::hasDataStream(const std::string &name) const {
 	for (StreamPtr stream : streams_) {
 		if (stream->name().find(name) != std::string::npos)

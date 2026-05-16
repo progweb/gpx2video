@@ -147,6 +147,8 @@ public:
 		return layout_height_;
 	}
 
+	void computeTelemetryRange(void);
+
 	void append(VideoWidget *widget);
 	void remove(VideoWidget *widget);
 	void drop(void);
@@ -178,6 +180,7 @@ protected:
 	bool loadMap(layout::Map *m);
 	bool loadTrack(layout::Track *t);
 	bool loadWidget(layout::Widget *w);
+
 	void computeWidgetsPosition(void);
 
 	VideoWidget * create(VideoWidget::Widget type);

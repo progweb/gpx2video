@@ -74,7 +74,6 @@ public:
 		VideoWidget::start();
 
 		init();
-		limits();
 
 		return true;
 	}
@@ -102,7 +101,6 @@ protected:
 	}
 
 	void init(void);
-	void limits(void);
 	bool load(void);
 
 	// Download each tule
@@ -155,6 +153,9 @@ private:
 
 	// Map filename to tmp save
 	std::string filename_;
+
+	// Bounding box (tile view area)
+	int vx1_, vy1_, vx2_, vy2_;
 
 	// Bounding box (track area)
 	int lim_x1_, lim_y1_, lim_x2_, lim_y2_;

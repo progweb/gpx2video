@@ -32,8 +32,8 @@ TrackSettings::TrackSettings() {
 	width_ = 320;
 	height_ = 240;
 
-	zoom_ = 12;
-	zoomfit_ = true;
+	zoom_ = 14; //18;
+	view_ = TrackSettings::ViewZoomFit;
 
 	divider_ = 1.0;
 
@@ -78,13 +78,13 @@ void TrackSettings::setZoom(const int &zoom) {
 }
 
 
-const bool& TrackSettings::zoomfit(void) const {
-	return zoomfit_;
+const TrackSettings::View& TrackSettings::view(void) const {
+	return view_;
 }
 
 
-void TrackSettings::setZoomfit(const bool &zoomfit) {
-	zoomfit_ = zoomfit;
+void TrackSettings::setView(const TrackSettings::View &view) {
+	view_ = view;
 }
 
 
@@ -203,6 +203,37 @@ void TrackSettings::setBoundingBox(double lat1, double lon1, double lat2, double
 }
 
 
+TrackSettings::View TrackSettings::string2view(std::string &s) {
+	TrackSettings::View view;
+
+	if (s.empty() || (s == "default"))
+		view = TrackSettings::ViewDefault;
+	else if (s == "center")
+		view = TrackSettings::ViewLockCenter;
+	else if (s == "zoomfit")
+		view = TrackSettings::ViewZoomFit;
+	else 
+		view = TrackSettings::ViewUnknown;
+
+	return view;
+}
+
+
+std::string TrackSettings::view2string(View view) {
+	switch (view) {
+	case TrackSettings::ViewZoomFit:
+		return "zoomfit";
+	case TrackSettings::ViewLockCenter:
+		return "center";
+	case TrackSettings::ViewDefault:
+		return "default";
+	default:
+		return "";
+	}
+}
+
+
+
 Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase)
 	: VideoWidget(app, type)
 	, ShapeBase(VideoWidget::theme())
@@ -217,14 +248,16 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 	theme().setFlags(VideoWidget::Theme::FlagNone);
 	theme().setSize(settings().width(), settings().height());
 
+	is_init_ = false;
+
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
 	trackbuf_ = NULL;
 
 	divider_ = 1.0;
 
-	x1_ = y1_ = x2_ = y2_ = 0;
-	px1_ = py1_ = px2_ = py2_ = 0;
+	pvx1_ = pvy1_ = pvx2_ = pvy2_ = 0;
+	pevx1_ = pevy1_ = pevx2_ = pevy2_ = 0;
 
 	x_end_ = y_end_ = 0;
 	x_start_ = y_start_ = 0;
@@ -318,53 +351,84 @@ int Track::lon2pixel(int zoom, float lon) {
 
 
 bool Track::preinit(void) {
+	bool zoomfit;
+
+	bool ok = false;
+
+	TelemetryData p1, p2;
+
 	TelemetrySource *source;
    
 	log_call();
 
+	zoomfit = (settings().view() == TrackSettings::ViewZoomFit);
+
 	// Init
-	x1_ = y1_ = x2_ = y2_ = 0;
-	px1_ = py1_ = px2_ = py2_ = 0;
+	last_posX_ = last_posY_ = -1;
+
+	pvx1_ = pvy1_ = pvx2_ = pvy2_ = 0;
+	pevx1_ = pevy1_ = pevx2_ = pevy2_ = 0;
+
+	is_init_ = false;
 
 	last_data_ = TelemetryData();
+
+	// Check telemetry data
+	if (app_.settings().inputfile().empty()) {
+		log_warn("Track init aborted due to missing telemetry data!");
+		goto abort;
+	}
 
 	// Open telemetry data file
 	source = TelemetryMedia::open(app_.settings().inputfile(), telemetry_settings_, true);
 
 	if (source == NULL) {
 		log_warn("Can't read telemetry data, skip %s widget initialization", name().c_str());
-		return false;
+		goto abort;
 	}
 
 	// Create map bounding box
-	TelemetryData p1, p2;
-	source->getBoundingBox(&p1, &p2);
+	source->getBoundingBox(
+			zoomfit ? TelemetrySource::RangeData : TelemetrySource::RangeView, &p1, &p2);
 
 	// Track settings
 	track_settings_.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 
+	// Get data range
+	source->getBoundingBox(TelemetrySource::RangeData, &lim_p1_, &lim_p2_);
+
+	// Completed with success
+	ok = true;
+
+abort:
 	// Delete previous track buffer
 	if (trackbuf_ != NULL) {
 		delete trackbuf_;
 		trackbuf_ = NULL;
 	}
 
-	return true;
+	return ok;
 }
 
 
 void Track::init(void) {
 	int zoom;
-	bool zoomfit;
 
-	int padding;
+	int space;
+	int padding_vertical;
+	int padding_horizontal;
 
 	double lat1, lon1;
 	double lat2, lon2;
 
 	int w, h;
-	int width = settings().width(); // 800;
-	int height = settings().height(); // 500;
+	int width = settings().width();
+	int height = settings().height();
+
+	int data_width, data_height;
+
+	int pos_lim_x1, pos_lim_y1;
+	int pos_lim_x2, pos_lim_y2;
 
 	log_call();
 
@@ -374,83 +438,196 @@ void Track::init(void) {
 	}
 
 	zoom = settings().zoom();
-	zoomfit = settings().zoomfit();
 	divider_ = settings().divider();
 
 	// Compute track area
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
 
-	// Tiles:
-	// +-------+-------+-------+ ..... +-------+
-	// | x1,y1 |       |       |       | x2,y1 |
-	// +-------+-------+-------+ ..... +-------+
-	// |       |       |       |       |       |
-	// +-------+-------+-------+ ..... +-------+
-	// | x1,y2 |       |       |       | x2,y2 |
-	// +-------+-------+-------+ ..... +-------+
+	// Tiles for view area:
+	// +---------+---------+---------+ ..... +---------+
+	// | vx1,vy1 |         |         |       | vx2,vy1 |
+	// +---------+---------+---------+ ..... +---------+
+	// |         |         |         |       |         |
+	// +---------+---------+---------+ ..... +---------+
+	// | vx1,vy2 |         |         |       | vx2,vy2 |
+	// +---------+---------+---------+ ..... +---------+
 
-	// lat/lon to pixel
-	px1_ = Track::lon2pixel(zoom, lon1);
-	py1_ = Track::lat2pixel(zoom, lat1);
+	// Convert view area lat/lon to pixel
+	pvx1_ = Track::lon2pixel(zoom, lon1);
+	pvy1_ = Track::lat2pixel(zoom, lat1);
 
-	px2_ = Track::lon2pixel(zoom, lon2);
-	py2_ = Track::lat2pixel(zoom, lat2);
+	pvx2_ = Track::lon2pixel(zoom, lon2);
+	pvy2_ = Track::lat2pixel(zoom, lat2);
 
-	// lat/lon to tile index
-	x1_ = floor((float) px1_ / (float) TILESIZE);
-	y1_ = floorf((float) py1_ / (float) TILESIZE);
+	// Convert limit lat/lon to pixel
+	lim_px1_ = floorf((float) Track::lon2pixel(zoom, lim_p1_.longitude()));
+	lim_py1_ = floorf((float) Track::lat2pixel(zoom, lim_p1_.latitude()));
 
-	x2_ = ceilf((float) px2_ / (float) TILESIZE);
-	y2_ = ceilf((float) py2_ / (float) TILESIZE);
+	lim_px2_ = floorf((float) Track::lon2pixel(zoom, lim_p2_.longitude()));
+	lim_py2_ = floorf((float) Track::lat2pixel(zoom, lim_p2_.latitude()));
 
-	// Use padding (to see markers)
-	padding = theme().border() + settings().markerSize();
+	// Compute extended view area to match with widget size
+	pevx1_ = pvx1_;
+	pevy1_ = pvy1_;
 
-	width -= 2 * padding;
-	height -= 2 * padding;
+	pevx2_ = pvx2_;
+	pevy2_ = pvy2_;
 
-	if (zoomfit) {
-		double divider = 1.0;
+	// Compute padding
+	space = ceilf((settings().pathThick() + settings().pathBorder()) / 2.0);
+
+	padding_vertical = 2 * theme().border()
+		+ theme().padding(VideoWidget::Theme::PaddingTop)
+		+ theme().padding(VideoWidget::Theme::PaddingBottom);
+	padding_horizontal = 2 * theme().border()
+		+ theme().padding(VideoWidget::Theme::PaddingLeft)
+		+ theme().padding(VideoWidget::Theme::PaddingRight);
+
+	switch (settings().view()) {
+	// Apply zoom fit - center track
+	case TrackSettings::ViewZoomFit:
+		// Apply padding
+		width -= padding_horizontal + 2 * space;
+		height -= padding_vertical + 2 * space;
 
 		// Compute divider to match with the size of widget
-		w = ceilf((float) px2_ - px1_);
-		h = ceilf((float) py2_ - py1_);
+		w = ceilf((float) pevx2_ - pevx1_);
+		h = ceilf((float) pevy2_ - pevy1_);
 
 		if ((w > 0) && (h > 0)) {
 			if (((float) width / w) > ((float) height / h))
-				divider = (float) height / h;
+				divider_ = (float) height / h;
 			else
-				divider = (float) width / w;
+				divider_ = (float) width / w;
 		}
 
-		// Save computed divider value
-		divider_ = divider;
+		// Append space around track
+		pevx1_ -= ceilf(space / divider_);
+		pevx2_ += ceilf(space / divider_);
+
+		pevy1_ -= ceilf(space / divider_);
+		pevy2_ += ceilf(space / divider_);
+
+		break;
+
+	// Center & lock view on the current position
+	case TrackSettings::ViewLockCenter:
+		// Apply padding
+		width -= 2 * theme().border();
+		height -= 2 * theme().border();
+
+		// Increase width view so as match widget size
+		// as position is at point of view '1' or '2'
+		pevx1_ -= ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingLeft)) / divider_;
+		pevx2_ += ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingRight)) / divider_;
+
+		// Increase height view so as match widget size
+		// as position is at point of view '1' or '2'
+		pevy1_ -= ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingTop)) / divider_;
+		pevy2_ += ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingBottom)) / divider_;
+
+		// Adjust limit to append space around track
+		lim_px1_ -= ceilf(space / divider_);
+		lim_px2_ += ceilf(space / divider_);
+
+		lim_py1_ -= ceilf(space / divider_);
+		lim_py2_ += ceilf(space / divider_);
+
+		// Crop view size
+		pevx1_ = std::max(lim_px1_, pevx1_);
+		pevx2_ = std::min(lim_px2_, pevx2_);
+
+		pevy1_ = std::max(lim_py1_, pevy1_);
+		pevy2_ = std::min(lim_py2_, pevy2_);
+
+		break;
+
+	// Default mode
+	case TrackSettings::ViewDefault:
+	default:
+		// width x height of data area
+		data_width = (lim_px2_ - lim_px1_) * divider_;
+		data_height = (lim_py2_ - lim_py1_) * divider_;
+
+		// Apply padding
+		width -= 2 * theme().border();
+		height -= 2 * theme().border();
+
+		// Adjust limit to append space around track
+		lim_px1_ -= ceilf(space / divider_);
+		lim_px2_ += ceilf(space / divider_);
+
+		lim_py1_ -= ceilf(space / divider_);
+		lim_py2_ += ceilf(space / divider_);
+
+		// Compute lim1 (top-left)
+		pos_lim_x1 = (lim_px1_ - pevx1_) * divider_;
+		pos_lim_y1 = (lim_py1_ - pevy1_) * divider_;
+
+		// Compute lim2 (bottom-right)
+		pos_lim_x2 = (lim_px2_ - pevx1_) * divider_;
+		pos_lim_y2 = (lim_py2_ - pevy1_) * divider_;
+
+		// Track fit in width
+		if (data_width > width) {
+			// Increase width view so as match widget size
+			// as position is at point of view '1' or '2'
+			if ((width / 2) > -pos_lim_x1)
+				pevx1_ = lim_px1_;
+			else if ((width / 2) > pos_lim_x2)
+				pevx1_ -= (theme().width() - theme().padding(VideoWidget::Theme::PaddingRight)) / divider_;
+			else
+				pevx1_ -= ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingLeft)) / divider_;
+
+			if ((width / 2) > pos_lim_x2)
+				pevx2_ = lim_px2_;
+			else if ((width / 2) > -pos_lim_x1)
+				pevx2_ += (theme().width() - theme().padding(VideoWidget::Theme::PaddingLeft)) / divider_;
+			else
+				pevx2_ += ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingRight)) / divider_;
+		}
+		else {
+			// Use limit
+			pevx1_ = lim_px1_;
+			pevx2_ = lim_px2_;
+		}
+
+		// Track fit in height
+		if (data_height > height) {
+			// Increase height view so as match widget size
+			// as position is at point of view '1' or '2'
+			if ((height / 2) > -pos_lim_y1)
+				pevy1_ = lim_py1_;
+			else if ((height / 2) > -pos_lim_y2)
+				pevy1_ -= (theme().height() - theme().padding(VideoWidget::Theme::PaddingBottom)) / divider_;
+			else
+				pevy1_ -= ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingTop)) / divider_;
+
+			if ((height / 2) > pos_lim_y2)
+				pevy2_ = lim_py2_;
+			else if ((height / 2) > -pos_lim_y1)
+				pevy2_ += (theme().height() - theme().padding(VideoWidget::Theme::PaddingTop)) / divider_;
+			else
+				pevy2_ += ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingBottom)) / divider_;
+		}
+		else {
+			// Use limit
+			pevy1_ = lim_py1_;
+			pevy2_ = lim_py2_;
+		}
+
+		// Crop view size
+		pevx1_ = std::max(lim_px1_, pevx1_);
+		pevx2_ = std::min(lim_px2_, pevx2_);
+
+		pevy1_ = std::max(lim_py1_, pevy1_);
+		pevy2_ = std::min(lim_py2_, pevy2_);
+
+		break;
 	}
 
-	// Append tile so as padding is enough
-	while (((px1_ - (x1_ * TILESIZE)) * divider_) < padding)
-		x1_ -= 1;
-
-	while (((py1_ - (y1_ * TILESIZE)) * divider_) < padding)
-		y1_ -= 1;
-
-	while ((((x2_ * TILESIZE) - px2_) * divider_) < padding)
-		x2_ += 1;
-
-	while ((((y2_ * TILESIZE) - py2_) * divider_) < padding)
-		y2_ += 1;
-
-	// Append tile so as width tiles sum is enough
-	while (((x2_ - x1_) * TILESIZE * divider_) < (2 * width)) {
-		x1_ -= 1;
-		x2_ += 1;
-	}
-
-	// Append tile so as height tiles sum is enough
-	while (((y2_ - y1_) * TILESIZE * divider_) < (2 * height)) {
-		y1_ -= 1;
-		y2_ += 1;
-	}
+	// Init done
+	is_init_ = true;
 }
 
 
@@ -490,15 +667,14 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 
 	// Path border
 	if (path_border > 0) {
-//		cairo_set_source_rgb(cairo, 0.0, 0.0, 0.0); // BGR #000000
 		cairo_set_source_rgba(cairo, outline[0], outline[1], outline[2], outline[3]); // BGR #0000000
 		cairo_set_line_width(cairo, path_border + path_thick); //4.4); //40.96);
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		// Draw each WPT
 		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
-			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
+			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 			x *= divider;
 			y *= divider;
@@ -511,14 +687,13 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	}
 
 	// Draw each WPT with secondary color
-//	cairo_set_source_rgb(cairo, 0.9, 0.4, 0.2); // BGR #669df6
 	cairo_set_source_rgba(cairo, fill[0], fill[1], fill[2], fill[3]); // BGR #669df600
 	cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
-		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
+		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 		x *= divider;
 		y *= divider;
@@ -610,8 +785,8 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
-			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
+			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 			x *= divider;
 			y *= divider;
@@ -644,15 +819,15 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
 
 		// Last point
-		x1 = floorf((float) Track::lon2pixel(zoom, last_data_.longitude())) - (x1_ * TILESIZE);
-		y1 = floorf((float) Track::lat2pixel(zoom, last_data_.latitude())) - (y1_ * TILESIZE);
+		x1 = floorf((float) Track::lon2pixel(zoom, last_data_.longitude())) - pevx1_;
+		y1 = floorf((float) Track::lat2pixel(zoom, last_data_.latitude())) - pevy1_;
 
 		x1 *= divider;
 		y1 *= divider;
 
 		// Current point
-		x2 = floorf((float) Track::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
-		y2 = floorf((float) Track::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
+		x2 = floorf((float) Track::lon2pixel(zoom, data.longitude())) - pevx1_;
+		y2 = floorf((float) Track::lat2pixel(zoom, data.latitude())) - pevy1_;
 
 		x2 *= divider;
 		y2 *= divider;
@@ -745,23 +920,19 @@ bool Track::load(void) {
 
 	log_call();
 
-	// Compute track size
-	width = (x2_ - x1_) * TILESIZE;
-	height = (y2_ - y1_) * TILESIZE;
-
-	if ((width == 0) || (height == 0))
+	if (!isInitialized())
 		return true;
 
-	// Create background track buffer
-	trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width * divider_, height * divider_, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
+	// Compute track size
+	width = ceilf((pevx2_ - pevx1_) * divider_);
+	height = ceilf((pevy2_ - pevy1_) * divider_);
 
+	// Load telemetry data
 	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
 
 	if (source != NULL) {
-//		// Telemetry data limits
-//		source->setFrom(app_.settings().from());
-//		source->setTo(app_.settings().to());
-		//gpx->setTimeOffset(app_.settings().offset());
+		// Create background track buffer
+		trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
 		// Draw background path
 		path(*trackbuf_, source, divider_);
@@ -769,8 +940,8 @@ bool Track::load(void) {
 		// Compute begin
 		source->retrieveFirst(wpt);
 
-		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
+		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 		x_start_ *= divider_;
 		y_start_ *= divider_;
@@ -779,8 +950,8 @@ bool Track::load(void) {
 		// Compute end
 		source->retrieveLast(wpt);
 
-		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - (x1_ * TILESIZE);
-		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - (y1_ * TILESIZE);
+		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
+		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 		x_end_ *= divider_;
 		y_end_ *= divider_;
@@ -821,13 +992,24 @@ skip:
 
 
 OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
-	int x = 0; //this->x();
-	int y = 0; //this->y();
-	int w, width = settings().width();
-	int h, height = settings().height();
+	int x, y;
+
+	int w, width;
+	int h, height;
+
+	int width_available;
+	int height_available;
+
+	int data_width, data_height;
 
 	int posX, posY;
 	int offsetX, offsetY;
+
+	int pos_lim_x1, pos_lim_y1;
+	int pos_lim_x2, pos_lim_y2;
+
+	int padding_vertical;
+	int padding_horizontal;
 
 	int zoom = settings().zoom();
 	int marker_size = settings().markerSize();
@@ -850,8 +1032,8 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = y_end_;
 	}
 	else if (data.timestamp() > ts_start_) {
-		posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - (x1_ * TILESIZE);
-		posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - (y1_ * TILESIZE);
+		posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - pevx1_;
+		posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - pevy1_;
 
 		posX *= divider_;
 		posY *= divider_;
@@ -861,23 +1043,97 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = y_start_;
 	}
 
-	// width x height of track
-	w = (px2_ - px1_) * divider_; // floorf((float) Track::lon2pixel(zoom, lon1)) - (x1_ * TILESIZE);
-	h = (py2_ - py1_) * divider_; // floorf((float) Track::lat2pixel(zoom, lat1)) - (y1_ * TILESIZE);
-
-	// Center track
-	if (settings().zoomfit()) {
-		offsetX = px1_ - (x1_ * TILESIZE);
-		offsetX *= divider_;
-		offsetX -= (width - w) / 2;
-
-		offsetY = py1_ - (y1_ * TILESIZE);
-		offsetY *= divider_;
-		offsetY -= (height - h) / 2;
+	// Move ?
+	if ((posX == last_posX_) && (posY == last_posY_)) {
+		is_update = false;
+		goto skip;
 	}
-	else {
-		offsetX = posX - (width / 2);
-		offsetY = posY - (height / 2);
+
+	// track position
+	x = theme().border();
+	y = theme().border();
+
+	// width x height of track
+	w = (pevx2_ - pevx1_) * divider_;
+	h = (pevy2_ - pevy1_) * divider_;
+
+	// width x height of widget
+	width = settings().width() - 2 * theme().border();
+	height = settings().height() - 2 * theme().border();
+
+	// compute padding for track
+	padding_horizontal = theme().padding(VideoWidget::Theme::PaddingLeft) + theme().padding(VideoWidget::Theme::PaddingRight);
+	padding_vertical = theme().padding(VideoWidget::Theme::PaddingTop) + theme().padding(VideoWidget::Theme::PaddingBottom);
+
+	// Apply padding
+	width_available = width - padding_horizontal;
+	height_available = height - padding_vertical;
+
+	switch (settings().view()) {
+	// Apply zoom fit - center track
+	case TrackSettings::ViewZoomFit:
+		// Apply padding
+		x += theme().padding(VideoWidget::Theme::PaddingLeft);
+		y += theme().padding(VideoWidget::Theme::PaddingTop);
+
+		// Add offset to center the track
+		offsetX = (width_available - w) / 2;
+		offsetY = (height_available - h) / 2;
+
+		break;
+
+	// Center & lock view on the current position
+	case TrackSettings::ViewLockCenter:
+		// Add offset to center on the current position
+		offsetX = theme().padding(VideoWidget::Theme::PaddingLeft);
+		offsetY = theme().padding(VideoWidget::Theme::PaddingTop);
+
+		offsetX += (width_available / 2) - posX;
+		offsetY += (height_available / 2) - posY;
+
+		break;
+
+	// Default mode
+	case TrackSettings::ViewDefault:
+	default:
+		// width x height of data area
+		data_width = (lim_px2_ - lim_px1_) * divider_;
+		data_height = (lim_py2_ - lim_py1_) * divider_;
+
+		// Compute lim1 (top-left)
+		pos_lim_x1 = (lim_px1_ - pevx1_) * divider_;
+		pos_lim_y1 = (lim_py1_ - pevy1_) * divider_;
+
+		// Compute lim2 (bottom-right)
+		pos_lim_x2 = (lim_px2_ - pevx1_) * divider_;
+		pos_lim_y2 = (lim_py2_ - pevy1_) * divider_;
+
+		// Compute offset
+		offsetX = theme().padding(VideoWidget::Theme::PaddingLeft);
+		offsetY = theme().padding(VideoWidget::Theme::PaddingTop);
+
+		offsetX += (width_available / 2) - posX;
+		offsetY += (height_available / 2) - posY;
+
+		if (data_width > width) {
+			if ((posX - pos_lim_x1) < (width_available / 2))
+				offsetX += posX - pos_lim_x1 - (width_available / 2);
+			else if ((pos_lim_x2 - posX) < (width_available / 2))
+				offsetX += posX - pos_lim_x2 + (width_available / 2);
+		}
+		else
+			offsetX = theme().padding(VideoWidget::Theme::PaddingLeft) + (width_available - w) / 2;
+
+		if (data_height > height) {
+			if ((pos_lim_y2 - posY) < (height_available / 2))
+				offsetY += posY - pos_lim_y2 + (height_available / 2);
+			else if ((posY - pos_lim_y1) < (height_available / 2))
+				offsetY += posY - pos_lim_y1 - (height_available / 2);
+		}
+		else
+			offsetY = theme().padding(VideoWidget::Theme::PaddingTop) + (height_available - h) / 2;
+
+		break;
 	}
 
 	// Update path progress
@@ -893,27 +1149,33 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
 	// Draw track image over
-	trackbuf_->specmod().x = x - offsetX;
-	trackbuf_->specmod().y = y - offsetY;
+	trackbuf_->specmod().x = x + offsetX;
+	trackbuf_->specmod().y = y + offsetY;
 	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
 	if (marker_size > 0) {
-		drawPicto(*fg_buf_, x - offsetX + x_end_, y - offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
-		drawPicto(*fg_buf_, x - offsetX + x_start_, y - offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
 	
 		if (data.hasValue(TelemetryData::DataFix))
-			drawPicto(*fg_buf_, x - offsetX + posX, y - offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
 	}
 
-	is_update = true;
+	// Save last position
+	last_posX_ = posX;
+	last_posY_ = posY;
 
+	is_update = true;
 skip:
 	return fg_buf_;
 }
 
 
 void Track::clear(void) {
+	last_posX_= -1;
+	last_posY_= -1;
+
 	if (trackbuf_)
 		delete trackbuf_;
 

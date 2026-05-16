@@ -606,8 +606,8 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryBegin(),
 					app.settings().telemetryEnd());
 			settings.setComputeRange(
-					app.settings().telemetryFrom(),
-					app.settings().telemetryTo());
+					app.settings().telemetryComputeFrom(),
+					app.settings().telemetryComputeTo());
 
 			settings.setTelemetryFilter(app.settings().telemetryFilter());
 

@@ -74,6 +74,10 @@ protected:
 
 	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase);
 
+	bool isInitialized(void) {
+		return is_init_;
+	}
+
 	bool preinit(void);
 	void init(void);
 	bool load(void);
@@ -113,7 +117,7 @@ protected:
 
 		os << "<marker>" << settings().markerSize() << "</marker>" << std::endl;
 
-		os << "<zoomfit>" << VideoWidget::bool2string(settings().zoomfit()) << "</zoomfit>" << std::endl;
+		os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
 		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
 
 		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
@@ -129,15 +133,25 @@ protected:
 
 	struct event_base *evbase_;
 
+	bool is_init_;
+
 	OIIO::ImageBuf *trackbuf_;
 
 	TelemetryData last_data_;
 
 	double divider_;
 
-	// Bounding box
-	int x1_, y1_, x2_, y2_;
-	int px1_, py1_, px2_, py2_;
+	int last_posX_, last_posY_;
+
+	// Data boudning box (range)
+	TelemetryData lim_p1_, lim_p2_;
+
+	// Bounding box (pixel view area)
+	int pvx1_, pvy1_, pvx2_, pvy2_;
+	// Bounding box (pixel extended view area)
+	int pevx1_, pevy1_, pevx2_, pevy2_;
+	// Bounding box (pixel data range)
+	int lim_px1_, lim_py1_, lim_px2_, lim_py2_;
 
 	// Start & end position/timestamp
 	int x_end_, y_end_;

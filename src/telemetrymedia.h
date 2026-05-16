@@ -25,6 +25,12 @@ public:
 		DataEof
 	};
 
+	enum Range {
+		RangeData,
+		RangeCompute,
+		RangeView
+	};
+
 	class Point : public TelemetryData {
 	public:
 		Point()
@@ -541,7 +547,7 @@ public:
 	uint64_t beginTimestamp(void) const;
 	uint64_t endTimestamp(void) const;
 
-	bool getBoundingBox(TelemetryData *p1, TelemetryData *p2);
+	bool getBoundingBox(Range range, TelemetryData *p1, TelemetryData *p2);
 
 	// Data api
 	bool isOpen(void) const;
@@ -602,7 +608,8 @@ protected:
 	int64_t offset_;
 
 	uint64_t begin_, end_;
-	uint64_t from_, to_;
+	uint64_t view_start_, view_stop_;
+	uint64_t compute_start_, compute_stop_;
 
 	TelemetrySettings settings_;
 

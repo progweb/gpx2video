@@ -7,6 +7,13 @@
 
 class TrackSettings {
 public:
+	enum View {
+		ViewDefault,
+		ViewLockCenter,
+		ViewZoomFit,
+		ViewUnknown,
+	};
+
 	TrackSettings();
 	virtual ~TrackSettings();
 
@@ -19,6 +26,9 @@ public:
 
 	const bool& zoomfit(void) const;
 	void setZoomfit(const bool &enable);
+
+	const View& view(void) const;
+	void setView(const View &view);
 
 	const double& divider(void) const;
 	void setDivider(const double &divier);
@@ -47,9 +57,13 @@ public:
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
+	static View string2view(std::string &s);
+
+	static std::string view2string(View view);
+
 protected:
 	int zoom_;
-	bool zoomfit_;
+	View view_;
 
 	double divider_;
 

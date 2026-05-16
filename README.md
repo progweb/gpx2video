@@ -115,8 +115,8 @@ this case, the `creation_time` value is computed form 'GoPro MET' stream.
 If the `creation_time` field and 'GoPro MET' stream can't be found, gpx2video assumes that the video starts in the
 same time that the GPX stream.
 
-At last, you can overwrite `creation_time` value or just set the video start time (if `creation_time` doesn't exist)
-in using --start-time option.
+At last, you can overwrite `creation_time` value in using --start-time option. As this option is used, gpx2video 
+doesn't 
 
 "sync" command permits to test the sychronization process:
 
@@ -630,7 +630,7 @@ Map settings:
 <map x="250" y="450" width="600" height="120" position="left" display="true">
 	<source>1</source>
 	<zoom>11</zoom>
-	<zoomfit>false</zoomfit>
+	<view>default</view>
 	<factor>1.2</factor>
 	<marker>60</marker>
 	<border>5</border>
@@ -648,7 +648,10 @@ Map settings:
 **path-thick** path thick.
 **path-border** border size of path.
 
-**zoomfit** computes **factor** value to fit map in the widget area. In this case, **factor** value is ignored.
+**view** values are "zoomfit", "center", "default".
+
+As **view** is set to "zoomfit", gpx2video computes **factor** value to fit the map in the widget area. 
+In this case, **factor** value is ignored.
 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. 
 At last, you can define several map widgets.
@@ -665,7 +668,7 @@ Track settings:
 ```xml
 <track x="250" y="450" width="600" height="120" position="left" display="true">
 	<marker>60</marker>
-	<zoomfit>true</zoomfit>
+	<view>zoomfit</view>
 	<factor>1.2</factor>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
@@ -675,7 +678,10 @@ Track settings:
 </widget>		
 ```
 
-**zoomfit** computes **factor** value to fit track in the widget area. In this case, **factor** value is ignored.
+**view** values are "zoomfit", "center", "default".
+
+As **view** is set to "zoomfit", gpx2video computes **factor** value to fit the track in the widget area. 
+In this case, **factor** value is ignored.
 
 *Track widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 

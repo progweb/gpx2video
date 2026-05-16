@@ -2,6 +2,7 @@
 #define __GPX2VIDEO__APPLICATION_H__
 
 #include <list>
+#include <algorithm>
 #include <cstdlib>
 #include <cstdint>
 #include <cstring>
@@ -155,10 +156,17 @@ public:
 		tasks_.push_back(task);
 	}
 
-	void insert(Task *task) {
+	void insert(Task *task, Task *before=NULL) {
 		task->reset();
 
-		tasks_.push_front(task);
+		if (before != NULL) {
+			auto it = std::find(tasks_.begin(), tasks_.end(), before);
+
+			if (it != tasks_.end())
+				tasks_.insert(it, task);
+		}
+		else
+			tasks_.push_front(task);
 	}
 
 	void remove(Task *task) {

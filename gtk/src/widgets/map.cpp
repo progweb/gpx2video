@@ -12,6 +12,26 @@ GPX2VideoMapWidgetSettingsBox::GPX2VideoMapWidgetSettingsBox(BaseObjectType *cob
 	// Populate models
 	//-----------------
 
+	view_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = view_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = MapSettings::ViewDefault;
+		row[model_.m_name] = "Default";
+		row[model_.m_enable] = true;
+
+		row = *(view_model_->append());
+		row[model_.m_id] = MapSettings::ViewLockCenter;
+		row[model_.m_name] = "Center";
+		row[model_.m_enable] = true;
+
+		row = *(view_model_->append());
+		row[model_.m_id] = MapSettings::ViewZoomFit;
+		row[model_.m_name] = "Zoom fit";
+		row[model_.m_enable] = true;
+	}
+
 	source_model_ = Gtk::ListStore::create(model_);
 
 	for (int i=MapSettings::SourceNull; i != MapSettings::SourceCount; i++) {
@@ -42,7 +62,6 @@ GPX2VideoMapWidgetSettingsBox::GPX2VideoMapWidgetSettingsBox(BaseObjectType *cob
 void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 	log_call();
 
-	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -79,25 +98,32 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Zoomfit enable
-	sw = ref_builder_->get_widget<Gtk::Switch>("zoomfit_switch");
-	if (!sw)
-		throw std::runtime_error("No \"zoomfit_switch\" object in " + resource_file_);
-	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_switch_changed), sw, 
-					[this](const bool &state) {
-						log_info("Widget %s: zoomfit changed to '%s'",
-							   widget_->name().c_str(), std::to_string(state).c_str());
+	// View
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("view_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"view_combobox\" object in" + resource_file_);
 
-						((Map *) widget_->widget())->settings().setZoomfit(state);
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_info("Widget %s: view changed to '%s'", 
+								widget_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						((Map *) widget_->widget())->settings().setView((MapSettings::View) value);
 
 						// Update
 						update_boundaries();
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
-					} 
-			), false);
+					}
+			));
 
 	// Zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
@@ -232,7 +258,6 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 
 	const float *color;
 
-	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -252,12 +277,15 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 	if (find_in_listtore(source_model_, ((Map *) widget_->widget())->settings().source(), iter))
 		combobox->set_active(iter);
 
-	// zoomfit
-	sw = ref_builder_->get_widget<Gtk::Switch>("zoomfit_switch");
-	if (!sw)
-		throw std::runtime_error("No \"zoomfit_switch\" object in " + resource_file_);
+	// view
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("view_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"view_combobox\" object in " + resource_file_);
 
-	sw->set_active(((Map *) widget_->widget())->settings().zoomfit());
+	combobox->set_model(view_model_);
+
+	if (find_in_listtore(view_model_, ((Map *) widget_->widget())->settings().view(), iter))
+		combobox->set_active(iter);
 
 	// zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
@@ -347,6 +375,6 @@ void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_sensitive(((Map *) widget_->widget())->settings().zoomfit() == false);
+	spinbutton->set_sensitive(((Map *) widget_->widget())->settings().view() != MapSettings::ViewZoomFit);
 }
 

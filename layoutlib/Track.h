@@ -170,11 +170,11 @@ namespace layout
     Decimal  &marginBottom() { return _margin_bottom; }
 
     ///
-    /// Get zoomfit
+    /// Get view
     ///
-    /// @return the zoom element
+    /// @return the view element
     ///
-    Boolean  &zoomfit() { return _zoomfit; }
+    String  &view() { return _view; }
 
 	///
 	/// Get factor
@@ -256,7 +256,7 @@ namespace layout
 	Decimal      _margin_right;
 	Decimal      _margin_top;
 	Decimal      _margin_bottom;
-	Boolean      _zoomfit;
+	String       _view;
 	Decimal      _factor;
 	Unsigned     _border;
 	String       _bordercolor;

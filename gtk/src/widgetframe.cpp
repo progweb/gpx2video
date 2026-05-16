@@ -682,7 +682,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						widget_selected_->widget()->theme().setBorder(value);
 
 						// Broadcast widget change
-						widget_selected_->dispatchEvent(false);
+						widget_selected_->dispatchEvent(true);
 					}
 			));
 
@@ -1770,9 +1770,38 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	// Widget type
 	type = widget_selected_->widget()->type();
 
-	// Layout size
-	width = renderer_->width();
-	height = renderer_->height();
+	// Paddings
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_left_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"padding_left_spinbutton\" object in widget_frame.ui");
+
+	width = widget_selected_->theme().width();
+
+	spinbutton->set_range(0, width);
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_right_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"padding_right_spinbutton\" object in widget_frame.ui");
+
+	width = widget_selected_->theme().width();
+
+	spinbutton->set_range(0, width);
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_top_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"padding_top_spinbutton\" object in widget_frame.ui");
+
+	height = widget_selected_->theme().height();
+
+	spinbutton->set_range(0, height);
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_bottom_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"padding_bottom_spinbutton\" object in widget_frame.ui");
+
+	height = widget_selected_->theme().height();
+
+	spinbutton->set_range(0, height);
 
 	// Label expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
@@ -1791,8 +1820,13 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"width_spinbutton\" object in widget_frame.ui");
 
-	margin = widget_selected_->widget()->margin(VideoWidget::MarginLeft) 
-		+ widget_selected_->widget()->margin(VideoWidget::MarginRight);
+	width = renderer_->width();
+	if (widget_selected_->widget()->position() == VideoWidget::PositionNone) {
+		margin = widget_selected_->widget()->margin(VideoWidget::MarginLeft) 
+			+ widget_selected_->widget()->margin(VideoWidget::MarginRight);
+	}
+	else
+		margin = 0;
 
 	spinbutton->set_range(0, width - margin);
 
@@ -1801,8 +1835,13 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"height_spinbutton\" object in widget_frame.ui");
 
-	margin = widget_selected_->widget()->margin(VideoWidget::MarginTop) 
-		+ widget_selected_->widget()->margin(VideoWidget::MarginBottom);
+	height = renderer_->height();
+	if (widget_selected_->widget()->position() == VideoWidget::PositionNone) {
+		margin = widget_selected_->widget()->margin(VideoWidget::MarginTop) 
+			+ widget_selected_->widget()->margin(VideoWidget::MarginBottom);
+	}
+	else
+		margin = 0;
 
 	spinbutton->set_range(0, height - margin);
 }
@@ -1922,11 +1961,11 @@ void GPX2VideoWidgetFrame::on_widget_padding_value_changed(const VideoWidget::Th
 
 	widget_selected_->widget()->theme().setPadding(padding, value);
 
-	// Refresh widget
-	renderer_->refresh(widget_selected_);
+	// Update limit
+	update_boundaries();
 
-	// Refresh video preview
-	dispatcher_.emit();
+	// Broadcast widget change
+	widget_selected_->dispatchEvent(true);
 }
 
 
@@ -1942,12 +1981,6 @@ void GPX2VideoWidgetFrame::on_widget_font_changed(Gtk::FontButton *button, std::
 
 	// Set description
 	set(description);
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 }
 
 
@@ -1963,12 +1996,6 @@ void GPX2VideoWidgetFrame::on_widget_spin_changed(Gtk::SpinButton *button, std::
 
 	// Set value
 	set(value);
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 }
 
 
@@ -1994,12 +2021,6 @@ void GPX2VideoWidgetFrame::on_widget_color_changed(Gtk::ColorButton *button, std
 
 	// Set color
 	set(color);
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 }
 
 
@@ -2011,12 +2032,6 @@ void GPX2VideoWidgetFrame::on_widget_entry_changed(Gtk::Entry *entry, std::funct
 
 	// Set entry
 	set(entry->get_text());
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 }
 
 
@@ -2028,12 +2043,6 @@ void GPX2VideoWidgetFrame::on_widget_combobox_changed(Gtk::ComboBox *combobox, s
 
 	// Set combobox
 	set(combobox->get_active());
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 }
 
 bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set) {
@@ -2047,12 +2056,6 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 
 	// Set state
 	set(state);
-
-//	// Refresh widget
-//	renderer_->refresh(widget_selected_);
-//
-//	// Refresh video preview
-//	dispatcher_.emit();
 
 	return true;
 }

@@ -46,6 +46,9 @@ bool Renderer::init(MediaContainer *container) {
 	// Media
 	container_ = container;
 
+	// Compute telemetry range
+	computeTelemetryRange();
+
 	return true;
 }
 
@@ -144,6 +147,8 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	unsigned int mapsource;
 
+	MapSettings::View view;
+
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
@@ -200,6 +205,13 @@ bool Renderer::loadMap(layout::Map *m) {
 //	TelemetryData p1, p2;
 //	source->getBoundingBox(&p1, &p2);
 
+	// View
+	s = (const char *) m->view();
+	view = MapSettings::string2view(s);
+
+	if (view == MapSettings::ViewUnknown)
+		log_error("Map view value '%s' unknown", s.c_str());
+
 	// Position
 	s = (const char *) m->position();
 	position = VideoWidget::string2position(s);
@@ -219,7 +231,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setSize(width, height);
 	mapSettings.setSource((MapSettings::Source) mapsource);
 	mapSettings.setZoom(m->zoom());
-	mapSettings.setZoomfit(m->zoomfit());
+	mapSettings.setView((MapSettings::View) view);
 	mapSettings.setDivider(m->factor());
 	mapSettings.setMarkerSize(marker_size);
 //	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
@@ -263,6 +275,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	std::string s;
 
+	TrackSettings::View view;
+
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
@@ -305,6 +319,13 @@ bool Renderer::loadTrack(layout::Track *t) {
 //	if (source != NULL)
 //		source->getBoundingBox(&p1, &p2);
 
+	// View
+	s = (const char *) t->view();
+	view = TrackSettings::string2view(s);
+
+	if (view == TrackSettings::ViewUnknown)
+		log_error("Track view value '%s' unknown", s.c_str());
+
 	// Position
 	s = (const char *) t->position();
 	position = VideoWidget::string2position(s);
@@ -323,7 +344,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
 //	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
-	trackSettings.setZoomfit(t->zoomfit());
+	trackSettings.setView((MapSettings::View) view);
 	trackSettings.setDivider(t->factor());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
@@ -636,6 +657,22 @@ void Renderer::drop(void) {
 
 		delete widget;
 	}
+}
+
+
+void Renderer::computeTelemetryRange(void) {
+	log_call();
+
+	uint64_t ts;
+	uint64_t duration;
+
+	if (!container_)
+		return;
+
+	ts = container_->startTime();
+	duration = container_->duration();
+
+	telemetrySettings().setViewRange(ts, ts + duration);
 }
 
 

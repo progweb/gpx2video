@@ -419,28 +419,20 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 			break;
 
 		case Extractor::GPMF_TYPE_SIGNED_SHORT: // 0x73
-			inputtypesize = 2;
-			for (i=0, k=0; i<data->header.count; i++) {
-				for (j=0; j<data->header.size / inputtypesize; j++) {
-					data->value.s16[k+j] = bswap_16(data->value.s16[k+j]);
+			for (i=0; i<data->header.count; i++) {
+				data->value.s16[i] = bswap_16(data->value.s16[i]);
 
-					if (dump)
-						out << "  value[" << k+j << "]: " << data->value.s16[k+j] << std::endl;
-				}
-				k += data->header.size / inputtypesize;
+				if (dump)
+					out << "  value: " << data->value.s16[i] << std::endl;
 			}
 			break;
 
 		case Extractor::GPMF_TYPE_UNSIGNED_SHORT: // 0x53
-			inputtypesize = 2;
-			for (i=0, k=0; i<data->header.count; i++) {
-				for (j=0; j<data->header.size / inputtypesize; j++) {
-					data->value.u16[k+j] = bswap_16(data->value.u16[k+j]);
+			for (i=0; i<data->header.count; i++) {
+				data->value.u16[i] = bswap_16(data->value.u16[i]);
 
-					if (dump)
-						out << "  value[" << k+j << "]: " << data->value.u16[k+j] << std::endl;
-				}
-				k += data->header.size / inputtypesize;
+				if (dump)
+					out << "  value[" << i << "]: " << data->value.u16[i] << std::endl;
 			}
 			break;
 
@@ -515,7 +507,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				data->value.u64[i] = __bswap_64(data->value.u64[i]);
 
 				if (dump)
-					out << "  value: " << (double) data->value.u64[i] << std::endl;
+					out << "  mmmmmvalue: " << (double) data->value.u64[i] << std::endl;
 			}
 			break;
 
@@ -558,28 +550,6 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				k += data->header.size / inputtypesize;
 			}
 		}
-//		else if (key == STR2FOURCC("ACCL")) {
-//			for (i=0, k=0; i<data->header.count; i++) {
-//				printf("ACCL[%d] = Z: %f X: %f Y: %f\n", 
-//						i, 
-//						(double) data->value.s16[k] / (double) scal[0],
-//						(double) data->value.s16[k+1] / (double) scal[0],
-//						(double) data->value.s16[k+2] / (double) scal[0]);
-//
-//				k += data->header.size / inputtypesize;
-//			}
-//		}
-//		else if (key == STR2FOURCC("GYRO")) {
-//			for (i=0, k=0; i<data->header.count; i++) {
-//				printf("GYRO[%d] = Z: %f X: %f Y: %f\n", 
-//						i, 
-//						(double) data->value.s16[k] / (double) scal[0],
-//						(double) data->value.s16[k+1] / (double) scal[0],
-//						(double) data->value.s16[k+2] / (double) scal[0]);
-//
-//				k += data->header.size / inputtypesize;
-//			}
-//		}
 
 		if (data->header.type != 0x00) { 
 			n += len;

@@ -143,8 +143,10 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 	, offset_(0) 
 	, begin_(0)
 	, end_(0)
-	, from_(0)
-	, to_(0) {
+	, view_start_(0)
+	, view_stop_(0)
+	, compute_start_(0)
+	, compute_stop_(0) {
 	log_call();
 
 //	pool_.setNumberOfPoints(100);
@@ -188,8 +190,8 @@ bool TelemetrySource::inRange(uint64_t timestamp) const {
 
 	uint64_t from, to;
 
-	from = !settings().telemetryFrom() ? settings().telemetryBegin() : settings().telemetryFrom();
-	to = !settings().telemetryTo() ? settings().telemetryEnd() : settings().telemetryTo();
+	from = !settings().telemetryComputeFrom() ? settings().telemetryBegin() : settings().telemetryComputeFrom();
+	to = !settings().telemetryComputeTo() ? settings().telemetryEnd() : settings().telemetryComputeTo();
 
 	if (from && (timestamp <= from))
 		in_range = false;
@@ -424,7 +426,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		}
 	
 		// Clear flag
-		if (!enable && (curPoint.timestamp() < from_)) {
+		if (!enable && (curPoint.timestamp() < compute_start_)) {
 			// Before first point, no computed data
 			curPoint.clearValue(
 					TelemetryData::DataDuration
@@ -478,6 +480,12 @@ void TelemetrySource::config(void) {
 	// Telemetry range
 	begin_ = settings().telemetryBegin();
 	end_ = settings().telemetryEnd();
+
+	view_start_ = settings().telemetryViewFrom();
+	view_stop_ = settings().telemetryViewTo();
+
+	compute_start_ = settings().telemetryComputeFrom();
+	compute_stop_ = settings().telemetryComputeTo();
 
 	// Telemtry data filter
 	check_ = settings().telemetryCheck();
@@ -551,9 +559,13 @@ void TelemetrySource::range(void) {
 	begin_ = (begin_ != 0) ? MAX(first, begin_) : first;
 	end_ = (end_ != 0) ? MIN(last, end_) : last;
 
+	// Set view range [from:to]
+	view_start_ = (view_start_ != 0) ? MAX(begin_, view_start_) : begin_;
+	view_stop_ = (view_stop_ != 0) ? MIN(view_stop_, end_) : end_;
+
 	// Set compute range [from:to]
-	from_ = (from_ != 0) ? MAX(begin_, from_) : begin_;
-	to_ = (to_ != 0) ? MIN(to_, end_) : end_;
+	compute_start_ = (compute_start_ != 0) ? MAX(begin_, compute_start_) : begin_;
+	compute_stop_ = (compute_stop_ != 0) ? MIN(compute_stop_, end_) : end_;
 
 	// Data range sumup
 	if (!quiet_) {
@@ -570,10 +582,10 @@ void TelemetrySource::range(void) {
 		// Insert points
 		if ((pool_.current().timestamp() < begin_) && (pool_.next().timestamp() > begin_))
 			insertData(begin_);
-		else if ((pool_.current().timestamp() < from_) && (pool_.next().timestamp() > from_))
-			insertData(from_);
-		else if ((pool_.current().timestamp() < to_) && (pool_.next().timestamp() > to_))
-			insertData(to_);
+		else if ((pool_.current().timestamp() < compute_start_) && (pool_.next().timestamp() > compute_start_))
+			insertData(compute_start_);
+		else if ((pool_.current().timestamp() < compute_stop_) && (pool_.next().timestamp() > compute_stop_))
+			insertData(compute_stop_);
 		else if ((pool_.current().timestamp() < end_) && (pool_.next().timestamp() > end_))
 			insertData(end_);
 	}
@@ -659,8 +671,8 @@ void TelemetrySource::compute(void) {
 	if (!quiet_) {
 		log_info("%s: Compute telemetry data from '%s' to '%s'", 
 				name().c_str(),
-				Datetime::timestamp2string(from_).c_str(),
-				Datetime::timestamp2string(to_).c_str());
+				Datetime::timestamp2string(compute_start_).c_str(),
+				Datetime::timestamp2string(compute_stop_).c_str());
 		log_info("%s: Pause detection: %s",
 				name().c_str(),
 				pause_detection_ ? "enabled" : "disabled");
@@ -1639,15 +1651,17 @@ void TelemetrySource::dump(bool content) {
 	std::cout << "  pause detection:      " << (pause_detection_ ? "true" : "false") << std::endl;
 	std::cout << "  begin data range:     " << Datetime::timestamp2string(begin_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << begin_ << ")" << std::endl;
 	std::cout << "  end data range:       " << Datetime::timestamp2string(end_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << end_ << ")" << std::endl;
-	std::cout << "  from compute range:   " << Datetime::timestamp2string(from_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << from_ << ")" << std::endl;
-	std::cout << "  to compute range:     " << Datetime::timestamp2string(to_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << to_ << ")" << std::endl;
+	std::cout << "  from compute range:   " << Datetime::timestamp2string(compute_start_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << compute_start_ << ")" << std::endl;
+	std::cout << "  to compute range:     " << Datetime::timestamp2string(compute_stop_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << compute_stop_ << ")" << std::endl;
+	std::cout << "  from view range:      " << Datetime::timestamp2string(view_start_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << view_start_ << ")" << std::endl;
+	std::cout << "  to view range:        " << Datetime::timestamp2string(view_stop_, Datetime::FormatDatetime, false).c_str() << " (timestamp: " << view_stop_ << ")" << std::endl;
 	std::cout << "  interpolation method: " << method_ << " (rate: " << settings().telemetryRate() << ")" << std::endl;
 
 	pool_.dump(content);
 }
 
 
-bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
+bool TelemetrySource::getBoundingBox(TelemetrySource::Range range, TelemetryData *p1, TelemetryData *p2) {
 	TelemetryData data;
 
 	enum TelemetrySource::Data type = TelemetrySource::DataUnknown;
@@ -1659,7 +1673,11 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 		if (!data.hasValue(TelemetryData::DataFix))
 			continue;
 
-		if (data.timestamp() < begin_)
+		if ((range == TelemetrySource::RangeData) && (data.timestamp() < begin_))
+			continue;
+		if ((range == TelemetrySource::RangeCompute) && (data.timestamp() < compute_start_))
+			continue;
+		if ((range == TelemetrySource::RangeView) && (data.timestamp() < view_start_))
 			continue;
 
 		if (!p1->hasValue(TelemetryData::DataFix))
@@ -1679,7 +1697,11 @@ bool TelemetrySource::getBoundingBox(TelemetryData *p1, TelemetryData *p2) {
 		if (data.lat_ < p2->lat_)
 			p2->lat_ = data.lat_;
 
-		if (data.timestamp() > end_)
+		if ((range == TelemetrySource::RangeData) && (data.timestamp() > end_))
+			break;
+		if ((range == TelemetrySource::RangeCompute) && (data.timestamp() > compute_stop_))
+			break;
+		if ((range == TelemetrySource::RangeView) && (data.timestamp() > view_stop_))
 			break;
 	}
 
@@ -2089,8 +2111,8 @@ enum TelemetrySource::Data TelemetrySource::retrieveFrom(TelemetryData &data) {
 
 	result = retrieveFirst(data);
 
-	if (from_ != 0) {
-		result = retrieveNext(data, from_);
+	if (compute_start_ != 0) {
+		result = retrieveNext(data, compute_start_);
 	}
 
 	return result;
@@ -2157,10 +2179,10 @@ eof:
 enum TelemetrySource::Data TelemetrySource::retrieveTo(TelemetryData &data) {
 	enum TelemetrySource::Data result;
 
-	if (to_ != 0) {
+	if (compute_stop_ != 0) {
 		result = retrieveFirst(data);
 
-		result = retrieveNext(data, to_);
+		result = retrieveNext(data, compute_stop_);
 	}
 	else
 		result = retrieveLast(data);

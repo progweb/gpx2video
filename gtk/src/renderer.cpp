@@ -149,11 +149,13 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	// Reset telemetry data
 	data_ = TelemetryData();
 
-	// Need to start widget again
-	restart();
+//	// Need to start widget again
+//	restart();
 
-	// Request buffering
-	refresh();
+//	// Request buffering
+//	refresh();
+	// Restart each widget & request buffering
+	refresh(NULL, true);
 }
 
 
@@ -185,6 +187,8 @@ void GPX2VideoRenderer::update_telemetry_settings(void) {
 	log_call();
 
 	telemetrySettings().copy(source_->settings());
+
+	computeTelemetryRange();
 
 	compute_telemetry_rate();
 }
@@ -233,8 +237,8 @@ void GPX2VideoRenderer::reset_timestamp(void) {
 	else 
 		set_timestamp(0);
 
-	// Widget refresh
-	refresh();
+	// Schedule each widget & request buffering
+	refresh(NULL, true);
 }
 
 
@@ -466,10 +470,15 @@ void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget, bool schedule) {
 	is_ready_ = false;
 
 	// Widget settings has changed & need to be scheduled
-	if (widget && schedule) {
+	if (schedule) {
 		Task::reset();
 
-		app_.insert(widget->widget());
+		if (widget == NULL) {
+			for (GPX2VideoWidget *item : widgets_)
+				app_.insert(item->widget(), this);
+		}
+		else
+			app_.insert(widget->widget(), this);
 	}
 
 	// Force widgets draw

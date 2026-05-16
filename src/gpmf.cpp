@@ -248,21 +248,13 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_SIGNED_SHORT: // 0x73
-			inputtypesize = 2;
-			for (i=0, k=0; i<data->header.count; i++) {
-				for (j=0; j<data->header.size / inputtypesize; j++)
-					data->value.s16[k+j] = bswap_16(data->value.s16[k+j]);
-				k += data->header.size / inputtypesize;
-			}
+			for (i=0; i<data->header.count; i++)
+				data->value.s16[i] = bswap_16(data->value.s16[i]);
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_UNSIGNED_SHORT: // 0x53
-			inputtypesize = 2;
-			for (i=0, k=0; i<data->header.count; i++) {
-				for (j=0; j<data->header.size / inputtypesize; j++)
-					data->value.u16[k+j] = bswap_16(data->value.u16[k+j]);
-				k += data->header.size / inputtypesize;
-			}
+			for (i=0; i<data->header.count; i++)
+				data->value.u16[i] = bswap_16(data->value.u16[i]);
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_FLOAT: // 0x66

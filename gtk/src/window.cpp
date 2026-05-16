@@ -506,13 +506,13 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 	// Update actions
 	use_gpx_data_action_->set_enabled(true);
 
-	// Use telemetry data for rendering
-	renderer_->set_telemetry(source);
-
 	// Update ui components
 	video_frame_->set_telemetry(source);
 	telemetry_frame_->set_telemetry(source);
 	telemetry_stackpage_->set_telemetry(source);
+
+	// Use telemetry data for rendering
+	renderer_->set_telemetry(source);
 }
 
 
@@ -833,6 +833,7 @@ void GPX2VideoApplicationWindow::on_timesync_changed(void) {
 	video_frame_->refresh();
 
 	// Timestamp updated
+	renderer_->update_telemetry_settings();
 	renderer_->reset_timestamp();
 
 	// Video refresh
@@ -878,6 +879,9 @@ void GPX2VideoApplicationWindow::on_video_changed(void) {
 	log_call();
 
 	log_info("Video metadata changed");
+
+	// Compute telmetry range
+	renderer_->computeTelemetryRange();
 
 	// Timestamp updated
 	renderer_->reset_timestamp();

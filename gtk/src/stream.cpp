@@ -539,9 +539,11 @@ double GPX2VideoStream::duration(void) const {
 	if (!container_)
 		return 0.0;
 
-	VideoStreamPtr stream = container_->getVideoStream();
+//	VideoStreamPtr stream = container_->getVideoStream();
+//
+//	return stream->duration() * av_q2d(stream->timeBase()) * 1000.0;
 
-	return stream->duration() * av_q2d(stream->timeBase()) * 1000.0;
+	return container_->duration();
 }
 
 
