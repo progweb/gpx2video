@@ -7,7 +7,7 @@
 #include <gtkmm/label.h>
 #include <gtkmm/image.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "../src/widgets.h"
 #include "append.h"
 
@@ -182,7 +182,8 @@ void GPX2VideoAppend::on_ok_clicked(void) {
 	widget = widget_model_->get_item(index);
 
 	// Append widget to layout
-	log_info("Append new widget '%s'", VideoWidget::widget2string(widget->type()).c_str());
+	log_info("Request to create & append new widget '%s'", 
+			VideoWidget::widget2string(widget->type()).c_str());
 
 	renderer_->append(widget->type());
 

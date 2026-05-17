@@ -5,7 +5,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "datetime.h"
 #include "oiioutils.h"
 #include "ffmpegutils.h"

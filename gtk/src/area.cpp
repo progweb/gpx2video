@@ -29,7 +29,7 @@ extern "C" {
 #include <pulse/error.h>
 
 #include "../../src/oiioutils.h"
-#include "log.h"
+#include "log_i.h"
 #include "compat.h"
 #include "datetime.h"
 #include "area.h"
@@ -209,10 +209,6 @@ void GPX2VideoArea::open_stream(MediaContainer *container) {
 
 	VideoStreamPtr video_stream;
 
-//	// Reset
-//	real_duration_ms_ = 0;
-//	last_timecode_ms_ = 0;
-
 	// Audio
 	audio_device_->connect();
 
@@ -372,13 +368,6 @@ GPX2VideoWidget * GPX2VideoArea::get_widget_at(const double &x, const double &y)
 }
 
 
-//void GPX2VideoArea::widget_append(VideoWidget *widget) {
-//	log_call();
-//
-//	widget_ = GPX2VideoWidget::create(widget);
-//}
-
-
 void GPX2VideoArea::on_realize(void) {
 	log_call();
 
@@ -393,7 +382,7 @@ void GPX2VideoArea::on_realize(void) {
 
 		const bool use_es = get_context()->get_use_es();
 
-		log_info("%s", use_es ? "Use OpenGL ES" : "Use OpenGL");
+		log_notice("%s", use_es ? "Use OpenGL ES" : "Use OpenGL");
 
 		load_cursor_shaders();
 		load_widgets_shaders();
@@ -580,7 +569,7 @@ void GPX2VideoArea::on_renderer_ready(void) {
 	log_call();
 
 	if (!is_playing_) {
-		log_info("Widget rendering ready");
+		log_notice("Widgets rendering ready - refresh view");
 		refresh();
 	}
 }
@@ -707,7 +696,6 @@ retry:
 //		log_debug("Delay:\t\t\t%f", delay); 
 
 		if (time < frame_timer_ + delay) {
-//			remaining_time = frame_timer_ + delay - time;
 			remaining_time = FFMIN(frame_timer_ + delay - time, remaining_time);
 
 			log_debug("Remaining time:\t\t\t%f", remaining_time);
@@ -853,7 +841,7 @@ void GPX2VideoArea::load_cursor_shaders(void) {
 	const std::string vertex_path = use_es ? "/com/progweb/gpx2video/gl/cursor-gles.vs.glsl" : "/com/progweb/gpx2video/gl/cursor-gl.vs.glsl";
 	const std::string fragment_path = use_es ? "/com/progweb/gpx2video/gl/cursor-gles.fs.glsl" : "/com/progweb/gpx2video/gl/cursor-gl.fs.glsl";
 
-	log_info("Load cursor shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
+	log_notice("Load cursor shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
 
 	cursor_shader_ = GPX2VideoShader::create(vertex_path, fragment_path);
 }
@@ -867,7 +855,7 @@ void GPX2VideoArea::load_widgets_shaders(void) {
 	const std::string vertex_path = use_es ? "/com/progweb/gpx2video/gl/widget-gles.vs.glsl" : "/com/progweb/gpx2video/gl/widget-gl.vs.glsl";
 	const std::string fragment_path = use_es ? "/com/progweb/gpx2video/gl/widget-gles.fs.glsl" : "/com/progweb/gpx2video/gl/widget-gl.fs.glsl";
 
-	log_info("Load widgets shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
+	log_notice("Load widgets shaders for %s", use_es ? "OpenGL ES" : "OpenGL");
 
 	widget_shader_ = GPX2VideoShader::create(vertex_path, fragment_path);
 }
@@ -914,14 +902,6 @@ void GPX2VideoArea::load_video_texture(FramePtr frame) {
 
 	stream_.load(frame);
 
-//	log_info("width: %d x height: %d - linesize: %d", 
-//			frame->width(), frame->height(), frame->linesizeBytes());
-//
-//	// Status
-//	log_info("Frame PTS: %ld - TS: %ld ms", 
-//			frame->timestamp(),
-//			(uint64_t) (frame->timestamp() * 1000 * av_q2d(frame->videoParams().timeBase())));
-
 	check_gl_error();
 }
 
@@ -959,7 +939,7 @@ void GPX2VideoArea::resize_viewport(gint width, gint height) {
 		requiredWidthOfViewport = height * desiredAspectRatio;
 
 		if (requiredWidthOfViewport > width) {
-			std::cout << "can't find size..." << std::endl;
+			log_warn("Resize viewport failure, can't find size...");
 		}
 		else {
 			widthOfViewport = static_cast<int>(requiredWidthOfViewport);

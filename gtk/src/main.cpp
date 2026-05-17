@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "log.h"
+#include "log_i.h"
 #include "application.h"
 
 extern void gpx2video_ui_register_resource(void);
@@ -11,8 +11,8 @@ int main(int argc, char *argv[]) {
 //	g_setenv ("GSETTINGS_SCHEMA_DIR", ".", FALSE);
 //::gpx2video_ui_register_resource();
 	GPX2VideoLog::setup("gpx2video-gtk");
-	GPX2VideoLog::quiet(0);
-	GPX2VideoLog::debug_enable(0);
+	GPX2VideoLog::quiet(false);
+	GPX2VideoLog::set_level(0);
 
 	// gpx2video application
 	auto app = GPX2VideoApplication::create();

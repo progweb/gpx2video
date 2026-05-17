@@ -17,7 +17,7 @@ extern "C" {
 #include <event2/event.h>
 }
 
-#include "log.h"
+#include "log_i.h"
 #include "version.h"
 #include "application.h"
 

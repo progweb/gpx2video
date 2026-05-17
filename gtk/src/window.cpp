@@ -33,7 +33,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include "log.h"
+#include "log_i.h"
 #include "utils.h"
 #include "compat.h"
 #include "datetime.h"
@@ -645,7 +645,7 @@ void GPX2VideoApplicationWindow::save_layout_file(const Glib::RefPtr<const Gio::
 
 	out << "</layout>" << std::endl;
 
-	log_info("Layout exported in '%s' with success", filename.c_str());
+	log_notice("Layout exported in '%s' with success", filename.c_str());
 }
 
 
@@ -1103,39 +1103,6 @@ void GPX2VideoApplicationWindow::on_video_area_mouse_leave(void) {
 }
 
 
-//void GPX2VideoApplicationWindow::on_video_area_mouse_pressed(int n_press, double x, double y) {
-//	log_call();
-//
-//	GPX2VideoWidget *widget;
-//
-//	(void) n_press;
-//
-//	// Get widget
-//	widget = video_area_->get_widget_at(x, y);
-//
-//	if (widget != NULL) {
-//		// Make cursor visible
-//		video_area_->set_cursor_visible(true, x, y);
-//
-//		// Make widget stackpage visible
-//		info_stack_->set_visible_child(*widget_stackpage_);
-//	}
-//
-//	// Select / unselect the widget
-//	widget_stackpage_->set_widget_selected(widget);
-//}
-//
-//
-//void GPX2VideoApplicationWindow::on_video_area_mouse_released(int n_press, double x, double y) {
-//	log_call();
-//
-//	(void) n_press;
-//
-//	// Make cursor not visible
-//	video_area_->set_cursor_visible(false, x, y);
-//}
-
-
 /**
  * Notification video, telemetry or widgets stack change
  *
@@ -1188,6 +1155,11 @@ void GPX2VideoApplicationWindow::on_widget_clicked(GPX2VideoWidget *widget) {
 void GPX2VideoApplicationWindow::on_widget_selected(GPX2VideoWidget *widget) {
 	log_call();
 
+	if (widget)
+		log_notice("Widget '%s' selected", widget->name().c_str());
+	else
+		log_notice("None selected widget");
+
 	widget_frame_->set_widget_selected(widget);
 }
 
@@ -1201,6 +1173,8 @@ void GPX2VideoApplicationWindow::on_widget_selected(GPX2VideoWidget *widget) {
  */
 void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widget) {
 	log_call();
+
+	log_notice("Widget '%s' removed", widget->name().c_str());
 
 	// Unselect widget
 	if (widget_frame_->widget_selected() == widget)
@@ -1237,7 +1211,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 	auto info = file->query_info();
 	auto type = info->get_content_type();
 
-	log_info("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
+	log_notice("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
 
 	// Open layout or media file
 	if (type == "application/xml") {
@@ -1283,7 +1257,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 	auto info = file->query_info();
 	auto type = info->get_content_type();
 
-	log_info("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
+	log_notice("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
 
 	if (type == "application/xml") {
 		open_layout_file(file);
@@ -1313,7 +1287,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(const Glib::RefPtr<
 		return;
 
 	// Export layout
-	log_info("Export layout in %s ", file->get_parse_name().c_str());
+	log_notice("Export layout in %s ", file->get_parse_name().c_str());
 
 	save_layout_file(file);
 }
@@ -1340,7 +1314,7 @@ void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(
 		return;
 
 	// Export layout
-	log_info("Export layout in %s ", file->get_parse_name().c_str());
+	log_notice("Export layout in %s ", file->get_parse_name().c_str());
 
 	save_layout_file(file);
 }

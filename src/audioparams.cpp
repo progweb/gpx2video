@@ -1,3 +1,4 @@
+#include "log_i.h"
 #include "ffmpegutils.h"
 #include "audioparams.h"
 

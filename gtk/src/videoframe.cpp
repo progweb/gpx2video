@@ -5,8 +5,9 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/menubutton.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "compat.h"
+#include "datetime.h"
 #include "videoframe.h"
 
 
@@ -108,9 +109,11 @@ bool GPX2VideoVideoFrame::set_starttime_from_gpx_data(void) {
 	if ((media_ == NULL) || (source_ == NULL))
 		return false;
 
-	log_info("Sync video starttime with the GPX first point");
-
+	// Get first point
 	source_->retrieveFirst(data);
+
+	log_notice("Sync video starttime with the GPX first point at '%s'",
+			Datetime::timestamp2string(data.timestamp()).c_str());
 
 	// Use first point as start time
 	media_->setStartTime(data.timestamp());
@@ -158,7 +161,8 @@ bool GPX2VideoVideoFrame::set_starttime_from_creation_time(void) {
 	if (!media_->creationTime())
 		return false;
 
-	log_info("Sync video starttime with creation time video metadata");
+	log_notice("Sync video starttime with creation time video metadata at '%s'",
+			Datetime::timestamp2string(media_->creationTime()).c_str());
 
 	// Set video start time
 	media_->setStartTime(media_->creationTime());
@@ -191,7 +195,7 @@ void GPX2VideoVideoFrame::on_action_use_creation_time(void) {
 void GPX2VideoVideoFrame::on_action_use_gpmf_stream(void) {
 	log_call();
 
-	log_info("Sync video starttime with GPMF video stream");
+	log_notice("Request to sync video starttime with GPMF video stream");
 
 	// Request timesync action
 	timesync_dispatcher_.emit();

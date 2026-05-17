@@ -9,7 +9,7 @@
 #include "layoutlib/Parser.h"
 #include "layoutlib/ReportCerr.h"
 
-#include "log.h"
+#include "log_i.h"
 #include "oiioutils.h"
 #include "decoder.h"
 #include "audioparams.h"

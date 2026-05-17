@@ -1,7 +1,7 @@
 #include <librsvg/rsvg.h>
 #include <pango/pangocairo.h>
 
-#include "log.h"
+#include "../log_i.h"
 #include "text.h"
 
 

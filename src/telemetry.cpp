@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <filesystem>
 
-#include "log.h"
+#include "log_i.h"
 #include "datetime.h"
 #include "telemetry.h"
 #include "telemetry/gpx.h"

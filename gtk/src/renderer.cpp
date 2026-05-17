@@ -1,7 +1,8 @@
 #include <iostream>
 #include <memory>
+#include <ranges>
 
-#include "log.h"
+#include "log_i.h"
 #include "datetime.h"
 #include "videowidget.h"
 #include "renderer.h"
@@ -217,8 +218,8 @@ void GPX2VideoRenderer::set_timestamp(uint64_t timestamp) {
 	// Save current timestamp
 	timestamp_ = timestamp;
 
-	// Set timestamp for each widget
-	timestamp -= (timestamp % rate_);
+//	// Set timestamp for each widget
+//	timestamp -= (timestamp % rate_);
 
 	for (GPX2VideoWidget *item : widgets_)
 		item->set_timestamp(timestamp);
@@ -252,37 +253,43 @@ const std::list<GPX2VideoWidget *>& GPX2VideoRenderer::widgets(void) {
 void GPX2VideoRenderer::append(VideoWidget::Widget type) {
 	log_call();
 
-	VideoWidget *item;
-	GPX2VideoWidget *widget;
+	VideoWidget *widget;
+	GPX2VideoWidget *item;
 
 	// Widget drawing...
 	app_.remove(this);
 
 	// Create widget from type
-	item = Renderer::create(type);
+	widget = Renderer::create(type);
 
-	// Create gtk widget 
-	widget = GPX2VideoWidget::create(item);
+	// Create gtk widget widget item
+	item = GPX2VideoWidget::create(widget);
 
 	// Center
-	widget->widget()->setPosition(
+	widget->setPosition(
 		(layout_width_ - widget->theme().width()) / 2, 
 		(layout_height_ - widget->theme().height()) / 2
 	);
 
 	// Initialize
-	widget->init_buffers();
-	widget->set_timestamp(timestamp_);
-	widget->setLayoutSize(layout_width_, layout_height_);
+	item->init_buffers();
+	item->set_timestamp(timestamp_);
+	item->setLayoutSize(layout_width_, layout_height_);
 
-	// Append
-	widgets_.push_back(widget);
+	// Notice
+	log_notice("Append new widget '%s' at %dx%d [size: %dx%d]", 
+			VideoWidget::widget2string(widget->type()).c_str(),
+			widget->x(), widget->y(),
+			widget->theme().width(), widget->theme().height());
+
+	// Append the new item
+	widgets_.push_back(item);
 
 	// Register tasks
 	app_.append(this);
 
 	// Broadcast event
-	signal_widget_appened_.emit(widget);
+	signal_widget_appened_.emit(item);
 
 	// Force widget drawing
 	refresh();
@@ -310,7 +317,13 @@ void GPX2VideoRenderer::remove(GPX2VideoWidget *widget) {
 GPX2VideoWidget * GPX2VideoRenderer::get_at(const double &x, const double &y) {
 	log_call();
 
-	for (GPX2VideoWidget *item : widgets_) {
+	GPX2VideoWidget *item;
+
+// C++20
+//	for (GPX2VideoWidget *item : widgets_ | std::views::reverse) {
+	for (auto it = widgets_.rbegin(); it != widgets_.rend(); ++it) {
+		item = *it;
+
 		if (!item->is_over(x, y))
 			continue;
 
@@ -395,7 +408,7 @@ void GPX2VideoRenderer::draw(void) {
 
 				if (!item->ready() || (data.type() == TelemetryData::TypeUnknown)) {
 					timestamp = timestamp_;
-					timestamp -= (timestamp_ % rate_);
+//					timestamp -= (timestamp_ % rate_);
 
 					// Retrieve first point
 					source_->retrieveFrom(data);
@@ -412,7 +425,7 @@ void GPX2VideoRenderer::draw(void) {
 
 				// Optimize timestamp
 				timestamp = data.timestamp();
-				timestamp -= (timestamp_ % rate_);
+//				timestamp -= (timestamp_ % rate_);
 
 				// Save timestamp requested
 				data.setDatetime(timestamp);
@@ -423,7 +436,7 @@ void GPX2VideoRenderer::draw(void) {
 			}
 		}
 
-//		printf("RENDERING DURATION: %ld\n", get_system_clock() - clock);
+//		printf("RENDERING DURATION: %ld us\n", get_system_clock() - clock);
 	}
 	else {
 		bool loop;

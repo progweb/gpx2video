@@ -1,6 +1,6 @@
 #include <pango/pangocairo.h>
 
-#include "log.h"
+#include "../log_i.h"
 #include "base.h"
 
 

@@ -1,4 +1,4 @@
-#include "../log.h"
+#include "../log_i.h"
 #include "../../src/track.h"
 #include "track.h"
 
@@ -67,7 +67,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: view changed to '%s'", 
+						log_notice("Widget %s: view changed to '%s'", 
 								widget_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						((Track *) widget_->widget())->settings().setView((TrackSettings::View) value);
@@ -87,7 +87,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_info("Widget %s: factor changed to '%.1f'",
+						log_notice("Widget %s: factor changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						((Track *) widget_->widget())->settings().setDivider(value);
@@ -105,7 +105,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_info("Widget %s: path thick changed to '%.1f'",
+						log_notice("Widget %s: path thick changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						((Track *) widget_->widget())->settings().setPathThick(value);
@@ -123,7 +123,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_info("Widget %s: path thick changed to '%.1f'",
+						log_notice("Widget %s: path thick changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						((Track *) widget_->widget())->settings().setPathBorder(value);
@@ -141,7 +141,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: path border color changed to '%s'", 
+						log_notice("Widget %s: path border color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						((Track *) widget_->widget())->settings().setPathBorderColor(color);
@@ -159,7 +159,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: path primary color changed to '%s'", 
+						log_notice("Widget %s: path primary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						((Track *) widget_->widget())->settings().setPathPrimaryColor(color);
@@ -177,7 +177,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: path secondary color changed to '%s'", 
+						log_notice("Widget %s: path secondary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						((Track *) widget_->widget())->settings().setPathSecondaryColor(color);

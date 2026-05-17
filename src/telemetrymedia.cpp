@@ -9,7 +9,7 @@
 
 #include <GeographicLib/Geodesic.hpp>
 
-#include "log.h"
+#include "log_i.h"
 #include "utils.h"
 #include "datetime.h"
 #include "telemetry/csv.h"
@@ -1403,76 +1403,76 @@ void TelemetrySource::smooth(void) {
 
 	if (!quiet_) {
 		// 1/
-		log_info("%s: Smooth telemetry data using 'windowed moving average' filter ", name().c_str());
+		printf("%s: Smooth telemetry data using 'windowed moving average' filter\n", name().c_str());
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) && (grade_window > 1))
-			log_info("     - grade: window size '%ld' (+/- %d points)", 
+			printf("     - grade: window size '%ld' (+/- %d points)\n", 
 					grade_window, settings().telemetrySmoothPoints(TelemetryData::DataGrade));
 		else
-			log_info("     - grade: no");
+			printf("     - grade: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) && (speed_window > 1))
-			log_info("     - speed: window size '%ld' (+/- %d points)", 
+			printf("     - speed: window size '%ld' (+/- %d points)\n", 
 					speed_window, settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
 		else
-			log_info("     - speed: no");
+			printf("     - speed: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) && (heading_window > 1))
-			log_info("     - heading: window size '%ld' (+/- %d points)", 
+			printf("     - heading: window size '%ld' (+/- %d points)\n", 
 					heading_window, settings().telemetrySmoothPoints(TelemetryData::DataHeading));
 		else
-			log_info("     - heading: no");
+			printf("     - heading: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothWindowedMovingAverage) && (elevation_window > 1))
-			log_info("     - elevation: window size '%ld' (+/- %d points)", 
+			printf("     - elevation: window size '%ld' (+/- %d points)\n", 
 					elevation_window, settings().telemetrySmoothPoints(TelemetryData::DataElevation));
 		else
-			log_info("     - elevation: no");
+			printf("     - elevation: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothWindowedMovingAverage) && (acceleration_window > 1))
-			log_info("     - acceleration: window size '%ld' (+/- %d points)", 
+			printf("     - acceleration: window size '%ld' (+/- %d points)\n", 
 					acceleration_window, settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 		else
-			log_info("     - acceleration: no");
+			printf("     - acceleration: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) && (verticalspeed_window > 1))
-			log_info("     - verticalspeed: window size '%ld' (+/- %d points)", 
+			printf("     - verticalspeed: window size '%ld' (+/- %d points)\n", 
 					verticalspeed_window, settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 		else
-			log_info("     - verticalspeed: no");
+			printf("     - verticalspeed: no\n");
 
 		// 2/
-		log_info("%s: Smooth telemetry data using 'butterworth' filter ", name().c_str());
+		printf("%s: Smooth telemetry data using 'butterworth' filter\n", name().c_str());
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothButterworth)
-			log_info("     - grade: a = 4.0 / z = 0.7");
+			printf("     - grade: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - grade: no");
+			printf("     - grade: no\n");
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothButterworth)
-			log_info("     - speed: a = 4.0 / z = 0.7");
+			printf("     - speed: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - speed: no");
+			printf("     - speed: no\n");
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothButterworth)
-			log_info("     - heading: a = 4.0 / z = 0.7");
+			printf("     - heading: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - heading: no");
+			printf("     - heading: no\n");
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothButterworth)
-			log_info("     - elevation: a = 4.0 / z = 0.7");
+			printf("     - elevation: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - elevation: no");
+			printf("     - elevation: no\n");
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothButterworth)
-			log_info("     - acceleration: a = 4.0 / z = 0.7");
+			printf("     - acceleration: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - acceleration: no");
+			printf("     - acceleration: no\n");
 
 		if (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothButterworth)
-			log_info("     - verticalspeed: a = 4.0 / z = 0.7");
+			printf("     - verticalspeed: a = 4.0 / z = 0.7\n");
 		else
-			log_info("     - verticalspeed: no");
+			printf("     - verticalspeed: no\n");
 	}
 
 	smooth_step_one();

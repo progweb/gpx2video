@@ -8,7 +8,7 @@
 #include <gtkmm/application.h>
 #include <gtkmm/applicationwindow.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "compat.h"
 #include "application.h"
 #include "about.h"
@@ -21,17 +21,17 @@ GPX2VideoApplication::GPX2VideoApplication()
 			Gio::Application::Flags::NON_UNIQUE | Gio::Application::Flags::HANDLES_OPEN) {
 	log_call();
 
-	log_info("gpx2video built with gtkmm v%d.%d.%d", 
+	log_notice("gpx2video built with gtkmm v%d.%d.%d", 
 			GTKMM_MAJOR_VERSION, GTKMM_MINOR_VERSION, GTKMM_MICRO_VERSION);
-	log_info("  glibmm v%d.%d.%d",
+	log_notice("  glibmm v%d.%d.%d",
 			GLIBMM_MAJOR_VERSION, GLIBMM_MINOR_VERSION, GLIBMM_MICRO_VERSION);
 
 #if GIOMM_CHECK_VERSION(2, 80, 0)
 	set_version("v0.0.0");
 #endif
 
-	add_main_option_entry(Gio::Application::OptionType::BOOL, "debug", 'd', "Debug gpx2video core mode", "boolean");
-	add_main_option_entry(Gio::Application::OptionType::BOOL, "verbose", 'v', "Verbose mode", "boolean");
+	add_main_option_entry(Gio::Application::OptionType::BOOL, "quiet", 'd', "Disable output", "boolean");
+	add_main_option_entry(Gio::Application::OptionType::INT, "verbose", 'v', "Verbose mode (level: 0-2)", "level");
 }
 
 
@@ -65,10 +65,15 @@ GPX2VideoApplicationWindow * GPX2VideoApplication::create_application_window(voi
 int GPX2VideoApplication::on_handle_local_options(const Glib::RefPtr<Glib::VariantDict>& options) {
 	log_call();
 
-	bool debug = false;
+	int level = 0;
 
-	if (options->lookup_value("verbose", debug))
-		GPX2VideoLog::debug_enable(debug ? 1 : 0);
+	bool enable = false;
+
+	if (options->lookup_value("verbose", level))
+		GPX2VideoLog::set_level(level);
+
+	if (options->lookup_value("quiet", enable))
+		GPX2VideoLog::quiet(enable);
 
 	return -1;
 }

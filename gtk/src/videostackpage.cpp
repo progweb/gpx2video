@@ -6,7 +6,7 @@
 
 #include <gtkmm/label.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "compat.h"
 #include "videostackpage.h"
 

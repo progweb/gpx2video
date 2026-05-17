@@ -1,7 +1,7 @@
 #include <string>
 #include <iomanip>
 
-#include "log.h"
+#include "log_i.h"
 #include "utils.h"
 #include "datetime.h"
 #include "test.h"

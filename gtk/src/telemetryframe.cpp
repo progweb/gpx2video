@@ -2,7 +2,7 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/checkbutton.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "../../src/telemetrysettings.h"
 #include "telemetryframe.h"
 
@@ -174,7 +174,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry time offset changed to '%d' ms", value);
+						log_notice("Telemetry time offset changed to '%d' ms", value);
 
 						source_->settings().setTelemetryOffset(value);
 					}
@@ -188,7 +188,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	checkbutton->signal_toggled().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_checkbutton_toggled), checkbutton, 
 					[this](const bool active) {
-						log_info("Telemetry skip bad point toggled to '%s' ms", std::to_string(active).c_str());
+						log_notice("Telemetry skip bad point toggled to '%s' ms", std::to_string(active).c_str());
 
 						source_->settings().setTelemetryCheck(active);
 					}
@@ -202,7 +202,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	checkbutton->signal_toggled().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_checkbutton_toggled), checkbutton, 
 					[this](const bool active) {
-						log_info("Telemetry pause detection toggled to '%s' ms", std::to_string(active).c_str());
+						log_notice("Telemetry pause detection toggled to '%s' ms", std::to_string(active).c_str());
 
 						source_->settings().setTelemetryPauseDetection(active);
 					}
@@ -216,7 +216,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	checkbutton->signal_toggled().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_checkbutton_toggled), checkbutton, 
 					[this](const bool active) {
-						log_info("Telemetry filter toggled to '%s' ms", std::to_string(active).c_str());
+						log_notice("Telemetry filter toggled to '%s' ms", std::to_string(active).c_str());
 
 						source_->settings().setTelemetryFilter(
 								active ? TelemetrySettings::FilterOutlier : TelemetrySettings::FilterNone);
@@ -239,7 +239,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 
 						int rate = source_->settings().telemetryRate();
 
-						log_info("Telemetry prediction method changed to '%s'", 
+						log_notice("Telemetry prediction method changed to '%s'", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetryMethod((TelemetrySettings::Method) value, rate);
@@ -259,7 +259,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const int &value) {
 						TelemetrySettings::Method method = source_->settings().telemetryMethod();
 
-						log_info("Telemetry rate value changed to '%d' ms", value);
+						log_notice("Telemetry rate value changed to '%d' ms", value);
 
 						source_->settings().setTelemetryMethod(method, value);
 					}
@@ -279,7 +279,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for grade data", 
+						log_notice("Telemetry smooth method changed to '%s' for grade data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataGrade, (TelemetrySettings::Smooth) value);
@@ -294,7 +294,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for grade data", value);
+						log_notice("Telemetry window size value changed to '%d' for grade data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataGrade, value);
 					}
@@ -314,7 +314,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for heading data", 
+						log_notice("Telemetry smooth method changed to '%s' for heading data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataHeading, (TelemetrySettings::Smooth) value);
@@ -329,7 +329,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for heading data", value);
+						log_notice("Telemetry window size value changed to '%d' for heading data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataHeading, value);
 					}
@@ -349,7 +349,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for elevation data", 
+						log_notice("Telemetry smooth method changed to '%s' for elevation data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataElevation, (TelemetrySettings::Smooth) value);
@@ -364,7 +364,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for elevation data", value);
+						log_notice("Telemetry window size value changed to '%d' for elevation data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataElevation, value);
 					}
@@ -384,7 +384,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for acceleration data", 
+						log_notice("Telemetry smooth method changed to '%s' for acceleration data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataAcceleration, (TelemetrySettings::Smooth) value);
@@ -399,7 +399,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for acceleration data", value);
+						log_notice("Telemetry window size value changed to '%d' for acceleration data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataAcceleration, value);
 					}
@@ -419,7 +419,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for speed data", 
+						log_notice("Telemetry smooth method changed to '%s' for speed data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataSpeed, (TelemetrySettings::Smooth) value);
@@ -434,7 +434,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for speed data", value);
+						log_notice("Telemetry window size value changed to '%d' for speed data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataSpeed, value);
 					}
@@ -454,7 +454,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Telemetry smooth method changed to '%s' for vertical speed data", 
+						log_notice("Telemetry smooth method changed to '%s' for vertical speed data", 
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, (TelemetrySettings::Smooth) value);
@@ -469,7 +469,7 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Telemetry window size value changed to '%d' for vertical speed data", value);
+						log_notice("Telemetry window size value changed to '%d' for vertical speed data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, value);
 					}

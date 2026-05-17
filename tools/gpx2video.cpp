@@ -12,7 +12,7 @@ extern "C" {
 #include <libavcodec/avcodec.h>
 }
 
-#include "log.h"
+#include "log_i.h"
 #include "version.h"
 #include "utils.h"
 #include "evcurl.h"
@@ -867,7 +867,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	// Debug
 	setLogLevel((verbose > 1) ? AV_LOG_DEBUG : AV_LOG_INFO);
-	gpx2video_log_debug_enable((verbose > 2));
+	gpx2video_log_set_level(verbose);
 
 	// Check command
 	if (argc == 1) {

@@ -16,7 +16,7 @@ extern "C" {
 #include <event2/event.h>
 }
 
-#include "log.h"
+#include "log_i.h"
 #include "version.h"
 #include "telemetry.h"
 #include "test.h"
@@ -444,7 +444,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	optind = 0;
 
 	// Debug
-	gpx2video_log_debug_enable((verbose > 1));
+	gpx2video_log_set_level(verbose);
 
 	// Check command
 	if (argc == 1) {

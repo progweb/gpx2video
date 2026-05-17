@@ -1,7 +1,7 @@
 #include <iostream>
 #include <memory>
 
-#include "log.h"
+#include "log_i.h"
 #include "media.h"
 #include "datetime.h"
 

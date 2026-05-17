@@ -1,4 +1,4 @@
-#include "../log.h"
+#include "../log_i.h"
 #include "bar.h"
 
 
@@ -42,6 +42,9 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: tick status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTick);
 						else
@@ -59,7 +62,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' tick color changed to '%s'", 
+						log_notice("Widget '%s' tick color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickColor(color);
@@ -79,7 +82,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: tick align changed to '%s'", 
+						log_notice("Widget %s: tick align changed to '%s'", 
 								widget_->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_->theme().setTickAlign((VideoWidget::Theme::Align) value);
@@ -96,6 +99,9 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: tick label status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTickLabel);
 						else
@@ -113,7 +119,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' tick label color changed to '%s'", 
+						log_notice("Widget '%s' tick label color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickLabelColor(color);
@@ -130,6 +136,9 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: gauge status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagGauge);
 						else
@@ -147,7 +156,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge color changed to '%s'", 
+						log_notice("Widget '%s' gauge color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeColor(0, color);
@@ -164,7 +173,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: gauge border changed to '%d'",
+						log_notice("Widget %s: gauge border changed to '%d'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setGaugeBorder(value);
@@ -181,7 +190,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge border color changed to '%s'", 
+						log_notice("Widget '%s' gauge border color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBorderColor(color);
@@ -198,7 +207,7 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoBarShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget '%s' gauge background color changed to '%s'", 
+						log_notice("Widget '%s' gauge background color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBackgroundColor(color);

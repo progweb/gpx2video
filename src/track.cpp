@@ -16,8 +16,8 @@
 
 #include <cairo.h>
 
+#include "log_i.h"
 #include "utils.h"
-#include "log.h"
 #include "oiioutils.h"
 #include "videoparams.h"
 #include "telemetrymedia.h"

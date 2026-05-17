@@ -17,7 +17,7 @@ extern "C" {
 
 #include <pulse/error.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "compat.h"
 #include "datetime.h"
 #include "stream.h"
@@ -1158,7 +1158,7 @@ void GPX2VideoStream::Video::seek(double pos) {
 
 		FramePtr frame = getFrame();
 
-		log_info("Stream seek position %s", Datetime::timestamp2string(pos, Datetime::FormatTime).c_str());
+		log_notice("Stream seek position %s", Datetime::timestamp2string(pos, Datetime::FormatTime).c_str());
 
 		cond_.notify_all();
 	}

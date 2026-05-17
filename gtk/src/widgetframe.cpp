@@ -10,7 +10,7 @@
 #include <pangomm/cairofontmap.h>
 #include <pangomm/fontdescription.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "shape/arc.h"
 #include "shape/bar.h"
 #include "shape/text.h"
@@ -456,7 +456,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: shape changed to '%s'", 
+						log_notice("Widget %s: shape changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->setShape((VideoWidget::Shape) value);
@@ -484,13 +484,10 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const int &value) {
 						int y = widget_selected_->widget()->y();
 
-						log_info("Widget %s: position changed to '%dx%d'", 
+						log_notice("Widget %s: position changed to '%dx%d'", 
 								widget_selected_->widget()->name().c_str(), value, y);
 
 						widget_selected_->widget()->setPosition(value, y);
-
-//						// Compute new position
-//						renderer_->compute();
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -505,13 +502,10 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const int &value) {
 						int x = widget_selected_->widget()->x();
 
-						log_info("Widget %s: position changed to '%dx%d'", 
+						log_notice("Widget %s: position changed to '%dx%d'", 
 								widget_selected_->widget()->name().c_str(), x, value);
 
 						widget_selected_->widget()->setPosition(x, value);
-
-//						// Compute new position
-//						renderer_->compute();
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -534,7 +528,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: position changed to '%s'", 
+						log_notice("Widget %s: position changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->setPosition((VideoWidget::Position) value);
@@ -563,7 +557,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: orientation changed to '%s'", 
+						log_notice("Widget %s: orientation changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->setOrientation((VideoWidget::Orientation) value);
@@ -585,7 +579,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const int &value) {
 						int height = widget_selected_->widget()->theme().height();
 
-						log_info("Widget %s: size changed to '%dx%d'", 
+						log_notice("Widget %s: size changed to '%dx%d'", 
 								widget_selected_->widget()->name().c_str(), value, height);
 
 						widget_selected_->setSize(value, height);
@@ -606,7 +600,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const int &value) {
 						int width = widget_selected_->widget()->theme().width();
 
-						log_info("Widget %s: size changed to '%dx%d'", 
+						log_notice("Widget %s: size changed to '%dx%d'", 
 								widget_selected_->widget()->name().c_str(), width, value);
 
 						widget_selected_->setSize(width, value);
@@ -676,7 +670,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: border changed to '%d'",
+						log_notice("Widget %s: border changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setBorder(value);
@@ -693,7 +687,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: border color changed to '%s'", 
+						log_notice("Widget %s: border color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setBorderColor(color);
@@ -710,7 +704,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: background color changed to '%s'", 
+						log_notice("Widget %s: background color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setBackgroundColor(color);
@@ -727,6 +721,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: label status changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagLabel);
 						else
@@ -746,7 +743,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Glib::ustring &value) {
 						Gtk::FontButton *button;
 
-						log_info("Widget %s: label text changed to '%s'",
+						log_notice("Widget %s: label text changed to '%s'",
 							   widget_selected_->widget()->name().c_str(), value.c_str());
 
 						// Update label font family button
@@ -771,7 +768,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Pango::FontDescription &description) {
 						std::string value = description.get_family();
 
-						log_info("Widget %s: label font family changed to '%s'",
+						log_notice("Widget %s: label font family changed to '%s'",
 							   widget_selected_->widget()->name().c_str(), value.c_str());
 
 						// Update label font weight combobox
@@ -795,7 +792,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						Pango::FontDescription description;
 
-						log_info("Widget %s: label font size changed to '%d'",
+						log_notice("Widget %s: label font size changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						// Update label font family button
@@ -825,7 +822,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: label shadow opacity changed to '%d'",
+						log_notice("Widget %s: label shadow opacity changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelShadowOpacity(value);
@@ -842,7 +839,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: label shadow distance changed to '%d'",
+						log_notice("Widget %s: label shadow distance changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelShadowDistance(value);
@@ -871,7 +868,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: label style changed to '%s'", 
+						log_notice("Widget %s: label style changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						// Update label font family button
@@ -912,7 +909,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: label weight changed to '%s'", 
+						log_notice("Widget %s: label weight changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						// Update label font family button
@@ -949,7 +946,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: label align changed to '%s'", 
+						log_notice("Widget %s: label align changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->theme().setLabelAlign((VideoWidget::Theme::Align) value);
@@ -966,7 +963,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: label color changed to '%s'", 
+						log_notice("Widget %s: label color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelColor(color);
@@ -983,7 +980,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: label border width changed to '%d'",
+						log_notice("Widget %s: label border width changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelBorderWidth(value);
@@ -1000,7 +997,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: label border color changed to '%s'", 
+						log_notice("Widget %s: label border color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setLabelBorderColor(color);
@@ -1017,6 +1014,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: value status changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagValue);
 						else
@@ -1037,7 +1037,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Pango::FontDescription &description) {
 						std::string value = description.get_family();
 
-						log_info("Widget %s: value font family changed to '%s'",
+						log_notice("Widget %s: value font family changed to '%s'",
 							   widget_selected_->widget()->name().c_str(), value.c_str());
 
 						// Update value font weight combobox
@@ -1061,7 +1061,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						Pango::FontDescription description;
 
-						log_info("Widget %s: value font size changed to '%d'",
+						log_notice("Widget %s: value font size changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						// Update value font family button
@@ -1091,7 +1091,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value shadow opacity_changed to '%d'",
+						log_notice("Widget %s: value shadow opacity_changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueShadowOpacity(value);
@@ -1108,7 +1108,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value shadow distance_changed to '%d'",
+						log_notice("Widget %s: value shadow distance_changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueShadowDistance(value);
@@ -1137,7 +1137,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: value style changed to '%s'", 
+						log_notice("Widget %s: value style changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						// Update value font family button
@@ -1178,7 +1178,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: value weight changed to '%s'", 
+						log_notice("Widget %s: value weight changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						// Update value font family button
@@ -1215,7 +1215,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: value align changed to '%s'", 
+						log_notice("Widget %s: value align changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_selected_->widget()->theme().setValueAlign((VideoWidget::Theme::Align) value);
@@ -1232,7 +1232,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: value color changed to '%s'", 
+						log_notice("Widget %s: value color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueColor(color);
@@ -1249,7 +1249,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value border width changed to '%d'",
+						log_notice("Widget %s: value border width changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueBorderWidth(value);
@@ -1266,7 +1266,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: value border color changed to '%s'", 
+						log_notice("Widget %s: value border color changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), color.c_str());
 
 						widget_selected_->widget()->theme().setValueBorderColor(color);
@@ -1283,7 +1283,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value min. changed to '%d'",
+						log_notice("Widget %s: value min. changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueMin(value);
@@ -1300,7 +1300,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: value max. changed to '%d'",
+						log_notice("Widget %s: value max. changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueMax(value);

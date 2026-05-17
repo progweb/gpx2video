@@ -18,7 +18,7 @@
 #include <cairo.h>
 
 #include "utils.h"
-#include "log.h"
+#include "log_i.h"
 #include "evcurl.h"
 #include "oiioutils.h"
 #include "videoparams.h"
@@ -280,6 +280,9 @@ Map::Map(GPXApplication &app, const TelemetrySettings &telemetry_settings, const
 
 Map::~Map() {
 	log_call();
+
+	if (filename_ != "")
+		::unlink(filename_.c_str());
 
 	if (mapbuf_ != NULL)
 		delete mapbuf_;
@@ -796,7 +799,6 @@ bool Map::load(void) {
 	OIIO::ImageBuf buf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
 
-printf("MAP BUF = %d x %d\n", (int) (spec.width * divider), (int) (spec.height * divider));
 	// Resize map
 	mapbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);

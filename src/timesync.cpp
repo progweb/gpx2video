@@ -7,7 +7,7 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
-#include "log.h"
+#include "log_i.h"
 #include "datetime.h"
 #include "timesync.h"
 

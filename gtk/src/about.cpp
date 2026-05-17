@@ -3,7 +3,7 @@
 
 #include <gdkmm/general.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "about.h"
 
 

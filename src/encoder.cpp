@@ -1,4 +1,4 @@
-#include "log.h"
+#include "log_i.h"
 #include "ffmpegutils.h"
 #include "encoder.h"
 

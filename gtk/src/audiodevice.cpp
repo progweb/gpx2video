@@ -1,6 +1,6 @@
 #include <pulse/error.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "audiodevice.h"
 
 
@@ -40,7 +40,7 @@ void GPX2VideoAudioDevice::onContextStateChanged(pa_context_state_t state) {
 
 	switch (state) {
 	case PA_CONTEXT_READY:
-		log_info("PulseAudio connection ready");
+		log_notice("PulseAudio connection ready");
 		if (is_connected && (stream_ == NULL))
 			connect_i();
 		break;
@@ -53,7 +53,7 @@ void GPX2VideoAudioDevice::onContextStateChanged(pa_context_state_t state) {
 	case PA_CONTEXT_AUTHORIZING:
 	case PA_CONTEXT_SETTING_NAME:
 	default:
-		log_info("PulseAudio connection state: %i", state);
+		log_notice("PulseAudio connection state: %i", state);
 		break;
 	}
 }
@@ -103,13 +103,14 @@ void GPX2VideoAudioDevice::onPlaybackStateChanged(pa_stream_state_t state) {
 
 	switch (state) {
 	case PA_STREAM_CREATING:
-		log_info("Audio playback stream connecting...");
+		log_notice("Audio playback stream connecting...");
 		break;
 		break;
 	case PA_STREAM_READY:
-		log_info("Audio playback stream is ready.");
+		log_notice("Audio playback stream is ready.");
 		attr = pa_stream_get_buffer_attr(stream_);
 		if (attr) {
+			log_info("Audio buffer properties:");
 			log_info(" - buffer max length: %u", attr->maxlength);
 			log_info(" - target length: %u", attr->tlength);
 			log_info(" - pre-buffering: %u", attr->prebuf);
@@ -120,14 +121,14 @@ void GPX2VideoAudioDevice::onPlaybackStateChanged(pa_stream_state_t state) {
 		break;
 	case PA_STREAM_TERMINATED:
 	case PA_STREAM_FAILED:
-		log_info("Audio playback stream terminated: %s.",
+		log_notice("Audio playback stream terminated: %s.",
 				pa_strerror(pa_context_errno(context_)));
 //		pa_stream_unref(stream_);
 		stream_ = NULL;
 		break;
 	case PA_STREAM_UNCONNECTED:
 	default:
-		log_info("Audio playback stream state %i.", state);
+		log_notice("Audio playback stream state %i.", state);
 		break;
 	}
 }
@@ -145,7 +146,7 @@ static void gpx2video_playback_state_callback(pa_stream *stream, void *userdata)
 void GPX2VideoAudioDevice::onSuspendChanged(bool suspended) {
 	log_call();
 
-	log_info("Playback stream suspended: %s", 
+	log_notice("Playback stream suspended: %s", 
 			suspended ? "true" : "false");
 }
 
@@ -185,7 +186,7 @@ static void gpx2video_underflow_callback(pa_stream *stream, void *userdata) {
 	(void) stream;
 	(void) userdata;
 
-	log_warn("AUDIO UNDERFLOW!");
+	log_warn("Audio underflow!");
 }
 
 
@@ -195,7 +196,7 @@ static void gpx2video_overflow_callback(pa_stream *stream, void *userdata) {
 	(void) stream;
 	(void) userdata;
 
-	log_warn("AUDIO OVERFLOW!\n");
+	log_warn("Audio overflow!\n");
 }
 
 

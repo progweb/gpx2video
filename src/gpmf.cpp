@@ -5,7 +5,7 @@
 
 #include <byteswap.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "gpmf.h"
 #include "datetime.h"
 

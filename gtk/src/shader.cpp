@@ -9,7 +9,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-#include "log.h"
+#include "log_i.h"
 #include "shader.h"
 
 
@@ -73,7 +73,7 @@ GPX2VideoShader::GPX2VideoShader(const GLchar *vertex_path, const GLchar *fragme
 		id_ = 0;
 	}
 	else {
-		log_info("Shader built with success");
+		log_notice("Shader built with success");
 
 		glDetachShader(id_, vertex);
 		glDetachShader(id_, fragment);

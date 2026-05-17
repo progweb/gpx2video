@@ -3,7 +3,7 @@
 #include <string>
 #include <algorithm>
 
-#include "log.h"
+#include "log_i.h"
 #include "ffmpegutils.h"
 #include "decoder.h"
 

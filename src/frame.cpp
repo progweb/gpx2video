@@ -5,6 +5,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
+#include "log_i.h"
 #include "oiioutils.h"
 #include "frame.h"
 

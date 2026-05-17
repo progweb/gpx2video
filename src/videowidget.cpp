@@ -6,7 +6,7 @@
 #include <OpenImageIO/imagebuf.h>
 #include <OpenImageIO/imagebufalgo.h>
 
-#include "log.h"
+#include "log_i.h"
 #include "utils.h"
 #include "oiio.h"
 #include "oiioutils.h"

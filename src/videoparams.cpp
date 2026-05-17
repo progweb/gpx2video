@@ -1,3 +1,4 @@
+#include "log_i.h"
 #include "videoparams.h"
 
 

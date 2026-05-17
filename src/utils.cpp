@@ -7,6 +7,7 @@
 #include <errno.h>
 #include <dirent.h>
 
+#include "log_i.h"
 #include "utils.h"
 
 

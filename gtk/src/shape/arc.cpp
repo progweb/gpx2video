@@ -1,4 +1,4 @@
-#include "../log.h"
+#include "../log_i.h"
 #include "arc.h"
 
 
@@ -54,6 +54,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: tick status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTick);
 						else
@@ -71,7 +74,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: tick color changed to '%s'", 
+						log_notice("Widget %s: tick color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickColor(color);
@@ -88,6 +91,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: tick label status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagTickLabel);
 						else
@@ -105,7 +111,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: tick label color changed to '%s'", 
+						log_notice("Widget %s: tick label color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickLabelColor(color);
@@ -129,6 +135,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: needle status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagNeedle);
 						else
@@ -149,7 +158,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_info("Widget %s: needle type changed to '%s'", 
+						log_notice("Widget %s: needle type changed to '%s'", 
 								widget_->name().c_str(), iter->get_value(model_.m_name).c_str());
 
 						widget_->theme().setNeedleType((VideoWidget::Theme::NeedleType) value);
@@ -166,7 +175,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: needle primary color changed to '%s'", 
+						log_notice("Widget %s: needle primary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setNeedlePrimaryColor(color);
@@ -183,7 +192,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: needle secondary color changed to '%s'", 
+						log_notice("Widget %s: needle secondary color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setNeedleSecondaryColor(color);
@@ -200,6 +209,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
+						log_notice("Widget %s: gauge status changed to '%s'",
+							   widget_->name().c_str(), state ? "enabled" : "disabled");
+
 						if (state)
 							widget_->theme().addFlag(VideoWidget::Theme::FlagGauge);
 						else
@@ -217,7 +229,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: gauge color changed to '%s'", 
+						log_notice("Widget %s: gauge color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeColor(0, color);
@@ -234,7 +246,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
 					[this](const int &value) {
-						log_info("Widget %s: gauge border changed to '%d'",
+						log_notice("Widget %s: gauge border changed to '%d'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setGaugeBorder(value);
@@ -251,7 +263,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: gauge border color changed to '%s'", 
+						log_notice("Widget %s: gauge border color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBorderColor(color);
@@ -268,7 +280,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	colorbutton->signal_color_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
 					[this](const std::string &color) {
-						log_info("Widget %s: gauge background color changed to '%s'", 
+						log_notice("Widget %s: gauge background color changed to '%s'", 
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBackgroundColor(color);

@@ -7,8 +7,6 @@
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/colorbutton.h>
 
-#include "log.h"
-
 
 class GPX2VideoWidgetHelper {
 public:
