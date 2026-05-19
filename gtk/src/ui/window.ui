@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkAdjustment" id="progress_adjustment">
 		<property name="upper">100</property>
 		<property name="value">0</property>
@@ -7,7 +8,7 @@
 		<property name="page-increment">1000</property>
 	</object>
 	<object class="GtkApplicationWindow" id="application_window">
-		<property name="title" translatable="yes">GPX2Video</property>
+		<property name="title" translatable="no">GPX2Video</property>
 		<property name="default-width">800</property>
 		<property name="default-height">600</property>
 		<property name="hide-on-close">True</property>
@@ -84,7 +85,8 @@
 								</child>
 								<child>
 									<object class="GtkScale" id="progress_scale">
-										<property name="draw-value">False</property>
+										<property name="draw-value">True</property>
+										<property name="value-pos">right</property>
 										<property name="adjustment">progress_adjustment</property>
 										<property name="hexpand">True</property>
 										<property name="hexpand-set">True</property>
@@ -108,6 +110,14 @@
 											<mark value="100" position="bottom"></mark>
 										</marks>
 										-->
+									</object>
+								</child>
+								<child>
+									<object class="GtkLabel" id="videotime_label">
+										<property name="can-focus">False</property>
+										<property name="justify">center</property>
+										<property name="label"></property>
+										<property name="valign">baseline</property>
 									</object>
 								</child>
 							</object>

@@ -8,6 +8,7 @@
 
 #include "log_i.h"
 #include "compat.h"
+#include "datetime.h"
 #include "videostackpage.h"
 
 
@@ -42,6 +43,8 @@ void GPX2VideoVideoStackPage::set_media(MediaContainer *media) {
 
 	Gtk::Label *label;
 
+	double duration;
+
 	VideoStreamPtr stream;
 	Glib::DateTime creationtime;
 
@@ -57,6 +60,9 @@ void GPX2VideoVideoStackPage::set_media(MediaContainer *media) {
 //	creationtime = Glib::DateTime::create_from_iso8601(Datetime::timestamp2iso(media_->creationTime()));
 //#endif
 	creationtime = Glib::DateTime::create_now_local(media->creationTime() / 1000);
+
+	// Video duration
+	duration = media->duration();
 
 	// Populate date label
 	label = ref_builder_->get_widget<Gtk::Label>("date_label");
@@ -81,5 +87,9 @@ void GPX2VideoVideoStackPage::set_media(MediaContainer *media) {
 	// Populate filesize label
 	label = ref_builder_->get_widget<Gtk::Label>("filesize_label");
 	label->set_label(Glib::format_size(info->get_size()));
+
+	// Populate duration label
+	label = ref_builder_->get_widget<Gtk::Label>("duration_label");
+	label->set_label(Datetime::timestamp2string(duration, Datetime::FormatTime));
 }
 

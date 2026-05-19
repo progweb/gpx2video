@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkBox" id="video_stackpage">
 		<property name="orientation">vertical</property>
 		<property name="margin-bottom">6</property>
@@ -16,7 +17,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">Date</property>
+						<property name="label" translatable="yes">Date</property>
 						<property name="mnemonic-widget">date_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -46,7 +47,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">Time</property>
+						<property name="label" translatable="yes">Time</property>
 						<property name="mnemonic-widget">time_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -76,7 +77,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">Size</property>
+						<property name="label" translatable="yes">Size</property>
 						<property name="mnemonic-widget">size_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -106,7 +107,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">File size</property>
+						<property name="label" translatable="yes">File size</property>
 						<property name="mnemonic-widget">filesize_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -129,6 +130,36 @@
 						<layout>
 							<property name="column">1</property>
 							<property name="row">3</property>
+						</layout>
+					</object>
+				</child>
+				<child>
+					<object class="GtkLabel">
+						<property name="can-focus">False</property>
+						<property name="justify">right</property>
+						<property name="label" translatable="yes">Duration</property>
+						<property name="mnemonic-widget">duration_label</property>
+						<property name="valign">baseline</property>
+						<property name="xalign">1</property>
+						<property name="yalign">0</property>
+						<style>
+							<class name="dim-label"/>
+						</style>
+						<layout>
+							<property name="column">0</property>
+							<property name="row">4</property>
+						</layout>
+					</object>
+				</child>
+				<child>
+					<object class="GtkLabel" id="duration_label">
+						<property name="can-focus">False</property>
+						<property name="label">-</property>
+						<property name="selectable">True</property>
+						<property name="xalign">0</property>
+						<layout>
+							<property name="column">1</property>
+							<property name="row">4</property>
 						</layout>
 					</object>
 				</child>

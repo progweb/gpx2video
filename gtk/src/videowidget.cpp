@@ -108,6 +108,11 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 
 	// Texture
 	texture_ = 0;
+
+	// Stats
+	stats_texture_reused_ = 0;
+	stats_texture_dropped_ = 0;
+	stats_texture_updated_ = 0;
 }
 
 
@@ -202,6 +207,8 @@ bool GPX2VideoWidget::ready(void) {
 void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 	log_call();
 
+	int dropped = -1;
+
 	GPX2VideoWidget::BufferPtr next;
 
 	std::lock_guard<std::mutex> lock(mutex_);
@@ -218,8 +225,15 @@ void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 
 		queue_.pop_front();
 
+		dropped++;
+
 		is_update_ = true;
 	}
+
+	// Stats
+	// dropped > 1, as texture hasn't been used
+	if (dropped > 0)
+		stats_texture_dropped_ += dropped;
 }
 
 
@@ -282,16 +296,23 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 		overlay_->get_pixels(OIIO::ROI(), 
 				overlay_->spec().format, 
 				reinterpret_cast<char*>(buffer->data()));
-		
+
 		// Save buffer
 		std::lock_guard<std::mutex> lock(mutex_);
 
 		queue_.push_back(buffer);
+
+		// Stats
+		stats_texture_updated_++;
 	}
 	else {
+		// Update buffer timestamp
 		buffer = queue_.back();
 		buffer->setTimestamp(data.timestamp());
 		queue_.back() = buffer;
+
+		// Stats
+		stats_texture_reused_++;
 	}
 
 	return is_update;
@@ -307,6 +328,22 @@ void GPX2VideoWidget::clear(void) {
 
 	// Clear buffer requested
 	clear_req_ = true;
+}
+
+
+void GPX2VideoWidget::stats(void) {
+	log_call();
+
+	const size_t max = 16;
+
+	size_t len = widget()->name().length();
+
+	log_info("Widget %s stats: %*s %4d reused, %4d dropped, %4d updated", 
+			widget()->name().c_str(),
+			(int) (max - len), "",
+			stats_texture_reused_,
+			stats_texture_dropped_,
+			stats_texture_updated_);
 }
 
 
@@ -480,6 +517,11 @@ printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
 	// Drop buffers
 	while (!queue_.empty())
 		queue_.pop_front();
+
+	// Stats
+	stats_texture_reused_ = 0;
+	stats_texture_dropped_ = 0;
+	stats_texture_updated_ = 0;
 
 	// Reset index
 	index_ = 0;

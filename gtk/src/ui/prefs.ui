@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <object class="gtkmm__CustomObject_GPX2VideoPrefs" id="prefs_dialog">
-    <property name="title" translatable="yes">Preferences</property>
-    <property name="resizable">True</property>
-    <property name="modal">True</property>
-    <property name="hide_on_close">True</property>
-  </object>
+	<requires lib="gtk" version="4.0"/>
+	<object class="gtkmm__CustomObject_GPX2VideoPrefs" id="prefs_dialog">
+		<property name="title" translatable="yes">Preferences</property>
+		<property name="resizable">True</property>
+		<property name="modal">True</property>
+		<property name="hide_on_close">True</property>
+	</object>
 </interface>

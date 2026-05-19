@@ -84,6 +84,8 @@ public:
 	bool full(void);
 	bool ready(void);
 
+	void stats(void);
+
 	void init_buffers(void);
 	void resize_buffers(void);
 	void write_buffers(const TelemetryData &data, bool &loop);
@@ -119,6 +121,11 @@ private:
 	mutable std::mutex mutex_;
 
 	std::deque<BufferPtr> queue_;
+
+	// Stats
+	int stats_texture_reused_;
+	int stats_texture_dropped_;
+	int stats_texture_updated_;
 
 	bool clear_req_;
 

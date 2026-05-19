@@ -1,3 +1,5 @@
+#include <glibmm/i18n.h>
+
 #include <gtkmm/box.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/switch.h>
@@ -60,17 +62,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = orientation_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::OrientationNone;
-		row[model_.m_name] = "None";
+		row[model_.m_name] = _("None");
 		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
 		row[model_.m_id] = VideoWidget::OrientationHorizontal;
-		row[model_.m_name] = "Horizontal";
+		row[model_.m_name] = _("Horizontal");
 		row[model_.m_enable] = true;
 
 		row = *(orientation_model_->append());
 		row[model_.m_id] = VideoWidget::OrientationVertical;
-		row[model_.m_name] = "Vertical";
+		row[model_.m_name] = _("Vertical");
 		row[model_.m_enable] = true;
 	}
 
@@ -80,17 +82,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = shape_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::ShapeText;
-		row[model_.m_name] = "Text";
+		row[model_.m_name] = _("Text");
 		row[model_.m_enable] = true;
 
 		row = *(shape_model_->append());
 		row[model_.m_id] = VideoWidget::ShapeArc;
-		row[model_.m_name] = "Arc";
+		row[model_.m_name] = _("Arc");
 		row[model_.m_enable] = true;
 
 		row = *(shape_model_->append());
 		row[model_.m_id] = VideoWidget::ShapeBar;
-		row[model_.m_name] = "Bar";
+		row[model_.m_name] = _("Bar");
 		row[model_.m_enable] = true;
 	}
 
@@ -100,47 +102,47 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = position_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = 0;
-		row[model_.m_name] = "None";
+		row[model_.m_name] = _("None");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 1;
-		row[model_.m_name] = "Left";
+		row[model_.m_name] = _("Left");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 2;
-		row[model_.m_name] = "Right";
+		row[model_.m_name] = _("Right");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 3;
-		row[model_.m_name] = "Bottom";
+		row[model_.m_name] = _("Bottom");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 4;
-		row[model_.m_name] = "Top";
+		row[model_.m_name] = _("Top");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 5;
-		row[model_.m_name] = "Bottom - Left";
+		row[model_.m_name] = _("Bottom - Left");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 6;
-		row[model_.m_name] = "Bottom - Right";
+		row[model_.m_name] = _("Bottom - Right");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 7;
-		row[model_.m_name] = "Top - Left";
+		row[model_.m_name] = _("Top - Left");
 		row[model_.m_enable] = true;
 
 		row = *(position_model_->append());
 		row[model_.m_id] = 8;
-		row[model_.m_name] = "Top - Right";
+		row[model_.m_name] = _("Top - Right");
 		row[model_.m_enable] = true;
 	}
 
@@ -150,12 +152,12 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = font_style_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::FontStyleNormal;
-		row[model_.m_name] = "Normal";
+		row[model_.m_name] = _("Normal");
 		row[model_.m_enable] = true;
 
 		row = *(font_style_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::FontStyleItalic;
-		row[model_.m_name] = "Italic";
+		row[model_.m_name] = _("Italic");
 		row[model_.m_enable] = true;
 	}
 
@@ -165,57 +167,57 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = font_weight_model->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::FontWeightThin;
-		row[model_.m_name] = "Thin (100)";
+		row[model_.m_name] = _("Thin (100)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraLight;
-		row[model_.m_name] = "Ultra light (200)";
+		row[model_.m_name] = _("Ultra light (200)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightLight;
-		row[model_.m_name] = "Light (300)";
+		row[model_.m_name] = _("Light (300)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightSemiLight;
-		row[model_.m_name] = "Semi light (350)";
+		row[model_.m_name] = _("Semi light (350)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightBook;
-		row[model_.m_name] = "Book (380)";
+		row[model_.m_name] = _("Book (380)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightNormal;
-		row[model_.m_name] = "Normal (400)";
+		row[model_.m_name] = _("Normal (400)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightMedium;
-		row[model_.m_name] = "Medium (500)";
+		row[model_.m_name] = _("Medium (500)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightSemiBold;
-		row[model_.m_name] = "Semi bold (600)";
+		row[model_.m_name] = _("Semi bold (600)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraBold;
-		row[model_.m_name] = "Ultra bold (800)";
+		row[model_.m_name] = _("Ultra bold (800)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightHeavy;
-		row[model_.m_name] = "Heavy (900)";
+		row[model_.m_name] = _("Heavy (900)");
 		row[model_.m_enable] = true;
 
 		row = *(font_weight_model->append());
 		row[model_.m_id] = VideoWidget::Theme::FontWeightUltraHeavy;
-		row[model_.m_name] = "Ultra heavy (1000)";
+		row[model_.m_name] = _("Ultra heavy (1000)");
 		row[model_.m_enable] = true;
 	}
 
@@ -225,17 +227,17 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		auto iter = text_align_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::AlignLeft;
-		row[model_.m_name] = "Left";
+		row[model_.m_name] = _("Left");
 		row[model_.m_enable] = true;
 
 		row = *(text_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignCenter;
-		row[model_.m_name] = "Center";
+		row[model_.m_name] = _("Center");
 		row[model_.m_enable] = true;
 
 		row = *(text_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignRight;
-		row[model_.m_name] = "Right";
+		row[model_.m_name] = _("Right");
 		row[model_.m_enable] = true;
 	}
 

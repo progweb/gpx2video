@@ -35,6 +35,26 @@ GPX2VideoAudioDevice * GPX2VideoAudioDevice::create(void) {
 }
 
 
+std::string GPX2VideoAudioDevice::contextState2String(pa_context_state_t state) {
+	log_call();
+
+	switch (state) {
+	case PA_CONTEXT_READY:
+		return "ready";
+	case PA_CONTEXT_FAILED:
+		return "failed";
+	case PA_CONTEXT_CONNECTING:
+		return "connecting";
+	case PA_CONTEXT_AUTHORIZING:
+		return "authorizing";
+	case PA_CONTEXT_SETTING_NAME:
+		return "setting name";
+	default:
+		return "unknown (state: " + std::to_string(state) + ")";
+	}
+}
+
+
 void GPX2VideoAudioDevice::onContextStateChanged(pa_context_state_t state) {
 	log_call();
 
@@ -53,7 +73,7 @@ void GPX2VideoAudioDevice::onContextStateChanged(pa_context_state_t state) {
 	case PA_CONTEXT_AUTHORIZING:
 	case PA_CONTEXT_SETTING_NAME:
 	default:
-		log_notice("PulseAudio connection state: %i", state);
+		log_notice("PulseAudio connection state: %s", contextState2String(state).c_str());
 		break;
 	}
 }

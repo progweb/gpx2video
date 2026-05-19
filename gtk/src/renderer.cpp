@@ -502,6 +502,15 @@ void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget, bool schedule) {
 }
 
 
+void GPX2VideoRenderer::stats(void) {
+	log_call();
+
+	for (GPX2VideoWidget *item : widgets_) {
+		item->stats();
+	}
+}
+
+
 void GPX2VideoRenderer::init_buffers(void) {
 	log_call();
 

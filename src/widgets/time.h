@@ -47,7 +47,7 @@ skip:
 		// Compute time
 		t = data.datetime() / 1000;
 
-		// Refresh dynamic info
+		// Check changes
 		if (fg_buf_ != NULL) {
 			if (t == last_time_) {
 				is_update = false;
@@ -76,7 +76,6 @@ skip:
 
 		is_update = true;
 		last_time_ = t;
-
 skip:
 		return fg_buf_;
 	}

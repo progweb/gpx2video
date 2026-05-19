@@ -4,8 +4,11 @@
 #include <gtkmm/builder.h>
 #include <gtkmm/dialog.h>
 #include <gtkmm/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/filter.h>
 #include <gtkmm/listbox.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/filterlistmodel.h>
 
 #include "../src/widgets.h"
 #include "renderer.h"
@@ -13,6 +16,19 @@
 
 class GPX2VideoAppend : public Gtk::Dialog {
 private:
+	class Filter : public Gtk::Filter {
+	public: 
+		Filter();
+
+		void set_needle(const std::string &needle);
+
+	protected:
+		bool match_vfunc(const Glib::RefPtr<Glib::ObjectBase> &item);
+
+	private:
+		std::string needle_;
+	};
+
 	class Widget : public Glib::Object {
 	public:
 		VideoWidget::Widget id_;
@@ -55,11 +71,13 @@ protected:
 
 	GPX2VideoRenderer *renderer_;
 
-	Glib::RefPtr<Gio::ListStore<GPX2VideoAppend::Widget>> widget_model_;
+	Glib::RefPtr<GPX2VideoAppend::Filter> filter_;
+	Glib::RefPtr<Gtk::FilterListModel> widget_model_;
 
 	void build(void);
 	Gtk::Widget * create_row(const Glib::RefPtr<Glib::ObjectBase> &obj);
 
+	void on_search_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set);
 	void on_selected(Gtk::ListBoxRow *row);
 	void on_ok_clicked(void);
 	void on_cancel_clicked(void);

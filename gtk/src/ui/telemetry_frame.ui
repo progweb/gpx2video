@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkAdjustment" id="timeoffset_adjustment">
 		<property name="lower">-100000</property>
 		<property name="upper">100000</property>
@@ -88,7 +89,7 @@
 							<object class="GtkLabel">
 								<property name="can-focus">False</property>
 								<property name="justify">center</property>
-								<property name="label">Telemetry properties</property>
+								<property name="label" translatable="yes">Telemetry properties</property>
 								<property name="valign">baseline</property>
 								<property name="margin-bottom">6</property>
 							</object>
@@ -96,7 +97,7 @@
 
 						<child>
 							<object class="GtkExpander" id="common_expander">
-								<property name="label">Filter</property>
+								<property name="label" translatable="yes">Filter</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -116,7 +117,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Time offset (in ms):</property>
+														<property name="label" translatable="yes">Time offset (in ms):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -154,7 +155,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Check &amp; drop invalid points</property>
+														<property name="label" translatable="yes">Check &amp; drop invalid points</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -180,7 +181,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Enable pause detection</property>
+														<property name="label" translatable="yes">Enable pause detection</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -206,7 +207,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Apply 'Iglewicz &amp; Hoaglin' modified z-scores</property>
+														<property name="label" translatable="yes">Apply 'Iglewicz &amp; Hoaglin' modified z-scores</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -225,7 +226,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Prediction method:</property>
+														<property name="label" translatable="yes">Prediction method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -250,7 +251,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Rate (in ms):</property>
+														<property name="label" translatable="yes">Rate (in ms):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -276,7 +277,7 @@
 
 						<child>
 							<object class="GtkExpander" id="grade_smooth_expander">
-								<property name="label">Grade filter &amp; smooth</property>
+								<property name="label" translatable="yes">Grade filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -297,7 +298,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -322,7 +323,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -348,7 +349,7 @@
 
 						<child>
 							<object class="GtkExpander" id="heading_smooth_expander">
-								<property name="label">Heading filter &amp; smooth</property>
+								<property name="label" translatable="yes">Heading filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -369,7 +370,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -394,7 +395,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -420,7 +421,7 @@
 
 						<child>
 							<object class="GtkExpander" id="elevation_smooth_expander">
-								<property name="label">Elevation filter &amp; smooth</property>
+								<property name="label" translatable="yes">Elevation filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -441,7 +442,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -466,7 +467,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -492,7 +493,7 @@
 
 						<child>
 							<object class="GtkExpander" id="acceleration_smooth_expander">
-								<property name="label">Acceleration filter &amp; smooth</property>
+								<property name="label" translatable="yes">Acceleration filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -513,7 +514,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -538,7 +539,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -564,7 +565,7 @@
 
 						<child>
 							<object class="GtkExpander" id="speed_smooth_expander">
-								<property name="label">Speed filter &amp; smooth</property>
+								<property name="label" translatable="yes">Speed filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -585,7 +586,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -610,7 +611,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -636,7 +637,7 @@
 
 						<child>
 							<object class="GtkExpander" id="verticalspeed_smooth_expander">
-								<property name="label">Vertical speed filter &amp; smooth</property>
+								<property name="label" translatable="yes">Vertical speed filter &amp; smooth</property>
 								<child>
 									<object class="GtkBox">
 										<property name="orientation">vertical</property>
@@ -657,7 +658,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Method:</property>
+														<property name="label" translatable="yes">Method:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
@@ -682,7 +683,7 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label">Window size (in points):</property>
+														<property name="label" translatable="yes">Window size (in points):</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>

@@ -6,11 +6,46 @@
 #include <gtkmm.h>
 #include <gtkmm/label.h>
 #include <gtkmm/image.h>
+#include <gtkmm/expression.h>
+#include <gtkmm/stringsorter.h>
 
 #include "log_i.h"
 #include "../src/widgets.h"
 #include "append.h"
 
+
+
+GPX2VideoAppend::Filter::Filter()
+	: Gtk::Filter()
+	, needle_("") {
+}
+
+
+void GPX2VideoAppend::Filter::set_needle(const std::string &needle) {
+	if (needle == needle_)
+		return;
+
+	needle_ = needle;
+
+	changed();
+}
+
+
+bool GPX2VideoAppend::Filter::match_vfunc(const Glib::RefPtr<Glib::ObjectBase> &item) {
+	const auto widget = std::dynamic_pointer_cast<GPX2VideoAppend::Widget>(item);
+
+	if (needle_ == "")
+		return true;
+
+	if (widget) {
+		auto label = Glib::ustring(widget->label()).lowercase();
+		auto needle = Glib::ustring(needle_).lowercase();
+
+		return label.find(needle_) != Glib::ustring::npos;
+	}
+
+	return false;
+}
 
 
 GPX2VideoAppend::GPX2VideoAppend()
@@ -24,11 +59,22 @@ GPX2VideoAppend::GPX2VideoAppend(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 	: Glib::ObjectBase("GPX2VideoAppend")
 	, Gtk::Dialog(cobject)
 	, ref_builder_(ref_builder)
-	, renderer_(renderer) {
+	, renderer_(renderer) 
+	, filter_(NULL)
+	, widget_model_(NULL) {
 	log_call();
 
 	// Populate widgets list
 	build();
+
+	// Connect search entry
+	auto entry = ref_builder_->get_widget<Gtk::Entry>("needle_entry");
+	entry->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoAppend::on_search_entry_changed), entry, 
+					[this](const Glib::ustring &value) {
+						filter_->set_needle(value);
+					}
+			));
 
 	// Connect widget list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
@@ -36,7 +82,6 @@ GPX2VideoAppend::GPX2VideoAppend(BaseObjectType *cobject, const Glib::RefPtr<Gtk
 		throw std::runtime_error("No \"widgets_listbox\" object in append.ui");
 
 	list->signal_row_selected().connect(sigc::mem_fun(*this, &GPX2VideoAppend::on_selected));
-
 
 	// OK button object
 	ok_button_ = ref_builder_->get_widget<Gtk::Button>("ok_button");
@@ -82,12 +127,14 @@ GPX2VideoAppend * GPX2VideoAppend::create(Gtk::Window &parent, GPX2VideoRenderer
 void GPX2VideoAppend::build(void) {
 	log_call();
 
-	widget_model_ = Gio::ListStore<GPX2VideoAppend::Widget>::create();
+	// Create model 
+	auto model = Gio::ListStore<GPX2VideoAppend::Widget>::create();
 
+	// Populate model
 	for (int i=0; i != VideoWidget::WidgetUnknown; i++) {
 		VideoWidget::Widget type = (VideoWidget::Widget) i;
 
-		widget_model_->append(Widget::create(
+		model->append(Widget::create(
 				type,
 				VideoWidget::getIconFilename(type),
 				VideoWidget::getFriendlyName(type)
@@ -95,13 +142,33 @@ void GPX2VideoAppend::build(void) {
 		);
 	}
 
+	// Create the sort model
+	auto expr = Gtk::ClosureExpression<Glib::ustring>::create(
+		[] (const Glib::RefPtr<Glib::ObjectBase> &item) -> Glib::ustring {
+			const auto widget = std::dynamic_pointer_cast<GPX2VideoAppend::Widget>(item);
+			return widget ? widget->label() : "";
+		}
+	);
+
+	auto sorter = Gtk::StringSorter::create(expr);
+
+	// Wrap the store in a sort list model
+	auto sorted_model = Gtk::SortListModel::create(model, sorter);
+
+	// Create the filter model
+	filter_ = Glib::make_refptr_for_instance<GPX2VideoAppend::Filter>(new GPX2VideoAppend::Filter());
+
+	auto filter_model = Gtk::FilterListModel::create(sorted_model, filter_);
+
 	// Widgets list
 	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
 	if (!list)
 		throw std::runtime_error("No \"widgets_listbox\" object in append.ui");
 
+	list->bind_model(filter_model, sigc::mem_fun(*this, &GPX2VideoAppend::create_row));
 
-	list->bind_model(widget_model_, sigc::mem_fun(*this, &GPX2VideoAppend::create_row));
+	// Save model
+	widget_model_ = filter_model;
 }
 
 
@@ -134,6 +201,14 @@ Gtk::Widget * GPX2VideoAppend::create_row(const Glib::RefPtr<Glib::ObjectBase> &
 }
 
 
+void GPX2VideoAppend::on_search_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set) {
+	log_call();
+
+	// Set entry
+	set(entry->get_text());
+}
+
+
 void GPX2VideoAppend::on_selected(Gtk::ListBoxRow *row) {
 	log_call();
 
@@ -148,7 +223,7 @@ void GPX2VideoAppend::on_selected(Gtk::ListBoxRow *row) {
 	index = row->get_index();
 
 	// Get item
-	widget = widget_model_->get_item(index);
+	widget = std::dynamic_pointer_cast<GPX2VideoAppend::Widget>(widget_model_->get_object(index));
 
 	log_info("New widget '%s' selected", VideoWidget::widget2string(widget->type()).c_str());
 
@@ -179,7 +254,7 @@ void GPX2VideoAppend::on_ok_clicked(void) {
 	index = row->get_index();
 
 	// Get item
-	widget = widget_model_->get_item(index);
+	widget = std::dynamic_pointer_cast<GPX2VideoAppend::Widget>(widget_model_->get_object(index));
 
 	// Append widget to layout
 	log_info("Request to create & append new widget '%s'", 

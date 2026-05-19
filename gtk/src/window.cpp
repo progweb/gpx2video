@@ -1,9 +1,13 @@
+#include <libintl.h>
+#include <locale.h>
+
 #include <iostream>
 #include <exception>
 
 #include <glibmm/binding.h>
 #include <glibmm/datetime.h>
 #include <glibmm/miscutils.h>
+#include <glibmm/i18n.h>
 
 //#include <giomm/simpleaction.h>
 #include <giomm/settingsschemasource.h>
@@ -172,6 +176,27 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	progress_scale_->signal_change_value().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_progress_change_value), adjustment), false);
 	video_area_->set_adjustment(adjustment);
+
+	progress_scale_->set_format_value_func(
+		[this] (double value) -> Glib::ustring {
+			char buf[32];
+
+			uint64_t ts = (uint64_t) value;
+
+			int ms = ts % 1000;
+			int sec = (ts / 1000) % 60;
+			int min = (ts / 1000 / 60) % 60;
+			int hour = (ts / 1000 / 60 / 60);
+
+			// Media duration > 1 hour
+			if (media_ && (media_->duration() > (1 * 60 * 60 * 1000)))
+				sprintf(buf, "%02d:%02d:%02d", hour, min, sec);
+			else
+				sprintf(buf, "%02d:%02d.%03d", min, sec, ms);
+
+			return Glib::ustring(buf);
+		}
+	);
 
 	// Connect widgets button
 	button = ref_builder_->get_widget<Gtk::Button>("widget_append_button");
@@ -445,7 +470,7 @@ void GPX2VideoApplicationWindow::open_media_file(const Glib::RefPtr<const Gio::F
 
 	// Video resolution
 	stream = media_->getVideoStream();
-	
+
 	// Video creation time
 //#if GLIBMM_CHECK_VERSION(2, 80, 0)
 //	creationtime = Glib::DateTime::create_from_utc_usec(media_->creationTime() * 1000);
@@ -659,11 +684,11 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 
 	// File filter
 	auto filter_video = Gtk::FileFilter::create();
-	filter_video->set_name("All video files");
+	filter_video->set_name(_("All video files"));
 	filter_video->add_mime_type("video/*");
 
 	auto filter_layout = Gtk::FileFilter::create();
-	filter_layout->set_name("All layout files");
+	filter_layout->set_name(_("All layout files"));
 //	filter_layout->add_mime_type("application/xml");
 	filter_layout->add_suffix("xml");
 

@@ -282,6 +282,9 @@ void GPX2VideoArea::toggle_pause(void) {
 
 	stream_toggle_pause();
 	schedule_refresh(100);
+
+	if (!is_playing_ && renderer_)
+		renderer_->stats();
 }
 
 

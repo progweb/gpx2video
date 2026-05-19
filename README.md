@@ -197,7 +197,7 @@ make run-ubuntu-noble VIDEO_DIR=~/Videos
 To build gpx2video, please install all dependencies (on Debian):
 
 ```bash
-apt-get install cmake g++ libevent-dev libssl-dev libcurl4-gnutls-dev \
+apt-get install cmake g++ gettext libevent-dev libssl-dev libcurl4-gnutls-dev \
     libavutil-dev libavformat-dev libavcodec-dev libavfilter-dev \
     libswresample-dev libswscale-dev libopenimageio-dev libgeographic-dev \
     libpango1.0-dev libcairo2-dev librsvg2-dev libopenexr-dev \

@@ -149,6 +149,7 @@ public:
 	}
 
 	static std::string assets(const std::string &path = "");
+	static std::string locale(void);
 
 	void append(Task *task) {
 		task->reset();

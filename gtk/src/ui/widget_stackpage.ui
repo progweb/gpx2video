@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkScrolledWindow" id="widget_stackpage">
 		<property name="hscrollbar-policy">2</property>
 		<property name="vexpand">1</property>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkBox" id="telemetry_stackpage">
 		<property name="orientation">vertical</property>
 		<property name="margin-bottom">6</property>
@@ -16,7 +17,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">File name</property>
+						<property name="label" translatable="yes">File name</property>
 						<property name="mnemonic-widget">filename_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -46,7 +47,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">First point</property>
+						<property name="label" translatable="yes">First point</property>
 						<property name="mnemonic-widget">firstpoint_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -76,7 +77,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">Last point</property>
+						<property name="label" translatable="yes">Last point</property>
 						<property name="mnemonic-widget">lastpoint_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -106,7 +107,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">Number of points</property>
+						<property name="label" translatable="yes">Number of points</property>
 						<property name="mnemonic-widget">numberofpoint_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>
@@ -136,7 +137,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">right</property>
-						<property name="label">File size</property>
+						<property name="label" translatable="yes">File size</property>
 						<property name="mnemonic-widget">filesize_label</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">1</property>

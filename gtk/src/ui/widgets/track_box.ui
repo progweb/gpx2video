@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkAdjustment" id="factor_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">100</property>
@@ -35,7 +36,7 @@
 			<object class="GtkLabel">
 				<property name="can-focus">False</property>
 				<property name="justify">center</property>
-				<property name="label">Track properties</property>
+				<property name="label" translatable="yes">Track properties</property>
 				<property name="valign">baseline</property>
 				<property name="xalign">0.5</property>
 				<property name="margin-bottom">6</property>
@@ -44,7 +45,7 @@
 
 		<child>
 			<object class="GtkExpander" id="track_expander">
-				<property name="label">Track</property>
+				<property name="label" translatable="yes">Track</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -65,7 +66,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">View:</property>
+										<property name="label" translatable="yes">View:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -91,7 +92,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Factor:</property>
+										<property name="label" translatable="yes">Factor:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -123,7 +124,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Path thick:</property>
+										<property name="label" translatable="yes">Path thick:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -155,7 +156,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Path border:</property>
+										<property name="label" translatable="yes">Path border:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -186,7 +187,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Path border color:</property>
+										<property name="label" translatable="yes">Path border color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -215,7 +216,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Path primary color:</property>
+										<property name="label" translatable="yes">Path primary color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -244,7 +245,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Path secondary color:</property>
+										<property name="label" translatable="yes">Path secondary color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>

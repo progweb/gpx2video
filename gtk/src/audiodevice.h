@@ -61,6 +61,8 @@ public:
 	uint32_t tlength_;
 
 	size_t data_length_;
+
+	static std::string contextState2String(pa_context_state_t state);
 };
 
 #endif

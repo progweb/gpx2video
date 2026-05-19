@@ -1,0 +1,25 @@
+# Core
+../src/videowidget.cpp
+
+# Resource
+../gtk/src/ui/append.ui
+../gtk/src/ui/gears_menu.ui
+../gtk/src/ui/prefs.ui
+../gtk/src/ui/telemetry_frame.ui
+../gtk/src/ui/telemetry_stackpage.ui
+../gtk/src/ui/video_frame.ui
+../gtk/src/ui/video_stackpage.ui
+../gtk/src/ui/widget_frame.ui
+../gtk/src/ui/widget_stackpage.ui
+../gtk/src/ui/window.ui
+../gtk/src/ui/shape/arc_box.ui
+../gtk/src/ui/shape/bar_box.ui
+../gtk/src/ui/shape/text_box.ui
+../gtk/src/ui/widgets/map_box.ui
+../gtk/src/ui/widgets/track_box.ui
+
+# GTK
+../gtk/src/telemetryframe.cpp
+../gtk/src/widgetframe.cpp
+../gtk/src/window.cpp
+

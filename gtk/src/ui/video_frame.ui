@@ -1,22 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<menu id="starttime_menumodel">
 		<section>
 			<item>
 				<attribute name="action">win.use_creation_time</attribute>
-				<attribute name="label">Use video creation time</attribute>
+				<attribute name="label" translatable="yes">Use video creation time</attribute>
 			</item>
 		</section>
 		<section id="starttime_gpmf_menusection">
 			<item>
 				<attribute name="action">win.use_gpmf_stream</attribute>
-				<attribute name="label">Use GPMF GoPro stream</attribute>
+				<attribute name="label" translatable="yes">Use GPMF GoPro stream</attribute>
 			</item>
 		</section>
 		<section>
 			<item>
 				<attribute name="action">win.use_gpx_data</attribute>
-				<attribute name="label">Use GPX first point</attribute>
+				<attribute name="label" translatable="yes">Use GPX first point</attribute>
 			</item>
 		</section>
 	</menu>
@@ -67,7 +68,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">center</property>
-						<property name="label">Video properties</property>
+						<property name="label" translatable="yes">Video properties</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">0.5</property>
 						<property name="margin-bottom">6</property>
@@ -77,7 +78,7 @@
 					<object class="GtkLabel">
 						<property name="can-focus">False</property>
 						<property name="justify">left</property>
-						<property name="label">Start time</property>
+						<property name="label" translatable="yes">Start time</property>
 						<property name="valign">baseline</property>
 						<property name="xalign">0.0</property>
 					</object>
@@ -89,7 +90,7 @@
 						<child>
 							<object class="GtkEntry" id="datetimestart_entry">
 								<property name="hexpand">True</property>
-								<property name="placeholder-text">Video start time</property>
+								<property name="placeholder-text" translatable="yes">Video start time</property>
 								<property name="valign">center</property>
 								<property name="editable">False</property>
 							</object>
@@ -156,7 +157,7 @@
 														<property name="margin-start">4</property>
 														<property name="margin-top">4</property>
 														<property name="valign">center</property>
-														<property name="label">Ok</property>
+														<property name="label" translatable="yes">Ok</property>
 													</object>
 												</child>
 											</object>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="gtkmm__CustomObject_GPX2VideoAppend" id="append_dialog">
 		<property name="title" translatable="yes">Append widget</property>
 		<property name="resizable">True</property>
@@ -14,6 +15,15 @@
 				<property name="valign">fill</property>
 				<property name="hexpand">True</property>
 				<property name="vexpand">True</property>
+				<child>
+					<object class="GtkEntry" id="needle_entry">
+						<property name="hexpand">True</property>
+						<property name="valign">center</property>
+						<property name="placeholder-text" translatable="yes">Name...</property>
+						<property name="primary-icon-name">edit-find-symbolic</property>
+						<property name="primary-icon-tooltip-text" translatable="yes">Search by name</property>
+					</object>
+				</child>
 				<child>
 					<object class="GtkScrolledWindow" id="widget_scrollwindow">
 						<property name="hscrollbar-policy">2</property>
@@ -41,7 +51,7 @@
 						<child>
 							<object class="GtkButton" id="ok_button">
 								<property name="sensitive">False</property>
-								<property name="label" translatable="yes">OK</property>
+								<property name="label" translatable="yes">Ok</property>
 							</object>
 						</child>
 						<child>

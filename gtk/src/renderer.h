@@ -48,6 +48,7 @@ public:
 	void clear(GPX2VideoWidget *widget=NULL);
 	void compute(void);
 	void refresh(GPX2VideoWidget *widget=NULL, bool schedule=false);
+	void stats(void);
 
 	Glib::Dispatcher& ready(void) {
 		return dispatcher_;

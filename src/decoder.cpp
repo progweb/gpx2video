@@ -130,7 +130,7 @@ MediaContainer * Decoder::probe(const std::string &filename) {
 				}
 
     			// Warning, value isn't the same result as FFprobe.
-				av_log(NULL, AV_LOG_INFO, "interlacing = %s, rotate = %0.2f\n", 
+				av_log(NULL, AV_LOG_INFO, "Video interlacing = %s, rotate = %0.2f\n", 
 						(interlacing != VideoParams::InterlaceNone) ? 
 							((interlacing = VideoParams::InterlacedBottomFirst) ? "BFF" : "TFF") : "none", theta);
 

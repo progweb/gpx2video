@@ -8,6 +8,7 @@
 
 #include "log_i.h"
 #include "utils.h"
+#include "i18n.h"
 #include "oiio.h"
 #include "oiioutils.h"
 #include "videowidget.h"
@@ -720,57 +721,57 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 	switch (type) {
 	case VideoWidget::WidgetAverageSpeed:
-		return "Average speed";
+		return _("Average speed");
 	case VideoWidget::WidgetAverageRideSpeed:
-		return "Average ride speed";
+		return _("Average ride speed");
 	case VideoWidget::WidgetBatteryLevel:
-		return "Battery level";
+		return _("Battery level");
 	case VideoWidget::WidgetCadence:
-		return "Cadence";
+		return _("Cadence");
 	case VideoWidget::WidgetDate:
-		return "Date";
+		return _("Date");
 	case VideoWidget::WidgetDistance:
-		return "Distance";
+		return _("Distance");
 	case VideoWidget::WidgetDuration:
-		return "Duration";
+		return _("Duration");
 	case VideoWidget::WidgetElevation:
-		return "Elevation";
+		return _("Elevation");
 	case VideoWidget::WidgetGForce:
-		return "GForce";
+		return _("GForce");
 	case VideoWidget::WidgetGPX:
-		return "GPX";
+		return _("GPX");
 	case VideoWidget::WidgetGrade:
-		return "Grade / Slope";
+		return _("Grade / Slope");
 	case VideoWidget::WidgetHeading:
-		return "Heading";
+		return _("Heading");
 	case VideoWidget::WidgetHeartRate:
-		return "Heart rate";
+		return _("Heart rate");
 	case VideoWidget::WidgetHomeDistance:
-		return "Home distance";
+		return _("Home distance");
 	case VideoWidget::WidgetImage:
-		return "Image";
+		return _("Image");
 	case VideoWidget::WidgetLap:
-		return "Lap";
+		return _("Lap");
 	case VideoWidget::WidgetMap:
-		return "Map";
+		return _("Map");
 	case VideoWidget::WidgetMaxSpeed:
-		return "Maximum speed";
+		return _("Maximum speed");
 	case VideoWidget::WidgetPosition:
-		return "Position";
+		return _("Position");
 	case VideoWidget::WidgetPower:
-		return "Power";
+		return _("Power");
 	case VideoWidget::WidgetSpeed:
-		return "Speed";
+		return _("Speed");
 	case VideoWidget::WidgetTemperature:
-		return "Temperature";
+		return _("Temperature");
 	case VideoWidget::WidgetText:
-		return "Text";
+		return _("Text");
 	case VideoWidget::WidgetTime:
-		return "Time";
+		return _("Time");
 	case VideoWidget::WidgetTrack:
-		return "Track";
+		return _("Track");
 	case VideoWidget::WidgetVerticalSpeed:
-		return "Vertical speed";
+		return _("Vertical speed");
 	default:
 		return "";
 	}

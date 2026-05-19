@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<interface domain="gtk40">
+<interface>
+	<requires lib="gtk" version="4.0"/>
 	<object class="GtkAdjustment" id="gauge_border_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">99</property>
@@ -21,7 +22,7 @@
 			<object class="GtkLabel">
 				<property name="can-focus">False</property>
 				<property name="justify">center</property>
-				<property name="label">Arc extension</property>
+				<property name="label" translatable="yes">Arc extension</property>
 				<property name="valign">baseline</property>
 				<property name="xalign">0.5</property>
 				<property name="margin-bottom">6</property>
@@ -30,7 +31,7 @@
 
 		<child>
 			<object class="GtkExpander" id="tick_expander">
-				<property name="label">Tick</property>
+				<property name="label" translatable="yes">Tick</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -51,7 +52,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Tick enable:</property>
+										<property name="label" translatable="yes">Tick enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -77,7 +78,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Tick color:</property>
+										<property name="label" translatable="yes">Tick color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -107,7 +108,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Tick label enable:</property>
+										<property name="label" translatable="yes">Tick label enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -133,7 +134,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Tick label color:</property>
+										<property name="label" translatable="yes">Tick label color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -158,7 +159,7 @@
 
 		<child>
 			<object class="GtkExpander" id="needle_expander">
-				<property name="label">Needle</property>
+				<property name="label" translatable="yes">Needle</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -179,7 +180,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Needle enable:</property>
+										<property name="label" translatable="yes">Needle enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -205,7 +206,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Needle type:</property>
+										<property name="label" translatable="yes">Needle type:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -231,7 +232,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Needle primary color:</property>
+										<property name="label" translatable="yes">Needle primary color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -261,7 +262,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Needle secondary color:</property>
+										<property name="label" translatable="yes">Needle secondary color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -286,7 +287,7 @@
 
 		<child>
 			<object class="GtkExpander" id="arc_expander">
-				<property name="label">Arc</property>
+				<property name="label" translatable="yes">Arc</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -307,7 +308,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Arc enable:</property>
+										<property name="label" translatable="yes">Arc enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -332,7 +333,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Arc color:</property>
+										<property name="label" translatable="yes">Arc color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -361,7 +362,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Arc border width:</property>
+										<property name="label" translatable="yes">Arc border width:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -391,7 +392,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Arc border color:</property>
+										<property name="label" translatable="yes">Arc border color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
@@ -420,7 +421,7 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label">Arc background color:</property>
+										<property name="label" translatable="yes">Arc background color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>

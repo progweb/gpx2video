@@ -11,6 +11,7 @@ RUN apt-get update \
         build-essential \
         cmake \
         pkg-config \
+		gettext \
         \
         libevent-dev \
         libssl-dev \

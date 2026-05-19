@@ -177,6 +177,11 @@ std::string GPXApplication::assets(const std::string &path) {
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 
+		// <builddir>/../assets/<path>
+		fullpath = exepath + "/.." + assets;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+
 		// gpx2video: <sourcedir>/assets/<path>
 		exepath = std::filesystem::path(exepath).parent_path();
 		fullpath = exepath + assets;
@@ -204,6 +209,48 @@ std::string GPXApplication::assets(const std::string &path) {
 
 	// Default
 	return "." + assets;
+}
+
+
+std::string GPXApplication::locale(void) {
+	log_call();
+
+	char buff[PATH_MAX];
+
+	ssize_t len;
+
+	struct stat sb;
+
+	std::string exepath;
+	std::string fullpath;
+	std::string locale = "/po/locale";
+
+	len = ::readlink("/proc/self/exe", buff, sizeof(buff) - 1);
+	if (len != -1) {
+		buff[len] = '\0';
+
+		exepath = std::filesystem::path(buff).parent_path();
+
+		// <builddir>/po/locale
+		fullpath = exepath + locale;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+
+		// <builddir>/../po/locale
+		fullpath = exepath + "/.." + locale;
+		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+			return fullpath;
+	}
+
+	// /usr/share/locale (default path)
+	fullpath = "/usr/share/locale";
+	if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
+		return fullpath;
+
+	log_warn("Locale path not found!");
+
+	// Default
+	return "." + locale;
 }
 
 

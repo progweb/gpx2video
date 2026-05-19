@@ -57,6 +57,14 @@ skip:
 		// Format data
 		no_value_ = !data.hasValue(TelemetryData::DataMaxSpeed);
 
+		// Check changes
+		if (fg_buf_ != NULL) {
+			if (data.maxspeed() == last_speed_) {
+				is_update = false;
+				goto skip;
+			}
+		}
+
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
@@ -77,6 +85,7 @@ skip:
 		this->destroyCairoContext(cairo);
 
 		is_update = true;
+		last_speed_ = data.maxspeed();
 skip:
 		return fg_buf_;
 	}
@@ -102,6 +111,8 @@ private:
 
 	VideoWidget *widget_;
 
+	double last_speed_;
+
 	std::string icon_filename_;
 
 	MaxSpeedTextShape(VideoWidget *widget)
@@ -110,6 +121,8 @@ private:
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
+
+		last_speed_ = 0;
 
 		icon_filename_ = widget->getIconFilename(widget->type());
 	}

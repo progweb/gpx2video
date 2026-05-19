@@ -1,3 +1,5 @@
+#include <glibmm/i18n.h>
+
 #include <gtkmm/combobox.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/checkbutton.h>
@@ -41,22 +43,22 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 		auto iter = prediction_method_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = TelemetrySettings::MethodNone;
-		row[model_.m_name] = "None";
+		row[model_.m_name] = _("None");
 		row[model_.m_enable] = true;
 
 		row = *(prediction_method_model_->append());
 		row[model_.m_id] = TelemetrySettings::MethodSample;
-		row[model_.m_name] = "Sample";
+		row[model_.m_name] = _("Sample");
 		row[model_.m_enable] = true;
 
 		row = *(prediction_method_model_->append());
 		row[model_.m_id] = TelemetrySettings::MethodLinear;
-		row[model_.m_name] = "Linear";
+		row[model_.m_name] = _("Linear");
 		row[model_.m_enable] = true;
 
 		row = *(prediction_method_model_->append());
 		row[model_.m_id] = TelemetrySettings::MethodInterpolate;
-		row[model_.m_name] = "Interpolate";
+		row[model_.m_name] = _("Interpolate");
 		row[model_.m_enable] = true;
 	}
 
@@ -66,17 +68,17 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 		auto iter = smooth_method_model->append();
 		auto row = *iter;
 		row[model_.m_id] = TelemetrySettings::SmoothNone;
-		row[model_.m_name] = "None";
+		row[model_.m_name] = _("None");
 		row[model_.m_enable] = true;
 
 		row = *(smooth_method_model->append());
 		row[model_.m_id] = TelemetrySettings::SmoothWindowedMovingAverage;
-		row[model_.m_name] = "Windowed moving average";
+		row[model_.m_name] = _("Windowed moving average");
 		row[model_.m_enable] = true;
 
 		row = *(smooth_method_model->append());
 		row[model_.m_id] = TelemetrySettings::SmoothButterworth;
-		row[model_.m_name] = "Butterworth";
+		row[model_.m_name] = _("Butterworth");
 		row[model_.m_enable] = true;
 	}
 

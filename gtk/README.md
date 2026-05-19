@@ -19,15 +19,13 @@ User interface feature:
 - widget settings
 
 To fix:
-- reload map tile as user changes the widget size
 - sound player (issue on some device)
-- build map from viewport (and not whole map)
 
 To do:
-- append new widget
 - translate user application
 - redraw each icon (in real svg)
 - marker size for 'track' & 'map' widget
+- to be able to use user icons
 - arc & bar settings customization
 - add more widget shapes (ramp & curve)
 - add chart support
@@ -35,7 +33,7 @@ To do:
 - option to enable / disable sound
 - optimization & fix cpu usage
 - add progress bar, bufferization information...
-- add video timer
+- add video timer on the interface
 
 ## Data installation
 
