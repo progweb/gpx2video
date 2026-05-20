@@ -135,6 +135,8 @@ protected:
 
 	bool is_init_;
 
+	std::string assets_path_;
+
 	OIIO::ImageBuf *trackbuf_;
 
 	TelemetryData last_data_;

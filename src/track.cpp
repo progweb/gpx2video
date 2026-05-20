@@ -250,6 +250,8 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 
 	is_init_ = false;
 
+	assets_path_ = "";
+
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
 	trackbuf_ = NULL;
@@ -372,6 +374,9 @@ bool Track::preinit(void) {
 	is_init_ = false;
 
 	last_data_ = TelemetryData();
+
+	// Assets path
+	assets_path_ = app_.assets("marker");
 
 	// Check telemetry data
 	if (app_.settings().inputfile().empty()) {
@@ -1155,11 +1160,11 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 
 	// Draw picto
 	if (marker_size > 0) {
-		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
-		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
 	
 		if (data.hasValue(TelemetryData::DataFix))
-			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
 	}
 
 	// Save last position

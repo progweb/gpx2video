@@ -751,8 +751,8 @@ void Map::draw(void) {
 	OIIO::ImageBufAlgo::over(buf, *trackbuf_, buf);
 
 	// Draw markers
-	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), "./assets/marker/end.png", marker_size);
-	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), "./assets/marker/start.png", marker_size);
+	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), std::string(assets_path_ + "/end.png").c_str(), marker_size);
+	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), std::string(assets_path_ + "/start.png").c_str(), marker_size);
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -992,11 +992,11 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 	// Draw picto
 	if (marker_size > 0) {
-		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/end.png", marker_size);
-		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/start.png", marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
+		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
 	
 		if (data.hasValue(TelemetryData::DataFix))
-			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), "./assets/marker/position.png", marker_size);
+			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
 	}
 	
 	// Save last position
