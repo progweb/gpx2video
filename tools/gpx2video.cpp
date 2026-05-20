@@ -1083,6 +1083,8 @@ int main(int argc, char *argv[], char *envp[]) {
 			log_error("Don't forget to create assets link");
 			goto exit;
 		}
+
+		log_notice("Assets data found in: %s", GPXApplication::assets("").c_str());
 	}
 
 	// Process

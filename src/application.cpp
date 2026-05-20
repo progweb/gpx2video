@@ -172,25 +172,25 @@ std::string GPXApplication::assets(const std::string &path) {
 
 		exepath = std::filesystem::path(buff).parent_path();
 
-		// <builddir>/assets/<path>
+		// <builddir>/tools/assets/<path>
+		// <builddir>/gtk/assets/<path>
 		fullpath = exepath + assets;
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 
-		// <builddir>/../assets/<path>
-		fullpath = exepath + "/.." + assets;
+		// <builddir>/assets/<path>
+		exepath = std::filesystem::path(exepath).parent_path();
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 
-		// gpx2video: <sourcedir>/assets/<path>
+		// gpupx2video: <sourcedir>/assets/<path>
 		exepath = std::filesystem::path(exepath).parent_path();
 		fullpath = exepath + assets;
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 
 		// gpx2video-gtk <sourcedir>/assets/<path>
-		exepath = std::filesystem::path(exepath).parent_path();
-		fullpath = exepath + assets;
+		fullpath = exepath + "/gtk" + assets;
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 	}
