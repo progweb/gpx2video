@@ -322,13 +322,7 @@ void TextShape::xmlwrite(std::ostream &os) {
 
 	ShapeBase::xmlwrite(os);
 
-	os << "<shape>text</shape>" << std::endl;
-
-	os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
-
-//	os << "<text-ratio>" << theme().textRatio() << "</text-ratio>" << std::endl;
-//	os << "<text-shadow>" << theme().textShadow() << "</text-shadow>" << std::endl;
-//	os << "<text-linespace>" << theme().textLineSpace() << "</text-linespace>" << std::endl;
+	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeText) << "</shape>" << std::endl;
 
 	os << "<with-icon>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIcon)) << "</with-icon>" << std::endl;
 }

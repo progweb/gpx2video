@@ -26,15 +26,15 @@ void VerticalSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	if (widget_->unit() == VideoWidget::UnitMPS) {
+	if (widget_->valueUnit() == VideoWidget::UnitMPS) {
 	}
 	else {
 	}
 
 	if (!no_value_)
-		sprintf(s, "%.1f %s", verticalspeed, widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "%.1f %s", verticalspeed, widget_->unit2string(widget_->valueUnit()).c_str());
 	else
-		sprintf(s, "-- %s", widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -147,7 +147,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	if (widget_->unit() == VideoWidget::UnitMPS) {
+	if (widget_->valueUnit() == VideoWidget::UnitMPS) {
 	}
 	else {
 	}
@@ -232,7 +232,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			double xb = scale(amin, amax, value, rotate);
 
 			if (first || (value >= max))
-				sprintf(s, "%d %s", value, widget_->unit2string(widget_->unit()).c_str());
+				sprintf(s, "%d %s", value, widget_->unit2string(widget_->valueUnit()).c_str());
 			else
 				sprintf(s, "%d", value);
 
@@ -266,3 +266,20 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		label(cr, x, y, theme().labelColor(), widget_->label());
 	}
 }
+
+
+VerticalSpeedWidget::VerticalSpeedWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetVerticalSpeed) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeBar);
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+	setShape(VideoWidget::ShapeText);
+}
+

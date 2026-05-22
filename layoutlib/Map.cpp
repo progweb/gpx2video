@@ -47,10 +47,15 @@ namespace layout
     _margin_right(this, "margin-right", Node::ELEMENT, false),
     _margin_top(this, "margin-top", Node::ELEMENT, false),
     _margin_bottom(this, "margin-bottom", Node::ELEMENT, false),
+    _padding(this, "padding", Node::ELEMENT, false),
+    _padding_left(this, "padding-left", Node::ELEMENT, false),
+    _padding_right(this, "padding-right", Node::ELEMENT, false),
+    _padding_top(this, "padding-top", Node::ELEMENT, false),
+    _padding_bottom(this, "padding-bottom", Node::ELEMENT, false),
+
     _view(this, "view", Node::ELEMENT, false),
     _zoom(this, "zoom", Node::ELEMENT, false),
     _factor(this, "factor", Node::ELEMENT, false),
-    _marker(this, "marker", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
@@ -58,7 +63,10 @@ namespace layout
 	_path_border(this, "path-border", Node::ELEMENT, false),
 	_path_border_color(this, "path-border-color", Node::ELEMENT, false),
 	_path_primary_color(this, "path-primary-color", Node::ELEMENT, false),
-	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false)
+	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false),
+    _marker_size(this, "marker-size", Node::ELEMENT, false),
+	
+	_with_marker(this, "with-maker", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);
@@ -75,10 +83,15 @@ namespace layout
     getInterfaces().push_back(&_margin_right);
     getInterfaces().push_back(&_margin_top);
     getInterfaces().push_back(&_margin_bottom);
+    getInterfaces().push_back(&_padding);
+    getInterfaces().push_back(&_padding_left);
+    getInterfaces().push_back(&_padding_right);
+    getInterfaces().push_back(&_padding_top);
+    getInterfaces().push_back(&_padding_bottom);
+
     getInterfaces().push_back(&_view);
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_factor);
-    getInterfaces().push_back(&_marker);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
@@ -87,6 +100,9 @@ namespace layout
     getInterfaces().push_back(&_path_border_color);
     getInterfaces().push_back(&_path_primary_color);
     getInterfaces().push_back(&_path_secondary_color);
+    getInterfaces().push_back(&_marker_size);
+
+    getInterfaces().push_back(&_with_marker);
 
 	_display.setValue("true");
 
@@ -94,6 +110,11 @@ namespace layout
 	_margin_right.setValue("-1");
 	_margin_top.setValue("-1");
 	_margin_bottom.setValue("-1");
+
+	_padding_left.setValue("-1");
+	_padding_right.setValue("-1");
+	_padding_top.setValue("-1");
+	_padding_bottom.setValue("-1");
 
 	_zoom.setValue("12");
 	_factor.setValue("1.0");
@@ -103,6 +124,10 @@ namespace layout
 	_path_border_color.setValue("#000000ff");
 	_path_primary_color.setValue("#669df6ff");
 	_path_secondary_color.setValue("#ffffffff");
+
+	_marker_size.setValue("1.0");
+
+	_with_marker.setValue("true");
   }
 
   Map::~Map()

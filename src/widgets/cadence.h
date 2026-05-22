@@ -176,11 +176,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	CadenceWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetCadence) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	CadenceWidget(GPXApplication &app);
 };
 
 #endif

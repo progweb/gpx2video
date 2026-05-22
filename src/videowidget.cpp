@@ -404,6 +404,20 @@ std::string VideoWidget::bool2string(bool value) {
 }
 
 
+std::string VideoWidget::shape2string(VideoWidget::Shape shape) {
+	switch (shape) {
+	case VideoWidget::ShapeArc:
+		return "arc";
+	case VideoWidget::ShapeBar:
+		return "bar";
+	case VideoWidget::ShapeText:
+		return "text";
+	default:
+		return "";
+	}
+}	
+
+
 std::string VideoWidget::widget2string(VideoWidget::Widget type) {
 	switch (type) {
 	case VideoWidget::WidgetAverageSpeed:
@@ -575,18 +589,18 @@ std::string VideoWidget::needletype2string(Theme::NeedleType type) {
 }
 
 
-std::string VideoWidget::unit2string(VideoWidget::Unit unit, bool label) {
+std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 	switch (unit) {
 	case VideoWidget::UnitMPS:
-		return label ? "m/s" : "mps";
+		return "mps";
 	case VideoWidget::UnitMPH:
-		return label ? "m/h" : "mph";
+		return "mph";
 	case VideoWidget::UnitKPH:
-		return label ? "km/h" : "kph";
+		return "kph";
 	case VideoWidget::UnitMPM:
-		return label ? "min/mile" : "mpm";
+		return "mpm";
 	case VideoWidget::UnitMPK:
-		return label ? "min/km" : "mpk";
+		return "mpk";
 	case VideoWidget::UnitKm:
 		return "km";
 	case VideoWidget::UnitMeter:
@@ -596,13 +610,13 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit, bool label) {
 	case VideoWidget::UnitMiles:
 		return "miles";
 	case VideoWidget::UnitCelsius:
-		return label ? "°C" : "celsius";
+		return "celsius";
 	case VideoWidget::UnitFarenheit:
-		return label ? "F" : "farenheit";
+		return "farenheit";
 	case VideoWidget::UnitG:
 		return "g";
 	case VideoWidget::UnitMeterPS2:
-		return label ? "m/s²" : "mps2";
+		return "mps2";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:
@@ -718,6 +732,19 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 }
 
 
+std::string VideoWidget::getFriendlyName(VideoWidget::Shape shape) {
+	switch (shape) {
+	case VideoWidget::ShapeArc:
+		return _("Arc");
+	case VideoWidget::ShapeBar:
+		return _("Bar");
+	case VideoWidget::ShapeText:
+		return _("Text");
+	default:
+		return "";
+	}
+}
+
 std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 	switch (type) {
 	case VideoWidget::WidgetAverageSpeed:
@@ -772,6 +799,42 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 		return _("Track");
 	case VideoWidget::WidgetVerticalSpeed:
 		return _("Vertical speed");
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::getFriendlyName(VideoWidget::Unit unit) {
+	switch (unit) {
+	case VideoWidget::UnitMPS:
+		return "m/s";
+	case VideoWidget::UnitMPH:
+		return "m/h";
+	case VideoWidget::UnitKPH:
+		return "km/h";
+	case VideoWidget::UnitMPM:
+		return "min/mile";
+	case VideoWidget::UnitMPK:
+		return "min/km";
+	case VideoWidget::UnitKm:
+		return "km";
+	case VideoWidget::UnitMeter:
+		return "m";
+	case VideoWidget::UnitFoot:
+		return "ft";
+	case VideoWidget::UnitMiles:
+		return "miles";
+	case VideoWidget::UnitCelsius:
+		return "°C";
+	case VideoWidget::UnitFarenheit:
+		return "F";
+	case VideoWidget::UnitG:
+		return "g";
+	case VideoWidget::UnitMeterPS2:
+		return "m/s²";
+	case VideoWidget::UnitNone:
+	case VideoWidget::UnitUnknown:
 	default:
 		return "";
 	}

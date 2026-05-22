@@ -65,3 +65,18 @@ void BatteryLevelTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 }
 
+
+BatteryLevelWidget::BatteryLevelWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetBatteryLevel) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+	setShape(VideoWidget::ShapeText);
+}
+

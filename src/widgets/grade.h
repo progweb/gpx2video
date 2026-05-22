@@ -173,11 +173,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	GradeWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetGrade) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	GradeWidget(GPXApplication &app);
 };
 
 #endif

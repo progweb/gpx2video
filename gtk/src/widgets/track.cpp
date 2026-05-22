@@ -1,3 +1,5 @@
+#include <glibmm/i18n.h>
+
 #include "../log_i.h"
 #include "../../src/track.h"
 #include "track.h"
@@ -5,8 +7,7 @@
 
 GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, GPX2VideoWidget *widget) 
-	: GPX2VideoWidgetBaseSettingsBox(cobject, ref_builder, "GPX2VideoTrackWidgetSettingsBox", resource_file) 
-	, widget_(widget) {
+	: GPX2VideoWidgetBaseSettingsBox(cobject, ref_builder, "GPX2VideoTrackWidgetSettingsBox", resource_file, widget) { 
 	log_call();
 
 	// Populate models
@@ -18,17 +19,17 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 		auto iter = view_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = TrackSettings::ViewDefault;
-		row[model_.m_name] = "Default";
+		row[model_.m_name] = _("Default");
 		row[model_.m_enable] = true;
 
 		row = *(view_model_->append());
 		row[model_.m_id] = TrackSettings::ViewLockCenter;
-		row[model_.m_name] = "Center";
+		row[model_.m_name] = _("Center");
 		row[model_.m_enable] = true;
 
 		row = *(view_model_->append());
 		row[model_.m_id] = TrackSettings::ViewZoomFit;
-		row[model_.m_name] = "Zoom fit";
+		row[model_.m_name] = _("Zoom fit");
 		row[model_.m_enable] = true;
 	}
 
@@ -44,6 +45,7 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 	log_call();
 
+	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -186,6 +188,43 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 						widget_->dispatchEvent(true);
 					}
 			));
+
+	// Marker enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("marker_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"marker_enable_switch\" object in " + resource_file_);
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: marker status changed to '%s'",
+							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						if (state)
+							widget_->widget()->theme().addFlag(VideoWidget::Theme::FlagIcon);
+						else
+							widget_->widget()->theme().removeFlag(VideoWidget::Theme::FlagIcon);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(false);
+					} 
+			), false);
+
+	// Marker size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("marker_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: factor changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Track *) widget_->widget())->settings().setMarkerSize(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(false);
+					}
+			));
 }
 
 
@@ -196,6 +235,7 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 
 	const float *color;
 
+	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -269,8 +309,21 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Unmask value changed
+	// Marker enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("marker_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"marker_enable_switch\" object in " + resource_file_);
 
+	sw->set_active(widget_->widget()->theme().hasFlag(VideoWidget::Theme::FlagIcon));
+
+	// Marker size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("marker_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(((Track *) widget_->widget())->settings().markerSize());
+
+	// Unmask value changed
 	loading_ = false;
 }
 

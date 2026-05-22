@@ -110,6 +110,12 @@ public:
 		ZoomUnknown
 	};
 
+	struct ListItem {
+		int id;
+		std::string name;
+		std::string fmt;
+	};
+
 	virtual ~VideoWidget() {
 	}
 
@@ -780,17 +786,20 @@ public:
 		return theme_;
 	}
 
+	virtual const std::list<ListItem>& shapes(void) const {
+		return shapes_supported_;
+	}
+
 	virtual void setShape(Shape shape) {
 		shape_ = shape;
 	}
 
-	virtual bool isShapeSupported(Shape type) {
-		switch (type) {
-		case VideoWidget::ShapeText:
-			return true;
-		default:
-			return false;
-		}
+	const uint64_t& timestamp(void) const {
+		return timestamp_;
+	}
+
+	void setTimestamp(uint64_t timestmap) {
+		timestamp_  = timestmap;
 	}
 
 	uint64_t& atBeginTime(void) {
@@ -828,14 +837,6 @@ public:
 		orientation_ = orientation;
 	}
 
-	Unit& unit(void) {
-		return unit_;
-	}
-
-	virtual void setUnit(Unit unit) {
-		unit_ = unit;
-	}
-
 	Zoom& zoom(void) {
 		return zoom_;
 	}
@@ -844,12 +845,28 @@ public:
 		zoom_ = zoom;
 	}
 
-	const std::string& format(void) {
-		return format_;
+	virtual const std::list<ListItem>& units(void) const {
+		return units_supported_;
 	}
 
-	virtual void setFormat(std::string format) {
-		format_ = format;
+	Unit& valueUnit(void) {
+		return value_unit_;
+	}
+
+	virtual void setValueUnit(Unit unit) {
+		value_unit_ = unit;
+	}
+
+	virtual const std::list<ListItem>& formats(void) const {
+		return formats_supported_;
+	}
+
+	const std::string& valueFormat(void) {
+		return value_format_;
+	}
+
+	virtual void setValueFormat(std::string format) {
+		value_format_ = format;
 	}
 
 	const std::string& source(void) {
@@ -970,6 +987,7 @@ public:
 	static Zoom string2zoom(std::string &s);
 
 	static std::string bool2string(bool value);
+	static std::string shape2string(Shape type);
 	static std::string widget2string(Widget type);
 	static std::string position2string(Position position);
 	static std::string orientation2string(Orientation orientation);
@@ -977,10 +995,13 @@ public:
 	static std::string fontstyle2string(Theme::FontStyle style);
 	static std::string fontweight2string(Theme::FontWeight weight);
 	static std::string needletype2string(Theme::NeedleType type);
-	static std::string unit2string(Unit unit, bool label=true);
+	static std::string unit2string(Unit unit);
 
 	static std::string getIconFilename(Widget type);
+
+	static std::string getFriendlyName(Shape shape);
 	static std::string getFriendlyName(Widget type);
+	static std::string getFriendlyName(Unit unit);
 
 protected:
 	VideoWidget(GPXApplication &app, Widget type)  
@@ -988,13 +1009,9 @@ protected:
 		, app_(app) 
 		, at_begin_time_(0)
 		, at_end_time_(0)
-//		, label_px_(0)
-//   		, label_size_(0)
-//		, value_px_(0)
-//   		, value_size_(0)
-//		, value_offset_(0)
 		, name_(widget2string(type))
 		, type_(type) {
+		setTimestamp(0),
 		setShape(ShapeText),
 		setPosition(PositionNone);
 		setOrientation(OrientationNone);
@@ -1002,21 +1019,8 @@ protected:
 		setPosition(0, 0);
 		setMargin(MarginAll, 10);
 		setLabel(widget2string(type));
-		setUnit(VideoWidget::UnitNone);
+		setValueUnit(VideoWidget::UnitNone);
 	}
-
-//	void createBox(OIIO::ImageBuf **buf, int width, int height);
-//
-//	void drawBorder(OIIO::ImageBuf *buf);
-//	void drawBackground(OIIO::ImageBuf *buf);
-//	void drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, Zoom zoom);
-//	void drawText(OIIO::ImageBuf *buf, int x, int y, int pt, const char *label);
-//	void drawLabel(OIIO::ImageBuf *buf, const char *label);
-//	void drawValue(OIIO::ImageBuf *buf, const char *value);
-//
-//	bool textSize(std::string text, int fontsize, 
-//		int &x1, int &y1, int &x2, int &y2,
-//		int &width, int &height);
 
 	virtual void xmlopen(std::ostream &os);
 	virtual void xmlwrite(std::ostream &os);
@@ -1026,12 +1030,15 @@ protected:
 	Shape shape_;
 	Position position_;
 	Orientation orientation_;
-	Unit unit_;
 	Zoom zoom_;
-	std::string format_;
+	Unit value_unit_;
+	std::string value_format_;
 	std::string source_;
 
 	const int null_ = 0;
+
+	// Used only to store video timestamp for profiling
+	uint64_t timestamp_;
 
 	uint64_t at_begin_time_;
 	uint64_t at_end_time_;
@@ -1043,19 +1050,16 @@ protected:
 	int margin_left_;
 	int margin_right_;
 
-//	int label_px_;
-//	int label_size_;
-//	int value_px_;
-//	int value_size_;
-//	int value_offset_;
 	std::string text_;
 
 	std::string name_;
 	std::string label_;
 
-//	int flags_;
-
 	Theme theme_;
+
+	std::list<ListItem> shapes_supported_;
+	std::list<ListItem> units_supported_;
+	std::list<ListItem> formats_supported_;
 
 private:
 	Widget type_;

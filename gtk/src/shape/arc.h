@@ -10,8 +10,7 @@
 class GPX2VideoArcShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
 public:
 	GPX2VideoArcShapeSettingsBox()
-		: GPX2VideoShapeBaseSettingsBox("GPX2VideoArcShapeSettingsBox") 
-		, widget_(NULL) {
+		: GPX2VideoShapeBaseSettingsBox("GPX2VideoArcShapeSettingsBox") {
 	}
 
 	GPX2VideoArcShapeSettingsBox(BaseObjectType *cobject,
@@ -39,9 +38,6 @@ public:
 
 	void bind_content(void);
 	void update_content(void);
-
-protected:
-	GPX2VideoWidget *widget_;
 
 private:
 	Glib::RefPtr<Gtk::ListStore> needle_type_model_;

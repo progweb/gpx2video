@@ -8,8 +8,7 @@
 class GPX2VideoTextShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
 public:
 	GPX2VideoTextShapeSettingsBox()
-		: GPX2VideoShapeBaseSettingsBox("GPX2VideoTextShapeSettingsBox")
-		, widget_(NULL) {
+		: GPX2VideoShapeBaseSettingsBox("GPX2VideoTextShapeSettingsBox") {
 	}
 
 	GPX2VideoTextShapeSettingsBox(BaseObjectType *cobject,
@@ -36,9 +35,6 @@ public:
 	}
 
 	void update_content(void);
-
-protected:
-	GPX2VideoWidget *widget_;
 
 private:
 	Glib::RefPtr<Gtk::ListStore> tick_align_model_;

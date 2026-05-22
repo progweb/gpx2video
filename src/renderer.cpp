@@ -141,11 +141,11 @@ bool Renderer::loadMap(layout::Map *m) {
 	int x, y;
 	int width, height;
 
-	int marker_size;
-
 	std::string s;
 
 	unsigned int mapsource;
+
+	int flags = VideoWidget::Theme::FlagNone;
 
 	MapSettings::View view;
 
@@ -168,22 +168,6 @@ bool Renderer::loadMap(layout::Map *m) {
 		return false;
 	}
 
-//	// Open telemetry data file
-//	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
-//
-//	if (source == NULL) {
-//		log_warn("Can't read telemetry data, skip map widget");
-//		return false;
-//	}
-
-//	// Telemetry data limits
-//	source->setFrom(app_.settings().from());
-//	source->setTo(app_.settings().to());
-
-	// Media
-//	MediaContainer *container = app_.media();
-//	TODO FIX check no break....
-
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	// Default size
@@ -195,15 +179,6 @@ bool Renderer::loadMap(layout::Map *m) {
 	// Default position
 	x = (m->x() > 0) ? m->x() : video_stream->width() - width - m->margin();
 	y = (m->y() > 0) ? m->y() : video_stream->height() - height - m->margin();
-
-	// Default marker size (132x200)
-	// 2704x1520 => 40x60
-	//  432x240  =>  ?x?
-	marker_size = (m->marker() > 0) ? m->marker() : 60 * video_stream->height() / 1520.0;
-
-//	// Create map bounding box
-//	TelemetryData p1, p2;
-//	source->getBoundingBox(&p1, &p2);
 
 	// View
 	s = (const char *) m->view();
@@ -226,6 +201,10 @@ bool Renderer::loadMap(layout::Map *m) {
 	if (orientation == VideoWidget::OrientationUnknown)
 		log_error("Map orientation value '%s' unknown", s.c_str());
 
+	// Flags
+	if (m->withMarker())
+		flags |= VideoWidget::Theme::FlagIcon;
+
 	// Map settings
 	MapSettings mapSettings;
 	mapSettings.setSize(width, height);
@@ -233,13 +212,12 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setView((MapSettings::View) view);
 	mapSettings.setDivider(m->factor());
-	mapSettings.setMarkerSize(marker_size);
-//	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
 	mapSettings.setPathPrimaryColor((const char *) m->pathPrimaryColor());
 	mapSettings.setPathSecondaryColor((const char *) m->pathSecondaryColor());
+	mapSettings.setMarkerSize((double) m->markerSize());
 
 	Map *map = Map::create(app_, telemetrySettings(), mapSettings);
 
@@ -256,6 +234,14 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->setMargin(VideoWidget::MarginRight, m->marginRight());
 	map->setMargin(VideoWidget::MarginTop, m->marginTop());
 	map->setMargin(VideoWidget::MarginBottom, m->marginBottom());
+
+	// Widget theme
+	map->theme().setFlags(flags);
+	map->theme().setPadding(VideoWidget::Theme::PaddingAll, m->padding());
+	map->theme().setPadding(VideoWidget::Theme::PaddingLeft, m->paddingLeft());
+	map->theme().setPadding(VideoWidget::Theme::PaddingRight, m->paddingRight());
+	map->theme().setPadding(VideoWidget::Theme::PaddingTop, m->paddingTop());
+	map->theme().setPadding(VideoWidget::Theme::PaddingBottom, m->paddingBottom());
 	map->theme().setBorder(m->border());
 	map->theme().setBorderColor((const char *) m->borderColor());
 	map->theme().setBackgroundColor((const char *) m->backgroundColor());
@@ -275,6 +261,8 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	std::string s;
 
+	int flags = VideoWidget::Theme::FlagNone;
+
 	TrackSettings::View view;
 
 	VideoWidget::Position position = VideoWidget::PositionNone;
@@ -288,20 +276,6 @@ bool Renderer::loadTrack(layout::Track *t) {
 		return true;
 	}
 
-//	// Open telemetry data file
-//	TelemetrySource *source = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), true);
-//
-//	if (source == NULL)
-//		log_warn("Can't read telemetry data, track widget init delayed");
-
-//	// Telemetry data limits
-//	source->setFrom(app_.settings().from());
-//	source->setTo(app_.settings().to());
-
-	// Media
-//	TODO FIX check no break....
-//	MediaContainer *container = app_.media();
-
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
 	// Default size
@@ -313,11 +287,6 @@ bool Renderer::loadTrack(layout::Track *t) {
 	// Default position
 	x = (t->x() > 0) ? t->x() : video_stream->width() - width - t->margin();
 	y = (t->y() > 0) ? t->y() : video_stream->height() - height - t->margin();
-
-//	// Create map bounding box
-//	TelemetryData p1, p2;
-//	if (source != NULL)
-//		source->getBoundingBox(&p1, &p2);
 
 	// View
 	s = (const char *) t->view();
@@ -340,10 +309,13 @@ bool Renderer::loadTrack(layout::Track *t) {
 	if (orientation == VideoWidget::OrientationUnknown)
 		log_error("Track orientation value '%s' unknown", s.c_str());
 
+	// Flags
+	if (t->withMarker())
+		flags |= VideoWidget::Theme::FlagIcon;
+
 	// Track settings
 	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
-//	trackSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	trackSettings.setView((MapSettings::View) view);
 	trackSettings.setDivider(t->factor());
 	trackSettings.setPathThick((double) t->pathThick());
@@ -352,6 +324,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathBorderColor((const char *) t->pathBorderColor());
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
+	trackSettings.setMarkerSize((double) t->markerSize());
 
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 
@@ -368,6 +341,14 @@ bool Renderer::loadTrack(layout::Track *t) {
 	track->setMargin(VideoWidget::MarginRight, t->marginRight());
 	track->setMargin(VideoWidget::MarginTop, t->marginTop());
 	track->setMargin(VideoWidget::MarginBottom, t->marginBottom());
+
+	// Widget theme
+	track->theme().setFlags(flags);
+	track->theme().setPadding(VideoWidget::Theme::PaddingAll, t->padding());
+	track->theme().setPadding(VideoWidget::Theme::PaddingLeft, t->paddingLeft());
+	track->theme().setPadding(VideoWidget::Theme::PaddingRight, t->paddingRight());
+	track->theme().setPadding(VideoWidget::Theme::PaddingTop, t->paddingTop());
+	track->theme().setPadding(VideoWidget::Theme::PaddingBottom, t->paddingBottom());
 	track->theme().setBorder(t->border());
 	track->theme().setBorderColor((const char *) t->borderColor());
 	track->theme().setBackgroundColor((const char *) t->backgroundColor());
@@ -385,6 +366,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	std::string s;
 
 	VideoWidget *widget = NULL;
+
+	std::string format;
 
 	int flags = VideoWidget::Theme::FlagNone;
 
@@ -452,13 +435,16 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	}
 
 	// Unit
-	s = (const char *) w->unit();
+	s = (const char *) w->valueUnit();
 	unit = VideoWidget::string2unit(s);
 
 	if (unit == VideoWidget::UnitUnknown) {
 		log_error("Widget loading error, unit value '%s' unknown", s.c_str());
 		goto error;
 	}
+
+	// Format
+	format = (const char *) w->valueFormat();
 
 	// Zoom
 	s = (const char *) w->zoom();
@@ -559,19 +545,35 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	if ((widget = this->create(type)) == NULL)
 		goto skip;
 
+	// Use default values if undefined
+	if (unit == VideoWidget::UnitNone)
+		unit = widget->valueUnit();
+	if (format == "")
+		format = widget->valueFormat();
+
 	// Widget common settings
 	widget->setShape(shape);
 	widget->setPosition(position);
 	widget->setOrientation(orientation);
 	widget->setPosition(w->x(), w->y());
 	widget->setAtTime(w->at(), w->at() + w->duration());
-	widget->setFormat((const char *) w->format());
 	widget->setSize(w->width(), w->height());
 	widget->setMargin(VideoWidget::MarginAll, w->margin());
 	widget->setMargin(VideoWidget::MarginLeft, w->marginLeft());
 	widget->setMargin(VideoWidget::MarginRight, w->marginRight());
 	widget->setMargin(VideoWidget::MarginTop, w->marginTop());
 	widget->setMargin(VideoWidget::MarginBottom, w->marginBottom());
+	
+	// Widget misc. settings
+	widget->setLabel((const char *) w->name());
+	widget->setText((const char *) w->text());
+	widget->setValueUnit(unit);
+	widget->setValueFormat(format);
+	widget->setZoom(zoom);
+	widget->setSource((const char *) w->source());
+
+	// Widget theme
+	widget->theme().setFlags(flags);
 	widget->theme().setPadding(VideoWidget::Theme::PaddingAll, w->padding());
 	widget->theme().setPadding(VideoWidget::Theme::PaddingLeft, w->paddingLeft());
 	widget->theme().setPadding(VideoWidget::Theme::PaddingRight, w->paddingRight());
@@ -582,8 +584,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
 
 	widget->theme().setFont((const char *) w->font());
-	widget->setLabel((const char *) w->name());
-	widget->setText((const char *) w->text());
 
 	// Widget label settings
 	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());
@@ -613,16 +613,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setNeedleType(needle_type);
 	widget->theme().setNeedlePrimaryColor((const char *) w->needlePrimaryColor());
 	widget->theme().setNeedleSecondaryColor((const char *) w->needleSecondaryColor());
-
-	// Widget misc. settings
-//	widget->theme().setTextShadow(w->textShadow());
-//	widget->theme().setTextRatio((double) w->textRatio());
-//	widget->theme().setTextLineSpace(w->textLineSpace());
-	if (unit != VideoWidget::UnitNone)
-		widget->setUnit(unit);
-	widget->setZoom(zoom);
-	widget->setSource((const char *) w->source());
-	widget->theme().setFlags(flags);
 
 skip:
 	return true;

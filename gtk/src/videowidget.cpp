@@ -85,7 +85,8 @@ void GPX2VideoWidget::Buffer::setData(int index, uint8_t *data) {
 
 GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget) 
 	: widget_(widget)
-	, mutex_() {
+	, mutex_()
+	, queue_mutex_() {
 	log_call();
 
 	is_update_ = false;
@@ -211,10 +212,13 @@ void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 
 	GPX2VideoWidget::BufferPtr next;
 
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	// Save current timestamp
 	timestamp_ = timestamp;
+
+	// Update widget for profiling
+	widget_->setTimestamp(timestamp);
 
 	// Drop old buffers
 	while (queue_.size() > 1) {
@@ -253,6 +257,9 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 #ifdef WIDGET_DEBUG
 printf("WIDGET::DRAW %s\n", widget()->name().c_str());
 #endif
+
+	// Lock
+	std::lock_guard<std::mutex> lock(mutex_);
 
 //	widget_->dump();
 
@@ -298,7 +305,7 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 				reinterpret_cast<char*>(buffer->data()));
 
 		// Save buffer
-		std::lock_guard<std::mutex> lock(mutex_);
+		std::lock_guard<std::mutex> lock(queue_mutex_);
 
 		queue_.push_back(buffer);
 
@@ -307,6 +314,8 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 	}
 	else {
 		// Update buffer timestamp
+		std::lock_guard<std::mutex> lock(queue_mutex_);
+
 		buffer = queue_.back();
 		buffer->setTimestamp(data.timestamp());
 		queue_.back() = buffer;
@@ -508,11 +517,11 @@ void GPX2VideoWidget::clear_buffers(void) {
 printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
 #endif
 
-	is_update_ = false;
-
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	log_info("Clear widget '%s' cache", widget()->name().c_str());
+
+	is_update_ = false;
 
 	// Drop buffers
 	while (!queue_.empty())
@@ -549,7 +558,7 @@ printf("WIDGET::LOAD TEXTURE %s - updated: %s\n",
 
 	GPX2VideoWidget::BufferPtr buffer;
 
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	// 
 //	int nchannels = 4;
@@ -660,7 +669,7 @@ printf("WIDGET::LOADING TEXTURE...\n");
 void GPX2VideoWidget::unload_texture(void) {
 	log_call();
 
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	if (texture_)
 		glDeleteTextures(1, &texture_);
@@ -727,7 +736,7 @@ double GPX2VideoWidget::glHeight(void) const {
 GPX2VideoWidget::BufferPtr GPX2VideoWidget::get_last_buffer(void) {
 	log_call();
 
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	if (!queue_.empty())
 		return queue_.back();
@@ -747,7 +756,7 @@ void GPX2VideoWidget::render(GPX2VideoShader *shader) {
 printf("WIDGET::RENDER %s\n", widget()->name().c_str());
 #endif
 
-	std::lock_guard<std::mutex> lock(mutex_);
+	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	if (!texture_) {
 		log_warn("Widget %s can't rendered, no texture", widget()->name().c_str());

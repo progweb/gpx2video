@@ -171,18 +171,12 @@ protected:
 		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
-
-//		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	PowerWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetPower) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	PowerWidget(GPXApplication &app);
 };
 
 #endif

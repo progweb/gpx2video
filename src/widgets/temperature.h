@@ -134,7 +134,7 @@ public:
 
 		widget = new TemperatureWidget(app);
 
-		widget->setUnit(VideoWidget::UnitCelsius);
+		widget->setValueUnit(VideoWidget::UnitCelsius);
 
 		return widget;
 	}
@@ -174,17 +174,14 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	TemperatureWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetTemperature) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	TemperatureWidget(GPXApplication &app);
 };
 
 #endif

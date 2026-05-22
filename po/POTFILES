@@ -22,4 +22,6 @@
 ../gtk/src/telemetryframe.cpp
 ../gtk/src/widgetframe.cpp
 ../gtk/src/window.cpp
+../gtk/src/widgets/map.cpp
+../gtk/src/widgets/track.cpp
 

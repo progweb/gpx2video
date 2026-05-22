@@ -1,25 +1,32 @@
 #ifndef __GPX2VIDEO__WIDGETS__GPX_H__
 #define __GPX2VIDEO__WIDGETS__GPX_H__
 
-#include "../shape/text.h"
+#include "../oiio.h"
+#include "../shape/base.h"
 
 
 /**
- * GPX text & icon shape widget
+ * Widget definition
  */
 
-class GPXTextShape : public TextShape {
+class GPXWidget : public VideoWidget, public ShapeBase {
 public:
-	virtual ~GPXTextShape() {
-		clear();
+	virtual ~GPXWidget() {
 	}
 
-	static GPXTextShape * create(VideoWidget *widget) {
-		GPXTextShape *shape;
+	static GPXWidget * create(GPXApplication &app) {
+		GPXWidget *widget;
 
-		shape = new GPXTextShape(widget);
-		
-		return shape;
+		widget = new GPXWidget(app);
+
+		return widget;
+	}
+
+	void setPadding(int left, int right, int top, int bottom) {
+		padding_left_ = left;
+		padding_right_ = right;
+		padding_top_ = top;
+		padding_bottom_ = bottom;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -42,16 +49,16 @@ skip:
 		cairo_t *cairo;
 
 		// Refresh dynamic info
-		if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
-			is_update = true;
-			goto skip;
+		if (fg_buf_ != NULL) {
+			if (data.type() == TelemetryData::TypeUnchanged) {
+				is_update = false;
+				goto skip;
+			}
 		}
 
 		// Refresh dynamic info
 		if (fg_buf_ != NULL)
 			delete fg_buf_;
-
-		this->createBox(&fg_buf_, theme().width(), theme().height());
 
 		// Image buffer
 		this->createBox(&fg_buf_, theme().width(), theme().height());
@@ -88,82 +95,20 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	VideoWidget *widget_;
+	int padding_left_;
+	int padding_right_;
+	int padding_top_;
+	int padding_bottom_;
 
-	GPXTextShape(VideoWidget *widget) 
-		: TextShape(widget->theme())
-		, bg_buf_(NULL)
-		, fg_buf_(NULL) 
-		, widget_(widget) {
-	}
+	GPXWidget(GPXApplication &app);
 
 	void initialize(void);
 	void draw(cairo_t *cr, const TelemetryData &data);
-};
 
-
-/**
- * Widget definition
- */
-
-class GPXWidget : public VideoWidget {
-public:
-	virtual ~GPXWidget() {
-		delete shape_;
-	}
-
-	static GPXWidget * create(GPXApplication &app) {
-		GPXWidget *widget;
-
-		widget = new GPXWidget(app);
-
-		return widget;
-	}
-
-	void setShape(VideoWidget::Shape type) {
-		if (shape_)
-			delete shape_;
-
-		switch (type) {
-		case VideoWidget::ShapeText:
-			shape_ = GPXTextShape::create(this);
-			break;
-
-		default:
-			// TODO raise exception
-			break;
-		}
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		return shape_->prepare(is_update);
-	}
-
-	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-		return shape_->render(data, is_update);
-	}
-
-	void clear(void) {
-		shape_->clear();
-	}
-
-protected:
-	void xmlwrite(std::ostream &os) {
-		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
-
-		shape_->xmlwrite(os);
-	}
-
-private:
-	ShapeBase *shape_;
-
-	GPXWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetGPX)
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	int label(cairo_t *cr, ShapeBase::Font &font, 
+			const float *fill, const float *outline, const char *text);
+	int value(cairo_t *cr, int y, ShapeBase::Font &font, 
+			const float *fill, const float *outline, const char *text);
 };
 
 #endif

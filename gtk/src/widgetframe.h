@@ -68,6 +68,8 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> text_align_model_;
 	Glib::RefPtr<Gtk::ListStore> label_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_font_weight_model_;
+	Glib::RefPtr<Gtk::ListStore> value_format_model_;
+	Glib::RefPtr<Gtk::ListStore> value_unit_model_;
 
 	Glib::RefPtr<Gtk::ListStore> duplicate_liststore(const Glib::RefPtr<Gtk::ListStore> &source, class Model &columns);
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);

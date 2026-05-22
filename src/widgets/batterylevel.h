@@ -176,11 +176,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	BatteryLevelWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetBatteryLevel) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	BatteryLevelWidget(GPXApplication &app);
 };
 
 #endif

@@ -323,7 +323,7 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 		<name>VITESSE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<unit>kph</unit>
+		<value-unit>kph</value-unit>
 	</widget>		
 	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical">
 		<type>elevation</type>
@@ -331,14 +331,14 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 		<name>ALTITUDE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<unit>m</unit>
+		<value-unit>m</value-unit>
 	</widget>
 	<widget x="250" y="450" width="600" height="120" position="right" orientation="vertical">
 		<type>date</type>
 		<name>DATE</name>
 		<margin>20</margin>
 		<padding>5</padding>
-		<format>%d-%m-%Y</format>
+		<value-format>%d-%m-%Y</value-format>
 	</widget>
 	<widget x="250" y="450" width="600" height="120" position="left" orientation="vertical" display="false">
 		<type>heartrate</type>
@@ -485,11 +485,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>speed</type>
-	<unit>kph</unit>
+	<value-unit>kph</value-unit>
 </widget>		
 ```
 
-**unit** values are: mph, kph, mpm / minmile, mpk / minkm.
+**value-unit** values are: mph, kph, mpm / minmile, mpk / minkm.
 
 
 ##### vertical speed widget
@@ -497,11 +497,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>verticalspeed</type>
-	<unit>mps</unit>
+	<value-unit>mps</value-unit>
 </widget>		
 ```
 
-**unit** values are: mps.
+**value-unit** values are: mps.
 
 
 ##### distance widget
@@ -509,11 +509,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>distance</type>
-	<unit>km</unit>
+	<value-unit>km</value-unit>
 </widget>		
 ```
 
-**unit** values are: m, km, ft or miles.
+**value-unit** values are: m, km, ft or miles.
 
 
 ##### elevation widget
@@ -521,11 +521,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>elevation</type>
-	<unit>m</unit>
+	<value-unit>m</value-unit>
 </widget>		
 ```
 
-**unit** values are: m or ft.
+**value-unit** values are: m or ft.
 
 
 ##### date widget
@@ -533,7 +533,7 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>date</type>
-	<format>%Y-%m-%d</format>
+	<value-format>%Y-%m-%d</value-format>
 </widget>		
 ```
 
@@ -543,11 +543,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>temperature</type>
-	<unit>C</unit>
+	<value-unit>C</value-unit>
 </widget>		
 ```
 
-**unit** values are: C, celsius or F, fahrenheit.
+**value-unit** values are: C, celsius or F, fahrenheit.
 
 
 ##### g-force widget
@@ -555,11 +555,11 @@ You can specify units for some widgets.
 ```xml
 <widget>
 	<type>gforce</type>
-	<unit>g</unit>
+	<value-unit>g</value-unit>
 </widget>		
 ```
 
-**unit** values are: g or mps2.
+**value-unit** values are: g or mps2.
 
 
 ##### lap widget

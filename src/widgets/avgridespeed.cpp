@@ -27,7 +27,7 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataAverageRideSpeed);
 
-	switch (widget_->unit()) {
+	switch (widget_->valueUnit()) {
 	case VideoWidget::UnitMPH:
 		speed *= 0.6213711922;
 		break;
@@ -50,16 +50,16 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	if (no_value_)
-		sprintf(s, "-- %s", widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
 	else if (pace_unit) {
 		double pace = 60.0 / speed;
 		int min = (int) pace;
 		int sec = (int) round((pace - min) * 60) % 60;
 
-		sprintf(s, "%d:%02d %s", min, sec, widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "%d:%02d %s", min, sec, widget_->unit2string(widget_->valueUnit()).c_str());
 	} 
 	else
-		sprintf(s, "%.1f %s", speed, widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "%.1f %s", speed, widget_->unit2string(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -95,5 +95,30 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+}
+
+
+AvgRideSpeedWidget::AvgRideSpeedWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetAverageRideSpeed) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(VideoWidget::UnitMPH);
+	ADD_UNIT(VideoWidget::UnitKPH);
+	ADD_UNIT(VideoWidget::UnitMPM);
+	ADD_UNIT(VideoWidget::UnitMPK);
+
+	setShape(VideoWidget::ShapeText);
 }
 

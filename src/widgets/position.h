@@ -176,11 +176,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	PositionWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetPosition)
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	PositionWidget(GPXApplication &app);
 };
 
 #endif

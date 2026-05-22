@@ -179,11 +179,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	HeadingWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetHeading) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	HeadingWidget(GPXApplication &app);
 };
 
 #endif

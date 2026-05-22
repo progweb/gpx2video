@@ -134,7 +134,7 @@ public:
 
 		widget = new AvgRideSpeedWidget(app);
 
-		widget->setUnit(VideoWidget::UnitMPH);
+		widget->setValueUnit(VideoWidget::UnitMPH);
 
 		return widget;
 	}
@@ -174,17 +174,14 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	AvgRideSpeedWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetAverageRideSpeed) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	AvgRideSpeedWidget(GPXApplication &app);
 };
 
 #endif

@@ -33,8 +33,8 @@ public:
 	const double& divider(void) const;
 	void setDivider(const double &divier);
 
-	const int& markerSize(void) const;
-	void setMarkerSize(const int &size);
+	const double& markerSize(void) const;
+	void setMarkerSize(const double &size);
 
 	const double& pathThick(void) const;
 	void setPathThick(const double &thick);
@@ -67,7 +67,7 @@ protected:
 
 	double divider_;
 
-	int marker_size_;
+	double marker_size_;
 
 	double path_thick_;
 	double path_border_;

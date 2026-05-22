@@ -31,13 +31,13 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataAcceleration);
 
-	if (widget_->unit() == VideoWidget::UnitG)
+	if (widget_->valueUnit() == VideoWidget::UnitG)
 		gforce /= 9.81;
 
 	if (!no_value_)
-		sprintf(s, "%.2f %s", gforce, widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "%.2f %s", gforce, widget_->unit2string(widget_->valueUnit()).c_str());
 	else
-		sprintf(s, "-- %s", widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -73,5 +73,28 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+}
+
+
+GForceWidget::GForceWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetGForce) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(VideoWidget::UnitMeterPS2);
+	ADD_UNIT(VideoWidget::UnitG);
+	
+	setShape(VideoWidget::ShapeText);
 }
 

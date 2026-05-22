@@ -65,3 +65,18 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 }
 
+
+CadenceWidget::CadenceWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetCadence) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+	setShape(VideoWidget::ShapeText);
+}
+

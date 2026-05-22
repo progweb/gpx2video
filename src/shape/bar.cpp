@@ -143,7 +143,7 @@ void BarShape::xmlwrite(std::ostream &os) {
 
 	ShapeBase::xmlwrite(os);
 
-	os << "<shape>bar</shape>" << std::endl;
+	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeBar) << "</shape>" << std::endl;
 
 	os << "<value-background-color>" << theme_.color2hex(theme_.valueBackgroundColor()) << "</value-background-color>" << std::endl;
 

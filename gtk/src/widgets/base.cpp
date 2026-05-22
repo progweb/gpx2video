@@ -26,6 +26,10 @@ void GPX2VideoWidgetBaseSettingsBox::on_widget_spin_int_changed(Gtk::SpinButton 
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Read value
 	value = button->get_value_as_int();
 
 	// Set value
@@ -41,6 +45,10 @@ void GPX2VideoWidgetBaseSettingsBox::on_widget_spin_double_changed(Gtk::SpinButt
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Read value
 	value = button->get_value();
 
 	// Set value
@@ -58,6 +66,10 @@ void GPX2VideoWidgetBaseSettingsBox::on_widget_color_changed(Gtk::ColorButton *b
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Read color
 	rgba = button->get_rgba();
 
 	// Convert to hexa string color
@@ -79,6 +91,9 @@ void GPX2VideoWidgetBaseSettingsBox::on_widget_combobox_changed(Gtk::ComboBox *c
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
 	// Set combobox
 	set(combobox->get_active());
 }
@@ -89,6 +104,9 @@ bool GPX2VideoWidgetBaseSettingsBox::on_widget_switch_changed(bool state, Gtk::S
 
 	if (loading_)
 		return false;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
 
 	// Text enable
 	sw->set_state(state);

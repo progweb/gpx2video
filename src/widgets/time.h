@@ -279,16 +279,6 @@ public:
 		}
 	}
 
-	bool isShapeSupported(VideoWidget::Shape type) {
-		switch (type) {
-		case VideoWidget::ShapeArc:
-		case VideoWidget::ShapeText:
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		return shape_->prepare(is_update);
 	}
@@ -313,11 +303,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	TimeWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetTime) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	TimeWidget(GPXApplication &app);
 };
 
 #endif

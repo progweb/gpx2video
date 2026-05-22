@@ -107,25 +107,11 @@ namespace layout
     String &orientation() { return _orientation; }
 
     ///
-    /// Get unit
-    ///
-    /// @return the unit element
-    ///
-    String &unit() { return _unit; }
-
-    ///
     /// Get zoom
     ///
     /// @return the zoom element
     ///
     String &zoom() { return _zoom; }
-
-    ///
-    /// Get format
-    ///
-    /// @return the format element
-    ///
-    String &format() { return _format; }
 
     ///
     /// Get source
@@ -400,6 +386,34 @@ namespace layout
     ///
     String &valueBorderColor() { return _value_bordercolor; }
 
+    ///
+    /// Get min
+    ///
+    /// @return the min element
+    ///
+    Decimal &valueMin() { return _value_min; }
+
+    ///
+    /// Get max
+    ///
+    /// @return the max element
+    ///
+    Decimal &valueMax() { return _value_max; }
+
+    ///
+    /// Get unit
+    ///
+    /// @return the unit element
+    ///
+    String &valueUnit() { return _value_unit; }
+
+    ///
+    /// Get format
+    ///
+    /// @return the format element
+    ///
+    String &valueFormat() { return _value_format; }
+
 	///
 	/// Get needle type
 	/// @return the needle type element
@@ -548,14 +562,16 @@ namespace layout
 	Decimal      _value_shadowdistance;
 	Decimal      _value_borderwidth;
 	String       _value_bordercolor;
+    Decimal      _value_min;
+    Decimal      _value_max;
+    String       _value_unit;
+    String       _value_format;
 
 	String       _needle_type;
 	String       _needle_primary_color;
 	String       _needle_secondary_color;
 
-    String       _unit;
     String       _zoom;
-    String       _format;
 	String       _source;
 	Unsigned     _nbr_lap;
 

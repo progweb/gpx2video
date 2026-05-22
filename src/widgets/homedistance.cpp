@@ -26,12 +26,12 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataHomeDistance);
 
-	if (widget_->unit() == VideoWidget::UnitKm) {
+	if (widget_->valueUnit() == VideoWidget::UnitKm) {
 		homedistance /= 1000.0;
 	}
-	else if (widget_->unit() == VideoWidget::UnitMeter) {
+	else if (widget_->valueUnit() == VideoWidget::UnitMeter) {
 	}
-	else if (widget_->unit() == VideoWidget::UnitFoot) {
+	else if (widget_->valueUnit() == VideoWidget::UnitFoot) {
 		homedistance *= 3.28084;
 	}
 	else {
@@ -49,10 +49,10 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		else
 			format = "%.0f %s";
 
-		sprintf(s, format, homedistance, widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, format, homedistance, widget_->unit2string(widget_->valueUnit()).c_str());
 	}
 	else
-		sprintf(s, "-- %s", widget_->unit2string(widget_->unit()).c_str());
+		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -88,5 +88,30 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+}
+
+
+HomeDistanceWidget::HomeDistanceWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetHomeDistance)
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(VideoWidget::UnitMiles);
+	ADD_UNIT(VideoWidget::UnitKm);
+	ADD_UNIT(VideoWidget::UnitMeter);
+	ADD_UNIT(VideoWidget::UnitFoot);
+
+	setShape(VideoWidget::ShapeText);
 }
 

@@ -195,13 +195,13 @@ std::string GPXApplication::assets(const std::string &path) {
 			return fullpath;
 	}
 
-	// /usr/share/gpx2video/<path>
-	fullpath = "/usr/share/gpx2video/" + path;
+	// $HOME/.local/share/gpx2video/<path>
+	fullpath = std::getenv("HOME") + std::string("/.gpx2video/" + path);
 	if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 		return fullpath;
 
-	// $HOME/.local/share/gpx2video/<path>
-	fullpath = std::getenv("HOME") + std::string("/.gpx2video/" + path);
+	// /usr/share/gpx2video/<path>
+	fullpath = "/usr/share/gpx2video/" + path;
 	if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 		return fullpath;
 

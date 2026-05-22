@@ -134,7 +134,7 @@ public:
 
 		widget = new DistanceWidget(app);
 
-		widget->setUnit(VideoWidget::UnitMiles);
+		widget->setValueUnit(VideoWidget::UnitMiles);
 
 		return widget;
 	}
@@ -174,17 +174,14 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	DistanceWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetDistance)
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	DistanceWidget(GPXApplication &app);
 };
 
 #endif

@@ -45,62 +45,9 @@ public:
 		is_update = true;
 skip:
 		return bg_buf_;
-//		int x, y;
-//
-//		int px;
-//		int x1, y1, x2, y2;
-//		int text_width, text_height;
-//
-//		int border = theme().border();
-////		int padding_x = theme().padding(VideoWidget::Theme::PaddingLeft);
-//		int padding_yt = theme().padding(VideoWidget::Theme::PaddingTop);
-//		int padding_yb = theme().padding(VideoWidget::Theme::PaddingBottom);
-//
-//		if (bg_buf_ != NULL)
-//			goto skip;
-//
-//		// Compute font size (1 pt = 1.333 px)
-//		// +-------------
-//		// |  Text    px
-//		// +-------------
-//		//        h = px + padding_top + padding_bottom
-//		px = theme().height() - 2 * border - padding_yt - padding_yb;
-//		// pt = 3 * px / 4;
-//
-//		// Create overlay buffer
-//		this->createBox(&bg_buf_, theme().width(), theme().height());
-//		this->drawBorder(bg_buf_);
-//		this->drawBackground(bg_buf_);
-//
-//		this->textSize(this->text().c_str(), px,
-//				x1, y1, x2, y2,
-//				text_width, text_height);
-//
-//		// Text offset
-//		x = -x1;
-//		y = 0; //-y1;
-//
-//		// Text position
-//		x += border + (theme().width() - text_width) / 2;
-//		y += border + (theme().height() - text_height) / 2;
-//
-//		this->drawText(bg_buf_, x, y, px, this->text().c_str());
-//
-//		is_update = true;
-//skip:
-//		return bg_buf_;
-//
-//		is_update = false;
-//
-//		return NULL;
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
-//		(void) data;
-//
-//		is_update = false;
-//
-//		return NULL;
 		cairo_t *cairo;
 
 		if (fg_buf_ != NULL) {
@@ -163,13 +110,7 @@ private:
 	int padding_top_;
 	int padding_bottom_;
 
-	TextWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetText) 
-		, ShapeBase(theme())
-		, bg_buf_(NULL)
-		, fg_buf_(NULL) {
-	}
-
+	TextWidget(GPXApplication &app);
 
 	void initialize(void);
 	void draw(cairo_t *cr, const TelemetryData &data);

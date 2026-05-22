@@ -32,7 +32,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Indeed, with garmin devices, gpx time has an offset.
 	localtime_r(&t, &time);
 
-	strftime(s, sizeof(s), widget_->format().c_str(), &time);
+	strftime(s, sizeof(s), widget_->valueFormat().c_str(), &time);
 
 	// Format data
 	if (data.datetime() == 0) {
@@ -75,5 +75,24 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+}
+
+
+DateWidget::DateWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetDate) 
+   	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+	// Append format supported
+	formats_supported_.push_back((VideoWidget::ListItem) { 0, "YYYY-MM-DD", "%Y-%m-%d" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 1, "YYYY/MM/DD", "%Y/%m/%d" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 2, "DD-MM-YYYY", "%d-%m-%Y" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 3, "DD/MM/YYYY", "%d/%m/%Y" });
 }
 

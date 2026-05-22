@@ -83,7 +83,7 @@ void ArcShape::xmlwrite(std::ostream &os) {
 
 	ShapeBase::xmlwrite(os);
 
-	os << "<shape>arc</shape>" << std::endl;
+	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeArc) << "</shape>" << std::endl;
 
 	os << "<with-tick>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTick)) << "</with-tick>" << std::endl;
 	os << "<with-tick-label>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) << "</with-tick-label>" << std::endl;

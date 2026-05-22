@@ -4,8 +4,7 @@
 
 GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, GPX2VideoWidget *widget) 
-	: GPX2VideoShapeBaseSettingsBox(cobject, ref_builder, "GPX2VideoBarShapeSettingsBox", resource_file) 
-	, widget_(widget) {
+	: GPX2VideoShapeBaseSettingsBox(cobject, ref_builder, "GPX2VideoBarShapeSettingsBox", resource_file, widget) {
 	log_call();
 
 	Gtk::Switch *sw;

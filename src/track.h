@@ -33,12 +33,6 @@ public:
 
 	void setSettings(const TrackSettings &settings);
 
-	virtual bool isShapeSupported(Shape type) {
-		(void) type;
-
-		return false;
-	}
-
 	void setSize(int width, int height);
 
 	bool start(void) {
@@ -82,7 +76,7 @@ protected:
 	void init(void);
 	bool load(void);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size);
+	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider);
 
 	void xmlopen(std::ostream &os) {
 		log_call();

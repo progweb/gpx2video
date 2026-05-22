@@ -8,8 +8,7 @@
 class GPX2VideoTrackWidgetSettingsBox : public GPX2VideoWidgetBaseSettingsBox {
 public:
 	GPX2VideoTrackWidgetSettingsBox()
-		: GPX2VideoWidgetBaseSettingsBox("GPX2VideoTrackWidgetSettingsBox") 
-		, widget_(NULL) {
+		: GPX2VideoWidgetBaseSettingsBox("GPX2VideoTrackWidgetSettingsBox") {
 	}
 
 	GPX2VideoTrackWidgetSettingsBox(BaseObjectType *cobject,
@@ -40,8 +39,6 @@ public:
 	void update_boundaries(void);
 
 protected:
-	GPX2VideoWidget *widget_;
-
 	Glib::RefPtr<Gtk::ListStore> view_model_;
 };
 

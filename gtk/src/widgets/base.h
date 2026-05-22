@@ -9,23 +9,25 @@
 #include <gtkmm/colorbutton.h>
 #include <gtkmm/liststore.h>
 
-#include "../log.h"
+#include "../videowidget.h"
 
 
 class GPX2VideoWidgetBaseSettingsBox : public Gtk::Box {
 public:
 	GPX2VideoWidgetBaseSettingsBox(const std::string &name)
 		: Glib::ObjectBase(name)
-		, ref_builder_(NULL) {
+		, ref_builder_(NULL) 
+		, widget_(NULL) {
 		loading_ = false;
 	}
 
 	GPX2VideoWidgetBaseSettingsBox(BaseObjectType *cobject,
-			const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string name, std::string resource_file)
+			const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string name, std::string resource_file, GPX2VideoWidget *widget)
 		: Glib::ObjectBase(name)
 		, Gtk::Box(cobject)
 		, ref_builder_(ref_builder) 
-		, resource_file_(resource_file) {
+		, resource_file_(resource_file) 
+		, widget_(widget) {
 		loading_ = false;
 	}
 
@@ -56,6 +58,8 @@ protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
 
 	const std::string resource_file_;
+
+	GPX2VideoWidget *widget_;
 
 	bool loading_;
 

@@ -83,14 +83,16 @@ namespace layout
 	_value_shadowdistance(this, "value-shadow-distance", Node::ELEMENT, false),
 	_value_borderwidth(this, "value-border-width", Node::ELEMENT, false),
 	_value_bordercolor(this, "value-border-color", Node::ELEMENT, false),
+    _value_min(this, "value-min",   Node::ELEMENT, false),
+    _value_max(this, "value-max",   Node::ELEMENT, false),
+    _value_unit(this, "value-unit",   Node::ELEMENT, false),
+    _value_format(this, "value-format",   Node::ELEMENT, false),
 
 	_needle_type(this, "needle-type", Node::ELEMENT, false),
 	_needle_primary_color(this, "needle-primary-color", Node::ELEMENT, false),
 	_needle_secondary_color(this, "needle-secondary-color", Node::ELEMENT, false),
 
-    _unit(this, "unit",   Node::ELEMENT, false),
     _zoom(this, "zoom",   Node::ELEMENT, false),
-    _format(this, "format",   Node::ELEMENT, false),
     _source(this, "source",   Node::ELEMENT, false),
 	_nbr_lap(this, "nbr-lap", Node::ELEMENT, false),
 
@@ -153,14 +155,16 @@ namespace layout
     getInterfaces().push_back(&_value_shadowdistance);
     getInterfaces().push_back(&_value_borderwidth);
     getInterfaces().push_back(&_value_bordercolor);
+    getInterfaces().push_back(&_value_min);
+    getInterfaces().push_back(&_value_max);
+    getInterfaces().push_back(&_value_unit);
+    getInterfaces().push_back(&_value_format);
 
     getInterfaces().push_back(&_needle_type);
     getInterfaces().push_back(&_needle_primary_color);
     getInterfaces().push_back(&_needle_secondary_color);
 
-    getInterfaces().push_back(&_unit);
     getInterfaces().push_back(&_zoom);
-    getInterfaces().push_back(&_format);
     getInterfaces().push_back(&_source);
     getInterfaces().push_back(&_nbr_lap);
 

@@ -130,7 +130,7 @@ public:
 
 		widget = new DateWidget(app);
 
-		widget->setFormat("%Y-%m-%d");
+		widget->setValueFormat("%Y-%m-%d");
 
 		return widget;
 	}
@@ -170,17 +170,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<format>" << format() << "</format>" << std::endl;
+		os << "<format>" << valueFormat() << "</format>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	DateWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetDate) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	DateWidget(GPXApplication &app);
 };
 
 #endif

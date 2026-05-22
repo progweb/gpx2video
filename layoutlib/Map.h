@@ -170,6 +170,41 @@ namespace layout
     Decimal  &marginBottom() { return _margin_bottom; }
 
     ///
+    /// Get padding
+    ///
+    /// @return the padding attribute
+    ///
+    Unsigned  &padding() { return _padding; }
+
+    ///
+    /// Get paddingLeft
+    ///
+    /// @return the padding left attribute
+    ///
+    Decimal  &paddingLeft() { return _padding_left; }
+
+    ///
+    /// Get paddingRight
+    ///
+    /// @return the padding right attribute
+    ///
+    Decimal  &paddingRight() { return _padding_right; }
+
+    ///
+    /// Get paddingTop
+    ///
+    /// @return the padding top attribute
+    ///
+    Decimal  &paddingTop() { return _padding_top; }
+
+    ///
+    /// Get paddingBottom
+    ///
+    /// @return the padding bottom attribute
+    ///
+    Decimal  &paddingBottom() { return _padding_bottom; }
+
+    ///
     /// Get view
     ///
     /// @return the view element
@@ -189,13 +224,6 @@ namespace layout
 	/// @return the factor elememnt
 	///
 	Decimal &factor() { return _factor; }
-
-	///
-	/// Get marker
-	/// 
-	/// @return the marker elememnt
-	///
-	Unsigned &marker() { return _marker; }
 
     ///
     /// Get border
@@ -253,6 +281,20 @@ namespace layout
     ///
     String  &pathSecondaryColor() { return _path_secondary_color; }
 
+    ///
+    /// Get marker size
+    ///
+    /// @return the marker size element
+    ///
+    Decimal  &markerSize() { return _marker_size; }
+
+	/// 
+	/// Get marker flag
+	///
+	/// @return the marker flag element
+	///
+	Boolean  &withMarker() { return _with_marker; }
+
     // Methods
 
     private:
@@ -270,10 +312,15 @@ namespace layout
 	Decimal      _margin_right;
 	Decimal      _margin_top;
 	Decimal      _margin_bottom;
+	Unsigned     _padding;
+	Decimal      _padding_left;
+	Decimal      _padding_right;
+	Decimal      _padding_top;
+	Decimal      _padding_bottom;
+
 	String       _view;
 	Unsigned     _zoom;
 	Decimal      _factor;
-	Unsigned     _marker;
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;
@@ -282,7 +329,10 @@ namespace layout
 	String       _path_border_color;
 	String       _path_primary_color;
 	String       _path_secondary_color;
+	Decimal      _marker_size;
     
+	Boolean      _with_marker;
+
     // Disable copy constructors
     Map(const Map &);
     Map& operator=(const Map &);  

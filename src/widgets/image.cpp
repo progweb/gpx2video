@@ -5,6 +5,13 @@
  * Text shape
  */
 
+ImageWidget::ImageWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetImage) 
+	, ShapeBase(theme()) {
+	setShape(VideoWidget::ShapeNone);
+}
+
+
 void ImageWidget::initialize(void) {
 //	setSize(theme().height());
 //

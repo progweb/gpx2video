@@ -176,11 +176,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	HeartRateWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetHeartRate) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	HeartRateWidget(GPXApplication &app);
 };
 
 #endif

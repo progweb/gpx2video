@@ -70,11 +70,7 @@ protected:
 private:
 	OIIO::ImageBuf *bg_buf_;
 
-	ImageWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetImage) 
-		, ShapeBase(theme()) {
-		setShape(VideoWidget::ShapeNone);
-	}
+	ImageWidget(GPXApplication &app);
 
 	void initialize(void);
 	void draw(cairo_t *cr, const TelemetryData &data);

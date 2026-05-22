@@ -1,5 +1,21 @@
 #include "text.h"
 
+
+TextWidget::TextWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetText) 
+	, ShapeBase(theme())
+	, bg_buf_(NULL)
+	, fg_buf_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeText);
+}
+
+
 void TextWidget::initialize(void) {
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -199,7 +215,7 @@ void TextWidget::label(cairo_t *cr, ShapeBase::Font &font,
 		x += padding_left_;
 	}
 	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-		x += theme().width()/2;
+		x += theme().width() / 2;
 		x -= width / 2;
 	}
 	else if (textAlign == VideoWidget::Theme::AlignRight) {
@@ -231,7 +247,7 @@ void TextWidget::value(cairo_t *cr, ShapeBase::Font &font,
 		x += padding_left_;
 	}
 	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-		x += theme().width()/2;
+		x += theme().width() / 2;
 		x -= width / 2;
 	}
 	else if (textAlign == VideoWidget::Theme::AlignRight) {

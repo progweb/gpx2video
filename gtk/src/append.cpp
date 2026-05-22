@@ -41,7 +41,7 @@ bool GPX2VideoAppend::Filter::match_vfunc(const Glib::RefPtr<Glib::ObjectBase> &
 		auto label = Glib::ustring(widget->label()).lowercase();
 		auto needle = Glib::ustring(needle_).lowercase();
 
-		return label.find(needle_) != Glib::ustring::npos;
+		return label.find(needle) != Glib::ustring::npos;
 	}
 
 	return false;
@@ -222,7 +222,7 @@ void GPX2VideoAppend::on_selected(Gtk::ListBoxRow *row) {
 	// Get selected row
 	index = row->get_index();
 
-	// Get item
+	// Get item selected
 	widget = std::dynamic_pointer_cast<GPX2VideoAppend::Widget>(widget_model_->get_object(index));
 
 	log_info("New widget '%s' selected", VideoWidget::widget2string(widget->type()).c_str());

@@ -78,24 +78,6 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 
 	shape_model_ = Gtk::ListStore::create(model_);
 
-	{
-		auto iter = shape_model_->append();
-		auto row = *iter;
-		row[model_.m_id] = VideoWidget::ShapeText;
-		row[model_.m_name] = _("Text");
-		row[model_.m_enable] = true;
-
-		row = *(shape_model_->append());
-		row[model_.m_id] = VideoWidget::ShapeArc;
-		row[model_.m_name] = _("Arc");
-		row[model_.m_enable] = true;
-
-		row = *(shape_model_->append());
-		row[model_.m_id] = VideoWidget::ShapeBar;
-		row[model_.m_name] = _("Bar");
-		row[model_.m_enable] = true;
-	}
-
 	position_model_ = Gtk::ListStore::create(model_);
 
 	{
@@ -240,6 +222,10 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		row[model_.m_name] = _("Right");
 		row[model_.m_enable] = true;
 	}
+
+	value_format_model_ = Gtk::ListStore::create(model_);
+
+	value_unit_model_ = Gtk::ListStore::create(model_);
 
 	label_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
 	value_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
@@ -451,8 +437,6 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	combobox->add_attribute(renderer->property_text(), model_.m_name);
 	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
 
-//	combobox->pack_start(model_.m_id);
-//	combobox->pack_start(model_.m_name);
 	combobox->signal_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
 					[this](const Gtk::TreeModel::const_iterator &iter) {
@@ -1311,6 +1295,65 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						widget_selected_->dispatchEvent(false);
 					}
 			));
+
+	// Value unit
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_unit_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: value unit changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_selected_->widget()->setValueUnit((VideoWidget::Unit) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Value format
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_format_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_format_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						std::list<VideoWidget::ListItem> formats;
+
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: value format changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						formats = widget_selected_->widget()->formats();
+
+						for (auto item : formats) {
+							if (item.id != value)
+								continue;
+
+							widget_selected_->widget()->setValueFormat(item.fmt);
+
+							break;
+						}
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
 }
 
 
@@ -1324,9 +1367,11 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	const float *color;
 
+	Gtk::Box *box;
 	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
+	Gtk::Expander *expander;
 	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -1334,6 +1379,10 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	Pango::FontDescription description;
 
 	Gtk::TreeModel::iterator iter;
+
+	std::list<VideoWidget::ListItem> shapes;
+	std::list<VideoWidget::ListItem> units;
+	std::list<VideoWidget::ListItem> formats;
 
 	// Frame is visible only as widget is selected
 	Gtk::Frame::set_visible(is_visible_ && (widget_selected_ != NULL));
@@ -1351,21 +1400,39 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	width = renderer_->width();
 	height = renderer_->height();
 
+	// Widget shapes, units & formats supported list
+	shapes = widget_selected_->widget()->shapes();
+	units = widget_selected_->widget()->units();
+	formats = widget_selected_->widget()->formats();
+
+	// Widget shape expander container
+	expander = ref_builder_->get_widget<Gtk::Expander>("shape_expander");
+
+	expander->set_visible((shapes.size() > 1));
+
 	// Widget shape
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"shape_combobox\" object in widget_frame.ui");
 
-	for (auto iter = shape_model_->children().begin(); iter != shape_model_->children().end(); iter++) {
-		bool enable = widget_selected_->widget()->isShapeSupported((VideoWidget::Shape) iter->get_value(model_.m_id));
-
-		iter->set_value(model_.m_enable, enable);
-	}
-
 	combobox->set_model(shape_model_);
 
-	if (find_in_listtore(shape_model_, widget_selected_->widget()->shape(), iter))
-		combobox->set_active(iter);
+	// Fill shape model
+	shape_model_->clear();
+
+	if (shapes.size() > 1) {
+		for (auto item : shapes) {
+			auto iter = shape_model_->append();
+			auto row = *iter;
+
+			row[model_.m_id] = item.id;
+			row[model_.m_name] = item.name;
+			row[model_.m_enable] = true;
+		}
+
+		if (find_in_listtore(shape_model_, widget_selected_->widget()->shape(), iter))
+			combobox->set_active(iter);
+	}
 
 	// Widget X x Y
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("x_spinbutton");
@@ -1743,6 +1810,69 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
 
+	// Widget value unit box container
+	box = ref_builder_->get_widget<Gtk::Box>("value_unit_box");
+
+	box->set_visible(units.size() > 1);
+
+	// Widget value unit 
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_unit_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(value_unit_model_);
+
+	// Fill unit model
+	value_unit_model_->clear();
+
+	if (units.size() > 1) {
+		for (auto item : units) {
+			auto iter = value_unit_model_->append();
+			auto row = *iter;
+
+			row[model_.m_id] = item.id;
+			row[model_.m_name] = item.name;
+			row[model_.m_enable] = true;
+		}
+
+		if (find_in_listtore(value_unit_model_, widget_selected_->widget()->valueUnit(), iter))
+			combobox->set_active(iter);
+	}
+
+	// Widget value format box container
+	box = ref_builder_->get_widget<Gtk::Box>("value_format_box");
+
+	box->set_visible(formats.size() > 1);
+
+	// Widget value format
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_format_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_format_combobox\" object in widget_frame.ui");
+	
+	combobox->set_model(value_format_model_);
+
+	// Fill format model
+	value_format_model_->clear();
+
+	if (formats.size() > 1) {
+		int value = 0;
+
+		for (auto item : formats) {
+			auto iter = value_format_model_->append();
+			auto row = *iter;
+
+			row[model_.m_id] = item.id;
+			row[model_.m_name] = item.name;
+			row[model_.m_enable] = true;
+
+			if (item.fmt == widget_selected_->widget()->valueFormat())
+				value = item.id;
+		}
+
+		if (find_in_listtore(value_format_model_, value, iter))
+			combobox->set_active(iter);
+	}
+
 	// Widget settings
 	update_shape_content();
 	update_widget_content();
@@ -1949,6 +2079,9 @@ void GPX2VideoWidgetFrame::on_widget_padding_value_changed(const VideoWidget::Th
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
 	// Widget padding
 	auto spinbutton = ref_builder_->get_widget<Gtk::SpinButton>(paddings[padding]);
 	if (!spinbutton) {
@@ -1979,6 +2112,10 @@ void GPX2VideoWidgetFrame::on_widget_font_changed(Gtk::FontButton *button, std::
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
+	// Read font description
 	description = button->get_font_desc();
 
 	// Set description
@@ -1994,6 +2131,10 @@ void GPX2VideoWidgetFrame::on_widget_spin_changed(Gtk::SpinButton *button, std::
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
+	// Read value
 	value = button->get_value_as_int();
 
 	// Set value
@@ -2011,6 +2152,10 @@ void GPX2VideoWidgetFrame::on_widget_color_changed(Gtk::ColorButton *button, std
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
+	// Read color
 	rgba = button->get_rgba();
 
 	// Convert to hexa string color
@@ -2032,6 +2177,9 @@ void GPX2VideoWidgetFrame::on_widget_entry_changed(Gtk::Entry *entry, std::funct
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
 	// Set entry
 	set(entry->get_text());
 }
@@ -2043,6 +2191,9 @@ void GPX2VideoWidgetFrame::on_widget_combobox_changed(Gtk::ComboBox *combobox, s
 	if (loading_)
 		return;
 
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
 	// Set combobox
 	set(combobox->get_active());
 }
@@ -2052,6 +2203,9 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 
 	if (loading_)
 		return false;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
 
 	// Text enable
 	sw->set_state(state);

@@ -10,8 +10,7 @@
 class GPX2VideoBarShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
 public:
 	GPX2VideoBarShapeSettingsBox()
-		: GPX2VideoShapeBaseSettingsBox("GPX2VideoBarShapeSettingsBox")
-		, widget_(NULL) {
+		: GPX2VideoShapeBaseSettingsBox("GPX2VideoBarShapeSettingsBox") {
 	}
 
 	GPX2VideoBarShapeSettingsBox(BaseObjectType *cobject,
@@ -38,9 +37,6 @@ public:
 	}
 
 	void update_content(void);
-
-protected:
-	GPX2VideoWidget *widget_;
 
 private:
 	Glib::RefPtr<Gtk::ListStore> tick_align_model_;

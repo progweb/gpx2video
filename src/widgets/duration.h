@@ -193,11 +193,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DurationWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetDuration) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	DurationWidget(GPXApplication &app);
 };
 
 #endif

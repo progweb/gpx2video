@@ -1,5 +1,6 @@
 #include <libintl.h>
 #include <locale.h>
+#include <pthread.h>
 
 #include <iostream>
 #include <exception>
@@ -305,6 +306,10 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
  */
 void GPX2VideoApplicationWindow::run(void) {
 	log_call();
+
+	std::string name = "gpx2video-core";
+
+	pthread_setname_np(pthread_self(), name.c_str());
 
 	while (loop_)
 		loop();

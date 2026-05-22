@@ -271,7 +271,7 @@ public:
 
 		widget = new VerticalSpeedWidget(app);
 
-		widget->setUnit(VideoWidget::UnitMPS);
+		widget->setValueUnit(VideoWidget::UnitMPS);
 
 		return widget;
 	}
@@ -297,16 +297,6 @@ public:
 		}
 	}
 
-	bool isShapeSupported(VideoWidget::Shape type) {
-		switch (type) {
-		case VideoWidget::ShapeBar:
-		case VideoWidget::ShapeText:
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		return shape_->prepare(is_update);
 	}
@@ -327,17 +317,14 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<unit>" << unit2string(unit(), false) << "</unit>" << std::endl;
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	VerticalSpeedWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetVerticalSpeed) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	VerticalSpeedWidget(GPXApplication &app);
 };
 
 #endif

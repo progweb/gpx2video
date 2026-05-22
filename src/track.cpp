@@ -37,7 +37,7 @@ TrackSettings::TrackSettings() {
 
 	divider_ = 1.0;
 
-	marker_size_ = 60;
+	marker_size_ = 1.0;
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
@@ -98,12 +98,12 @@ void TrackSettings::setDivider(const double &divider) {
 }
 
 
-const int& TrackSettings::markerSize(void) const {
+const double& TrackSettings::markerSize(void) const {
 	return marker_size_;
 }
 
 
-void TrackSettings::setMarkerSize(const int &size) {
+void TrackSettings::setMarkerSize(const double &size) {
 	marker_size_ = size;
 }
 
@@ -582,14 +582,14 @@ void Track::init(void) {
 			else if ((width / 2) > pos_lim_x2)
 				pevx1_ -= (theme().width() - theme().padding(VideoWidget::Theme::PaddingRight)) / divider_;
 			else
-				pevx1_ -= ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingLeft)) / divider_;
+				pevx1_ -= (theme().width() / 2) / divider_;
 
 			if ((width / 2) > pos_lim_x2)
 				pevx2_ = lim_px2_;
 			else if ((width / 2) > -pos_lim_x1)
 				pevx2_ += (theme().width() - theme().padding(VideoWidget::Theme::PaddingLeft)) / divider_;
 			else
-				pevx2_ += ((theme().width() / 2) + theme().padding(VideoWidget::Theme::PaddingRight)) / divider_;
+				pevx2_ += (theme().width() / 2) / divider_;
 		}
 		else {
 			// Use limit
@@ -606,14 +606,14 @@ void Track::init(void) {
 			else if ((height / 2) > -pos_lim_y2)
 				pevy1_ -= (theme().height() - theme().padding(VideoWidget::Theme::PaddingBottom)) / divider_;
 			else
-				pevy1_ -= ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingTop)) / divider_;
+				pevy1_ -= (theme().height() / 2) / divider_;
 
 			if ((height / 2) > pos_lim_y2)
 				pevy2_ = lim_py2_;
 			else if ((height / 2) > -pos_lim_y1)
 				pevy2_ += (theme().height() - theme().padding(VideoWidget::Theme::PaddingTop)) / divider_;
 			else
-				pevy2_ += ((theme().height() / 2) + theme().padding(VideoWidget::Theme::PaddingBottom)) / divider_;
+				pevy2_ += (theme().height() / 2) / divider_;
 		}
 		else {
 			// Use limit
@@ -1017,7 +1017,8 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int padding_horizontal;
 
 	int zoom = settings().zoom();
-	int marker_size = settings().markerSize();
+	double marker_size = settings().markerSize();
+	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
 	// Check track buffer
 	if (trackbuf_ == NULL) {
@@ -1127,7 +1128,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 				offsetX += posX - pos_lim_x2 + (width_available / 2);
 		}
 		else
-			offsetX = theme().padding(VideoWidget::Theme::PaddingLeft) + (width_available - w) / 2;
+			offsetX = (width_available - w) / 2;
 
 		if (data_height > height) {
 			if ((pos_lim_y2 - posY) < (height_available / 2))
@@ -1136,7 +1137,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 				offsetY += posY - pos_lim_y1 - (height_available / 2);
 		}
 		else
-			offsetY = theme().padding(VideoWidget::Theme::PaddingTop) + (height_available - h) / 2;
+			offsetY = (height_available - h) / 2;
 
 		break;
 	}
@@ -1159,7 +1160,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
-	if (marker_size > 0) {
+	if (marker_enable && (marker_size > 0)) {
 		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
 		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
 	
@@ -1196,10 +1197,8 @@ void Track::clear(void) {
 }
 
 
-bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, int size) {
+bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider) {
 	bool result;
-
-	double divider;
 
 	// Open picto
 	auto img = OIIO::ImageInput::open(picto);
@@ -1208,9 +1207,6 @@ bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const ch
 
 	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
 	img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
-
-	// Compute divider
-	divider = (double) size / (double) spec.height;
 
 	// Resize picto
 	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));

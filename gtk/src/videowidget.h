@@ -45,6 +45,10 @@ public:
 
 	VideoWidget * widget(void);
 
+	std::mutex& mutex(void) {
+		return mutex_;
+	}
+
 	const std::string& name(void) const {
 		return widget_->name();
 	}
@@ -119,6 +123,7 @@ private:
 	OIIO::ImageBuf *overlay_;
 
 	mutable std::mutex mutex_;
+	mutable std::mutex queue_mutex_;
 
 	std::deque<BufferPtr> queue_;
 

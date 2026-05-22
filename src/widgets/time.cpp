@@ -424,5 +424,20 @@ void TimeArcShape::drawNeedle(cairo_t *cr, VideoWidget::Theme::NeedleType  type,
 //
 //	cairo_restore();
 //}
-//
-//
+	
+
+TimeWidget::TimeWidget(GPXApplication &app)
+	: VideoWidget(app, VideoWidget::WidgetTime) 
+	, shape_(NULL) {
+
+#define ADD_SHAPE(shape) \
+	shapes_supported_.push_back((VideoWidget::ListItem) { \
+		shape, VideoWidget::getFriendlyName(shape), VideoWidget::shape2string(shape) \
+	})
+
+	ADD_SHAPE(VideoWidget::ShapeArc);
+	ADD_SHAPE(VideoWidget::ShapeText);
+
+	setShape(VideoWidget::ShapeText);
+}
+

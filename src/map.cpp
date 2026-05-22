@@ -530,7 +530,7 @@ void Map::init(void) {
 			else if ((width_available / 2) > (lim_px2_ - pvx2_))
 				space = (width - theme().padding(VideoWidget::Theme::PaddingRight)) - ((lim_px2_ - (vx1_ * TILESIZE)) * divider_);
 			else
-				space = ((width + offsetx) / 2.0) - ((pvx1_ - (vx1_ * TILESIZE)) * divider_);
+				space = (width / 2.0) - ((pvx1_ - (vx1_ * TILESIZE)) * divider_);
 			vx1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
 			if ((width_available / 2) > (lim_px2_ - pvx2_))
@@ -538,14 +538,14 @@ void Map::init(void) {
 			else if ((width_available / 2) > (pvx1_ - lim_px1_))
 				space = (width - theme().padding(VideoWidget::Theme::PaddingLeft)) - ((((vx2_ * TILESIZE) + TILESIZE) - lim_px1_) * divider_);
 			else
-				space = ((width - offsetx)/ 2.0) - (TILESIZE - (pvx2_ - (vx2_ * TILESIZE)) * divider_);
+				space = (width / 2.0) - (TILESIZE - (pvx2_ - (vx2_ * TILESIZE)) * divider_);
 			vx2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
 		}
 		else {
-			space = ((width - data_width + offsetx) / 2.0) + (((vx1_ * TILESIZE) - lim_px1_) * divider_);
+			space = ((width - data_width) / 2.0) + (((vx1_ * TILESIZE) - lim_px1_) * divider_);
 			vx1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
-			space = ((width - data_width - offsetx) / 2.0) + ((lim_px2_ - ((vx2_ * TILESIZE) + TILESIZE)) * divider_);
+			space = ((width - data_width) / 2.0) + ((lim_px2_ - ((vx2_ * TILESIZE) + TILESIZE)) * divider_);
 			vx2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
 		}
 
@@ -556,7 +556,7 @@ void Map::init(void) {
 			else if ((height_available / 2) > (lim_py2_ - pvy2_))
 				space = (height - theme().padding(VideoWidget::Theme::PaddingBottom)) - ((lim_py2_ - (vy1_ * TILESIZE)) * divider_);
 			else
-				space = ((height + offsety) / 2.0) - ((pvy1_ - (vy1_ * TILESIZE)) * divider_);
+				space = (height / 2.0) - ((pvy1_ - (vy1_ * TILESIZE)) * divider_);
 			vy1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
 			if ((height_available / 2) > (lim_py2_ - pvy2_))
@@ -564,14 +564,14 @@ void Map::init(void) {
 			else if ((height_available / 2) > (pvy1_ - lim_py1_))
 				space = (height - theme().padding(VideoWidget::Theme::PaddingTop)) - ((((vy2_ * TILESIZE) + TILESIZE) - lim_py1_) * divider_);
 			else
-				space = ((height - offsety) / 2.0) - (TILESIZE - (pvy2_ - (vy2_ * TILESIZE)) * divider_);
+				space = (height / 2.0) - (TILESIZE - (pvy2_ - (vy2_ * TILESIZE)) * divider_);
 			vy2_ += std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 		}
 		else {
-			space = ((height - data_height + offsety) / 2.0) + (((vy1_ * TILESIZE) - lim_py1_) * divider_);
+			space = ((height - data_height) / 2.0) + (((vy1_ * TILESIZE) - lim_py1_) * divider_);
 			vy1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
-			space = ((height - data_height - offsety) / 2.0) + ((lim_py2_ - ((vy2_ * TILESIZE) + TILESIZE)) * divider_);
+			space = ((height - data_height) / 2.0) + ((lim_py2_ - ((vy2_ * TILESIZE) + TILESIZE)) * divider_);
 			vy2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
 		}
 
@@ -855,6 +855,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 	int zoom = settings().zoom();
 	double marker_size = settings().markerSize();
+	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
 	// Check map & track buffers
 	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
@@ -959,7 +960,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 				offsetX += posX - pos_lim_x2 + (width_available / 2);
 		}
 		else
-			offsetX = theme().padding(VideoWidget::Theme::PaddingLeft) + (width_available - w) / 2;
+			offsetX = (width_available - w) / 2;
 
 		if (data_height > height) {
 			if ((pos_lim_y2 - posY) < (height_available / 2))
@@ -968,7 +969,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 				offsetY += posY - pos_lim_y1 - (height_available / 2);
 		}
 		else
-			offsetY = theme().padding(VideoWidget::Theme::PaddingTop) + (height_available - h) / 2;
+			offsetY = (height_available - h) / 2;
 
 		break;
 	}
@@ -991,7 +992,7 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 	// Draw picto
-	if (marker_size > 0) {
+	if (marker_enable && (marker_size > 0)) {
 		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
 		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
 	

@@ -134,7 +134,7 @@ public:
 
 		widget = new GForceWidget(app);
 
-		widget->setUnit(VideoWidget::UnitG);
+		widget->setValueUnit(VideoWidget::UnitG);
 
 		return widget;
 	}
@@ -173,16 +173,15 @@ protected:
 		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
+
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	GForceWidget(GPXApplication &app)
-		: VideoWidget(app, VideoWidget::WidgetGForce) 
-   		, shape_(NULL) {
-		setShape(VideoWidget::ShapeText);
-	}
+	GForceWidget(GPXApplication &app);
 };
 
 #endif
