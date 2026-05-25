@@ -231,6 +231,8 @@ public:
 		void restore(Point point, bool flags=false) {
 			int mask = DataNone;
 
+			line_ = point.line_;
+
 			// Restore previous data & flags:
 			//  distance, grade, speed, maxspeed, 
 			//  duration, ridetime, elaspedtime,

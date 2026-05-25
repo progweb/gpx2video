@@ -49,10 +49,10 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		else
 			format = "%.0f %s";
 
-		sprintf(s, format, distance, widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, format, distance, widget_->getFriendlyName(widget_->valueUnit()).c_str());
 	}
 	else
-		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -93,6 +93,7 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 DistanceWidget::DistanceWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetDistance)
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

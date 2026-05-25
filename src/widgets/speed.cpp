@@ -50,16 +50,16 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	if (no_value_)
-		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
 	else if (pace_unit) {
 		double pace = 60.0 / speed;
 		int min = (int) pace;
 		int sec = (int) round((pace - min) * 60) % 60;
 
-		sprintf(s, "%d:%02d %s", min, sec, widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "%d:%02d %s", min, sec, widget_->getFriendlyName(widget_->valueUnit()).c_str());
 	} 
 	else
-		sprintf(s, "%.1f %s", speed, widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "%.1f %s", speed, widget_->getFriendlyName(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -313,7 +313,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		const float *fill = theme().valueColor();
 
-		std::string unit = widget_->unit2string(widget_->valueUnit());
+		std::string unit = widget_->getFriendlyName(widget_->valueUnit());
 
 		if (no_value_)
 			sprintf(value, "--");
@@ -348,6 +348,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 SpeedWidget::SpeedWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetSpeed) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

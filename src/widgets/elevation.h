@@ -258,7 +258,7 @@ private:
  * Widget definition
  */
 
-class ElevationWidget : public VideoWidget {
+class ElevationWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~ElevationWidget() {
 		delete shape_;
@@ -272,6 +272,10 @@ public:
 		widget->setValueUnit(VideoWidget::UnitMiles);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -310,8 +314,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 

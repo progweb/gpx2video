@@ -78,7 +78,7 @@
 
 GPXWidget::GPXWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetGPX)
-	, ShapeBase(theme())
+	, ShapeBase(theme(), VideoWidget::ShapeText)
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) {
 

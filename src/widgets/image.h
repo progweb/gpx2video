@@ -21,6 +21,10 @@ public:
 		return widget;
 	}
 
+	ShapeBase * shape(void) {
+		return this;
+	}
+
 	OIIO::ImageBuf * prepare(bool &is_update) {
 		if (bg_buf_ != NULL) {
 			is_update = false;
@@ -60,8 +64,6 @@ skip:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		ShapeBase::xmlwrite(os);
 	}

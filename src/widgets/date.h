@@ -119,7 +119,7 @@ private:
  * Widget definition
  */
 
-class DateWidget : public VideoWidget {
+class DateWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~DateWidget() {
 		delete shape_;
@@ -133,6 +133,10 @@ public:
 		widget->setValueFormat("%Y-%m-%d");
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -166,11 +170,9 @@ protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
 
-		IndentingOStreambuf indent(os, 4);
-
 		shape_->xmlwrite(os);
 
-		os << "<format>" << valueFormat() << "</format>" << std::endl;
+		os << "<value-format>" << valueFormat() << "</value-format>" << std::endl;
 	}
 
 private:

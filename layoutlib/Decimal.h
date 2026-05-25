@@ -1,6 +1,9 @@
 #ifndef __LAYOUT__DECIMAL_H__
 #define __LAYOUT__DECIMAL_H__
 
+#include <cmath>
+
+
 //==============================================================================
 //
 //           Decimal - the decimal simple type in the layout library
@@ -69,17 +72,21 @@ namespace layout
     virtual bool validate(Report *report = nullptr) const;
     
 	operator int() const { 
-		if (this->getValue().empty())
-			return 0;
+		double value;
 
-		return std::stoi(this->getValue());
+		if (!this->convert(value))
+			return 0.0;
+
+		return (int) std::round(value);
 	}
     
 	operator double() const { 
-		if (this->getValue().empty())
+		double value;
+
+		if (!this->convert(value))
 			return 0.0;
 
-		return std::stod(this->getValue());
+		return value;
 	}
     
   protected:

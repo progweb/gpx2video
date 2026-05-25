@@ -68,6 +68,7 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 GradeWidget::GradeWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetGrade) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

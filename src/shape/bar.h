@@ -15,7 +15,7 @@ public:
 
 	BarShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface = NULL, 
 			int width = 0, int height = 0)
-		: ShapeBase(theme) {
+		: ShapeBase(theme, VideoWidget::ShapeBar) {
 		init(fontface, width, height);
 
 		setPadding(0, 0, 0, 0);

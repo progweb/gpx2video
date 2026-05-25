@@ -68,6 +68,7 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 PowerWidget::PowerWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetPower) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

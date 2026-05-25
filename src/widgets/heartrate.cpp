@@ -68,6 +68,7 @@ void HeartRateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 HeartRateWidget::HeartRateWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetHeartRate) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

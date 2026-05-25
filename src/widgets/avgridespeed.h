@@ -123,7 +123,7 @@ private:
  * Widget definition
  */
 
-class AvgRideSpeedWidget : public VideoWidget {
+class AvgRideSpeedWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~AvgRideSpeedWidget() {
 		delete shape_;
@@ -137,6 +137,10 @@ public:
 		widget->setValueUnit(VideoWidget::UnitMPH);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -169,8 +173,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 

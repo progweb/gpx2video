@@ -123,7 +123,7 @@ private:
  * Widget definition
  */
 
-class CadenceWidget : public VideoWidget {
+class CadenceWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~CadenceWidget() {
 		delete shape_;
@@ -135,6 +135,10 @@ public:
 		widget = new CadenceWidget(app);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -167,8 +171,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 	}

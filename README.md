@@ -379,7 +379,6 @@ Here all widget common element settings:
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
-	<font>/usr/share/fonts/truetype/freefont/FreeSerifItalic.ttf</font>
 
 	<with-label>true</with-label>
 	<label-font-size>20</label-font-size>

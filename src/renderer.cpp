@@ -325,7 +325,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
 	trackSettings.setMarkerSize((double) t->markerSize());
-
+printf("MARKER SIZE %f\n", (double) t->markerSize());
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 
 	log_info("Load track widget");
@@ -582,8 +582,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setBorder(w->border());
 	widget->theme().setBorderColor((const char *) w->borderColor());
 	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
-
-	widget->theme().setFont((const char *) w->font());
 
 	// Widget label settings
 	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());

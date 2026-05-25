@@ -133,7 +133,7 @@ private:
  * Widget definition
  */
 
-class LapWidget : public VideoWidget {
+class LapWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~LapWidget() {
 		delete shape_;
@@ -147,10 +147,8 @@ public:
 		return widget;
 	}
 
-	void setTargetLap(int target) {
-		shape_->setTargetLap(target);
-
-		nbr_target_lap_ = target;
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -160,6 +158,12 @@ public:
 			delete shape_;
 
 		shape_ = LapTextShape::create(this, nbr_target_lap_);
+	}
+
+	void setTargetLap(int target) {
+		shape_->setTargetLap(target);
+
+		nbr_target_lap_ = target;
 	}
 
 	OIIO::ImageBuf * prepare(bool &is_update) {
@@ -178,9 +182,9 @@ protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
 
-		IndentingOStreambuf indent(os, 4);
-
 		shape_->xmlwrite(os);
+
+		os << "<nbr-lap>" << std::to_string(nbr_target_lap_) << "</nbr-lap>" << std::endl;
 	}
 
 private:

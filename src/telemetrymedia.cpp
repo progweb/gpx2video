@@ -1747,6 +1747,9 @@ void TelemetrySource::insertData(uint64_t timestamp) {
 	// Predict data by interpolation
 	predictData(data, TelemetrySettings::MethodInterpolate, timestamp);
 
+	// Use the last line 
+	point.setLine(data.line());
+
 	// Create the new point
 	point.setType(TelemetryData::TypePredicted);
 	point.setPosition(timestamp, data.latitude(), data.longitude());

@@ -260,7 +260,7 @@ private:
  * Widget definition
  */
 
-class VerticalSpeedWidget : public VideoWidget {
+class VerticalSpeedWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~VerticalSpeedWidget() {
 		delete shape_;
@@ -274,6 +274,10 @@ public:
 		widget->setValueUnit(VideoWidget::UnitMPS);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -312,8 +316,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 

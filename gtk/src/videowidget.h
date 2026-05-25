@@ -43,6 +43,7 @@ public:
 	static GPX2VideoWidget * create(VideoWidget *widget);
 	virtual ~GPX2VideoWidget();
 
+	ShapeBase * shape(void);
 	VideoWidget * widget(void);
 
 	std::mutex& mutex(void) {

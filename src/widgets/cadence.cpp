@@ -68,6 +68,7 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 CadenceWidget::CadenceWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetCadence) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

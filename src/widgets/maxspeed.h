@@ -136,7 +136,7 @@ private:
  * Widget definition
  */
 
-class MaxSpeedWidget : public VideoWidget {
+class MaxSpeedWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~MaxSpeedWidget() {
 		delete shape_;
@@ -150,6 +150,10 @@ public:
 		widget->setValueUnit(VideoWidget::UnitMPH);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -182,8 +186,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 

@@ -140,7 +140,7 @@ private:
  * Widget definition
  */
 
-class DurationWidget : public VideoWidget {
+class DurationWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~DurationWidget() {
 		delete shape_;
@@ -152,6 +152,10 @@ public:
 		widget = new DurationWidget(app);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -184,8 +188,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 	}

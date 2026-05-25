@@ -68,6 +68,7 @@ void PositionTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 PositionWidget::PositionWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetPosition)
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

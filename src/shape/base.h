@@ -10,6 +10,13 @@
 
 class ShapeBase {
 public:
+	enum Feature {
+		FeatureLabel,
+		FeatureValue,
+		FeatureNeedle,
+		FeatureUnknown
+	};
+
 	struct Font {
 		int size;
 		int border;
@@ -24,6 +31,16 @@ public:
 		clear();
 	}
 	
+	VideoWidget::Shape type(void) const {
+		return type_;
+	}
+
+	virtual bool hasFeature(Feature feature) const {
+		(void) feature;
+
+		return true;
+	}
+
 	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
@@ -35,8 +52,11 @@ public:
 protected:
 	VideoWidget::Theme &theme_;
 
-	ShapeBase(VideoWidget::Theme &theme)
-   		: theme_(theme) {
+	VideoWidget::Shape type_;
+
+	ShapeBase(VideoWidget::Theme &theme, VideoWidget::Shape type = VideoWidget::ShapeNone)
+   		: theme_(theme) 
+		, type_(type) {
 	}
 
 	void createBox(OIIO::ImageBuf **buf, int width, int height);

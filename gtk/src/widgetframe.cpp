@@ -313,7 +313,8 @@ void GPX2VideoWidgetFrame::build_shape_settings(void) {
 
 	if (widget_selected_) {
 		// Build shape settings box child
-		switch (widget_selected_->widget()->shape()) {
+//		switch (widget_selected_->widget()->shape()) {
+		switch (widget_selected_->shape()->type()) {
 		case VideoWidget::ShapeArc:
 			shape_child_box_ = GPX2VideoArcShapeSettingsBox::create(widget_selected_);
 			break;
@@ -452,6 +453,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						// Widget shape settings
 						update_shape_content();
+						update_boundaries();
 
 						// Compute new position
 						renderer_->compute();
@@ -1430,7 +1432,8 @@ void GPX2VideoWidgetFrame::update_content(void) {
 			row[model_.m_enable] = true;
 		}
 
-		if (find_in_listtore(shape_model_, widget_selected_->widget()->shape(), iter))
+//		if (find_in_listtore(shape_model_, widget_selected_->widget()->shape(), iter))
+		if (find_in_listtore(shape_model_, widget_selected_->shape()->type(), iter))
 			combobox->set_active(iter);
 	}
 
@@ -1888,7 +1891,7 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	int margin;
 	int width, height;
 
-	VideoWidget::Widget type;
+//	VideoWidget::Widget type;
 
 	Gtk::Expander *expander;
 	Gtk::SpinButton *spinbutton;
@@ -1899,8 +1902,8 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	if (widget_selected_ == NULL)
 		return;
 
-	// Widget type
-	type = widget_selected_->widget()->type();
+//	// Widget type
+//	type = widget_selected_->widget()->type();
 
 	// Paddings
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_left_spinbutton");
@@ -1939,13 +1942,15 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
 	if (!expander)
 		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
-	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
 
 	// Value expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
 	if (!expander)
 		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
-	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
 
 	// Update UI range for widget width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("width_spinbutton");

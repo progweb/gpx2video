@@ -428,6 +428,7 @@ void TimeArcShape::drawNeedle(cairo_t *cr, VideoWidget::Theme::NeedleType  type,
 
 TimeWidget::TimeWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetTime) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

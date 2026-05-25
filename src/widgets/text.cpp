@@ -3,7 +3,7 @@
 
 TextWidget::TextWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetText) 
-	, ShapeBase(theme())
+	, ShapeBase(theme(), VideoWidget::ShapeText)
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) {
 

@@ -28,8 +28,18 @@ public:
 
 	static Track * create(GPXApplication &app, const TelemetrySettings& telemetry_settings, const TrackSettings& track_settings);
 
+	ShapeBase * shape(void) {
+		return this;
+	}
+
 	TrackSettings& settings();
 	const TrackSettings& settings() const;
+
+	bool hasFeature(ShapeBase::Feature feature) const {
+		(void) feature;
+
+		return false;
+	}
 
 	void setSettings(const TrackSettings &settings);
 
@@ -97,19 +107,11 @@ protected:
 	}
 
 	void xmlwrite(std::ostream &os) {
-		IndentingOStreambuf indent(os, 4);
+		VideoWidget::xmlwrite(os);
 
-		os << "<margin-left>" << margin(Margin::MarginLeft) << "</margin-left>" << std::endl;
-		os << "<margin-right>" << margin(Margin::MarginRight) << "</margin-right>" << std::endl;
-		os << "<margin-top>" << margin(Margin::MarginTop) << "</margin-top>" << std::endl;
-		os << "<margin-bottom>" << margin(Margin::MarginBottom) << "</margin-bottom>" << std::endl;
+		ShapeBase::xmlwrite(os);
 
-		os << "<border>" << theme().border() << "</border>" << std::endl;
-		os << "<border-color>" << VideoWidget::Theme::color2hex(theme().borderColor()) << "</border-color>" << std::endl;
-
-		os << "<background-color>" << VideoWidget::Theme::color2hex(theme().backgroundColor()) << "</background-color>" << std::endl;
-
-		os << "<marker>" << settings().markerSize() << "</marker>" << std::endl;
+		os << "<marker-size>" << settings().markerSize() << "</marker-size>" << std::endl;
 
 		os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
 		os << "<factor>" << settings().divider() << "</factor>" << std::endl;

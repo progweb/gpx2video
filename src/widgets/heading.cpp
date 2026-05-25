@@ -68,6 +68,7 @@ void HeadingTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 HeadingWidget::HeadingWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetHeading) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

@@ -244,7 +244,7 @@ private:
  * Widget definition
  */
 
-class TimeWidget : public VideoWidget {
+class TimeWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~TimeWidget() {
 		delete shape_;
@@ -256,6 +256,10 @@ public:
 		widget = new TimeWidget(app);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -294,8 +298,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 	}

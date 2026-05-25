@@ -24,6 +24,10 @@ public:
 		return widget;
 	}
 
+	ShapeBase * shape(void) {
+		return this;
+	}
+
 	void setPadding(int left, int right, int top, int bottom) {
 		padding_left_ = left;
 		padding_right_ = right;
@@ -93,8 +97,6 @@ skip:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		ShapeBase::xmlwrite(os);
 

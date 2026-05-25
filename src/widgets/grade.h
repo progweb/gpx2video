@@ -123,7 +123,7 @@ private:
  * Widget definition
  */
 
-class GradeWidget : public VideoWidget {
+class GradeWidget : public VideoWidget, ShapeBase {
 public:
 	virtual ~GradeWidget() {
 		delete shape_;
@@ -135,6 +135,10 @@ public:
 		widget = new GradeWidget(app);
 
 		return widget;
+	}
+
+	ShapeBase * shape(void) {
+		return shape_;
 	}
 
 	void setShape(VideoWidget::Shape type) {
@@ -164,8 +168,6 @@ public:
 protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
-
-		IndentingOStreambuf indent(os, 4);
 
 		shape_->xmlwrite(os);
 	}

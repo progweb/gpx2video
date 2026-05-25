@@ -132,6 +132,13 @@ GPX2VideoWidget::~GPX2VideoWidget() {
 }
 
 
+ShapeBase * GPX2VideoWidget::shape(void) {
+	log_call();
+
+	return widget_->shape();
+}
+
+
 VideoWidget * GPX2VideoWidget::widget(void) {
 	log_call();
 

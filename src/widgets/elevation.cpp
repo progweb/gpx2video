@@ -33,9 +33,9 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
  	if (!no_value_)
- 		sprintf(s, "%.0f %s", elevation, widget_->unit2string(widget_->valueUnit()).c_str());
+ 		sprintf(s, "%.0f %s", elevation, widget_->getFriendlyName(widget_->valueUnit()).c_str());
  	else
- 		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
+ 		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -229,7 +229,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			double xb = scale(amin, amax, value, rotate);
 
 			if (first || (value >= max))
-				sprintf(s, "%d %s", value, widget_->unit2string(widget_->valueUnit()).c_str());
+				sprintf(s, "%d %s", value, widget_->getFriendlyName(widget_->valueUnit()).c_str());
 			else
 				sprintf(s, "%d", value);
 
@@ -267,6 +267,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 ElevationWidget::ElevationWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetElevation) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

@@ -129,8 +129,6 @@ protected:
 	void xmlwrite(std::ostream &os) {
 		Track::xmlwrite(os);
 
-		IndentingOStreambuf indent(os, 4);
-
 		os << "<source>" << settings().source() << "</source>" << std::endl;
 		os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
 	}

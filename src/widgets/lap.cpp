@@ -70,6 +70,7 @@ void LapTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 LapWidget::LapWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetLap)
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL)
 	, nbr_target_lap_(1) {
 

@@ -15,6 +15,8 @@
 #include "application.h"
 
 
+class ShapeBase;
+
 class VideoWidget : public GPXApplication::Task {
 public:
 	enum Margin {
@@ -342,17 +344,6 @@ public:
 			tick_label_color_[2] = b;
 			tick_label_color_[3] = a;
 			return true;
-		}
-
-		const std::string& font(void) const {
-			return font_;
-		}
-
-		virtual void setFont(std::string font) {
-			if (font.empty())
-				return;
-
-			font_ = font;
 		}
 
 		enum Align labelAlign(void) const {
@@ -746,8 +737,6 @@ public:
 		float tick_color_[4];
 		float tick_label_color_[4];
 
-		std::string font_;
-
 		Align label_align_;
 		std::string label_font_family_;
 		int label_font_size_;
@@ -778,9 +767,11 @@ public:
 		float value_border_color_[4];
 	};
 
-	Shape& shape(void) {
-		return shape_;
-	}
+//	Shape& shape(void) {
+//		return shape_;
+//	}
+
+	virtual ShapeBase * shape(void) = 0;
 
 	Theme& theme(void) {
 		return theme_;
@@ -1012,7 +1003,7 @@ protected:
 		, name_(widget2string(type))
 		, type_(type) {
 		setTimestamp(0),
-		setShape(ShapeText),
+		setShape(ShapeNone),
 		setPosition(PositionNone);
 		setOrientation(OrientationNone);
 		setAtTime(0, 0);

@@ -84,6 +84,7 @@ void DurationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 DurationWidget::DurationWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetDuration) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

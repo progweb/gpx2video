@@ -233,13 +233,6 @@ namespace layout
     Decimal  &paddingBottom() { return _padding_bottom; }
 
     ///
-    /// Get font
-    ///
-    /// @return the font element
-    ///
-    String &font() { return _font; }
-
-    ///
     /// Get text color
     ///
     /// @return the text color element
@@ -538,7 +531,6 @@ namespace layout
 	String       _bordercolor;
 	String       _bgcolor;
 
-	String       _font;
 	String       _text;
 
 	String       _label_fontfamily;

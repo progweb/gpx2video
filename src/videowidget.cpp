@@ -45,8 +45,6 @@ VideoWidget::Theme::Theme() {
 
 	setCursorColor(0.8, 0.0, 0.0, 0.8);
 
-	setFont("./assets/fonts/Helvetica.ttf");
-
 	setLabelFontFamily("Sans");
 	setLabelFontSize(15);
 	setLabelFontStyle(VideoWidget::Theme::FontStyleNormal);
@@ -631,7 +629,13 @@ void VideoWidget::save(std::ostream &os) {
 	os.imbue(std::locale::classic());
 
 	xmlopen(os);
-	xmlwrite(os);
+
+	{
+		IndentingOStreambuf indent(os, 4);
+
+		xmlwrite(os);
+	}
+
 	xmlclose(os);
 }
 
@@ -657,8 +661,6 @@ void VideoWidget::xmlclose(std::ostream &os) {
 
 void VideoWidget::xmlwrite(std::ostream &os) {
 	log_call();
-
-	IndentingOStreambuf indent(os, 4);
 
 	os << "<type>" << name() << "</type>" << std::endl;
 	os << "<name>" << label() << "</name>" << std::endl;

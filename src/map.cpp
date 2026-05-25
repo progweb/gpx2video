@@ -771,6 +771,9 @@ error:
 
 
 bool Map::load(void) {
+	// Update track settings
+	Track::setSettings(settings());
+
 	if (Track::load() == false)
 		return false;
 

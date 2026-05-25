@@ -80,6 +80,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 DateWidget::DateWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetDate) 
+	, ShapeBase(VideoWidget::theme())
    	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \

@@ -7,7 +7,7 @@
 class TextShape : public ShapeBase {
 public:
 	TextShape(VideoWidget::Theme &theme) 
-		: ShapeBase(theme) {
+		: ShapeBase(theme, VideoWidget::ShapeText) {
 		setSize(0);
 		setPadding(0, 0, 0, 0);
 	}

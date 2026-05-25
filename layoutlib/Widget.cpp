@@ -59,7 +59,6 @@ namespace layout
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
 
-	_font(this, "font", Node::ELEMENT, false),
 	_text(this, "text", Node::ELEMENT, false),
 
 	_label_fontfamily(this, "label-font-family", Node::ELEMENT, false),
@@ -131,7 +130,6 @@ namespace layout
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
 
-    getInterfaces().push_back(&_font);
     getInterfaces().push_back(&_text);
 
     getInterfaces().push_back(&_label_fontfamily);

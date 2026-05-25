@@ -35,9 +35,9 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		gforce /= 9.81;
 
 	if (!no_value_)
-		sprintf(s, "%.2f %s", gforce, widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "%.2f %s", gforce, widget_->getFriendlyName(widget_->valueUnit()).c_str());
 	else
-		sprintf(s, "-- %s", widget_->unit2string(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -78,6 +78,7 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 GForceWidget::GForceWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetGForce) 
+	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \
