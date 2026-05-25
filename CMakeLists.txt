@@ -17,7 +17,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -O2 -g -ggdb -fPIC -fpermissi
 add_definitions(-Wall -Wextra -D_GNU_SOURCE)
 
 # Options
-OPTION(BUILD_GTK "Build gpx2video with gtk interface" OFF)
+OPTION(BUILD_GTK "Build gpx2video with gtk interface" ON)
 
 # CMake extensions
 LIST(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")

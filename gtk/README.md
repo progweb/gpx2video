@@ -1,4 +1,4 @@
-# GPX2Video - Telemetry overlay
+# GPX2Video - GTK interface
 
 GTK interface for gpx2video tool.
 
@@ -8,8 +8,6 @@ GTK interface for gpx2video tool.
 
 ## Features
 
-*Dev in progress*
-
 User interface feature:
 - video loading
 - video start time setting (from video metadata, GPMF or GPX and from calendar)
@@ -17,14 +15,13 @@ User interface feature:
 - telemetry file loading
 - telemetry settings 
 - widget settings
+- locales detection
 
 To fix:
 - sound player (issue on some device)
 
 To do:
-- translate user application
 - redraw each icon (in real svg)
-- marker size for 'track' & 'map' widget
 - to be able to use user icons
 - arc & bar settings customization
 - add more widget shapes (ramp & curve)
@@ -33,82 +30,6 @@ To do:
 - option to enable / disable sound
 - optimization & fix cpu usage
 - add progress bar, bufferization information...
-- add video timer on the interface
-
-## Data installation
-
-### Install gpx2video icons
-
-```bash
-mkdir -p ~/.local/share/icons/hicolor
-cp -a icons/48x48 icons/scalable ~/.local/share/icons/hicolor
-
-gtk-update-icon-cache
-```
-
-### Add gpx2video desktop application menu entry
-
-```bash
-desktop-file-install --dir=$HOME/.local/share/applications data/com.progweb.gpx2video.desktop
-update-desktop-database ~/.local/share/applications
-xdg-desktop-menu forceupdate
-```
-
-
-### Add gpx2video gsettings file 
-
-```bash
-sudo cp -a data/com.progweb.gpx2video.gschema.xml /usr/share/glib-2.0/schemas
-sudo glib-compile-schemas /usr/share/glib-2.0/schemas
-```
-
-
-## Build
-
-### Build on host
-
-To build gpx2video, please install all gpx2video tool dependencies 
-and gtk-4 and pulseaudio libraries (on Debian):
-
-```bash
-apt-get install libpulse-dev libgtkmm-4.0-dev libglibmm-2.68-dev libepoxy-dev libglm-dev
-```
-
-Then build in using cmake tools:
-
-```bash
-$ git clone https://github.com/progweb/gpx2video.git
-$ mkdir gpx2video/build
-$ cd gpx2video/build
-$ cmake -DBUILD_GTK=ON ..
-$ make
-$ ./gtk/gpx2video
-```
-
-### Build in docker
-
-#### Debian
-
-By default docker will use debian:12.8-slim as base image, but you can change it.
-
-```bash
-make build-docker
-make build-gpx2video
-make run-gpx2video VIDEO_DIR=~/Video
-./gtk/gpx2video /data/video.mp4
-```
-
-
-## Usage
-
-Shortkey:
-  - Key 'left arrow': -10.0 seconds 
-  - Key 'right arrow': 10.0 seconds
-  - Key 'down arrow': -60.0 seconds
-  - Key 'up arrow': 60.0 seconds
-  - Key 's': step one frame
-  - Key 'f': fullscreen mode
-  - Key 'space': play/pause
 
 
 ## Software thread architecture
@@ -128,6 +49,10 @@ Shortkey:
       |        ApplicationWindow::run
       |
       +--+ GPX2VideoArea
+            +--+ GPX2VideoStream::Audio thread
+            |
+            +--+ GPX2VideoStream::Video thread
+
 
 ## Software stack call
 
