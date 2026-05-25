@@ -49,19 +49,26 @@ public:
 
 	enum Unit {
 		UnitNone,
-		UnitMPS, // Meter / S
-		UnitMPH, // Mile / H
-		UnitKPH, // Km / H
-		UnitMPM, // Min / Mile
-		UnitMPK, // Min / Km
+		UnitMeterPerSec, // Meter / S
+		UnitMilesPerSec, // Miles / S
+		UnitFeetPerSec, // Feet / S
+		UnitMeterPerMin, // Meter / Min
+		UnitMilesPerMin, // Miles / Min
+		UnitFeetPerMin, // Feet / Min
+		UnitKmPerHour, // Km / H
+		UnitMeterPerHour, // Meter / H
+		UnitMilesPerHour, // Miles / H
+		UnitFeetPerHour, // Feet / H
+		UnitMinPerMile, // Min / Mile
+		UnitMinPerKm, // Min / Km
 		UnitKm,
 		UnitMeter,
-		UnitFoot,
+		UnitFeet,
 		UnitMiles,
 		UnitCelsius,
 		UnitFarenheit,
 		UnitG,
-		UnitMeterPS2,
+		UnitMeterPerSec2,
 		UnitUnknown
 	};
 

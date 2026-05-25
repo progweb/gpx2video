@@ -28,16 +28,16 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataAverageSpeed);
 
 	switch (widget_->valueUnit()) {
-	case VideoWidget::UnitMPH:
+	case VideoWidget::UnitMilesPerHour:
 		speed *= 0.6213711922;
 		break;
-	case VideoWidget::UnitKPH:
+	case VideoWidget::UnitKmPerHour:
 		break;
-	case VideoWidget::UnitMPM:
+	case VideoWidget::UnitMinPerMile:
 		speed *= 0.6213711922;
 		pace_unit = true;
 		break;
-	case VideoWidget::UnitMPK:
+	case VideoWidget::UnitMinPerKm:
 		pace_unit = true;
 		break;
 	default:
@@ -116,10 +116,10 @@ AvgSpeedWidget::AvgSpeedWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMPH);
-	ADD_UNIT(VideoWidget::UnitKPH);
-	ADD_UNIT(VideoWidget::UnitMPM);
-	ADD_UNIT(VideoWidget::UnitMPK);
+	ADD_UNIT(VideoWidget::UnitMilesPerHour);
+	ADD_UNIT(VideoWidget::UnitKmPerHour);
+	ADD_UNIT(VideoWidget::UnitMinPerMile);
+	ADD_UNIT(VideoWidget::UnitMinPerKm);
 
 	setShape(VideoWidget::ShapeText);
 }

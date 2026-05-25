@@ -325,7 +325,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
 	trackSettings.setMarkerSize((double) t->markerSize());
-printf("MARKER SIZE %f\n", (double) t->markerSize());
+
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 
 	log_info("Load track widget");
@@ -1139,17 +1139,20 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	VideoWidget *widget = NULL;
 
 	switch (type) {
-	case VideoWidget::WidgetGPX:
-		widget = GPXWidget::create(app_);
+	case VideoWidget::WidgetAverageSpeed: 
+		widget = AvgSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetAverageRideSpeed: 
+		widget = AvgRideSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetBatteryLevel:
+		widget = BatteryLevelWidget::create(app_);
+		break;
+	case VideoWidget::WidgetCadence:
+		widget = CadenceWidget::create(app_);
 		break;
 	case VideoWidget::WidgetDate:
 		widget = DateWidget::create(app_);
-		break;
-	case VideoWidget::WidgetTime:
-		widget = TimeWidget::create(app_);
-		break;
-	case VideoWidget::WidgetText:
-		widget = TextWidget::create(app_);
 		break;
 	case VideoWidget::WidgetDistance:
 		widget = DistanceWidget::create(app_);
@@ -1157,17 +1160,14 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	case VideoWidget::WidgetDuration: 
 		widget = DurationWidget::create(app_);
 		break;
-	case VideoWidget::WidgetSpeed: 
-		widget = SpeedWidget::create(app_);
+	case VideoWidget::WidgetElevation:
+		widget = ElevationWidget::create(app_);
 		break;
-	case VideoWidget::WidgetMaxSpeed: 
-		widget = MaxSpeedWidget::create(app_);
+	case VideoWidget::WidgetGForce:
+		widget = GForceWidget::create(app_);
 		break;
-	case VideoWidget::WidgetAverageSpeed: 
-		widget = AvgSpeedWidget::create(app_);
-		break;
-	case VideoWidget::WidgetAverageRideSpeed: 
-		widget = AvgRideSpeedWidget::create(app_);
+	case VideoWidget::WidgetGPX:
+		widget = GPXWidget::create(app_);
 		break;
 	case VideoWidget::WidgetGrade:
 		widget = GradeWidget::create(app_);
@@ -1175,38 +1175,41 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	case VideoWidget::WidgetHeading:
 		widget = HeadingWidget::create(app_);
 		break;
-	case VideoWidget::WidgetImage:
-		widget = ImageWidget::create(app_);
-		break;
-	case VideoWidget::WidgetElevation:
-		widget = ElevationWidget::create(app_);
-		break;
-	case VideoWidget::WidgetCadence:
-		widget = CadenceWidget::create(app_);
-		break;
 	case VideoWidget::WidgetHeartRate:
 		widget = HeartRateWidget::create(app_);
-		break;
-	case VideoWidget::WidgetTemperature:
-		widget = TemperatureWidget::create(app_);
-		break;
-	case VideoWidget::WidgetPower: 
-		widget = PowerWidget::create(app_);
-		break;
-	case VideoWidget::WidgetGForce:
-		widget = GForceWidget::create(app_);
-		break;
-	case VideoWidget::WidgetVerticalSpeed:
-		widget = VerticalSpeedWidget::create(app_);
-		break;
-	case VideoWidget::WidgetLap:
-		widget = LapWidget::create(app_);
 		break;
 	case VideoWidget::WidgetHomeDistance:
 		widget = HomeDistanceWidget::create(app_);
 		break;
-	case VideoWidget::WidgetBatteryLevel:
-		widget = BatteryLevelWidget::create(app_);
+	case VideoWidget::WidgetImage:
+		widget = ImageWidget::create(app_);
+		break;
+	case VideoWidget::WidgetLap:
+		widget = LapWidget::create(app_);
+		break;
+	case VideoWidget::WidgetMaxSpeed: 
+		widget = MaxSpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetPosition: 
+		widget = PositionWidget::create(app_);
+		break;
+	case VideoWidget::WidgetPower: 
+		widget = PowerWidget::create(app_);
+		break;
+	case VideoWidget::WidgetSpeed: 
+		widget = SpeedWidget::create(app_);
+		break;
+	case VideoWidget::WidgetTemperature:
+		widget = TemperatureWidget::create(app_);
+		break;
+	case VideoWidget::WidgetText:
+		widget = TextWidget::create(app_);
+		break;
+	case VideoWidget::WidgetTime:
+		widget = TimeWidget::create(app_);
+		break;
+	case VideoWidget::WidgetVerticalSpeed:
+		widget = VerticalSpeedWidget::create(app_);
 		break;
 	case VideoWidget::WidgetMap: {
 			MapSettings mapSettings;

@@ -344,22 +344,36 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 
 	if (s.empty() || (s == "none"))
 		unit = VideoWidget::UnitNone;
-	else if (s == "mps")
-		unit = VideoWidget::UnitMPS;
-	else if (s == "mph")
-		unit = VideoWidget::UnitMPH;
-	else if (s == "kph")
-		unit = VideoWidget::UnitKPH;
-	else if ((s == "mpm") || (s == "minmile"))
-		unit = VideoWidget::UnitMPM;
-	else if ((s == "mpk") || (s == "minkm"))
-		unit = VideoWidget::UnitMPK;
+	else if ((s == "mps") || (s == "meterpersec"))
+		unit = VideoWidget::UnitMilesPerSec;
+	else if (s == "milespersec")
+		unit = VideoWidget::UnitMilesPerSec;
+	else if ((s == "ftps") || (s == "feetpersec"))
+		unit = VideoWidget::UnitFeetPerSec;
+	else if (s == "meterpermin")
+		unit = VideoWidget::UnitMeterPerMin;
+	else if (s == "milespermin")
+		unit = VideoWidget::UnitMilesPerMin;
+	else if ((s == "ftpmin") || (s == "feetpermin"))
+		unit = VideoWidget::UnitFeetPerMin;
+	else if (s == "meterperhour")
+		unit = VideoWidget::UnitMeterPerHour;
+	else if ((s == "mph") || (s == "milesperhour"))
+		unit = VideoWidget::UnitMilesPerHour;
+	else if ((s == "kph") || (s == "kmperhour"))
+		unit = VideoWidget::UnitKmPerHour;
+	else if ((s == "ftph") || (s == "feetperhour"))
+		unit = VideoWidget::UnitFeetPerHour;
+	else if ((s == "mpm") || (s == "minpermile"))
+		unit = VideoWidget::UnitMinPerMile;
+	else if ((s == "mpk") || (s == "minperkm"))
+		unit = VideoWidget::UnitMinPerKm;
 	else if (s == "km")
 		unit = VideoWidget::UnitKm;
-	else if (s == "m")
+	else if ((s == "m") || (s == "meter"))
 		unit = VideoWidget::UnitMeter;
-	else if (s == "ft")
-		unit = VideoWidget::UnitFoot;
+	else if ((s == "ft") || (s == "feet"))
+		unit = VideoWidget::UnitFeet;
 	else if (s == "miles")
 		unit = VideoWidget::UnitMiles;
 	else if ((s == "C") || (s == "celsius"))
@@ -368,8 +382,8 @@ VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
 		unit = VideoWidget::UnitFarenheit;
 	else if ((s == "g") || (s == "G"))
 		unit = VideoWidget::UnitG;
-	else if (s == "mps2")
-		unit = VideoWidget::UnitMeterPS2;
+	else if (s == "meterpersec2")
+		unit = VideoWidget::UnitMeterPerSec2;
 	else
 		unit = VideoWidget::UnitUnknown;
 
@@ -589,21 +603,35 @@ std::string VideoWidget::needletype2string(Theme::NeedleType type) {
 
 std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 	switch (unit) {
-	case VideoWidget::UnitMPS:
-		return "mps";
-	case VideoWidget::UnitMPH:
-		return "mph";
-	case VideoWidget::UnitKPH:
-		return "kph";
-	case VideoWidget::UnitMPM:
-		return "mpm";
-	case VideoWidget::UnitMPK:
-		return "mpk";
+	case VideoWidget::UnitMeterPerSec:
+		return "meterpersec";
+	case VideoWidget::UnitMilesPerSec:
+		return "milespersec";
+	case VideoWidget::UnitFeetPerSec:
+		return "feetpersec";
+	case VideoWidget::UnitMeterPerMin:
+		return "meterpermin";
+	case VideoWidget::UnitMilesPerMin:
+		return "milespermin";
+	case VideoWidget::UnitFeetPerMin:
+		return "feetpermin";
+	case VideoWidget::UnitMeterPerHour:
+		return "meterperhour";
+	case VideoWidget::UnitMilesPerHour:
+		return "milesperhour";
+	case VideoWidget::UnitKmPerHour:
+		return "kmperhour";
+	case VideoWidget::UnitFeetPerHour:
+		return "feetperhour";
+	case VideoWidget::UnitMinPerMile:
+		return "minpermile";
+	case VideoWidget::UnitMinPerKm:
+		return "minperkm";
 	case VideoWidget::UnitKm:
 		return "km";
 	case VideoWidget::UnitMeter:
-		return "m";
-	case VideoWidget::UnitFoot:
+		return "meter";
+	case VideoWidget::UnitFeet:
 		return "ft";
 	case VideoWidget::UnitMiles:
 		return "miles";
@@ -613,8 +641,8 @@ std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
 		return "farenheit";
 	case VideoWidget::UnitG:
 		return "g";
-	case VideoWidget::UnitMeterPS2:
-		return "mps2";
+	case VideoWidget::UnitMeterPerSec2:
+		return "meterpersec2";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:
 	default:
@@ -809,21 +837,35 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 
 std::string VideoWidget::getFriendlyName(VideoWidget::Unit unit) {
 	switch (unit) {
-	case VideoWidget::UnitMPS:
+	case VideoWidget::UnitMeterPerSec:
 		return "m/s";
-	case VideoWidget::UnitMPH:
+	case VideoWidget::UnitMilesPerSec:
+		return "miles/s";
+	case VideoWidget::UnitFeetPerSec:
+		return "ft/s";
+	case VideoWidget::UnitMeterPerMin:
+		return "m/min";
+	case VideoWidget::UnitMilesPerMin:
+		return "miles/min";
+	case VideoWidget::UnitFeetPerMin:
+		return "ft/min";
+	case VideoWidget::UnitMeterPerHour:
 		return "m/h";
-	case VideoWidget::UnitKPH:
+	case VideoWidget::UnitMilesPerHour:
+		return "miles/h";
+	case VideoWidget::UnitKmPerHour:
 		return "km/h";
-	case VideoWidget::UnitMPM:
+	case VideoWidget::UnitFeetPerHour:
+		return "ft/h";
+	case VideoWidget::UnitMinPerMile:
 		return "min/mile";
-	case VideoWidget::UnitMPK:
+	case VideoWidget::UnitMinPerKm:
 		return "min/km";
 	case VideoWidget::UnitKm:
 		return "km";
 	case VideoWidget::UnitMeter:
 		return "m";
-	case VideoWidget::UnitFoot:
+	case VideoWidget::UnitFeet:
 		return "ft";
 	case VideoWidget::UnitMiles:
 		return "miles";
@@ -833,7 +875,7 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Unit unit) {
 		return "F";
 	case VideoWidget::UnitG:
 		return "g";
-	case VideoWidget::UnitMeterPS2:
+	case VideoWidget::UnitMeterPerSec2:
 		return "m/s²";
 	case VideoWidget::UnitNone:
 	case VideoWidget::UnitUnknown:

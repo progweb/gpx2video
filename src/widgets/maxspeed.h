@@ -147,7 +147,7 @@ public:
 
 		widget = new MaxSpeedWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitMPH);
+		widget->setValueUnit(VideoWidget::UnitMilesPerHour);
 
 		return widget;
 	}

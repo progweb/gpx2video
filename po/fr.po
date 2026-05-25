@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-05-22 21:54+0200\n"
+"POT-Creation-Date: 2026-05-25 22:45+0200\n"
 "PO-Revision-Date: 2026-05-17 16:18+0200\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -15,116 +15,116 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ../src/videowidget.cpp:738 ../gtk/src/ui/shape/arc_box.ui:290
+#: ../src/videowidget.cpp:750 ../gtk/src/ui/shape/arc_box.ui:290
 msgid "Arc"
 msgstr "Arc"
 
-#: ../src/videowidget.cpp:740
+#: ../src/videowidget.cpp:752
 msgid "Bar"
 msgstr "Barre"
 
-#: ../src/videowidget.cpp:742 ../src/videowidget.cpp:795
+#: ../src/videowidget.cpp:754 ../src/videowidget.cpp:807
 msgid "Text"
 msgstr "Texte"
 
-#: ../src/videowidget.cpp:751
+#: ../src/videowidget.cpp:763
 msgid "Average speed"
 msgstr "Vitesse moyenne"
 
-#: ../src/videowidget.cpp:753
+#: ../src/videowidget.cpp:765
 msgid "Average ride speed"
 msgstr "Vitesse moyenne en déplacement"
 
-#: ../src/videowidget.cpp:755
+#: ../src/videowidget.cpp:767
 msgid "Battery level"
 msgstr "Niveau de batterie"
 
-#: ../src/videowidget.cpp:757
+#: ../src/videowidget.cpp:769
 msgid "Cadence"
 msgstr "Cadence"
 
-#: ../src/videowidget.cpp:759 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:771 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr "Date"
 
-#: ../src/videowidget.cpp:761
+#: ../src/videowidget.cpp:773
 msgid "Distance"
 msgstr "Distance"
 
-#: ../src/videowidget.cpp:763 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:775 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr "Durée"
 
-#: ../src/videowidget.cpp:765
+#: ../src/videowidget.cpp:777
 msgid "Elevation"
 msgstr "Altitude"
 
-#: ../src/videowidget.cpp:767
+#: ../src/videowidget.cpp:779
 msgid "GForce"
 msgstr "G-Force"
 
-#: ../src/videowidget.cpp:769
+#: ../src/videowidget.cpp:781
 msgid "GPX"
 msgstr "GPX"
 
-#: ../src/videowidget.cpp:771
+#: ../src/videowidget.cpp:783
 msgid "Grade / Slope"
 msgstr "Pente"
 
-#: ../src/videowidget.cpp:773
+#: ../src/videowidget.cpp:785
 msgid "Heading"
 msgstr "Compas"
 
-#: ../src/videowidget.cpp:775
+#: ../src/videowidget.cpp:787
 msgid "Heart rate"
 msgstr "Fréquence cardiaque"
 
-#: ../src/videowidget.cpp:777
+#: ../src/videowidget.cpp:789
 msgid "Home distance"
 msgstr "Distance depuis le départ"
 
-#: ../src/videowidget.cpp:779
+#: ../src/videowidget.cpp:791
 msgid "Image"
 msgstr "Image"
 
-#: ../src/videowidget.cpp:781
+#: ../src/videowidget.cpp:793
 msgid "Lap"
 msgstr "Tour"
 
-#: ../src/videowidget.cpp:783 ../gtk/src/ui/widgets/map_box.ui:62
+#: ../src/videowidget.cpp:795 ../gtk/src/ui/widgets/map_box.ui:62
 msgid "Map"
 msgstr "Carte"
 
-#: ../src/videowidget.cpp:785
+#: ../src/videowidget.cpp:797
 msgid "Maximum speed"
 msgstr "Vitesse maximale"
 
-#: ../src/videowidget.cpp:787
+#: ../src/videowidget.cpp:799
 msgid "Position"
 msgstr "Position"
 
-#: ../src/videowidget.cpp:789
+#: ../src/videowidget.cpp:801
 msgid "Power"
 msgstr "Puissance"
 
-#: ../src/videowidget.cpp:791
+#: ../src/videowidget.cpp:803
 msgid "Speed"
 msgstr "Vitesse"
 
-#: ../src/videowidget.cpp:793
+#: ../src/videowidget.cpp:805
 msgid "Temperature"
 msgstr "Température"
 
-#: ../src/videowidget.cpp:797 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:809 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr "Heure"
 
-#: ../src/videowidget.cpp:799 ../gtk/src/ui/widgets/map_box.ui:194
+#: ../src/videowidget.cpp:811 ../gtk/src/ui/widgets/map_box.ui:194
 #: ../gtk/src/ui/widgets/track_box.ui:55
 msgid "Track"
 msgstr "Trace"
 
-#: ../src/videowidget.cpp:801
+#: ../src/videowidget.cpp:813
 msgid "Vertical speed"
 msgstr "Vitesse verticale"
 
@@ -374,7 +374,6 @@ msgstr "Couleur du bord :"
 #: ../gtk/src/ui/widgets/map_box.ui:350 ../gtk/src/ui/widgets/track_box.ui:210
 #: ../gtk/src/ui/widgets/track_box.ui:239
 #: ../gtk/src/ui/widgets/track_box.ui:268
-#, fuzzy
 msgid "Select a color"
 msgstr "Couleur principale :"
 

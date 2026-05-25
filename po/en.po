@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-05-22 21:54+0200\n"
+"POT-Creation-Date: 2026-05-25 22:45+0200\n"
 "PO-Revision-Date: 2026-05-17 11:33+0200\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -15,116 +15,116 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/videowidget.cpp:738 ../gtk/src/ui/shape/arc_box.ui:290
+#: ../src/videowidget.cpp:750 ../gtk/src/ui/shape/arc_box.ui:290
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:740
+#: ../src/videowidget.cpp:752
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:742 ../src/videowidget.cpp:795
+#: ../src/videowidget.cpp:754 ../src/videowidget.cpp:807
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:751
+#: ../src/videowidget.cpp:763
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:753
+#: ../src/videowidget.cpp:765
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:755
+#: ../src/videowidget.cpp:767
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:757
+#: ../src/videowidget.cpp:769
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:759 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:771 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:761
+#: ../src/videowidget.cpp:773
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:763 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:775 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:765
+#: ../src/videowidget.cpp:777
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:767
+#: ../src/videowidget.cpp:779
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:769
+#: ../src/videowidget.cpp:781
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:771
+#: ../src/videowidget.cpp:783
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:773
+#: ../src/videowidget.cpp:785
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:775
+#: ../src/videowidget.cpp:787
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:777
+#: ../src/videowidget.cpp:789
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:779
+#: ../src/videowidget.cpp:791
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:781
+#: ../src/videowidget.cpp:793
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:783 ../gtk/src/ui/widgets/map_box.ui:62
+#: ../src/videowidget.cpp:795 ../gtk/src/ui/widgets/map_box.ui:62
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:785
+#: ../src/videowidget.cpp:797
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:787
+#: ../src/videowidget.cpp:799
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:789
+#: ../src/videowidget.cpp:801
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:791
+#: ../src/videowidget.cpp:803
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:793
+#: ../src/videowidget.cpp:805
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:797 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:809 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:799 ../gtk/src/ui/widgets/map_box.ui:194
+#: ../src/videowidget.cpp:811 ../gtk/src/ui/widgets/map_box.ui:194
 #: ../gtk/src/ui/widgets/track_box.ui:55
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:801
+#: ../src/videowidget.cpp:813
 msgid "Vertical speed"
 msgstr ""
 

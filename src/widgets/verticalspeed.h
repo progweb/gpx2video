@@ -271,7 +271,7 @@ public:
 
 		widget = new VerticalSpeedWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitMPS);
+		widget->setValueUnit(VideoWidget::UnitMeterPerSec);
 
 		return widget;
 	}

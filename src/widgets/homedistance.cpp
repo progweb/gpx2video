@@ -31,7 +31,7 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 	else if (widget_->valueUnit() == VideoWidget::UnitMeter) {
 	}
-	else if (widget_->valueUnit() == VideoWidget::UnitFoot) {
+	else if (widget_->valueUnit() == VideoWidget::UnitFeet) {
 		homedistance *= 3.28084;
 	}
 	else {
@@ -111,7 +111,7 @@ HomeDistanceWidget::HomeDistanceWidget(GPXApplication &app)
 	ADD_UNIT(VideoWidget::UnitMiles);
 	ADD_UNIT(VideoWidget::UnitKm);
 	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFoot);
+	ADD_UNIT(VideoWidget::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 }

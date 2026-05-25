@@ -284,7 +284,7 @@ ElevationWidget::ElevationWidget(GPXApplication &app)
 	})
 
 	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFoot);
+	ADD_UNIT(VideoWidget::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 }

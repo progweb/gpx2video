@@ -377,7 +377,7 @@ You can specify units for some widgets.
 </widget>		
 ```
 
-**value-unit** values are: mph, kph, mpm / minmile, mpk / minkm.
+**value-unit** values are: mph, kph, mpm / minpermile, mpk / minperkm.
 
 
 ##### vertical speed widget
@@ -389,7 +389,7 @@ You can specify units for some widgets.
 </widget>		
 ```
 
-**value-unit** values are: mps.
+**value-unit** values are: mps / meterpersec, milespersec.
 
 
 ##### distance widget
@@ -447,7 +447,7 @@ You can specify units for some widgets.
 </widget>		
 ```
 
-**value-unit** values are: g or mps2.
+**value-unit** values are: g or meterpersec2.
 
 
 ##### lap widget

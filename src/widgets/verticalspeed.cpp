@@ -26,7 +26,7 @@ void VerticalSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	if (widget_->valueUnit() == VideoWidget::UnitMPS) {
+	if (widget_->valueUnit() == VideoWidget::UnitMeterPerSec) {
 	}
 	else {
 	}
@@ -147,9 +147,11 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	if (widget_->valueUnit() == VideoWidget::UnitMPS) {
+	if (widget_->valueUnit() == VideoWidget::UnitMeterPerSec) {
 	}
-	else {
+	else if (widget_->valueUnit() == VideoWidget::UnitMilesPerSec) {
+		verticalspeed /= 1000.0;
+		verticalspeed *= 0.6213711922;
 	}
 
 	// Apply padding
@@ -280,6 +282,14 @@ VerticalSpeedWidget::VerticalSpeedWidget(GPXApplication &app)
 
 	ADD_SHAPE(VideoWidget::ShapeBar);
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(VideoWidget::UnitMilesPerSec);
+	ADD_UNIT(VideoWidget::UnitMeterPerSec);
 
 	setShape(VideoWidget::ShapeText);
 }

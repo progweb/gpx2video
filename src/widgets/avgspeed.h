@@ -134,7 +134,7 @@ public:
 
 		widget = new AvgSpeedWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitMPH);
+		widget->setValueUnit(VideoWidget::UnitMilesPerHour);
 
 		return widget;
 	}

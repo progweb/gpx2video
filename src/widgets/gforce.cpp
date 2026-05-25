@@ -93,7 +93,7 @@ GForceWidget::GForceWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMeterPS2);
+	ADD_UNIT(VideoWidget::UnitMeterPerSec2);
 	ADD_UNIT(VideoWidget::UnitG);
 	
 	setShape(VideoWidget::ShapeText);

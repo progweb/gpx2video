@@ -31,10 +31,10 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 	else if (widget_->valueUnit() == VideoWidget::UnitMeter) {
 	}
-	else if (widget_->valueUnit() == VideoWidget::UnitFoot) {
+	else if (widget_->valueUnit() == VideoWidget::UnitFeet) {
 		distance *= 3.28084;
 	}
-	else {
+	else if (widget_->valueUnit() == VideoWidget::UnitMiles) {
 		distance /= 1000.0;
 		distance *= 0.6213711922;
 	}
@@ -111,7 +111,7 @@ DistanceWidget::DistanceWidget(GPXApplication &app)
 	ADD_UNIT(VideoWidget::UnitMiles);
 	ADD_UNIT(VideoWidget::UnitKm);
 	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFoot);
+	ADD_UNIT(VideoWidget::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 
