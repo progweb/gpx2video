@@ -262,7 +262,7 @@ public:
 
 		widget = new SpeedWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitMilesPerHour);
+		widget->setValueUnit(TelemetryData::UnitMilesPerHour);
 
 		return widget;
 	}

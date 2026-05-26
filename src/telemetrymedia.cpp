@@ -76,6 +76,346 @@ void TelemetryData::reset(bool all) {
 }
 
 
+int TelemetryData::line(void) const {
+	return line_;
+}
+
+
+int TelemetryData::index(void) const {
+	return index_;
+}
+
+
+void TelemetryData::setIndex(int index) {
+	index_ = index;
+}
+
+
+const TelemetryData::Type& TelemetryData::type(void) const {
+	return type_;
+}
+
+
+const char * TelemetryData::type2string(void) const {
+	const char *types[] = {
+		"U", // Unknown
+		"D", // Dummy
+		"M", // Measured
+		"F", // Fix
+		"P", // Predict
+		"C", // Unchanged
+		"E", // Error
+	};
+
+	if (type_ > ARRAY_SIZE(types))
+		return "";
+
+	return types[type_];
+}
+
+
+const uint64_t& TelemetryData::datetime(void) const {
+	return datetime_;
+}
+
+
+void TelemetryData::setDatetime(const uint64_t &datetime) {
+	if (type_ == TypeUnknown)
+		type_ = TypeDummy;
+
+	datetime_ = datetime;
+}
+
+
+const uint64_t& TelemetryData::timestamp(void) const {
+	return ts_;
+}
+
+
+const double& TelemetryData::latitude(void) const {
+	return lat_;
+}
+
+
+const double& TelemetryData::longitude(void) const {
+	return lon_;
+}
+
+
+double TelemetryData::elevation(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitFeet:
+		return ele_ * 3.28084;
+
+	case TelemetryData::UnitMiles:
+		return (ele_ * 0.6213711922) / 1000.0;
+
+	case TelemetryData::UnitMeter:
+	case TelemetryData::UnitDefault:
+	default:
+		return ele_;
+	}
+}
+
+
+int TelemetryData::cadence(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	// tr/min
+
+	return cadence_;
+}
+
+
+int TelemetryData::heartrate(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	// bpm
+
+	return heartrate_;
+}
+
+
+double TelemetryData::temperature(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitFarenheit:
+		return (temperature_ * 9.0 / 5.0) + 32.0;
+
+	case TelemetryData::UnitCelsius:
+	case TelemetryData::UnitDefault:
+	default:
+		return temperature_;
+	}
+}
+
+
+int TelemetryData::power(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	// watt
+
+	return power_;
+}
+
+
+double TelemetryData::duration(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	return duration_;
+}
+
+
+double TelemetryData::distance(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitFeet:
+		return distance_ * 3.28084;
+
+	case TelemetryData::UnitMiles:
+		return (distance_ * 0.6213711922) / 1000.0;
+
+	case TelemetryData::UnitKm:
+		return distance_ / 1000.0;
+
+	case TelemetryData::UnitMeter:
+	case TelemetryData::UnitDefault:
+	default:
+		return distance_;
+	}
+}
+
+
+double TelemetryData::heading(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	return heading_;
+}
+
+
+double TelemetryData::grade(void) const {
+	return grade_;
+}
+
+
+double TelemetryData::speed(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitMilesPerHour:
+		return speed_ * 0.6213711922;
+
+	case TelemetryData::UnitMinPerMile:
+		return 60.0 / (speed_ * 0.6213711922);
+
+	case TelemetryData::UnitMinPerKm:
+		return 60.0 / speed_;
+
+	case TelemetryData::UnitMeterPerHour:
+		return speed_ * 1000.0;
+
+	case TelemetryData::UnitKmPerHour:
+	case TelemetryData::UnitDefault:
+	default:
+		return speed_;
+	}
+}
+
+
+double TelemetryData::maxspeed(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitMilesPerHour:
+		return maxspeed_ * 0.6213711922;
+
+	case TelemetryData::UnitMinPerMile:
+		return 60.0 / (maxspeed_ * 0.6213711922);
+
+	case TelemetryData::UnitMinPerKm:
+		return 60.0 / maxspeed_;
+
+	case TelemetryData::UnitMeterPerHour:
+		return maxspeed_ * 1000.0;
+
+	case TelemetryData::UnitKmPerHour:
+	case TelemetryData::UnitDefault:
+	default:
+		return maxspeed_;
+	}
+}
+
+
+double TelemetryData::acceleration(TelemetryData::Unit unit) const {
+	// acceleration m/s²
+	// gforce g (= 9,80665 m/s²)
+
+	switch (unit) {
+	case TelemetryData::UnitG:
+		return acceleration_ / 9.81;
+
+	case TelemetryData::UnitMeterPerSec2:
+	case TelemetryData::UnitDefault:
+	default:
+		return acceleration_;
+	}
+}
+
+
+double TelemetryData::rideTime(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	return ridetime_;
+}
+
+
+double TelemetryData::elapsedTime(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	return elapsedtime_;
+}
+
+
+double TelemetryData::avgspeed(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitMilesPerHour:
+		return avgspeed_ * 0.6213711922;
+
+	case TelemetryData::UnitMinPerMile:
+		return 60.0 / (avgspeed_ * 0.6213711922);
+
+	case TelemetryData::UnitMinPerKm:
+		return 60.0 / avgspeed_;
+
+	case TelemetryData::UnitMeterPerHour:
+		return avgspeed_ * 1000.0;
+
+	case TelemetryData::UnitKmPerHour:
+	case TelemetryData::UnitDefault:
+	default:
+		return avgspeed_;
+	}
+}
+
+
+double TelemetryData::avgridespeed(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitMilesPerHour:
+		return avgridespeed_ * 0.6213711922;
+
+	case TelemetryData::UnitMinPerMile:
+		return 60.0 / (avgridespeed_ * 0.6213711922);
+
+	case TelemetryData::UnitMinPerKm:
+		return 60.0 / avgridespeed_;
+
+	case TelemetryData::UnitMeterPerHour:
+		return avgridespeed_ * 1000.0;
+
+	case TelemetryData::UnitKmPerHour:
+	case TelemetryData::UnitDefault:
+	default:
+		return avgridespeed_;
+	}
+}
+
+
+double TelemetryData::verticalspeed(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	switch (unit) {
+	case TelemetryData::UnitMilesPerSec:
+		return (verticalspeed_ * 0.6213711922) / 1000.0;
+
+	case TelemetryData::UnitFeetPerSec:
+		return verticalspeed_ * 3.28084;
+
+	case TelemetryData::UnitMeterPerSec:
+	case TelemetryData::UnitDefault:
+	default:
+		return verticalspeed_;
+	}
+}
+
+
+double TelemetryData::homedistance(TelemetryData::Unit unit) const {
+	switch (unit) {
+	case TelemetryData::UnitFeet:
+		return homedistance_ * 3.28084;
+
+	case TelemetryData::UnitMiles:
+		return (homedistance_ * 0.6213711922) / 1000.0;
+
+	case TelemetryData::UnitKm:
+		return homedistance_ / 1000.0;
+
+	case TelemetryData::UnitMeter:
+	case TelemetryData::UnitDefault:
+	default:
+		return homedistance_;
+	}
+}
+
+
+double TelemetryData::batterylevel(void) const {
+	return batterylevel_;
+}
+
+
+int TelemetryData::lap(void) const {
+	return lap_;
+}
+
+
+bool TelemetryData::inRange(void) const {
+	return in_range_;
+}
+
+
+bool TelemetryData::isPause(void) const {
+	return is_pause_;
+}
+
+
+bool TelemetryData::hasValue(Data type) const {
+	return ((has_value_ & type) != 0);
+}
+
+
 void TelemetryData::dump(void) const {
 	printf("  [%d] '%s' (Fix: %c) Time: %s [%f, %f] Distance: %.3f km in %d sec, speed: %.3f (pause: %s) - Altitude: %.1f (%.1f%%)\n",
 			line_,

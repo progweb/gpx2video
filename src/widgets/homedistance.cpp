@@ -21,23 +21,13 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double homedistance = data.homedistance();
+	double homedistance = data.homedistance(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataHomeDistance);
-
-	if (widget_->valueUnit() == VideoWidget::UnitKm) {
-		homedistance /= 1000.0;
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitMeter) {
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitFeet) {
-		homedistance *= 3.28084;
-	}
-	else {
-		homedistance /= 1000.0;
-		homedistance *= 0.6213711922;
-	}
 
 	if (!no_value_) {
 		const char *format;
@@ -49,10 +39,10 @@ void HomeDistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		else
 			format = "%.0f %s";
 
-		sprintf(s, format, homedistance, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, format, homedistance, unit.c_str());
 	}
 	else
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -108,10 +98,10 @@ HomeDistanceWidget::HomeDistanceWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMiles);
-	ADD_UNIT(VideoWidget::UnitKm);
-	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFeet);
+	ADD_UNIT(TelemetryData::UnitMiles);
+	ADD_UNIT(TelemetryData::UnitMeter);
+	ADD_UNIT(TelemetryData::UnitKm);
+	ADD_UNIT(TelemetryData::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 }

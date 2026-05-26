@@ -116,7 +116,7 @@
 										<property name="rgba">#9141AC</property>
 										<property name="show-editor">False</property>
 										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="1">Select a color</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
 									</object>
 								</child>
 							</object>
@@ -172,7 +172,7 @@
 										<property name="rgba">#9141AC</property>
 										<property name="show-editor">False</property>
 										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="1">Select a color</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
 									</object>
 								</child>
 							</object>
@@ -243,7 +243,7 @@
 										<property name="rgba">#9141AC</property>
 										<property name="show-editor">False</property>
 										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="1">Select a color</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
 									</object>
 								</child>
 							</object>
@@ -302,7 +302,7 @@
 										<property name="rgba">#9141AC</property>
 										<property name="show-editor">False</property>
 										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="1">Select a color</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
 									</object>
 								</child>
 							</object>
@@ -331,7 +331,7 @@
 										<property name="rgba">#9141AC</property>
 										<property name="show-editor">False</property>
 										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="1">Select a color</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
 									</object>
 								</child>
 							</object>

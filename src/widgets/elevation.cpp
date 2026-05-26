@@ -21,21 +21,18 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double elevation = data.elevation();
+	double elevation = data.elevation(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataElevation);
 
-	if (widget_->valueUnit() == VideoWidget::UnitMeter) {
-	}
-	else {
-		elevation *= 3.28084;
-	}
-
  	if (!no_value_)
- 		sprintf(s, "%.0f %s", elevation, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+ 		sprintf(s, "%.0f %s", elevation, unit.c_str());
  	else
- 		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+ 		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -134,7 +131,10 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	double xb1, xb2;
 
-	double elevation = data.elevation();
+	double elevation = data.elevation(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Limit
 	amin = theme().valueMin();
@@ -142,12 +142,6 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataElevation);
-
-	if (widget_->valueUnit() == VideoWidget::UnitMeter) {
-	}
-	else {
-		elevation *= 3.28084;
-	}
 
 	// Apply padding
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
@@ -229,7 +223,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			double xb = scale(amin, amax, value, rotate);
 
 			if (first || (value >= max))
-				sprintf(s, "%d %s", value, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+				sprintf(s, "%d %s", value, unit.c_str());
 			else
 				sprintf(s, "%d", value);
 
@@ -283,8 +277,9 @@ ElevationWidget::ElevationWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFeet);
+	ADD_UNIT(TelemetryData::UnitMiles);
+	ADD_UNIT(TelemetryData::UnitMeter);
+	ADD_UNIT(TelemetryData::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 }

@@ -339,53 +339,59 @@ VideoWidget::Theme::NeedleType VideoWidget::string2needletype(std::string &s) {
 }
 
 
-VideoWidget::Unit VideoWidget::string2unit(std::string &s) {
-	VideoWidget::Unit unit;
+TelemetryData::Unit VideoWidget::string2unit(std::string &s) {
+	TelemetryData::Unit unit;
 
 	if (s.empty() || (s == "none"))
-		unit = VideoWidget::UnitNone;
+		unit = TelemetryData::UnitNone;
 	else if ((s == "mps") || (s == "meterpersec"))
-		unit = VideoWidget::UnitMilesPerSec;
+		unit = TelemetryData::UnitMilesPerSec;
 	else if (s == "milespersec")
-		unit = VideoWidget::UnitMilesPerSec;
+		unit = TelemetryData::UnitMilesPerSec;
 	else if ((s == "ftps") || (s == "feetpersec"))
-		unit = VideoWidget::UnitFeetPerSec;
+		unit = TelemetryData::UnitFeetPerSec;
 	else if (s == "meterpermin")
-		unit = VideoWidget::UnitMeterPerMin;
+		unit = TelemetryData::UnitMeterPerMin;
 	else if (s == "milespermin")
-		unit = VideoWidget::UnitMilesPerMin;
+		unit = TelemetryData::UnitMilesPerMin;
 	else if ((s == "ftpmin") || (s == "feetpermin"))
-		unit = VideoWidget::UnitFeetPerMin;
+		unit = TelemetryData::UnitFeetPerMin;
 	else if (s == "meterperhour")
-		unit = VideoWidget::UnitMeterPerHour;
+		unit = TelemetryData::UnitMeterPerHour;
 	else if ((s == "mph") || (s == "milesperhour"))
-		unit = VideoWidget::UnitMilesPerHour;
+		unit = TelemetryData::UnitMilesPerHour;
 	else if ((s == "kph") || (s == "kmperhour"))
-		unit = VideoWidget::UnitKmPerHour;
+		unit = TelemetryData::UnitKmPerHour;
 	else if ((s == "ftph") || (s == "feetperhour"))
-		unit = VideoWidget::UnitFeetPerHour;
+		unit = TelemetryData::UnitFeetPerHour;
 	else if ((s == "mpm") || (s == "minpermile"))
-		unit = VideoWidget::UnitMinPerMile;
+		unit = TelemetryData::UnitMinPerMile;
 	else if ((s == "mpk") || (s == "minperkm"))
-		unit = VideoWidget::UnitMinPerKm;
+		unit = TelemetryData::UnitMinPerKm;
 	else if (s == "km")
-		unit = VideoWidget::UnitKm;
+		unit = TelemetryData::UnitKm;
 	else if ((s == "m") || (s == "meter"))
-		unit = VideoWidget::UnitMeter;
+		unit = TelemetryData::UnitMeter;
 	else if ((s == "ft") || (s == "feet"))
-		unit = VideoWidget::UnitFeet;
+		unit = TelemetryData::UnitFeet;
 	else if (s == "miles")
-		unit = VideoWidget::UnitMiles;
+		unit = TelemetryData::UnitMiles;
 	else if ((s == "C") || (s == "celsius"))
-		unit = VideoWidget::UnitCelsius;
+		unit = TelemetryData::UnitCelsius;
 	else if ((s == "F") || (s == "farenheit"))
-		unit = VideoWidget::UnitFarenheit;
+		unit = TelemetryData::UnitFarenheit;
 	else if ((s == "g") || (s == "G"))
-		unit = VideoWidget::UnitG;
+		unit = TelemetryData::UnitG;
 	else if (s == "meterpersec2")
-		unit = VideoWidget::UnitMeterPerSec2;
+		unit = TelemetryData::UnitMeterPerSec2;
+	else if (s == "bpm")
+		unit = TelemetryData::UnitBPM;
+	else if (s == "trpermin")
+		unit = TelemetryData::UnitTrPerMin;
+	else if (s == "watt")
+		unit = TelemetryData::UnitWatt;
 	else
-		unit = VideoWidget::UnitUnknown;
+		unit = TelemetryData::UnitUnknown;
 
 	return unit;
 }
@@ -601,50 +607,56 @@ std::string VideoWidget::needletype2string(Theme::NeedleType type) {
 }
 
 
-std::string VideoWidget::unit2string(VideoWidget::Unit unit) {
+std::string VideoWidget::unit2string(TelemetryData::Unit unit) {
 	switch (unit) {
-	case VideoWidget::UnitMeterPerSec:
+	case TelemetryData::UnitMeterPerSec:
 		return "meterpersec";
-	case VideoWidget::UnitMilesPerSec:
+	case TelemetryData::UnitMilesPerSec:
 		return "milespersec";
-	case VideoWidget::UnitFeetPerSec:
+	case TelemetryData::UnitFeetPerSec:
 		return "feetpersec";
-	case VideoWidget::UnitMeterPerMin:
+	case TelemetryData::UnitMeterPerMin:
 		return "meterpermin";
-	case VideoWidget::UnitMilesPerMin:
+	case TelemetryData::UnitMilesPerMin:
 		return "milespermin";
-	case VideoWidget::UnitFeetPerMin:
+	case TelemetryData::UnitFeetPerMin:
 		return "feetpermin";
-	case VideoWidget::UnitMeterPerHour:
+	case TelemetryData::UnitMeterPerHour:
 		return "meterperhour";
-	case VideoWidget::UnitMilesPerHour:
+	case TelemetryData::UnitMilesPerHour:
 		return "milesperhour";
-	case VideoWidget::UnitKmPerHour:
+	case TelemetryData::UnitKmPerHour:
 		return "kmperhour";
-	case VideoWidget::UnitFeetPerHour:
+	case TelemetryData::UnitFeetPerHour:
 		return "feetperhour";
-	case VideoWidget::UnitMinPerMile:
+	case TelemetryData::UnitMinPerMile:
 		return "minpermile";
-	case VideoWidget::UnitMinPerKm:
+	case TelemetryData::UnitMinPerKm:
 		return "minperkm";
-	case VideoWidget::UnitKm:
+	case TelemetryData::UnitKm:
 		return "km";
-	case VideoWidget::UnitMeter:
+	case TelemetryData::UnitMeter:
 		return "meter";
-	case VideoWidget::UnitFeet:
+	case TelemetryData::UnitFeet:
 		return "ft";
-	case VideoWidget::UnitMiles:
+	case TelemetryData::UnitMiles:
 		return "miles";
-	case VideoWidget::UnitCelsius:
+	case TelemetryData::UnitCelsius:
 		return "celsius";
-	case VideoWidget::UnitFarenheit:
+	case TelemetryData::UnitFarenheit:
 		return "farenheit";
-	case VideoWidget::UnitG:
+	case TelemetryData::UnitG:
 		return "g";
-	case VideoWidget::UnitMeterPerSec2:
+	case TelemetryData::UnitMeterPerSec2:
 		return "meterpersec2";
-	case VideoWidget::UnitNone:
-	case VideoWidget::UnitUnknown:
+	case TelemetryData::UnitBPM:
+		return "bpm";
+	case TelemetryData::UnitTrPerMin:
+		return "trpermin";
+	case TelemetryData::UnitWatt:
+		return "watt";
+	case TelemetryData::UnitNone:
+	case TelemetryData::UnitUnknown:
 	default:
 		return "";
 	}
@@ -835,50 +847,56 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 }
 
 
-std::string VideoWidget::getFriendlyName(VideoWidget::Unit unit) {
+std::string VideoWidget::getFriendlyName(TelemetryData::Unit unit) {
 	switch (unit) {
-	case VideoWidget::UnitMeterPerSec:
+	case TelemetryData::UnitMeterPerSec:
 		return "m/s";
-	case VideoWidget::UnitMilesPerSec:
+	case TelemetryData::UnitMilesPerSec:
 		return "miles/s";
-	case VideoWidget::UnitFeetPerSec:
+	case TelemetryData::UnitFeetPerSec:
 		return "ft/s";
-	case VideoWidget::UnitMeterPerMin:
+	case TelemetryData::UnitMeterPerMin:
 		return "m/min";
-	case VideoWidget::UnitMilesPerMin:
+	case TelemetryData::UnitMilesPerMin:
 		return "miles/min";
-	case VideoWidget::UnitFeetPerMin:
+	case TelemetryData::UnitFeetPerMin:
 		return "ft/min";
-	case VideoWidget::UnitMeterPerHour:
+	case TelemetryData::UnitMeterPerHour:
 		return "m/h";
-	case VideoWidget::UnitMilesPerHour:
+	case TelemetryData::UnitMilesPerHour:
 		return "miles/h";
-	case VideoWidget::UnitKmPerHour:
+	case TelemetryData::UnitKmPerHour:
 		return "km/h";
-	case VideoWidget::UnitFeetPerHour:
+	case TelemetryData::UnitFeetPerHour:
 		return "ft/h";
-	case VideoWidget::UnitMinPerMile:
+	case TelemetryData::UnitMinPerMile:
 		return "min/mile";
-	case VideoWidget::UnitMinPerKm:
+	case TelemetryData::UnitMinPerKm:
 		return "min/km";
-	case VideoWidget::UnitKm:
+	case TelemetryData::UnitKm:
 		return "km";
-	case VideoWidget::UnitMeter:
+	case TelemetryData::UnitMeter:
 		return "m";
-	case VideoWidget::UnitFeet:
+	case TelemetryData::UnitFeet:
 		return "ft";
-	case VideoWidget::UnitMiles:
+	case TelemetryData::UnitMiles:
 		return "miles";
-	case VideoWidget::UnitCelsius:
+	case TelemetryData::UnitCelsius:
 		return "°C";
-	case VideoWidget::UnitFarenheit:
+	case TelemetryData::UnitFarenheit:
 		return "F";
-	case VideoWidget::UnitG:
+	case TelemetryData::UnitG:
 		return "g";
-	case VideoWidget::UnitMeterPerSec2:
+	case TelemetryData::UnitMeterPerSec2:
 		return "m/s²";
-	case VideoWidget::UnitNone:
-	case VideoWidget::UnitUnknown:
+	case TelemetryData::UnitBPM:
+		return "bpm";
+	case TelemetryData::UnitTrPerMin:
+		return "tr/min";
+	case TelemetryData::UnitWatt:
+		return "Watt";
+	case TelemetryData::UnitNone:
+	case TelemetryData::UnitUnknown:
 	default:
 		return "";
 	}

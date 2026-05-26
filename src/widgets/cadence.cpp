@@ -21,13 +21,18 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
+	int cadence = data.cadence(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataCadence);
 
 	if (data.hasValue(TelemetryData::DataCadence))
-		sprintf(s, "%d tr/min", data.cadence());
+		sprintf(s, "%d %s", cadence, unit.c_str());
 	else
-		sprintf(s, "-- tr/min");
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -77,6 +82,13 @@ CadenceWidget::CadenceWidget(GPXApplication &app)
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(TelemetryData::UnitTrPerMin);
 
 	setShape(VideoWidget::ShapeText);
 }

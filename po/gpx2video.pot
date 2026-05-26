@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-05-25 22:45+0200\n"
+"POT-Creation-Date: 2026-05-26 19:37+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,121 +17,121 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/videowidget.cpp:750 ../gtk/src/ui/shape/arc_box.ui:290
+#: ../src/videowidget.cpp:780 ../gtk/src/ui/shape/arc_box.ui:290
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:752
+#: ../src/videowidget.cpp:782
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:754 ../src/videowidget.cpp:807
+#: ../src/videowidget.cpp:784 ../src/videowidget.cpp:837
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:763
+#: ../src/videowidget.cpp:793
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:765
+#: ../src/videowidget.cpp:795
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:767
+#: ../src/videowidget.cpp:797
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:769
+#: ../src/videowidget.cpp:799
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:771 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:801 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:773
+#: ../src/videowidget.cpp:803
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:775 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:805 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:777
+#: ../src/videowidget.cpp:807
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:779
+#: ../src/videowidget.cpp:809
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:781
+#: ../src/videowidget.cpp:811
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:783
+#: ../src/videowidget.cpp:813
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:785
+#: ../src/videowidget.cpp:815
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:787
+#: ../src/videowidget.cpp:817
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:789
+#: ../src/videowidget.cpp:819
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:791
+#: ../src/videowidget.cpp:821
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:793
+#: ../src/videowidget.cpp:823
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:795 ../gtk/src/ui/widgets/map_box.ui:62
+#: ../src/videowidget.cpp:825 ../gtk/src/ui/widgets/map_box.ui:62
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:797
+#: ../src/videowidget.cpp:827
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:799
+#: ../src/videowidget.cpp:829
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:801
+#: ../src/videowidget.cpp:831
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:803
+#: ../src/videowidget.cpp:833
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:805
+#: ../src/videowidget.cpp:835
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:809 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:839 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:811 ../gtk/src/ui/widgets/map_box.ui:194
+#: ../src/videowidget.cpp:841 ../gtk/src/ui/widgets/map_box.ui:194
 #: ../gtk/src/ui/widgets/track_box.ui:55
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:813
+#: ../src/videowidget.cpp:843
 msgid "Vertical speed"
 msgstr ""
 
-#: ../gtk/src/ui/append.ui:5
-msgid "Append widget"
+#: ../gtk/src/ui/append.ui:5 ../gtk/src/ui/window.ui:166
+msgid "Append a widget"
 msgstr ""
 
 #: ../gtk/src/ui/append.ui:22
@@ -142,7 +142,7 @@ msgstr ""
 msgid "Search by name"
 msgstr ""
 
-#: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:160
+#: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
 msgid "Ok"
 msgstr ""
 
@@ -277,6 +277,10 @@ msgstr ""
 
 #: ../gtk/src/ui/video_frame.ui:93
 msgid "Video start time"
+msgstr ""
+
+#: ../gtk/src/ui/video_frame.ui:102
+msgid "Set the video start time"
 msgstr ""
 
 #: ../gtk/src/ui/video_stackpage.ui:80 ../gtk/src/ui/widget_frame.ui:306
@@ -500,6 +504,10 @@ msgid "Value format:"
 msgstr ""
 
 #: ../gtk/src/ui/widget_frame.ui:1533
+msgid "Unit enable:"
+msgstr ""
+
+#: ../gtk/src/ui/widget_frame.ui:1559
 msgid "Value unit:"
 msgstr ""
 

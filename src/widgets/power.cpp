@@ -21,13 +21,18 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
+	int power = data.power(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataPower);
 
 	if (!no_value_)
-		sprintf(s, "%d Watt", data.power());
+		sprintf(s, "%d %s", power, unit.c_str());
 	else
-		sprintf(s, "-- Watt");
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

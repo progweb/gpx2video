@@ -21,23 +21,13 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double distance = data.distance();
+	double distance = data.distance(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataDistance);
-
-	if (widget_->valueUnit() == VideoWidget::UnitKm) {
-		distance /= 1000.0;
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitMeter) {
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitFeet) {
-		distance *= 3.28084;
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitMiles) {
-		distance /= 1000.0;
-		distance *= 0.6213711922;
-	}
 
 	if (!no_value_) {
 		const char *format;
@@ -49,10 +39,10 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		else
 			format = "%.0f %s";
 
-		sprintf(s, format, distance, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, format, distance, unit.c_str());
 	}
 	else
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -105,13 +95,13 @@ DistanceWidget::DistanceWidget(GPXApplication &app)
 
 #define ADD_UNIT(unit) \
 	units_supported_.push_back((VideoWidget::ListItem) { \
-		unit, VideoWidget::getFriendlyName(unit), VideoWidget::getFriendlyName(unit) \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMiles);
-	ADD_UNIT(VideoWidget::UnitKm);
-	ADD_UNIT(VideoWidget::UnitMeter);
-	ADD_UNIT(VideoWidget::UnitFeet);
+	ADD_UNIT(TelemetryData::UnitMiles);
+	ADD_UNIT(TelemetryData::UnitMeter);
+	ADD_UNIT(TelemetryData::UnitKm);
+	ADD_UNIT(TelemetryData::UnitFeet);
 
 	setShape(VideoWidget::ShapeText);
 

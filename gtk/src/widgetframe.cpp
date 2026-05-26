@@ -1298,6 +1298,26 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
+	// Unit enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: unit status changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						if (state)
+							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagUnit);
+						else
+							widget_selected_->widget()->theme().removeFlag(VideoWidget::Theme::FlagUnit);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					} 
+			), false);
+
 	// Value unit
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
 	if (!combobox)
@@ -1315,7 +1335,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						log_notice("Widget %s: value unit changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
-						widget_selected_->widget()->setValueUnit((VideoWidget::Unit) value);
+						widget_selected_->widget()->setValueUnit((TelemetryData::Unit) value);
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -1813,8 +1833,24 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
 
+	// Widget unit enable box container
+	box = ref_builder_->get_widget<Gtk::Box>("unit_enable_box");
+	if (!box)
+		throw std::runtime_error("No \"unit_enable_box\" object in widget_frame.ui");
+
+	box->set_visible(units.size() > 0);
+
+	// Widget unit enable switch
+	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
+
+	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagUnit));
+
 	// Widget value unit box container
 	box = ref_builder_->get_widget<Gtk::Box>("value_unit_box");
+	if (!box)
+		throw std::runtime_error("No \"value_unit_box\" object in widget_frame.ui");
 
 	box->set_visible(units.size() > 1);
 

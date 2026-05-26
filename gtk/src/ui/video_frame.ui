@@ -99,6 +99,7 @@
 							<object class="GtkMenuButton" id="datetimestart_menubutton">
 								<property name="halign">end</property>
 								<property name="icon-name">x-office-calendar-symbolic</property>
+								<property name="tooltip-text" translatable="yes">Set the video start time</property>
 								<property name="popover">
 									<object class="GtkPopover" id="datetimestart_popover">
 										<property name="position">top</property>

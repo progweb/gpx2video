@@ -21,13 +21,18 @@ void HeartRateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
+	int heartrate = data.heartrate(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataHeartrate);
 
 	if (!no_value_)
-		sprintf(s, "%d bpm", data.heartrate());
+		sprintf(s, "%d %s", heartrate, unit.c_str());
 	else
-		sprintf(s, "-- bpm");
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -77,6 +82,13 @@ HeartRateWidget::HeartRateWidget(GPXApplication &app)
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(TelemetryData::UnitBPM);
 
 	setShape(VideoWidget::ShapeText);
 }

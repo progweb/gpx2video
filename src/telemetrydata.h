@@ -53,157 +53,88 @@ public:
 		DataAll = (1 << 20) -1
 	};
 
+	enum Unit {
+		UnitNone,
+
+		UnitDefault,
+
+		UnitMeterPerSec, // Meter / Sec
+		UnitMilesPerSec, // Miles / Sec
+		UnitFeetPerSec, // Feet / Sec
+
+		UnitMeterPerMin, // Meter / Min
+		UnitMilesPerMin, // Miles / Min
+		UnitFeetPerMin, // Feet / Min
+
+		UnitKmPerHour, // Km / Hour
+		UnitMeterPerHour, // Meter / Hour
+		UnitMilesPerHour, // Miles / Hour
+		UnitFeetPerHour, // Feet / Hour
+
+		UnitMinPerMile, // Min / Mile
+		UnitMinPerKm, // Min / Km
+
+		UnitKm,
+		UnitMeter,
+		UnitFeet,
+		UnitMiles,
+
+		UnitCelsius,
+		UnitFarenheit,
+
+		UnitBPM,
+		UnitTrPerMin,
+		UnitWatt,
+
+		UnitG,
+		UnitMeterPerSec2,
+
+		UnitUnknown
+	};
+
 	TelemetryData();
 	virtual ~TelemetryData();
 
-	int line(void) const {
-		return line_;
-	}
+	int line(void) const;
 
-	int index(void) const {
-		return index_;
-	}
+	int index(void) const;
+	void setIndex(int index);
 
-	void setIndex(int index) {
-		index_ = index;
-	}
+	const Type& type(void) const;
+	const char * type2string(void) const;
 
-	const Type& type(void) const {
-		return type_;
-	}
+	const uint64_t& datetime(void) const;
+	void setDatetime(const uint64_t &datetime);
 
-	const char * type2string(void) const {
-		const char *types[] = {
-			"U", // Unknown
-			"D", // Dummy
-			"M", // Measured
-			"F", // Fix
-			"P", // Predict
-			"C", // Unchanged
-			"E", // Error
-		};
+	const uint64_t& timestamp(void) const;
+	const double& latitude(void) const;
+	const double& longitude(void) const;
 
-		if (type_ > ARRAY_SIZE(types))
-			return "";
+	double elevation(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	int cadence(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	int heartrate(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double temperature(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	int power(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double duration(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double distance(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double heading(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double grade(void) const;
+	double speed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double maxspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double acceleration(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double rideTime(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double elapsedTime(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double avgspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double avgridespeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double verticalspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double homedistance(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double batterylevel(void) const;
+	int lap(void) const;
 
-		return types[type_];
-	}
+	bool inRange(void) const;
+	bool isPause(void) const;
 
-
-	const uint64_t& datetime(void) const {
-		return datetime_;
-	}
-
-	void setDatetime(const uint64_t &datetime) {
-		if (type_ == TypeUnknown)
-			type_ = TypeDummy;
-
-		datetime_ = datetime;
-	}
-
-	const uint64_t& timestamp(void) const {
-		return ts_;
-	}
-
-	const double& latitude(void) const {
-		return lat_;
-	}
-
-	const double& longitude(void) const {
-		return lon_;
-	}
-
-	const double& elevation(void) const {
-		return ele_;
-	}
-
-	const int& cadence(void) const {
-		return cadence_;
-	}
-
-	const int& heartrate(void) const {
-		return heartrate_;
-	}
-
-	const double& temperature(void) const {
-		return temperature_;
-	}
-
-	const int& power(void) const {
-		return power_;
-	}
-
-	const double &duration(void) const {
-		return duration_;
-	}
-
-	const double& distance(void) const {
-		return distance_;
-	}
-
-	const double& heading(void) const {
-		return heading_;
-	}
-
-	const double& grade(void) const {
-		return grade_;
-	}
-
-	const double& speed(void) const {
-		return speed_;
-	}
-
-	const double& maxspeed(void) const {
-		return maxspeed_;
-	}
-
-	const double& acceleration(void) const {
-		return acceleration_;
-	}
-
-	const double& rideTime(void) const {
-		return ridetime_;
-	}
-
-	const double& elapsedTime(void) const {
-		return elapsedtime_;
-	}
-
-	const double& avgspeed(void) const {
-		return avgspeed_;
-	}
-
-	const double& avgridespeed(void) const {
-		return avgridespeed_;
-	}
-
-	const double& verticalspeed(void) const {
-		return verticalspeed_;
-	}
-
-	const double& homedistance(void) const {
-		return homedistance_;
-	}
-
-	const double& batterylevel(void) const {
-		return batterylevel_;
-	}
-
-	const int& lap(void) const {
-		return lap_;
-	}
-
-	bool inRange(void) const {
-		return in_range_;
-	}
-
-	bool isPause(void) const {
-		return is_pause_;
-	}
-
-	bool hasValue(Data type = DataAll) const {
-		return ((has_value_ & type) != 0);
-	}
+	bool hasValue(Data type = DataAll) const;
 
 	void reset(bool all = false);
 

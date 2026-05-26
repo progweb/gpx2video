@@ -163,6 +163,7 @@
 												<child type="end">
 													<object class="GtkButton" id="widget_append_button">
 														<property name="icon-name">list-add-symbolic</property>
+														<property name="tooltip-text" translatable="yes">Append a widget</property>
 														<property name="visible">False</property>
 													</object>
 												</child>

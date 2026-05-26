@@ -22,25 +22,21 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	TextShape::Font font;
 
 	bool pace_unit = false;
-	double speed = data.speed();
+	double speed = data.speed(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataSpeed);
 
 	switch (widget_->valueUnit()) {
-	case VideoWidget::UnitMilesPerHour:
-		speed *= 0.6213711922;
-		break;
-	case VideoWidget::UnitKmPerHour:
-		break;
-	case VideoWidget::UnitMinPerMile:
-		speed *= 0.6213711922;
-		pace_unit = true;
-		break;
-	case VideoWidget::UnitMinPerKm:
+	case TelemetryData::UnitMinPerMile:
+	case TelemetryData::UnitMinPerKm:
 		pace_unit = true;
 		break;
 	default:
+		pace_unit = false;
 		break;
 	}
 
@@ -50,16 +46,15 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	if (no_value_)
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 	else if (pace_unit) {
-		double pace = 60.0 / speed;
-		int min = (int) pace;
-		int sec = (int) round((pace - min) * 60) % 60;
+		int min = (int) speed;
+		int sec = (int) round((speed - min) * 60) % 60;
 
-		sprintf(s, "%d:%02d %s", min, sec, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "%d:%02d %s", min, sec, unit.c_str());
 	} 
 	else
-		sprintf(s, "%.1f %s", speed, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "%.1f %s", speed, unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -163,9 +158,9 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	int vmin, vmax;
 
-	double speed = data.speed();
-	double avgspeed = data.avgridespeed();
-	double maxspeed = data.maxspeed();
+	double speed = data.speed(widget_->valueUnit());
+	double avgspeed = data.avgridespeed(widget_->valueUnit());
+	double maxspeed = data.maxspeed(widget_->valueUnit());
 
 	// Limit
 	vmin = theme().valueMin();
@@ -189,23 +184,12 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataSpeed);
 
 	switch (widget_->valueUnit()) {
-	case VideoWidget::UnitMilesPerHour:
-		speed *= 0.6213711922;
-		avgspeed *= 0.6213711922;
-		maxspeed *= 0.6213711922;
-		break;
-	case VideoWidget::UnitKmPerHour:
-		break;
-	case VideoWidget::UnitMinPerMile:
-		speed *= 0.6213711922;
-		avgspeed *= 0.6213711922;
-		maxspeed *= 0.6213711922;
-		pace_unit = true;
-		break;
-	case VideoWidget::UnitMinPerKm:
+	case TelemetryData::UnitMinPerMile:
+	case TelemetryData::UnitMinPerKm:
 		pace_unit = true;
 		break;
 	default:
+		pace_unit = false;
 		break;
 	}
 
@@ -313,14 +297,14 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		const float *fill = theme().valueColor();
 
-		std::string unit = widget_->getFriendlyName(widget_->valueUnit());
+		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+			widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 		if (no_value_)
 			sprintf(value, "--");
 		else if (pace_unit) {
-			double pace = 60.0 / speed;
-			int min = (int) pace;
-			int sec = (int) round((pace - min) * 60) % 60;
+			int min = (int) speed;
+			int sec = (int) round((speed - min) * 60) % 60;
 
 			sprintf(value, "%d:%02d", min, sec);
 		} 
@@ -364,10 +348,11 @@ SpeedWidget::SpeedWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMilesPerHour);
-	ADD_UNIT(VideoWidget::UnitKmPerHour);
-	ADD_UNIT(VideoWidget::UnitMinPerMile);
-	ADD_UNIT(VideoWidget::UnitMinPerKm);
+	ADD_UNIT(TelemetryData::UnitMilesPerHour);
+	ADD_UNIT(TelemetryData::UnitKmPerHour);
+	ADD_UNIT(TelemetryData::UnitMeterPerHour);
+	ADD_UNIT(TelemetryData::UnitMinPerMile);
+	ADD_UNIT(TelemetryData::UnitMinPerKm);
 
 	setShape(VideoWidget::ShapeText);
 }

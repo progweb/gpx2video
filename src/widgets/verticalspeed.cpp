@@ -21,20 +21,18 @@ void VerticalSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double verticalspeed = data.verticalspeed();
+	double verticalspeed = data.verticalspeed(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	if (widget_->valueUnit() == VideoWidget::UnitMeterPerSec) {
-	}
-	else {
-	}
-
 	if (!no_value_)
-		sprintf(s, "%.1f %s", verticalspeed, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "%.1f %s", verticalspeed, unit.c_str());
 	else
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -138,7 +136,10 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	double xb1, xb2;
 
-	double verticalspeed = data.verticalspeed();
+	double verticalspeed = data.verticalspeed(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Limit
 	amin = theme().valueMin();
@@ -146,13 +147,6 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
-
-	if (widget_->valueUnit() == VideoWidget::UnitMeterPerSec) {
-	}
-	else if (widget_->valueUnit() == VideoWidget::UnitMilesPerSec) {
-		verticalspeed /= 1000.0;
-		verticalspeed *= 0.6213711922;
-	}
 
 	// Apply padding
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
@@ -234,7 +228,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			double xb = scale(amin, amax, value, rotate);
 
 			if (first || (value >= max))
-				sprintf(s, "%d %s", value, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+				sprintf(s, "%d %s", value, unit.c_str());
 			else
 				sprintf(s, "%d", value);
 
@@ -288,8 +282,9 @@ VerticalSpeedWidget::VerticalSpeedWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMilesPerSec);
-	ADD_UNIT(VideoWidget::UnitMeterPerSec);
+	ADD_UNIT(TelemetryData::UnitMilesPerSec);
+	ADD_UNIT(TelemetryData::UnitMeterPerSec);
+	ADD_UNIT(TelemetryData::UnitFeetPerSec);
 
 	setShape(VideoWidget::ShapeText);
 }

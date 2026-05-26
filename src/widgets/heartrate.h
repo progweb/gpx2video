@@ -134,6 +134,8 @@ public:
 
 		widget = new HeartRateWidget(app);
 
+		widget->setValueUnit(TelemetryData::UnitBPM);
+
 		return widget;
 	}
 
@@ -173,6 +175,8 @@ protected:
 		VideoWidget::xmlwrite(os);
 
 		shape_->xmlwrite(os);
+
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 	}
 
 private:

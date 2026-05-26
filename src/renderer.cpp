@@ -138,7 +138,6 @@ failure:
 
 
 bool Renderer::loadMap(layout::Map *m) {
-	int x, y;
 	int width, height;
 
 	std::string s;
@@ -175,10 +174,6 @@ bool Renderer::loadMap(layout::Map *m) {
 	//   1920x1080 =>   ?x?
 	width = (m->width() > 0) ? m->width() : 800 * video_stream->width() / 2704;
 	height = (m->height() > 0) ? m->height() : 500 * video_stream->height() / 1520;
-
-	// Default position
-	x = (m->x() > 0) ? m->x() : video_stream->width() - width - m->margin();
-	y = (m->y() > 0) ? m->y() : video_stream->height() - height - m->margin();
 
 	// View
 	s = (const char *) m->view();
@@ -221,12 +216,12 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	Map *map = Map::create(app_, telemetrySettings(), mapSettings);
 
-	log_info("Load map widget");
+	log_info("Load map widget at %dx%d", (int) m->x(), (int) m->y());
 
 	// Widget settings
 	map->setPosition(position);
 	map->setOrientation(orientation);
-	map->setPosition(x, y);
+	map->setPosition(m->x(), m->y());
 	map->setAtTime(m->at(), m->at() + m->duration());
 	map->setSize(mapSettings.width(), mapSettings.height());
 	map->setMargin(VideoWidget::MarginAll, m->margin());
@@ -256,7 +251,6 @@ bool Renderer::loadMap(layout::Map *m) {
 
 
 bool Renderer::loadTrack(layout::Track *t) {
-	int x, y;
 	int width, height;
 
 	std::string s;
@@ -283,10 +277,6 @@ bool Renderer::loadTrack(layout::Track *t) {
 	//   1920x1080 => 560x350
 	width = (t->width() > 0) ? t->width() : 800 * video_stream->width() / 2704;
 	height = (t->height() > 0) ? t->height() : 500 * video_stream->height() / 1520;
-
-	// Default position
-	x = (t->x() > 0) ? t->x() : video_stream->width() - width - t->margin();
-	y = (t->y() > 0) ? t->y() : video_stream->height() - height - t->margin();
 
 	// View
 	s = (const char *) t->view();
@@ -328,12 +318,12 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
 
-	log_info("Load track widget");
+	log_info("Load track widget at %dx%d", (int) t->x(), (int) t->y());
 
 	// Widget settings
 	track->setPosition(position);
 	track->setOrientation(orientation);
-	track->setPosition(x, y);
+	track->setPosition(t->x(), t->y());
 	track->setAtTime(t->at(), t->at() + t->duration());
 	track->setSize(trackSettings.width(), trackSettings.height());
 	track->setMargin(VideoWidget::MarginAll, t->margin());
@@ -375,7 +365,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget::Shape shape = VideoWidget::ShapeNone;
 
-	VideoWidget::Unit unit = VideoWidget::UnitNone;
+	TelemetryData::Unit unit = TelemetryData::UnitNone;
 	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
 	VideoWidget::Position position = VideoWidget::PositionNone;
@@ -438,7 +428,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	s = (const char *) w->valueUnit();
 	unit = VideoWidget::string2unit(s);
 
-	if (unit == VideoWidget::UnitUnknown) {
+	if (unit == TelemetryData::UnitUnknown) {
 		log_error("Widget loading error, unit value '%s' unknown", s.c_str());
 		goto error;
 	}
@@ -450,7 +440,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	s = (const char *) w->zoom();
 	zoom = VideoWidget::string2zoom(s);
 
-	log_info("Load widget '%s' (shape: %s)", (const char *) w->type(), (const char *) w->shape());
+	log_info("Load widget '%s' (shape: %s) at %dx%d", 
+			(const char *) w->type(), (const char *) w->shape(), (int) w->x(), (int) w->y());
 
 	// Font style for label
 	s = (const char *) w->labelFontStyle();
@@ -546,7 +537,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto skip;
 
 	// Use default values if undefined
-	if (unit == VideoWidget::UnitNone)
+	if (unit == TelemetryData::UnitNone)
 		unit = widget->valueUnit();
 	if (format == "")
 		format = widget->valueFormat();

@@ -21,23 +21,18 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double gforce;
+	double gforce = data.acceleration(widget_->valueUnit());
 
-	// Compute data
-	// acceleration m/s²
-	// gforce g (= 9,80665 m/s²)
-	gforce = data.acceleration();
-   
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataAcceleration);
 
-	if (widget_->valueUnit() == VideoWidget::UnitG)
-		gforce /= 9.81;
-
 	if (!no_value_)
-		sprintf(s, "%.2f %s", gforce, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "%.2f %s", gforce, unit.c_str());
 	else
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -93,8 +88,8 @@ GForceWidget::GForceWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitMeterPerSec2);
-	ADD_UNIT(VideoWidget::UnitG);
+	ADD_UNIT(TelemetryData::UnitMeterPerSec2);
+	ADD_UNIT(TelemetryData::UnitG);
 	
 	setShape(VideoWidget::ShapeText);
 }

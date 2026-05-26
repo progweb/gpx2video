@@ -398,12 +398,14 @@ void GPX2VideoRenderer::draw(void) {
 	if (source_) {
 //		uint64_t clock = get_system_clock();
 
-		TelemetrySource::Data type = TelemetrySource::DataUnknown;
-
 		for (GPX2VideoWidget *item : widgets_) {
+			int max = 3;
+
 			bool loop = true;
 
-			while (loop && !item->full()) {
+			TelemetrySource::Data type = TelemetrySource::DataUnknown;
+
+			while (loop && !item->full() && (type != TelemetrySource::DataEof) && (max-- > 0)) {
 				TelemetryData data = item->data();
 
 				if (!item->ready() || (data.type() == TelemetryData::TypeUnknown)) {
@@ -431,8 +433,6 @@ void GPX2VideoRenderer::draw(void) {
 				data.setDatetime(timestamp);
 
 				item->write_buffers(data, loop);
-				
-				(void) type;
 			}
 		}
 

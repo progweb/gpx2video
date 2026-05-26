@@ -269,7 +269,7 @@ public:
 
 		widget = new ElevationWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitMiles);
+		widget->setValueUnit(TelemetryData::UnitMiles);
 
 		return widget;
 	}

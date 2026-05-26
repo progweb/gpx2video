@@ -47,31 +47,6 @@ public:
 		PositionUnknown
 	};
 
-	enum Unit {
-		UnitNone,
-		UnitMeterPerSec, // Meter / S
-		UnitMilesPerSec, // Miles / S
-		UnitFeetPerSec, // Feet / S
-		UnitMeterPerMin, // Meter / Min
-		UnitMilesPerMin, // Miles / Min
-		UnitFeetPerMin, // Feet / Min
-		UnitKmPerHour, // Km / H
-		UnitMeterPerHour, // Meter / H
-		UnitMilesPerHour, // Miles / H
-		UnitFeetPerHour, // Feet / H
-		UnitMinPerMile, // Min / Mile
-		UnitMinPerKm, // Min / Km
-		UnitKm,
-		UnitMeter,
-		UnitFeet,
-		UnitMiles,
-		UnitCelsius,
-		UnitFarenheit,
-		UnitG,
-		UnitMeterPerSec2,
-		UnitUnknown
-	};
-
 	enum Shape {
 		ShapeNone = 0,
 		ShapeText,
@@ -847,11 +822,11 @@ public:
 		return units_supported_;
 	}
 
-	Unit& valueUnit(void) {
+	TelemetryData::Unit& valueUnit(void) {
 		return value_unit_;
 	}
 
-	virtual void setValueUnit(Unit unit) {
+	virtual void setValueUnit(TelemetryData::Unit unit) {
 		value_unit_ = unit;
 	}
 
@@ -981,7 +956,7 @@ public:
 	static Theme::FontStyle string2fontstyle(std::string &s);
 	static Theme::FontWeight string2fontweight(std::string &s);
 	static Theme::NeedleType string2needletype(std::string &);
-	static Unit string2unit(std::string &s);
+	static TelemetryData::Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
 
 	static std::string bool2string(bool value);
@@ -993,13 +968,13 @@ public:
 	static std::string fontstyle2string(Theme::FontStyle style);
 	static std::string fontweight2string(Theme::FontWeight weight);
 	static std::string needletype2string(Theme::NeedleType type);
-	static std::string unit2string(Unit unit);
+	static std::string unit2string(TelemetryData::Unit unit);
 
 	static std::string getIconFilename(Widget type);
 
 	static std::string getFriendlyName(Shape shape);
 	static std::string getFriendlyName(Widget type);
-	static std::string getFriendlyName(Unit unit);
+	static std::string getFriendlyName(TelemetryData::Unit unit);
 
 protected:
 	VideoWidget(GPXApplication &app, Widget type)  
@@ -1017,7 +992,7 @@ protected:
 		setPosition(0, 0);
 		setMargin(MarginAll, 10);
 		setLabel(widget2string(type));
-		setValueUnit(VideoWidget::UnitNone);
+		setValueUnit(TelemetryData::UnitNone);
 	}
 
 	virtual void xmlopen(std::ostream &os);
@@ -1029,7 +1004,7 @@ protected:
 	Position position_;
 	Orientation orientation_;
 	Zoom zoom_;
-	Unit value_unit_;
+	TelemetryData::Unit value_unit_;
 	std::string value_format_;
 	std::string source_;
 

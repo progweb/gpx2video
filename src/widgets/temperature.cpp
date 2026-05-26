@@ -21,21 +21,18 @@ void TemperatureTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	double temperature = data.temperature();
+	double temperature = data.temperature(widget_->valueUnit());
+
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataGrade);
 
-	if (widget_->valueUnit() == VideoWidget::UnitCelsius) {
-	}
-	else {
-		temperature = (temperature * 9/5) + 32;
-	}
-
 	if (!no_value_)
-		sprintf(s, "%.0f %s", temperature, widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "%.0f %s", temperature, unit.c_str());
 	else
-		sprintf(s, "-- %s", widget_->getFriendlyName(widget_->valueUnit()).c_str());
+		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -91,8 +88,8 @@ TemperatureWidget::TemperatureWidget(GPXApplication &app)
 		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
 	})
 
-	ADD_UNIT(VideoWidget::UnitCelsius);
-	ADD_UNIT(VideoWidget::UnitFarenheit);
+	ADD_UNIT(TelemetryData::UnitCelsius);
+	ADD_UNIT(TelemetryData::UnitFarenheit);
 
 	setShape(VideoWidget::ShapeText);
 }

@@ -134,6 +134,8 @@ public:
 
 		widget = new CadenceWidget(app);
 
+		widget->setValueUnit(TelemetryData::UnitTrPerMin);
+
 		return widget;
 	}
 
@@ -173,6 +175,8 @@ protected:
 		VideoWidget::xmlwrite(os);
 
 		shape_->xmlwrite(os);
+
+		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 	}
 
 private:

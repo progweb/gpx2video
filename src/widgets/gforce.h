@@ -134,7 +134,7 @@ public:
 
 		widget = new GForceWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitG);
+		widget->setValueUnit(TelemetryData::UnitG);
 
 		return widget;
 	}

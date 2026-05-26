@@ -134,7 +134,7 @@ public:
 
 		widget = new TemperatureWidget(app);
 
-		widget->setValueUnit(VideoWidget::UnitCelsius);
+		widget->setValueUnit(TelemetryData::UnitCelsius);
 
 		return widget;
 	}
