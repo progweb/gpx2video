@@ -8,49 +8,56 @@
    viewBox="0 0 377.021 377.021"
    xml:space="preserve"
    sodipodi:docname="DataOverlay_icn_battery.svg"
-   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg"><defs
    id="defs2" /><sodipodi:namedview
    id="namedview2"
-   pagecolor="#0000ff"
+   pagecolor="#5c5c5c"
    bordercolor="#000000"
    borderopacity="0.25"
    inkscape:showpageshadow="2"
-   inkscape:pageopacity="0.0"
-   inkscape:pagecheckerboard="0"
+   inkscape:pageopacity="0"
+   inkscape:pagecheckerboard="true"
    inkscape:deskcolor="#d1d1d1"
    showgrid="false"
    inkscape:zoom="2.0608932"
-   inkscape:cx="188.26788"
-   inkscape:cy="188.5105"
+   inkscape:cx="181.71733"
+   inkscape:cy="171.52757"
    inkscape:window-width="1920"
    inkscape:window-height="1003"
    inkscape:window-x="0"
-   inkscape:window-y="0"
+   inkscape:window-y="40"
    inkscape:window-maximized="1"
    inkscape:current-layer="g2" />
 <g
    id="g2">
 	<path
-   d="M279.522,36.163h-22.086V20c0-11.028-8.972-20-20-20h-97.85c-11.028,0-20,8.972-20,20v16.163H97.5   c-16.542,0-30,13.458-30,30v280.858c0,16.542,13.458,30,30,30h182.022c16.542,0,30-13.458,30-30V66.163   C309.522,49.621,296.064,36.163,279.522,36.163z M97.5,347.021V66.163h182.022l0.003,280.858H97.5z"
+   d="M 279.522,40.163 H 257.436 V 28 c 0,-11.028 -8.972,-12 -20,-12 h -97.85 c -11.028,0 -20,0.972 -20,12 V 40.163 H 97.5 c -16.542,0 -26,9.458 -26,26 v 276.858 c 0,16.542 9.458,30 26,30 h 182.022 c 16.542,0 26,-9.458 26,-26 V 66.163 c 0,-16.542 -9.458,-26 -26,-26 z M 93.5,351.021 V 62.163 h 190.022 l 0.003,288.858 z"
    id="path1"
-   style="fill:#ffffff" />
+   style="fill:#ffffff"
+   sodipodi:nodetypes="scsssscssssssssccccc" />
 	<rect
    x="122.586"
-   y="266.5"
-   width="131.85"
-   height="59.663"
+   y="288.30078"
+   width="131.85001"
+   height="37.862221"
    id="rect1"
-   style="fill:#ffffff" />
-	<rect
+   style="fill:#ffffff;stroke-width:0.796619" />
+	
+<rect
    x="122.586"
-   y="176.63"
-   width="131.85"
-   height="59.663"
-   id="rect2"
-   style="fill:#ffffff" />
-</g>
+   y="234.30078"
+   width="131.85001"
+   height="37.862221"
+   id="rect9945"
+   style="fill:#ffffff;stroke-width:0.796619" /><rect
+   x="122.586"
+   y="182.30078"
+   width="131.85001"
+   height="37.862221"
+   id="rect9947"
+   style="fill:#ffffff;stroke-width:0.796619" /></g>
 </svg>

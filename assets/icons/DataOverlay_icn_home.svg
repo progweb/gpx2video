@@ -9,7 +9,7 @@
    version="1.1"
    id="svg3"
    sodipodi:docname="DataOverlay_icn_home.svg"
-   inkscape:version="1.4.2 (ebf0e940d0, 2025-05-08)"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
@@ -18,37 +18,39 @@
      id="defs3" />
   <sodipodi:namedview
      id="namedview3"
-     pagecolor="#0000ff"
+     pagecolor="#5c5c5c"
      bordercolor="#000000"
      borderopacity="0.25"
      inkscape:showpageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:deskcolor="#beb3ef"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="0.97125"
-     inkscape:cx="400.5148"
-     inkscape:cy="400"
+     inkscape:cx="363.96396"
+     inkscape:cy="401.0296"
      inkscape:window-width="1920"
      inkscape:window-height="1003"
      inkscape:window-x="0"
-     inkscape:window-y="0"
+     inkscape:window-y="40"
      inkscape:window-maximized="1"
-     inkscape:current-layer="svg3" />
+     inkscape:current-layer="svg3"
+     showgrid="false" />
   <path
      d="M19 9L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21L14 21L10 21L9 21C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 9"
      stroke="#323232"
      stroke-width="2"
      stroke-linejoin="round"
      id="path1"
-     style="stroke:#ffffff;stroke-opacity:1" />
+     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none" />
   <path
-     d="M3 11L7.5 7L10.6713 4.18109C11.429 3.50752 12.571 3.50752 13.3287 4.18109L16.5 7L21 11"
+     d="M 3,11 7.5,7 10.6713,4.18109 c 0.7577,-0.67357 1.8997,-0.67357 2.6574,0 L 14.495554,5.2182853 16.5,7 21,11"
      stroke="#323232"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
      id="path2"
-     style="stroke:#ffffff;stroke-opacity:1" />
+     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none"
+     sodipodi:nodetypes="ccccccc" />
   <path
      d="M10 21V17C10 15.8954 10.8954 15 12 15V15C13.1046 15 14 15.8954 14 17V21"
      stroke="#323232"
@@ -56,5 +58,5 @@
      stroke-linecap="round"
      stroke-linejoin="round"
      id="path3"
-     style="stroke:#ffffff;stroke-opacity:1" />
+     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none" />
 </svg>
