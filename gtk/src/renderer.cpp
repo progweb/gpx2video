@@ -537,9 +537,11 @@ void GPX2VideoRenderer::load_texture(void) {
 		timestamp = item->load_texture();
 
 		if ((timestamp > 0) && (timestamp_ > (timestamp + rate_)))
-			log_warn("Widget '%s' texture delayed: %ld ms (rate: %ld ms)!", 
-					item->name().c_str(),
-					timestamp_ - timestamp, rate_);
+//			log_warn("Widget '%s' texture delayed: %ld ms (rate: %ld ms)!", 
+//					item->name().c_str(),
+//					timestamp_ - timestamp, rate_);
+
+			item->texture_delayed();
 	}
 }
 

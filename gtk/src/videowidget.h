@@ -89,6 +89,7 @@ public:
 	bool full(void);
 	bool ready(void);
 
+	void texture_delayed(void);
 	void stats(void);
 
 	void init_buffers(void);
@@ -130,6 +131,7 @@ private:
 
 	// Stats
 	int stats_texture_reused_;
+	int stats_texture_delayed_;
 	int stats_texture_dropped_;
 	int stats_texture_updated_;
 

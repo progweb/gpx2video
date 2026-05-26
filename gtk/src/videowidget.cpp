@@ -112,6 +112,7 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 
 	// Stats
 	stats_texture_reused_ = 0;
+	stats_texture_delayed_ = 0;
 	stats_texture_dropped_ = 0;
 	stats_texture_updated_ = 0;
 }
@@ -347,6 +348,12 @@ void GPX2VideoWidget::clear(void) {
 }
 
 
+void GPX2VideoWidget::texture_delayed(void) {
+	log_call();
+
+	stats_texture_delayed_++;
+}
+
 void GPX2VideoWidget::stats(void) {
 	log_call();
 
@@ -354,10 +361,11 @@ void GPX2VideoWidget::stats(void) {
 
 	size_t len = widget()->name().length();
 
-	log_info("Widget %s stats: %*s %4d reused, %4d dropped, %4d updated", 
+	log_info("Widget %s stats: %*s %4d reused, %4d delayed, %4d dropped, %4d updated", 
 			widget()->name().c_str(),
 			(int) (max - len), "",
 			stats_texture_reused_,
+			stats_texture_delayed_,
 			stats_texture_dropped_,
 			stats_texture_updated_);
 }
@@ -536,6 +544,7 @@ printf("WIDGET::CLEAR BUFFERS %s\n", widget()->name().c_str());
 
 	// Stats
 	stats_texture_reused_ = 0;
+	stats_texture_delayed_ = 0;
 	stats_texture_dropped_ = 0;
 	stats_texture_updated_ = 0;
 
