@@ -597,6 +597,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueShadowDistance(w->valueShadowDistance());
 	widget->theme().setValueBorderWidth(w->valueBorderWidth());
 	widget->theme().setValueBorderColor((const char *) w->valueBorderColor());
+	widget->theme().setValueMin(w->valueMin());
+	widget->theme().setValueMax(w->valueMax());
 
 	// Widget needle settings
 	widget->theme().setNeedleType(needle_type);
