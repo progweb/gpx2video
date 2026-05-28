@@ -10,90 +10,6 @@ void ShapeBase::createBox(OIIO::ImageBuf **buf, int width, int height) {
 }
 
 
-void ShapeBase::drawBorder(OIIO::ImageBuf *buf) {
-	int i;
-	int width, height;
-
-	int border;
-	float bordercolor[4];
-
-	width = theme_.width() - 1;
-	height = theme_.height() - 1;
-
-	border = theme_.border();
-	memcpy(bordercolor, theme_.borderColor(), sizeof(bordercolor));
-
-	// Draw border
-	if ((border > 0) && (bordercolor[3] != 0.0)) {
-		for (i=0; i<border; i++)
-			OIIO::ImageBufAlgo::render_box(*buf, i, i, width - i, height - i, bordercolor, false);
-	}
-}
-
-
-void ShapeBase::drawBackground(OIIO::ImageBuf *buf) {
-	int width, height;
-
-	int border;
-	float bgcolor[4];
-
-	width = theme_.width() - 1;
-	height = theme_.height() - 1;
-
-	border = theme_.border();
-	memcpy(bgcolor, theme_.backgroundColor(), sizeof(bgcolor));
-
-	if (bgcolor[3] != 0.0)
-		OIIO::ImageBufAlgo::render_box(*buf, border, border, width - border, height - border, bgcolor, true);
-}
-
-
-//void ShapeBase::drawText(OIIO::ImageBuf *buf, int x, int y, int px, const char *label) {
-//	bool result;
-//
-//	int x1, y1, x2, y2;
-//	int text_width, text_height;
-//
-//	int border = theme_.border();
-//	int padding_xl = theme_.padding(VideoWidget::Theme::PaddingLeft);
-////	int padding_xr = theme_.padding(VideoWidget::Theme::PaddingRight);
-//	int padding_yt = theme_.padding(VideoWidget::Theme::PaddingTop);
-////	int padding_yb = theme_.padding(VideoWidget::Theme::PaddingBottom);
-//
-//	float color[4]; // = { 1.0, 1.0, 1.0, 1.0 };
-//
-//	// Compute text size
-//	this->textSize(label, px,
-//			x1, y1, x2, y2,
-//			text_width, text_height);
-//
-//	// Text color
-//	memcpy(color, theme_.labelColor(), sizeof(color));
-//
-//	// Text offset
-//	x += -x1;
-//	y += -y1 + theme_.textShadow();
-//
-//	// Text position
-//	x += padding_xl;
-//	x += border + theme_.textShadow();
-//
-//	y += border + padding_yt;
-//
-//	result = OIIO::ImageBufAlgo::render_text_shadow(*buf, 
-//		x, 
-//		y, 
-//		label, 
-//		px, theme_.font(), color, 
-//		OIIO::ImageBufAlgo::TextAlignX::Left, 
-//		OIIO::ImageBufAlgo::TextAlignY::Baseline, 
-//		theme_.textShadow());
-//
-//	if (result == false)
-//		fprintf(stderr, "render text error\n");
-//}
-
-
 void ShapeBase::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, VideoWidget::Zoom zoom) {
 	bool ok;
 
@@ -180,24 +96,6 @@ void ShapeBase::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, V
 }
 
 
-//bool ShapeBase::textSize(std::string text, int fontsize, 
-//	int &x1, int &y1, int &x2, int &y2,
-//	int &width, int &height) {
-//
-//	OIIO::ROI roi = OIIO::ImageBufAlgo::text_size(text, fontsize, theme_.font());
-//
-//	x1 = roi.xbegin;
-//	x2 = roi.xend;
-//	y1 = roi.ybegin;
-//	y2 = roi.yend;
-//
-//	width = roi.width();
-//	height = roi.height();
-//
-//	return roi.defined();
-//}
-
-
 cairo_t * ShapeBase::createCairoContext(OIIO::ImageBuf *buf) {
 	// Create the cairo destination surface
 	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, buf->spec().width, buf->spec().height);
@@ -244,7 +142,35 @@ void ShapeBase::destroyCairoContext(cairo_t *cairo) {
 }
 
 
-void ShapeBase::drawText(cairo_t *cr, int x, int y, ShapeBase::Font &font, 
+void ShapeBase::background(cairo_t *cr) {
+	int border = theme_.border();
+
+	int x, y;
+	int width, height;
+
+	const float *fill = theme_.backgroundColor();
+	const float *outline = theme_.borderColor();
+
+	x = border / 2;
+	y = border / 2;
+
+	width = theme_.width() - border;
+	height = theme_.height() - border;
+
+	cairo_save(cr);
+	cairo_rectangle(cr, x, y, width, height);
+	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
+	cairo_fill_preserve(cr);
+	if ((border > 0) && (outline != NULL)) {
+		cairo_set_line_width(cr, border);
+		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
+	}
+	cairo_stroke(cr);
+	cairo_restore(cr);
+}
+
+
+void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font, 
 		const float *fill, const float *outline, const char *text) {
 	PangoLayout *layout;
 
@@ -264,6 +190,7 @@ void ShapeBase::drawText(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 	pango_font_description_set_absolute_size(desc, font.size * PANGO_SCALE);
 
 	// Draw text into layout
+	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
 	pango_layout_set_line_spacing(layout, 0);
 	pango_layout_set_font_description(layout, desc);
 	pango_layout_set_text(layout, text, -1);
@@ -299,7 +226,7 @@ void ShapeBase::drawText(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 }
 
 
-void ShapeBase::textSize(cairo_t *cr, ShapeBase::Font &font, const char *text,
+void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
 		int &x, int &y, int &width, int &height) {
 	PangoLayout *layout;
 
@@ -321,6 +248,7 @@ void ShapeBase::textSize(cairo_t *cr, ShapeBase::Font &font, const char *text,
 	pango_font_description_set_absolute_size(desc, font.size * PANGO_SCALE);
 
 	// Draw text into layout
+	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
 	pango_layout_set_line_spacing(layout, 0);
 	pango_layout_set_font_description(layout, desc);
 	pango_layout_set_text(layout, text, -1);

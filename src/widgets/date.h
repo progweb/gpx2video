@@ -30,8 +30,6 @@ public:
 
 		this->initialize();
 		this->createBox(&bg_buf_, theme().width(), theme().height());
-		this->drawBorder(bg_buf_);
-		this->drawBackground(bg_buf_);
 
 		is_update = true;
 skip:
@@ -79,16 +77,10 @@ skip:
 		return fg_buf_;
 	}
 
-	void clear(void) {
-		if (bg_buf_)
-			delete bg_buf_;
+	bool updated(const TelemetryData &data) const;
+	void draw(cairo_t *cr, const TelemetryData &data);
 
-		if (fg_buf_)
-			delete fg_buf_;
-
-		bg_buf_ = NULL;
-		fg_buf_ = NULL;
-	}
+	void clear(void);
 
 private:
 	time_t last_time_;
@@ -111,7 +103,6 @@ private:
 	}
 
 	void initialize(void);
-	void draw(cairo_t *cr, const TelemetryData &data);
 };
 
 
@@ -160,6 +151,14 @@ public:
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		return shape_->render(data, is_update);
+	}
+
+	bool updated(const TelemetryData &data) const {
+		return shape_->updated(data);
+	}
+
+	void draw(cairo_t *cairo, const TelemetryData &data) {
+		shape_->draw(cairo, data);
 	}
 
 	void clear(void) {

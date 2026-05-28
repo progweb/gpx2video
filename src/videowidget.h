@@ -158,6 +158,12 @@ public:
 			FontWeightUnknown
 		};
 
+		enum GaugeCap {
+			GaugeCapSquare,
+			GaugeCapRound,
+			GaugeCapUnknown
+		};
+
 		enum NeedleType {
 			NeedleTypeThin,
 			NeedleTypeLight,
@@ -280,51 +286,19 @@ public:
 			return true;
 		}
 
-		const float * gaugeColor(int index) const {
-			return gauge_color_[index];
+		const float * iconColor(void) const {
+			return icon_color_;
 		}
 
-		bool setGaugeColor(int index, std::string color) {
-			return hex2color(gauge_color_[index], color);
+		bool setIconColor(std::string color) {
+			return hex2color(icon_color_, color);
 		}
 
-		bool setGaugeColor(int index, double r, double g, double b, double a) {
-			gauge_color_[index][0] = r;
-			gauge_color_[index][1] = g;
-			gauge_color_[index][2] = b;
-			gauge_color_[index][3] = a;
-			return true;
-		}
-
-		const float * tickColor(void) const {
-			return tick_color_;
-		}
-
-		bool setTickColor(std::string color) {
-			return hex2color(tick_color_, color);
-		}
-
-		bool setTickColor(double r, double g, double b, double a) {
-			tick_color_[0] = r;
-			tick_color_[1] = g;
-			tick_color_[2] = b;
-			tick_color_[3] = a;
-			return true;
-		}
-
-		const float * tickLabelColor(void) const {
-			return tick_label_color_;
-		}
-
-		bool setTickLabelColor(std::string color) {
-			return hex2color(tick_label_color_, color);
-		}
-
-		bool setTickLabelColor(double r, double g, double b, double a) {
-			tick_label_color_[0] = r;
-			tick_label_color_[1] = g;
-			tick_label_color_[2] = b;
-			tick_label_color_[3] = a;
+		bool setIconColor(double r, double g, double b, double a) {
+			icon_color_[0] = r;
+			icon_color_[1] = g;
+			icon_color_[2] = b;
+			icon_color_[3] = a;
 			return true;
 		}
 
@@ -437,110 +411,6 @@ public:
 			label_border_color_[2] = b;
 			label_border_color_[3] = a;
 			return true;
-		}
-
-		NeedleType needleType(void) const {
-			return needle_type_;
-		}
-
-		void setNeedleType(NeedleType type) {
-			needle_type_ = type;
-		}
-
-		const float * needlePrimaryColor(void) const {
-			return needle_primary_color_;
-		}
-
-		bool setNeedlePrimaryColor(std::string color) {
-			return hex2color(needle_primary_color_, color);
-		}
-
-		bool setNeedlePrimaryColor(double r, double g, double b, double a) {
-			needle_primary_color_[0] = r;
-			needle_primary_color_[1] = g;
-			needle_primary_color_[2] = b;
-			needle_primary_color_[3] = a;
-			return true;
-		}
-
-		const float * needleSecondaryColor(void) const {
-			return needle_secondary_color_;
-		}
-
-		bool setNeedleSecondaryColor(std::string color) {
-			return hex2color(needle_secondary_color_, color);
-		}
-
-		bool setNeedleSecondaryColor(double r, double g, double b, double a) {
-			needle_secondary_color_[0] = r;
-			needle_secondary_color_[1] = g;
-			needle_secondary_color_[2] = b;
-			needle_secondary_color_[3] = a;
-			return true;
-		}
-
-		const float * cursorColor(void) const {
-			return cursor_color_;
-		}
-
-		bool setCursorColor(std::string color) {
-			return hex2color(cursor_color_, color);
-		}
-
-		bool setCursorColor(double r, double g, double b, double a) {
-			cursor_color_[0] = r;
-			cursor_color_[1] = g;
-			cursor_color_[2] = b;
-			cursor_color_[3] = a;
-			return true;
-		}
-
-		const int& gaugeBorder(void) const {
-			return gauge_border_;
-		}
-
-		void setGaugeBorder(int border) {
-			gauge_border_ = border;
-		}
-
-		const float * gaugeBorderColor(void) const {
-			return gauge_border_color_;
-		}
-
-		bool setGaugeBorderColor(std::string color) {
-			return hex2color(gauge_border_color_, color);
-		}
-
-		bool setGaugeBorderColor(double r, double g, double b, double a) {
-			gauge_border_color_[0] = r;
-			gauge_border_color_[1] = g;
-			gauge_border_color_[2] = b;
-			gauge_border_color_[3] = a;
-			return true;
-		}
-
-		const float * gaugeBackgroundColor(void) const {
-			return gauge_bg_color_;
-		}
-
-		bool setGaugeBackgroundColor(std::string color) {
-			return hex2color(gauge_bg_color_, color);
-		}
-
-		bool setGaugeBackgroundColor(double r, double g, double b, double a) {
-			gauge_bg_color_[0] = r;
-			gauge_bg_color_[1] = g;
-			gauge_bg_color_[2] = b;
-			gauge_bg_color_[3] = a;
-			return true;
-		}
-
-		const Align& tickAlign(void) const {
-			return tick_align_;
-		}
-
-		void setTickAlign(Align align) {
-			tick_align_ = align;
 		}
 
 		const int& valueMin(void) const {
@@ -686,6 +556,256 @@ public:
 			return true;
 		}
 
+		int unitFontSize(void) const {
+			return unit_font_size_;
+		}
+
+		void setUnitFontSize(int size) {
+			if (size < 0)
+				return;
+
+			unit_font_size_ = size;
+		}
+
+		const int& gaugeAngle(void) const {
+			return gauge_angle_;
+		}
+
+		void setGaugeAngle(int angle) {
+			if (angle < 0)
+				return;
+
+			gauge_angle_ = angle;
+		}
+
+		const int& gaugeRotation(void) const {
+			return gauge_rotation_;
+		}
+
+		void setGaugeRotation(int rotation) {
+			if (rotation < 0)
+				return;
+
+			gauge_rotation_ = rotation;
+		}
+
+		const bool& gaugeFlip(void) const {
+			return gauge_flip_;
+		}
+
+		void setGaugeFlip(bool flip) {
+			gauge_flip_ = flip;
+		}
+
+		const int& gaugeWidth(void) const {
+			return gauge_width_;
+		}
+
+		void setGaugeWidth(int width) {
+			if (width < 0)
+				return;
+
+			gauge_width_ = width;
+		}
+
+		GaugeCap gaugeCap(void) const {
+			return gauge_cap_;
+		}
+
+		void setGaugeCap(GaugeCap cap) {
+			gauge_cap_ = cap;
+		}
+
+		const int& gaugeBorder(void) const {
+			return gauge_border_;
+		}
+
+		void setGaugeBorder(int border) {
+			gauge_border_ = border;
+		}
+
+		const float * gaugeBorderColor(void) const {
+			return gauge_border_color_;
+		}
+
+		bool setGaugeBorderColor(std::string color) {
+			return hex2color(gauge_border_color_, color);
+		}
+
+		bool setGaugeBorderColor(double r, double g, double b, double a) {
+			gauge_border_color_[0] = r;
+			gauge_border_color_[1] = g;
+			gauge_border_color_[2] = b;
+			gauge_border_color_[3] = a;
+			return true;
+		}
+
+		const float * gaugePrimaryColor() const {
+			return gauge_primary_color_;
+		}
+
+		bool setGaugePrimaryColor(std::string color) {
+			return hex2color(gauge_primary_color_, color);
+		}
+
+		bool setGaugePrimaryColor(double r, double g, double b, double a) {
+			gauge_primary_color_[0] = r;
+			gauge_primary_color_[1] = g;
+			gauge_primary_color_[2] = b;
+			gauge_primary_color_[3] = a;
+			return true;
+		}
+
+		const float * gaugeSecondaryColor() const {
+			return gauge_secondary_color_;
+		}
+
+		bool setGaugeSecondaryColor(std::string color) {
+			return hex2color(gauge_secondary_color_, color);
+		}
+
+		bool setGaugeSecondaryColor(double r, double g, double b, double a) {
+			gauge_secondary_color_[0] = r;
+			gauge_secondary_color_[1] = g;
+			gauge_secondary_color_[2] = b;
+			gauge_secondary_color_[3] = a;
+			return true;
+		}
+
+		const float * gaugeBackgroundColor(void) const {
+			return gauge_bg_color_;
+		}
+
+		bool setGaugeBackgroundColor(std::string color) {
+			return hex2color(gauge_bg_color_, color);
+		}
+
+		bool setGaugeBackgroundColor(double r, double g, double b, double a) {
+			gauge_bg_color_[0] = r;
+			gauge_bg_color_[1] = g;
+			gauge_bg_color_[2] = b;
+			gauge_bg_color_[3] = a;
+			return true;
+		}
+
+		const int& tickSize(void) const {
+			return tick_size_;
+		}
+
+		void setTickSize(int size) {
+			if (size < 0)
+				return;
+
+			tick_size_ = size;
+		}
+
+		const Align& tickAlign(void) const {
+			return tick_align_;
+		}
+
+		void setTickAlign(Align align) {
+			tick_align_ = align;
+		}
+
+		const float * tickColor(void) const {
+			return tick_color_;
+		}
+
+		bool setTickColor(std::string color) {
+			return hex2color(tick_color_, color);
+		}
+
+		bool setTickColor(double r, double g, double b, double a) {
+			tick_color_[0] = r;
+			tick_color_[1] = g;
+			tick_color_[2] = b;
+			tick_color_[3] = a;
+			return true;
+		}
+
+		const int& tickLabelDistance(void) const {
+			return tick_label_distance_;
+		}
+
+		void setTickLabelDistance(int distance) {
+			if (distance < 0)
+				return;
+
+			tick_label_distance_ = distance;
+		}
+
+		const float * tickLabelColor(void) const {
+			return tick_label_color_;
+		}
+
+		bool setTickLabelColor(std::string color) {
+			return hex2color(tick_label_color_, color);
+		}
+
+		bool setTickLabelColor(double r, double g, double b, double a) {
+			tick_label_color_[0] = r;
+			tick_label_color_[1] = g;
+			tick_label_color_[2] = b;
+			tick_label_color_[3] = a;
+			return true;
+		}
+
+		NeedleType needleType(void) const {
+			return needle_type_;
+		}
+
+		void setNeedleType(NeedleType type) {
+			needle_type_ = type;
+		}
+
+		const float * needlePrimaryColor(void) const {
+			return needle_primary_color_;
+		}
+
+		bool setNeedlePrimaryColor(std::string color) {
+			return hex2color(needle_primary_color_, color);
+		}
+
+		bool setNeedlePrimaryColor(double r, double g, double b, double a) {
+			needle_primary_color_[0] = r;
+			needle_primary_color_[1] = g;
+			needle_primary_color_[2] = b;
+			needle_primary_color_[3] = a;
+			return true;
+		}
+
+		const float * needleSecondaryColor(void) const {
+			return needle_secondary_color_;
+		}
+
+		bool setNeedleSecondaryColor(std::string color) {
+			return hex2color(needle_secondary_color_, color);
+		}
+
+		bool setNeedleSecondaryColor(double r, double g, double b, double a) {
+			needle_secondary_color_[0] = r;
+			needle_secondary_color_[1] = g;
+			needle_secondary_color_[2] = b;
+			needle_secondary_color_[3] = a;
+			return true;
+		}
+
+		const float * cursorColor(void) const {
+			return cursor_color_;
+		}
+
+		bool setCursorColor(std::string color) {
+			return hex2color(cursor_color_, color);
+		}
+
+		bool setCursorColor(double r, double g, double b, double a) {
+			cursor_color_[0] = r;
+			cursor_color_[1] = g;
+			cursor_color_[2] = b;
+			cursor_color_[3] = a;
+			return true;
+		}
+
 		static bool hex2color(float color[4], std::string html);
 		static std::string color2hex(const float color[4]);
 
@@ -710,14 +830,7 @@ public:
 
 		float cursor_color_[4];
 
-		int gauge_border_;
-		float gauge_border_color_[4];
-		float gauge_bg_color_[4];
-		float gauge_color_[2][4];
-
-		Align tick_align_;
-		float tick_color_[4];
-		float tick_label_color_[4];
+		float icon_color_[4];
 
 		Align label_align_;
 		std::string label_font_family_;
@@ -747,6 +860,25 @@ public:
 		float value_color_[4];
 		float value_bg_color_[4];
 		float value_border_color_[4];
+
+		int unit_font_size_;
+
+		int gauge_angle_;
+		int gauge_rotation_;
+		bool gauge_flip_;
+		int gauge_width_;
+		GaugeCap gauge_cap_;
+		int gauge_border_;
+		float gauge_border_color_[4];
+		float gauge_bg_color_[4];
+		float gauge_primary_color_[4];
+		float gauge_secondary_color_[4];
+
+		int tick_size_;
+		Align tick_align_;
+		float tick_color_[4];
+		int tick_label_distance_;
+		float tick_label_color_[4];
 	};
 
 //	Shape& shape(void) {
@@ -922,11 +1054,11 @@ public:
 		label_ = label;
 	}
 
-	const std::string& text(void) const {
+	const std::string& value(void) const {
 		return text_;
 	}
 
-	virtual void setText(std::string text) {
+	virtual void setValue(std::string text) {
 		text_ = text;
 	}
 
@@ -944,6 +1076,11 @@ public:
 
 	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0; 
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
+
+	virtual bool updated(const TelemetryData &data) const = 0;
+
+	virtual void draw(cairo_t *cairo, const TelemetryData &data) = 0;
+
 	virtual void clear(void) = 0;
 
 	virtual void save(std::ostream &os);
@@ -955,6 +1092,7 @@ public:
 	static Theme::Align string2align(std::string &s);
 	static Theme::FontStyle string2fontstyle(std::string &s);
 	static Theme::FontWeight string2fontweight(std::string &s);
+	static Theme::GaugeCap string2gaugecap(std::string &);
 	static Theme::NeedleType string2needletype(std::string &);
 	static TelemetryData::Unit string2unit(std::string &s);
 	static Zoom string2zoom(std::string &s);
@@ -967,6 +1105,7 @@ public:
 	static std::string align2string(Theme::Align align);
 	static std::string fontstyle2string(Theme::FontStyle style);
 	static std::string fontweight2string(Theme::FontWeight weight);
+	static std::string gaugecap2string(Theme::GaugeCap cap);
 	static std::string needletype2string(Theme::NeedleType type);
 	static std::string unit2string(TelemetryData::Unit unit);
 

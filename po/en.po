@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-05-26 19:37+0200\n"
+"POT-Creation-Date: 2026-05-29 20:10+0200\n"
 "PO-Revision-Date: 2026-05-17 11:33+0200\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -15,123 +15,122 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/videowidget.cpp:780 ../gtk/src/ui/shape/arc_box.ui:290
+#: ../src/videowidget.cpp:817
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:782
+#: ../src/videowidget.cpp:819
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:784 ../src/videowidget.cpp:837
+#: ../src/videowidget.cpp:821 ../src/videowidget.cpp:874
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:793
+#: ../src/videowidget.cpp:830
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:795
+#: ../src/videowidget.cpp:832
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:797
+#: ../src/videowidget.cpp:834
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:799
+#: ../src/videowidget.cpp:836
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:801 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:838 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:803
+#: ../src/videowidget.cpp:840
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:805 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:842 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:807
+#: ../src/videowidget.cpp:844
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:809
+#: ../src/videowidget.cpp:846
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:811
+#: ../src/videowidget.cpp:848
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:813
+#: ../src/videowidget.cpp:850
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:815
+#: ../src/videowidget.cpp:852
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:817
+#: ../src/videowidget.cpp:854
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:819
+#: ../src/videowidget.cpp:856
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:821
+#: ../src/videowidget.cpp:858
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:823
+#: ../src/videowidget.cpp:860
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:825 ../gtk/src/ui/widgets/map_box.ui:62
+#: ../src/videowidget.cpp:862 ../gtk/src/ui/widgets/map_box.ui:62
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:827
+#: ../src/videowidget.cpp:864
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:829
+#: ../src/videowidget.cpp:866
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:831
+#: ../src/videowidget.cpp:868
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:833
+#: ../src/videowidget.cpp:870
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:835
+#: ../src/videowidget.cpp:872
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:839 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:876 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:841 ../gtk/src/ui/widgets/map_box.ui:194
+#: ../src/videowidget.cpp:878 ../gtk/src/ui/widgets/map_box.ui:194
 #: ../gtk/src/ui/widgets/track_box.ui:55
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:843
+#: ../src/videowidget.cpp:880
 msgid "Vertical speed"
 msgstr ""
 
 #: ../gtk/src/ui/append.ui:5 ../gtk/src/ui/window.ui:166
-#, fuzzy
 msgid "Append a widget"
-msgstr "Append widget"
+msgstr ""
 
 #: ../gtk/src/ui/append.ui:22
 msgid "Name..."
@@ -282,232 +281,242 @@ msgstr ""
 msgid "Set the video start time"
 msgstr ""
 
-#: ../gtk/src/ui/video_stackpage.ui:80 ../gtk/src/ui/widget_frame.ui:306
+#: ../gtk/src/ui/video_stackpage.ui:80 ../gtk/src/ui/widget_frame.ui:313
 msgid "Size"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:196
+#: ../gtk/src/ui/widget_frame.ui:203
 msgid "Widget properties"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:204
+#: ../gtk/src/ui/widget_frame.ui:211
 msgid "Shape"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:223
+#: ../gtk/src/ui/widget_frame.ui:230
 msgid "Position & Orientation"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:243
+#: ../gtk/src/ui/widget_frame.ui:250
 msgid "X:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:273
+#: ../gtk/src/ui/widget_frame.ui:280
 msgid "Y:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:326
+#: ../gtk/src/ui/widget_frame.ui:333
 msgid "Width:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:356
+#: ../gtk/src/ui/widget_frame.ui:363
 msgid "Height:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:381
+#: ../gtk/src/ui/widget_frame.ui:388
 msgid "Margin"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:401
+#: ../gtk/src/ui/widget_frame.ui:408
 msgid "Margin left:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:431
+#: ../gtk/src/ui/widget_frame.ui:438
 msgid "Margin right:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:461
+#: ../gtk/src/ui/widget_frame.ui:468
 msgid "Margin top:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:491
+#: ../gtk/src/ui/widget_frame.ui:498
 msgid "Margin bottom:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:516
+#: ../gtk/src/ui/widget_frame.ui:523
 msgid "Padding"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:536
+#: ../gtk/src/ui/widget_frame.ui:543
 msgid "Padding left:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:566
+#: ../gtk/src/ui/widget_frame.ui:573
 msgid "Padding right:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:596
+#: ../gtk/src/ui/widget_frame.ui:603
 msgid "Padding top:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:626
+#: ../gtk/src/ui/widget_frame.ui:633
 msgid "Padding bottom:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:651
+#: ../gtk/src/ui/widget_frame.ui:658
 msgid "Border"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:671
+#: ../gtk/src/ui/widget_frame.ui:678
 msgid "Border width:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:701
+#: ../gtk/src/ui/widget_frame.ui:708
 msgid "Border color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:714 ../gtk/src/ui/widget_frame.ui:758
-#: ../gtk/src/ui/widget_frame.ui:988 ../gtk/src/ui/widget_frame.ui:1107
-#: ../gtk/src/ui/widget_frame.ui:1311 ../gtk/src/ui/widget_frame.ui:1430
-#: ../gtk/src/ui/shape/arc_box.ui:94 ../gtk/src/ui/shape/arc_box.ui:150
-#: ../gtk/src/ui/shape/arc_box.ui:248 ../gtk/src/ui/shape/arc_box.ui:278
-#: ../gtk/src/ui/shape/arc_box.ui:349 ../gtk/src/ui/shape/arc_box.ui:408
-#: ../gtk/src/ui/shape/arc_box.ui:437 ../gtk/src/ui/shape/bar_box.ui:119
-#: ../gtk/src/ui/shape/bar_box.ui:175 ../gtk/src/ui/shape/bar_box.ui:246
-#: ../gtk/src/ui/shape/bar_box.ui:305 ../gtk/src/ui/shape/bar_box.ui:334
-#: ../gtk/src/ui/widgets/map_box.ui:292 ../gtk/src/ui/widgets/map_box.ui:321
-#: ../gtk/src/ui/widgets/map_box.ui:350 ../gtk/src/ui/widgets/track_box.ui:210
+#: ../gtk/src/ui/widget_frame.ui:721 ../gtk/src/ui/widget_frame.ui:765
+#: ../gtk/src/ui/widget_frame.ui:995 ../gtk/src/ui/widget_frame.ui:1114
+#: ../gtk/src/ui/widget_frame.ui:1318 ../gtk/src/ui/widget_frame.ui:1437
+#: ../gtk/src/ui/shape/arc_box.ui:270 ../gtk/src/ui/shape/arc_box.ui:299
+#: ../gtk/src/ui/shape/arc_box.ui:358 ../gtk/src/ui/shape/arc_box.ui:387
+#: ../gtk/src/ui/shape/arc_box.ui:489 ../gtk/src/ui/shape/arc_box.ui:575
+#: ../gtk/src/ui/shape/arc_box.ui:673 ../gtk/src/ui/shape/arc_box.ui:703
+#: ../gtk/src/ui/shape/bar_box.ui:163 ../gtk/src/ui/shape/bar_box.ui:192
+#: ../gtk/src/ui/shape/bar_box.ui:251 ../gtk/src/ui/shape/bar_box.ui:280
+#: ../gtk/src/ui/shape/bar_box.ui:407 ../gtk/src/ui/shape/bar_box.ui:463
+#: ../gtk/src/ui/shape/text_box.ui:86 ../gtk/src/ui/widgets/map_box.ui:292
+#: ../gtk/src/ui/widgets/map_box.ui:321 ../gtk/src/ui/widgets/map_box.ui:350
+#: ../gtk/src/ui/widgets/track_box.ui:210
 #: ../gtk/src/ui/widgets/track_box.ui:239
 #: ../gtk/src/ui/widgets/track_box.ui:268
 msgid "Select a color"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:725
+#: ../gtk/src/ui/widget_frame.ui:732
 msgid "Background"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:745
+#: ../gtk/src/ui/widget_frame.ui:752
 msgid "Background color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:769
+#: ../gtk/src/ui/widget_frame.ui:776
 msgid "Label"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:790
+#: ../gtk/src/ui/widget_frame.ui:797
 msgid "Label enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:816
+#: ../gtk/src/ui/widget_frame.ui:823
 msgid "Label text:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:841
+#: ../gtk/src/ui/widget_frame.ui:848
 msgid "Label font family:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:867
+#: ../gtk/src/ui/widget_frame.ui:874
 msgid "Label font size:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:898
+#: ../gtk/src/ui/widget_frame.ui:905
 msgid "Label style:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:924
+#: ../gtk/src/ui/widget_frame.ui:931
 msgid "Label weight:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:950
+#: ../gtk/src/ui/widget_frame.ui:957
 msgid "Label align:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:975
+#: ../gtk/src/ui/widget_frame.ui:982
 msgid "Label color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1004
+#: ../gtk/src/ui/widget_frame.ui:1011
 msgid "Label shadow opacity:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1034
+#: ../gtk/src/ui/widget_frame.ui:1041
 msgid "Label shadow distance:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1064
+#: ../gtk/src/ui/widget_frame.ui:1071
 msgid "Label border width:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1094
+#: ../gtk/src/ui/widget_frame.ui:1101
 msgid "Label border color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1118
+#: ../gtk/src/ui/widget_frame.ui:1125
 msgid "Value"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1139
+#: ../gtk/src/ui/widget_frame.ui:1146
 msgid "Value enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1164
+#: ../gtk/src/ui/widget_frame.ui:1171
 msgid "Value font family:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1190
+#: ../gtk/src/ui/widget_frame.ui:1197
 msgid "Value font size:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1221
+#: ../gtk/src/ui/widget_frame.ui:1228
 msgid "Value style:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1247
+#: ../gtk/src/ui/widget_frame.ui:1254
 msgid "Value weight:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1273
+#: ../gtk/src/ui/widget_frame.ui:1280
 msgid "Value align:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1298
+#: ../gtk/src/ui/widget_frame.ui:1305
 msgid "Value color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1327
+#: ../gtk/src/ui/widget_frame.ui:1334
 msgid "Value shadow opacity:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1357
+#: ../gtk/src/ui/widget_frame.ui:1364
 msgid "Value shadow distance:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1387
+#: ../gtk/src/ui/widget_frame.ui:1394
 msgid "Value border width:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1417
+#: ../gtk/src/ui/widget_frame.ui:1424
 msgid "Value border color:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1446
+#: ../gtk/src/ui/widget_frame.ui:1453
 msgid "Value min.:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1476
+#: ../gtk/src/ui/widget_frame.ui:1483
 msgid "Value max.:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1507
+#: ../gtk/src/ui/widget_frame.ui:1514
 msgid "Value format:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1533
+#: ../gtk/src/ui/widget_frame.ui:1540
+msgid "Value unit:"
+msgstr ""
+
+#: ../gtk/src/ui/widget_frame.ui:1561
+msgid "Unit"
+msgstr ""
+
+#: ../gtk/src/ui/widget_frame.ui:1582
 msgid "Unit enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:1559
-msgid "Value unit:"
+#: ../gtk/src/ui/widget_frame.ui:1607
+msgid "Unit font size:"
 msgstr ""
 
 #: ../gtk/src/ui/window.ui:21
@@ -518,100 +527,112 @@ msgstr "Open"
 msgid "Save"
 msgstr "Save"
 
-#: ../gtk/src/ui/shape/arc_box.ui:25
+#: ../gtk/src/ui/shape/arc_box.ui:60
 msgid "Arc extension"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:34 ../gtk/src/ui/shape/bar_box.ui:34
-msgid "Tick"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:55 ../gtk/src/ui/shape/bar_box.ui:55
-msgid "Tick enable:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:81 ../gtk/src/ui/shape/bar_box.ui:106
-msgid "Tick color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:111 ../gtk/src/ui/shape/bar_box.ui:136
-msgid "Tick label enable:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:137 ../gtk/src/ui/shape/bar_box.ui:162
-msgid "Tick label color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:162
-msgid "Needle"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:183
-msgid "Needle enable:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:209
-msgid "Needle type:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:235
-msgid "Needle primary color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:265
-msgid "Needle secondary color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:311
-msgid "Arc enable:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:336
-msgid "Arc color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:365
-msgid "Arc border width:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:395
-msgid "Arc border color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/arc_box.ui:424
-msgid "Arc background color:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/bar_box.ui:25
-msgid "Bar extension"
-msgstr ""
-
-#: ../gtk/src/ui/shape/bar_box.ui:81
-msgid "Tick align:"
-msgstr ""
-
-#: ../gtk/src/ui/shape/bar_box.ui:187
+#: ../gtk/src/ui/shape/arc_box.ui:69 ../gtk/src/ui/shape/bar_box.ui:48
 msgid "Gauge"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:208
+#: ../gtk/src/ui/shape/arc_box.ui:90 ../gtk/src/ui/shape/bar_box.ui:69
 msgid "Gauge enable:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:233
-msgid "Gauge color:"
+#: ../gtk/src/ui/shape/arc_box.ui:115
+msgid "Gauge angle:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:262
+#: ../gtk/src/ui/shape/arc_box.ui:145
+msgid "Gauge rotation:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:176
+msgid "Gauge flip:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:201 ../gtk/src/ui/shape/bar_box.ui:94
+msgid "Gauge width:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:232 ../gtk/src/ui/shape/bar_box.ui:125
+msgid "Gauge line cap:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:257 ../gtk/src/ui/shape/bar_box.ui:150
+msgid "Gauge primary color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:286 ../gtk/src/ui/shape/bar_box.ui:179
+msgid "Gauge secondary color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:315 ../gtk/src/ui/shape/bar_box.ui:208
 msgid "Gauge border width:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:292
+#: ../gtk/src/ui/shape/arc_box.ui:345 ../gtk/src/ui/shape/bar_box.ui:238
 msgid "Gauge border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:321
+#: ../gtk/src/ui/shape/arc_box.ui:374 ../gtk/src/ui/shape/bar_box.ui:267
 msgid "Gauge background color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:399 ../gtk/src/ui/shape/bar_box.ui:292
+msgid "Tick"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:420 ../gtk/src/ui/shape/bar_box.ui:313
+msgid "Tick enable:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:445 ../gtk/src/ui/shape/bar_box.ui:338
+msgid "Tick size:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:476 ../gtk/src/ui/shape/bar_box.ui:394
+msgid "Tick color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:506 ../gtk/src/ui/shape/bar_box.ui:424
+msgid "Tick label enable:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:531
+msgid "Tick label distance:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:562 ../gtk/src/ui/shape/bar_box.ui:450
+msgid "Tick label color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:587
+msgid "Needle"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:608
+msgid "Needle enable:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:634
+msgid "Needle type:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:660
+msgid "Needle primary color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/arc_box.ui:690
+msgid "Needle secondary color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:39
+msgid "Bar extension"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:369
+msgid "Tick align:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/text_box.ui:18
@@ -624,6 +645,10 @@ msgstr ""
 
 #: ../gtk/src/ui/shape/text_box.ui:48
 msgid "Icon enable:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/text_box.ui:73
+msgid "Icon color:"
 msgstr ""
 
 #: ../gtk/src/ui/widgets/map_box.ui:53
@@ -716,10 +741,12 @@ msgid "Vertical"
 msgstr ""
 
 #: ../gtk/src/widgetframe.cpp:92 ../gtk/src/widgetframe.cpp:212
+#: ../gtk/src/shape/bar.cpp:36
 msgid "Left"
 msgstr ""
 
 #: ../gtk/src/widgetframe.cpp:97 ../gtk/src/widgetframe.cpp:222
+#: ../gtk/src/shape/bar.cpp:44
 msgid "Right"
 msgstr ""
 
@@ -799,8 +826,8 @@ msgstr ""
 msgid "Ultra heavy (1000)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:217 ../gtk/src/widgets/map.cpp:27
-#: ../gtk/src/widgets/track.cpp:27
+#: ../gtk/src/widgetframe.cpp:217 ../gtk/src/shape/bar.cpp:40
+#: ../gtk/src/widgets/map.cpp:27 ../gtk/src/widgets/track.cpp:27
 msgid "Center"
 msgstr ""
 
@@ -812,6 +839,30 @@ msgstr "All video files"
 msgid "All layout files"
 msgstr "All layout files"
 
+#: ../gtk/src/shape/arc.cpp:23 ../gtk/src/shape/bar.cpp:23
+msgid "Square"
+msgstr ""
+
+#: ../gtk/src/shape/arc.cpp:27 ../gtk/src/shape/bar.cpp:27
+msgid "Round"
+msgstr ""
+
+#: ../gtk/src/shape/arc.cpp:36
+msgid "Thin"
+msgstr ""
+
+#: ../gtk/src/shape/arc.cpp:40
+msgid "Light"
+msgstr ""
+
+#: ../gtk/src/shape/arc.cpp:44
+msgid "Basic"
+msgstr ""
+
+#: ../gtk/src/shape/arc.cpp:48
+msgid "Design"
+msgstr ""
+
 #: ../gtk/src/widgets/map.cpp:22 ../gtk/src/widgets/track.cpp:22
 msgid "Default"
 msgstr ""
@@ -819,10 +870,3 @@ msgstr ""
 #: ../gtk/src/widgets/map.cpp:32 ../gtk/src/widgets/track.cpp:32
 msgid "Zoom fit"
 msgstr ""
-
-#, fuzzy
-#~ msgid "Append a new widget"
-#~ msgstr "Append widget"
-
-#~ msgid "Append widget"
-#~ msgstr "Append widget"

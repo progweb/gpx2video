@@ -5,7 +5,23 @@
  * Text shape
  */
 
+bool ElevationTextShape::updated(const TelemetryData &data) const {
+	if (is_initialized_) {
+		if ((data.type() == TelemetryData::TypeUnchanged))
+			return false;
+
+		if (no_value_ && !data.hasValue(TelemetryData::DataElevation))
+			return false;
+	}
+
+	return true;
+}
+
+
 void ElevationTextShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setSize(theme().height());
 
 	setPadding(
@@ -13,6 +29,8 @@ void ElevationTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -26,6 +44,9 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
 		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
+	// Initialize
+	initialize();
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataElevation);
 
@@ -34,9 +55,12 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
  	else
  		sprintf(s, "-- %s", unit.c_str());
 
+	// Draw background
+	background(cr);
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_);
+		icon(cr, icon_filename_, theme().iconColor());
 	}
 
 	// Draw label
@@ -47,6 +71,7 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -62,6 +87,7 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -70,12 +96,43 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 }
 
+void ElevationTextShape::clear(void) {
+	is_initialized_ = false;
+
+	no_value_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
+}
+
 
 /**
  * Bar shape
  */
 
+bool ElevationBarShape::updated(const TelemetryData &data) const {
+	if (is_initialized_) {
+		if ((data.type() == TelemetryData::TypeUnchanged))
+			return false;
+
+		if (no_value_ && !data.hasValue(TelemetryData::DataElevation))
+			return false;
+	}
+
+	return true;
+}
+
+
 void ElevationBarShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	width_ = theme().width();
 	height_ = theme().height();
 
@@ -85,6 +142,8 @@ void ElevationBarShape::initialize(void) {
 
 	tick_step_ = 10;
 	tick_mstep_ = 10;
+
+	is_initialized_ = true;
 }
 
 
@@ -136,6 +195,9 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
 		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
+	// Initialize
+	initialize();
+
 	// Limit
 	amin = theme().valueMin();
 	amax = theme().valueMax();
@@ -166,6 +228,9 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	offset /= 2;
 	setOffset(-offset);
 
+	// Draw background
+	background(cr);
+
 	// Draw gauge background
 	bar(cr, 0, 1, (size_ / 8) + (size_ / 25), theme().gaugeBorder(),
 			theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
@@ -179,7 +244,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		xb2 = scale(amin, amax, to, rotate);
 
 		bar(cr, xb1, xb2, size_ / 8 + size_ / 25, 0,
-				theme().gaugeColor(0));
+				theme().gaugePrimaryColor());
 	}
 
 	// Draw cursor
@@ -256,6 +321,22 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		label(cr, x, y, theme().labelColor(), widget_->label());
 	}
+}
+
+
+void ElevationBarShape::clear(void) {
+	is_initialized_ = false;
+
+	no_value_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 

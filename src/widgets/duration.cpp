@@ -5,7 +5,28 @@
  * Text shape
  */
 
+bool DurationTextShape::updated(const TelemetryData &data) const {
+	int duration;
+
+	// Compute duration
+	duration = data.duration();
+
+	if (is_initialized_) {
+		if (duration == last_duration_)
+			return false;
+
+		if (no_value_ && !data.hasValue(TelemetryData::DataDuration))
+			return false;
+	}
+
+	return true;
+}
+
+
 void DurationTextShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setSize(theme().height());
 
 	setPadding(
@@ -13,6 +34,8 @@ void DurationTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -30,6 +53,9 @@ void DurationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Compute duration
 	duration = data.duration();
 
+	// Initialize
+	initialize();
+
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataDuration);
 
@@ -45,9 +71,12 @@ void DurationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	else
 		sprintf(s, "--:--:--");
 
+	// Draw background
+	background(cr);
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_);
+		icon(cr, icon_filename_, theme().iconColor());
 	}
 
 	// Draw label
@@ -58,6 +87,7 @@ void DurationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -73,12 +103,34 @@ void DurationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+
+	// Save last value
+	last_duration_ = duration;
+}
+
+
+void DurationTextShape::clear(void) {
+	is_initialized_ = false;
+
+	no_value_ = false;
+
+	last_duration_ = 0;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 

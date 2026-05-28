@@ -5,7 +5,27 @@
  * Text shape
  */
 
+bool TimeTextShape::updated(const TelemetryData &data) const {
+	time_t t;
+
+	// Compute time
+	t = data.datetime() / 1000;
+
+	// Check changes
+	if (is_initialized_) {
+		if (t == last_time_) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
 void TimeTextShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setSize(theme().height());
 
 	setPadding(
@@ -13,6 +33,8 @@ void TimeTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -23,6 +45,9 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	time_t t;
 	struct tm time;
+
+	// Initialize
+	initialize();
 
 	// Format data
 	if (data.datetime() != 0) {
@@ -39,9 +64,12 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	else
 		strncpy(s, "--:--:--", sizeof(s));
 
+	// Draw background
+	background(cr);
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_);
+		icon(cr, icon_filename_, theme().iconColor());
 	}
 
 	// Draw label
@@ -52,6 +80,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -67,18 +96,53 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+
+	// Save last value
+	last_time_ = t;
+}
+
+
+void TimeTextShape::clear(void) {
+	is_initialized_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 
 /**
  * Text shape
  */
+
+bool TimeArcShape::updated(const TelemetryData &data) const {
+	time_t t;
+
+	// Compute time
+	t = data.datetime() / 1000;
+
+	// Check changes
+	if (is_initialized_) {
+		if (t == last_time_) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 
 void TimeArcShape::initialize(void) {
 	width_ = theme().width();
@@ -87,6 +151,14 @@ void TimeArcShape::initialize(void) {
 	size_ = std::min(width_, height_);
 
 	init(fontface_, width_, height_, size_);
+
+	setPadding(
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -100,12 +172,14 @@ void TimeArcShape::tickinit(int min, int max) {
 
 
 void TimeArcShape::ticklenwidth(int value, int *len, int *width) {
+	int size = theme().tickSize(); // size_ / 15
+								   //
 	if (value % 5 == 0) {
-		*len = size_ / 15 + size_ / 51;
+		*len = size + size_ / 51;
 		*width = size_ / 96;
 	}
 	else {
-		*len = size_ / 15 - size_ / 51;
+		*len = size - size_ / 51;
 		*width = size_ / 128;
 	}
 }
@@ -126,6 +200,9 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	int tmin, tmax;
 
 	const float *primary_color, *secondary_color;
+
+	// Initialize
+	initialize();
 
 	// Limit
 	tmin = 0;
@@ -156,7 +233,8 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	tickinit(tmin, tmax);
 
 	// Draw background
-	pieslice(cr, 0, 360, 0);
+	pieslice(cr, 0, 360, theme().border(),
+			theme().backgroundColor(), theme().borderColor());
 
 	// Draw tick lines around arc line
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
@@ -180,14 +258,11 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// 1 3 6...
 	// 1 6...
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		double distance;
-	   
-		if (theme().hasFlag(VideoWidget::Theme::FlagTick))
-			distance = size_ / 6.5;
-		else
-			distance = size_ / 16;
-
 		int mstep = (tick_mstep_ > 0) ? 3 * tick_mstep_ : 1;
+
+		double distance = theme().tickSize();
+		
+		distance += theme().tickLabelDistance();
 
 		for (int value = 0; value < 12; value = value + mstep) {
 			xa = scale(tmin / 5, tmax / 5, value + 1, rotate);
@@ -201,7 +276,7 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		}
 	}
 
-	// Needle type
+	// Draw needle
 	if (!no_value && theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
 		// thin, light, basic, design
 		type = theme().needleType();
@@ -212,219 +287,37 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		// Draw minute needle
 		xa = scale(tmin, tmax, time.tm_min, rotate);
-		drawNeedle(cr, type, xa, (size_ / 72), false, primary_color, secondary_color);
+		needle(cr, type, xa, (size_ / 72), false, primary_color, secondary_color);
 
 		// Draw hour needle
 		xa = scale(tmin, tmax, time.tm_hour * 5, rotate);
-		drawNeedle(cr, type, xa, (size_ / 4), false, primary_color, secondary_color);
+		needle(cr, type, xa, (size_ / 4), false, primary_color, secondary_color);
 
 		// Draw second needle
 		xa = scale(tmin, tmax, time.tm_sec, rotate);
-		drawNeedle(cr, VideoWidget::Theme::NeedleTypeThin, xa, 0.0,
-				(type == VideoWidget::Theme::NeedleTypeDesign),
+		needle(cr, VideoWidget::Theme::NeedleTypeThin, xa, 0.0,
+				(type == VideoWidget::Theme::NeedleTypeLight) || (type == VideoWidget::Theme::NeedleTypeDesign),
 				secondary_color, secondary_color);
 	}
+
+	// Save last value
+	last_time_ = t;
 }
 
 
-void TimeArcShape::drawNeedle(cairo_t *cr, VideoWidget::Theme::NeedleType  type, double xa, double len, bool design,
-		const float *color1, const float *color2) {
-	struct point p;
-   
-	const float *fill;
+void TimeArcShape::clear(void) {
+	is_initialized_ = false;
 
-	cairo_save(cr);
+	if (bg_buf_)
+		delete bg_buf_;
 
-	switch (type) {
-	case VideoWidget::Theme::NeedleTypeDesign:
-		//
-		fill = color1;
-		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
+	if (fg_buf_)
+		delete fg_buf_;
 
-		cairo_set_line_width(cr, size_ / 36);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-
-		p = locate(xa - 0, len);
-		cairo_move_to(cr, p.x, p.y);
-
-		p = locate(xa - 0, (size_ / 2));
-		cairo_line_to(cr, p.x, p.y);
-
-		cairo_stroke(cr);
-
-		//
-		fill = color2;
-		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-
-		cairo_set_line_width(cr, size_ / 72);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-
-		p = locate(xa - 0, len);
-		cairo_move_to(cr, p.x, p.y);
-
-		p = locate(xa - 0, (size_ / 3));
-		cairo_line_to(cr, p.x, p.y);
-
-		cairo_stroke(cr);
-		break;
-
-	case VideoWidget::Theme::NeedleTypeBasic:
-		fill = color1;
-		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-
-		p = locate(xa - 0, len);
-		cairo_move_to(cr, p.x, p.y);
-
-		p = locate(xa - 90, (size_ / 2) - 6);
-		cairo_line_to(cr, p.x, p.y);
-
-		p = locate(xa - 180, (size_ / 2) - 6);
-		cairo_line_to(cr, p.x, p.y);
-
-		p = locate(xa + 90, (size_ / 2) - 6);
-		cairo_line_to(cr, p.x, p.y);
-
-		cairo_close_path(cr);
-		cairo_fill_preserve(cr);
-		cairo_stroke(cr);
-		break;
-
-	case VideoWidget::Theme::NeedleTypeLight:
-		fill = color1;
-		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-
-		//
-		cairo_set_line_width(cr, size_ / 64);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-
-		p = locate(xa - 0, len);
-		cairo_move_to(cr, p.x, p.y);
-
-		p = locate(xa - 0, (size_ / 2));
-		cairo_line_to(cr, p.x, p.y);
-
-		cairo_stroke(cr);
-
-		break;
-
-	case VideoWidget::Theme::NeedleTypeThin:
-	default:
-		fill = color1;
-		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-
-		if (design) {
-			cairo_arc(cr, size_ / 2, size_ / 2, size_ / 64, 0, 2 * M_PI);
-			cairo_fill_preserve(cr);
-			cairo_stroke(cr);
-		}
-
-		//
-		cairo_set_line_width(cr, size_ / 96);
-		cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-
-		p = locate(xa - 0, len);
-		cairo_move_to(cr, p.x, p.y);
-
-		p = locate(xa - 0, (size_ / 2));
-		cairo_line_to(cr, p.x, p.y);
-
-		cairo_stroke(cr);
-
-		//
-		if (design) {
-			cairo_set_line_width(cr, size_ / 64);
-			cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-
-			p = locate(xa - 0, (size_ / 2.1));
-			cairo_move_to(cr, p.x, p.y);
-
-			p = locate(xa - 0, (size_ / 1.8));
-			cairo_line_to(cr, p.x, p.y);
-
-			cairo_stroke(cr);
-		}
-
-		//
-		if (design) {
-			cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, 1.0);
-
-			cairo_arc(cr, size_ / 2, size_ / 2, size_ / 512, 0, 2 * M_PI);
-			cairo_fill_preserve(cr);
-			cairo_stroke(cr);
-		}
-
-		break;
-	}
-
-	cairo_restore(cr);
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
-
-//void ClockIndicator::drawSecondNeedle(Cairo::RefPtr<Cairo::Context> const &cr, int type, int rotate) {
-//	double value = _second;
-//
-//	double xa = arc_.scale(min_, max_, value * 5, rotate);
-//
-//	struct Arc::point p;
-//   
-//	glm::vec4 fill = theme().needleSecondaryColor();
-//
-//	cairo_save();
-//
-//	switch (type) {
-//	case 0:
-//	case 1:
-//	default:
-//		//
-//		cairo_set_source_rgba(fill[0], fill[1], fill[2], fill[3]);
-//
-//		if (type == 1) {
-//			cairo_arc(_size / 2, _size / 2, _size / 64, 0, 2 * M_PI);
-//			cairo_fill_preserve();
-//			cairo_stroke();
-//		}
-//
-//		//
-//		cairo_set_line_width(_size / 96);
-//		cairo_set_line_cap(Cairo::Context::LineCap::ROUND);
-//
-//		p = arc_.locate(xa - 0, (_size / 64));
-//		cairo_move_to(p.x, p.y);
-//
-//		p = arc_.locate(xa - 0, (_size / 2));
-//		cairo_line_to(p.x, p.y);
-//
-//		cairo_stroke();
-//
-//		//
-//		if (type == 1) {
-//			cairo_set_line_width(_size / 64);
-//			cairo_set_line_cap(Cairo::Context::LineCap::ROUND);
-//
-//			p = arc_.locate(xa - 0, (_size / 2.1));
-//			cairo_move_to(p.x, p.y);
-//
-//			p = arc_.locate(xa - 0, (_size / 1.8));
-//			cairo_line_to(p.x, p.y);
-//
-//			cairo_stroke();
-//		}
-//
-//		//
-//		if (type == 1) {
-//			cairo_set_source_rgba(0.0, 0.0, 0.0, 1.0);
-//
-//			cairo_arc(_size / 2, _size / 2, _size / 512, 0, 2 * M_PI);
-//			cairo_fill_preserve();
-//			cairo_stroke();
-//		}
-//
-//		break;
-//	}
-//
-//	cairo_restore();
-//}
-	
 
 TimeWidget::TimeWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetTime) 
