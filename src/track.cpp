@@ -977,15 +977,30 @@ bool Track::load(void) {
 
 
 OIIO::ImageBuf * Track::prepare(bool &is_update) {
+	cairo_t *cairo;
+
 	if (bg_buf_ != NULL) {
 		is_update = false;
 		goto skip;
 	}
 
 	this->createBox(&bg_buf_, theme().width(), theme().height());
-	this->drawBorder(bg_buf_);
-	this->drawBackground(bg_buf_);
+//	this->drawBorder(bg_buf_);
+//	this->drawBackground(bg_buf_);
 
+	// Cairo context
+	cairo = this->createCairoContext(bg_buf_);
+
+	// Draw
+	background(cairo);
+
+	// Data bytes
+	this->renderCairoContext(bg_buf_, cairo);
+
+	// Release
+	this->destroyCairoContext(cairo);
+
+	// Load track
 	if (this->load() == false)
 		log_warn("Track renderer failure");
 
@@ -1175,6 +1190,50 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	is_update = true;
 skip:
 	return fg_buf_;
+}
+
+
+bool Track::updated(const TelemetryData &data) const {
+	int posX, posY;
+
+	int zoom = settings().zoom();
+
+	// Check track buffer
+	if (trackbuf_ == NULL)
+		return false;
+
+	// Refresh dynamic info
+	if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged))
+		return false;
+
+	// Current position
+	if (data.timestamp() > ts_end_) {
+		posX = x_end_;
+		posY = y_end_;
+	}
+	else if (data.timestamp() > ts_start_) {
+		posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - pevx1_;
+		posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - pevy1_;
+
+		posX *= divider_;
+		posY *= divider_;
+	}
+	else {
+		posX = x_start_;
+		posY = y_start_;
+	}
+
+	// Move ?
+	if ((posX == last_posX_) && (posY == last_posY_))
+		return false;
+
+	return true;
+}
+
+
+void Track::draw(cairo_t *cr, const TelemetryData &data) {
+	(void) cr;
+	(void) data;
 }
 
 

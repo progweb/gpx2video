@@ -38,7 +38,7 @@ public:
 //	void drawLabel(OIIO::ImageBuf *buf, const char *label);
 //	void drawValue(OIIO::ImageBuf *buf, const char *value);
 
-	void icon(cairo_t *cr, const std::string &filename);
+	void icon(cairo_t *cr, const std::string &filename, const float *fill);
 	void label(cairo_t *cr, TextShape::Font &font, 
 			const float *fill, const float *outline, const char *text);
 	void value(cairo_t *cr, TextShape::Font &font, 

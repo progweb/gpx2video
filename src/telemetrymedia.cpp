@@ -201,6 +201,8 @@ int TelemetryData::power(TelemetryData::Unit unit) const {
 double TelemetryData::duration(TelemetryData::Unit unit) const {
 	(void) unit;
 
+	// seconds - duration in the compute range
+
 	return duration_;
 }
 
@@ -299,12 +301,16 @@ double TelemetryData::acceleration(TelemetryData::Unit unit) const {
 double TelemetryData::rideTime(TelemetryData::Unit unit) const {
 	(void) unit;
 
+	// seconds - ride duration as speed > 4.0 in the compute range
+
 	return ridetime_;
 }
 
 
 double TelemetryData::elapsedTime(TelemetryData::Unit unit) const {
 	(void) unit;
+
+	// seconds - absolute duration during whole activity
 
 	return elapsedtime_;
 }
@@ -355,8 +361,6 @@ double TelemetryData::avgridespeed(TelemetryData::Unit unit) const {
 
 
 double TelemetryData::verticalspeed(TelemetryData::Unit unit) const {
-	(void) unit;
-
 	switch (unit) {
 	case TelemetryData::UnitMilesPerSec:
 		return (verticalspeed_ * 0.6213711922) / 1000.0;

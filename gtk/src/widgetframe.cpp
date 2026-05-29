@@ -1298,26 +1298,6 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
-	// Unit enable
-	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
-	if (!sw)
-		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
-	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_switch_changed), sw, 
-					[this](const bool &state) {
-						log_notice("Widget %s: unit status changed to '%s'",
-							   widget_selected_->widget()->name().c_str(), state ? "enabled" : "disabled");
-
-						if (state)
-							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagUnit);
-						else
-							widget_selected_->widget()->theme().removeFlag(VideoWidget::Theme::FlagUnit);
-
-						// Broadcast widget change
-						widget_selected_->dispatchEvent(false);
-					} 
-			), false);
-
 	// Value unit
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
 	if (!combobox)
@@ -1371,6 +1351,43 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 							break;
 						}
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: unit status changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						if (state)
+							widget_selected_->widget()->theme().addFlag(VideoWidget::Theme::FlagUnit);
+						else
+							widget_selected_->widget()->theme().removeFlag(VideoWidget::Theme::FlagUnit);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					} 
+			), false);
+
+	// Unit font size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_font_size_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: unit font size changed to '%d'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setUnitFontSize(value);
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -1833,19 +1850,12 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
 
-	// Widget unit enable box container
-	box = ref_builder_->get_widget<Gtk::Box>("unit_enable_box");
-	if (!box)
-		throw std::runtime_error("No \"unit_enable_box\" object in widget_frame.ui");
+	// Widget unit expander container
+	expander = ref_builder_->get_widget<Gtk::Expander>("unit_expander");
+	if (!expander)
+		throw std::runtime_error("No \"unit_expander\" object in widget_frame.ui");
 
-	box->set_visible(units.size() > 0);
-
-	// Widget unit enable switch
-	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
-	if (!sw)
-		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
-
-	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagUnit));
+	expander->set_visible(units.size() > 0);
 
 	// Widget value unit box container
 	box = ref_builder_->get_widget<Gtk::Box>("value_unit_box");
@@ -1911,6 +1921,20 @@ void GPX2VideoWidgetFrame::update_content(void) {
 		if (find_in_listtore(value_format_model_, value, iter))
 			combobox->set_active(iter);
 	}
+
+	// Widget unit enable switch
+	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
+
+	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagUnit));
+
+	// Widget unit size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_font_size_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().unitFontSize());
 
 	// Widget settings
 	update_shape_content();

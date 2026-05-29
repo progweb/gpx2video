@@ -233,11 +233,39 @@ namespace layout
     Decimal  &paddingBottom() { return _padding_bottom; }
 
     ///
-    /// Get text color
+    /// Get border
     ///
-    /// @return the text color element
+    /// @return the border attribute
+    ///
+    Unsigned  &border() { return _border; }
+
+    ///
+    /// Get border color
+    ///
+    /// @return the border color element
+    ///
+    String &borderColor() { return _bordercolor; }
+
+    ///
+    /// Get background color
+    ///
+    /// @return the background color element
+    ///
+    String &backgroundColor() { return _bgcolor; }
+
+    ///
+    /// Get text 
+    ///
+    /// @return the text element
     ///
     String &text() { return _text; }
+
+    ///
+    /// Get icon color
+    ///
+    /// @return the icon color element
+    ///
+    String &iconColor() { return _icon_color; }
 
     ///
     /// Get label font family
@@ -407,6 +435,59 @@ namespace layout
     ///
     String &valueFormat() { return _value_format; }
 
+    ///
+    /// Get unit font size
+    ///
+    /// @return the unit font size element
+    ///
+    Decimal  &unitFontSize() { return _unit_fontsize; }
+
+    ///
+    /// Get gauge angle
+    ///
+    /// @return the gauge angle attribute
+    ///
+    Decimal  &gaugeAngle() { return _gauge_angle; }
+
+    ///
+    /// Get gauge rotation
+    ///
+    /// @return the gauge rotation attribute
+    ///
+    Decimal  &gaugeRotation() { return _gauge_rotation; }
+
+    ///
+    /// Get gauge flip
+    ///
+    /// @return the gauge flip attribute
+    ///
+    Boolean  &gaugeFlip() { return _gauge_flip; }
+
+    ///
+    /// Get gauge width
+    ///
+    /// @return the gauge width attribute
+    ///
+    Decimal  &gaugeWidth() { return _gauge_width; }
+
+	///
+	/// Get gauge cap
+	/// @return the gauge cap element
+	///
+    String &gaugeCap() { return _gauge_cap; }
+
+	///
+	/// Get gauge primary color
+	/// @return the gauge primary color element
+	///
+    String &gaugePrimaryColor() { return _gauge_primary_color; }
+
+	///
+	/// Get gauge secondary color
+	/// @return the gauge secondary color element
+	///
+    String &gaugeSecondaryColor() { return _gauge_secondary_color; }
+
 	///
 	/// Get needle type
 	/// @return the needle type element
@@ -426,25 +507,32 @@ namespace layout
     String &needleSecondaryColor() { return _needle_secondary_color; }
 
     ///
-    /// Get border
+    /// Get tick size
     ///
-    /// @return the border attribute
+    /// @return the tick size attribute
     ///
-    Unsigned  &border() { return _border; }
+    Decimal  &tickSize() { return _tick_size; }
 
     ///
-    /// Get border color
+    /// Get tick color
     ///
-    /// @return the border color element
+    /// @return the tick color element
     ///
-    String &borderColor() { return _bordercolor; }
+    String &tickColor() { return _tick_color; }
 
     ///
-    /// Get background color
+    /// Get tick label distance
     ///
-    /// @return the background color element
+    /// @return the tick label distance attribute
     ///
-    String &backgroundColor() { return _bgcolor; }
+    Decimal  &tickLabelDistance() { return _tick_label_distance; }
+
+    ///
+    /// Get tick label color
+    ///
+    /// @return the tick label color element
+    ///
+    String &tickLabelColor() { return _tick_label_color; }
 
     ///
     /// Get nbr lap
@@ -496,6 +584,13 @@ namespace layout
 	Boolean  &withTickLabel() { return _with_tick_label; }
 
 	/// 
+	/// Get gauge flag
+	///
+	/// @return the gauge flag element
+	///
+	Boolean  &withGauge() { return _with_gauge; }
+
+	/// 
 	/// Get needle flag
 	///
 	/// @return the needle flag element
@@ -533,6 +628,8 @@ namespace layout
 
 	String       _text;
 
+	String       _icon_color;
+
 	String       _label_fontfamily;
 	Decimal      _label_fontsize;
 	String       _label_fontstyle;
@@ -559,9 +656,24 @@ namespace layout
     String       _value_unit;
     String       _value_format;
 
+	Decimal      _unit_fontsize;
+
+	Decimal      _gauge_angle;
+	Decimal      _gauge_rotation;
+	Boolean      _gauge_flip;
+	Decimal      _gauge_width;
+	String       _gauge_cap;
+	String       _gauge_primary_color;
+	String       _gauge_secondary_color;
+
 	String       _needle_type;
 	String       _needle_primary_color;
 	String       _needle_secondary_color;
+
+	Decimal      _tick_size;
+	String       _tick_color;
+	Decimal      _tick_label_distance;
+	String       _tick_label_color;
 
     String       _zoom;
 	String       _source;
@@ -573,6 +685,7 @@ namespace layout
 	Boolean      _with_unit;
 	Boolean      _with_tick;
 	Boolean      _with_tick_label;
+	Boolean      _with_gauge;
 	Boolean      _with_needle;
     
     // Disable copy constructors

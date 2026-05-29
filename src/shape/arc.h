@@ -38,6 +38,7 @@ public:
 
 	void init(cairo_font_face_t *fontface, int width, int height, int size = 0) {
 		setSize(width, height, size);
+		setPadding(0, 0, 0, 0);
 
 		fontface_ = fontface;
 	}
@@ -47,6 +48,13 @@ public:
 
 		center_x_ = width / 2;
 		center_y_ = height / 2;
+	}
+
+	void setPadding(int left, int right, int top, int bottom) {
+		padding_left_ = left;
+		padding_right_ = right;
+		padding_top_ = top;
+		padding_bottom_ = bottom;
 	}
 
 	const double& start(void) const {
@@ -63,13 +71,22 @@ public:
 	}
 
 	double scale(double min, double max, double value, int rotate = 0) {
+		double a;
+
 		double a_range = end_angle_ - start_angle_;
 
 		double v_point = (value - min) / (max - min);
 
 		double a_point = a_range * v_point;
 
-		return a_point + start_angle_ + rotate;
+		if (theme().gaugeFlip())
+			a = end_angle_ - a_point;
+		else
+			a = a_point + start_angle_;
+	   
+		a += rotate;
+
+		return a;
 	}
 
 #define DEG2RAD(a) ((a) * M_PI / 180.0)
@@ -81,20 +98,32 @@ public:
 		};
 	}
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
-	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
+//	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
+//	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
+	void background(cairo_t *cr, double border, const float *fill, const float *outline);
 	void arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
-	void pieslice(cairo_t *cr, double a1, double a2, double border);
+	void pieslice(cairo_t *cr, double a1, double a2, double border, const float *fill, const float *outline = NULL);
 	void line(cairo_t *cr, double a, double d1, double d2, double width, const float *fill);
 	void text(cairo_t *cr, double a, double d, const float *fill, std::string str);
+	void value(cairo_t *cr, Font &font, const float *fill, const float *outline, const char *text);
+	void unit(cairo_t *cr, Font &font, const float *fill, const float *outline, const char *text);
+	void needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
+			double xa, double len, bool design, const float *color1, const float *color2);
 
 	void xmlwrite(std::ostream &os);
 
 private:
 	int size_;
 
+	int padding_left_;
+	int padding_right_;
+	int padding_top_;
+	int padding_bottom_;
+
 	cairo_font_face_t *fontface_;
+
+	void arc_i(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 };
 
 #endif

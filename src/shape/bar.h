@@ -75,8 +75,8 @@ public:
 		};
 	}
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
-	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
+//	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
+//	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 	void bar(cairo_t *cr, double v1, double v2, double width, double border,
 			const float *fill, const float *outline = NULL);

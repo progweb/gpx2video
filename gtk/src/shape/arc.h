@@ -40,6 +40,7 @@ public:
 	void update_content(void);
 
 private:
+	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;
 	Glib::RefPtr<Gtk::ListStore> needle_type_model_;
 };
 

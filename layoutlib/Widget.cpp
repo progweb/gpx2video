@@ -61,6 +61,8 @@ namespace layout
 
 	_text(this, "text", Node::ELEMENT, false),
 
+	_icon_color(this, "icon-color", Node::ELEMENT, false),
+
 	_label_fontfamily(this, "label-font-family", Node::ELEMENT, false),
 	_label_fontsize(this, "label-font-size", Node::ELEMENT, false),
 	_label_fontstyle(this, "label-font-style", Node::ELEMENT, false),
@@ -87,9 +89,24 @@ namespace layout
     _value_unit(this, "value-unit",   Node::ELEMENT, false),
     _value_format(this, "value-format",   Node::ELEMENT, false),
 
+	_unit_fontsize(this, "unit-font-size", Node::ELEMENT, false),
+
+	_gauge_angle(this, "gauge-angle", Node::ELEMENT, false),
+	_gauge_rotation(this, "gauge-rotation", Node::ELEMENT, false),
+	_gauge_flip(this, "gauge-flip", Node::ELEMENT, false),
+	_gauge_width(this, "gauge-width", Node::ELEMENT, false),
+	_gauge_cap(this, "gauge-cap", Node::ELEMENT, false),
+	_gauge_primary_color(this, "gauge-primary-color", Node::ELEMENT, false),
+	_gauge_secondary_color(this, "gauge-secondary-color", Node::ELEMENT, false),
+
 	_needle_type(this, "needle-type", Node::ELEMENT, false),
 	_needle_primary_color(this, "needle-primary-color", Node::ELEMENT, false),
 	_needle_secondary_color(this, "needle-secondary-color", Node::ELEMENT, false),
+
+	_tick_size(this, "tick-size", Node::ELEMENT, false),
+	_tick_color(this, "tick-color", Node::ELEMENT, false),
+	_tick_label_distance(this, "tick-label-distance", Node::ELEMENT, false),
+	_tick_label_color(this, "tick-label-color", Node::ELEMENT, false),
 
     _zoom(this, "zoom",   Node::ELEMENT, false),
     _source(this, "source",   Node::ELEMENT, false),
@@ -101,6 +118,7 @@ namespace layout
 	_with_unit(this, "with-unit", Node::ELEMENT, false),
 	_with_tick(this, "with-tick", Node::ELEMENT, false),
 	_with_tick_label(this, "with-tick-label", Node::ELEMENT, false),
+	_with_gauge(this, "with-gauge", Node::ELEMENT, false),
 	_with_needle(this, "with-needle", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_name);
@@ -132,6 +150,8 @@ namespace layout
 
     getInterfaces().push_back(&_text);
 
+    getInterfaces().push_back(&_icon_color);
+
     getInterfaces().push_back(&_label_fontfamily);
     getInterfaces().push_back(&_label_fontsize);
     getInterfaces().push_back(&_label_fontstyle);
@@ -158,9 +178,24 @@ namespace layout
     getInterfaces().push_back(&_value_unit);
     getInterfaces().push_back(&_value_format);
 
+    getInterfaces().push_back(&_unit_fontsize);
+
+	getInterfaces().push_back(&_gauge_angle);
+	getInterfaces().push_back(&_gauge_rotation);
+	getInterfaces().push_back(&_gauge_flip);
+	getInterfaces().push_back(&_gauge_width);
+	getInterfaces().push_back(&_gauge_cap);
+    getInterfaces().push_back(&_gauge_primary_color);
+    getInterfaces().push_back(&_gauge_secondary_color);
+
     getInterfaces().push_back(&_needle_type);
     getInterfaces().push_back(&_needle_primary_color);
     getInterfaces().push_back(&_needle_secondary_color);
+
+    getInterfaces().push_back(&_tick_size);
+    getInterfaces().push_back(&_tick_color);
+    getInterfaces().push_back(&_tick_label_distance);
+    getInterfaces().push_back(&_tick_label_color);
 
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_source);
@@ -172,6 +207,7 @@ namespace layout
     getInterfaces().push_back(&_with_unit);
     getInterfaces().push_back(&_with_tick);
     getInterfaces().push_back(&_with_tick_label);
+    getInterfaces().push_back(&_with_gauge);
     getInterfaces().push_back(&_with_needle);
 
 	_shape.setValue("text");
@@ -198,12 +234,20 @@ namespace layout
 	_value_shadowdistance.setValue("-1");
 	_value_borderwidth.setValue("-1");
 
+	_gauge_angle.setValue("-1");
+	_gauge_rotation.setValue("-1");
+	_gauge_flip.setValue("false");
+	_gauge_width.setValue("-1");
+
+	_tick_size.setValue("-1");
+
 	_with_label.setValue("true");
 	_with_value.setValue("true");
 	_with_icon.setValue("true");
 	_with_unit.setValue("true");
 	_with_tick.setValue("true");
 	_with_tick_label.setValue("true");
+	_with_gauge.setValue("true");
 	_with_needle.setValue("true");
   }
 

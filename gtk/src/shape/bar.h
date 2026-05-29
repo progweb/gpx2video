@@ -36,9 +36,11 @@ public:
 		log_call();
 	}
 
+	void bind_content(void);
 	void update_content(void);
 
 private:
+	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;
 	Glib::RefPtr<Gtk::ListStore> tick_align_model_;
 };
 

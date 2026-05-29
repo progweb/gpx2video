@@ -29,19 +29,7 @@ VideoWidget::Theme::Theme() {
 	setBorderColor(0.0, 0.0, 0.0, 1.0);
 	setBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
-	setTickAlign(VideoWidget::Theme::AlignCenter);
-	setTickColor(1.0, 1.0, 1.0, 1.0);
-	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
-
-	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
-	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
-	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);
-
-	setGaugeBorder(0);
-	setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
-	setGaugeBackgroundColor(0.0, 0.0, 0.0, 0.0);
-	setGaugeColor(0, 0.0, 0.8, 0.0, 0.8);
-	setGaugeColor(1, 1.0, 0.0, 0.0, 1.0);
+	setIconColor(1.0, 1.0, 1.0, 1.0);
 
 	setCursorColor(0.8, 0.0, 0.0, 0.8);
 
@@ -69,6 +57,29 @@ VideoWidget::Theme::Theme() {
 	setValueBorderWidth(1);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 	setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
+
+	setUnitFontSize(25);
+
+	setGaugeAngle(300);
+	setGaugeRotation(0);
+	setGaugeFlip(false);
+	setGaugeWidth(10);
+	setGaugeCap(VideoWidget::Theme::GaugeCapSquare);
+	setGaugeBorder(0);
+	setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
+	setGaugeBackgroundColor(0.0, 0.0, 0.0, 0.0);
+	setGaugePrimaryColor(0.0, 0.8, 0.0, 0.8);
+	setGaugeSecondaryColor(1.0, 0.0, 0.0, 1.0);
+
+	setTickSize(10);
+	setTickAlign(VideoWidget::Theme::AlignCenter);
+	setTickColor(1.0, 1.0, 1.0, 1.0);
+	setTickLabelDistance(5);
+	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
+
+	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
+	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
+	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);
 
 //	setTextLineSpace(10);
 }
@@ -318,6 +329,20 @@ VideoWidget::Theme::FontWeight VideoWidget::string2fontweight(std::string &s) {
 	}
 
 	return weight;
+}
+
+
+VideoWidget::Theme::GaugeCap VideoWidget::string2gaugecap(std::string &s) {
+	VideoWidget::Theme::GaugeCap cap;
+
+	if (s.empty() || (s == "square"))
+		cap = VideoWidget::Theme::GaugeCapSquare;
+	else if (s == "round")
+		cap = VideoWidget::Theme::GaugeCapRound;
+	else
+		cap = VideoWidget::Theme::GaugeCapUnknown;
+
+	return cap;
 }
 
 
@@ -590,6 +615,18 @@ std::string VideoWidget::fontweight2string(Theme::FontWeight weight) {
 		return "";
 	}
 }
+
+std::string VideoWidget::gaugecap2string(Theme::GaugeCap cap) {
+	switch (cap) {
+	case Theme::GaugeCapSquare:
+		return "square";
+	case Theme::GaugeCapRound:
+		return "round";
+	default:
+		return "";
+	}
+}
+
 
 std::string VideoWidget::needletype2string(Theme::NeedleType type) {
 	switch (type) {

@@ -5,7 +5,23 @@
  * Text shape
  */
 
+bool DistanceTextShape::updated(const TelemetryData &data) const {
+	if (is_initialized_) {
+		if ((data.type() == TelemetryData::TypeUnchanged))
+			return false;
+
+		if (no_value_ && !data.hasValue(TelemetryData::DataDistance))
+			return false;
+	}
+
+	return true;
+}
+
+
 void DistanceTextShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setSize(theme().height());
 
 	setPadding(
@@ -13,6 +29,8 @@ void DistanceTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -25,6 +43,9 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
 		widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+	// Initialize
+	initialize();
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataDistance);
@@ -44,9 +65,12 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	else
 		sprintf(s, "-- %s", unit.c_str());
 
+	// Draw background
+	background(cr);
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_);
+		icon(cr, icon_filename_, theme().iconColor());
 	}
 
 	// Draw label
@@ -57,6 +81,7 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -72,12 +97,29 @@ void DistanceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+}
+
+
+void DistanceTextShape::clear(void) {
+	is_initialized_ = false;
+
+	no_value_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 
