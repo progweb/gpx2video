@@ -70,6 +70,9 @@ public:
 	// Render track
 	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
+
+	bool updated(const TelemetryData &data) const;
+	void draw(cairo_t *cr, const TelemetryData &data);
 	void clear(void);
 
 protected:

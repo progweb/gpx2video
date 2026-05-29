@@ -380,6 +380,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Theme::FontWeight label_font_weight = VideoWidget::Theme::FontWeightNormal;
 	VideoWidget::Theme::FontWeight value_font_weight = VideoWidget::Theme::FontWeightNormal;
 
+	VideoWidget::Theme::GaugeCap gauge_cap = VideoWidget::Theme::GaugeCapSquare;
 	VideoWidget::Theme::NeedleType needle_type = VideoWidget::Theme::NeedleTypeBasic;
 
 	// Type
@@ -497,6 +498,15 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Gauge cap
+	s = (const char *) w->gaugeCap();
+	gauge_cap = VideoWidget::string2gaugecap(s);
+
+	if (gauge_cap == VideoWidget::Theme::GaugeCapUnknown) {
+		log_error("Widget loading error, gauge cap value '%s' unknown", s.c_str());
+		goto error;
+	}
+
 	// Needle type
 	s = (const char *) w->needleType();
 	needle_type = VideoWidget::string2needletype(s);
@@ -525,12 +535,13 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		flags |= VideoWidget::Theme::FlagTick;
 	if (w->withTickLabel())
 		flags |= VideoWidget::Theme::FlagTickLabel;
+	if (w->withGauge())
+		flags |= VideoWidget::Theme::FlagGauge;
 	if (w->withNeedle())
 		flags |= VideoWidget::Theme::FlagNeedle;
 
 	// TODO
 	flags |= VideoWidget::Theme::FlagCursor;
-	flags |= VideoWidget::Theme::FlagGauge;
 
 	// Create widget
 	if ((widget = this->create(type)) == NULL)
@@ -557,7 +568,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	
 	// Widget misc. settings
 	widget->setLabel((const char *) w->name());
-	widget->setText((const char *) w->text());
+	widget->setValue((const char *) w->text());
 	widget->setValueUnit(unit);
 	widget->setValueFormat(format);
 	widget->setZoom(zoom);
@@ -573,6 +584,9 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setBorder(w->border());
 	widget->theme().setBorderColor((const char *) w->borderColor());
 	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
+
+	// Widget icon settings
+	widget->theme().setIconColor((const char *) w->iconColor());
 
 	// Widget label settings
 	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());
@@ -599,6 +613,24 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueBorderColor((const char *) w->valueBorderColor());
 	widget->theme().setValueMin(w->valueMin());
 	widget->theme().setValueMax(w->valueMax());
+
+	// Widget unit settings
+	widget->theme().setUnitFontSize(w->unitFontSize());
+
+	// Width gauge settings
+	widget->theme().setGaugeAngle(w->gaugeAngle());
+	widget->theme().setGaugeRotation(w->gaugeRotation());
+	widget->theme().setGaugeFlip(w->gaugeFlip());
+	widget->theme().setGaugeWidth(w->gaugeWidth());
+	widget->theme().setGaugeCap(gauge_cap);
+	widget->theme().setGaugePrimaryColor((const char *) w->gaugePrimaryColor());
+	widget->theme().setGaugeSecondaryColor((const char *) w->gaugeSecondaryColor());
+
+	// Widget tick settings
+	widget->theme().setTickSize(w->tickSize());
+	widget->theme().setTickColor((const char *) w->tickColor());
+	widget->theme().setTickLabelDistance(w->tickLabelDistance());
+	widget->theme().setTickLabelColor((const char *) w->tickLabelColor());
 
 	// Widget needle settings
 	widget->theme().setNeedleType(needle_type);

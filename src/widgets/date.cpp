@@ -5,7 +5,25 @@
  * Text shape
  */
 
+bool DateTextShape::updated(const TelemetryData &data) const {
+	time_t t;
+
+	// Compute time
+	t = data.datetime() / 1000;
+
+	if (is_initialized_) {
+		if (t == last_time_)
+			return false;
+	}
+
+	return true;
+}
+
+
 void DateTextShape::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setSize(theme().height());
 
 	setPadding(
@@ -13,6 +31,8 @@ void DateTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -23,6 +43,9 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	time_t t;
 	struct tm time;
+
+	// Initialize
+	initialize();
 
 	// Compute time
 	t = data.datetime() / 1000;
@@ -41,9 +64,12 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 				s[i] = '-';
 	}
 
+	// Draw background
+	background(cr);
+
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_);
+		icon(cr, icon_filename_, theme().iconColor());
 	}
 
 	// Draw label
@@ -54,6 +80,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -69,12 +96,30 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+
+	// Save last value
+	last_time_ = t;
+}
+
+
+void DateTextShape::clear(void) {
+	is_initialized_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
 }
 
 

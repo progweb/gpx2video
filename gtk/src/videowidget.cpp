@@ -13,6 +13,7 @@
 #include "videowidget.h"
 
 
+//#define USE_GL_SURFACE
 //#define WIDGET_DEBUG
 
 
@@ -150,8 +151,8 @@ VideoWidget * GPX2VideoWidget::widget(void) {
 bool GPX2VideoWidget::is_over(const double &x, const double &y) {
 	log_call();
 
-	double width = glWidth() / 2.0;
-	double height = glHeight() / 2.0;
+	double width = glWidth(); // / 2.0;
+	double height = glHeight(); // / 2.0;
 
 	if ((x < (glX() - width)) || (x > (glX() + width)))
 		return false;
@@ -252,6 +253,77 @@ void GPX2VideoWidget::set_timestamp(uint64_t timestamp) {
 /**
  * draw widget
  */
+#ifdef USE_GL_SURFACE
+bool GPX2VideoWidget::draw(const TelemetryData &data) {
+	log_call();
+
+	int index;
+
+	bool is_update;
+
+	GPX2VideoWidget::BufferPtr buffer;
+
+	// Lock widget settings
+	std::lock_guard<std::mutex> lock(mutex_);
+
+	// Draw changes
+	is_update = widget()->updated(data);
+
+#ifdef WIDGET_DEBUG
+printf("WIDGET::DRAW %s - updated: %s\n", 
+		widget()->name().c_str(),
+		is_update ? "true" : "false");
+#endif
+
+	if (is_update) {
+		// Buffer index
+		index = index_;
+		index_ = (index_ + 1) % queue_size_;
+
+		// Create new buffer
+		buffer = GPX2VideoWidget::Buffer::create();
+
+		buffer->setTimestamp(data.timestamp());
+		buffer->setData(index, buffer_[index]);
+
+		// Clear data
+		memset(reinterpret_cast<unsigned char *>(buffer->data()), 0x000000, 
+				theme().width() * theme().height() * 4);
+
+		// Create cairo context
+		int stride = Cairo::ImageSurface::format_stride_for_width(Cairo::Surface::Format::ARGB32, theme().width());
+
+		Cairo::RefPtr<Cairo::ImageSurface> surface = Cairo::ImageSurface::create(
+				reinterpret_cast<unsigned char *>(buffer->data()), Cairo::Surface::Format::ARGB32, theme().width(), theme().height(), stride);
+
+		Cairo::RefPtr<Cairo::Context> cr = Cairo::Context::create(surface);
+
+		// Draw
+		widget_->draw(cr->cobj(), data);
+
+		// Save buffer
+		std::lock_guard<std::mutex> lock(queue_mutex_);
+
+		queue_.push_back(buffer);
+
+		// Stats
+		stats_texture_updated_++;
+	}
+	else {
+		// Update buffer timestamp
+		std::lock_guard<std::mutex> lock(queue_mutex_);
+
+		buffer = queue_.back();
+		buffer->setTimestamp(data.timestamp());
+		queue_.back() = buffer;
+
+		// Stats
+		stats_texture_reused_++;
+	}
+
+	return is_update;
+}
+#else
 bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	log_call();
 
@@ -266,10 +338,8 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 printf("WIDGET::DRAW %s\n", widget()->name().c_str());
 #endif
 
-	// Lock
+	// Lock widget settings
 	std::lock_guard<std::mutex> lock(mutex_);
-
-//	widget_->dump();
 
 	OIIO::ImageBuf *bg_buf = widget_->prepare(is_bg_update);
 	OIIO::ImageBuf *fg_buf = widget_->render(data, is_fg_update);
@@ -334,6 +404,7 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 
 	return is_update;
 }
+#endif
 
 
 /**
@@ -576,10 +647,6 @@ printf("WIDGET::LOAD TEXTURE %s - updated: %s\n",
 
 	std::lock_guard<std::mutex> lock(queue_mutex_);
 
-	// 
-//	int nchannels = 4;
-//	static std::vector<unsigned char> m_tex_buffer;
-
 	if (queue_.empty())
 		return 0;
 
@@ -592,88 +659,59 @@ printf("WIDGET::LOAD TEXTURE %s - updated: %s\n",
 printf("WIDGET::LOADING TEXTURE...\n");
 #endif
 
-//	size_t size = overlay_->spec().width * overlay_->spec().height * nchannels
-//						* overlay_->spec().channel_bytes();
-
-//	if (!texture_) {
-//
-//		m_tex_buffer.resize(size);
-//	}
-//
-//	overlay_->get_pixels(OIIO::ROI(), 
-//			overlay_->spec().format, 
-//			reinterpret_cast<char*>(m_tex_buffer.data()));
-
-//	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_);
-//
-//	glBufferData(GL_PIXEL_UNPACK_BUFFER, size, NULL, GL_STREAM_DRAW);
-//
-//	buffer = glMapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
-//
-//	overlay_->get_pixels(OIIO::ROI(), 
-//			overlay_->spec().format, 
-//			reinterpret_cast<char*>(buffer));
-//
-//	glUnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, pbo_[buffer->index()]);
 
 	// texture
 	if (!texture_) {
 		glGenTextures(1, &texture_);
-//		glBindTexture(GL_UNPACK_ALIGNMENT, 1);
-//		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture_);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT); //GL_CLAMP);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR); //GL_LINEAR_MIPMAP_LINEAR); //GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
-//		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-//		glTexImage2D(GL_TEXTURE_2D, 
-//				0, 
-//				GL_RGBA, 
-//				frame->width(),
-//				frame->height(),
-//				0, GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0); //frame->linesizeBytes() / 4);
+#ifdef USE_GL_SURFACE
+		glTexImage2D(GL_TEXTURE_2D, 
+				0, 
+				GL_RGBA8,
+				overlay_->spec().width,
+				overlay_->spec().height,
+				0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+#else
 		glTexImage2D(GL_TEXTURE_2D, 
 				0, 
 				GL_RGBA, 
 				overlay_->spec().width,
 				overlay_->spec().height,
 				0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
-
-//		shader_->use();
-//		shader_->set("inputTexture2", 1);
+#endif
 	}
 	else {
-//		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, texture_);
-//		glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-//		glPixelStorei(GL_UNPACK_LSB_FIRST, GL_TRUE);
 		glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
 		glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-//		glPixelStorei(GL_UNPACK_ROW_LENGTH, frame->linesizeBytes() / 4);
-//		glTexSubImage2D(GL_TEXTURE_2D, 
-//				0,
-//				0, 0, 
-//				frame->width(),
-//				frame->height(),
-//				GL_RGBA, GL_UNSIGNED_BYTE, frame->constData());
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#ifdef USE_GL_SURFACE
+		glTexSubImage2D(GL_TEXTURE_2D, 
+				0, 
+				0, 0,
+				overlay_->spec().width,
+				overlay_->spec().height,
+				GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
+#else
 		glTexSubImage2D(GL_TEXTURE_2D, 
 				0, 
 				0, 0,
 				overlay_->spec().width,
 				overlay_->spec().height,
 				GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
+#endif
 	}
 
 	glBindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
-//	glBindTexture(GL_TEXTURE_2D, 0);
 
 	// Texture updated
 	is_update_ = false;

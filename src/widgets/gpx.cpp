@@ -16,12 +16,27 @@ GPXWidget::GPXWidget(GPXApplication &app)
 }
 
 
+bool GPXWidget::updated(const TelemetryData &data) const {
+	if (is_initialized_) {
+		if (data.type() == TelemetryData::TypeUnchanged)
+			return false;
+	}
+
+	return true;
+}
+
+
 void GPXWidget::initialize(void) {
+	if (is_initialized_)
+		return;
+
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	is_initialized_ = true;
 }
 
 
@@ -30,8 +45,14 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 
 	ShapeBase::Font font;
 
+	// Initialize
+	initialize();
+
 	// Add padding
 	y += padding_top_;
+
+	// Draw background
+	background(cr);
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -45,6 +66,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
+			.align = theme().labelAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -71,6 +93,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
+			.align = theme().valueAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -136,6 +159,20 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 }
 
 
+void GPXWidget::clear(void) {
+	is_initialized_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
+}
+
+
 int GPXWidget::label(cairo_t *cr, ShapeBase::Font &font, 
 		const float *fill, const float *outline, const char *text) {
 	int x, y;
@@ -145,7 +182,7 @@ int GPXWidget::label(cairo_t *cr, ShapeBase::Font &font,
 
 	enum VideoWidget::Theme::Align textAlign = theme().labelAlign();
 
-	this->textSize(cr, font, text, tx, ty, width, height);
+	this->extents(cr, font, text, tx, ty, width, height);
 
 	// Text offset
 	x = -tx;
@@ -166,7 +203,7 @@ int GPXWidget::label(cairo_t *cr, ShapeBase::Font &font,
 
 	y += padding_top_;
 
-	this->drawText(cr, x, y, font, fill, outline, text);
+	this->text(cr, x, y, font, fill, outline, text);
 
 	return height;
 }
@@ -181,7 +218,7 @@ int GPXWidget::value(cairo_t *cr, int y, ShapeBase::Font &font,
 
 	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
 
-	this->textSize(cr, font, text, tx, ty, width, height);
+	this->extents(cr, font, text, tx, ty, width, height);
 
 	// Text offset
 	x = -tx;
@@ -204,7 +241,7 @@ int GPXWidget::value(cairo_t *cr, int y, ShapeBase::Font &font,
 
 //	y += theme().height() - font.shadow_distance - padding_bottom_ - height;
 
-	this->drawText(cr, x, y, font, fill, outline, text);
+	this->text(cr, x, y, font, fill, outline, text);
 
 	return height;
 }

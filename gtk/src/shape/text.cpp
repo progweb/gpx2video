@@ -10,7 +10,7 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 	Gtk::Switch *sw;
 //	Gtk::ComboBox *combobox;
 //	Gtk::SpinButton *spinbutton;
-//	Gtk::ColorButton *colorbutton;
+	Gtk::ColorButton *colorbutton;
 
 	loading_ = false;
 
@@ -50,21 +50,38 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 						widget_->dispatchEvent();
 					} 
 			), false);
+
+	// Icon color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: icon color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setIconColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
 }
 
 
 void GPX2VideoTextShapeSettingsBox::update_content(void) {
 	log_call();
 
-//	Gdk::RGBA rgba;
-//
-//	const float *color;
+	Gdk::RGBA rgba;
+
+	const float *color;
 
 	Gtk::Switch *sw;
 //	Gtk::ComboBox *combobox;
 //	Gtk::SpinButton *spinbutton;
-//	Gtk::ColorButton *colorbutton;
-//
+	Gtk::ColorButton *colorbutton;
+
 //	Gtk::TreeModel::iterator iter;
 
 	// Mask value changed
@@ -76,6 +93,17 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 		throw std::runtime_error("No \"icon_enable_switch\" object in " + resource_file_);
 
 	sw->set_active(widget_->theme().hasFlag(VideoWidget::Theme::FlagIcon));
+
+	// Widget icon color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().iconColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
 
 	// Unmask value changed
 	loading_ = false;

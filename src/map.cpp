@@ -771,14 +771,14 @@ error:
 
 
 bool Map::load(void) {
+	if (mapbuf_)
+		return true;
+
 	// Update track settings
 	Track::setSettings(settings());
 
 	if (Track::load() == false)
 		return false;
-
-	if (mapbuf_)
-		return true;
 
 	double divider = divider_;
 
@@ -816,14 +816,28 @@ bool Map::load(void) {
 
 
 OIIO::ImageBuf * Map::prepare(bool &is_update) {
+	cairo_t *cairo;
+
 	if (bg_buf_ != NULL) {
 		is_update = false;
 		goto skip;
 	}
 
 	this->createBox(&bg_buf_, theme().width(), theme().height());
-	this->drawBorder(bg_buf_);
-	this->drawBackground(bg_buf_);
+//	this->drawBorder(bg_buf_);
+//	this->drawBackground(bg_buf_);
+
+	// Cairo context
+	cairo = this->createCairoContext(bg_buf_);
+
+	// Draw
+	background(cairo);
+
+	// Data bytes
+	this->renderCairoContext(bg_buf_, cairo);
+
+	// Release
+	this->destroyCairoContext(cairo);
 
 	// Load map & track
 	if (this->load() == false)
