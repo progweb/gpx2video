@@ -151,8 +151,8 @@ VideoWidget * GPX2VideoWidget::widget(void) {
 bool GPX2VideoWidget::is_over(const double &x, const double &y) {
 	log_call();
 
-	double width = glWidth(); // / 2.0;
-	double height = glHeight(); // / 2.0;
+	double width = glWidth() / 2.0;
+	double height = glHeight() / 2.0;
 
 	if ((x < (glX() - width)) || (x > (glX() + width)))
 		return false;

@@ -124,6 +124,7 @@ void TextShape::xmlwrite(std::ostream &os) {
 	ShapeBase::xmlwrite(os);
 
 	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeText) << "</shape>" << std::endl;
+	os << "<icon-color>" << VideoWidget::Theme::color2hex(theme_.iconColor()) << "</icon-color>" << std::endl;
 
 	os << "<with-icon>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIcon)) << "</with-icon>" << std::endl;
 }
