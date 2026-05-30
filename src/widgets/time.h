@@ -119,15 +119,7 @@ public:
 	static TimeArcShape * create(VideoWidget *widget) {
 		TimeArcShape *shape;
 
-		cairo_font_face_t *fontface;
-
-		fontface = cairo_toy_font_face_create(
-			"Roboto", 
-			CAIRO_FONT_SLANT_NORMAL, 
-			CAIRO_FONT_WEIGHT_NORMAL
-		);
-
-		shape = new TimeArcShape(widget->theme(), fontface, widget);
+		shape = new TimeArcShape(widget->theme(), widget);
 
 		return shape;
 	}
@@ -188,8 +180,6 @@ skip:
 	void clear(void);
 
 private:
-	cairo_font_face_t *fontface_;
-
 	int size_;
 	int width_;
 	int height_;
@@ -204,15 +194,12 @@ private:
 
 	time_t last_time_;
 
-	TimeArcShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface, VideoWidget *widget) 
-		: ArcShape(theme, fontface)
-		, fontface_(fontface)
+	TimeArcShape(VideoWidget::Theme &theme, VideoWidget *widget) 
+		: ArcShape(theme)
 		, bg_buf_(NULL)
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		last_time_ = 0;
-
-		cairo_font_face_reference(fontface);
 	}
 
 	void initialize(void);

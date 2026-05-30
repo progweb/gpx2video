@@ -528,11 +528,25 @@ namespace layout
     Decimal  &tickLabelDistance() { return _tick_label_distance; }
 
     ///
+    /// Get tick label font size
+    ///
+    /// @return the tick label font size element
+    ///
+    Decimal  &tickLabelFontSize() { return _tick_label_fontsize; }
+
+    ///
     /// Get tick label color
     ///
     /// @return the tick label color element
     ///
     String &tickLabelColor() { return _tick_label_color; }
+
+    ///
+    /// Get tick label border color
+    ///
+    /// @return the tick label border color element
+    ///
+    String &tickLabelBorderColor() { return _tick_label_bordercolor; }
 
     ///
     /// Get nbr lap
@@ -673,7 +687,9 @@ namespace layout
 	Decimal      _tick_size;
 	String       _tick_color;
 	Decimal      _tick_label_distance;
+	Decimal      _tick_label_fontsize;
 	String       _tick_label_color;
+	String       _tick_label_bordercolor;
 
     String       _zoom;
 	String       _source;

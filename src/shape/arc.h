@@ -18,14 +18,14 @@ public:
 		double y;
 	};
 
-	ArcShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface = NULL, int width = 0, int height = 0)
+	ArcShape(VideoWidget::Theme &theme, int width = 0, int height = 0)
 		: ShapeBase(theme, VideoWidget::ShapeArc) {
 		correction_ = 90;
 
 		// Default arc range
 		setArcRange(30.0, 360.0 - 30.0);
 
-		init(fontface, width, height);
+		init(width, height);
 	}
 
 	virtual ~ArcShape() {
@@ -36,11 +36,21 @@ public:
 		return theme_;
 	}
 
-	void init(cairo_font_face_t *fontface, int width, int height, int size = 0) {
+	virtual bool hasFeature(Feature feature) const {
+		switch (feature) {
+		case FeatureLabel:
+			return false;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+
+	void init(int width, int height, int size = 0) {
 		setSize(width, height, size);
 		setPadding(0, 0, 0, 0);
-
-		fontface_ = fontface;
 	}
 
 	void setSize(int width, int height, int size = 0) {
@@ -105,7 +115,7 @@ public:
 	void arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 	void pieslice(cairo_t *cr, double a1, double a2, double border, const float *fill, const float *outline = NULL);
 	void line(cairo_t *cr, double a, double d1, double d2, double width, const float *fill);
-	void text(cairo_t *cr, double a, double d, const float *fill, std::string str);
+	void ticklabel(cairo_t *cr, double a, double d, Font &font, const float *fill, const float *outline, const char *text);
 	void value(cairo_t *cr, Font &font, const float *fill, const float *outline, const char *text);
 	void unit(cairo_t *cr, Font &font, const float *fill, const float *outline, const char *text);
 	void needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
@@ -120,8 +130,6 @@ private:
 	int padding_right_;
 	int padding_top_;
 	int padding_bottom_;
-
-	cairo_font_face_t *fontface_;
 
 	void arc_i(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 };

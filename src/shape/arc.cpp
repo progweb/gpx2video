@@ -99,21 +99,24 @@ void ArcShape::line(cairo_t *cr, double a, double d1, double d2, double width, c
 }
 
 
-void ArcShape::text(cairo_t *cr, double a, double d, 
-		const float *fill, std::string str) {
-	cairo_text_extents_t extents;
+void ArcShape::ticklabel(cairo_t *cr, double a, double d, ArcShape::Font &font, 
+		const float *fill, const float *outline, const char *text) {
+	int x, y;
+	int width, height;
 
 	struct ArcShape::point p = locate(a, d);
 
-	cairo_save(cr);
-	cairo_set_font_face(cr, fontface_);
-	cairo_set_font_size(cr, size_ / 15);
-	cairo_text_extents(cr, str.c_str(), &extents);
-	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-	cairo_move_to(cr, p.x - (extents.width / 2), p.y + (extents.height / 2));
-	cairo_show_text(cr, str.c_str());
-	cairo_stroke(cr);
-	cairo_restore(cr);
+	this->extents(cr, font, text, x, y, width, height);
+
+	// Text offset
+	x = -x;
+	y = -y + font.shadow_distance;
+
+	// Text position
+	x += p.x - (width / 2);
+	y += p.y - (height / 2);
+
+	ShapeBase::text(cr, x, y, font, fill, outline, text);
 }
 
 
@@ -397,7 +400,9 @@ void ArcShape::xmlwrite(std::ostream &os) {
 	os << "<tick-size>" << theme().tickSize() << "</tick-size>" << std::endl;
 	os << "<tick-color>" << VideoWidget::Theme::color2hex(theme().tickColor()) << "</tick-color>" << std::endl;
 	os << "<tick-label-distance>" << theme().tickLabelDistance() << "</tick-label-distance>" << std::endl;
+	os << "<tick-label-font-size>" << theme_.tickLabelFontSize() << "</tick-label-font-size>" << std::endl;
 	os << "<tick-label-color>" << VideoWidget::Theme::color2hex(theme().tickLabelColor()) << "</tick-label-color>" << std::endl;
+	os << "<tick-label-border-color>" << VideoWidget::Theme::color2hex(theme().tickLabelBorderColor()) << "</tick-label-border-color>" << std::endl;
 
 	os << "<with-needle>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagNeedle)) << "</with-needle>" << std::endl;
 	os << "<needle-type>" << VideoWidget::needletype2string(theme().needleType()) << "</needle-type>" << std::endl;

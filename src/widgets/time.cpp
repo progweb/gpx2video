@@ -150,7 +150,7 @@ void TimeArcShape::initialize(void) {
 
 	size_ = std::min(width_, height_);
 
-	init(fontface_, width_, height_, size_);
+	init(width_, height_, size_);
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -189,6 +189,8 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	bool no_value = false;
 
 	int rotate = 0;
+
+	ArcShape::Font font;
 
 	VideoWidget::Theme::NeedleType type;
 
@@ -265,6 +267,8 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		distance += theme().tickLabelDistance();
 
 		for (int value = 0; value < 12; value = value + mstep) {
+			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
+
 			xa = scale(tmin / 5, tmax / 5, value + 1, rotate);
 
 			if (xa > (end() + rotate))
@@ -272,7 +276,20 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			std::string str = std::to_string(value + 1);
 
-			text(cr, xa, distance, theme().tickLabelColor(), str);
+//			text(cr, xa, distance, theme().tickLabelColor(), str);
+
+			font = (TextShape::Font) {
+				.size = (int) (theme().valueFontSize() * factor),
+				.border = (int) (theme().valueBorderWidth() * factor),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.family = theme().valueFontFamily(),
+				.align = VideoWidget::Theme::AlignCenter,
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			ticklabel(cr, xa, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), str.c_str());
 		}
 	}
 

@@ -167,7 +167,7 @@ void SpeedArcShape::initialize(void) {
 //	arc_start_ = 150;
 //	arc_end_ = 290;
 
-	init(fontface_, width_, height_, size_);
+	init(width_, height_, size_);
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -220,7 +220,7 @@ void SpeedArcShape::ticklenwidth(int value, int *len, int *width) {
 void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	int rotate = 180;
 
-	TextShape::Font font;
+	ArcShape::Font font;
 
 	double xa1, xa2;
 
@@ -402,7 +402,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		}
 	}
 
-	// Draw arc label
+	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
 		double distance = std::max(theme().gaugeWidth(), theme().tickSize());
 		
@@ -412,12 +412,27 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		for (int value = vmin; value < vmax + (tick_mstep_ * tick_step_); value = value + (tick_mstep_ * tick_step_)) {
 			double xa = scale(vmin, vmax, value, rotate);
 
+			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
+
 			if (xa > (end() + rotate))
 				break;
 
 			std::string str = std::to_string(value);
 
-			text(cr, xa, distance, theme().tickLabelColor(), str);
+//			text(cr, xa, distance, theme().tickLabelColor(), str);
+
+			font = (TextShape::Font) {
+				.size = (int) (theme().valueFontSize() * factor),
+				.border = (int) (theme().valueBorderWidth() * factor),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.family = theme().valueFontFamily(),
+				.align = VideoWidget::Theme::AlignCenter,
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			ticklabel(cr, xa, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), str.c_str());
 		}
 	}
 

@@ -345,6 +345,23 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Tick label font size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("tick_label_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"tick_label_font_size_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: tick label font size changed to '%d'",
+							   widget_->name().c_str(), value);
+
+						widget_->theme().setTickLabelFontSize(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
 	// Tick label color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("tick_label_color_button");
 	if (!colorbutton)
@@ -356,6 +373,23 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setTickLabelColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Tick label border color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("tick_label_border_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"tick_label_border_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: tick label border color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setTickLabelBorderColor(color);
 
 						// Broadcast widget change
 						widget_->dispatchEvent();
@@ -597,12 +631,30 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 
 	spinbutton->set_value(widget_->theme().tickLabelDistance());
 
+	// Widget tick label font size button
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("tick_label_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"tick_label_font_size_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(widget_->theme().tickLabelFontSize());
+
 	// Widget tick label color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("tick_label_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"tick_label_color_button\" object in " + resource_file_);
 
 	color = widget_->theme().tickLabelColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Widget tick label border color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("tick_label_border_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"tick_label_border_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().tickLabelBorderColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 

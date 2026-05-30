@@ -734,6 +734,17 @@ public:
 			tick_label_distance_ = distance;
 		}
 
+		int tickLabelFontSize(void) const {
+			return tick_label_font_size_;
+		}
+
+		void setTickLabelFontSize(int size) {
+			if (size < 0)
+				return;
+
+			tick_label_font_size_ = size;
+		}
+
 		const float * tickLabelColor(void) const {
 			return tick_label_color_;
 		}
@@ -747,6 +758,22 @@ public:
 			tick_label_color_[1] = g;
 			tick_label_color_[2] = b;
 			tick_label_color_[3] = a;
+			return true;
+		}
+
+		const float * tickLabelBorderColor(void) const {
+			return tick_label_border_color_;
+		}
+
+		bool setTickLabelBorderColor(std::string color) {
+			return hex2color(tick_label_border_color_, color);
+		}
+
+		bool setTickLabelBorderColor(double r, double g, double b, double a) {
+			tick_label_border_color_[0] = r;
+			tick_label_border_color_[1] = g;
+			tick_label_border_color_[2] = b;
+			tick_label_border_color_[3] = a;
 			return true;
 		}
 
@@ -878,7 +905,9 @@ public:
 		Align tick_align_;
 		float tick_color_[4];
 		int tick_label_distance_;
+		int tick_label_font_size_;
 		float tick_label_color_[4];
+		float tick_label_border_color_[4];
 	};
 
 //	Shape& shape(void) {

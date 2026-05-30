@@ -123,15 +123,7 @@ public:
 	static SpeedArcShape * create(VideoWidget *widget) {
 		SpeedArcShape *shape;
 
-		cairo_font_face_t *fontface;
-
-		fontface = cairo_toy_font_face_create(
-			"Roboto", 
-			CAIRO_FONT_SLANT_NORMAL, 
-			CAIRO_FONT_WEIGHT_NORMAL
-		);
-
-		shape = new SpeedArcShape(widget->theme(), fontface, widget);
+		shape = new SpeedArcShape(widget->theme(), widget);
 
 		return shape;
 	}
@@ -196,8 +188,6 @@ skip:
 private:
 	bool no_value_;
 
-	cairo_font_face_t *fontface_;
-
 	int size_;
 	int width_;
 	int height_;
@@ -210,15 +200,12 @@ private:
 
 	VideoWidget *widget_;
 
-	SpeedArcShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface, VideoWidget *widget) 
-		: ArcShape(theme, fontface)
-		, fontface_(fontface)
+	SpeedArcShape(VideoWidget::Theme &theme, VideoWidget *widget) 
+		: ArcShape(theme)
 		, bg_buf_(NULL)
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
-
-		cairo_font_face_reference(fontface);
 	}
 
 	void initialize(void);

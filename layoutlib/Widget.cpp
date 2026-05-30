@@ -106,7 +106,9 @@ namespace layout
 	_tick_size(this, "tick-size", Node::ELEMENT, false),
 	_tick_color(this, "tick-color", Node::ELEMENT, false),
 	_tick_label_distance(this, "tick-label-distance", Node::ELEMENT, false),
+	_tick_label_fontsize(this, "tick-label-font-size", Node::ELEMENT, false),
 	_tick_label_color(this, "tick-label-color", Node::ELEMENT, false),
+	_tick_label_bordercolor(this, "tick-label-border-color", Node::ELEMENT, false),
 
     _zoom(this, "zoom",   Node::ELEMENT, false),
     _source(this, "source",   Node::ELEMENT, false),
@@ -195,7 +197,9 @@ namespace layout
     getInterfaces().push_back(&_tick_size);
     getInterfaces().push_back(&_tick_color);
     getInterfaces().push_back(&_tick_label_distance);
+    getInterfaces().push_back(&_tick_label_fontsize);
     getInterfaces().push_back(&_tick_label_color);
+    getInterfaces().push_back(&_tick_label_bordercolor);
 
     getInterfaces().push_back(&_zoom);
     getInterfaces().push_back(&_source);
@@ -240,6 +244,7 @@ namespace layout
 	_gauge_width.setValue("-1");
 
 	_tick_size.setValue("-1");
+	_tick_label_fontsize.setValue("-1");
 
 	_with_label.setValue("true");
 	_with_value.setValue("true");

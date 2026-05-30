@@ -75,7 +75,9 @@ VideoWidget::Theme::Theme() {
 	setTickAlign(VideoWidget::Theme::AlignCenter);
 	setTickColor(1.0, 1.0, 1.0, 1.0);
 	setTickLabelDistance(5);
+	setTickLabelFontSize(10);
 	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
+	setTickLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
 	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
