@@ -372,7 +372,7 @@ TelemetryData::Unit VideoWidget::string2unit(std::string &s) {
 	if (s.empty() || (s == "none"))
 		unit = TelemetryData::UnitNone;
 	else if ((s == "mps") || (s == "meterpersec"))
-		unit = TelemetryData::UnitMilesPerSec;
+		unit = TelemetryData::UnitMeterPerSec;
 	else if (s == "milespersec")
 		unit = TelemetryData::UnitMilesPerSec;
 	else if ((s == "ftps") || (s == "feetpersec"))
