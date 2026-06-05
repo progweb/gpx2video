@@ -96,8 +96,6 @@ bool ImageRenderer::init(MediaContainer *container) {
 
 
 bool ImageRenderer::start(void) {
-	bool is_update = false;
-
 	time_t now = time(NULL);
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
@@ -112,31 +110,6 @@ bool ImageRenderer::start(void) {
 	// Compute start time
 	timecode_ = 0;
 	started_at_ = now;
-
-	// Create overlay buffer
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(layout_width_, layout_height_,
-		4, OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
-
-	// Prepare each widget, map...
-	for (VideoWidget *widget : widgets_) {
-		OIIO::ImageBuf *buf = NULL;
-
-		uint64_t begin = widget->atBeginTime();
-		uint64_t end = widget->atEndTime();
-
-		if ((begin != 0) || (end != 0))
-			continue;
-
-		buf = widget->prepare(is_update);
-
-		if (buf == NULL)
-			continue;
-
-		// Image over
-		buf->specmod().x = widget->x();
-		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, buf->roi());
-	}
 
 	return true;
 }
@@ -161,8 +134,11 @@ bool ImageRenderer::run(void) {
 
 	std::string filename = app_.settings().outputfile();
 
+	VideoStreamPtr video_stream = container_->getVideoStream();
+
 	// Create image buffer
-	OIIO::ImageBuf image_buffer(overlay_->spec()); 
+	OIIO::ImageBuf image_buffer(OIIO::ImageSpec(layout_width_, layout_height_,
+		4, OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
 
 	// Compute start time
 	time_factor = rendererSettings().timeFactor();
@@ -218,9 +194,6 @@ bool ImageRenderer::run(void) {
 	// Set current datetime
 	data_.setDatetime(datetime);
 
-	// Draw overlay
-	OIIO::ImageBufAlgo::over(image_buffer, *overlay_, image_buffer, OIIO::ROI());
-
 	// Draw each widget, map...
 	for (VideoWidget *widget : widgets_) {
 		OIIO::ImageBuf *buf = NULL;
@@ -233,17 +206,6 @@ bool ImageRenderer::run(void) {
 
 		if ((end != 0) && (end < timecode_ms))
 			continue;
-
-		if ((begin != 0) || (end != 0)) {
-			buf = widget->prepare(is_update);
-
-			if (buf != NULL) {
-				// Image over
-				buf->specmod().x = widget->x();
-				buf->specmod().y = widget->y();
-				OIIO::ImageBufAlgo::over(image_buffer, *buf, image_buffer, buf->roi());
-			}
-		}
 
 		// Render dynamic widget
 		buf = widget->render(data_, is_update);
@@ -334,11 +296,6 @@ bool ImageRenderer::stop(void) {
 			(working / 3600), (working / 60) % 60, (working) % 60);
 	else
 		printf("None frame proceed\n");
-
-	if (overlay_)
-		delete overlay_;
-
-	overlay_ = NULL;
 
 	// Done
 	Renderer::stop();

@@ -32,7 +32,7 @@ TrackSettings::TrackSettings() {
 	width_ = 320;
 	height_ = 240;
 
-	zoom_ = 14; //18;
+	zoom_ = 18;
 	view_ = TrackSettings::ViewZoomFit;
 
 	divider_ = 1.0;
@@ -41,6 +41,7 @@ TrackSettings::TrackSettings() {
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
+	path_smooth_ = 1;
 
 	setPathBorderColor(0.0, 0.0, 0.0, 1.0);
 	setPathPrimaryColor(0.9, 0.4, 0.2, 1.0);
@@ -105,6 +106,16 @@ const double& TrackSettings::markerSize(void) const {
 
 void TrackSettings::setMarkerSize(const double &size) {
 	marker_size_ = size;
+}
+
+
+const int& TrackSettings::pathSmooth(void) const {
+	return path_smooth_;
+}
+
+
+void TrackSettings::setPathSmooth(const int &smooth) {
+	path_smooth_ = smooth;
 }
 
 
@@ -637,11 +648,15 @@ void Track::init(void) {
 
 
 void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider) {
+	int n;
+
 	int zoom;
 	int stride;
 	double path_thick;
 	double path_border;
 	unsigned char *bytes;
+
+	int path_smooth;
 
 	const float *fill;
 	const float *outline;
@@ -657,6 +672,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	zoom = settings().zoom();
 	path_thick = settings().pathThick();
 	path_border = settings().pathBorder();
+	path_smooth = settings().pathSmooth();
 
 	fill = settings().pathSecondaryColor();
 	outline = settings().pathBorderColor();
@@ -677,7 +693,10 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		// Draw each WPT
-		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		for (n = 0, result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+			if ((path_smooth > 1) && ((n++ % path_smooth) != 0))
+				continue;
+
 			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
 			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
@@ -696,7 +715,10 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
-	for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+	for (n = 0, result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		if ((path_smooth > 1) && ((n++ % path_smooth) != 0))
+			continue;
+
 		x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
 		y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
@@ -738,6 +760,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divider) {
 	int zoom;
 	int stride;
+	int path_smooth;
 	double path_thick;
 	unsigned char *bytes;
 
@@ -766,11 +789,14 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 
 	zoom = settings().zoom();
 	path_thick = settings().pathThick();
+	path_smooth = settings().pathSmooth();
 
 	fill = settings().pathPrimaryColor();
 
 	// Start or continue path ?
 	if (last_data_.type() == TelemetryData::TypeUnknown) {
+		int n = 0;
+
 		std::string filename = app_.settings().inputfile();
 
 		TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
@@ -790,6 +816,9 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+			if ((path_smooth > 1) && ((n++ % path_smooth) != 0))
+				continue;
+
 			x = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
 			y = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
@@ -830,6 +859,10 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		x1 *= divider;
 		y1 *= divider;
 
+		// Last point
+		x1 = last_posX_;
+		y1 = last_posY_;
+
 		// Current point
 		x2 = floorf((float) Track::lon2pixel(zoom, data.longitude())) - pevx1_;
 		y2 = floorf((float) Track::lat2pixel(zoom, data.latitude())) - pevy1_;
@@ -837,9 +870,15 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		x2 *= divider;
 		y2 *= divider;
 
-		// Move ?
-		if ((x1 == x2) && (y1 == y2))
-			goto skip;
+		if (last_data_.type() != TelemetryData::TypeUnknown) {
+			// Smooth
+			x2 = (x1 + x2) / 2;
+			y2 = (y1 + y2) / 2;
+
+			// Move ?
+			if ((x1 == x2) && (y1 == y2))
+				goto skip;
+		}
 
 		// Move segment at origin
 		xoff = std::min(x1, x2);
@@ -976,41 +1015,6 @@ bool Track::load(void) {
 }
 
 
-OIIO::ImageBuf * Track::prepare(bool &is_update) {
-	cairo_t *cairo;
-
-	if (bg_buf_ != NULL) {
-		is_update = false;
-		goto skip;
-	}
-
-	this->createBox(&bg_buf_, theme().width(), theme().height());
-//	this->drawBorder(bg_buf_);
-//	this->drawBackground(bg_buf_);
-
-	// Cairo context
-	cairo = this->createCairoContext(bg_buf_);
-
-	// Draw
-	background(cairo);
-
-	// Data bytes
-	this->renderCairoContext(bg_buf_, cairo);
-
-	// Release
-	this->destroyCairoContext(cairo);
-
-	// Load track
-	if (this->load() == false)
-		log_warn("Track renderer failure");
-
-	is_update = true;
-
-skip:
-	return bg_buf_;
-}
-
-
 OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int x, y;
 
@@ -1035,11 +1039,11 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	double marker_size = settings().markerSize();
 	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
-	// Check track buffer
-	if (trackbuf_ == NULL) {
-		is_update = false;
-		return NULL;
-	}
+	cairo_t *cairo;
+
+	// Load track
+	if (this->load() == false)
+		log_warn("Track renderer failure");
 
 	// Refresh dynamic info
 	if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
@@ -1064,10 +1068,16 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = y_start_;
 	}
 
-	// Move ?
-	if ((posX == last_posX_) && (posY == last_posY_)) {
-		is_update = false;
-		goto skip;
+	if ((last_posX_ != -1) && (last_posY_ != -1)) {
+		// Smooth
+		posX = (posX + last_posX_) / 2;
+		posY = (posY + last_posY_) / 2;
+
+		// Move ?
+		if ((posX == last_posX_) && (posY == last_posY_)) {
+			is_update = false;
+			goto skip;
+		}
 	}
 
 	// track position
@@ -1157,11 +1167,6 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		break;
 	}
 
-	// Update path progress
-	trackbuf_->specmod().x = 0;
-	trackbuf_->specmod().y = 0;
-	path(*trackbuf_, data, divider_);
-
 	// Image buffer
 	if (fg_buf_ != NULL)
 		delete fg_buf_;
@@ -1169,18 +1174,38 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
-	// Draw track image over
-	trackbuf_->specmod().x = x + offsetX;
-	trackbuf_->specmod().y = y + offsetY;
-	OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+	// Cairo context
+	cairo = this->createCairoContext(fg_buf_);
 
-	// Draw picto
-	if (marker_enable && (marker_size > 0)) {
-		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
-		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
-	
-		if (data.hasValue(TelemetryData::DataFix))
-			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
+	// Draw
+	draw(cairo, data);
+
+	// Data bytes
+	this->renderCairoContext(fg_buf_, cairo);
+
+	// Release
+	this->destroyCairoContext(cairo);
+
+	// Path
+	if (trackbuf_ != NULL) {
+		// Update path progress
+		trackbuf_->specmod().x = 0;
+		trackbuf_->specmod().y = 0;
+		path(*trackbuf_, data, divider_);
+
+		// Draw track image over
+		trackbuf_->specmod().x = x + offsetX;
+		trackbuf_->specmod().y = y + offsetY;
+		OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+
+		// Draw picto
+		if (marker_enable && (marker_size > 0)) {
+			drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
+			drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
+		
+			if (data.hasValue(TelemetryData::DataFix))
+				drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
+		}
 	}
 
 	// Save last position
@@ -1232,8 +1257,10 @@ bool Track::updated(const TelemetryData &data) const {
 
 
 void Track::draw(cairo_t *cr, const TelemetryData &data) {
-	(void) cr;
 	(void) data;
+
+	// Draw
+	background(cr);
 }
 
 

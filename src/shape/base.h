@@ -42,12 +42,13 @@ public:
 		return true;
 	}
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 	virtual bool updated(const TelemetryData &data) const = 0;
 
-	virtual void initialize(void) {
+	virtual void initialize(cairo_t *cr) {
+		(void) cr;
+
 		is_initialized_ = true;
 	}
 

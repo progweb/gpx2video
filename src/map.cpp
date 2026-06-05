@@ -815,41 +815,6 @@ bool Map::load(void) {
 }
 
 
-OIIO::ImageBuf * Map::prepare(bool &is_update) {
-	cairo_t *cairo;
-
-	if (bg_buf_ != NULL) {
-		is_update = false;
-		goto skip;
-	}
-
-	this->createBox(&bg_buf_, theme().width(), theme().height());
-//	this->drawBorder(bg_buf_);
-//	this->drawBackground(bg_buf_);
-
-	// Cairo context
-	cairo = this->createCairoContext(bg_buf_);
-
-	// Draw
-	background(cairo);
-
-	// Data bytes
-	this->renderCairoContext(bg_buf_, cairo);
-
-	// Release
-	this->destroyCairoContext(cairo);
-
-	// Load map & track
-	if (this->load() == false)
-		log_warn("Map renderer failure");
-
-	is_update = true;
-
-skip:
-	return bg_buf_;
-}
-
-
 OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int x, y;
 
@@ -874,11 +839,17 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	double marker_size = settings().markerSize();
 	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
-	// Check map & track buffers
-	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
-		is_update = false;
-		return NULL;
-	}
+	cairo_t *cairo;
+
+	// Load map & track
+	if (this->load() == false)
+		log_warn("Map renderer failure");
+
+//	// Check map & track buffers
+//	if ((mapbuf_ == NULL) || (trackbuf_ == NULL)) {
+//		is_update = false;
+//		return NULL;
+//	}
 
 	// Refresh dynamic info
 	if ((fg_buf_ != NULL) && (data.type() == TelemetryData::TypeUnchanged)) {
@@ -903,10 +874,16 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		posY = y_start_;
 	}
 
-	// Move ?
-	if ((posX == last_posX_) && (posY == last_posY_)) {
-		is_update = false;
-		goto skip;
+	if ((last_posX_ != -1) && (last_posY_ != -1)) {
+		// Smooth
+		posX = (posX + last_posX_) / 2;
+		posY = (posY + last_posY_) / 2;
+
+		// Move ?
+		if ((posX == last_posX_) && (posY == last_posY_)) {
+			is_update = false;
+			goto skip;
+		}
 	}
 
 	// map position
@@ -991,11 +968,6 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		break;
 	}
 
-	// Update path progress
-	mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE)) * divider_;
-	mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE)) * divider_;
-	path(*mapbuf_, data, divider_);
-
 	// Image buffer
 	if (fg_buf_ != NULL)
 		delete fg_buf_;
@@ -1003,20 +975,39 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	// Draw
 	this->createBox(&fg_buf_, theme().width(), theme().height());
 
-	// Map & track image over
-	mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE)) * divider_);
-	mapbuf_->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE)) * divider_);
-	OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+	// Cairo context
+	cairo = this->createCairoContext(fg_buf_);
 
-	// Draw picto
-	if (marker_enable && (marker_size > 0)) {
-		drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
-		drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
-	
-		if (data.hasValue(TelemetryData::DataFix))
-			drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
+	// Draw
+	draw(cairo, data);
+
+	// Data bytes
+	this->renderCairoContext(fg_buf_, cairo);
+
+	// Release
+	this->destroyCairoContext(cairo);
+
+	if (mapbuf_ != NULL) {
+		// Update path progress
+		mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE)) * divider_;
+		mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE)) * divider_;
+		path(*mapbuf_, data, divider_);
+
+		// Map & track image over
+		mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE)) * divider_);
+		mapbuf_->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE)) * divider_);
+		OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+
+		// Draw picto
+		if (marker_enable && (marker_size > 0)) {
+			drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
+			drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
+		
+			if (data.hasValue(TelemetryData::DataFix))
+				drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
+		}
 	}
-	
+
 	// Save last position
 	last_posX_ = posX;
 	last_posY_ = posY;
@@ -1024,6 +1015,19 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	is_update = true;
 skip:
 	return fg_buf_;
+}
+
+
+bool Map::updated(const TelemetryData &data) const {
+	return Track::updated(data);
+}
+
+
+void Map::draw(cairo_t *cr, const TelemetryData &data) {
+	(void) data;
+
+	// Draw
+	background(cr);
 }
 
 

@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<requires lib="gtk" version="4.0"/>
+	<object class="GtkAdjustment" id="linespace_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="GtkBox" id="settings_box">
 		<property name="orientation">vertical</property>
 		<property name="halign">fill</property>
@@ -92,8 +99,55 @@
 					</object>
 				</child>
 			</object>
-
 		</child>
+
+		<child>
+			<object class="GtkExpander" id="misc_expander">
+				<property name="label" translatable="yes">Misc.</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Text line space:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="linespace_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="width-chars">3</property>
+										<property name="max-width-chars">3</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">linespace_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+
 	</object>
 </interface>
 

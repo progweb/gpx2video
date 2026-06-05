@@ -107,7 +107,7 @@ make run-ubuntu-noble VIDEO_DIR=~/Videos
 
 ### Build on host
 
-[Please follow documentation to build gpx2video without gtk interface.](gtk/README.md)
+[Please follow documentation to build gpx2video without gtk interface.](tools/README.md)
 
 To build gpx2video, please install all dependencies (on Debian):
 

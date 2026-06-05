@@ -107,8 +107,8 @@ public:
 	void setDatetime(const uint64_t &datetime);
 
 	const uint64_t& timestamp(void) const;
-	const double& latitude(void) const;
-	const double& longitude(void) const;
+	const double& latitude(bool raw=false) const;
+	const double& longitude(bool raw=false) const;
 
 	double elevation(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	int cadence(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;

@@ -108,9 +108,6 @@ public:
 		};
 	}
 
-//	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
-//	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
-
 	void background(cairo_t *cr, double border, const float *fill, const float *outline);
 	void arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 	void pieslice(cairo_t *cr, double a1, double a2, double border, const float *fill, const float *outline = NULL);

@@ -106,10 +106,13 @@ public:
 	class Theme {
 	public:
 		enum Align {
-			AlignLeft = 0,
-			AlignCenter,
-			AlignRight,
-			AlignUnknown
+			AlignNone = -1,
+			AlignLeft = 0, // PANGO_ALIGN_LEFT
+			AlignCenter = 1, // PANGO_ALIGN_CENTER
+			AlignRight = 2, // PANGO_ALIGN_RIGHT
+			AlignTop = 3,
+			AlignBottom = 4,
+			AlignUnknown = 5
 		};
 
 		enum Padding {
@@ -302,12 +305,20 @@ public:
 			return true;
 		}
 
-		enum Align labelAlign(void) const {
-			return label_align_;
+		enum Align labelHorizontalAlign(void) const {
+			return label_horizontal_align_;
 		}
 
-		virtual void setLabelAlign(Align align) {
-			label_align_ = align;
+		virtual void setLabelHorizontalAlign(Align align) {
+			label_horizontal_align_ = align;
+		}
+
+		enum Align labelVerticalAlign(void) const {
+			return label_vertical_align_;
+		}
+
+		virtual void setLabelVerticalAlign(Align align) {
+			label_vertical_align_ = align;
 		}
 
 		const std::string& labelFontFamily(void) const {
@@ -429,12 +440,20 @@ public:
 			value_max_ = value;
 		}
 
-		enum Align valueAlign(void) const {
-			return value_align_;
+		enum Align valueHorizontalAlign(void) const {
+			return value_horizontal_align_;
 		}
 
-		virtual void setValueAlign(Align align) {
-			value_align_ = align;
+		virtual void setValueHorizontalAlign(Align align) {
+			value_horizontal_align_ = align;
+		}
+
+		enum Align valueVerticalAlign(void) const {
+			return value_vertical_align_;
+		}
+
+		virtual void setValueVerticalAlign(Align align) {
+			value_vertical_align_ = align;
 		}
 
 		const std::string& valueFontFamily(void) const {
@@ -565,6 +584,17 @@ public:
 				return;
 
 			unit_font_size_ = size;
+		}
+
+		int lineSpace(void) const {
+			return line_space_;
+		}
+
+		void setLineSpace(int size) {
+			if (size < 0)
+				return;
+
+			line_space_ = size;
 		}
 
 		const int& gaugeAngle(void) const {
@@ -859,7 +889,8 @@ public:
 
 		float icon_color_[4];
 
-		Align label_align_;
+		Align label_horizontal_align_;
+		Align label_vertical_align_;
 		std::string label_font_family_;
 		int label_font_size_;
 		FontStyle label_font_style_;
@@ -876,7 +907,8 @@ public:
 
 		int value_min_;
 		int value_max_;
-		Align value_align_;
+		Align value_horizontal_align_;
+		Align value_vertical_align_;
 		std::string value_font_family_;
 		int value_font_size_;
 		FontStyle value_font_style_;
@@ -889,6 +921,8 @@ public:
 		float value_border_color_[4];
 
 		int unit_font_size_;
+
+		int line_space_;
 
 		int gauge_angle_;
 		int gauge_rotation_;
@@ -1103,7 +1137,6 @@ public:
 
 	void dump(void);
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0; 
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 	virtual bool updated(const TelemetryData &data) const = 0;

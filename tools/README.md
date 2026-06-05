@@ -273,7 +273,8 @@ Here all widget common element settings:
 	<label-font-size>20</label-font-size>
 	<label-font-style>normal</label-font-style>
 	<label-font-weight>400</label-font-weight>
-	<label-align>left</label-align>
+	<label-horizontal-align>left</label-horizontal-align>
+	<label-vertical-align>center</label-vertical-align>
 	<label-color>#00ff00ff</label-color>
 	<label-shadow-opacity>3</label-shadow-opacity>
 	<label-shadow-distance>3</label-shadow-distance>
@@ -281,18 +282,21 @@ Here all widget common element settings:
 	<label-border-color>#000000ff</label-border-color>
 
 	<with-value>true</with-value>
-	<value-align>right</value-align>
 	<value-font-size>20</value-font-size>
 	<value-font-style>normal</value-font-style>
 	<value-font-weight>400</value-font-weight>
-	<value-align>left</value-align>
+	<value-horizontal-align>left</value-horizontal-align>
+	<value-vertical-align>center</value-vertical-align>
 	<value-color>#00ff00ff</value-color>
 	<value-shadow-opacity>3</value-shadow-opacity>
 	<value-shadow-distance>3</value-shadow-distance>
 	<value-border-width>2</value-border-width>
 	<value-border-color>#000000ff</value-border-color>
 
-	<with-picto>true</with-picto>
+	<icon-color>#00ff00ff</icon-color>
+    <line-space>5</line-space>
+
+	<with-icon>true</with-icon>
 	<with-unit>true</with-unit>
 </widget>		
 ```
@@ -320,12 +324,14 @@ Label or value node elements are:
   - **xxxx-font-style**: to set the text style (normal or italic).
   - **xxxx-font-weight**: to set the text weight value (100, 200, 300, 350, 380, 400, 500, 600, 700, 800, 900 or 1000)).
   - **xxxx-color**: to set the text color in #RGBA.
-  - **xxxx-align**: to set text alignement (left, center, right)
+  - **xxxx-horizontal-align**: to set text horizontal alignement (left, center, right)
+  - **xxxx-vertical-align**: to set text vertical alignement (top, center, bottom)
   - **xxxx-shadow-opacity**: text shadow opacity (in percent).
   - **xxxx-shadow-distance**: text shadow thickness.
   - **xxxx-border-width**: to set the text border width.
   - **xxxx-border-color**: to set the text border color in #RGBA.
 
+Other settings:
   - **with-xxxx**: to show or not the field (default is true).
 
 **type** gauges supported are:

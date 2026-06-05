@@ -22,9 +22,14 @@ bool TimeTextShape::updated(const TelemetryData &data) const {
 }
 
 
-void TimeTextShape::initialize(void) {
+void TimeTextShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	TextShape::Font font;
 
 	setSize(theme().height());
 
@@ -33,6 +38,44 @@ void TimeTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = "00:00:00";
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }
@@ -47,7 +90,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	struct tm time;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Format data
 	if (data.datetime() != 0) {
@@ -80,7 +123,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -96,7 +139,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -111,6 +154,8 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 void TimeTextShape::clear(void) {
 	is_initialized_ = false;
+
+	TextShape::clear();
 
 	if (bg_buf_)
 		delete bg_buf_;
@@ -144,7 +189,9 @@ bool TimeArcShape::updated(const TelemetryData &data) const {
 }
 
 
-void TimeArcShape::initialize(void) {
+void TimeArcShape::initialize(cairo_t *cr) {
+	(void) cr;
+
 	width_ = theme().width();
 	height_ = theme().height();
 
@@ -173,7 +220,7 @@ void TimeArcShape::tickinit(int min, int max) {
 
 void TimeArcShape::ticklenwidth(int value, int *len, int *width) {
 	int size = theme().tickSize(); // size_ / 15
-								   //
+	
 	if (value % 5 == 0) {
 		*len = size + size_ / 51;
 		*width = size_ / 96;
@@ -204,7 +251,7 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	const float *primary_color, *secondary_color;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Limit
 	tmin = 0;

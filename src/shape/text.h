@@ -9,7 +9,7 @@ public:
 	TextShape(VideoWidget::Theme &theme) 
 		: ShapeBase(theme, VideoWidget::ShapeText) {
 		setSize(0);
-		setPadding(0, 0, 0, 0);
+		clear();
 	}
 
 	virtual ~TextShape() {
@@ -31,7 +31,22 @@ public:
 		padding_bottom_ = bottom;
 	}
 
-	virtual OIIO::ImageBuf * prepare(bool &is_update) = 0;
+	void setLabelExtents(int x, int y, int width, int height) {
+		label_x_ = x;
+		label_y_ = y;
+
+		label_width_ = width;
+		label_height_ = height;
+	}
+
+	void setValueExtents(int x, int y, int width, int height) {
+		value_x_ = x;
+		value_y_ = y;
+
+		value_width_ = width;
+		value_height_ = height;
+	}
+
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 //	void initialize(void);
@@ -46,6 +61,12 @@ public:
 
 	void xmlwrite(std::ostream &os);
 
+	void clear(void) {
+		setPadding(0, 0, 0, 0);
+		setLabelExtents(0, 0, 0, 0);
+		setValueExtents(0, 0, 0, 0);
+	}
+
 private:
 	int size_;
 
@@ -53,6 +74,9 @@ private:
 	int padding_right_;
 	int padding_top_;
 	int padding_bottom_;
+
+	int label_x_, label_y_, label_width_, label_height_;
+	int value_x_, value_y_, value_width_, value_height_;
 
 //	int label_px_;
 //	int label_size_;

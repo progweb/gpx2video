@@ -16,6 +16,7 @@
 ../gtk/src/ui/shape/bar_box.ui
 ../gtk/src/ui/shape/text_box.ui
 ../gtk/src/ui/widgets/map_box.ui
+../gtk/src/ui/widgets/text_box.ui
 ../gtk/src/ui/widgets/track_box.ui
 
 # GTK
@@ -26,5 +27,6 @@
 ../gtk/src/shape/bar.cpp
 ../gtk/src/shape/text.cpp
 ../gtk/src/widgets/map.cpp
+../gtk/src/widgets/text.cpp
 ../gtk/src/widgets/track.cpp
 

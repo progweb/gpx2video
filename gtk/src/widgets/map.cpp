@@ -161,6 +161,24 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Path smooth
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_smooth_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"path_smooth_spinbutton\" object in " + resource_file_);
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_int_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: path smooth changed to '%d'",
+							   widget_->name().c_str(), value);
+
+						((Map *) widget_->widget())->settings().setPathSmooth(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
 	if (!spinbutton)
@@ -187,7 +205,7 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_notice("Widget %s: path thick changed to '%.1f'",
+						log_notice("Widget %s: path border changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						((Map *) widget_->widget())->settings().setPathBorder(value);
@@ -274,11 +292,11 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 	// Marker size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("marker_size_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"marker_size_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_notice("Widget %s: factor changed to '%.1f'",
+						log_notice("Widget %s: marker size changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						((Map *) widget_->widget())->settings().setMarkerSize(value);
@@ -340,6 +358,13 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(((Map *) widget_->widget())->settings().divider());
+
+	// Path smooth
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_smooth_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"path_smooth_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(((Map *) widget_->widget())->settings().pathSmooth());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");

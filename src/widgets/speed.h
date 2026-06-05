@@ -24,20 +24,6 @@ public:
 		return shape;
 	}
 
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		if (bg_buf_ != NULL) {
-			is_update = false;
-			goto skip;
-		}
-
-		this->initialize();
-		this->createBox(&bg_buf_, theme().width(), theme().height());
-
-		is_update = true;
-skip:
-		return bg_buf_;
-	}
-
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -83,7 +69,6 @@ skip:
 
 	bool updated(const TelemetryData &data) const;
 	void draw(cairo_t *cr, const TelemetryData &data);
-
 	void clear(void);
 
 private:
@@ -106,7 +91,7 @@ private:
 		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
-	void initialize(void);
+	void initialize(cairo_t *cr);
 };
 
 
@@ -126,14 +111,6 @@ public:
 		shape = new SpeedArcShape(widget->theme(), widget);
 
 		return shape;
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		is_update = false;
-
-		this->initialize();
-
-		return bg_buf_;
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
@@ -208,7 +185,7 @@ private:
 		no_value_ = false;
 	}
 
-	void initialize(void);
+	void initialize(cairo_t *cr);
 	void tickinit(int min, int max);
 	void ticklenwidth(int value, int *len, int *width);
 };
@@ -257,10 +234,6 @@ public:
 			// TODO raise exception
 			break;
 		}
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		return shape_->prepare(is_update);
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {

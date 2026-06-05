@@ -33,18 +33,20 @@ public:
 		padding_bottom_ = bottom;
 	}
 
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		if (bg_buf_ != NULL) {
-			is_update = false;
-			goto skip;
-		}
+	void setLabelExtents(int x, int y, int width, int height) {
+		label_x_ = x;
+		label_y_ = y;
 
-		this->initialize();
-		this->createBox(&bg_buf_, theme().width(), theme().height());
+		label_width_ = width;
+		label_height_ = height;
+	}
 
-		is_update = true;
-skip:
-		return bg_buf_;
+	void setValueExtents(int x, int y, int width, int height) {
+		value_x_ = x;
+		value_y_ = y;
+
+		value_width_ = width;
+		value_height_ = height;
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
@@ -83,9 +85,7 @@ skip:
 	}
 
 	bool updated(const TelemetryData &data) const;
-
 	void draw(cairo_t *cr, const TelemetryData &data);
-
 	void clear(void);
 
 protected:
@@ -104,9 +104,12 @@ private:
 	int padding_top_;
 	int padding_bottom_;
 
+	int label_x_, label_y_, label_width_, label_height_;
+	int value_x_, value_y_, value_width_, value_height_;
+
 	GPXWidget(GPXApplication &app);
 
-	void initialize(void);
+	void initialize(cairo_t *cr);
 
 	int label(cairo_t *cr, ShapeBase::Font &font, 
 			const float *fill, const float *outline, const char *text);

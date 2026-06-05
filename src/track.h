@@ -68,7 +68,6 @@ public:
 	void path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divider=1.0);
 
 	// Render track
-	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
 
 	bool updated(const TelemetryData &data) const;
@@ -119,6 +118,7 @@ protected:
 		os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
 		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
 
+		os << "<path-smooth>" << settings().pathSmooth() << "</path-smooth>" << std::endl;
 		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
 		os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;
 		os << "<path-border-color>" << VideoWidget::Theme::color2hex(settings().pathBorderColor()) << "</path-border-color>" << std::endl;

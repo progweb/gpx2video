@@ -65,7 +65,8 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> position_model_;
 	Glib::RefPtr<Gtk::ListStore> orientation_model_;
 	Glib::RefPtr<Gtk::ListStore> font_style_model_;
-	Glib::RefPtr<Gtk::ListStore> text_align_model_;
+	Glib::RefPtr<Gtk::ListStore> text_horizontal_align_model_;
+	Glib::RefPtr<Gtk::ListStore> text_vertical_align_model_;
 	Glib::RefPtr<Gtk::ListStore> label_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_format_model_;

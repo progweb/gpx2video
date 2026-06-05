@@ -17,6 +17,7 @@
 #include "shape/bar.h"
 #include "shape/text.h"
 #include "widgets/map.h"
+#include "widgets/text.h"
 #include "widgets/track.h"
 #include "widgetframe.h"
 
@@ -203,23 +204,43 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 		row[model_.m_enable] = true;
 	}
 
-	text_align_model_ = Gtk::ListStore::create(model_);
+	text_horizontal_align_model_ = Gtk::ListStore::create(model_);
 
 	{
-		auto iter = text_align_model_->append();
+		auto iter = text_horizontal_align_model_->append();
 		auto row = *iter;
 		row[model_.m_id] = VideoWidget::Theme::AlignLeft;
 		row[model_.m_name] = _("Left");
 		row[model_.m_enable] = true;
 
-		row = *(text_align_model_->append());
+		row = *(text_horizontal_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignCenter;
 		row[model_.m_name] = _("Center");
 		row[model_.m_enable] = true;
 
-		row = *(text_align_model_->append());
+		row = *(text_horizontal_align_model_->append());
 		row[model_.m_id] = VideoWidget::Theme::AlignRight;
 		row[model_.m_name] = _("Right");
+		row[model_.m_enable] = true;
+	}
+
+	text_vertical_align_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = text_vertical_align_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = VideoWidget::Theme::AlignTop;
+		row[model_.m_name] = _("Top");
+		row[model_.m_enable] = true;
+
+		row = *(text_vertical_align_model_->append());
+		row[model_.m_id] = VideoWidget::Theme::AlignCenter;
+		row[model_.m_name] = _("Center");
+		row[model_.m_enable] = true;
+
+		row = *(text_vertical_align_model_->append());
+		row[model_.m_id] = VideoWidget::Theme::AlignBottom;
+		row[model_.m_name] = _("Bottom");
 		row[model_.m_enable] = true;
 	}
 
@@ -364,6 +385,10 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 		switch (widget_selected_->widget()->type()) {
 		case VideoWidget::WidgetMap:
 			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_);
+			break;
+
+		case VideoWidget::WidgetText:
+			widget_child_box_ = GPX2VideoTextWidgetSettingsBox::create(widget_selected_);
 			break;
 
 		case VideoWidget::WidgetTrack:
@@ -919,10 +944,10 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
-	// Label align
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_align_combobox");
+	// Label horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_horizontal_align_combobox");
 	if (!combobox)
-		throw std::runtime_error("No \"label_align_combobox\" object in widget_frame.ui");
+		throw std::runtime_error("No \"label_horizontal_align_combobox\" object in widget_frame.ui");
 
 	combobox->pack_start(*renderer, true);
 	combobox->add_attribute(renderer->property_text(), model_.m_name);
@@ -934,10 +959,35 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_notice("Widget %s: label align changed to '%s'", 
+						log_notice("Widget %s: label horizontal align changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
-						widget_selected_->widget()->theme().setLabelAlign((VideoWidget::Theme::Align) value);
+						widget_selected_->widget()->theme().setLabelHorizontalAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Label vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"label_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: label vertical align changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_selected_->widget()->theme().setLabelVerticalAlign((VideoWidget::Theme::Align) value);
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -1188,10 +1238,10 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
-	// Value align
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_align_combobox");
+	// Value horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_horizontal_align_combobox");
 	if (!combobox)
-		throw std::runtime_error("No \"value_align_combobox\" object in widget_frame.ui");
+		throw std::runtime_error("No \"value_horizontal_align_combobox\" object in widget_frame.ui");
 
 	combobox->pack_start(*renderer, true);
 	combobox->add_attribute(renderer->property_text(), model_.m_name);
@@ -1203,10 +1253,35 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						log_notice("Widget %s: value align changed to '%s'", 
+						log_notice("Widget %s: value horizontal align changed to '%s'", 
 								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
 
-						widget_selected_->widget()->theme().setValueAlign((VideoWidget::Theme::Align) value);
+						widget_selected_->widget()->theme().setValueHorizontalAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Value vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: value vertical align changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_selected_->widget()->theme().setValueVerticalAlign((VideoWidget::Theme::Align) value);
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -1694,14 +1769,24 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(label_font_weight_model_, widget_selected_->widget()->theme().labelFontWeight(), iter))
 		combobox->set_active(iter);
 
-	// Widget label align
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_align_combobox");
+	// Widget label horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_horizontal_align_combobox");
 	if (!combobox)
-		throw std::runtime_error("No \"label_align_combobox\" object in widget_frame.ui");
+		throw std::runtime_error("No \"label_horizontal_align_combobox\" object in widget_frame.ui");
 
-	combobox->set_model(text_align_model_);
+	combobox->set_model(text_horizontal_align_model_);
 
-	if (find_in_listtore(text_align_model_, widget_selected_->widget()->theme().labelAlign(), iter))
+	if (find_in_listtore(text_horizontal_align_model_, widget_selected_->widget()->theme().labelHorizontalAlign(), iter))
+		combobox->set_active(iter);
+
+	// Widget label vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"label_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(text_vertical_align_model_);
+
+	if (find_in_listtore(text_vertical_align_model_, widget_selected_->widget()->theme().labelVerticalAlign(), iter))
 		combobox->set_active(iter);
 
 	// Widget label color button
@@ -1797,14 +1882,24 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(value_font_weight_model_, widget_selected_->widget()->theme().valueFontWeight(), iter))
 		combobox->set_active(iter);
 
-	// Widget value align
-	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_align_combobox");
+	// Widget value horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_horizontal_align_combobox");
 	if (!combobox)
-		throw std::runtime_error("No \"value_align_combobox\" object in widget_frame.ui");
+		throw std::runtime_error("No \"value_horizontal_align_combobox\" object in widget_frame.ui");
 
-	combobox->set_model(text_align_model_);
+	combobox->set_model(text_horizontal_align_model_);
 
-	if (find_in_listtore(text_align_model_, widget_selected_->widget()->theme().valueAlign(), iter))
+	if (find_in_listtore(text_horizontal_align_model_, widget_selected_->widget()->theme().valueHorizontalAlign(), iter))
+		combobox->set_active(iter);
+
+	// Widget value vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"value_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(text_vertical_align_model_);
+
+	if (find_in_listtore(text_vertical_align_model_, widget_selected_->widget()->theme().valueVerticalAlign(), iter))
 		combobox->set_active(iter);
 
 	// Widget value color button
@@ -1998,20 +2093,6 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 
 	spinbutton->set_range(0, height);
 
-	// Label expander
-	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
-	if (!expander)
-		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
-//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
-	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
-
-	// Value expander
-	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
-	if (!expander)
-		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
-//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
-	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
-
 	// Update UI range for widget width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("width_spinbutton");
 	if (!spinbutton)
@@ -2039,6 +2120,34 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	}
 	else
 		margin = 0;
+
+	spinbutton->set_range(0, height - margin);
+
+	// Label expander
+	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
+	if (!expander)
+		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
+//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
+
+	// Label font size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_range(0, height - margin);
+
+	// Value expander
+	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
+	if (!expander)
+		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
+//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
+	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
+
+	// Value font size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_range(0, height - margin);
 }

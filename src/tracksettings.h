@@ -36,6 +36,9 @@ public:
 	const double& markerSize(void) const;
 	void setMarkerSize(const double &size);
 
+	const int& pathSmooth(void) const;
+	void setPathSmooth(const int &smooth);
+
 	const double& pathThick(void) const;
 	void setPathThick(const double &thick);
 
@@ -69,6 +72,7 @@ protected:
 
 	double marker_size_;
 
+	int path_smooth_;
 	double path_thick_;
 	double path_border_;
 

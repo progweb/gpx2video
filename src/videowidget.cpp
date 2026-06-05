@@ -39,7 +39,8 @@ VideoWidget::Theme::Theme() {
 	setLabelFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setLabelShadowOpacity(80);
 	setLabelShadowDistance(3);
-	setLabelAlign(VideoWidget::Theme::AlignLeft);
+	setLabelHorizontalAlign(VideoWidget::Theme::AlignLeft);
+	setLabelVerticalAlign(VideoWidget::Theme::AlignTop);
 	setLabelColor(1.0, 1.0, 1.0, 1.0);
 	setLabelBorderWidth(1);
 	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
@@ -52,13 +53,16 @@ VideoWidget::Theme::Theme() {
 	setValueFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setValueShadowOpacity(80);
 	setValueShadowDistance(3);
-	setValueAlign(VideoWidget::Theme::AlignLeft);
+	setValueHorizontalAlign(VideoWidget::Theme::AlignLeft);
+	setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
 	setValueColor(1.0, 1.0, 1.0, 1.0);
 	setValueBorderWidth(1);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 	setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
 	setUnitFontSize(25);
+
+	setLineSpace(10);
 
 	setGaugeAngle(300);
 	setGaugeRotation(0);
@@ -256,12 +260,18 @@ VideoWidget::Orientation VideoWidget::string2orientation(std::string &s) {
 VideoWidget::Theme::Align VideoWidget::string2align(std::string &s) {
 	VideoWidget::Theme::Align align;
 
-	if (s.empty() || (s == "none") || (s == "left"))
+	if (s.empty() || (s == "none"))
+		align = VideoWidget::Theme::AlignNone;
+	else if (s == "left")
 		align = VideoWidget::Theme::AlignLeft;
-	else if (s == "center")
-		align = VideoWidget::Theme::AlignCenter;
 	else if (s == "right")
 		align = VideoWidget::Theme::AlignRight;
+	else if (s == "center")
+		align = VideoWidget::Theme::AlignCenter;
+	else if (s == "bottom")
+		align = VideoWidget::Theme::AlignBottom;
+	else if (s == "top")
+		align = VideoWidget::Theme::AlignTop;
 	else
 		align = VideoWidget::Theme::AlignUnknown;
 
@@ -563,10 +573,14 @@ std::string VideoWidget::align2string(Theme::Align align) {
 	switch (align) {
 	case Theme::AlignLeft:
 		return "left";
+	case Theme::AlignTop:
+		return "top";
 	case Theme::AlignCenter:
 		return "center";
 	case Theme::AlignRight:
 		return "right";
+	case Theme::AlignBottom:
+		return "bottom";
 	default:
 		return "";
 	}
@@ -758,55 +772,55 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 	switch (type) {
 	case VideoWidget::WidgetAverageSpeed:
 	case VideoWidget::WidgetAverageRideSpeed:
-		return path + "/DataOverlay_icn_avgspeed.svg";
+		return path + "/avgspeed.svg";
 	case VideoWidget::WidgetBatteryLevel:
-		return path + "/DataOverlay_icn_battery.svg";
+		return path + "/battery.svg";
 	case VideoWidget::WidgetCadence:
-		return path + "/DataOverlay_icn_cadence.svg";
+		return path + "/cadence.svg";
 	case VideoWidget::WidgetDate:
-		return path + "/DataOverlay_icn_date.svg";
+		return path + "/date.svg";
 	case VideoWidget::WidgetDistance:
-		return path + "/DataOverlay_icn_distance.svg";
+		return path + "/distance.svg";
 	case VideoWidget::WidgetDuration:
-		return path + "/DataOverlay_icn_duration.svg";
+		return path + "/duration.svg";
 	case VideoWidget::WidgetElevation:
-		return path + "/DataOverlay_icn_elevation.svg";
+		return path + "/elevation.svg";
 	case VideoWidget::WidgetGForce:
-		return path + "/DataOverlay_icn_gforce.svg";
+		return path + "/gforce.svg";
 	case VideoWidget::WidgetGPX:
-		return path + "/DataOverlay_icn_position.svg";
+		return path + "/position.svg";
 	case VideoWidget::WidgetGrade:
-		return path + "/DataOverlay_icn_grade.svg";
+		return path + "/grade.svg";
 	case VideoWidget::WidgetHeading:
-		return path + "/DataOverlay_icn_compass.svg";
+		return path + "/compass.svg";
 	case VideoWidget::WidgetHeartRate:
-		return path + "/DataOverlay_icn_heartrate.svg";
+		return path + "/heartrate.svg";
 	case VideoWidget::WidgetHomeDistance:
-		return path + "/DataOverlay_icn_home.svg";
+		return path + "/home.svg";
 	case VideoWidget::WidgetImage:
-		return path + "/DataOverlay_icn_image.svg";
+		return path + "/image.svg";
 	case VideoWidget::WidgetLap:
-		return path + "/DataOverlay_icn_laps.svg";
+		return path + "/laps.svg";
 	case VideoWidget::WidgetMap:
-		return path + "/DataOverlay_icn_map.svg";
+		return path + "/map.svg";
 	case VideoWidget::WidgetMaxSpeed:
-		return path + "/DataOverlay_icn_maxspeed.svg";
+		return path + "/maxspeed.svg";
 	case VideoWidget::WidgetPosition:
-		return path + "/DataOverlay_icn_position.svg";
+		return path + "/position.svg";
 	case VideoWidget::WidgetPower:
-		return path + "/DataOverlay_icn_power.svg";
+		return path + "/power.svg";
 	case VideoWidget::WidgetSpeed:
-		return path + "/DataOverlay_icn_speed.svg";
+		return path + "/speed.svg";
 	case VideoWidget::WidgetTemperature:
-		return path + "/DataOverlay_icn_temperature.svg";
+		return path + "/temperature.svg";
 	case VideoWidget::WidgetText:
-		return path + "/DataOverlay_icn_text.svg";
+		return path + "/text.svg";
 	case VideoWidget::WidgetTime:
-		return path + "/DataOverlay_icn_time.svg";
+		return path + "/time.svg";
 	case VideoWidget::WidgetTrack:
-		return path + "/DataOverlay_icn_track.svg";
+		return path + "/track.svg";
 	case VideoWidget::WidgetVerticalSpeed:
-		return path + "/DataOverlay_icn_aviationAltitude.svg";
+		return path + "/altitude.svg";
 	default:
 		return "";
 	}

@@ -122,7 +122,8 @@ private:
 
 	VideoWidget *widget_;
 
-	OIIO::ImageBuf *overlay_;
+	int overlay_width_;
+	int overlay_height_;
 
 	mutable std::mutex mutex_;
 	mutable std::mutex queue_mutex_;

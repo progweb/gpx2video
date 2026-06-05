@@ -26,7 +26,7 @@
      showgrid="false"
      inkscape:zoom="1.4859428"
      inkscape:cx="305.52993"
-     inkscape:cy="227.12853"
+     inkscape:cy="231.16637"
      inkscape:window-width="1920"
      inkscape:window-height="1003"
      inkscape:window-x="0"
@@ -40,7 +40,7 @@
      inkscape:groupmode="layer"
      id="layer1">
     <path
-       style="fill:none;stroke:#ffffff;stroke-width:9.44958;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       style="fill:none;stroke:#ffffff;stroke-width:9.78958333;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
        id="path163"
        transform="rotate(-44.083297)"
        sodipodi:type="arc"
@@ -54,19 +54,19 @@
        d="M -51.294495,98.276994 A 48.436783,48.436783 0 0 1 -0.8802349,51.961746 48.436783,48.436783 0 0 1 45.494547,102.32125 48.436783,48.436783 0 0 1 -4.8101274,148.7555 48.436783,48.436783 0 0 1 -51.303782,98.505722"
        sodipodi:open="true" />
     <path
-       style="fill:#ffffff;stroke:#ffffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none"
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:9.78958333;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none"
        d="m 67.647369,49.285588 0.171929,22.2167"
        id="path26615" />
     <path
-       style="fill:#ffffff;stroke:#ffffff;stroke-width:10;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none"
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:9.78958333;stroke-linecap:round;stroke-linejoin:bevel;stroke-dasharray:none"
        d="M 92.324084,98.189598 68.201276,72.832461"
        id="path27343" />
     <path
-       style="fill:#ffffff;stroke:#ffffff;stroke-width:10.3084;stroke-linecap:round"
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:9.78958333;stroke-linecap:round;stroke-dasharray:none"
        d="M 82.355433,10.414135 106.0279,19.59427"
        id="path27388" />
     <path
-       style="fill:#ffffff;stroke:#ffffff;stroke-width:10.3084;stroke-linecap:round"
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:9.78958333;stroke-linecap:round;stroke-dasharray:none"
        d="M 53.111227,10.414135 29.438763,19.59427"
        id="path27390" />
   </g>

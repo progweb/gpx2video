@@ -4,14 +4,14 @@
 #include <pango/pangocairo.h>
 
 #include "../oiio.h"
-#include "../shape/base.h"
+#include "../shape/text.h"
 
 
 /**
  * Widget definition
  */
 
-class TextWidget : public VideoWidget, public ShapeBase {
+class TextWidget : public VideoWidget, public TextShape {
 public:
 	virtual ~TextWidget() {
 	}
@@ -28,25 +28,8 @@ public:
 		return this;
 	}
 
-	void setPadding(int left, int right, int top, int bottom) {
-		padding_left_ = left;
-		padding_right_ = right;
-		padding_top_ = top;
-		padding_bottom_ = bottom;
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		if (bg_buf_ != NULL) {
-			is_update = false;
-			goto skip;
-		}
-
-		this->initialize();
-		this->createBox(&bg_buf_, theme().width(), theme().height());
-
-		is_update = true;
-skip:
-		return bg_buf_;
+	VideoWidget::Theme& theme(void) {
+		return VideoWidget::theme();
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
@@ -78,9 +61,7 @@ skip:
 	}
 
 	bool updated(const TelemetryData &data) const;
-
 	void draw(cairo_t *cairo, const TelemetryData &data);
-
 	void clear(void);
 
 	bool isStatic(void) {
@@ -100,20 +81,9 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	int padding_left_;
-	int padding_right_;
-	int padding_top_;
-	int padding_bottom_;
-
 	TextWidget(GPXApplication &app);
 
-	void initialize(void);
-
-	void label(cairo_t *cr, ShapeBase::Font &font, 
-			const float *fill, const float *outline, const char *text);
-
-	void value(cairo_t *cr, ShapeBase::Font &font, 
-			const float *fill, const float *outline, const char *text);
+	void initialize(cairo_t *cr);
 };
 
 #endif

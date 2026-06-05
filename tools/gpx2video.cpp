@@ -107,6 +107,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --map-factor                      : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source                      : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom                        : Map zoom" << std::endl;
+	std::cout << "\t-    --path-smooth                     : Path smooth (default: 1)" << std::endl;
 	std::cout << "\t-    --path-thick                      : Path thick (default: 3.0)" << std::endl;
 	std::cout << "\t-    --path-border                     : Path border (default: 1.4)" << std::endl;
 	std::cout << "\t- v, --verbose                         : Show trace" << std::endl;
@@ -370,6 +371,7 @@ Map * GPX2Video::buildMap(void) {
 	mapSettings.setZoom(settings().mapzoom());
 	mapSettings.setDivider(settings().mapfactor());
 	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
+	mapSettings.setPathSmooth(settings().pathsmooth());
 	mapSettings.setPathThick(settings().paththick());
 	mapSettings.setPathBorder(settings().pathborder());
 
@@ -425,6 +427,8 @@ int GPX2Video::parseTelemetrySmoothArg(char *arg,
 
 			if (name == "all")
 				type = TelemetryData::DataAll;
+			else if (name == "position")
+				type = TelemetryData::DataPosition;
 			else if (name == "grade")
 				type = TelemetryData::DataGrade;
 			else if (name == "speed")
@@ -481,6 +485,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	double map_factor = 1.0;
 
+	int path_smooth = 1;
 	double path_thick = 3.0;
 	double path_border = 1.4;
 
@@ -587,6 +592,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			else if (s && !strcmp(s, "map-source")) {
 				map_source = (MapSettings::Source) atoi(optarg);
 			}
+			else if (s && !strcmp(s, "path-smooth")) {
+				path_smooth = atoi(optarg);
+			}
 			else if (s && !strcmp(s, "path-thick")) {
 				path_thick = strtod(optarg, NULL);
 			}
@@ -647,6 +655,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				parseTelemetrySmoothArg(optarg, type, method, number);
 
 				switch (type) {
+				case TelemetryData::DataPosition:
+					telemetry_smooth_position_method = method;
+					telemetry_smooth_position_points = number;
+					break;
+
 				case TelemetryData::DataGrade:
 					telemetry_smooth_grade_method = method;
 					telemetry_smooth_grade_points = number;
@@ -994,6 +1007,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_zoom,
 		max_duration_ms,
 		map_source,
+		path_smooth,
 		path_thick,
 		path_border,
 		gpx_begin,

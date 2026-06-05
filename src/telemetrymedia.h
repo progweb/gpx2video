@@ -582,6 +582,7 @@ private:
 	void compute(void);
 	void smooth_step_one(void);
 	void smooth_step_two(void);
+	void smooth_step_three(void);
 	void smooth(void);
 	void fix(void);
 	void trim(void);

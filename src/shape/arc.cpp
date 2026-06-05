@@ -104,13 +104,17 @@ void ArcShape::ticklabel(cairo_t *cr, double a, double d, ArcShape::Font &font,
 	int x, y;
 	int width, height;
 
-	struct ArcShape::point p = locate(a, d);
+	struct ArcShape::point p;
 
+	// Text dimensions
 	this->extents(cr, font, text, x, y, width, height);
+
+	// Compute position
+	p = locate(a, (height / 2) + d);
 
 	// Text offset
 	x = -x;
-	y = -y + font.shadow_distance;
+	y = -y;
 
 	// Text position
 	x += p.x - (width / 2);
@@ -125,13 +129,13 @@ void ArcShape::value(cairo_t *cr, ArcShape::Font &font,
 	int x, y;
 	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
+	enum VideoWidget::Theme::Align textAlign = theme().valueHorizontalAlign();
 
 	this->extents(cr, font, text, x, y, width, height);
 
 	// Text offset
 	x = -x;
-	y = -y + font.shadow_distance;
+	y = -y;
 
 	// Text position
 	if (textAlign == VideoWidget::Theme::AlignLeft) {
@@ -143,10 +147,10 @@ void ArcShape::value(cairo_t *cr, ArcShape::Font &font,
 	}
 	else if (textAlign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
-		x -= width + font.shadow_distance;
+		x -= width;
 	}
 
-	y += theme().height() - font.shadow_distance - padding_bottom_ - height;
+	y += theme().height() - padding_bottom_ - height;
 
 	ShapeBase::text(cr, x, y, font, fill, outline, text);
 }
@@ -157,13 +161,13 @@ void ArcShape::unit(cairo_t *cr, ArcShape::Font &font,
 	int x, y;
 	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
+	enum VideoWidget::Theme::Align textAlign = theme().valueHorizontalAlign();
 
 	this->extents(cr, font, text, x, y, width, height);
 
 	// Text offset
 	x = -x;
-	y = -y + font.shadow_distance;
+	y = -y;
 
 	// Text position
 	if (textAlign == VideoWidget::Theme::AlignLeft) {
@@ -175,10 +179,10 @@ void ArcShape::unit(cairo_t *cr, ArcShape::Font &font,
 	}
 	else if (textAlign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
-		x -= width + font.shadow_distance;
+		x -= width;
 	}
 
-	y += theme().height() - font.shadow_distance - padding_bottom_;
+	y += theme().height() - padding_bottom_;
 	y += height / 3.0;
 
 	ShapeBase::text(cr, x, y, font, fill, outline, text);

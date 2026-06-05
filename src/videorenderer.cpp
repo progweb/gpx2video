@@ -262,14 +262,9 @@ void VideoRenderer::computeWidgetsPosition(void) {
 
 
 bool VideoRenderer::start(void) {
-	bool is_update = false;
-
 	uint64_t start_time;
 
 	time_t now = time(NULL);
-
-	double sar;
-	int orientation;
 
 	VideoStreamPtr video_stream = container_->getVideoStream();
 
@@ -285,45 +280,8 @@ bool VideoRenderer::start(void) {
 
 	log_info("Video: start at '%s'", Datetime::timestamp2string(start_time).c_str());
 
-	// SAR & orientation video
-	sar = av_q2d(encoder_->settings().videoParams().pixelAspectRatio());
-	orientation = encoder_->settings().videoParams().orientation();
-
 	started_at_ = now;
 	last_timecode_ms_ = 0;
-
-	// Create overlay buffer
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(video_stream->width(), video_stream->height(), 
-		video_stream->nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(video_stream->format())));
-
-	// Prepare each widget, map...
-	for (VideoWidget *widget : widgets_) {
-		OIIO::ImageBuf *buf = NULL;
-
-		uint64_t begin = widget->atBeginTime();
-		uint64_t end = widget->atEndTime();
-
-//		// Dump widget info
-//		widget->dump();
-
-		if ((begin != 0) || (end != 0))
-			continue;
-
-		// Render static widget
-		buf = widget->prepare(is_update);
-
-		if (buf == NULL)
-			continue;
-
-		// Rotate & rescale
-		this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
-		this->rotate(buf, orientation);
-
-		// Image over
-		buf->specmod().x = widget->x();
-		buf->specmod().y = widget->y();
-		OIIO::ImageBufAlgo::over(*overlay_, *buf, *overlay_, buf->roi());
-	}
 
 	return true;
 }
@@ -411,9 +369,6 @@ bool VideoRenderer::run(void) {
 	// Set current datetime
 	data_.setDatetime(datetime);
 
-	// Draw overlay
-	OIIO::ImageBufAlgo::over(frame_buffer, *overlay_, frame_buffer, OIIO::ROI());
-
 	// Draw each widget, map...
 	for (VideoWidget *widget : widgets_) {
 		OIIO::ImageBuf *buf = NULL;
@@ -426,23 +381,6 @@ bool VideoRenderer::run(void) {
 
 		if ((end != 0) && (end < timecode_ms))
 			continue;
-
-		if ((begin != 0) || (end != 0)) {
-			buf = widget->prepare(is_update);
-
-			if (buf != NULL) {
-				// Rotate & resize
-				if (is_update) {
-					this->resize(buf, round((double) widget->theme().width() / sar), widget->theme().height());
-					this->rotate(buf, orientation);
-				}
-
-				// Image over
-				buf->specmod().x = widget->x();
-				buf->specmod().y = widget->y();
-				OIIO::ImageBufAlgo::over(frame_buffer, *buf, frame_buffer, buf->roi());
-			}
-		}
 
 		// Render dynamic widget
 		buf = widget->render(data_, is_update);
@@ -554,12 +492,8 @@ bool VideoRenderer::stop(void) {
 		decoder_audio_->close();
 	decoder_video_->close();
 
-	if (overlay_)
-		delete overlay_;
-
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
-	overlay_ = NULL;
 
 	// Register task status
 	Renderer::stop();

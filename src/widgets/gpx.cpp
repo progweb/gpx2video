@@ -26,15 +26,60 @@ bool GPXWidget::updated(const TelemetryData &data) const {
 }
 
 
-void GPXWidget::initialize(void) {
+void GPXWidget::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	ShapeBase::Font font;
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		std::string s = ((VideoWidget *) this)->label();
+
+		font = (ShapeBase::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, s.c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = std::to_string(888.8);
+
+		font = (ShapeBase::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }
@@ -46,7 +91,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	ShapeBase::Font font;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Add padding
 	y += padding_top_;
@@ -66,7 +111,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -93,7 +138,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -138,14 +183,26 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 		y += value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), s);
 		y += linewidth;
 
+		// Latitude (raw)
+		sprintf(s, "Lat (raw): %.4f", data.latitude());
+
+		y += value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), s);
+		y += linewidth;
+
+		// Longitude (raw)
+		sprintf(s, "Lon (raw): %.4f", data.longitude());
+
+		y += value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), s);
+		y += linewidth;
+
 		// Latitude
-		sprintf(s, "Lat: %.4f", data.latitude());
+		sprintf(s, "Lat (smooth): %.4f", data.latitude());
 
 		y += value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), s);
 		y += linewidth;
 
 		// Longitude
-		sprintf(s, "Lon: %.4f", data.longitude());
+		sprintf(s, "Lon (smooth): %.4f", data.longitude());
 
 		y += value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), s);
 		y += linewidth;
@@ -162,6 +219,10 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 void GPXWidget::clear(void) {
 	is_initialized_ = false;
 
+	setPadding(0, 0, 0, 0);
+	setLabelExtents(0, 0, 0, 0);
+	setValueExtents(0, 0, 0, 0);
+
 	if (bg_buf_)
 		delete bg_buf_;
 
@@ -177,35 +238,47 @@ int GPXWidget::label(cairo_t *cr, ShapeBase::Font &font,
 		const float *fill, const float *outline, const char *text) {
 	int x, y;
 
-	int tx, ty;
-	int width, height;
+//	int tx, ty;
+//	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().labelAlign();
+	enum VideoWidget::Theme::Align halign = theme().labelHorizontalAlign();
+	enum VideoWidget::Theme::Align valign = theme().labelVerticalAlign();
 
-	this->extents(cr, font, text, tx, ty, width, height);
+//	this->extents(cr, font, text, tx, ty, width, height);
 
 	// Text offset
-	x = -tx;
-	y = -ty + font.shadow_distance;
+	x = -label_x_; //-tx;
+	y = -label_y_; //-ty + font.shadow_distance;
 
 	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
+	if (halign == VideoWidget::Theme::AlignLeft) {
 		x += padding_left_;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
+	else if (halign == VideoWidget::Theme::AlignCenter) {
 		x += theme().width() / 2;
-		x -= width / 2;
+		x -= label_width_ / 2;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
+	else if (halign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
-		x -= width + font.shadow_distance;
+		x -= label_width_ + font.shadow_distance;
 	}
 
-	y += padding_top_;
+	// Text vertical position
+	if (valign == VideoWidget::Theme::AlignTop) {
+		y += padding_top_;
+	}
+	else if (valign == VideoWidget::Theme::AlignCenter) {
+		y += theme().height() / 2 + padding_top_ - padding_bottom_;
+		y -= label_height_ / 2;
+	}
+	else if (valign == VideoWidget::Theme::AlignBottom) {
+		y += theme().height() - padding_bottom_;
+		y -= label_height_;
+	}
 
 	this->text(cr, x, y, font, fill, outline, text);
 
-	return height;
+	return y + label_height_;
 }
 
 
@@ -216,23 +289,23 @@ int GPXWidget::value(cairo_t *cr, int y, ShapeBase::Font &font,
 	int tx, ty;
 	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
+	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
 
 	this->extents(cr, font, text, tx, ty, width, height);
 
 	// Text offset
-	x = -tx;
-	y += -ty + font.shadow_distance;
+	x = -value_x_; //-tx;
+	y += -value_y_; //-ty;
 
 	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
+	if (halign == VideoWidget::Theme::AlignLeft) {
 		x += padding_left_;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
+	else if (halign == VideoWidget::Theme::AlignCenter) {
 		x += theme().width() / 2;
 		x -= width / 2;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
+	else if (halign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
 		x -= width + font.shadow_distance;
 	}

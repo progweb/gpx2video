@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg2"
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   sodipodi:docname="DataOverlay_icn_compass.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#727272"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="1.2216797"
+     inkscape:cx="170.2574"
+     inkscape:cy="244.33574"
+     inkscape:window-width="1920"
+     inkscape:window-height="1003"
+     inkscape:window-x="0"
+     inkscape:window-y="40"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8">
+    <path
+       style="fill:none;stroke:#ffffff;stroke-width:37;stroke-linecap:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path163"
+       transform="rotate(-44.083298)"
+       sodipodi:type="arc"
+       sodipodi:cx="5.7921901"
+       sodipodi:cy="361.99252"
+       sodipodi:rx="183.06816"
+       sodipodi:ry="183.06816"
+       sodipodi:start="3.1845341"
+       sodipodi:end="3.179808"
+       sodipodi:arc-type="arc"
+       d="M -177.10721,354.13373 A 183.06816,183.06816 0 0 1 13.43488,179.08396 183.06816,183.06816 0 0 1 188.70965,369.4191 183.06816,183.06816 0 0 1 -1.4182571,544.91863 183.06816,183.06816 0 0 1 -177.14231,354.99821"
+       sodipodi:open="true" />
+    <path
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:21.1389;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:10;stroke-dasharray:none"
+       d="m 327.62275,172.63012 -177.1001,109.46328 82.7997,0.32321 13.39184,80.52021 z"
+       id="path47666"
+       sodipodi:nodetypes="ccccc" />
+  </g>
+</svg>

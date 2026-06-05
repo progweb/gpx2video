@@ -3,7 +3,7 @@
 
 TextWidget::TextWidget(GPXApplication &app)
 	: VideoWidget(app, VideoWidget::WidgetText) 
-	, ShapeBase(theme(), VideoWidget::ShapeText)
+	, TextShape(theme())
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) {
 
@@ -27,15 +27,60 @@ bool TextWidget::updated(const TelemetryData &data) const {
 }
 
 
-void TextWidget::initialize(void) {
+void TextWidget::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	ShapeBase::Font font;
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		std::string s = ((VideoWidget *) this)->label();
+
+		font = (ShapeBase::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, s.c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = VideoWidget::value();
+
+		font = (ShapeBase::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 //	int n_families;
 //
@@ -82,7 +127,7 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	(void) data;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Draw background
 	background(cr);
@@ -97,12 +142,12 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
 
-		label(cr, font, theme().labelColor(), theme().labelBorderColor(), s.c_str());
+		TextShape::label(cr, font, theme().labelColor(), theme().labelBorderColor(), s.c_str());
 	}
 
 	// Draw value
@@ -113,12 +158,12 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
 
-		value(cr, font, theme().valueColor(), theme().valueBorderColor(), VideoWidget::value().c_str());
+		TextShape::value(cr, font, theme().valueColor(), theme().valueBorderColor(), VideoWidget::value().c_str());
 	}
 
 //	double fix;
@@ -224,6 +269,10 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 void TextWidget::clear(void) {
 	is_initialized_ = false;
 
+	setPadding(0, 0, 0, 0);
+	setLabelExtents(0, 0, 0, 0);
+	setValueExtents(0, 0, 0, 0);
+
 	if (bg_buf_)
 		delete bg_buf_;
 
@@ -233,69 +282,4 @@ void TextWidget::clear(void) {
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
 }
-
-
-void TextWidget::label(cairo_t *cr, ShapeBase::Font &font, 
-		const float *fill, const float *outline, const char *text) {
-	int x, y;
-	int width, height;
-
-	enum VideoWidget::Theme::Align textAlign = theme().labelAlign();
-
-	this->extents(cr, font, text, x, y, width, height);
-
-	// Text offset
-	x = -x;
-	y = -y + font.shadow_distance;
-
-	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
-		x += padding_left_;
-	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-		x += theme().width() / 2;
-		x -= width / 2;
-	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
-		x += theme().width() - padding_right_;
-		x -= width + font.shadow_distance;
-	}
-
-	y += padding_top_;
-
-	this->text(cr, x, y, font, fill, outline, text);
-}
-
-
-void TextWidget::value(cairo_t *cr, ShapeBase::Font &font, 
-		const float *fill, const float *outline, const char *text) {
-	int x, y;
-	int width, height;
-
-	enum VideoWidget::Theme::Align textAlign = theme().valueAlign();
-
-	this->extents(cr, font, text, x, y, width, height);
-
-	// Text offset
-	x = -x;
-	y = -y + font.shadow_distance;
-
-	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
-		x += padding_left_;
-	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
-		x += theme().width() / 2;
-		x -= width / 2;
-	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
-		x += theme().width() - padding_right_;
-		x -= width + font.shadow_distance;
-	}
-
-	y += theme().height() - font.shadow_distance - padding_bottom_ - height;
-
-	this->text(cr, x, y, font, fill, outline, text);
-}
-
 

@@ -61,13 +61,16 @@ namespace layout
 
 	_text(this, "text", Node::ELEMENT, false),
 
+	_line_space(this, "line-space", Node::ELEMENT, false),
+
 	_icon_color(this, "icon-color", Node::ELEMENT, false),
 
 	_label_fontfamily(this, "label-font-family", Node::ELEMENT, false),
 	_label_fontsize(this, "label-font-size", Node::ELEMENT, false),
 	_label_fontstyle(this, "label-font-style", Node::ELEMENT, false),
 	_label_fontweight(this, "label-font-weight", Node::ELEMENT, false),
-	_label_align(this, "label-align", Node::ELEMENT, false),
+	_label_horizontal_align(this, "label-horizontal-align", Node::ELEMENT, false),
+	_label_vertical_align(this, "label-vertical-align", Node::ELEMENT, false),
 	_label_color(this, "label-color", Node::ELEMENT, false),
 	_label_shadowopacity(this, "label-shadow-opactiy", Node::ELEMENT, false),
 	_label_shadowdistance(this, "label-shadow-distance", Node::ELEMENT, false),
@@ -78,7 +81,8 @@ namespace layout
 	_value_fontsize(this, "value-font-size", Node::ELEMENT, false),
 	_value_fontstyle(this, "value-font-style", Node::ELEMENT, false),
 	_value_fontweight(this, "value-font-weight", Node::ELEMENT, false),
-	_value_align(this, "value-align", Node::ELEMENT, false),
+	_value_horizontal_align(this, "value-horizontal_align", Node::ELEMENT, false),
+	_value_vertical_align(this, "value-vertical_align", Node::ELEMENT, false),
 	_value_color(this, "value-color", Node::ELEMENT, false),
 	_value_shadowopacity(this, "value-shadow-opactiy", Node::ELEMENT, false),
 	_value_shadowdistance(this, "value-shadow-distance", Node::ELEMENT, false),
@@ -152,13 +156,16 @@ namespace layout
 
     getInterfaces().push_back(&_text);
 
+    getInterfaces().push_back(&_line_space);
+
     getInterfaces().push_back(&_icon_color);
 
     getInterfaces().push_back(&_label_fontfamily);
     getInterfaces().push_back(&_label_fontsize);
     getInterfaces().push_back(&_label_fontstyle);
     getInterfaces().push_back(&_label_fontweight);
-    getInterfaces().push_back(&_label_align);
+    getInterfaces().push_back(&_label_horizontal_align);
+    getInterfaces().push_back(&_label_vertical_align);
     getInterfaces().push_back(&_label_color);
     getInterfaces().push_back(&_label_shadowopacity);
     getInterfaces().push_back(&_label_shadowdistance);
@@ -169,7 +176,8 @@ namespace layout
     getInterfaces().push_back(&_value_fontsize);
     getInterfaces().push_back(&_value_fontstyle);
     getInterfaces().push_back(&_value_fontweight);
-    getInterfaces().push_back(&_value_align);
+    getInterfaces().push_back(&_value_horizontal_align);
+    getInterfaces().push_back(&_value_vertical_align);
     getInterfaces().push_back(&_value_color);
     getInterfaces().push_back(&_value_shadowopacity);
     getInterfaces().push_back(&_value_shadowdistance);

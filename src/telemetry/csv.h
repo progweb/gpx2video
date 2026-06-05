@@ -68,6 +68,7 @@ failure:
 
 		log_call();
 
+		stream_.clear();
 		stream_.seekg(0, stream_.beg);
 
 		line_ = 0;

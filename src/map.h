@@ -88,14 +88,10 @@ public:
 	void draw(void);
 
 	// Render map
-	OIIO::ImageBuf * prepare(bool &is_update);
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update);
 
-	void draw(cairo_t *cr, const TelemetryData &data) {
-		(void) cr;
-		(void) data;
-	}
-
+	bool updated(const TelemetryData &data) const;
+	void draw(cairo_t *cr, const TelemetryData &data);
 	void clear(void);
 
 	static void downloadProgress(Tile &tile, curl_off_t dltotal, curl_off_t dlnow);

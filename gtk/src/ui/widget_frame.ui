@@ -414,8 +414,8 @@
 													<object class="GtkSpinButton" id="margin_left_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -444,8 +444,8 @@
 													<object class="GtkSpinButton" id="margin_right_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -474,8 +474,8 @@
 													<object class="GtkSpinButton" id="margin_top_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -504,8 +504,8 @@
 													<object class="GtkSpinButton" id="margin_bottom_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -549,8 +549,8 @@
 													<object class="GtkSpinButton" id="padding_left_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -579,8 +579,8 @@
 													<object class="GtkSpinButton" id="padding_right_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -609,8 +609,8 @@
 													<object class="GtkSpinButton" id="padding_top_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -639,8 +639,8 @@
 													<object class="GtkSpinButton" id="padding_bottom_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -684,8 +684,8 @@
 													<object class="GtkSpinButton" id="border_width_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -880,8 +880,8 @@
 													<object class="GtkSpinButton" id="label_font_size_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -954,13 +954,39 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label" translatable="yes">Label align:</property>
+														<property name="label" translatable="yes">Label horizontal align:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
 												</child>
 												<child>
-													<object class="GtkComboBox" id="label_align_combobox">
+													<object class="GtkComboBox" id="label_horizontal_align_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Label vertical align:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="label_vertical_align_combobox">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
 														<property name="valign">center</property>
@@ -1017,8 +1043,8 @@
 													<object class="GtkSpinButton" id="label_shadow_opacity_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1047,8 +1073,8 @@
 													<object class="GtkSpinButton" id="label_shadow_distance_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1077,8 +1103,8 @@
 													<object class="GtkSpinButton" id="label_border_width_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1203,8 +1229,8 @@
 													<object class="GtkSpinButton" id="value_font_size_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1277,13 +1303,39 @@
 													<object class="GtkLabel">
 														<property name="can-focus">False</property>
 														<property name="justify">left</property>
-														<property name="label" translatable="yes">Value align:</property>
+														<property name="label" translatable="yes">Value horizontal align:</property>
 														<property name="valign">baseline</property>
 														<property name="xalign">0.5</property>
 													</object>
 												</child>
 												<child>
-													<object class="GtkComboBox" id="value_align_combobox">
+													<object class="GtkComboBox" id="value_horizontal_align_combobox">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="valign">center</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<property name="spacing">6</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Value vertical align:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkComboBox" id="value_vertical_align_combobox">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
 														<property name="valign">center</property>
@@ -1340,8 +1392,8 @@
 													<object class="GtkSpinButton" id="value_shadow_opacity_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1370,8 +1422,8 @@
 													<object class="GtkSpinButton" id="value_shadow_distance_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1400,8 +1452,8 @@
 													<object class="GtkSpinButton" id="value_border_width_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
@@ -1613,8 +1665,8 @@
 													<object class="GtkSpinButton" id="unit_font_size_spinbutton">
 														<property name="halign">end</property>
 														<property name="hexpand">True</property>
-														<property name="width-chars">2</property>
-														<property name="max-width-chars">2</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">4</property>
 														<property name="numeric">True</property>
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>

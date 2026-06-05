@@ -28,20 +28,6 @@ public:
 		nbr_target_lap_ = target;
 	}
 
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		if (bg_buf_ != NULL) {
-			is_update = false;
-			goto skip;
-		}
-
-		this->initialize();
-		this->createBox(&bg_buf_, theme().width(), theme().height());
-
-		is_update = true;
-skip:
-		return bg_buf_;
-	}
-
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -87,7 +73,6 @@ skip:
 
 	bool updated(const TelemetryData &data) const;
 	void draw(cairo_t *cr, const TelemetryData &data);
-
 	void clear(void);
 
 private:
@@ -114,7 +99,7 @@ private:
 		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
-	void initialize(void);
+	void initialize(cairo_t *cr);
 };
 
 
@@ -153,10 +138,6 @@ public:
 		shape_->setTargetLap(target);
 
 		nbr_target_lap_ = target;
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		return shape_->prepare(is_update);
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {

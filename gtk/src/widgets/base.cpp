@@ -117,3 +117,17 @@ bool GPX2VideoWidgetBaseSettingsBox::on_widget_switch_changed(bool state, Gtk::S
 	return true;
 }
 
+
+void GPX2VideoWidgetBaseSettingsBox::on_widget_textview_changed(Gtk::TextView *textview, std::function<void(Glib::RefPtr<Gtk::TextBuffer>)> set) {
+	log_call();
+
+	if (loading_)
+		return;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Text
+	set(textview->get_buffer());
+}
+

@@ -169,7 +169,7 @@ protected:
 	int layout_width_;
 	int layout_height_;
 
-	OIIO::ImageBuf *overlay_;
+//	OIIO::ImageBuf *overlay_;
 
 	Renderer(GPXApplication &app,
 			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings);

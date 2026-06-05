@@ -24,9 +24,11 @@ bool ImageWidget::updated(const TelemetryData &data) const {
 }
 
 
-void ImageWidget::initialize(void) {
+void ImageWidget::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	(void) cr;
 
 //	setSize(theme().height());
 //
@@ -44,7 +46,7 @@ void ImageWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	(void) data;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Draw background
 	background(cr);

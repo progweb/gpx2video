@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   version="1.1"
+   id="svg2"
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   sodipodi:docname="DataOverlay_icn_power.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs6" />
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#727272"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="true"
+     inkscape:deskcolor="#d1d1d1"
+     showgrid="false"
+     inkscape:zoom="0.86385797"
+     inkscape:cx="97.238207"
+     inkscape:cy="423.10196"
+     inkscape:window-width="1920"
+     inkscape:window-height="1003"
+     inkscape:window-x="0"
+     inkscape:window-y="40"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g8" />
+  <g
+     inkscape:groupmode="layer"
+     inkscape:label="Image"
+     id="g8">
+    <rect
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:30.0392;stroke-miterlimit:10"
+       id="rect369"
+       width="281.31357"
+       height="49.166641"
+       x="-503.11386"
+       y="-24.671446"
+       transform="rotate(-135)" />
+    <rect
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:22.4315;stroke-miterlimit:10"
+       id="rect371"
+       width="176.3011"
+       height="57.568497"
+       x="-88.062424"
+       y="-507.04697"
+       transform="rotate(135)" />
+    <rect
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:22.4315;stroke-miterlimit:10"
+       id="rect371-6"
+       width="176.3011"
+       height="57.568497"
+       x="-87.749069"
+       y="-275.53467"
+       transform="rotate(135)" />
+    <rect
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:17.5908;stroke-miterlimit:10"
+       id="rect400"
+       width="102.39893"
+       height="5.4092031"
+       x="-51.111347"
+       y="-532.41919"
+       transform="rotate(135)" />
+    <rect
+       style="fill:#ffffff;stroke:#ffffff;stroke-width:17.5908;stroke-miterlimit:10"
+       id="rect400-7"
+       width="102.39893"
+       height="5.4092031"
+       x="-51.111347"
+       y="-198.03331"
+       transform="rotate(135)" />
+  </g>
+</svg>

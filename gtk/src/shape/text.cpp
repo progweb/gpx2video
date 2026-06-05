@@ -9,7 +9,7 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 
 	Gtk::Switch *sw;
 //	Gtk::ComboBox *combobox;
-//	Gtk::SpinButton *spinbutton;
+	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
 	loading_ = false;
@@ -67,6 +67,23 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 						widget_->dispatchEvent();
 					}
 			));
+
+	// Misc. linespace
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("linespace_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"linespace_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: linespace changed to '%d'",
+							   widget_->name().c_str(), value);
+
+						widget_->theme().setLineSpace(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
 }
 
 
@@ -79,7 +96,7 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 
 	Gtk::Switch *sw;
 //	Gtk::ComboBox *combobox;
-//	Gtk::SpinButton *spinbutton;
+	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
 //	Gtk::TreeModel::iterator iter;
@@ -104,6 +121,13 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 
 	colorbutton->set_rgba(rgba);
+
+	// Widget linespace button
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("linespace_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"linespace_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(widget_->theme().lineSpace());
 
 	// Unmask value changed
 	loading_ = false;

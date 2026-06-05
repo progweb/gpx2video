@@ -257,8 +257,8 @@ void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
 	pango_layout_get_pixel_extents(layout, &rectangle, NULL);
 
 	// Return text position & size
-	x = rectangle.x - 1;
-	y = rectangle.y - 1;
+	x = (rectangle.x - 1);
+	y = (rectangle.y - 1);
 	width = rectangle.width;
 	height = rectangle.height;
 
@@ -284,7 +284,8 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 		os << "<label-font-family>" << theme_.labelFontFamily() << "</label-font-family>" << std::endl;
 		os << "<label-font-style>" << VideoWidget::fontstyle2string(theme_.labelFontStyle()) << "</label-font-style>" << std::endl;
 		os << "<label-font-weight>" << VideoWidget::fontweight2string(theme_.labelFontWeight()) << "</label-font-weight>" << std::endl;
-		os << "<label-align>" << VideoWidget::align2string(theme_.labelAlign()) << "</label-align>" << std::endl;
+		os << "<label-horizontal-align>" << VideoWidget::align2string(theme_.labelHorizontalAlign()) << "</label-horizontal-align>" << std::endl;
+		os << "<label-vertical-align>" << VideoWidget::align2string(theme_.labelVerticalAlign()) << "</label-vertical-align>" << std::endl;
 		os << "<label-color>" << VideoWidget::Theme::color2hex(theme_.labelColor()) << "</label-color>" << std::endl;
 		os << "<label-shadow-opacity>" << theme_.labelShadowOpacity() << "</label-shadow-opacity>" << std::endl;
 		os << "<label-shadow-distance>" << theme_.labelShadowDistance() << "</label-shadow-distance>" << std::endl;
@@ -298,7 +299,8 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 		os << "<value-font-size>" << theme_.valueFontSize() << "</value-font-size>" << std::endl;
 		os << "<value-font-style>" << VideoWidget::fontstyle2string(theme_.valueFontStyle()) << "</value-font-style>" << std::endl;
 		os << "<value-font-weight>" << VideoWidget::fontweight2string(theme_.valueFontWeight()) << "</value-font-weight>" << std::endl;
-		os << "<value-align>" << VideoWidget::align2string(theme_.valueAlign()) << "</value-align>" << std::endl;
+		os << "<value-horizontal-align>" << VideoWidget::align2string(theme_.valueHorizontalAlign()) << "</value-horizontal-align>" << std::endl;
+		os << "<value-vertical-align>" << VideoWidget::align2string(theme_.valueVerticalAlign()) << "</value-vertical-align>" << std::endl;
 		os << "<value-color>" << VideoWidget::Theme::color2hex(theme_.valueColor()) << "</value-color>" << std::endl;
 		os << "<value-shadow-opacity>" << theme_.valueShadowOpacity() << "</value-shadow-opacity>" << std::endl;
 		os << "<value-shadow-distance>" << theme_.valueShadowDistance() << "</value-shadow-distance>" << std::endl;

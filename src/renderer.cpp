@@ -27,7 +27,7 @@ Renderer::Renderer(GPXApplication &app,
 	, telemetry_settings_(telemetry_settings) {
 	container_ = NULL;
 
-	overlay_ = NULL;
+//	overlay_ = NULL;
 
 	source_ = NULL;
 }
@@ -207,6 +207,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setView((MapSettings::View) view);
 	mapSettings.setDivider(m->factor());
+	mapSettings.setPathSmooth((int) m->pathSmooth());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
@@ -308,6 +309,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setSize(width, height);
 	trackSettings.setView((MapSettings::View) view);
 	trackSettings.setDivider(t->factor());
+	trackSettings.setPathSmooth((int) t->pathSmooth());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 	trackSettings.setPathBorder((double) t->pathBorder());
@@ -371,8 +373,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
 
-	VideoWidget::Theme::Align label_align = VideoWidget::Theme::AlignLeft;
-	VideoWidget::Theme::Align value_align = VideoWidget::Theme::AlignLeft;
+	VideoWidget::Theme::Align align;
+	VideoWidget::Theme::Align label_horizontal_align = VideoWidget::Theme::AlignLeft;
+	VideoWidget::Theme::Align label_vertical_align = VideoWidget::Theme::AlignTop;
+	VideoWidget::Theme::Align value_horizontal_align = VideoWidget::Theme::AlignLeft;
+	VideoWidget::Theme::Align value_vertical_align = VideoWidget::Theme::AlignBottom;
 
 	VideoWidget::Theme::FontStyle label_font_style = VideoWidget::Theme::FontStyleNormal;
 	VideoWidget::Theme::FontStyle value_font_style = VideoWidget::Theme::FontStyleNormal;
@@ -462,14 +467,27 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
-	// Text alignment for label
-	s = (const char *) w->labelAlign();
-	label_align = VideoWidget::string2align(s);
+	// Text horizontal alignment for label
+	s = (const char *) w->labelHorizontalAlign();
+	align = VideoWidget::string2align(s);
 
-	if (label_align == VideoWidget::Theme::AlignUnknown) {
-		log_error("Widget loading error, label align value '%s' unknown", s.c_str());
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, label horizontal align value '%s' unknown", s.c_str());
 		goto error;
 	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		label_horizontal_align = align;
+
+	// Text vertical alignment for label
+	s = (const char *) w->labelVerticalAlign();
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, label vertical align value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		label_vertical_align = align;
 
 	// Font style for value
 	s = (const char *) w->valueFontStyle();
@@ -489,14 +507,27 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
-	// Text alignment for value
-	s = (const char *) w->valueAlign();
-	value_align = VideoWidget::string2align(s);
+	// Text horizontal alignment for value
+	s = (const char *) w->valueHorizontalAlign();
+	align = VideoWidget::string2align(s);
 
-	if (value_align == VideoWidget::Theme::AlignUnknown) {
-		log_error("Widget loading error, value align value '%s' unknown", s.c_str());
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, value horizontal align value '%s' unknown", s.c_str());
 		goto error;
 	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		value_horizontal_align = align;
+
+	// Text vertical alignment for value
+	s = (const char *) w->valueVerticalAlign();
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, value vertical align value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		value_vertical_align = align;
 
 	// Gauge cap
 	s = (const char *) w->gaugeCap();
@@ -588,12 +619,16 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Widget icon settings
 	widget->theme().setIconColor((const char *) w->iconColor());
 
+	// Widget misc. settings
+	widget->theme().setLineSpace(w->lineSpace());
+
 	// Widget label settings
 	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());
 	widget->theme().setLabelFontSize(w->labelFontSize());
 	widget->theme().setLabelFontStyle(label_font_style);
 	widget->theme().setLabelFontWeight(label_font_weight);
-	widget->theme().setLabelAlign(label_align);
+	widget->theme().setLabelHorizontalAlign(label_horizontal_align);
+	widget->theme().setLabelVerticalAlign(label_vertical_align);
 	widget->theme().setLabelColor((const char *) w->labelColor());
 	widget->theme().setLabelShadowOpacity(w->labelShadowOpacity());
 	widget->theme().setLabelShadowDistance(w->labelShadowDistance());
@@ -605,7 +640,8 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueFontSize(w->valueFontSize());
 	widget->theme().setValueFontStyle(value_font_style);
 	widget->theme().setValueFontWeight(value_font_weight);
-	widget->theme().setValueAlign(value_align);
+	widget->theme().setValueHorizontalAlign(value_horizontal_align);
+	widget->theme().setValueVerticalAlign(value_vertical_align);
 	widget->theme().setValueColor((const char *) w->valueColor());
 	widget->theme().setValueShadowOpacity(w->valueShadowOpacity());
 	widget->theme().setValueShadowDistance(w->valueShadowDistance());

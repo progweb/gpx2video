@@ -2,9 +2,9 @@
 <!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
 
 <svg
-   width="800px"
-   height="800px"
-   viewBox="0 0 24 24"
+   width="512"
+   height="512"
+   viewBox="0 0 15.36 15.36"
    fill="none"
    version="1.1"
    id="svg3"
@@ -26,8 +26,8 @@
      inkscape:pagecheckerboard="true"
      inkscape:deskcolor="#d1d1d1"
      inkscape:zoom="0.97125"
-     inkscape:cx="363.96396"
-     inkscape:cy="401.0296"
+     inkscape:cx="377.34878"
+     inkscape:cy="407.20721"
      inkscape:window-width="1920"
      inkscape:window-height="1003"
      inkscape:window-x="0"
@@ -36,27 +36,27 @@
      inkscape:current-layer="svg3"
      showgrid="false" />
   <path
-     d="M19 9L19 17C19 18.8856 19 19.8284 18.4142 20.4142C17.8284 21 16.8856 21 15 21L14 21L10 21L9 21C7.11438 21 6.17157 21 5.58579 20.4142C5 19.8284 5 18.8856 5 17L5 9"
+     d="M 12.451223,5.3858845 V 10.94589 c 0,1.310493 0,1.965741 -0.407132,2.372872 -0.40713,0.40713 -1.062378,0.40713 -2.372871,0.40713 H 8.9762198 6.1962169 5.5012162 c -1.3105072,0 -1.9657609,0 -2.3728783,-0.40713 C 2.7212134,12.911631 2.7212134,12.256383 2.7212134,10.94589 V 5.3858845"
      stroke="#323232"
      stroke-width="2"
      stroke-linejoin="round"
      id="path1"
-     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none" />
+     style="stroke:#ffffff;stroke-width:1.11;stroke-dasharray:none;stroke-opacity:1" />
   <path
-     d="M 3,11 7.5,7 10.6713,4.18109 c 0.7577,-0.67357 1.8997,-0.67357 2.6574,0 L 14.495554,5.2182853 16.5,7 21,11"
+     d="M 1.331212,6.7758858 4.4587152,3.995883 6.662771,2.0367386 c 0.526602,-0.4681317 1.3202928,-0.4681317 1.8468948,0 l 0.8109641,0.7208515 1.3930911,1.2382929 3.127504,2.7800028"
      stroke="#323232"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
      id="path2"
-     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none"
+     style="stroke:#ffffff;stroke-width:1.11;stroke-dasharray:none;stroke-opacity:1"
      sodipodi:nodetypes="ccccccc" />
   <path
-     d="M10 21V17C10 15.8954 10.8954 15 12 15V15C13.1046 15 14 15.8954 14 17V21"
+     d="M 6.1962169,13.725892 V 10.94589 c 0,-0.767698 0.6223037,-1.390001 1.3900014,-1.390001 v 0 c 0.7676978,0 1.3900015,0.622303 1.3900015,1.390001 v 2.780002"
      stroke="#323232"
      stroke-width="2"
      stroke-linecap="round"
      stroke-linejoin="round"
      id="path3"
-     style="stroke:#ffffff;stroke-opacity:1;stroke-width:1.5;stroke-dasharray:none" />
+     style="stroke:#ffffff;stroke-width:1.11;stroke-dasharray:none;stroke-opacity:1" />
 </svg>

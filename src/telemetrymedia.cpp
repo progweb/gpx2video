@@ -132,13 +132,13 @@ const uint64_t& TelemetryData::timestamp(void) const {
 }
 
 
-const double& TelemetryData::latitude(void) const {
-	return lat_;
+const double& TelemetryData::latitude(bool raw) const {
+	return raw ? raw_lat_ : lat_;
 }
 
 
-const double& TelemetryData::longitude(void) const {
-	return lon_;
+const double& TelemetryData::longitude(bool raw) const {
+	return raw ? raw_lon_ : lon_;
 }
 
 
@@ -1735,7 +1735,166 @@ void TelemetrySource::smooth_step_two(void) {
 }
 
 
+void TelemetrySource::smooth_step_three(void) {
+	int position_count = 0;
+
+	size_t position_window = 0;
+
+	double lat_sum = 0;
+	double lon_sum = 0;
+
+	TelemetrySettings::Smooth position_method;
+
+	std::deque<Point> position_points;
+
+	TelemetrySource::Point nextPoint, previousPoint;
+
+	log_call();
+
+	position_method = settings().telemetrySmoothMethod(TelemetryData::DataPosition);
+
+	position_window = (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
+		(settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1 : 0;
+
+	// Fill 'position' window
+	for (size_t i=0; i<position_window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		position_points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			lat_sum += nextPoint.latitude();
+			lon_sum += nextPoint.longitude();
+
+			position_count += 1;
+		}
+	}
+
+	// Move to first point
+	pool_.seek(1);
+
+	// Compute average value for each point
+	while (!pool_.empty()) {
+		if (pool_.current().type() != TelemetryData::TypeError) {
+			// position
+			//----------
+
+			if (position_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (position_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(position_window/2 - 1);
+
+					// Save point
+					position_points.emplace_back(nextPoint);
+
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							lat_sum += nextPoint.latitude();
+							lon_sum += nextPoint.longitude();
+							position_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (position_points.size() > position_window) {
+						previousPoint = position_points.front();
+						position_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							lat_sum -= previousPoint.latitude();
+							lon_sum -= previousPoint.longitude();
+							position_count -= 1;
+						}
+					}
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'position' smooth values
+						pool_.current().setPosition(lat_sum / position_count, lon_sum / position_count);
+					}
+				}
+			}
+			else if (position_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						// Compute 'position' smooth values
+						double lat = (pool_.current().latitude() + (pool_.previous().latitude() * (a + ((a * a) / (2 * z * z)))) \
+							- (pool_.previous(1).latitude() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)));
+						double lon = (pool_.current().longitude() + (pool_.previous().longitude() * (a + ((a * a) / (2 * z * z)))) \
+							- (pool_.previous(1).longitude() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)));
+
+						pool_.current().setPosition(lat , lon);
+					}
+				}
+			}
+		}
+
+		// Move to next
+		pool_.seek(1);
+	}
+
+
+//	int index = 0;
+//
+//	double lat, lon;
+//
+//	size_t samplerate = 10;
+//
+//	TelemetrySource::Point curPoint;
+//	TelemetrySource::Point prevPoint, nextPoint;
+//
+//	// Move to first point
+//	pool_.seek(1);
+//
+//	// Compute average value for each point
+//	while (!pool_.empty()) {
+//		// Next point
+//		index++;
+//		pool_.seek(1);
+//
+//		// Get current point
+//		curPoint = pool_.current();
+//
+//		// Skip invalid point
+//		if (curPoint.type() == TelemetryData::TypeError)
+//			continue;
+//
+//		// Keep point of interest
+//		if (index % samplerate == 0)
+//			continue;
+//
+//		// Enough point
+//		if (pool_.size() < samplerate)
+//			break;
+//
+//		// Extract previsous & next point
+//		prevPoint = pool_.previous(index % samplerate - 1);
+//		nextPoint = pool_.next(samplerate - (index % samplerate) - 1);
+//
+//		// Compute position
+//		lat = prevPoint.lat_ + ((int) (curPoint.ts_ - prevPoint.ts_)) * (nextPoint.lat_ - prevPoint.lat_) / ((int) (nextPoint.ts_ - prevPoint.ts_));
+//		lon = prevPoint.lon_ + ((int) (curPoint.ts_ - prevPoint.ts_)) * (nextPoint.lon_ - prevPoint.lon_) / ((int) (nextPoint.ts_ - prevPoint.ts_));
+//
+//		// Save position
+//		curPoint.setPosition(lat, lon);
+//
+//		// Save point
+//		pool_.current() = curPoint;
+//	}
+
+	// Reset
+	pool_.reset();
+}
+
+
 void TelemetrySource::smooth(void) {
+	size_t position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
 	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
 	size_t speed_window = (settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1;
 	size_t heading_window = (settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1;
@@ -1748,6 +1907,12 @@ void TelemetrySource::smooth(void) {
 	if (!quiet_) {
 		// 1/
 		printf("%s: Smooth telemetry data using 'windowed moving average' filter\n", name().c_str());
+
+		if ((settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) && (position_window > 1))
+			printf("     - position: window size '%ld' (+/- %d points)\n", 
+					position_window, settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+		else
+			printf("     - position: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) && (grade_window > 1))
 			printf("     - grade: window size '%ld' (+/- %d points)\n", 
@@ -1788,6 +1953,11 @@ void TelemetrySource::smooth(void) {
 		// 2/
 		printf("%s: Smooth telemetry data using 'butterworth' filter\n", name().c_str());
 
+		if (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothButterworth)
+			printf("     - position: a = 4.0 / z = 0.7\n");
+		else
+			printf("     - position: no\n");
+
 		if (settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothButterworth)
 			printf("     - grade: a = 4.0 / z = 0.7\n");
 		else
@@ -1821,6 +1991,7 @@ void TelemetrySource::smooth(void) {
 
 	smooth_step_one();
 	smooth_step_two();
+	smooth_step_three();
 }
 
 

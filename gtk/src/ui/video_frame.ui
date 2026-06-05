@@ -120,8 +120,8 @@
 														</child>
 														<child>
 															<object class="GtkSpinButton" id="hourstart_spinbutton">
-																<property name="width-chars">2</property>
-																<property name="max-width-chars">2</property>
+																<property name="width-chars">4</property>
+																<property name="max-width-chars">4</property>
 																<property name="numeric">True</property>
 																<property name="orientation">vertical</property>
 																<property name="valign">center</property>
@@ -130,8 +130,8 @@
 														</child>
 														<child>
 															<object class="GtkSpinButton" id="minutestart_spinbutton">
-																<property name="width-chars">2</property>
-																<property name="max-width-chars">2</property>
+																<property name="width-chars">4</property>
+																<property name="max-width-chars">4</property>
 																<property name="numeric">True</property>
 																<property name="orientation">vertical</property>
 																<property name="valign">center</property>
@@ -140,8 +140,8 @@
 														</child>
 														<child>
 															<object class="GtkSpinButton" id="secondstart_spinbutton">
-																<property name="width-chars">2</property>
-																<property name="max-width-chars">2</property>
+																<property name="width-chars">4</property>
+																<property name="max-width-chars">4</property>
 																<property name="numeric">True</property>
 																<property name="orientation">vertical</property>
 																<property name="valign">center</property>

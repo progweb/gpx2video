@@ -247,6 +247,13 @@ namespace layout
     String  &backgroundColor() { return _bgcolor; }
 
     ///
+    /// Get path smooth
+    ///
+    /// @return the path smooth element
+    ///
+    Unsigned  &pathSmooth() { return _path_smooth; }
+
+    ///
     /// Get path thick
     ///
     /// @return the path thick element
@@ -324,6 +331,7 @@ namespace layout
 	Unsigned     _border;
 	String       _bordercolor;
 	String       _bgcolor;
+	Unsigned     _path_smooth;
 	Decimal      _path_thick;
 	Decimal      _path_border;
 	String       _path_border_color;

@@ -35,6 +35,7 @@ TelemetrySettings::TelemetrySettings(
 		, telemetry_rate_(rate) {
 
 	telemetry_smooth_default_method_ = TelemetrySettings::SmoothNone;
+	telemetry_smooth_position_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_grade_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_speed_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_heading_method_ = telemetry_smooth_default_method_;
@@ -43,6 +44,7 @@ TelemetrySettings::TelemetrySettings(
 	telemetry_smooth_verticalspeed_method_ = telemetry_smooth_default_method_;
 
 	telemetry_smooth_default_points_ = 0;
+	telemetry_smooth_position_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_grade_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_speed_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_heading_points_ = telemetry_smooth_default_points_;
@@ -75,6 +77,7 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 
 	telemetry_rate_ = settings.telemetryRate();
 
+	telemetry_smooth_position_method_ = settings.telemetrySmoothMethod(TelemetryData::DataPosition);
 	telemetry_smooth_grade_method_ = settings.telemetrySmoothMethod(TelemetryData::DataGrade);
 	telemetry_smooth_speed_method_ = settings.telemetrySmoothMethod(TelemetryData::DataSpeed);
 	telemetry_smooth_heading_method_ = settings.telemetrySmoothMethod(TelemetryData::DataHeading);
@@ -82,6 +85,7 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 	telemetry_smooth_acceleration_method_ = settings.telemetrySmoothMethod(TelemetryData::DataAcceleration);
 	telemetry_smooth_verticalspeed_method_ = settings.telemetrySmoothMethod(TelemetryData::DataVerticalSpeed);
 
+	telemetry_smooth_position_points_ = settings.telemetrySmoothPoints(TelemetryData::DataPosition);
 	telemetry_smooth_grade_points_ = settings.telemetrySmoothPoints(TelemetryData::DataGrade);
 	telemetry_smooth_speed_points_ = settings.telemetrySmoothPoints(TelemetryData::DataSpeed);
 	telemetry_smooth_heading_points_ = settings.telemetrySmoothPoints(TelemetryData::DataHeading);
@@ -310,6 +314,10 @@ void TelemetrySettings::setTelemetryMethod(const TelemetrySettings::Method &meth
 
 const TelemetrySettings::Smooth& TelemetrySettings::telemetrySmoothMethod(TelemetryData::Data type) const {
 	switch (type) {
+	case TelemetryData::DataPosition:
+		return telemetry_smooth_position_method_;
+		break;
+
 	case TelemetryData::DataGrade:
 		return telemetry_smooth_grade_method_;
 		break;
@@ -348,6 +356,10 @@ void TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::Data type, Telem
 	}
 
 	switch (type) {
+	case TelemetryData::DataPosition:
+		telemetry_smooth_position_method_ = method;
+		break;
+
 	case TelemetryData::DataGrade:
 		telemetry_smooth_grade_method_ = method;
 		break;
@@ -381,6 +393,10 @@ void TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::Data type, Telem
 
 const int& TelemetrySettings::telemetrySmoothPoints(TelemetryData::Data type) const {
 	switch (type) {
+	case TelemetryData::DataPosition:
+		return telemetry_smooth_position_points_;
+		break;
+
 	case TelemetryData::DataGrade:
 		return telemetry_smooth_grade_points_;
 		break;
@@ -413,6 +429,10 @@ const int& TelemetrySettings::telemetrySmoothPoints(TelemetryData::Data type) co
 
 void TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::Data type, int number) {
 	switch (type) {
+	case TelemetryData::DataPosition:
+		telemetry_smooth_position_points_ = number;
+		break;
+
 	case TelemetryData::DataGrade:
 		telemetry_smooth_grade_points_ = number;
 		break;

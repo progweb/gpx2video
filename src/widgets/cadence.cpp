@@ -18,9 +18,14 @@ bool CadenceTextShape::updated(const TelemetryData &data) const {
 }
 
 
-void CadenceTextShape::initialize(void) {
+void CadenceTextShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	TextShape::Font font;
 
 	setSize(theme().height());
 
@@ -29,6 +34,44 @@ void CadenceTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = std::to_string(888);
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }
@@ -45,7 +88,7 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataCadence);
@@ -71,7 +114,7 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -87,7 +130,7 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -98,6 +141,8 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 void CadenceTextShape::clear(void) {
 	is_initialized_ = false;
+
+	TextShape::clear();
 
 	no_value_ = false;
 

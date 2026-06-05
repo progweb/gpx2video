@@ -100,8 +100,8 @@
 									<object class="GtkSpinButton" id="gauge_width_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
-										<property name="width-chars">2</property>
-										<property name="max-width-chars">2</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
@@ -214,8 +214,8 @@
 									<object class="GtkSpinButton" id="gauge_border_width_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
-										<property name="width-chars">2</property>
-										<property name="max-width-chars">2</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
@@ -344,8 +344,8 @@
 									<object class="GtkSpinButton" id="tick_size_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
-										<property name="width-chars">2</property>
-										<property name="max-width-chars">2</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>

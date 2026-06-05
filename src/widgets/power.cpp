@@ -18,9 +18,14 @@ bool PowerTextShape::updated(const TelemetryData &data) const {
 }
 
 
-void PowerTextShape::initialize(void) {
+void PowerTextShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	TextShape::Font font;
 
 	setSize(theme().height());
 
@@ -29,6 +34,49 @@ void PowerTextShape::initialize(void) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = std::to_string(888);
+
+		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+			widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		txt = txt + unit;
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }
@@ -45,7 +93,7 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataPower);
@@ -71,7 +119,7 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -87,7 +135,7 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -99,6 +147,8 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 void PowerTextShape::clear(void) {
 	is_initialized_ = false;
+
+	TextShape::clear();
 
 	no_value_ = false;
 

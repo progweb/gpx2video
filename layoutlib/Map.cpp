@@ -59,6 +59,7 @@ namespace layout
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
+	_path_smooth(this, "path-smooth", Node::ELEMENT, false),
 	_path_thick(this, "path-thick", Node::ELEMENT, false),
 	_path_border(this, "path-border", Node::ELEMENT, false),
 	_path_border_color(this, "path-border-color", Node::ELEMENT, false),
@@ -95,6 +96,7 @@ namespace layout
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_bgcolor);
+    getInterfaces().push_back(&_path_smooth);
     getInterfaces().push_back(&_path_thick);
     getInterfaces().push_back(&_path_border);
     getInterfaces().push_back(&_path_border_color);
@@ -119,6 +121,7 @@ namespace layout
 	_zoom.setValue("12");
 	_factor.setValue("1.0");
 
+	_path_smooth.setValue("1");
 	_path_thick.setValue("3.0");
 	_path_border.setValue("1.4");
 	_path_border_color.setValue("#000000ff");

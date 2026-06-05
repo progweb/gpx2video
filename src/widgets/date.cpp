@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "date.h"
 
 
@@ -8,11 +10,13 @@
 bool DateTextShape::updated(const TelemetryData &data) const {
 	time_t t;
 
-	// Compute time
+#define TIMESTAMP2DAY(x)  (x / (24 * 60 * 60))
+
+	// Convert time to sec
 	t = data.datetime() / 1000;
 
 	if (is_initialized_) {
-		if (t == last_time_)
+		if (TIMESTAMP2DAY(t) == TIMESTAMP2DAY(last_time_))
 			return false;
 	}
 
@@ -20,9 +24,18 @@ bool DateTextShape::updated(const TelemetryData &data) const {
 }
 
 
-void DateTextShape::initialize(void) {
+void DateTextShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
+
+	int x, y;
+	int width, height;
+
+	char s[128];
+
+	time_t now = time(NULL);
+
+	TextShape::Font font;
 
 	setSize(theme().height());
 
@@ -32,6 +45,48 @@ void DateTextShape::initialize(void) {
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
 
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		struct tm tm;
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		localtime_r(&now, &tm);
+		strftime(s, sizeof(s), widget_->valueFormat().c_str(), &tm);
+
+		extents(cr, font, s, x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
+
+	// Done
 	is_initialized_ = true;
 }
 
@@ -45,7 +100,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	struct tm time;
 
 	// Initialize
-	initialize();
+	initialize(cr);
 
 	// Compute time
 	t = data.datetime() / 1000;
@@ -80,7 +135,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().labelShadowOpacity(),
 			.shadow_distance = theme().labelShadowDistance(),
 			.family = theme().labelFontFamily(),
-			.align = theme().labelAlign(),
+			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
 		};
@@ -96,7 +151,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.shadow_opacity = theme().valueShadowOpacity(),
 			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
-			.align = theme().valueAlign(),
+			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
 		};
@@ -111,6 +166,8 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 void DateTextShape::clear(void) {
 	is_initialized_ = false;
+
+	TextShape::clear();
 
 	if (bg_buf_)
 		delete bg_buf_;

@@ -104,12 +104,15 @@ GPX2VideoWidget::GPX2VideoWidget(VideoWidget *widget)
 	queue_size_ = !widget->isStatic() ? 2 : 1;
 
 	buffer_ = NULL;
-	overlay_ = NULL;
 
 	clear_req_ = false;
 
 	// Texture
 	texture_ = 0;
+
+	// Overlay size
+	overlay_width_ = 0;
+	overlay_height_ = 0;
 
 	// Stats
 	stats_texture_reused_ = 0;
@@ -128,9 +131,6 @@ GPX2VideoWidget::~GPX2VideoWidget() {
 
 	if (buffer_ != NULL)
 		free(buffer_);
-
-	if (overlay_ != NULL)
-		delete overlay_;
 }
 
 
@@ -330,7 +330,6 @@ bool GPX2VideoWidget::draw(const TelemetryData &data) {
 	int index;
 
 	bool is_update;
-	bool is_bg_update, is_fg_update;
 
 	GPX2VideoWidget::BufferPtr buffer;
 
@@ -341,10 +340,7 @@ printf("WIDGET::DRAW %s\n", widget()->name().c_str());
 	// Lock widget settings
 	std::lock_guard<std::mutex> lock(mutex_);
 
-	OIIO::ImageBuf *bg_buf = widget_->prepare(is_bg_update);
-	OIIO::ImageBuf *fg_buf = widget_->render(data, is_fg_update);
-
-	is_update = (is_bg_update || is_fg_update);
+	OIIO::ImageBuf *overlay = widget_->render(data, is_update);
 
 #ifdef WIDGET_DEBUG
 printf("WIDGET::DRAW %s - updated: %s\n", 
@@ -363,23 +359,9 @@ printf("WIDGET::DRAW %s - updated: %s\n",
 		buffer->setTimestamp(data.timestamp());
 		buffer->setData(index, buffer_[index]);
 
-		// Swap fg & bg ?
-		if (!bg_buf) {
-			bg_buf = fg_buf;
-			fg_buf = NULL;
-		}
-
-		// Draw bg
-		if (bg_buf)
-			OIIO::ImageBufAlgo::copy(*overlay_, *bg_buf, bg_buf->spec().format, bg_buf->roi(), 4);
-
-		// Draw fg
-		if (fg_buf)
-			OIIO::ImageBufAlgo::over(*overlay_, *fg_buf, *overlay_, fg_buf->roi(), 4);
-
 		// Update buffer
-		overlay_->get_pixels(OIIO::ROI(), 
-				overlay_->spec().format, 
+		overlay->get_pixels(OIIO::ROI(), 
+				overlay->spec().format, 
 				reinterpret_cast<char*>(buffer->data()));
 
 		// Save buffer
@@ -457,13 +439,13 @@ printf("WIDGET::INIT BUFFERS %s\n", widget()->name().c_str());
 	buffer_ = (uint8_t **) malloc(queue_size_ * sizeof(uint8_t *));
 
 	// Widgets overlay
-	overlay_ = new OIIO::ImageBuf(OIIO::ImageSpec(widget_->theme().width(), widget_->theme().height(), 
-		4, OIIO::TypeDesc::UINT8));
-//		stream_.nbChannels(), OIIOUtils::getOIIOBaseTypeFromFormat(stream_.format())));
+	overlay_width_ = widget_->theme().width();
+	overlay_height_ = widget_->theme().height();
+
+	OIIO::ImageSpec spec(overlay_width_, overlay_height_, 4, OIIO::TypeDesc::UINT8);
 
 	// Buffer size
-	size = overlay_->spec().width * overlay_->spec().height * nchannels
-						* overlay_->spec().channel_bytes();
+	size = spec.width * spec.height * nchannels * spec.channel_bytes();
 
 	// Create buffers
 	glGenVertexArrays(1, &vao_);
@@ -523,12 +505,13 @@ printf("WIDGET::RESIZE BUFFERS %s\n", widget()->name().c_str());
 	unload_texture();
 
 	// Widgets overlay
-	overlay_->reset(OIIO::ImageSpec(widget_->theme().width(), widget_->theme().height(), 
-		4, OIIO::TypeDesc::UINT8));
+	overlay_width_ = widget_->theme().width();
+	overlay_height_ = widget_->theme().height();
+
+	OIIO::ImageSpec spec(overlay_width_, overlay_height_, 4, OIIO::TypeDesc::UINT8);
 
 	// Buffer size
-	size = overlay_->spec().width * overlay_->spec().height * nchannels
-						* overlay_->spec().channel_bytes();
+	size = spec.width * spec.height * nchannels * spec.channel_bytes();
 
 	glDeleteBuffers(queue_size_, pbo_);
 
@@ -675,15 +658,15 @@ printf("WIDGET::LOADING TEXTURE...\n");
 		glTexImage2D(GL_TEXTURE_2D, 
 				0, 
 				GL_RGBA8,
-				overlay_->spec().width,
-				overlay_->spec().height,
+				overlay_width_,
+				overlay_height_,
 				0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
 #else
 		glTexImage2D(GL_TEXTURE_2D, 
 				0, 
 				GL_RGBA, 
-				overlay_->spec().width,
-				overlay_->spec().height,
+				overlay_width_,
+				overlay_height_,
 				0, GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
 #endif
 	}
@@ -698,15 +681,15 @@ printf("WIDGET::LOADING TEXTURE...\n");
 		glTexSubImage2D(GL_TEXTURE_2D, 
 				0, 
 				0, 0,
-				overlay_->spec().width,
-				overlay_->spec().height,
+				overlay_width_,
+				overlay_height_,
 				GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, NULL);
 #else
 		glTexSubImage2D(GL_TEXTURE_2D, 
 				0, 
 				0, 0,
-				overlay_->spec().width,
-				overlay_->spec().height,
+				overlay_width_,
+				overlay_height_,
 				GL_RGBA, GL_UNSIGNED_BYTE, NULL); //m_tex_buffer.data());
 #endif
 	}

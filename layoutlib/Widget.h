@@ -261,6 +261,13 @@ namespace layout
     String &text() { return _text; }
 
     ///
+    /// Get line space
+    ///
+    /// @return the line space element
+    ///
+    Unsigned &lineSpace() { return _line_space; }
+
+    ///
     /// Get icon color
     ///
     /// @return the icon color element
@@ -296,11 +303,18 @@ namespace layout
     String &labelFontWeight() { return _label_fontweight; }
 
     ///
-    /// Get label align
+    /// Get label horizontal align
     ///
-    /// @return the label align element
+    /// @return the label horizontal align element
     ///
-    String &labelAlign() { return _label_align; }
+    String &labelHorizontalAlign() { return _label_horizontal_align; }
+
+    ///
+    /// Get label vertical align
+    ///
+    /// @return the label vertical align element
+    ///
+    String &labelVerticalAlign() { return _label_vertical_align; }
 
     ///
     /// Get label color
@@ -366,11 +380,18 @@ namespace layout
     String &valueFontWeight() { return _value_fontweight; }
 
     ///
-    /// Get value align
+    /// Get value horizontal align
     ///
-    /// @return the value align element
+    /// @return the value horizontal align element
     ///
-    String &valueAlign() { return _value_align; }
+    String &valueHorizontalAlign() { return _value_horizontal_align; }
+
+    ///
+    /// Get value vertical align
+    ///
+    /// @return the value vertical align element
+    ///
+    String &valueVerticalAlign() { return _value_vertical_align; }
 
     ///
     /// Get value color
@@ -642,13 +663,16 @@ namespace layout
 
 	String       _text;
 
+	Unsigned     _line_space;
+
 	String       _icon_color;
 
 	String       _label_fontfamily;
 	Decimal      _label_fontsize;
 	String       _label_fontstyle;
 	String       _label_fontweight;
-	String       _label_align;
+	String       _label_horizontal_align;
+	String       _label_vertical_align;
 	String       _label_color;
 	Decimal      _label_shadowopacity;
 	Decimal      _label_shadowdistance;
@@ -659,7 +683,8 @@ namespace layout
 	Decimal      _value_fontsize;
 	String       _value_fontstyle;
 	String       _value_fontweight;
-	String       _value_align;
+	String       _value_horizontal_align;
+	String       _value_vertical_align;
 	String       _value_color;
 	Decimal      _value_shadowopacity;
 	Decimal      _value_shadowdistance;

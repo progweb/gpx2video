@@ -22,31 +22,12 @@ public:
 		return shape;
 	}
 
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		if (bg_buf_ != NULL) {
-			is_update = false;
-			goto skip;
-		}
-
-		this->initialize();
-		this->createBox(&bg_buf_, theme().width(), theme().height());
-
-		is_update = true;
-skip:
-		return bg_buf_;
-	}
-
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
-		time_t t;
-
-		// Compute time
-		t = data.datetime() / 1000;
-
 		// Refresh dynamic info
 		if (fg_buf_ != NULL) {
-			if (t == last_time_) {
+			if (!updated(data)) {
 				is_update = false;
 				goto skip;
 			}
@@ -71,8 +52,8 @@ skip:
 		this->destroyCairoContext(cairo);
 
 		is_update = true;
-		last_time_ = t;
 
+		last_time_ = data.datetime() / 1000;
 skip:
 		return fg_buf_;
 	}
@@ -102,7 +83,7 @@ private:
 		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
-	void initialize(void);
+	void initialize(cairo_t *cr);
 };
 
 
@@ -143,10 +124,6 @@ public:
 			// TODO raise exception
 			break;
 		}
-	}
-
-	OIIO::ImageBuf * prepare(bool &is_update) {
-		return shape_->prepare(is_update);
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
