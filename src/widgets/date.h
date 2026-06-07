@@ -79,8 +79,6 @@ private:
 		, fg_buf_(NULL) 
 		, widget_(widget) {
 		last_time_ = 0;
-
-		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(cairo_t *cr);

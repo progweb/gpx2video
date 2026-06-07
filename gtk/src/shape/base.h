@@ -3,6 +3,7 @@
 
 #include <gtkmm/builder.h>
 #include <gtkmm/box.h>
+#include <gtkmm/image.h>
 #include <gtkmm/switch.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/spinbutton.h>

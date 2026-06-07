@@ -161,6 +161,42 @@ public:
 			FontWeightUnknown
 		};
 
+		enum Icon {
+			// Begin match VideoWidget::Type
+			IconAverageSpeed,
+			IconAverageRideSpeed,
+			IconBatteryLevel,
+			IconCadence,
+			IconDate,
+			IconDistance,
+			IconDuration,
+			IconElevation,
+			IconGForce,
+			IconGPX,
+			IconGrade,
+			IconHeading,
+			IconHeartRate,
+			IconHomeDistance,
+			IconImage,
+			IconLap,
+			IconMap,
+			IconMaxSpeed,
+			IconPosition,
+			IconPower,
+			IconSpeed,
+			IconTemperature,
+			IconText,
+			IconTime,
+			IconTrack,
+			IconVerticalSpeed,
+			// End match VideoWidget::Type
+
+			IconDefault,
+			IconRunning,
+
+			IconUnknown
+		};
+
 		enum GaugeCap {
 			GaugeCapSquare,
 			GaugeCapRound,
@@ -291,6 +327,14 @@ public:
 
 		const float * iconColor(void) const {
 			return icon_color_;
+		}
+
+		const Icon& icon(void) const {
+			return icon_;
+		}
+
+		void setIcon(const Icon &icon) {
+			icon_ = icon;
 		}
 
 		bool setIconColor(std::string color) {
@@ -887,6 +931,7 @@ public:
 
 		float cursor_color_[4];
 
+		Icon icon_;
 		float icon_color_[4];
 
 		Align label_horizontal_align_;
@@ -1147,6 +1192,8 @@ public:
 
 	virtual void save(std::ostream &os);
 
+	std::string getIconFilename(Theme::Icon icon);
+
 	static Widget string2widget(std::string &s);
 	static Shape string2shape(std::string &s);
 	static Position string2position(std::string &s);
@@ -1157,6 +1204,7 @@ public:
 	static Theme::GaugeCap string2gaugecap(std::string &);
 	static Theme::NeedleType string2needletype(std::string &);
 	static TelemetryData::Unit string2unit(std::string &s);
+	static Theme::Icon string2icon(std::string &s);
 	static Zoom string2zoom(std::string &s);
 
 	static std::string bool2string(bool value);
@@ -1170,9 +1218,9 @@ public:
 	static std::string gaugecap2string(Theme::GaugeCap cap);
 	static std::string needletype2string(Theme::NeedleType type);
 	static std::string unit2string(TelemetryData::Unit unit);
+	static std::string icon2string(Theme::Icon icon);
 
 	static std::string getIconFilename(Widget type);
-
 	static std::string getFriendlyName(Shape shape);
 	static std::string getFriendlyName(Widget type);
 	static std::string getFriendlyName(TelemetryData::Unit unit);

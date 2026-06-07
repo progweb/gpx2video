@@ -63,6 +63,7 @@ namespace layout
 
 	_line_space(this, "line-space", Node::ELEMENT, false),
 
+    _icon_name(this, "icon-name",   Node::ELEMENT, false),
 	_icon_color(this, "icon-color", Node::ELEMENT, false),
 
 	_label_fontfamily(this, "label-font-family", Node::ELEMENT, false),
@@ -158,6 +159,7 @@ namespace layout
 
     getInterfaces().push_back(&_line_space);
 
+    getInterfaces().push_back(&_icon_name);
     getInterfaces().push_back(&_icon_color);
 
     getInterfaces().push_back(&_label_fontfamily);

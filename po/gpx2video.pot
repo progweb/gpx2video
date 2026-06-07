@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-06-05 12:36+0200\n"
+"POT-Creation-Date: 2026-06-07 17:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,116 +17,116 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/videowidget.cpp:833
+#: ../src/videowidget.cpp:983
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:835
+#: ../src/videowidget.cpp:985
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:837 ../src/videowidget.cpp:890
+#: ../src/videowidget.cpp:987 ../src/videowidget.cpp:1040
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:846
+#: ../src/videowidget.cpp:996
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:848
+#: ../src/videowidget.cpp:998
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:850
+#: ../src/videowidget.cpp:1000
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:852
+#: ../src/videowidget.cpp:1002
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:854 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:1004 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:856
+#: ../src/videowidget.cpp:1006
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:858 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:1008 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:860
+#: ../src/videowidget.cpp:1010
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:862
+#: ../src/videowidget.cpp:1012
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:864
+#: ../src/videowidget.cpp:1014
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:866
+#: ../src/videowidget.cpp:1016
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:868
+#: ../src/videowidget.cpp:1018
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:870
+#: ../src/videowidget.cpp:1020
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:872
+#: ../src/videowidget.cpp:1022
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:874
+#: ../src/videowidget.cpp:1024
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:876
+#: ../src/videowidget.cpp:1026
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:878 ../gtk/src/ui/widgets/map_box.ui:69
+#: ../src/videowidget.cpp:1028 ../gtk/src/ui/widgets/map_box.ui:69
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:880
+#: ../src/videowidget.cpp:1030
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:882
+#: ../src/videowidget.cpp:1032
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:884
+#: ../src/videowidget.cpp:1034
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:886
+#: ../src/videowidget.cpp:1036
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:888
+#: ../src/videowidget.cpp:1038
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:892 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:1042 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:894 ../gtk/src/ui/widgets/map_box.ui:201
+#: ../src/videowidget.cpp:1044 ../gtk/src/ui/widgets/map_box.ui:201
 #: ../gtk/src/ui/widgets/track_box.ui:62
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:896
+#: ../src/videowidget.cpp:1046
 msgid "Vertical speed"
 msgstr ""
 
@@ -143,6 +143,7 @@ msgid "Search by name"
 msgstr ""
 
 #: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
+#: ../gtk/src/ui/shape/text_box.ui:146
 msgid "Ok"
 msgstr ""
 
@@ -178,65 +179,65 @@ msgstr ""
 msgid "Time offset (in ms):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:165
+#: ../gtk/src/ui/telemetry_frame.ui:151
 msgid "Check & drop invalid points"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:191
+#: ../gtk/src/ui/telemetry_frame.ui:159
 msgid "Enable pause detection"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:217
+#: ../gtk/src/ui/telemetry_frame.ui:167
 msgid "Apply 'Iglewicz & Hoaglin' modified z-scores"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:236
+#: ../gtk/src/ui/telemetry_frame.ui:182
 msgid "Prediction method:"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:261
+#: ../gtk/src/ui/telemetry_frame.ui:207
 msgid "Rate (in ms):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:287
+#: ../gtk/src/ui/telemetry_frame.ui:233
 msgid "Position filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:308 ../gtk/src/ui/telemetry_frame.ui:380
-#: ../gtk/src/ui/telemetry_frame.ui:452 ../gtk/src/ui/telemetry_frame.ui:524
-#: ../gtk/src/ui/telemetry_frame.ui:596 ../gtk/src/ui/telemetry_frame.ui:668
-#: ../gtk/src/ui/telemetry_frame.ui:740
+#: ../gtk/src/ui/telemetry_frame.ui:254 ../gtk/src/ui/telemetry_frame.ui:326
+#: ../gtk/src/ui/telemetry_frame.ui:398 ../gtk/src/ui/telemetry_frame.ui:470
+#: ../gtk/src/ui/telemetry_frame.ui:542 ../gtk/src/ui/telemetry_frame.ui:614
+#: ../gtk/src/ui/telemetry_frame.ui:686
 msgid "Method:"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:333 ../gtk/src/ui/telemetry_frame.ui:405
-#: ../gtk/src/ui/telemetry_frame.ui:477 ../gtk/src/ui/telemetry_frame.ui:549
-#: ../gtk/src/ui/telemetry_frame.ui:621 ../gtk/src/ui/telemetry_frame.ui:693
-#: ../gtk/src/ui/telemetry_frame.ui:765
+#: ../gtk/src/ui/telemetry_frame.ui:279 ../gtk/src/ui/telemetry_frame.ui:351
+#: ../gtk/src/ui/telemetry_frame.ui:423 ../gtk/src/ui/telemetry_frame.ui:495
+#: ../gtk/src/ui/telemetry_frame.ui:567 ../gtk/src/ui/telemetry_frame.ui:639
+#: ../gtk/src/ui/telemetry_frame.ui:711
 msgid "Window size (in points):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:359
+#: ../gtk/src/ui/telemetry_frame.ui:305
 msgid "Grade filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:431
+#: ../gtk/src/ui/telemetry_frame.ui:377
 msgid "Heading filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:503
+#: ../gtk/src/ui/telemetry_frame.ui:449
 msgid "Elevation filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:575
+#: ../gtk/src/ui/telemetry_frame.ui:521
 msgid "Acceleration filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:647
+#: ../gtk/src/ui/telemetry_frame.ui:593
 msgid "Speed filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:719
+#: ../gtk/src/ui/telemetry_frame.ui:665
 msgid "Vertical speed filter & smooth"
 msgstr ""
 
@@ -383,7 +384,7 @@ msgstr ""
 #: ../gtk/src/ui/shape/arc_box.ui:770 ../gtk/src/ui/shape/bar_box.ui:163
 #: ../gtk/src/ui/shape/bar_box.ui:192 ../gtk/src/ui/shape/bar_box.ui:251
 #: ../gtk/src/ui/shape/bar_box.ui:280 ../gtk/src/ui/shape/bar_box.ui:407
-#: ../gtk/src/ui/shape/bar_box.ui:463 ../gtk/src/ui/shape/text_box.ui:93
+#: ../gtk/src/ui/shape/bar_box.ui:463 ../gtk/src/ui/shape/text_box.ui:188
 #: ../gtk/src/ui/widgets/map_box.ui:331 ../gtk/src/ui/widgets/map_box.ui:360
 #: ../gtk/src/ui/widgets/map_box.ui:389 ../gtk/src/ui/widgets/track_box.ui:249
 #: ../gtk/src/ui/widgets/track_box.ui:278
@@ -672,14 +673,26 @@ msgid "Icon enable:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/text_box.ui:80
+msgid "Icon:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/text_box.ui:91
+msgid "Set the icon"
+msgstr ""
+
+#: ../gtk/src/ui/shape/text_box.ui:138
+msgid "Use default"
+msgstr ""
+
+#: ../gtk/src/ui/shape/text_box.ui:175
 msgid "Icon color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/text_box.ui:106
+#: ../gtk/src/ui/shape/text_box.ui:201
 msgid "Misc."
 msgstr ""
 
-#: ../gtk/src/ui/shape/text_box.ui:127
+#: ../gtk/src/ui/shape/text_box.ui:222
 msgid "Text line space:"
 msgstr ""
 

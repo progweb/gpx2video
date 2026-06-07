@@ -95,8 +95,6 @@ private:
 		no_value_ = false;
 
 		nbr_target_lap_ = 1;
-
-		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(cairo_t *cr);

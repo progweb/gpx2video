@@ -85,8 +85,6 @@ private:
 		, fg_buf_(NULL) 
 		, widget_(widget) {
 		no_value_ = false;
-
-		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(cairo_t *cr);

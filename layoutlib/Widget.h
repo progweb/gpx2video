@@ -268,6 +268,13 @@ namespace layout
     Unsigned &lineSpace() { return _line_space; }
 
     ///
+    /// Get icon name
+    ///
+    /// @return the icon name element
+    ///
+    String &icon() { return _icon_name; }
+
+    ///
     /// Get icon color
     ///
     /// @return the icon color element
@@ -665,6 +672,7 @@ namespace layout
 
 	Unsigned     _line_space;
 
+    String       _icon_name;
 	String       _icon_color;
 
 	String       _label_fontfamily;

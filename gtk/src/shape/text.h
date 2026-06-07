@@ -1,12 +1,39 @@
 #ifndef __GPX2VIDEO__GTK__TEXTSHAPESETTINGSBOX_H__
 #define __GPX2VIDEO__GTK__TEXTSHAPESETTINGSBOX_H__
 
+#include <gtkmm.h>
+#include <gtkmm/singleselection.h>
+
 #include "../videowidget.h"
 #include "base.h"
 
 
 class GPX2VideoTextShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
 public:
+	class Icon : public Glib::Object {
+	public:
+		VideoWidget::Theme::Icon id_;
+		std::string filename_;
+
+		Icon(VideoWidget::Theme::Icon id, const std::string &filename)
+			: Glib::Object()
+			, id_(id)
+			, filename_(filename) {
+		}
+
+		static Glib::RefPtr<Icon> create(VideoWidget::Theme::Icon id, const std::string &filename) {
+			return Glib::make_refptr_for_instance<Icon>(new Icon(id, filename));
+		}
+
+		VideoWidget::Theme::Icon icon(void) const {
+			return id_;
+		}
+
+		const std::string& filename(void) const {
+			return filename_;
+		}
+	};
+
 	GPX2VideoTextShapeSettingsBox()
 		: GPX2VideoShapeBaseSettingsBox("GPX2VideoTextShapeSettingsBox") {
 	}
@@ -34,10 +61,14 @@ public:
 		log_call();
 	}
 
+	void bind_content(void);
 	void update_content(void);
 
-private:
-	Glib::RefPtr<Gtk::ListStore> tick_align_model_;
+protected:
+	Glib::RefPtr<Gtk::SingleSelection> icon_model_;
+
+	void on_icon_clicked(void);
+	void on_icon_toggled(void);
 };
 
 #endif

@@ -100,8 +100,6 @@ private:
 		no_value_ = false;
 
 		last_duration_ = 0;
-
-		icon_filename_ = widget->getIconFilename(widget->type());
 	}
 
 	void initialize(cairo_t *cr);

@@ -45,6 +45,9 @@ void DateTextShape::initialize(cairo_t *cr) {
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
 
+	// Icon
+	icon_filename_ = widget_->getIconFilename(theme().icon());
+
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
 		font = (TextShape::Font) {
@@ -197,5 +200,7 @@ DateWidget::DateWidget(GPXApplication &app)
 	formats_supported_.push_back((VideoWidget::ListItem) { 1, "YYYY/MM/DD", "%Y/%m/%d" });
 	formats_supported_.push_back((VideoWidget::ListItem) { 2, "DD-MM-YYYY", "%d-%m-%Y" });
 	formats_supported_.push_back((VideoWidget::ListItem) { 3, "DD/MM/YYYY", "%d/%m/%Y" });
+
+	setShape(VideoWidget::ShapeText);
 }
 

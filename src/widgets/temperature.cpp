@@ -35,6 +35,9 @@ void TemperatureTextShape::initialize(cairo_t *cr) {
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
 
+	// Icon
+	icon_filename_ = widget_->getIconFilename(theme().icon());
+
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
 		font = (TextShape::Font) {

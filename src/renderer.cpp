@@ -368,6 +368,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Shape shape = VideoWidget::ShapeNone;
 
 	TelemetryData::Unit unit = TelemetryData::UnitNone;
+
 	VideoWidget::Zoom zoom = VideoWidget::ZoomNone;
 
 	VideoWidget::Position position = VideoWidget::PositionNone;
@@ -385,6 +386,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Theme::FontWeight label_font_weight = VideoWidget::Theme::FontWeightNormal;
 	VideoWidget::Theme::FontWeight value_font_weight = VideoWidget::Theme::FontWeightNormal;
 
+	VideoWidget::Theme::Icon icon = VideoWidget::Theme::IconDefault;
 	VideoWidget::Theme::GaugeCap gauge_cap = VideoWidget::Theme::GaugeCapSquare;
 	VideoWidget::Theme::NeedleType needle_type = VideoWidget::Theme::NeedleTypeBasic;
 
@@ -436,6 +438,15 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	if (unit == TelemetryData::UnitUnknown) {
 		log_error("Widget loading error, unit value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Icon
+	s = (const char *) w->icon();
+	icon = VideoWidget::string2icon(s);
+
+	if (icon == VideoWidget::Theme::IconUnknown) {
+		log_error("Widget loading error, icon '%s' unknown", s.c_str());
 		goto error;
 	}
 
@@ -617,6 +628,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
 
 	// Widget icon settings
+	widget->theme().setIcon(icon);
 	widget->theme().setIconColor((const char *) w->iconColor());
 
 	// Widget misc. settings
