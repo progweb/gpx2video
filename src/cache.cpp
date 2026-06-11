@@ -27,7 +27,7 @@ void Cache::init(void) {
 
 	// Create gpx2video cache directories
 	path_ = std::getenv("HOME") + std::string("/.gpx2video/cache");
-	::mkpath(path_, 0700);
+	Utils::mkpath(path_, 0700);
 }
 
 
@@ -42,7 +42,7 @@ bool Cache::start(void) {
 	if (app_.command() != GPXApplication::CommandClear)
 		goto done;
 
-	rmpath(path_);
+	Utils::rmpath(path_);
 
 done:
 	return true;

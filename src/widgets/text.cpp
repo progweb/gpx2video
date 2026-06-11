@@ -36,11 +36,16 @@ void TextWidget::initialize(cairo_t *cr) {
 
 	ShapeBase::Font font;
 
+	TextShape::setSize(theme().height());
+
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Icon
+	icon_filename_ = getIconFilename(theme().icon());
 
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -131,6 +136,11 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw background
 	background(cr);
+
+	// Draw icon
+	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
+		icon(cr, icon_filename_, theme().iconColor());
+	}
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {

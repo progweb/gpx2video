@@ -12,7 +12,15 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 	loading_ = false;
 
 	// Populate models
-	//-----------------
+	load_models();
+
+	// Binding
+	bind_content();
+}
+
+
+void GPX2VideoBarShapeSettingsBox::load_models(void) {
+	log_call();
 
 	gauge_cap_model_ = Gtk::ListStore::create(model_);
 
@@ -43,10 +51,8 @@ GPX2VideoBarShapeSettingsBox::GPX2VideoBarShapeSettingsBox(BaseObjectType *cobje
 		row[model_.m_id] = VideoWidget::Theme::AlignRight;
 		row[model_.m_name] = _("Right");
 	}
-
-	// Binding
-	bind_content();
 }
+
 
 void GPX2VideoBarShapeSettingsBox::bind_content(void) {
 	log_call();
@@ -458,5 +464,13 @@ void GPX2VideoBarShapeSettingsBox::update_content(void) {
 
 	// Unmask value changed
 	loading_ = false;
+
+	// Apply limit
+	update_boundaries();
+}
+
+
+void GPX2VideoBarShapeSettingsBox::update_boundaries(void) {
+	log_call();
 }
 

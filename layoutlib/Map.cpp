@@ -65,9 +65,20 @@ namespace layout
 	_path_border_color(this, "path-border-color", Node::ELEMENT, false),
 	_path_primary_color(this, "path-primary-color", Node::ELEMENT, false),
 	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false),
-    _marker_size(this, "marker-size", Node::ELEMENT, false),
+
+    _icon_end_name(this, "icon-end-name",   Node::ELEMENT, false),
+    _icon_start_name(this, "icon-start-name",   Node::ELEMENT, false),
+    _icon_position_name(this, "icon-position-name",   Node::ELEMENT, false),
+	_icon_end_color(this, "icon-end-color", Node::ELEMENT, false),
+	_icon_start_color(this, "icon-start-color", Node::ELEMENT, false),
+	_icon_position_color(this, "icon-position-color", Node::ELEMENT, false),
+    _icon_end_size(this, "icon-end-size", Node::ELEMENT, false),
+    _icon_start_size(this, "icon-start-size", Node::ELEMENT, false),
+    _icon_position_size(this, "icon-position-size", Node::ELEMENT, false),
 	
-	_with_marker(this, "with-maker", Node::ELEMENT, false)
+	_with_icon_end(this, "with-maker-end", Node::ELEMENT, false),
+	_with_icon_start(this, "with-maker-start", Node::ELEMENT, false),
+	_with_icon_position(this, "with-maker-position", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);
@@ -102,9 +113,20 @@ namespace layout
     getInterfaces().push_back(&_path_border_color);
     getInterfaces().push_back(&_path_primary_color);
     getInterfaces().push_back(&_path_secondary_color);
-    getInterfaces().push_back(&_marker_size);
 
-    getInterfaces().push_back(&_with_marker);
+    getInterfaces().push_back(&_icon_end_name);
+    getInterfaces().push_back(&_icon_start_name);
+    getInterfaces().push_back(&_icon_position_name);
+    getInterfaces().push_back(&_icon_end_color);
+    getInterfaces().push_back(&_icon_start_color);
+    getInterfaces().push_back(&_icon_position_color);
+    getInterfaces().push_back(&_icon_end_size);
+    getInterfaces().push_back(&_icon_start_size);
+    getInterfaces().push_back(&_icon_position_size);
+
+    getInterfaces().push_back(&_with_icon_end);
+    getInterfaces().push_back(&_with_icon_start);
+    getInterfaces().push_back(&_with_icon_position);
 
 	_display.setValue("true");
 
@@ -128,9 +150,17 @@ namespace layout
 	_path_primary_color.setValue("#669df6ff");
 	_path_secondary_color.setValue("#ffffffff");
 
-	_marker_size.setValue("1.0");
+	_icon_end_color.setValue("#00000000");
+	_icon_start_color.setValue("#00000000");
+	_icon_position_color.setValue("#00000000");
 
-	_with_marker.setValue("true");
+	_icon_end_size.setValue("1.0");
+	_icon_start_size.setValue("1.0");
+	_icon_position_size.setValue("1.0");
+
+	_with_icon_end.setValue("true");
+	_with_icon_start.setValue("true");
+	_with_icon_position.setValue("true");
   }
 
   Map::~Map()

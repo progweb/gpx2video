@@ -85,9 +85,11 @@ set(RESOURCE_UI_LIST
 	prefs.ui
 	window.ui
 	append.ui
+	media_frame.ui
 	video_frame.ui
 	widget_frame.ui
 	telemetry_frame.ui
+	media_stackpage.ui
 	video_stackpage.ui
 	widget_stackpage.ui
 	telemetry_stackpage.ui
@@ -171,6 +173,7 @@ set(GPX2VIDEO_SOURCES
 	src/audiodevice.cpp
 	src/log.cpp
 	src/main.cpp
+	src/media.cpp
 	src/prefs.cpp
 	src/append.cpp
 	src/cursor.cpp
@@ -178,11 +181,13 @@ set(GPX2VIDEO_SOURCES
 	src/shader.cpp
 	src/stream.cpp
 	src/window.cpp
+	src/mediaframe.cpp
 	src/videoframe.cpp
 	src/widgetframe.cpp
 	src/telemetryframe.cpp
 	src/timesync.cpp
 	src/videowidget.cpp
+	src/mediastackpage.cpp
 	src/videostackpage.cpp
 	src/widgetstackpage.cpp
 	src/telemetrystackpage.cpp

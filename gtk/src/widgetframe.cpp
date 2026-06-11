@@ -1,3 +1,5 @@
+#include <limits>
+
 #include <glibmm/i18n.h>
 
 #include <gtkmm/box.h>
@@ -27,6 +29,7 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame()
 	: Glib::ObjectBase("GPX2VideoWidgetFrame")
 	, ref_builder_(NULL) 
 	, dispatcher_()
+	, media_model_(NULL)
 	, renderer_(NULL)
 	, widget_selected_(NULL)
 	, shape_child_box_(NULL)
@@ -38,11 +41,13 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame()
 }
 
 
-GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder) 
+GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder,
+		const Glib::RefPtr<GPX2VideoMediaListStore> &media_model) 
 	: Glib::ObjectBase("GPX2VideoWidgetFrame")
 	, Gtk::Frame(cobject)
 	, ref_builder_(ref_builder) 
 	, dispatcher_()
+	, media_model_(media_model)
 	, renderer_(NULL)
 	, widget_selected_(NULL)
 	, shape_child_box_(NULL)
@@ -345,7 +350,7 @@ void GPX2VideoWidgetFrame::build_shape_settings(void) {
 			break;
 
 		case VideoWidget::ShapeText:
-			shape_child_box_ = GPX2VideoTextShapeSettingsBox::create(widget_selected_);
+			shape_child_box_ = GPX2VideoTextShapeSettingsBox::create(widget_selected_, media_model_);
 			break;
 
 		default:
@@ -384,7 +389,7 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 		// Build widget settings box child
 		switch (widget_selected_->widget()->type()) {
 		case VideoWidget::WidgetMap:
-			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_);
+			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_, media_model_);
 			break;
 
 		case VideoWidget::WidgetText:
@@ -392,7 +397,7 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 			break;
 
 		case VideoWidget::WidgetTrack:
-			widget_child_box_ = GPX2VideoTrackWidgetSettingsBox::create(widget_selected_);
+			widget_child_box_ = GPX2VideoTrackWidgetSettingsBox::create(widget_selected_, media_model_);
 			break;
 
 		default:
@@ -2150,6 +2155,20 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_range(0, height - margin);
+
+	// Value min.
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_min_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_range(std::numeric_limits<double>::min(), widget_selected_->widget()->theme().valueMax());
+
+	// Value max.
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_range(widget_selected_->widget()->theme().valueMin(), std::numeric_limits<double>::max());
 }
 
 

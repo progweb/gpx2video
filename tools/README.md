@@ -526,7 +526,15 @@ Map settings:
 	<zoom>11</zoom>
 	<view>default</view>
 	<factor>1.2</factor>
-	<marker>60</marker>
+    <with-icon-start>true</with-icon-start>
+    <with-icon-end>true</with-icon-end>
+    <with-icon-position>true</with-icon-position>
+	<icon-end-name>default</icon-end-name>
+	<icon-start-name>default</icon-start-name>
+	<icon-position-name>default</icon-position-name>
+	<icon-end-size>1</icon-end-size>
+	<icon-start-size>1</icon-start-size>
+	<icon-position-size>1</icon-position-size>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -538,9 +546,11 @@ Map settings:
 **source** map provider.
 **zoom** value sets the map details.
 **factor** value applies a zoom factor as render.
-**marker** marker size in pixels.
+**icon-xxxx-size** icon size in pixels.
 **path-thick** path thick.
 **path-border** border size of path.
+
+**with-icon-xxxx** enable/disable start, end or position icon.
 
 **view** values are "zoomfit", "center", "default".
 
@@ -561,7 +571,15 @@ Track settings:
 
 ```xml
 <track x="250" y="450" width="600" height="120" position="left" display="true">
-	<marker>60</marker>
+    <with-icon-start>true</with-icon-start>
+    <with-icon-end>true</with-icon-end>
+    <with-icon-position>true</with-icon-position>
+	<icon-end-name>default</icon-end-name>
+	<icon-start-name>default</icon-start-name>
+	<icon-position-name>default</icon-position-name>
+	<icon-end-size>1</icon-end-size>
+	<icon-start-size>1</icon-start-size>
+	<icon-position-size>1</icon-position-size>
 	<view>zoomfit</view>
 	<factor>1.2</factor>
 	<border>5</border>

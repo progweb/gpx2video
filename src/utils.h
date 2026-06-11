@@ -5,15 +5,19 @@
 #include <string>
 
 
+namespace Utils {
+
 std::string replace(
 		std::string sHaystack, std::string sNeedle, std::string sReplace,
 		size_t nTimes=0);
 
 int mkpath(std::string &path, mode_t mode);
 
-void rmpath(std:: string path);
+void rmpath(std::string path);
 
 std::string capitalize(std::string s);
+
+bool starts_with(const std::string &s, const std::string &prefix);
 
 class IndentingOStreambuf : public std::streambuf {
 	std::streambuf *myDest;
@@ -53,6 +57,8 @@ public:
 			myOwner->rdbuf(myDest);
 	}
 };
+
+}
 
 #endif
 

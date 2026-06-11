@@ -26,6 +26,9 @@ public:
 	static void bufferToFrame(OIIO::ImageBuf *buf, const Frame *frame);
 
 	static void bufferToFile(const OIIO::ImageBuf &buf, const std::string &filename);
+
+
+	static OIIO::ImageBuf * loadsvg(const char *filename, const double &divider, const float *color=NULL);
 };
 
 #endif

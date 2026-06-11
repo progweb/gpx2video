@@ -6,43 +6,65 @@
 
 
 void TextShape::icon(cairo_t *cr, const std::string &filename, const float *fill) {
-	RsvgHandle *handle;
+	bool apply_color;
 
-	RsvgRectangle viewport = {
+    GError *error = NULL;
+
+	cairo_t *mask = NULL;
+	cairo_surface_t *surface = NULL;
+
+	RsvgRectangle viewport;
+
+	RsvgHandle *handle = NULL;
+
+	if (filename.empty())
+		return;
+
+	// Set color
+	apply_color = (fill != NULL) && (fill[3] != 0);
+
+	// load svg data
+	handle = rsvg_handle_new_from_file(filename.c_str(), &error);
+    if (!handle) {
+        log_error("Load svn image failure: %s", error->message);
+        g_error_free(error);
+        return;
+    }
+
+	if (apply_color) {
+		// Create alpha only surface
+		surface = cairo_image_surface_create(CAIRO_FORMAT_A8, size_, size_);
+
+		// Create mask
+		mask = cairo_create(surface);
+	}
+
+	// Render svg into cairo surface
+	viewport = (RsvgRectangle) {
 		.x = (double) theme().border(),
 		.y = (double) theme().border(),
 		.width = (double) (size_ - 2 * theme().border()),
 		.height = (double) (size_ - 2 * theme().border())
 	};
 
-//	if ((filename == NULL) || (filename[0] == '\0'))
-//		return;
-	if (filename.empty())
-		return;
+	rsvg_handle_render_document(handle, apply_color ? mask : cr, &viewport, NULL);
 
-	// load svg data
-	handle = rsvg_handle_new_from_file(filename.c_str(), NULL);
+	if (apply_color) {
+		// Apply color
+		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
 
-	// Create alpha only surface
-	cairo_surface_t *surface = cairo_image_surface_create(CAIRO_FORMAT_A8, size_, size_);
+		// Paint mask
+		cairo_mask_surface(cr, surface, 0, 0);
+	}
 
-	// Create mask
-	cairo_t *mask = cairo_create(surface);
+	// Free
+	if (surface)
+		cairo_surface_destroy(surface);
+	if (mask)
+		cairo_destroy(mask);
 
-//	rsvg_handle_render_document(handle, cr, &viewport, NULL);
-	rsvg_handle_render_document(handle, mask, &viewport, NULL);
-
-	cairo_destroy(mask);
-
-	// Apply color
-	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-
-	// Paint mask
-	cairo_mask_surface(cr, surface, 0, 0);
-
-	cairo_surface_destroy(surface);
-
-	g_object_unref(handle);
+	if (handle != NULL)
+		g_object_unref(handle);
 }
 
 
@@ -176,7 +198,7 @@ void TextShape::xmlwrite(std::ostream &os) {
 	ShapeBase::xmlwrite(os);
 
 	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeText) << "</shape>" << std::endl;
-	os << "<icon-name>" << VideoWidget::icon2string(theme_.icon()) << "</icon-name>" << std::endl;
+	os << "<icon-name>" << VideoWidget::icon2string(theme_.icon()) << theme_.iconFile() << "</icon-name>" << std::endl;
 	os << "<icon-color>" << VideoWidget::Theme::color2hex(theme_.iconColor()) << "</icon-color>" << std::endl;
 	os << "<line-space>" << theme_.lineSpace() << "</line-space>" << std::endl;
 

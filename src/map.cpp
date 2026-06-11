@@ -338,32 +338,32 @@ std::string Map::buildURI(int zoom, int x, int y) {
 
 	if (std::strstr(uri.c_str(), URI_MARKER_X)) {
 		snprintf(s, sizeof(s), "%d", x);
-		uri = replace(uri, URI_MARKER_X, s);
+		uri = Utils::replace(uri, URI_MARKER_X, s);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_Y)) {
 		snprintf(s, sizeof(s), "%d", y);
-		uri = replace(uri, URI_MARKER_Y, s);
+		uri = Utils::replace(uri, URI_MARKER_Y, s);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_Z)) {
 		snprintf(s, sizeof(s), "%d", zoom);
-		uri = replace(uri, URI_MARKER_Z, s);
+		uri = Utils::replace(uri, URI_MARKER_Z, s);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_S)) {
 		snprintf(s, sizeof(s), "%d", max_zoom-zoom);
-		uri = replace(uri, URI_MARKER_S, s);
+		uri = Utils::replace(uri, URI_MARKER_S, s);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_Q)) {
 //		map_convert_coords_to_quadtree_string(map, x, y, zoom, location, 't', "qrts");
-//		uri = replace(uri, URI_MARKER_Q, location);
+//		uri = Utils::replace(uri, URI_MARKER_Q, location);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_Q0)) {
 //		map_convert_coords_to_quadtree_string(map, x, y, zoom, location, '\0', "0123");
-//		uri = replace(uri, URI_MARKER_Q0, location);
+//		uri = Utils::replace(uri, URI_MARKER_Q0, location);
 	}
 
 	if (std::strstr(uri.c_str(), URI_MARKER_YS)) {
@@ -371,7 +371,7 @@ std::string Map::buildURI(int zoom, int x, int y) {
 
 	if (std::strstr(uri.c_str(), URI_MARKER_R)) {
 		snprintf(s, sizeof(s), "%d", (int) (random() % 4));
-		uri = replace(uri, URI_MARKER_R, s);
+		uri = Utils::replace(uri, URI_MARKER_R, s);
 	}
 
 	if (std::strstr(uri.c_str(), "google.com")) {
@@ -725,8 +725,6 @@ error:
 
 
 void Map::draw(void) {
-	int marker_size = settings().markerSize();
-
 	std::string filename = "track.png";
 
 	log_call();
@@ -750,9 +748,11 @@ void Map::draw(void) {
 	// Draw track
 	OIIO::ImageBufAlgo::over(buf, *trackbuf_, buf);
 
-	// Draw markers
-	drawPicto(buf, x_end_, y_end_, OIIO::ROI(), std::string(assets_path_ + "/end.png").c_str(), marker_size);
-	drawPicto(buf, x_start_, y_start_, OIIO::ROI(), std::string(assets_path_ + "/start.png").c_str(), marker_size);
+	// Draw icons
+	if (icon_start_buf_)
+		icon(buf, *icon_start_buf_, x_start_, y_start_, OIIO::ROI());
+	if (icon_end_buf_)
+		icon(buf, *icon_end_buf_, x_end_, y_end_, OIIO::ROI());
 
 	// Save
 	std::unique_ptr<OIIO::ImageOutput> out = OIIO::ImageOutput::create(filename);
@@ -836,8 +836,6 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	int padding_horizontal;
 
 	int zoom = settings().zoom();
-	double marker_size = settings().markerSize();
-	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
 	cairo_t *cairo;
 
@@ -999,13 +997,13 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 		// Draw picto
-		if (marker_enable && (marker_size > 0)) {
-			drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
-			drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
-		
-			if (data.hasValue(TelemetryData::DataFix))
-				drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
-		}
+		if (icon_start_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconStart))
+			icon(*fg_buf_, *icon_start_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height));
+		if (icon_end_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconEnd))
+			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
+	
+		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition))
+			icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
 	}
 
 	// Save last position
@@ -1217,7 +1215,7 @@ bool Map::Tile::download(void) {
 
 	log_call();
 
-	::mkpath(path_, 0700);
+	Utils::mkpath(path_, 0700);
 
 	// Check if file exists in cache
 	if (access(output.c_str(), F_OK) == 0) {

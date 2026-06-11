@@ -47,7 +47,7 @@ VideoWidget::Theme::Theme() {
 	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setValueMin(0);
-	setValueMax(1000);
+	setValueMax(100);
 	setValueFontFamily("Sans");
 	setValueFontSize(25);
 	setValueFontStyle(VideoWidget::Theme::FontStyleNormal);
@@ -440,60 +440,62 @@ VideoWidget::Theme::Icon VideoWidget::string2icon(std::string &s) {
 
 	if (s.empty() || (s == "default"))
 		icon = VideoWidget::Theme::IconDefault;
-	else if (s == "running")
-		icon = VideoWidget::Theme::IconRunning;
-	else if (s == "avgspeed")
+	else if (s == "internal:avgspeed")
 		icon = VideoWidget::Theme::IconAverageSpeed;
-	else if (s == "avgridespeed")
+	else if (s == "internal:avgridespeed")
 		icon = VideoWidget::Theme::IconAverageRideSpeed;
-	else if (s == "batterylevel")
+	else if (s == "internal:batterylevel")
 		icon = VideoWidget::Theme::IconBatteryLevel;
-	else if (s == "cadence")
+	else if (s == "internal:cadence")
 		icon = VideoWidget::Theme::IconCadence;
-	else if (s == "date")
+	else if (s == "internal:date")
 		icon = VideoWidget::Theme::IconDate;
-	else if (s == "distance")
+	else if (s == "internal:distance")
 		icon = VideoWidget::Theme::IconDistance;
-	else if (s == "duration")
+	else if (s == "internal:duration")
 		icon = VideoWidget::Theme::IconDuration;
-	else if (s == "elevation")
+	else if (s == "internal:elevation")
 		icon = VideoWidget::Theme::IconElevation;
-	else if (s == "gforce")
+	else if (s == "internal:gforce")
 		icon = VideoWidget::Theme::IconGForce;
-	else if (s == "gpx")
+	else if (s == "internal:gpx")
 		icon = VideoWidget::Theme::IconGPX;
-	else if (s == "grade")
+	else if (s == "internal:grade")
 		icon = VideoWidget::Theme::IconGrade;
-	else if (s == "heading")
+	else if (s == "internal:heading")
 		icon = VideoWidget::Theme::IconHeading;
-	else if (s == "heartrate")
+	else if (s == "internal:heartrate")
 		icon = VideoWidget::Theme::IconHeartRate;
-	else if (s == "homedistance")
+	else if (s == "internal:homedistance")
 		icon = VideoWidget::Theme::IconHomeDistance;
-	else if (s == "image")
+	else if (s == "internal:image")
 		icon = VideoWidget::Theme::IconImage;
-	else if (s == "lap")
+	else if (s == "internal:lap")
 		icon = VideoWidget::Theme::IconLap;
-	else if (s == "map")
+	else if (s == "internal:map")
 		icon = VideoWidget::Theme::IconMap;
-	else if (s == "maxspeed")
+	else if (s == "internal:maxspeed")
 		icon = VideoWidget::Theme::IconMaxSpeed;
-	else if (s == "position")
+	else if (s == "internal:position")
 		icon = VideoWidget::Theme::IconPosition;
-	else if (s == "power")
+	else if (s == "internal:power")
 		icon = VideoWidget::Theme::IconPower;
-	else if (s == "speed")
+	else if (s == "internal:speed")
 		icon = VideoWidget::Theme::IconSpeed;
-	else if (s == "temperature")
+	else if (s == "internal:temperature")
 		icon = VideoWidget::Theme::IconTemperature;
-	else if (s == "text")
+	else if (s == "internal:text")
 		icon = VideoWidget::Theme::IconText;
-	else if (s == "time")
+	else if (s == "internal:time")
 		icon = VideoWidget::Theme::IconTime;
-	else if (s == "track")
+	else if (s == "internal:track")
 		icon = VideoWidget::Theme::IconTrack;
-	else if (s == "verticalspeed")
+	else if (s == "internal:verticalspeed")
 		icon = VideoWidget::Theme::IconVerticalSpeed;
+	else if (s == "internal:running")
+		icon = VideoWidget::Theme::IconRunning;
+	else if (Utils::starts_with(s, "file:"))
+		icon = VideoWidget::Theme::IconUserFile;
 	else
 		icon = VideoWidget::Theme::IconUnknown;
 
@@ -785,63 +787,67 @@ std::string VideoWidget::unit2string(TelemetryData::Unit unit) {
 
 std::string VideoWidget::icon2string(VideoWidget::Theme::Icon icon) {
 	switch (icon) {
-	case VideoWidget::Theme::IconAverageSpeed:
-		return "avgspeed";
-	case VideoWidget::Theme::IconAverageRideSpeed:
-		return "avgridespeed";
-	case VideoWidget::Theme::IconBatteryLevel:
-		return "batterylevel";
-	case VideoWidget::Theme::IconCadence:
-		return "cadence";
-	case VideoWidget::Theme::IconDate:
-		return "date";
-	case VideoWidget::Theme::IconDistance:
-		return "distance";
-	case VideoWidget::Theme::IconDuration:
-		return "duration";
-	case VideoWidget::Theme::IconElevation:
-		return "elevation";
-	case VideoWidget::Theme::IconGForce:
-		return "gforce";
-	case VideoWidget::Theme::IconGPX:
-		return "gpx";
-	case VideoWidget::Theme::IconGrade:
-		return "grade";
-	case VideoWidget::Theme::IconHeading:
-		return "heading";
-	case VideoWidget::Theme::IconHeartRate:
-		return "heartrate";
-	case VideoWidget::Theme::IconHomeDistance:
-		return "homedistance";
-	case VideoWidget::Theme::IconImage:
-		return "image";
-	case VideoWidget::Theme::IconLap:
-		return "lap";
-	case VideoWidget::Theme::IconMap:
-		return "map";
-	case VideoWidget::Theme::IconMaxSpeed:
-		return "maxspeed";
-	case VideoWidget::Theme::IconPosition:
-		return "position";
-	case VideoWidget::Theme::IconPower:
-		return "power";
-	case VideoWidget::Theme::IconSpeed:
-		return "speed";
-	case VideoWidget::Theme::IconTemperature:
-		return "temperature";
-	case VideoWidget::Theme::IconText:
-		return "text";
-	case VideoWidget::Theme::IconTime:
-		return "time";
-	case VideoWidget::Theme::IconTrack:
-		return "track";
-	case VideoWidget::Theme::IconVerticalSpeed:
-		return "verticalspeed";
-
 	case VideoWidget::Theme::IconDefault:
 		return "default";
+
+	case VideoWidget::Theme::IconAverageSpeed:
+		return "internal:avgspeed";
+	case VideoWidget::Theme::IconAverageRideSpeed:
+		return "internal:avgridespeed";
+	case VideoWidget::Theme::IconBatteryLevel:
+		return "internal:batterylevel";
+	case VideoWidget::Theme::IconCadence:
+		return "internal:cadence";
+	case VideoWidget::Theme::IconDate:
+		return "internal:date";
+	case VideoWidget::Theme::IconDistance:
+		return "internal:distance";
+	case VideoWidget::Theme::IconDuration:
+		return "internal:duration";
+	case VideoWidget::Theme::IconElevation:
+		return "internal:elevation";
+	case VideoWidget::Theme::IconGForce:
+		return "internal:gforce";
+	case VideoWidget::Theme::IconGPX:
+		return "internal:gpx";
+	case VideoWidget::Theme::IconGrade:
+		return "internal:grade";
+	case VideoWidget::Theme::IconHeading:
+		return "internal:heading";
+	case VideoWidget::Theme::IconHeartRate:
+		return "internal:heartrate";
+	case VideoWidget::Theme::IconHomeDistance:
+		return "internal:homedistance";
+	case VideoWidget::Theme::IconImage:
+		return "internal:image";
+	case VideoWidget::Theme::IconLap:
+		return "internal:lap";
+	case VideoWidget::Theme::IconMap:
+		return "internal:map";
+	case VideoWidget::Theme::IconMaxSpeed:
+		return "internal:maxspeed";
+	case VideoWidget::Theme::IconPosition:
+		return "internal:position";
+	case VideoWidget::Theme::IconPower:
+		return "internal:power";
+	case VideoWidget::Theme::IconSpeed:
+		return "internal:speed";
+	case VideoWidget::Theme::IconTemperature:
+		return "internal:temperature";
+	case VideoWidget::Theme::IconText:
+		return "internal:text";
+	case VideoWidget::Theme::IconTime:
+		return "internal:time";
+	case VideoWidget::Theme::IconTrack:
+		return "internal:track";
+	case VideoWidget::Theme::IconVerticalSpeed:
+		return "internal:verticalspeed";
+
 	case VideoWidget::Theme::IconRunning:
-		return "running";
+		return "internal:running";
+
+	case VideoWidget::Theme::IconUserFile:
+		return "file:";
 
 	default:
 		return "";
@@ -857,7 +863,7 @@ void VideoWidget::save(std::ostream &os) {
 	xmlopen(os);
 
 	{
-		IndentingOStreambuf indent(os, 4);
+		Utils::IndentingOStreambuf indent(os, 4);
 
 		xmlwrite(os);
 	}
@@ -965,8 +971,10 @@ std::string VideoWidget::getIconFilename(VideoWidget::Theme::Icon icon) {
 
 	if (icon == VideoWidget::Theme::IconDefault)
 		return VideoWidget::getIconFilename(this->type());
-	else if (icon < VideoWidget::Theme::IconDefault)
+	else if ((VideoWidget::Widget) icon < VideoWidget::WidgetUnknown)
 		return VideoWidget::getIconFilename((VideoWidget::Widget) icon);
+	else if (icon == VideoWidget::Theme::IconUserFile)
+		return theme().iconFile();
 
 	switch (icon) {
 	case VideoWidget::Theme::IconRunning:

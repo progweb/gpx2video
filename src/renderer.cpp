@@ -142,21 +142,35 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	std::string s;
 
+	Map *map = NULL;
+
+	std::string icon_end_file;
+	std::string icon_start_file;
+	std::string icon_position_file;
+
 	unsigned int mapsource;
 
 	int flags = VideoWidget::Theme::FlagNone;
 
 	MapSettings::View view;
 
+	MapSettings mapSettings;
+
+	VideoStreamPtr video_stream;
+
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
+
+	MapSettings::Icon icon_end = MapSettings::IconDefault;
+	MapSettings::Icon icon_start = MapSettings::IconDefault;
+	MapSettings::Icon icon_position = MapSettings::IconDefault;
 
 	log_call();
 
 	// Display
 	if ((bool) m->display() == false) {
 		log_info("Skip map widget");
-		return true;
+		goto skip;
 	}
 
 	// Map source
@@ -167,7 +181,7 @@ bool Renderer::loadMap(layout::Map *m) {
 		return false;
 	}
 
-	VideoStreamPtr video_stream = container_->getVideoStream();
+	video_stream = container_->getVideoStream();
 
 	// Default size
 	//   2704x1520 => 800x500
@@ -196,12 +210,57 @@ bool Renderer::loadMap(layout::Map *m) {
 	if (orientation == VideoWidget::OrientationUnknown)
 		log_error("Map orientation value '%s' unknown", s.c_str());
 
+	// Icon start
+	s = (const char *) m->iconStart();
+	icon_start = MapSettings::string2icon(s);
+
+	if (icon_start == MapSettings::IconUnknown) {
+		log_error("Map loading error, icon start '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_start == MapSettings::IconUserFile) {
+		icon_start_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_start_file = "";
+
+	// Icon end
+	s = (const char *) m->iconEnd();
+	icon_end = MapSettings::string2icon(s);
+
+	if (icon_end == MapSettings::IconUnknown) {
+		log_error("Map loading error, icon end '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_end == MapSettings::IconUserFile) {
+		icon_end_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_end_file = "";
+
+	// Icon position
+	s = (const char *) m->iconPosition();
+	icon_position = MapSettings::string2icon(s);
+
+	if (icon_position == MapSettings::IconUnknown) {
+		log_error("Map loading error, icon position '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_position == MapSettings::IconUserFile) {
+		icon_position_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_position_file = "";
+
 	// Flags
-	if (m->withMarker())
-		flags |= VideoWidget::Theme::FlagIcon;
+	if (m->withIconEnd())
+		flags |= VideoWidget::Theme::FlagIconEnd;
+	if (m->withIconStart())
+		flags |= VideoWidget::Theme::FlagIconStart;
+	if (m->withIconPosition())
+		flags |= VideoWidget::Theme::FlagIconPosition;
 
 	// Map settings
-	MapSettings mapSettings;
 	mapSettings.setSize(width, height);
 	mapSettings.setSource((MapSettings::Source) mapsource);
 	mapSettings.setZoom(m->zoom());
@@ -213,9 +272,22 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
 	mapSettings.setPathPrimaryColor((const char *) m->pathPrimaryColor());
 	mapSettings.setPathSecondaryColor((const char *) m->pathSecondaryColor());
-	mapSettings.setMarkerSize((double) m->markerSize());
 
-	Map *map = Map::create(app_, telemetrySettings(), mapSettings);
+	// Map icon settings
+	mapSettings.setIcon(MapSettings::IconStart, icon_start);
+	mapSettings.setIconFile(MapSettings::IconStart, icon_start_file);
+	mapSettings.setIconColor(MapSettings::IconStart, (const char *) m->iconStartColor());
+	mapSettings.setIconSize(MapSettings::IconStart, (double) m->iconStartSize());
+	mapSettings.setIcon(MapSettings::IconEnd, icon_end);
+	mapSettings.setIconFile(MapSettings::IconEnd, icon_end_file);
+	mapSettings.setIconColor(MapSettings::IconEnd, (const char *) m->iconEndColor());
+	mapSettings.setIconSize(MapSettings::IconEnd, (double) m->iconEndSize());
+	mapSettings.setIcon(MapSettings::IconPosition, icon_position);
+	mapSettings.setIconFile(MapSettings::IconPosition, icon_position_file);
+	mapSettings.setIconColor(MapSettings::IconPosition, (const char *) m->iconPositionColor());
+	mapSettings.setIconSize(MapSettings::IconPosition, (double) m->iconPositionSize());
+
+	map = Map::create(app_, telemetrySettings(), mapSettings);
 
 	log_info("Load map widget at %dx%d", (int) m->x(), (int) m->y());
 
@@ -247,7 +319,14 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	this->append(map);
 
+skip:
 	return true;
+
+error:
+	if (map)
+		delete map;
+
+	return false;
 }
 
 
@@ -256,22 +335,36 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	std::string s;
 
+	Track *track = NULL;
+
+	std::string icon_end_file;
+	std::string icon_start_file;
+	std::string icon_position_file;
+
 	int flags = VideoWidget::Theme::FlagNone;
 
 	TrackSettings::View view;
 
+	TrackSettings trackSettings;
+
+	VideoStreamPtr video_stream;
+
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
+
+	TrackSettings::Icon icon_end = TrackSettings::IconDefault;
+	TrackSettings::Icon icon_start = TrackSettings::IconDefault;
+	TrackSettings::Icon icon_position = TrackSettings::IconDefault;
 
 	log_call();
 
 	// Display
 	if ((bool) t->display() == false) {
 		log_info("Skip track widget");
-		return true;
+		goto skip;
 	}
 
-	VideoStreamPtr video_stream = container_->getVideoStream();
+	video_stream = container_->getVideoStream();
 
 	// Default size
 	//   2704x1520 => 800x500
@@ -300,12 +393,57 @@ bool Renderer::loadTrack(layout::Track *t) {
 	if (orientation == VideoWidget::OrientationUnknown)
 		log_error("Track orientation value '%s' unknown", s.c_str());
 
+	// Icon start
+	s = (const char *) t->iconStart();
+	icon_start = TrackSettings::string2icon(s);
+
+	if (icon_start == TrackSettings::IconUnknown) {
+		log_error("Track loading error, icon start '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_start == TrackSettings::IconUserFile) {
+		icon_start_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_start_file = "";
+
+	// Icon end
+	s = (const char *) t->iconEnd();
+	icon_end = TrackSettings::string2icon(s);
+
+	if (icon_end == TrackSettings::IconUnknown) {
+		log_error("Track loading error, icon end '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_end == TrackSettings::IconUserFile) {
+		icon_end_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_end_file = "";
+
+	// Icon  position
+	s = (const char *) t->iconPosition();
+	icon_position = TrackSettings::string2icon(s);
+
+	if (icon_position == TrackSettings::IconUnknown) {
+		log_error("Track loading error, icon position '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (icon_position == TrackSettings::IconUserFile) {
+		icon_position_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_position_file = "";
+
 	// Flags
-	if (t->withMarker())
-		flags |= VideoWidget::Theme::FlagIcon;
+	if (t->withIconEnd())
+		flags |= VideoWidget::Theme::FlagIconEnd;
+	if (t->withIconStart())
+		flags |= VideoWidget::Theme::FlagIconStart;
+	if (t->withIconPosition())
+		flags |= VideoWidget::Theme::FlagIconPosition;
 
 	// Track settings
-	TrackSettings trackSettings;
 	trackSettings.setSize(width, height);
 	trackSettings.setView((MapSettings::View) view);
 	trackSettings.setDivider(t->factor());
@@ -316,9 +454,22 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathBorderColor((const char *) t->pathBorderColor());
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
-	trackSettings.setMarkerSize((double) t->markerSize());
 
-	Track *track = Track::create(app_, telemetrySettings(), trackSettings);
+	// Track icon settings
+	trackSettings.setIcon(TrackSettings::IconStart, icon_start);
+	trackSettings.setIconFile(TrackSettings::IconStart, icon_start_file);
+	trackSettings.setIconColor(TrackSettings::IconStart, (const char *) t->iconStartColor());
+	trackSettings.setIconSize(TrackSettings::IconStart, (double) t->iconStartSize());
+	trackSettings.setIcon(TrackSettings::IconEnd, icon_end);
+	trackSettings.setIconFile(TrackSettings::IconEnd, icon_end_file);
+	trackSettings.setIconColor(TrackSettings::IconEnd, (const char *) t->iconEndColor());
+	trackSettings.setIconSize(TrackSettings::IconEnd, (double) t->iconEndSize());
+	trackSettings.setIcon(TrackSettings::IconPosition, icon_position);
+	trackSettings.setIconFile(TrackSettings::IconPosition, icon_position_file);
+	trackSettings.setIconColor(TrackSettings::IconPosition, (const char *) t->iconPositionColor());
+	trackSettings.setIconSize(TrackSettings::IconPosition, (double) t->iconPositionSize());
+
+	track = Track::create(app_, telemetrySettings(), trackSettings);
 
 	log_info("Load track widget at %dx%d", (int) t->x(), (int) t->y());
 
@@ -350,7 +501,14 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	this->append(track);
 
+skip:
 	return true;
+
+error:
+	if (track)
+		delete track;
+
+	return false;
 }
 
 
@@ -360,6 +518,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget *widget = NULL;
 
 	std::string format;
+	std::string icon_file;
 
 	int flags = VideoWidget::Theme::FlagNone;
 
@@ -449,6 +608,11 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		log_error("Widget loading error, icon '%s' unknown", s.c_str());
 		goto error;
 	}
+	else if (icon == VideoWidget::Theme::IconUserFile) {
+		icon_file = Utils::replace(s, "file:", "");
+	}
+	else
+		icon_file = "";
 
 	// Format
 	format = (const char *) w->valueFormat();
@@ -629,6 +793,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Widget icon settings
 	widget->theme().setIcon(icon);
+	widget->theme().setIconFile(icon_file);
 	widget->theme().setIconColor((const char *) w->iconColor());
 
 	// Widget misc. settings

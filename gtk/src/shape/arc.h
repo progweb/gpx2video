@@ -36,8 +36,10 @@ public:
 		log_call();
 	}
 
+	void load_models(void);
 	void bind_content(void);
 	void update_content(void);
+	void update_boundaries(void);
 
 private:
 	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;

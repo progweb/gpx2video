@@ -4,6 +4,8 @@
 #include <iostream>
 #include <string>
 
+#include "videowidget.h"
+
 
 class TrackSettings {
 public:
@@ -12,6 +14,25 @@ public:
 		ViewLockCenter,
 		ViewZoomFit,
 		ViewUnknown,
+	};
+
+	enum Icon {
+		IconDefault = -1,
+
+		// Internal type icons
+		IconStart = 0,
+		IconEnd,
+		IconPosition,
+
+		// Other internal icons
+		IconFinish,
+		IconNeedle,
+		IconSpot,
+
+		// At last user icons
+		IconUserFile,
+
+		IconUnknown
 	};
 
 	TrackSettings();
@@ -32,9 +53,6 @@ public:
 
 	const double& divider(void) const;
 	void setDivider(const double &divier);
-
-	const double& markerSize(void) const;
-	void setMarkerSize(const double &size);
 
 	const int& pathSmooth(void) const;
 	void setPathSmooth(const int &smooth);
@@ -57,20 +75,160 @@ public:
 	bool setPathSecondaryColor(std::string color);
 	bool setPathSecondaryColor(double r, double g, double b, double a);
 
+	Icon icon(Icon type) const {
+		switch (type) {
+		case IconStart:
+			return icon_start_;
+		case IconEnd:
+			return icon_end_;
+		case IconPosition:
+			return icon_position_;
+		default:
+			return IconUnknown;
+		}
+	}
+
+	void setIcon(const Icon &type, const Icon &icon) {
+		switch (type) {
+		case IconStart:
+			icon_start_ = icon;
+			break;
+		case IconEnd:
+			icon_end_ = icon;
+			break;
+		case IconPosition:
+			icon_position_ = icon;
+			break;
+		default:
+			break;
+		}
+	}
+
+	const std::string& iconFile(const Icon &type) const {
+		switch (type) {
+		case IconStart:
+			return icon_start_file_;
+		case IconEnd:
+			return icon_end_file_;
+		case IconPosition:
+			return icon_position_file_;
+		default:
+			return dummy_;
+		}
+	}
+
+	void setIconFile(const Icon &type, const std::string &file) {
+		switch (type) {
+		case IconStart:
+			icon_start_file_ = file;
+			break;
+		case IconEnd:
+			icon_end_file_ = file;
+			break;
+		case IconPosition:
+			icon_position_file_ = file;
+			break;
+		default:
+			break;
+		}
+	}
+
+	const float * iconColor(const Icon &type) const {
+		switch (type) {
+		case IconStart:
+			return icon_start_color_;
+		case IconEnd:
+			return icon_end_color_;
+		case IconPosition:
+			return icon_position_color_;
+		default:
+			return NULL;
+		}
+	}
+
+	bool setIconColor(const Icon &type, std::string color) {
+		switch (type) {
+		case IconStart:
+			return VideoWidget::Theme::hex2color(icon_start_color_, color);
+		case IconEnd:
+			return VideoWidget::Theme::hex2color(icon_end_color_, color);
+		case IconPosition:
+			return VideoWidget::Theme::hex2color(icon_position_color_, color);
+		default:
+			return false;
+		}
+	}
+
+	bool setIconColor(const Icon &type, double r, double g, double b, double a) {
+		switch (type) {
+		case IconStart:
+			icon_start_color_[0] = r;
+			icon_start_color_[1] = g;
+			icon_start_color_[2] = b;
+			icon_start_color_[3] = a;
+			break;
+		case IconEnd:
+			icon_end_color_[0] = r;
+			icon_end_color_[1] = g;
+			icon_end_color_[2] = b;
+			icon_end_color_[3] = a;
+			break;
+		case IconPosition:
+			icon_position_color_[0] = r;
+			icon_position_color_[1] = g;
+			icon_position_color_[2] = b;
+			icon_position_color_[3] = a;
+			break;
+		default:
+			return false;
+		}
+		return true;
+	}
+
+	const double& iconSize(const Icon &type) const {
+		switch (type) {
+		case IconStart:
+			return icon_start_size_;
+		case IconEnd:
+			return icon_end_size_;
+		case IconPosition:
+			return icon_position_size_;
+		default:
+			return null_;
+		}
+	}
+
+	void setIconSize(const Icon &type, const double &size) {
+		switch (type) {
+		case IconStart:
+			icon_start_size_ = size;
+			break;
+		case IconEnd:
+			icon_end_size_ = size;
+			break;
+		case IconPosition:
+			icon_position_size_ = size;
+			break;
+		default:
+			break;
+		}
+	}
+
 	void getBoundingBox(double *lat1, double *lon1, double *lat2, double *lon2) const;
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
 	static View string2view(std::string &s);
+	static Icon string2icon(std::string &s);
 
 	static std::string view2string(View view);
+	static std::string icon2string(Icon icon);
 
 protected:
 	int zoom_;
 	View view_;
 
+	double null_;
 	double divider_;
-
-	double marker_size_;
 
 	int path_smooth_;
 	double path_thick_;
@@ -79,6 +237,23 @@ protected:
 	float path_border_color_[4];
 	float path_primary_color_[4];
 	float path_secondary_color_[4];
+
+	Icon icon_start_;
+	std::string icon_start_file_;
+	float icon_start_color_[4];
+	double icon_start_size_;
+
+	Icon icon_end_;
+	std::string icon_end_file_;
+	float icon_end_color_[4];
+	double icon_end_size_;
+
+	Icon icon_position_;
+	std::string icon_position_file_;
+	float icon_position_color_[4];
+	double icon_position_size_;
+
+	std::string dummy_;
 
 private:
 	int width_, height_;

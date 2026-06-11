@@ -11,7 +11,7 @@ GPX2VideoTextWidgetSettingsBox::GPX2VideoTextWidgetSettingsBox(BaseObjectType *c
 	log_call();
 
 	// Populate models
-	//-----------------
+	load_models();
 
 	// Binding
 	bind_content();
@@ -19,6 +19,11 @@ GPX2VideoTextWidgetSettingsBox::GPX2VideoTextWidgetSettingsBox(BaseObjectType *c
 	// Update ui
 	update_content();
 	update_boundaries();
+}
+
+
+void GPX2VideoTextWidgetSettingsBox::load_models(void) {
+	log_call();
 }
 
 

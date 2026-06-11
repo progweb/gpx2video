@@ -12,12 +12,13 @@ GPX2VideoWidgetStackPage::GPX2VideoWidgetStackPage(BaseObjectType *cobject,
 	, ref_builder_(ref_builder) 
 	, resource_file_(resource_file) 
 	, parent_window_(parent) {
+	log_call();
 
 	// Connect widget list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widget_listbox");
 
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in " + resource_file_);
+		throw std::runtime_error("No \"widget_listbox\" object in " + resource_file_);
 
 	list->signal_row_selected().connect(sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_selected));
 }
@@ -51,9 +52,9 @@ void GPX2VideoWidgetStackPage::append(GPX2VideoWidget *widget) {
 	log_call();
 
 	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widget_listbox");
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+		throw std::runtime_error("No \"widget_listbox\" object in " + resource_file_);
 
 	// Build & append widget item
 	auto box = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
@@ -99,9 +100,9 @@ void GPX2VideoWidgetStackPage::remove(GPX2VideoWidget *widget) {
 		return;
 
 	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widget_listbox");
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+		throw std::runtime_error("No \"widget_listbox\" object in window.ui");
 
 	// Remove item
 	auto row = list->get_row_at_index(index);
@@ -113,9 +114,9 @@ void GPX2VideoWidgetStackPage::purge(void) {
 	log_call();
 
 	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widget_listbox");
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+		throw std::runtime_error("No \"widget_listbox\" object in window.ui");
 
 	// Clear widgets list
 	for (auto child = list->get_first_child(); child;) {
@@ -132,9 +133,9 @@ void GPX2VideoWidgetStackPage::set_widget_selected(GPX2VideoWidget *widget) {
 	size_t index = 0;
 
 	// Widgets list
-	auto list = ref_builder_->get_widget<Gtk::ListBox>("widgets_listbox");
+	auto list = ref_builder_->get_widget<Gtk::ListBox>("widget_listbox");
 	if (!list)
-		throw std::runtime_error("No \"widgets_listbox\" object in window.ui");
+		throw std::runtime_error("No \"widget_listbox\" object in window.ui");
 
 	if (widget) {
 		// Search widget item index

@@ -134,7 +134,10 @@ public:
 			FlagTickLabel = (1 << 6),
 			FlagCursor = (1 << 7),
 			FlagGauge = (1 << 8),
-			FlagUnknown = (1 << 9),
+			FlagIconStart = (1 << 9),
+			FlagIconEnd = (1 << 10),
+			FlagIconPosition = (1 << 11),
+			FlagUnknown = (1 << 12),
 			FlagAll = ~0x0
 		};
 
@@ -162,8 +165,10 @@ public:
 		};
 
 		enum Icon {
+			IconDefault = -1,
+
 			// Begin match VideoWidget::Type
-			IconAverageSpeed,
+			IconAverageSpeed = 0,
 			IconAverageRideSpeed,
 			IconBatteryLevel,
 			IconCadence,
@@ -191,8 +196,11 @@ public:
 			IconVerticalSpeed,
 			// End match VideoWidget::Type
 
-			IconDefault,
+			// Other internal icons
 			IconRunning,
+
+			// At last user icons
+			IconUserFile,
 
 			IconUnknown
 		};
@@ -337,6 +345,14 @@ public:
 			icon_ = icon;
 		}
 
+		const std::string& iconFile(void) const {
+			return icon_file_;
+		}
+
+		void setIconFile(const std::string &file) {
+			icon_file_ = file;
+		}
+
 		bool setIconColor(std::string color) {
 			return hex2color(icon_color_, color);
 		}
@@ -473,7 +489,8 @@ public:
 		}
 
 		void setValueMin(int value) {
-			value_min_ = value;
+			if (value < value_max_)
+				value_min_ = value;
 		}
 
 		const int& valueMax(void) const {
@@ -481,7 +498,8 @@ public:
 		}
 
 		void setValueMax(int value) {
-			value_max_ = value;
+			if (value > value_min_)
+				value_max_ = value;
 		}
 
 		enum Align valueHorizontalAlign(void) const {
@@ -932,6 +950,7 @@ public:
 		float cursor_color_[4];
 
 		Icon icon_;
+		std::string icon_file_;
 		float icon_color_[4];
 
 		Align label_horizontal_align_;

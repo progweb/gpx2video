@@ -289,18 +289,40 @@ namespace layout
     String  &pathSecondaryColor() { return _path_secondary_color; }
 
     ///
-    /// Get marker size
+    /// Get icon name
     ///
-    /// @return the marker size element
+    /// @return the icon name element
     ///
-    Decimal  &markerSize() { return _marker_size; }
+    String &iconEnd() { return _icon_end_name; }
+    String &iconStart() { return _icon_start_name; }
+    String &iconPosition() { return _icon_position_name; }
+
+    ///
+    /// Get icon color
+    ///
+    /// @return the icon color element
+    ///
+    String &iconEndColor() { return _icon_end_color; }
+    String &iconStartColor() { return _icon_start_color; }
+    String &iconPositionColor() { return _icon_position_color; }
+
+    ///
+    /// Get icon size
+    ///
+    /// @return the icon size element
+    ///
+    Decimal  &iconEndSize() { return _icon_end_size; }
+    Decimal  &iconStartSize() { return _icon_start_size; }
+    Decimal  &iconPositionSize() { return _icon_position_size; }
 
 	/// 
-	/// Get marker flag
+	/// Get icon flag
 	///
-	/// @return the marker flag element
+	/// @return the icon flag element
 	///
-	Boolean  &withMarker() { return _with_marker; }
+	Boolean  &withIconEnd() { return _with_icon_end; }
+	Boolean  &withIconStart() { return _with_icon_start; }
+	Boolean  &withIconPosition() { return _with_icon_position; }
 
     // Methods
 
@@ -337,9 +359,20 @@ namespace layout
 	String       _path_border_color;
 	String       _path_primary_color;
 	String       _path_secondary_color;
-	Decimal      _marker_size;
     
-	Boolean      _with_marker;
+    String       _icon_end_name;
+    String       _icon_start_name;
+    String       _icon_position_name;
+	String       _icon_end_color;
+	String       _icon_start_color;
+	String       _icon_position_color;
+	Decimal      _icon_end_size;
+	Decimal      _icon_start_size;
+	Decimal      _icon_position_size;
+
+	Boolean      _with_icon_end;
+	Boolean      _with_icon_start;
+	Boolean      _with_icon_position;
 
     // Disable copy constructors
     Map(const Map &);

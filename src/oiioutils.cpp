@@ -1,3 +1,6 @@
+#include <librsvg/rsvg.h>
+#include <cairo.h>
+
 #include "log_i.h"
 #include "oiioutils.h"
 
@@ -90,3 +93,113 @@ error:
 	return;
 }
 
+
+OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider, const float *color) {
+	bool apply_color;
+
+	int stride;
+	unsigned char *data;
+
+	double width, height;
+
+    GError *error = nullptr;
+
+	cairo_t *cr = NULL;
+	cairo_t *mask = NULL;
+	cairo_surface_t *surface = NULL;
+	cairo_surface_t *masksurface = NULL;
+
+	RsvgRectangle viewport;
+
+	RsvgHandle *handle = NULL;
+
+	OIIO::ImageBuf *buf;
+
+	// Set color
+	apply_color = (color != NULL) && (color[3] != 0);
+
+	// load svg data
+    handle = rsvg_handle_new_from_file(filename, &error);
+    if (!handle) {
+        log_error("Load svn image failure: %s", error->message);
+        g_error_free(error);
+        return NULL;
+    }
+
+    // svg dimensions
+	rsvg_handle_get_intrinsic_size_in_pixels(handle, &width, &height);
+
+	// Compute size
+	width *= divider;
+	height *= divider;
+
+	// Create cairo surface (ARGB32)
+	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+
+	// Create cairo context
+	cr = cairo_create(surface);
+
+	if (apply_color) {
+    	// Create cairo alpha only surface
+		masksurface = cairo_image_surface_create(CAIRO_FORMAT_A8, width, height);
+
+		// Create mask
+		mask = cairo_create(masksurface);
+	}
+
+	// Render svg into cairo surface
+	viewport = (RsvgRectangle) {
+		.x = 0,
+		.y = 0,
+		.width = (double) width,
+		.height = (double) height
+	};
+
+	rsvg_handle_render_document(handle, apply_color ? mask : cr, &viewport, NULL);
+
+	if (apply_color) {
+		// Apply color
+		cairo_set_source_rgba(cr, color[0], color[1], color[2], color[3]);
+
+		// Paint mask
+		cairo_mask_surface(cr, masksurface, 0, 0);
+	}
+
+    // Get raw pixel data from cairo
+    data = cairo_image_surface_get_data(surface);
+    stride = cairo_image_surface_get_stride(surface);
+
+    // Create OpenImageIO ImageBuf (convert ARGB → RGBA if needed)
+	buf = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8));
+
+	// Cairo to OIIO
+	if (data != NULL) {
+		buf->set_pixels(OIIO::ROI(),
+			buf->spec().format,
+			data, 
+			OIIO::AutoStride,
+			stride);
+	}
+
+	// BGRA => RGBA
+	int channelorder[] = { 2, 1, 0, 3 };
+	float channelvalues[] = { };
+	std::string channelnames[] = { "B", "G", "R", "A" };
+
+	OIIO::ImageBufAlgo::channels(*buf, *buf, 4, channelorder, channelvalues, channelnames);
+
+	// Free
+	if (masksurface)
+		cairo_surface_destroy(masksurface);
+	if (surface)
+		cairo_surface_destroy(surface);
+	if (mask)
+		cairo_destroy(mask);
+	if (cr)
+		cairo_destroy(cr);
+
+	if (handle != NULL)
+		g_object_unref(handle);
+
+	return buf;
+}

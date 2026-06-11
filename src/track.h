@@ -74,6 +74,8 @@ public:
 	void draw(cairo_t *cr, const TelemetryData &data);
 	void clear(void);
 
+	std::string getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon bydefault=TrackSettings::IconUnknown);
+
 protected:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
@@ -88,7 +90,7 @@ protected:
 	void init(void);
 	bool load(void);
 
-	bool drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider);
+	bool icon(OIIO::ImageBuf &map, OIIO::ImageBuf &icon, int x, int y, OIIO::ROI roi);
 
 	void xmlopen(std::ostream &os) {
 		log_call();
@@ -108,23 +110,7 @@ protected:
 		os << "</track>" << std::endl;
 	}
 
-	void xmlwrite(std::ostream &os) {
-		VideoWidget::xmlwrite(os);
-
-		ShapeBase::xmlwrite(os);
-
-		os << "<marker-size>" << settings().markerSize() << "</marker-size>" << std::endl;
-
-		os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
-		os << "<factor>" << settings().divider() << "</factor>" << std::endl;
-
-		os << "<path-smooth>" << settings().pathSmooth() << "</path-smooth>" << std::endl;
-		os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
-		os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;
-		os << "<path-border-color>" << VideoWidget::Theme::color2hex(settings().pathBorderColor()) << "</path-border-color>" << std::endl;
-		os << "<path-primary-color>" << VideoWidget::Theme::color2hex(settings().pathPrimaryColor()) << "</path-primary-color>" << std::endl;
-		os << "<path-secondary-color>" << VideoWidget::Theme::color2hex(settings().pathSecondaryColor()) << "</path-secondary-color>" << std::endl;
-	}
+	void xmlwrite(std::ostream &os);
 
 	GPXApplication &app_;
 	TrackSettings track_settings_;
@@ -137,6 +123,10 @@ protected:
 	std::string assets_path_;
 
 	OIIO::ImageBuf *trackbuf_;
+
+	OIIO::ImageBuf *icon_end_buf_;
+	OIIO::ImageBuf *icon_start_buf_;
+	OIIO::ImageBuf *icon_position_buf_;
 
 	TelemetryData last_data_;
 

@@ -34,6 +34,7 @@ public:
 		log_call();
 	}
 
+	void load_models(void);
 	void bind_content(void);
 	void update_content(void);
 	void update_boundaries(void);

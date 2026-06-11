@@ -124,7 +124,7 @@ eof:
 		// Grade, Distance, Heading, Speed, MaxSpeed, Average, Ride Average, 
 		// Cadence, Heartrate, Power, Lap
 		for (size_t i=0; i<columns.size(); i++) {
-			name = capitalize(columns[i]);
+			name = Utils::capitalize(columns[i]);
 
 			if (name == "Timestamp")
 				index_timestamp_ = i;

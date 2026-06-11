@@ -41,6 +41,7 @@ extern "C" {
 #include "log_i.h"
 #include "utils.h"
 #include "compat.h"
+#include "media.h"
 #include "datetime.h"
 #include "timesync.h"
 #include "widgetstackpage.h"
@@ -93,6 +94,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	// Application settings
 	bind_settings();
 
+	// Media list
+	media_model_ = GPX2VideoMediaListStore::create();
+
 	// Connect the menu to the MenuButton gears_.
 	// (The connection between action and menu item is specified in gears_menu.ui)
 	Glib::RefPtr<Gtk::Builder> builder;
@@ -105,6 +109,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	gears_->set_menu_model(menu);
 
 	// Append video stack page
+	media_stackpage_ = GPX2VideoMediaStackPage::create();
 	video_stackpage_ = GPX2VideoVideoStackPage::create();
 	widget_stackpage_ = GPX2VideoWidgetStackPage::create(*this);
 	telemetry_stackpage_ = GPX2VideoTelemetryStackPage::create();
@@ -115,6 +120,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 		throw std::runtime_error("No \"info_stack\" object in window.ui");
 	stackpage = info_stack_->add(*(video_stackpage_), video_stackpage_->name(), video_stackpage_->title());
 	stackpage->set_icon_name(video_stackpage_->icon_name());
+	stackpage = info_stack_->add(*(media_stackpage_), media_stackpage_->name(), media_stackpage_->title());
+	stackpage->set_icon_name(media_stackpage_->icon_name());
 	stackpage = info_stack_->add(*(telemetry_stackpage_), telemetry_stackpage_->name(), telemetry_stackpage_->title());
 	stackpage->set_icon_name(telemetry_stackpage_->icon_name());
 	stackpage = info_stack_->add(*(widget_stackpage_), widget_stackpage_->name(), widget_stackpage_->title());
@@ -126,9 +133,15 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	if (!video_frame_)
 		throw std::runtime_error("No \"video_frame\" object in video_frame.ui");
 
+	// Media frame object
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/media_frame.ui");
+	media_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoMediaFrame>(builder, "media_frame", media_model_);
+	if (!media_frame_)
+		throw std::runtime_error("No \"media_frame\" object in media_frame.ui");
+
 	// Widget frame object
 	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/widget_frame.ui");
-	widget_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoWidgetFrame>(builder, "widget_frame");
+	widget_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoWidgetFrame>(builder, "widget_frame", media_model_);
 	if (!widget_frame_)
 		throw std::runtime_error("No \"widget_frame\" object in widget_frame.ui");
 
@@ -143,6 +156,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	if (!box)
 		throw std::runtime_error("No \"frames_box\" object in window.ui");
 
+	box->append(*media_frame_);
 	box->append(*video_frame_);
 	box->append(*telemetry_frame_);
 	box->append(*widget_frame_);
@@ -257,6 +271,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	video_area_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_clicked));
 	video_area_->signal_widget_position_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_position_changed));
 
+	// Connect media category
+	media_stackpage_->signal_media_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_media_changed));
+
 	// Connect widget list
 	widget_stackpage_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_selected));
 	widget_stackpage_->signal_widget_remove_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_remove_clicked));
@@ -285,6 +302,7 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 	// Create a dummy instance before the call to Gtk::Builder::create_from_resource
 	// This creation registers custom GPX2VideoWidget's class in the GType system.
 	static_cast<void>(GPX2VideoArea(dummy));
+	static_cast<void>(GPX2VideoMediaFrame());
 	static_cast<void>(GPX2VideoVideoFrame());
 	static_cast<void>(GPX2VideoWidgetFrame());
 	static_cast<void>(GPX2VideoTelemetryFrame());
@@ -397,6 +415,54 @@ void GPX2VideoApplicationWindow::bind_settings(void) {
 				Gio::Settings::BindFlags::DEFAULT
 		);
 	}
+}
+
+
+/**
+ * Open icon file (svg)
+ *
+ * Append icon file to user icons list
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::open_icon_file(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	Glib::ustring filename = file->get_parse_name();
+
+	if (filename.empty())
+		return;
+
+	log_info("Append icon file: %s", filename.c_str());
+
+	media_model_->append(
+		GPX2VideoMedia::MediaIcon,
+		filename
+	);
+}
+
+
+/**
+ * Open image file (png / jpg)
+ *
+ * Append image file to user images list
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::open_image_file(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	Glib::ustring filename = file->get_parse_name();
+
+	if (filename.empty())
+		return;
+
+	log_info("Append image file: %s", filename.c_str());
+
+	media_model_->append(
+		GPX2VideoMedia::MediaImage,
+		filename
+	);
 }
 
 
@@ -668,7 +734,7 @@ void GPX2VideoApplicationWindow::save_layout_file(const Glib::RefPtr<const Gio::
 	out << "<layout>" << std::endl;
 
 	for (GPX2VideoWidget *item : renderer_->widgets()) {
-		IndentingOStreambuf indent(out, 4);
+		Utils::IndentingOStreambuf indent(out, 4);
 
 		item->widget()->save(out);
 	}
@@ -688,6 +754,8 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 	log_call();
 
 	// File filter
+	Glib::RefPtr<Gtk::FileFilter> default_filter;
+
 	auto filter_video = Gtk::FileFilter::create();
 	filter_video->set_name(_("All video files"));
 	filter_video->add_mime_type("video/*");
@@ -697,11 +765,17 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 //	filter_layout->add_mime_type("application/xml");
 	filter_layout->add_suffix("xml");
 
+	// Default filter
+	if (media_ == NULL)
+		default_filter = filter_video;
+	else
+		default_filter = filter_layout;
+
 	// Create file chooser dialog
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	auto dialog = Gtk::FileDialog::create(); 
 
-	dialog->set_title("Open a file");
+	dialog->set_title(_("Open a file"));
 	dialog->set_modal(true);
 	dialog->set_initial_folder(working_folder_);
 
@@ -711,14 +785,14 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 	filters->append(filter_video);
 	filters->append(filter_layout);
 
-	dialog->set_default_filter((media_ == NULL) ? filter_video : filter_layout);
 	dialog->set_filters(filters);
+	dialog->set_default_filter(default_filter);
 
 	// Bind open file signal
 	dialog->open(*this, sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
 #else
-	auto dialog = new Gtk::FileChooserDialog(*this, "Open a file", Gtk::FileChooserDialog::Action::OPEN);
+	auto dialog = new Gtk::FileChooserDialog(*this, _("Open a file"), Gtk::FileChooserDialog::Action::OPEN);
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
@@ -726,8 +800,8 @@ void GPX2VideoApplicationWindow::on_action_open(void) {
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_video);
 	dialog->add_filter(filter_layout);
-	dialog->set_filter((media_ == NULL) ? filter_video : filter_layout);
-	dialog->add_button("Ok", Gtk::ResponseType::OK);
+	dialog->set_filter(default_filter);
+	dialog->add_button(_("Ok"), Gtk::ResponseType::OK);
 	dialog->show();
 
 	dialog->signal_response().connect(sigc::bind(
@@ -746,7 +820,7 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 
 	// File filter
 	auto filter = Gtk::FileFilter::create();
-	filter->set_name("All layout files");
+	filter->set_name(_("All layout files"));
 //	filter->add_mime_type("application/xml");
 	filter->add_suffix("xml");
 
@@ -756,7 +830,7 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 
 	std::string name = Glib::path_get_basename(Glib::StdStringView(layout_file_));
 
-	dialog->set_title("Export layout");
+	dialog->set_title(_("Export layout"));
 	dialog->set_modal(true);
 	dialog->set_initial_folder(working_layout_);
 	dialog->set_initial_name(name.empty() ? "layout.xml" : name);
@@ -773,7 +847,7 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 	dialog->save(*this, sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_save_clicked), dialog));
 #else
-	auto dialog = new Gtk::FileChooserDialog(*this, "Export layout", Gtk::FileChooserDialog::Action::SAVE);
+	auto dialog = new Gtk::FileChooserDialog(*this, _("Export layout"), Gtk::FileChooserDialog::Action::SAVE);
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
@@ -781,7 +855,7 @@ void GPX2VideoApplicationWindow::on_action_save(void) {
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter);
 	dialog->set_filter(filter);
-	dialog->add_button("Ok", Gtk::ResponseType::OK);
+	dialog->add_button(_("Ok"), Gtk::ResponseType::OK);
 	dialog->show();
 
 	dialog->signal_response().connect(sigc::bind(
@@ -802,21 +876,36 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 	log_call();
 
 	// File filter
+	Glib::RefPtr<Gtk::FileFilter> default_filter;
+
 	auto filter_gpx = Gtk::FileFilter::create();
-	filter_gpx->set_name("All GPX files");
+	filter_gpx->set_name(_("All GPX files"));
 	filter_gpx->add_mime_type("application/gpx+xml");
-//	filter_gpx->add_suffix("gpx");
-//	filter_gpx->add_suffix("GPX");
 
 	auto filter_csv = Gtk::FileFilter::create();
-	filter_csv->set_name("All CSV files");
+	filter_csv->set_name(_("All CSV files"));
 	filter_csv->add_mime_type("text/csv");
+
+	auto filter_icon = Gtk::FileFilter::create();
+	filter_icon->set_name(_("All icon files"));
+	filter_icon->add_mime_type("image/svg+xml");
+
+	auto filter_image = Gtk::FileFilter::create();
+	filter_image->set_name(_("All image files"));
+	filter_image->add_mime_type("image/png");
+	filter_image->add_mime_type("image/jpeg");
+
+	// Default filter
+	if (settings().inputfile() == "")
+		default_filter = filter_gpx;
+	else
+		default_filter = filter_image;
 
 	// Create file chooser dialog
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	auto dialog = Gtk::FileDialog::create(); 
 
-	dialog->set_title("Open a telemetry file");
+	dialog->set_title(_("Open an image or a telemetry file"));
 	dialog->set_modal(true);
 	dialog->set_initial_folder(working_folder_);
 
@@ -825,14 +914,17 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 
 	filters->append(filter_gpx);
 	filters->append(filter_csv);
+	filters->append(filter_icon);
+	filters->append(filter_image);
 
 	dialog->set_filters(filters);
+	dialog->set_default_filter(default_filter);
 
 	// Bind open file signal
 	dialog->open(*this, sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_file_dialog_open_clicked), dialog));
 #else
-	auto dialog = new Gtk::FileChooserDialog(*this, "Open a telemetry file", Gtk::FileChooserDialog::Action::OPEN);
+	auto dialog = new Gtk::FileChooserDialog(*this, _("Open an image or a telemetry file"), Gtk::FileChooserDialog::Action::OPEN);
 
 	dialog->set_transient_for(*this);
 	dialog->set_modal(true);
@@ -840,7 +932,9 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 	dialog->set_default_size(640, 480);
 	dialog->add_filter(filter_gpx);
 	dialog->add_filter(filter_csv);
-	dialog->add_button("Ok", Gtk::ResponseType::OK);
+	dialog->add_filter(filter_icon);
+	dialog->add_filter(filter_image);
+	dialog->add_button(_("Ok"), Gtk::ResponseType::OK);
 	dialog->show();
 
 	dialog->signal_response().connect(sigc::bind(
@@ -1157,8 +1251,17 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 
 	// Update visible frame
 	video_frame_->set_visible((name == "video_page"));
+	media_frame_->set_visible((name == "media_page"));
 	telemetry_frame_->set_visible((name == "telemetry_page"));
 	widget_frame_->set_visible((name == "widget_page"));
+}
+
+
+void GPX2VideoApplicationWindow::on_media_changed(void) {
+	log_call();
+
+	// List media by category
+	media_frame_->set_media(media_stackpage_->get_media());
 }
 
 
@@ -1251,6 +1354,10 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 	}
 	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
 		open_telemetry_file(file);
+	else if (type == "image/svg+xml")
+		open_icon_file(file);
+	else if ((type == "image/png") || (type == "image/jpeg")) 
+		open_image_file(file);
 	else
 		open_media_file(file);
 }
@@ -1296,6 +1403,10 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 	}
 	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
 		open_telemetry_file(file);
+	else if (type == "image/svg+xml")
+		open_icon_file(file);
+	else if ((type == "image/png") || (type == "image/jpeg")) 
+		open_image_file(file);
 	else
 		open_media_file(file);
 }

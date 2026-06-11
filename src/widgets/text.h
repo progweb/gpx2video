@@ -81,6 +81,8 @@ private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
+	std::string icon_filename_;
+
 	TextWidget(GPXApplication &app);
 
 	void initialize(cairo_t *cr);

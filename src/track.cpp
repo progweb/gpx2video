@@ -32,12 +32,12 @@ TrackSettings::TrackSettings() {
 	width_ = 320;
 	height_ = 240;
 
+	null_ = 0.0;
+
 	zoom_ = 18;
 	view_ = TrackSettings::ViewZoomFit;
 
 	divider_ = 1.0;
-
-	marker_size_ = 1.0;
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
@@ -46,6 +46,18 @@ TrackSettings::TrackSettings() {
 	setPathBorderColor(0.0, 0.0, 0.0, 1.0);
 	setPathPrimaryColor(0.9, 0.4, 0.2, 1.0);
 	setPathSecondaryColor(1.0, 1.0, 1.0, 1.0);
+
+	setIcon(TrackSettings::IconStart, TrackSettings::IconDefault);
+	setIconColor(TrackSettings::IconStart, 0.0, 0.0, 0.0, 0.0);
+	setIconSize(TrackSettings::IconStart, 1.0);
+
+	setIcon(TrackSettings::IconEnd, TrackSettings::IconDefault);
+	setIconColor(TrackSettings::IconEnd, 0.0, 0.0, 0.0, 0.0);
+	setIconSize(TrackSettings::IconEnd, 1.0);
+
+	setIcon(TrackSettings::IconPosition, TrackSettings::IconDefault);
+	setIconColor(TrackSettings::IconPosition, 0.0, 0.0, 0.0, 0.0);
+	setIconSize(TrackSettings::IconPosition, 1.0);
 }
 
 
@@ -96,16 +108,6 @@ const double& TrackSettings::divider(void) const {
 
 void TrackSettings::setDivider(const double &divider) {
 	divider_ = divider;
-}
-
-
-const double& TrackSettings::markerSize(void) const {
-	return marker_size_;
-}
-
-
-void TrackSettings::setMarkerSize(const double &size) {
-	marker_size_ = size;
 }
 
 
@@ -230,6 +232,32 @@ TrackSettings::View TrackSettings::string2view(std::string &s) {
 }
 
 
+TrackSettings::Icon TrackSettings::string2icon(std::string &s) {
+	TrackSettings::Icon icon;
+
+	if (s.empty() || (s == "default"))
+		icon = TrackSettings::IconDefault;
+	else if (s == "internal:start")
+		icon = TrackSettings::IconStart;
+	else if (s == "internal:end")
+		icon = TrackSettings::IconEnd;
+	else if (s == "internal:position")
+		icon = TrackSettings::IconPosition;
+	else if (s == "internal:finish")
+		icon = TrackSettings::IconFinish;
+	else if (s == "internal:needle")
+		icon = TrackSettings::IconNeedle;
+	else if (s == "internal:spot")
+		icon = TrackSettings::IconSpot;
+	else if (Utils::starts_with(s, "file:"))
+		icon = TrackSettings::IconUserFile;
+	else
+		icon = TrackSettings::IconUnknown;
+
+	return icon;
+}
+
+
 std::string TrackSettings::view2string(View view) {
 	switch (view) {
 	case TrackSettings::ViewZoomFit:
@@ -243,6 +271,33 @@ std::string TrackSettings::view2string(View view) {
 	}
 }
 
+
+std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
+	switch (icon) {
+	case TrackSettings::IconDefault:
+		return "default";
+
+	case TrackSettings::IconStart:
+		return "internal:start";
+	case TrackSettings::IconEnd:
+		return "internal:end";
+	case TrackSettings::IconPosition:
+		return "internal:position";
+
+	case TrackSettings::IconFinish:
+		return "internal:finish";
+	case TrackSettings::IconNeedle:
+		return "internal:needle";
+	case TrackSettings::IconSpot:
+		return "internal:spot";
+
+	case TrackSettings::IconUserFile:
+		return "file:";
+
+	default:
+		return "";
+	}
+}
 
 
 Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase)
@@ -267,6 +322,10 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 	fg_buf_ = NULL;
 	trackbuf_ = NULL;
 
+	icon_end_buf_ = NULL;
+	icon_start_buf_ = NULL;
+	icon_position_buf_ = NULL;
+
 	divider_ = 1.0;
 
 	pvx1_ = pvy1_ = pvx2_ = pvy2_ = 0;
@@ -280,6 +339,13 @@ Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, c
 
 Track::~Track() {
 	log_call();
+
+	if (icon_end_buf_ != NULL)
+		delete icon_end_buf_;
+	if (icon_start_buf_ != NULL)
+		delete icon_start_buf_;
+	if (icon_position_buf_ != NULL)
+		delete icon_position_buf_;
 
 	if (trackbuf_ != NULL)
 		delete trackbuf_;
@@ -387,7 +453,7 @@ bool Track::preinit(void) {
 	last_data_ = TelemetryData();
 
 	// Assets path
-	assets_path_ = app_.assets("marker");
+	assets_path_ = app_.assets("icon");
 
 	// Check telemetry data
 	if (app_.settings().inputfile().empty()) {
@@ -434,6 +500,10 @@ void Track::init(void) {
 	int padding_vertical;
 	int padding_horizontal;
 
+	double size;
+
+	const float *color;
+
 	double lat1, lon1;
 	double lat2, lon2;
 
@@ -445,6 +515,8 @@ void Track::init(void) {
 
 	int pos_lim_x1, pos_lim_y1;
 	int pos_lim_x2, pos_lim_y2;
+
+	std::string filename;
 
 	log_call();
 
@@ -641,6 +713,30 @@ void Track::init(void) {
 
 		break;
 	}
+
+	// Delete old buffers
+	if (icon_end_buf_ != NULL)
+		delete icon_end_buf_;
+	if (icon_start_buf_ != NULL)
+		delete icon_start_buf_;
+	if (icon_position_buf_ != NULL)
+		delete icon_position_buf_;
+
+	// Load icons
+	size = settings().iconSize(TrackSettings::IconEnd);
+	color = settings().iconColor(TrackSettings::IconEnd);
+	filename = getIconFilename(settings().icon(TrackSettings::IconEnd), TrackSettings::IconEnd);
+	icon_end_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
+
+	size = settings().iconSize(TrackSettings::IconStart);
+	color = settings().iconColor(TrackSettings::IconStart);
+	filename = getIconFilename(settings().icon(TrackSettings::IconStart), TrackSettings::IconStart);
+	icon_start_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
+
+	size = settings().iconSize(TrackSettings::IconPosition);
+	color = settings().iconColor(TrackSettings::IconPosition);
+	filename = getIconFilename(settings().icon(TrackSettings::IconPosition), TrackSettings::IconPosition);
+	icon_position_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
 
 	// Init done
 	is_init_ = true;
@@ -1036,8 +1132,6 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int padding_horizontal;
 
 	int zoom = settings().zoom();
-	double marker_size = settings().markerSize();
-	bool marker_enable = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
 	cairo_t *cairo;
 
@@ -1199,13 +1293,13 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		OIIO::ImageBufAlgo::over(*fg_buf_, *trackbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 		// Draw picto
-		if (marker_enable && (marker_size > 0)) {
-			drawPicto(*fg_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/end.png").c_str(), marker_size);
-			drawPicto(*fg_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/start.png").c_str(), marker_size);
-		
-			if (data.hasValue(TelemetryData::DataFix))
-				drawPicto(*fg_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height), std::string(assets_path_ + "/position.png").c_str(), marker_size);
-		}
+		if (icon_start_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconStart))
+			icon(*fg_buf_, *icon_start_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height));
+		if (icon_end_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconEnd))
+			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
+
+		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition))
+			icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
 	}
 
 	// Save last position
@@ -1283,29 +1377,17 @@ void Track::clear(void) {
 }
 
 
-bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const char *picto, double divider) {
+bool Track::icon(OIIO::ImageBuf &map, OIIO::ImageBuf &icon, int x, int y, OIIO::ROI roi) {
 	bool result;
 
-	// Open picto
-	auto img = OIIO::ImageInput::open(picto);
-	const OIIO::ImageSpec& spec = img->spec();
-	OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
-
-	OIIO::ImageBuf buf = OIIO::ImageBuf(OIIO::ImageSpec(spec.width, spec.height, spec.nchannels, type));
-	img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
-
-	// Resize picto
-	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type));
-	OIIO::ImageBufAlgo::resize(dst, buf);
-
-	// Marker position
-	x -= dst.spec().width / 2;
-	y -= dst.spec().height - (25 * divider);
+	// Icon position
+	x -= icon.spec().width / 2;
+	y -= icon.spec().height / 2;
 
 	// Image over
-	dst.specmod().x = x;
-	dst.specmod().y = y;
-	result = OIIO::ImageBufAlgo::over(map, dst, map, roi);
+	icon.specmod().x = x;
+	icon.specmod().y = y;
+	result = OIIO::ImageBufAlgo::over(map, icon, map, roi);
 
 	if (!result)
 		log_error("ImageBufAlgo::over failure");
@@ -1313,4 +1395,65 @@ bool Track::drawPicto(OIIO::ImageBuf &map, int x, int y, OIIO::ROI roi, const ch
 	return result;
 }
 
+
+std::string Track::getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon bydefault) {
+	log_call();
+
+	std::string path = GPXApplication::assets("marker");
+
+	if (icon == TrackSettings::IconDefault)
+		icon = bydefault;
+	else if (icon == TrackSettings::IconUserFile)
+		return settings().iconFile(bydefault);
+	
+	switch (icon) {
+	case TrackSettings::IconStart:
+		return path + "/start.svg";
+	case TrackSettings::IconEnd:
+		return path + "/end.svg";
+	case TrackSettings::IconPosition:
+		return path + "/position.svg";
+	case TrackSettings::IconFinish:
+		return path + "/finish.svg";
+	case TrackSettings::IconNeedle:
+		return path + "/needle.svg";
+	case TrackSettings::IconSpot:
+		return path + "/spot.svg";
+	default:
+		return "";
+	}
+}
+
+
+void Track::xmlwrite(std::ostream &os) {
+	VideoWidget::xmlwrite(os);
+
+	ShapeBase::xmlwrite(os);
+
+	os << "<with-icon-start>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-start>" << std::endl;
+	os << "<with-icon-end>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-end>" << std::endl;
+	os << "<with-icon-position>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-position>" << std::endl;
+
+	os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
+	os << "<factor>" << settings().divider() << "</factor>" << std::endl;
+
+	os << "<path-smooth>" << settings().pathSmooth() << "</path-smooth>" << std::endl;
+	os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
+	os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;
+	os << "<path-border-color>" << VideoWidget::Theme::color2hex(settings().pathBorderColor()) << "</path-border-color>" << std::endl;
+	os << "<path-primary-color>" << VideoWidget::Theme::color2hex(settings().pathPrimaryColor()) << "</path-primary-color>" << std::endl;
+	os << "<path-secondary-color>" << VideoWidget::Theme::color2hex(settings().pathSecondaryColor()) << "</path-secondary-color>" << std::endl;
+
+	os << "<icon-start-name>" << TrackSettings::icon2string(settings().icon(TrackSettings::IconStart)) << settings().iconFile(TrackSettings::IconStart) << "</icon-start-name>" << std::endl;
+	os << "<icon-start-color>" << VideoWidget::Theme::color2hex(settings().iconColor(TrackSettings::IconStart)) << "</icon-start-color>" << std::endl;
+	os << "<icon-start-size>" << settings().iconSize(TrackSettings::IconStart) << "</icon-start-size>" << std::endl;
+
+	os << "<icon-end-name>" << TrackSettings::icon2string(settings().icon(TrackSettings::IconEnd)) << settings().iconFile(TrackSettings::IconEnd) << "</icon-end-name>" << std::endl;
+	os << "<icon-end-color>" << VideoWidget::Theme::color2hex(settings().iconColor(TrackSettings::IconEnd)) << "</icon-end-color>" << std::endl;
+	os << "<icon-end-size>" << settings().iconSize(TrackSettings::IconEnd) << "</icon-end-size>" << std::endl;
+
+	os << "<icon-position-name>" << TrackSettings::icon2string(settings().icon(TrackSettings::IconPosition)) << settings().iconFile(TrackSettings::IconPosition) << "</icon-position-name>" << std::endl;
+	os << "<icon-position-color>" << VideoWidget::Theme::color2hex(settings().iconColor(TrackSettings::IconPosition)) << "</icon-position-color>" << std::endl;
+	os << "<icon-position-size>" << settings().iconSize(TrackSettings::IconPosition) << "</icon-position-size>" << std::endl;
+}
 

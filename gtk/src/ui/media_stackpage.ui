@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+	<requires lib="gtk" version="4.0"/>
+	<object class="GtkScrolledWindow" id="media_stackpage">
+		<property name="hscrollbar-policy">2</property>
+		<property name="vexpand">1</property>
+		<property name="has-frame">1</property>
+		<property name="child">
+			<object class="GtkListBox" id="media_listbox">
+				<property name="selection-mode">single</property>
+				<property name="activate-on-single-click">True</property>
+				<property name="vexpand">True</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkImage">
+								<property name="halign">start</property>
+								<property name="hexpand">False</property>
+								<property name="valign">center</property>
+								<property name="vexpand">True</property>
+								<property name="icon-name">audio-x-generic-symbolic</property>
+								<property name="margin-bottom">8</property>
+								<property name="margin-end">8</property>
+								<property name="margin-start">8</property>
+								<property name="margin-top">8</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkLabel">
+								<property name="valign">baseline</property>
+								<property name="justify">left</property>
+								<property name="label" translatable="yes">Audio</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+					</object>
+				</child>
+
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkImage">
+								<property name="halign">start</property>
+								<property name="hexpand">False</property>
+								<property name="valign">center</property>
+								<property name="vexpand">True</property>
+								<property name="icon-name">insert-object-symbolic</property>
+								<property name="margin-bottom">8</property>
+								<property name="margin-end">8</property>
+								<property name="margin-start">8</property>
+								<property name="margin-top">8</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkLabel">
+								<property name="valign">baseline</property>
+								<property name="justify">left</property>
+								<property name="label" translatable="yes">Icon</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+					</object>
+				</child>
+
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">horizontal</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkImage">
+								<property name="halign">start</property>
+								<property name="hexpand">False</property>
+								<property name="valign">center</property>
+								<property name="vexpand">True</property>
+								<property name="icon-name">image-x-generic-symbolic</property>
+								<property name="margin-bottom">8</property>
+								<property name="margin-end">8</property>
+								<property name="margin-start">8</property>
+								<property name="margin-top">8</property>
+							</object>
+						</child>
+						<child>
+							<object class="GtkLabel">
+								<property name="valign">baseline</property>
+								<property name="justify">left</property>
+								<property name="label" translatable="yes">Image</property>
+								<property name="xalign">0.5</property>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</property>
+	</object>
+</interface>

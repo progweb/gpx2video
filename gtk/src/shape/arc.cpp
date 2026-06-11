@@ -12,7 +12,15 @@ GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobje
 	loading_ = false;
 
 	// Populate models
-	//-----------------
+	load_models();
+
+	// Binding
+	bind_content();
+}
+
+
+void GPX2VideoArcShapeSettingsBox::load_models(void) {
+	log_call();
 
 	gauge_cap_model_ = Gtk::ListStore::create(model_);
 
@@ -47,9 +55,6 @@ GPX2VideoArcShapeSettingsBox::GPX2VideoArcShapeSettingsBox(BaseObjectType *cobje
 		row[model_.m_id] = VideoWidget::Theme::NeedleTypeDesign;
 		row[model_.m_name] = _("Design");
 	}
-
-	// Binding
-	bind_content();
 }
 
 
@@ -711,5 +716,13 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 
 	// Unmask value changed
 	loading_ = false;
+
+	// Apply limit
+	update_boundaries();
+}
+
+
+void GPX2VideoArcShapeSettingsBox::update_boundaries(void) {
+	log_call();
 }
 

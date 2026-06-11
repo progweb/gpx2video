@@ -104,6 +104,35 @@
 														<property name="valign">start</property>
 														<property name="vexpand">False</property>
 														<child>
+															<object class="GtkBox">
+																<property name="orientation">horizontal</property>
+																<property name="halign">fill</property>
+																<property name="hexpand">True</property>
+																<property name="valign">end</property>
+																<property name="vexpand">False</property>
+																<property name="margin-bottom">4</property>
+																<property name="margin-end">4</property>
+																<property name="margin-start">0</property>
+																<property name="margin-top">4</property>
+																<child>
+																	<object class="GtkButton" id="icon_zoomout_button">
+																		<property name="icon-name">zoom-out-symbolic</property>
+																		<property name="halign">end</property>
+																		<property name="hexpand">True</property>
+																		<property name="valign">center</property>
+																	</object>
+																</child>
+																<child>
+																	<object class="GtkButton" id="icon_zoomin_button">
+																		<property name="icon-name">zoom-in-symbolic</property>
+																		<property name="halign">end</property>
+																		<property name="hexpand">False</property>
+																		<property name="valign">center</property>
+																	</object>
+																</child>
+															</object>
+														</child>
+														<child>
 															<object class="GtkScrolledWindow">
 																<property name="can-focus">1</property>
 																<property name="margin-top">6</property>
@@ -131,7 +160,7 @@
 																<property name="margin-start">0</property>
 																<property name="margin-top">4</property>
 																<child>
-																	<object class="GtkCheckButton" id="icon_checkbutton">
+																	<object class="GtkCheckButton" id="icon_usedefault_checkbutton">
 																		<property name="halign">start</property>
 																		<property name="hexpand">False</property>
 																		<property name="valign">center</property>
@@ -139,7 +168,7 @@
 																	</object>
 																</child>
 																<child>
-																	<object class="GtkButton" id="icon_button">
+																	<object class="GtkButton" id="icon_ok_button">
 																		<property name="halign">end</property>
 																		<property name="hexpand">True</property>
 																		<property name="valign">center</property>

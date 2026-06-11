@@ -27,9 +27,11 @@
 #include "audiodevice.h"
 #include "area.h"
 #include "renderer.h"
+#include "mediaframe.h"
 #include "videoframe.h"
 #include "widgetframe.h"
 #include "telemetryframe.h"
+#include "mediastackpage.h"
 #include "videostackpage.h"
 #include "widgetstackpage.h"
 #include "telemetrystackpage.h"
@@ -47,8 +49,10 @@ public:
 	void start(void);
 	void stop(void);
 
-	void open_media_file(const Glib::RefPtr<const Gio::File> &file);
+	void open_icon_file(const Glib::RefPtr<const Gio::File> &file);
+	void open_image_file(const Glib::RefPtr<const Gio::File> &file);
 	void open_layout_file(const Glib::RefPtr<const Gio::File> &file);
+	void open_media_file(const Glib::RefPtr<const Gio::File> &file);
 	void open_telemetry_file(const Glib::RefPtr<const Gio::File> &file);
 
 	void save_layout_file(const Glib::RefPtr<const Gio::File> &file);
@@ -69,17 +73,21 @@ protected:
 
 	Gtk::Stack *info_stack_ = NULL;
 
+	GPX2VideoMediaStackPage *media_stackpage_ = NULL;
 	GPX2VideoVideoStackPage *video_stackpage_ = NULL;
 	GPX2VideoWidgetStackPage *widget_stackpage_ = NULL;
 	GPX2VideoTelemetryStackPage *telemetry_stackpage_ = NULL;
 
 	GPX2VideoArea *video_area_ = NULL;
 
+	GPX2VideoMediaFrame *media_frame_ = NULL;
 	GPX2VideoVideoFrame *video_frame_ = NULL;
 	GPX2VideoWidgetFrame *widget_frame_ = NULL;
 	GPX2VideoTelemetryFrame *telemetry_frame_ = NULL;
 
 	GPX2VideoAudioDevice *audio_device_ = NULL;
+
+	Glib::RefPtr<GPX2VideoMediaListStore> media_model_ = NULL;
 
 	void bind_settings(void);
 
@@ -96,6 +104,7 @@ protected:
 	void on_timesync_changed(void);
 	void on_timesync_requested(void);
 
+	void on_media_changed(void);
 	void on_video_changed(void);
 	void on_widget_changed(void);
 	void on_widget_appened(GPX2VideoWidget *widget);

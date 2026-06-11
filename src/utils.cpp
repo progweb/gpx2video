@@ -11,6 +11,8 @@
 #include "utils.h"
 
 
+namespace Utils {
+
 std::string replace(
 		std::string sHaystack, std::string sNeedle, std::string sReplace,
 		size_t nTimes) {
@@ -128,5 +130,13 @@ std::string capitalize(std::string s) {
     }
 
 	return input;
+}
+
+
+bool starts_with(const std::string &s, const std::string &prefix) {
+	return s.size() >= prefix.size() &&
+		(s.compare(0, prefix.size(), prefix) == 0);
+}
+
 }
 

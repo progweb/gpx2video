@@ -6,7 +6,7 @@
 		<property name="vexpand">1</property>
 		<property name="has-frame">1</property>
 		<property name="child">
-			<object class="GtkListBox" id="widgets_listbox">
+			<object class="GtkListBox" id="widget_listbox">
 				<property name="selection-mode">single</property>
 				<property name="activate-on-single-click">True</property>
 				<property name="vexpand">True</property>

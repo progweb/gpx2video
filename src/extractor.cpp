@@ -384,7 +384,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 
 		if (key == STR2FOURCC("STRM")) {
 			if (nstream > 1) {
-				IndentingOStreambuf indent(out, 4 * (nstream - 1));
+				Utils::IndentingOStreambuf indent(out, 4 * (nstream - 1));
  
 				if (dump)
 					out << "]" << std::endl;
@@ -394,7 +394,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 
 		// Indent ?
-		IndentingOStreambuf indent(out, 4 * nstream);
+		Utils::IndentingOStreambuf indent(out, 4 * nstream);
 
 		if (dump) {
 			snprintf(string, sizeof(string), "%c%c%c%c %s %c 0x%X %u %u", 
@@ -560,7 +560,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 	}
 
 	if (nstream > 1) {
-		IndentingOStreambuf indent(out, 4 * (nstream - 1));
+		Utils::IndentingOStreambuf indent(out, 4 * (nstream - 1));
 
 		if (dump)
 			out << "]" << std::endl;

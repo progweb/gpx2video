@@ -15,6 +15,7 @@
 
 #include <pangomm/fontdescription.h>
 
+#include "media.h"
 #include "renderer.h"
 #include "videowidget.h"
 #include "shape/base.h"
@@ -24,7 +25,8 @@
 class GPX2VideoWidgetFrame : public Gtk::Frame {
 public:
 	GPX2VideoWidgetFrame();
-	GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder);
+	GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder,
+			const Glib::RefPtr<GPX2VideoMediaListStore> &media_model);
 	virtual ~GPX2VideoWidgetFrame();
 
 	void set_renderer(GPX2VideoRenderer *renderer);
@@ -71,6 +73,8 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> value_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_format_model_;
 	Glib::RefPtr<Gtk::ListStore> value_unit_model_;
+
+	Glib::RefPtr<GPX2VideoMediaListStore> media_model_;
 
 	Glib::RefPtr<Gtk::ListStore> duplicate_liststore(const Glib::RefPtr<Gtk::ListStore> &source, class Model &columns);
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);

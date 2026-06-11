@@ -4,6 +4,8 @@
 # Resource
 ../gtk/src/ui/append.ui
 ../gtk/src/ui/gears_menu.ui
+../gtk/src/ui/media_frame.ui
+../gtk/src/ui/media_stackpage.ui
 ../gtk/src/ui/prefs.ui
 ../gtk/src/ui/telemetry_frame.ui
 ../gtk/src/ui/telemetry_stackpage.ui
@@ -20,6 +22,7 @@
 ../gtk/src/ui/widgets/track_box.ui
 
 # GTK
+../gtk/src/media.cpp
 ../gtk/src/telemetryframe.cpp
 ../gtk/src/widgetframe.cpp
 ../gtk/src/window.cpp

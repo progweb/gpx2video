@@ -1,18 +1,94 @@
 #include <glibmm/i18n.h>
 
+#include <gtkmm/popover.h>
+
 #include "../log_i.h"
-#include "../../src/track.h"
 #include "track.h"
 
 
 GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType *cobject,
-	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, GPX2VideoWidget *widget) 
-	: GPX2VideoWidgetBaseSettingsBox(cobject, ref_builder, "GPX2VideoTrackWidgetSettingsBox", resource_file, widget) { 
+	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, 
+	GPX2VideoWidget *widget, const Glib::RefPtr<GPX2VideoMediaListStore> &media_model) 
+	: GPX2VideoWidgetBaseSettingsBox(cobject, ref_builder, "GPX2VideoTrackWidgetSettingsBox", resource_file, widget) 
+	, media_model_(media_model) { 
 	log_call();
 
-	// Populate models
-	//-----------------
+	// Default icon size
+	icon_pixel_size_ = 32;
+	icon_pixel_minsize_ = 16;
+	icon_pixel_maxsize_ = 96;
 
+	// Populate models
+	load_models();
+
+	// Binding
+	bind_content();
+
+	// Update ui
+	update_content();
+	update_boundaries();
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::load_models(void) {
+	log_call();
+
+	auto model = Gio::ListStore<GPX2VideoTrackWidgetSettingsBox::Icon>::create();
+
+	// Internal icon
+	for (int i=0; i != TrackSettings::IconUnknown; i++) {
+		if (i != TrackSettings::IconUserFile) {
+			TrackSettings::Icon icon = (TrackSettings::Icon) i;
+
+			std::string filename = ((Track *) widget_->widget())->getIconFilename(icon);
+			model->append(Icon::create(
+					icon,
+					filename	
+				)
+			);
+		}
+	}
+
+	// User icon
+	guint n_items = media_model_->get_n_items();
+
+	for (guint i=0; i < n_items; i++) {
+		auto item = media_model_->get_item(i);
+		if (!item)
+			continue;
+
+		model->append(Icon::create(
+				TrackSettings::IconUserFile,
+				item->filename()
+			)
+		);
+	}
+
+	// Wrap store in a SingleSelection model
+	icon_model_ = Gtk::SingleSelection::create(model);
+
+	// Create a factory to build and bind list icons
+	icon_factory_ = Gtk::SignalListItemFactory::create();
+
+	icon_factory_->signal_setup().connect([this] (const Glib::RefPtr<Gtk::ListItem>& list_item) {
+		auto image = Gtk::make_managed<Gtk::Image>();
+
+		image->set_pixel_size(icon_pixel_size_);
+
+		list_item->set_child(*image);
+	});
+
+	icon_factory_->signal_bind().connect([this] (const Glib::RefPtr<Gtk::ListItem>& list_item) {
+		auto image = dynamic_cast<Gtk::Image*>(list_item->get_child());
+		auto item = std::dynamic_pointer_cast<GPX2VideoTrackWidgetSettingsBox::Icon>(list_item->get_item());
+
+		if (image && item) {
+			image->set_pixel_size(icon_pixel_size_);
+			image->set(item->filename());
+		}
+	});
+
+	// Track view model
 	view_model_ = Gtk::ListStore::create(model_);
 
 	{
@@ -32,13 +108,6 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 		row[model_.m_name] = _("Zoom fit");
 		row[model_.m_enable] = true;
 	}
-
-	// Binding
-	bind_content();
-
-	// Update ui
-	update_content();
-	update_boundaries();
 }
 
 
@@ -47,6 +116,7 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
+	Gtk::MenuButton *menubutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
@@ -207,42 +277,197 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Marker enable
-	sw = ref_builder_->get_widget<Gtk::Switch>("marker_enable_switch");
+	// Icon start enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_start_enable_switch");
 	if (!sw)
-		throw std::runtime_error("No \"marker_enable_switch\" object in " + resource_file_);
+		throw std::runtime_error("No \"icon_start_enable_switch\" object in " + resource_file_);
 	sw->signal_state_set().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
 					[this](const bool &state) {
-						log_notice("Widget %s: marker status changed to '%s'",
+						log_notice("Widget %s: icon start status changed to '%s'",
 							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
 
 						if (state)
-							widget_->widget()->theme().addFlag(VideoWidget::Theme::FlagIcon);
+							widget_->widget()->theme().addFlag(VideoWidget::Theme::FlagIconStart);
 						else
-							widget_->widget()->theme().removeFlag(VideoWidget::Theme::FlagIcon);
+							widget_->widget()->theme().removeFlag(VideoWidget::Theme::FlagIconStart);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(false);
 					} 
 			), false);
 
-	// Marker size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("marker_size_spinbutton");
+	// Icon start menubutton
+	menubutton = ref_builder_->get_widget<Gtk::MenuButton>("icon_start_menubutton");
+	if (!menubutton)
+		throw std::runtime_error("No \"icon_start_menubutton\" object in " + resource_file_);
+
+	menubutton->set_create_popup_func(sigc::bind(
+			sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::create_popover), menubutton, TrackSettings::IconStart));
+
+	// Icon start color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_start_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_start_color_button\" object in " + resource_file_);
+
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: icon start color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						((Track *) widget_->widget())->settings().setIconColor(TrackSettings::IconStart, color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Icon start size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_start_size_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"icon_start_size_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_notice("Widget %s: factor changed to '%.1f'",
+						log_notice("Widget %s: icon start size changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
-						((Track *) widget_->widget())->settings().setMarkerSize(value);
+						((Track *) widget_->widget())->settings().setIconSize(TrackSettings::IconStart, value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Icon end enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_end_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_end_enable_switch\" object in " + resource_file_);
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: icon end status changed to '%s'",
+							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						if (state)
+							widget_->widget()->theme().addFlag(VideoWidget::Theme::FlagIconEnd);
+						else
+							widget_->widget()->theme().removeFlag(VideoWidget::Theme::FlagIconEnd);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(false);
+					} 
+			), false);
+
+	// Icon end menubutton
+	menubutton = ref_builder_->get_widget<Gtk::MenuButton>("icon_end_menubutton");
+	if (!menubutton)
+		throw std::runtime_error("No \"icon_end_menubutton\" object in " + resource_file_);
+
+	menubutton->set_create_popup_func(sigc::bind(
+			sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::create_popover), menubutton, TrackSettings::IconEnd));
+
+	// Icon end color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_end_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_end_color_button\" object in " + resource_file_);
+
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: icon end color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						((Track *) widget_->widget())->settings().setIconColor(TrackSettings::IconEnd, color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
 					}
 			));
+
+	// Icon end size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_end_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_end_size_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: icon end size changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Track *) widget_->widget())->settings().setIconSize(TrackSettings::IconEnd, value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Icon position enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_position_enable_switch\" object in " + resource_file_);
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: icon position status changed to '%s'",
+							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						if (state)
+							widget_->widget()->theme().addFlag(VideoWidget::Theme::FlagIconPosition);
+						else
+							widget_->widget()->theme().removeFlag(VideoWidget::Theme::FlagIconPosition);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(false);
+					} 
+			), false);
+
+	// Icon position menubutton
+	menubutton = ref_builder_->get_widget<Gtk::MenuButton>("icon_position_menubutton");
+	if (!menubutton)
+		throw std::runtime_error("No \"icon_position_menubutton\" object in " + resource_file_);
+
+	menubutton->set_create_popup_func(sigc::bind(
+			sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::create_popover), menubutton, TrackSettings::IconPosition));
+
+	// Icon position color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_position_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_position_color_button\" object in " + resource_file_);
+
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: icon position color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						((Track *) widget_->widget())->settings().setIconColor(TrackSettings::IconPosition, color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Icon position size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_position_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_position_size_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: icon position size changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Track *) widget_->widget())->settings().setIconSize(TrackSettings::IconPosition, value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Icon model
+	media_model_->signal_items_changed().connect(sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_model_changed));
 }
 
 
@@ -254,11 +479,14 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	const float *color;
 
 	Gtk::Switch *sw;
+	Gtk::Image *image;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
 	Gtk::TreeModel::iterator iter;
+
+	TrackSettings &settings = ((Track *) widget_->widget())->settings();
 
 	// Mask value changed
 	loading_ = true;
@@ -270,7 +498,7 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 
 	combobox->set_model(view_model_);
 
-	if (find_in_listtore(view_model_, ((Track *) widget_->widget())->settings().view(), iter))
+	if (find_in_listtore(view_model_, settings.view(), iter))
 		combobox->set_active(iter);
 
 	// factor
@@ -278,35 +506,35 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().divider());
+	spinbutton->set_value(settings.divider());
 
 	// Path smooth
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_smooth_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"path_smooth_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().pathSmooth());
+	spinbutton->set_value(settings.pathSmooth());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"path_thick_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().pathThick());
+	spinbutton->set_value(settings.pathThick());
 
 	// Path border
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_border_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"path_border_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().pathBorder());
+	spinbutton->set_value(settings.pathBorder());
 
 	// Path border color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("path_border_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"path_border_color_button\" object in " + resource_file_);
 
-	color = ((Track *) widget_->widget())->settings().pathBorderColor();
+	color = settings.pathBorderColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 
@@ -317,7 +545,7 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!colorbutton)
 		throw std::runtime_error("No \"path_primary_color_button\" object in " + resource_file_);
 
-	color = ((Track *) widget_->widget())->settings().pathPrimaryColor();
+	color = settings.pathPrimaryColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 
@@ -328,25 +556,110 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!colorbutton)
 		throw std::runtime_error("No \"path_secondary_color_button\" object in " + resource_file_);
 
-	color = ((Track *) widget_->widget())->settings().pathSecondaryColor();
+	color = settings.pathSecondaryColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 
 	colorbutton->set_rgba(rgba);
 
-	// Marker enable
-	sw = ref_builder_->get_widget<Gtk::Switch>("marker_enable_switch");
+	// Icon start enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_start_enable_switch");
 	if (!sw)
-		throw std::runtime_error("No \"marker_enable_switch\" object in " + resource_file_);
+		throw std::runtime_error("No \"icon_start_enable_switch\" object in " + resource_file_);
 
-	sw->set_active(widget_->widget()->theme().hasFlag(VideoWidget::Theme::FlagIcon));
+	sw->set_active(widget_->widget()->theme().hasFlag(VideoWidget::Theme::FlagIconStart));
 
-	// Marker size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("marker_size_spinbutton");
+	// Icon start image
+	image = ref_builder_->get_widget<Gtk::Image>("icon_start_image");
+	if (!image)
+		throw std::runtime_error("No \"icon_start_image\" object in " + resource_file_);
+
+	image->set_pixel_size(24);
+	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconStart), TrackSettings::IconStart));
+
+	// Icon start color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_start_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_start_color_button\" object in " + resource_file_);
+
+	color = settings.iconColor(TrackSettings::IconStart);
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Icon start size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_start_size_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"icon_start_size_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().markerSize());
+	spinbutton->set_value(settings.iconSize(TrackSettings::IconPosition));
+
+	// Icon end enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_end_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_end_enable_switch\" object in " + resource_file_);
+
+	sw->set_active(widget_->widget()->theme().hasFlag(VideoWidget::Theme::FlagIconEnd));
+
+	// Icon end image
+	image = ref_builder_->get_widget<Gtk::Image>("icon_end_image");
+	if (!image)
+		throw std::runtime_error("No \"icon_end_image\" object in " + resource_file_);
+
+	image->set_pixel_size(24);
+	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconEnd), TrackSettings::IconEnd));
+
+	// Icon end color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_end_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_end_color_button\" object in " + resource_file_);
+
+	color = settings.iconColor(TrackSettings::IconEnd);
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Icon end size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_end_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_end_size_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.iconSize(TrackSettings::IconEnd));
+
+	// Icon position enable
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_enable_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_position_enable_switch\" object in " + resource_file_);
+
+	sw->set_active(widget_->widget()->theme().hasFlag(VideoWidget::Theme::FlagIconPosition));
+
+	// Icon position image
+	image = ref_builder_->get_widget<Gtk::Image>("icon_position_image");
+	if (!image)
+		throw std::runtime_error("No \"icon_position_image\" object in " + resource_file_);
+
+	image->set_pixel_size(24);
+	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconPosition), TrackSettings::IconPosition));
+
+	// Icon position color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_position_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"icon_position_color_button\" object in " + resource_file_);
+
+	color = settings.iconColor(TrackSettings::IconPosition);
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Icon position size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_position_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_position_size_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.iconSize(TrackSettings::IconPosition));
 
 	// Unmask value changed
 	loading_ = false;
@@ -356,6 +669,7 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 
+	Gtk::Button *button;
 	Gtk::SpinButton *spinbutton;
 
 	// Factor
@@ -365,5 +679,285 @@ void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 
 	spinbutton->set_value(((Track *) widget_->widget())->settings().divider());
 	spinbutton->set_sensitive(((Track *) widget_->widget())->settings().view() != TrackSettings::ViewZoomFit);
+
+	// Icon zoomin button
+	button = ref_builder_->get_widget<Gtk::Button>("icon_zoomin_button");
+	if (!button)
+		throw std::runtime_error("No \"icon_zoomin_button\" object in " + resource_file_);
+
+	button->set_sensitive(icon_pixel_size_ < icon_pixel_maxsize_);
+
+	// Icon zoomout button
+	button = ref_builder_->get_widget<Gtk::Button>("icon_zoomout_button");
+	if (!button)
+		throw std::runtime_error("No \"icon_zoomout_button\" object in " + resource_file_);
+
+	button->set_sensitive(icon_pixel_size_ > icon_pixel_minsize_);
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::create_popover(Gtk::MenuButton *menubutton, TrackSettings::Icon type) {
+	log_call();
+
+	int index;
+
+	Gtk::Button *button;
+	Gtk::Popover *popover;
+	Gtk::GridView *gridview;
+	Gtk::CheckButton *checkbutton;
+
+	TrackSettings &settings = ((Track *) widget_->widget())->settings();
+
+	// Icon model
+	index = settings.icon(type);
+	if (index == TrackSettings::IconDefault)
+		index = type;
+	else if (index == TrackSettings::IconUserFile) {
+		guint n_items;
+
+		auto model = icon_model_->get_model();
+
+		n_items = model->get_n_items();
+
+		for (guint i=0; i < n_items; i++) {
+			auto item = std::dynamic_pointer_cast<GPX2VideoTrackWidgetSettingsBox::Icon>(model->get_object(i));
+			if (!item || item->icon() != TrackSettings::IconUserFile)
+				continue;
+			if (item->filename() != settings.iconFile(type))
+				continue;
+			index = i;
+			break;
+		}
+
+		// Icon not found!
+		if (index == TrackSettings::IconUserFile) {
+			// Auto append
+			media_model_->append(GPX2VideoMedia::MediaIcon, settings.iconFile(type));
+
+			// Select
+			index = n_items;
+		}
+	}
+
+	icon_model_->set_selected(index);
+
+	// Icon popover
+	popover = ref_builder_->get_widget<Gtk::Popover>("icon_popover");
+	if (!popover)
+		throw std::runtime_error("No \"icon_popover\" object in " + resource_file_);
+
+	menubutton->set_popover(*popover);
+
+	// Icon gridview
+	gridview = ref_builder_->get_widget<Gtk::GridView>("icon_gridview");
+	if (!gridview)
+		throw std::runtime_error("No \"icon_gridview\" object in " + resource_file_);
+
+	gridview->set_sensitive((settings.icon(type) != TrackSettings::IconDefault));
+	gridview->set_model(icon_model_);
+	gridview->set_factory(icon_factory_);
+	gridview->set_min_columns(1);
+	gridview->set_max_columns(10);
+
+	// Icon checkbutton
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("icon_usedefault_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"icon_usedefault_checkbutton\" object in " + resource_file_);
+
+	checkbutton->set_active((settings.icon(type) == TrackSettings::IconDefault));
+
+	// Connect icon checkbutton
+	icon_checkbutton_connection_.disconnect();
+	icon_checkbutton_connection_ = checkbutton->signal_toggled().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_icon_usedefault_toggled), type));
+
+	// Connect icon zoomin button
+	button = ref_builder_->get_widget<Gtk::Button>("icon_zoomin_button");
+	if (!button)
+		throw std::runtime_error("No \"icon_zoomin_button\" object in " + resource_file_);
+
+	icon_zoomin_connection_.disconnect();
+	icon_zoomin_connection_ = button->signal_clicked().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_icon_zoomin_clicked), type));
+
+	// Connect icon zoomout button
+	button = ref_builder_->get_widget<Gtk::Button>("icon_zoomout_button");
+	if (!button)
+		throw std::runtime_error("No \"icon_zoomout_button\" object in " + resource_file_);
+
+	icon_zoomout_connection_.disconnect();
+	icon_zoomout_connection_ = button->signal_clicked().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_icon_zoomout_clicked), type));
+
+	// Connect icon button
+	button = ref_builder_->get_widget<Gtk::Button>("icon_ok_button");
+	if (!button)
+		throw std::runtime_error("No \"icon_ok_button\" object in " + resource_file_);
+
+	icon_ok_connection_.disconnect();
+	icon_ok_connection_ = button->signal_clicked().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_icon_ok_clicked), type));
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::on_icon_ok_clicked(TrackSettings::Icon type) {
+	log_call();
+
+	bool use_default;
+
+	std::string typestr;
+
+	Gtk::CheckButton *checkbutton;
+
+	Glib::RefPtr<const GPX2VideoTrackWidgetSettingsBox::Icon> icon;
+
+	TrackSettings &settings = ((Track *) widget_->widget())->settings();
+
+	// Convert type to string
+	switch (type) {
+	case TrackSettings::IconStart:
+		typestr = "start";
+		break;
+	case TrackSettings::IconEnd:
+		typestr = "end";
+		break;
+	case TrackSettings::IconPosition:
+		typestr = "position";
+		break;
+	default:
+		break;
+	}
+
+	// Use default icon 
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("icon_usedefault_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"icon_usedefault_checkbutton\" object in " + resource_file_);
+
+	use_default = checkbutton->get_active();
+
+	// Get icon selected
+	icon = std::dynamic_pointer_cast<GPX2VideoTrackWidgetSettingsBox::Icon>(icon_model_->get_selected_item());
+
+	if (icon != NULL) {
+		if (use_default) {
+			log_notice("Widget %s: icon %s changed to 'default'", 
+					widget_->name().c_str(), typestr.c_str());
+
+			settings.setIcon(type, TrackSettings::IconDefault);
+			settings.setIconFile(type, "");
+		}
+		else {
+			std::string filename = (icon->icon() == TrackSettings::IconUserFile) ? icon->filename() : "";
+
+			log_notice("Widget %s: icon %s changed to '%s%s'", 
+					widget_->name().c_str(), typestr.c_str(), TrackSettings::icon2string(icon->icon()).c_str(), filename.c_str());
+
+			settings.setIcon(type, icon->icon());
+			settings.setIconFile(type, filename);
+		}
+
+		// Update
+		update_content();
+
+		// Broadcast widget change
+		widget_->dispatchEvent(true);
+	}
+
+	// Hide icon popover
+	auto popover = ref_builder_->get_widget<Gtk::Popover>("icon_popover");
+	if (!popover)
+		throw std::runtime_error("No \"icon_popover\" object in " + resource_file_);
+
+	popover->popdown();
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::on_icon_usedefault_toggled(TrackSettings::Icon type) {
+	log_call();
+
+	Gtk::GridView *gridview;
+	Gtk::CheckButton *checkbutton;
+
+	(void) type;
+
+	// Widget icon checkbutton
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("icon_usedefault_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"icon_usedefault_checkbutton\" object in " + resource_file_);
+
+	// Widget icon gridview
+	gridview = ref_builder_->get_widget<Gtk::GridView>("icon_gridview");
+	if (!gridview)
+		throw std::runtime_error("No \"icon_gridview\" object in " + resource_file_);
+
+	gridview->set_sensitive(!checkbutton->get_active());
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::on_icon_zoomin_clicked(TrackSettings::Icon type) {
+	log_call();
+
+	Gtk::GridView *gridview;
+
+	(void) type;
+
+	// Increase zoom
+	icon_pixel_size_ += 8;
+
+	if (icon_pixel_size_ > icon_pixel_maxsize_)
+		icon_pixel_size_ = icon_pixel_maxsize_;
+
+	log_info("New icon size: %d", icon_pixel_size_);
+
+	// Widget icon gridview
+	gridview = ref_builder_->get_widget<Gtk::GridView>("icon_gridview");
+	if (!gridview)
+		throw std::runtime_error("No \"icon_gridview\" object in " + resource_file_);
+
+	gridview->set_factory(NULL);
+	gridview->set_factory(icon_factory_);
+
+	// Apply limit
+	update_boundaries();
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::on_icon_zoomout_clicked(TrackSettings::Icon type) {
+	log_call();
+
+	Gtk::GridView *gridview;
+
+	(void) type;
+
+	// Decrease zoom
+	icon_pixel_size_ -= 8;
+
+	if (icon_pixel_size_ < icon_pixel_minsize_)
+		icon_pixel_size_ = icon_pixel_minsize_;
+
+	log_info("New icon size: %d", icon_pixel_size_);
+
+	// Widget icon gridview
+	gridview = ref_builder_->get_widget<Gtk::GridView>("icon_gridview");
+	if (!gridview)
+		throw std::runtime_error("No \"icon_gridview\" object in " + resource_file_);
+
+	gridview->set_factory(NULL);
+	gridview->set_factory(icon_factory_);
+
+	// Apply limit
+	update_boundaries();
+}
+
+
+void GPX2VideoTrackWidgetSettingsBox::on_model_changed(guint position, guint removed, guint added) {
+	log_call();
+
+	(void) position;
+	(void) removed;
+	(void) added;
+
+	// Load models
+	load_models();
 }
 
