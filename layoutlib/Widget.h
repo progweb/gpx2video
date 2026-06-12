@@ -522,6 +522,25 @@ namespace layout
 	///
     String &needleType() { return _needle_type; }
 
+    ///
+    /// Get needle distance
+    ///
+    /// @return the needle distance attribute
+    ///
+    Decimal &needleDistance() { return _needle_distance; }
+
+	///
+	/// Get needle border color
+	/// @return the needle border color element
+	///
+    String &needleBorderColor() { return _needle_border_color; }
+
+	///
+	/// Get needle background color
+	/// @return the needle background color element
+	///
+    String &needleBackgroundColor() { return _needle_background_color; }
+
 	///
 	/// Get needle primary color
 	/// @return the needle primary color element
@@ -714,6 +733,9 @@ namespace layout
 	String       _gauge_secondary_color;
 
 	String       _needle_type;
+	Decimal      _needle_distance;
+	String       _needle_border_color;
+	String       _needle_background_color;
 	String       _needle_primary_color;
 	String       _needle_secondary_color;
 

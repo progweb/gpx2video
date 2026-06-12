@@ -277,7 +277,7 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void TextWidget::clear(void) {
-	is_initialized_ = false;
+	TextShape::clear();
 
 	setPadding(0, 0, 0, 0);
 	setLabelExtents(0, 0, 0, 0);

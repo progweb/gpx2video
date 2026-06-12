@@ -1,5 +1,6 @@
 #include <iomanip>
 #include <iostream>
+#include <limits>
 #include <memory>
 
 #include <OpenImageIO/imageio.h>
@@ -20,6 +21,11 @@
  */
 
 VideoWidget::Theme::Theme() {
+	// Init
+	value_min_ = std::numeric_limits<int>::min();
+	value_max_ = std::numeric_limits<int>::max();
+
+	// Default value
 	setSize(240, 50);
 	setFlags(VideoWidget::Theme::FlagAll);
 
@@ -59,7 +65,6 @@ VideoWidget::Theme::Theme() {
 	setValueColor(1.0, 1.0, 1.0, 1.0);
 	setValueBorderWidth(1);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
-	setValueBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
 	setUnitFontSize(25);
 
@@ -85,6 +90,9 @@ VideoWidget::Theme::Theme() {
 	setTickLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
+	setNeedleDistance(0);
+	setNeedleBorderColor(0.0, 0.0, 0.0, 1.0);
+	setNeedleBackgroundColor(0.0, 0.0, 0.0, 0.8);
 	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);
 

@@ -148,8 +148,6 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 }
 
 void ElevationTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;
@@ -186,47 +184,150 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
 
-	(void) cr;
+	int x, y;
+	int width, height;
+
+	int left, right;
+	int top, bottom;
+
+	char s[128];
+
+	TextShape::Font font;
 
 	width_ = theme().width();
 	height_ = theme().height();
 
 	size_ = std::min(width_, height_);
 
-	init(fontface_, width_, height_, size_); //, size_);
+	// Size
+	setSize(width_, height_, size_); //, size_);
 
+	// Label height
+	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
+
+		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+
+		setLabelExtents(x, y, width, height);
+	}
+
+	// Tick
 	tick_step_ = 10;
 	tick_mstep_ = 10;
+
+	tick_label_width_ = 0;
+	tick_label_height_ = 0;
+
+	// Tick label space
+	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
+		int amin = theme().valueMin();
+		int amax = theme().valueMax();
+
+		int min = amin;
+		int max = amax;
+
+		bool first = true;
+
+		int step = tick_mstep_ * tick_step_;
+
+		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+			widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+		min /= step;
+		min *= step;
+
+		max /= step;
+		max *= step;
+
+		for (int value = min; value < max + step; value = value + step) {
+			int txtx, txty;
+			int txtw, txth;
+
+			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
+
+			if (theme().hasFlag(VideoWidget::Theme::FlagUnit) && (first || (value >= max)))
+				sprintf(s, "%d %s", value, unit.c_str());
+			else
+				sprintf(s, "%d", value);
+
+			if (value < amin)
+				continue;
+
+			font = (TextShape::Font) {
+				.size = (int) (theme().valueFontSize() * factor),
+				.border = (int) (theme().valueBorderWidth() * factor),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.family = theme().valueFontFamily(),
+				.align = VideoWidget::Theme::AlignCenter,
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			this->extents(cr, font, s, txtx, txty, txtw, txth);
+
+			tick_label_width_ = std::max(tick_label_width_, txtw - txtx);
+			tick_label_height_ = std::max(tick_label_height_, txth - txty);
+
+			first = false;
+		}
+	}
+
+	// Padding
+	top = tick_label_height_ / 2;
+	bottom = tick_label_height_ / 2;
+
+	setPadding(
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop) + top,
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom) + bottom);
 
 	is_initialized_ = true;
 }
 
 
 void ElevationBarShape::ticklenwidth(int value, int *offset, int *len, int *width) {
+	int length;
+	int size = theme().tickSize();
+
 	VideoWidget::Theme::Align align = theme().tickAlign();
 
 	if (value % 10 == 0) {
-		*len = (size_ / 8) + (size_ / 25);
+		*len = size;
 		*width = size_ / 64;
 		*offset = 0;
 	}
 	else if (value % 5 == 0) {
-		*len = size_ / 8;
+		length = size - (size / 6);
+
+		*len = length;
 		*width = size_ / 64;
-		if (align == VideoWidget::Theme::AlignCenter)
-			*offset = (size_ / 25) / 2;
+		if (align == VideoWidget::Theme::AlignLeft)
+			*offset = -(size - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = (size_ / 25);
+			*offset = (size - length) / 2;
 		else
 			*offset = 0;
 	}
 	else {
-		*len = (size_ / 8) - (size_ / 25);
+		length = size - (size / 3);
+
+		*len = length;
 		*width = size_ / 128;
-		if (align == VideoWidget::Theme::AlignCenter)
-			*offset = (size_ / 25);
+		if (align == VideoWidget::Theme::AlignLeft)
+			*offset = -(size - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = 2 * (size_ / 25);
+			*offset = (size - length) / 2;
 		else
 			*offset = 0;
 	}
@@ -236,10 +337,12 @@ void ElevationBarShape::ticklenwidth(int value, int *offset, int *len, int *widt
 void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	char s[128];
 
+	BarShape::Font font;
+
 	int offset = 0;
 	int rotate = 0;
 
-	int top = 0, bottom = 0;
+//	int top = 0, bottom = 0;
 
 	int amin, amax;
 
@@ -261,34 +364,34 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataElevation);
 
 	// Apply padding
-	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
-		offset = (size_ / 14);
-	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
-		offset = (size_ / 14) / 2;
-	else
-		offset = 0;
+//	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
+//		offset = (size_ / 14);
+//	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
+//		offset = (size_ / 14) / 2;
+//	else
+//		offset = 0;
 
-	if (theme().hasFlag(VideoWidget::Theme::FlagLabel))
-		bottom = size_ / 10;
-
-	setPadding(
-		theme().padding(VideoWidget::Theme::PaddingLeft),
-		theme().padding(VideoWidget::Theme::PaddingRight),
-		theme().padding(VideoWidget::Theme::PaddingTop) + offset + top,
-		theme().padding(VideoWidget::Theme::PaddingBottom) + offset + bottom
-	);
+//	// Update padding
+//	setPadding(
+//		theme().padding(VideoWidget::Theme::PaddingLeft),
+//		theme().padding(VideoWidget::Theme::PaddingRight),
+//		theme().padding(VideoWidget::Theme::PaddingTop) + offset + top,
+//		theme().padding(VideoWidget::Theme::PaddingBottom) + offset + bottom
+//	);
 
 	// Compute gauge position
-	offset = ((size_ / 8) + (size_ / 25)); // gauge width
-	offset /= 2;
+//	offset = ((size_ / 8) + (size_ / 25)); // gauge width
+//	offset /= 2;
 	setOffset(-offset);
 
 	// Draw background
 	background(cr);
 
 	// Draw gauge background
-	bar(cr, 0, 1, (size_ / 8) + (size_ / 25), theme().gaugeBorder(),
-			theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+	if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
+		bar(cr, 0, 1, theme().gaugeWidth(), theme().gaugeBorder(),
+				theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+	}
 
 	// Draw gauge
 	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (elevation >= amin)) {
@@ -298,7 +401,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		xb1 = scale(amin, amax, from, rotate);
 		xb2 = scale(amin, amax, to, rotate);
 
-		bar(cr, xb1, xb2, size_ / 8 + size_ / 25, 0,
+		bar(cr, xb1, xb2, theme().gaugeWidth() - (2 * theme().gaugeBorder()), 0,
 				theme().gaugePrimaryColor());
 	}
 
@@ -306,7 +409,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((elevation >= amin) && (elevation <= amax))) {
 		double xb = scale(amin, amax, elevation, rotate);
 
-		cursor(cr, xb, size_ / 8 + size_ / 25);
+		cursor(cr, xb, theme().gaugeWidth() - (2 * theme().gaugeBorder()), theme().cursorColor());
 	}
 
 	// Draw tick lines on bar
@@ -320,13 +423,13 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			ticklenwidth(value / tick_mstep_, &tickoffset, &ticklen, &tickwidth);
 
-			line(cr, xb, tickoffset, tickoffset + ticklen, theme().tickColor());
+			line(cr, xb, tickoffset, tickoffset + ticklen, tickwidth, theme().tickColor());
 		}
 	}
 
 	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int min = amin; // + (mstep_ * step_);
+		int min = amin;
 		int max = amax;
 
 		bool first = true;
@@ -339,48 +442,83 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		max /= step;
 		max *= step;
 
+		double distance = theme().tickLabelDistance();
+
+		int tick_width = theme().hasFlag(VideoWidget::Theme::FlagTick) ? theme().tickSize() : 0;
+		int gauge_width = theme().hasFlag(VideoWidget::Theme::FlagGauge) ? theme().gaugeWidth() : 0;
+
+		distance += std::max(tick_width / 2, gauge_width / 2);
+
 		for (int value = min; value < max + step; value = value + step) {
 			double xb = scale(amin, amax, value, rotate);
 
-			if (first || (value >= max))
+			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
+
+			if (theme().hasFlag(VideoWidget::Theme::FlagUnit) && (first || (value >= max)))
 				sprintf(s, "%d %s", value, unit.c_str());
 			else
 				sprintf(s, "%d", value);
 
-//				std::string str = std::to_string(value);
-
 			if (value < amin)
 				continue;
 
-			text(cr, xb, size_ / 2.75, size_ / 14, theme().tickLabelColor(), std::string(s)); //str);
+			font = (TextShape::Font) {
+				.size = (int) (theme().valueFontSize() * factor),
+				.border = (int) (theme().valueBorderWidth() * factor),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.family = theme().valueFontFamily(),
+				.align = VideoWidget::Theme::AlignCenter,
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			ticklabel(cr, xb, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), s);
 
 			first = false;
 		}
 	}
 
-	// Draw marker value
-	if (theme().hasFlag(VideoWidget::Theme::FlagValue) && ((elevation >= amin) && (elevation <= amax))) {
+	// Draw needle & value
+	if ((elevation >= amin) && (elevation <= amax)) {
 		double xb = scale(amin, amax, elevation, rotate);
 
-		std::string value = std::to_string((int) std::round(elevation));
+		std::string str = std::to_string((int) std::round(elevation));
 
-		marker(cr, xb, theme().valueBorderWidth(), theme().valueColor(), theme().valueBackgroundColor(), theme().valueBorderColor(), value);
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = VideoWidget::Theme::AlignCenter,
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
 	}
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
-		int x, y;
+		font = (TextShape::Font) {
+			.size = theme().labelFontSize(),
+			.border = theme().labelBorderWidth(),
+			.shadow_opacity = theme().labelShadowOpacity(),
+			.shadow_distance = theme().labelShadowDistance(),
+			.family = theme().labelFontFamily(),
+			.align = theme().labelHorizontalAlign(),
+			.style = theme().labelFontStyle(),
+			.weight = theme().labelFontWeight(),
+		};
 
-		x = width_ / 2;
-		y = height_ - theme().padding(VideoWidget::Theme::PaddingBottom);
-
-		label(cr, x, y, theme().labelColor(), widget_->label());
+		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
 	}
 }
 
 
 void ElevationBarShape::clear(void) {
-	is_initialized_ = false;
+	BarShape::clear();
 
 	no_value_ = false;
 

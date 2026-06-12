@@ -621,22 +621,6 @@ public:
 			return true;
 		}
 
-		const float * valueBackgroundColor(void) const {
-			return value_bg_color_;
-		}
-
-		bool setValueBackgroundColor(std::string color) {
-			return hex2color(value_bg_color_, color);
-		}
-
-		bool setValueBackgroundColor(double r, double g, double b, double a) {
-			value_bg_color_[0] = r;
-			value_bg_color_[1] = g;
-			value_bg_color_[2] = b;
-			value_bg_color_[3] = a;
-			return true;
-		}
-
 		int unitFontSize(void) const {
 			return unit_font_size_;
 		}
@@ -877,6 +861,49 @@ public:
 			needle_type_ = type;
 		}
 
+		const int& needleDistance(void) const {
+			return needle_distance_;
+		}
+
+		void setNeedleDistance(int distance) {
+			if (distance < 0)
+				return;
+
+			needle_distance_ = distance;
+		}
+
+		const float * needleBorderColor(void) const {
+			return needle_border_color_;
+		}
+
+		bool setNeedleBorderColor(std::string color) {
+			return hex2color(needle_border_color_, color);
+		}
+
+		bool setNeedleBorderColor(double r, double g, double b, double a) {
+			needle_border_color_[0] = r;
+			needle_border_color_[1] = g;
+			needle_border_color_[2] = b;
+			needle_border_color_[3] = a;
+			return true;
+		}
+
+		const float * needleBackgroundColor(void) const {
+			return needle_background_color_;
+		}
+
+		bool setNeedleBackgroundColor(std::string color) {
+			return hex2color(needle_background_color_, color);
+		}
+
+		bool setNeedleBackgroundColor(double r, double g, double b, double a) {
+			needle_background_color_[0] = r;
+			needle_background_color_[1] = g;
+			needle_background_color_[2] = b;
+			needle_background_color_[3] = a;
+			return true;
+		}
+
 		const float * needlePrimaryColor(void) const {
 			return needle_primary_color_;
 		}
@@ -966,6 +993,9 @@ public:
 		float label_border_color_[4];
 
 		NeedleType needle_type_;
+		int needle_distance_;
+		float needle_border_color_[4];
+		float needle_background_color_[4];
 		float needle_primary_color_[4];
 		float needle_secondary_color_[4];
 
@@ -981,7 +1011,6 @@ public:
 		int value_shadow_opacity_;
 		int value_shadow_distance_;
 		float value_color_[4];
-		float value_bg_color_[4];
 		float value_border_color_[4];
 
 		int unit_font_size_;

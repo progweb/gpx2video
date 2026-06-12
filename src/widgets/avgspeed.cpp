@@ -170,8 +170,6 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void AvgSpeedTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;

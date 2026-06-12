@@ -106,15 +106,7 @@ public:
 	static ElevationBarShape * create(VideoWidget *widget) {
 		ElevationBarShape *shape;
 
-		cairo_font_face_t *fontface;
-
-		fontface = cairo_toy_font_face_create(
-			"Roboto", 
-			CAIRO_FONT_SLANT_NORMAL, 
-			CAIRO_FONT_WEIGHT_NORMAL
-		);
-
-		shape = new ElevationBarShape(widget->theme(), fontface, widget);
+		shape = new ElevationBarShape(widget->theme(), widget);
 
 		return shape;
 	}
@@ -171,8 +163,6 @@ skip:
 private:
 	bool no_value_;
 
-	cairo_font_face_t *fontface_;
-
 	int size_;
 	int width_;
 	int height_;
@@ -180,20 +170,20 @@ private:
 	int tick_step_;
 	int tick_mstep_;
 
+	int tick_label_width_;
+	int tick_label_height_;
+
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
 	VideoWidget *widget_;
 
-	ElevationBarShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface, VideoWidget *widget) 
-		: BarShape(theme, fontface)
-		, fontface_(fontface)
+	ElevationBarShape(VideoWidget::Theme &theme, VideoWidget *widget) 
+		: BarShape(theme)
 		, bg_buf_(NULL)
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
-
-		cairo_font_face_reference(fontface);
 	}
 
 	void initialize(cairo_t *cr);

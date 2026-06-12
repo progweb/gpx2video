@@ -105,15 +105,7 @@ public:
 	static VerticalSpeedBarShape * create(VideoWidget *widget) {
 		VerticalSpeedBarShape *shape;
 
-		cairo_font_face_t *fontface;
-
-		fontface = cairo_toy_font_face_create(
-			"Roboto", 
-			CAIRO_FONT_SLANT_NORMAL, 
-			CAIRO_FONT_WEIGHT_NORMAL
-		);
-
-		shape = new VerticalSpeedBarShape(widget->theme(), fontface, widget);
+		shape = new VerticalSpeedBarShape(widget->theme(), widget);
 
 		return shape;
 	}
@@ -170,8 +162,6 @@ skip:
 private:
 	bool no_value_;
 
-	cairo_font_face_t *fontface_;
-
 	int size_;
 	int width_;
 	int height_;
@@ -187,15 +177,12 @@ private:
 
 	VideoWidget *widget_;
 
-	VerticalSpeedBarShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface, VideoWidget *widget) 
-		: BarShape(theme, fontface)
-		, fontface_(fontface)
+	VerticalSpeedBarShape(VideoWidget::Theme &theme, VideoWidget *widget) 
+		: BarShape(theme)
 		, bg_buf_(NULL)
 		, fg_buf_(NULL)
 		, widget_(widget) {
 		no_value_ = false;
-
-		cairo_font_face_reference(fontface);
 	}
 
 	void initialize(cairo_t *cr);

@@ -171,8 +171,6 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void SpeedTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;
@@ -222,7 +220,7 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 //	arc_start_ = 150;
 //	arc_end_ = 290;
 
-	init(width_, height_, size_);
+	setSize(width_, height_, size_);
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -551,7 +549,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void SpeedArcShape::clear(void) {
-	is_initialized_ = false;
+	ArcShape::clear();
 
 	no_value_ = false;
 

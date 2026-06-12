@@ -168,8 +168,6 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void DateTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	if (bg_buf_)

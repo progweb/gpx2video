@@ -105,6 +105,9 @@ namespace layout
 	_gauge_secondary_color(this, "gauge-secondary-color", Node::ELEMENT, false),
 
 	_needle_type(this, "needle-type", Node::ELEMENT, false),
+	_needle_distance(this, "needle-distance", Node::ELEMENT, false),
+	_needle_border_color(this, "needle-border-color", Node::ELEMENT, false),
+	_needle_background_color(this, "needle-background-color", Node::ELEMENT, false),
 	_needle_primary_color(this, "needle-primary-color", Node::ELEMENT, false),
 	_needle_secondary_color(this, "needle-secondary-color", Node::ELEMENT, false),
 
@@ -201,6 +204,9 @@ namespace layout
     getInterfaces().push_back(&_gauge_secondary_color);
 
     getInterfaces().push_back(&_needle_type);
+    getInterfaces().push_back(&_needle_distance);
+    getInterfaces().push_back(&_needle_border_color);
+    getInterfaces().push_back(&_needle_background_color);
     getInterfaces().push_back(&_needle_primary_color);
     getInterfaces().push_back(&_needle_secondary_color);
 

@@ -217,7 +217,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void GPXWidget::clear(void) {
-	is_initialized_ = false;
+	ShapeBase::clear();
 
 	setPadding(0, 0, 0, 0);
 	setLabelExtents(0, 0, 0, 0);

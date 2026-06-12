@@ -149,8 +149,6 @@ void GForceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void GForceTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;

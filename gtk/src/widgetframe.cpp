@@ -1356,6 +1356,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 						widget_selected_->widget()->theme().setValueMin(value);
 
+						// Update limits
+						update_boundaries();
+
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
 					}
@@ -1372,6 +1375,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueMax(value);
+
+						// Update limits
+						update_boundaries();
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -2048,6 +2054,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 
 void GPX2VideoWidgetFrame::update_boundaries(void) {
+	int value;
 	int margin;
 	int width, height;
 
@@ -2161,14 +2168,24 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_min_spinbutton\" object in widget_frame.ui");
 
-	spinbutton->set_range(std::numeric_limits<double>::min(), widget_selected_->widget()->theme().valueMax());
+	if (widget_selected_->widget()->theme().valueMax() > widget_selected_->widget()->theme().valueMin())
+		value = widget_selected_->widget()->theme().valueMax();
+	else
+		value = std::numeric_limits<int>::max();
+
+	spinbutton->set_range(std::numeric_limits<int>::min(), value);
 
 	// Value max.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
 
-	spinbutton->set_range(widget_selected_->widget()->theme().valueMin(), std::numeric_limits<double>::max());
+	if (widget_selected_->widget()->theme().valueMax() > widget_selected_->widget()->theme().valueMin())
+		value = widget_selected_->widget()->theme().valueMin();
+	else
+		value = std::numeric_limits<int>::min();
+
+	spinbutton->set_range(value, std::numeric_limits<int>::max());
 }
 
 

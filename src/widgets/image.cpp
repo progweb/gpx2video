@@ -54,7 +54,7 @@ void ImageWidget::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void ImageWidget::clear(void) {
-	is_initialized_ = false;
+	ShapeBase::clear();
 
 	if (bg_buf_)
 		delete bg_buf_;

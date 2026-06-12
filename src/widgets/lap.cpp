@@ -143,8 +143,6 @@ void LapTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void LapTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;

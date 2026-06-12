@@ -24,6 +24,7 @@
 # GTK
 ../gtk/src/media.cpp
 ../gtk/src/telemetryframe.cpp
+../gtk/src/videoframe.cpp
 ../gtk/src/widgetframe.cpp
 ../gtk/src/window.cpp
 ../gtk/src/shape/arc.cpp

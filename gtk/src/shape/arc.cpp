@@ -401,13 +401,6 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 					}
 			));
 
-//		// Tick alignment
-//		combobox = ref_builder_->get_widget<Gtk::ComboBox>("tick_align_combobox");
-//		if (!combobox)
-//			throw std::runtime_error("No \"tick_align_combobox\" object in " + resource_file_);
-//		combobox->pack_start(model_.m_name);
-//		combobox->signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoElevationWidget::on_widget_tick_align_value_changed));
-
 	// Needle enable
 	sw = ref_builder_->get_widget<Gtk::Switch>("needle_enable_switch");
 	if (!sw)
@@ -664,16 +657,6 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 
 	colorbutton->set_rgba(rgba);
-
-//		// Widget tick alignment
-//		combobox = ref_builder_->get_widget<Gtk::ComboBox>("tick_align_combobox");
-//		if (!combobox)
-//			throw std::runtime_error("No \"tick_align_combobox\" object in " + resource_file_);
-//
-//		combobox->set_model(tick_align_model_);
-//
-//		if (find_in_listtore(tick_align_model_, widget_->theme().tickAlign(), iter))
-//			combobox->set_active(iter);
 
 	// Widget needle enable switch
 	sw = ref_builder_->get_widget<Gtk::Switch>("needle_enable_switch");

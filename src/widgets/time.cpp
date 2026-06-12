@@ -200,7 +200,7 @@ void TimeArcShape::initialize(cairo_t *cr) {
 
 	size_ = std::min(width_, height_);
 
-	init(width_, height_, size_);
+	setSize(width_, height_, size_);
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -373,7 +373,7 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void TimeArcShape::clear(void) {
-	is_initialized_ = false;
+	ArcShape::clear();
 
 	if (bg_buf_)
 		delete bg_buf_;

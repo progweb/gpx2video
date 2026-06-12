@@ -9,6 +9,7 @@ public:
 	TextShape(VideoWidget::Theme &theme) 
 		: ShapeBase(theme, VideoWidget::ShapeText) {
 		setSize(0);
+
 		clear();
 	}
 
@@ -59,13 +60,15 @@ public:
 	void value(cairo_t *cr, TextShape::Font &font, 
 			const float *fill, const float *outline, const char *text);
 
-	void xmlwrite(std::ostream &os);
-
 	void clear(void) {
+		ShapeBase::clear();
+
 		setPadding(0, 0, 0, 0);
 		setLabelExtents(0, 0, 0, 0);
 		setValueExtents(0, 0, 0, 0);
 	}
+
+	void xmlwrite(std::ostream &os);
 
 private:
 	int size_;

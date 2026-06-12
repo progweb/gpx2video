@@ -171,8 +171,6 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void AvgRideSpeedTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;

@@ -25,7 +25,9 @@ public:
 		// Default arc range
 		setArcRange(30.0, 360.0 - 30.0);
 
-		init(width, height);
+		setSize(width, height);
+
+		clear();
 	}
 
 	virtual ~ArcShape() {
@@ -46,11 +48,6 @@ public:
 		}
 
 		return true;
-	}
-
-	void init(int width, int height, int size = 0) {
-		setSize(width, height, size);
-		setPadding(0, 0, 0, 0);
 	}
 
 	void setSize(int width, int height, int size = 0) {
@@ -117,6 +114,12 @@ public:
 	void unit(cairo_t *cr, Font &font, const float *fill, const float *outline, const char *text);
 	void needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 			double xa, double len, bool design, const float *color1, const float *color2);
+
+	void clear(void) {
+		ShapeBase::clear();
+
+		setPadding(0, 0, 0, 0);
+	}
 
 	void xmlwrite(std::ostream &os);
 

@@ -143,10 +143,10 @@ void ShapeBase::destroyCairoContext(cairo_t *cairo) {
 
 
 void ShapeBase::background(cairo_t *cr) {
-	int border = theme_.border();
-
 	int x, y;
 	int width, height;
+
+	int border = theme_.border();
 
 	const float *fill = theme_.backgroundColor();
 	const float *outline = theme_.borderColor();

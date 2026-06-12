@@ -843,10 +843,14 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setTickSize(w->tickSize());
 	widget->theme().setTickColor((const char *) w->tickColor());
 	widget->theme().setTickLabelDistance(w->tickLabelDistance());
+	widget->theme().setTickLabelFontSize(w->tickLabelFontSize());
 	widget->theme().setTickLabelColor((const char *) w->tickLabelColor());
 
 	// Widget needle settings
 	widget->theme().setNeedleType(needle_type);
+	widget->theme().setNeedleDistance(w->needleDistance());
+	widget->theme().setNeedleBorderColor((const char *) w->needleBorderColor());
+	widget->theme().setNeedleBackgroundColor((const char *) w->needleBackgroundColor());
 	widget->theme().setNeedlePrimaryColor((const char *) w->needlePrimaryColor());
 	widget->theme().setNeedleSecondaryColor((const char *) w->needleSecondaryColor());
 

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-06-11 20:26+0200\n"
+"POT-Creation-Date: 2026-06-12 20:12+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,117 +17,117 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/videowidget.cpp:991
+#: ../src/videowidget.cpp:999
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:993
+#: ../src/videowidget.cpp:1001
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:995 ../src/videowidget.cpp:1048
+#: ../src/videowidget.cpp:1003 ../src/videowidget.cpp:1056
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:1004
+#: ../src/videowidget.cpp:1012
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1006
+#: ../src/videowidget.cpp:1014
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1008
+#: ../src/videowidget.cpp:1016
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:1010
+#: ../src/videowidget.cpp:1018
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:1012 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:1020 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:1014
+#: ../src/videowidget.cpp:1022
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:1016 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:1024 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:1018
+#: ../src/videowidget.cpp:1026
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:1020
+#: ../src/videowidget.cpp:1028
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:1022
+#: ../src/videowidget.cpp:1030
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:1024
+#: ../src/videowidget.cpp:1032
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:1026
+#: ../src/videowidget.cpp:1034
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:1028
+#: ../src/videowidget.cpp:1036
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:1030
+#: ../src/videowidget.cpp:1038
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:1032 ../gtk/src/ui/media_stackpage.ui:102
+#: ../src/videowidget.cpp:1040 ../gtk/src/ui/media_stackpage.ui:102
 #: ../gtk/src/media.cpp:14
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:1034
+#: ../src/videowidget.cpp:1042
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:1036 ../gtk/src/ui/widgets/map_box.ui:175
+#: ../src/videowidget.cpp:1044 ../gtk/src/ui/widgets/map_box.ui:175
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:1038
+#: ../src/videowidget.cpp:1046
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1040
+#: ../src/videowidget.cpp:1048
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:1042
+#: ../src/videowidget.cpp:1050
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:1044
+#: ../src/videowidget.cpp:1052
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1046
+#: ../src/videowidget.cpp:1054
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:1050 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:1058 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:1052 ../gtk/src/ui/widgets/map_box.ui:307
+#: ../src/videowidget.cpp:1060 ../gtk/src/ui/widgets/map_box.ui:307
 #: ../gtk/src/ui/widgets/track_box.ui:168
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:1054
+#: ../src/videowidget.cpp:1062
 msgid "Vertical speed"
 msgstr ""
 
@@ -398,14 +398,15 @@ msgstr ""
 #: ../gtk/src/ui/shape/arc_box.ui:365 ../gtk/src/ui/shape/arc_box.ui:394
 #: ../gtk/src/ui/shape/arc_box.ui:496 ../gtk/src/ui/shape/arc_box.ui:612
 #: ../gtk/src/ui/shape/arc_box.ui:642 ../gtk/src/ui/shape/arc_box.ui:740
-#: ../gtk/src/ui/shape/arc_box.ui:770 ../gtk/src/ui/shape/bar_box.ui:163
-#: ../gtk/src/ui/shape/bar_box.ui:192 ../gtk/src/ui/shape/bar_box.ui:251
-#: ../gtk/src/ui/shape/bar_box.ui:280 ../gtk/src/ui/shape/bar_box.ui:407
-#: ../gtk/src/ui/shape/bar_box.ui:463 ../gtk/src/ui/shape/text_box.ui:217
-#: ../gtk/src/ui/widgets/map_box.ui:437 ../gtk/src/ui/widgets/map_box.ui:466
-#: ../gtk/src/ui/widgets/map_box.ui:495 ../gtk/src/ui/widgets/map_box.ui:598
-#: ../gtk/src/ui/widgets/map_box.ui:717 ../gtk/src/ui/widgets/map_box.ui:836
-#: ../gtk/src/ui/widgets/track_box.ui:355
+#: ../gtk/src/ui/shape/arc_box.ui:770 ../gtk/src/ui/shape/bar_box.ui:236
+#: ../gtk/src/ui/shape/bar_box.ui:265 ../gtk/src/ui/shape/bar_box.ui:324
+#: ../gtk/src/ui/shape/bar_box.ui:353 ../gtk/src/ui/shape/bar_box.ui:480
+#: ../gtk/src/ui/shape/bar_box.ui:596 ../gtk/src/ui/shape/bar_box.ui:626
+#: ../gtk/src/ui/shape/bar_box.ui:729 ../gtk/src/ui/shape/bar_box.ui:759
+#: ../gtk/src/ui/shape/text_box.ui:217 ../gtk/src/ui/widgets/map_box.ui:437
+#: ../gtk/src/ui/widgets/map_box.ui:466 ../gtk/src/ui/widgets/map_box.ui:495
+#: ../gtk/src/ui/widgets/map_box.ui:598 ../gtk/src/ui/widgets/map_box.ui:717
+#: ../gtk/src/ui/widgets/map_box.ui:836 ../gtk/src/ui/widgets/track_box.ui:355
 #: ../gtk/src/ui/widgets/track_box.ui:384
 #: ../gtk/src/ui/widgets/track_box.ui:413
 #: ../gtk/src/ui/widgets/track_box.ui:516
@@ -570,11 +571,11 @@ msgstr ""
 msgid "Arc extension"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:76 ../gtk/src/ui/shape/bar_box.ui:48
+#: ../gtk/src/ui/shape/arc_box.ui:76 ../gtk/src/ui/shape/bar_box.ui:69
 msgid "Gauge"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:97 ../gtk/src/ui/shape/bar_box.ui:69
+#: ../gtk/src/ui/shape/arc_box.ui:97 ../gtk/src/ui/shape/bar_box.ui:90
 msgid "Gauge enable:"
 msgstr ""
 
@@ -586,79 +587,79 @@ msgstr ""
 msgid "Gauge rotation:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:183
+#: ../gtk/src/ui/shape/arc_box.ui:183 ../gtk/src/ui/shape/bar_box.ui:142
 msgid "Gauge flip:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:208 ../gtk/src/ui/shape/bar_box.ui:94
+#: ../gtk/src/ui/shape/arc_box.ui:208 ../gtk/src/ui/shape/bar_box.ui:167
 msgid "Gauge width:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:239 ../gtk/src/ui/shape/bar_box.ui:125
+#: ../gtk/src/ui/shape/arc_box.ui:239 ../gtk/src/ui/shape/bar_box.ui:198
 msgid "Gauge line cap:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:264 ../gtk/src/ui/shape/bar_box.ui:150
+#: ../gtk/src/ui/shape/arc_box.ui:264 ../gtk/src/ui/shape/bar_box.ui:223
 msgid "Gauge primary color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:293 ../gtk/src/ui/shape/bar_box.ui:179
+#: ../gtk/src/ui/shape/arc_box.ui:293 ../gtk/src/ui/shape/bar_box.ui:252
 msgid "Gauge secondary color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:322 ../gtk/src/ui/shape/bar_box.ui:208
+#: ../gtk/src/ui/shape/arc_box.ui:322 ../gtk/src/ui/shape/bar_box.ui:281
 msgid "Gauge border width:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:352 ../gtk/src/ui/shape/bar_box.ui:238
+#: ../gtk/src/ui/shape/arc_box.ui:352 ../gtk/src/ui/shape/bar_box.ui:311
 msgid "Gauge border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:381 ../gtk/src/ui/shape/bar_box.ui:267
+#: ../gtk/src/ui/shape/arc_box.ui:381 ../gtk/src/ui/shape/bar_box.ui:340
 msgid "Gauge background color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:406 ../gtk/src/ui/shape/bar_box.ui:292
+#: ../gtk/src/ui/shape/arc_box.ui:406 ../gtk/src/ui/shape/bar_box.ui:365
 msgid "Tick"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:427 ../gtk/src/ui/shape/bar_box.ui:313
+#: ../gtk/src/ui/shape/arc_box.ui:427 ../gtk/src/ui/shape/bar_box.ui:386
 msgid "Tick enable:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:452 ../gtk/src/ui/shape/bar_box.ui:338
+#: ../gtk/src/ui/shape/arc_box.ui:452 ../gtk/src/ui/shape/bar_box.ui:411
 msgid "Tick size:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:483 ../gtk/src/ui/shape/bar_box.ui:394
+#: ../gtk/src/ui/shape/arc_box.ui:483 ../gtk/src/ui/shape/bar_box.ui:467
 msgid "Tick color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:513 ../gtk/src/ui/shape/bar_box.ui:424
+#: ../gtk/src/ui/shape/arc_box.ui:513 ../gtk/src/ui/shape/bar_box.ui:497
 msgid "Tick label enable:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:538
+#: ../gtk/src/ui/shape/arc_box.ui:538 ../gtk/src/ui/shape/bar_box.ui:522
 msgid "Tick label distance:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:568
+#: ../gtk/src/ui/shape/arc_box.ui:568 ../gtk/src/ui/shape/bar_box.ui:552
 msgid "Tick label font size:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:599 ../gtk/src/ui/shape/bar_box.ui:450
+#: ../gtk/src/ui/shape/arc_box.ui:599 ../gtk/src/ui/shape/bar_box.ui:583
 msgid "Tick label color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:629
+#: ../gtk/src/ui/shape/arc_box.ui:629 ../gtk/src/ui/shape/bar_box.ui:613
 msgid "Tick label border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:654
+#: ../gtk/src/ui/shape/arc_box.ui:654 ../gtk/src/ui/shape/bar_box.ui:638
 msgid "Needle"
 msgstr ""
 
-#: ../gtk/src/ui/shape/arc_box.ui:675
+#: ../gtk/src/ui/shape/arc_box.ui:675 ../gtk/src/ui/shape/bar_box.ui:659
 msgid "Needle enable:"
 msgstr ""
 
@@ -674,12 +675,28 @@ msgstr ""
 msgid "Needle secondary color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:39
+#: ../gtk/src/ui/shape/bar_box.ui:60
 msgid "Bar extension"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:369
+#: ../gtk/src/ui/shape/bar_box.ui:116
+msgid "Gauge orientation:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:442
 msgid "Tick align:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:685
+msgid "Needle distance:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:716
+msgid "Needle border color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/bar_box.ui:746
+msgid "Needle background color:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/text_box.ui:25
@@ -844,21 +861,21 @@ msgstr ""
 msgid "Butterworth"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:76
+#: ../gtk/src/widgetframe.cpp:76 ../gtk/src/shape/bar.cpp:31
 msgid "Horizontal"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:81
+#: ../gtk/src/widgetframe.cpp:81 ../gtk/src/shape/bar.cpp:36
 msgid "Vertical"
 msgstr ""
 
 #: ../gtk/src/widgetframe.cpp:98 ../gtk/src/widgetframe.cpp:218
-#: ../gtk/src/shape/bar.cpp:44
+#: ../gtk/src/shape/bar.cpp:59
 msgid "Left"
 msgstr ""
 
 #: ../gtk/src/widgetframe.cpp:103 ../gtk/src/widgetframe.cpp:228
-#: ../gtk/src/shape/bar.cpp:52
+#: ../gtk/src/shape/bar.cpp:67
 msgid "Right"
 msgstr ""
 
@@ -939,7 +956,7 @@ msgid "Ultra heavy (1000)"
 msgstr ""
 
 #: ../gtk/src/widgetframe.cpp:223 ../gtk/src/widgetframe.cpp:243
-#: ../gtk/src/shape/bar.cpp:48 ../gtk/src/widgets/map.cpp:103
+#: ../gtk/src/shape/bar.cpp:63 ../gtk/src/widgets/map.cpp:103
 #: ../gtk/src/widgets/track.cpp:103
 msgid "Center"
 msgstr ""
@@ -980,11 +997,11 @@ msgstr ""
 msgid "Open an image or a telemetry file"
 msgstr ""
 
-#: ../gtk/src/shape/arc.cpp:31 ../gtk/src/shape/bar.cpp:31
+#: ../gtk/src/shape/arc.cpp:31 ../gtk/src/shape/bar.cpp:46
 msgid "Square"
 msgstr ""
 
-#: ../gtk/src/shape/arc.cpp:35 ../gtk/src/shape/bar.cpp:35
+#: ../gtk/src/shape/arc.cpp:35 ../gtk/src/shape/bar.cpp:50
 msgid "Round"
 msgstr ""
 

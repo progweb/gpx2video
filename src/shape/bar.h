@@ -13,12 +13,11 @@ public:
 		double y;
 	};
 
-	BarShape(VideoWidget::Theme &theme, cairo_font_face_t *fontface = NULL, 
-			int width = 0, int height = 0)
+	BarShape(VideoWidget::Theme &theme, int width = 0, int height = 0)
 		: ShapeBase(theme, VideoWidget::ShapeBar) {
-		init(fontface, width, height);
+		setSize(width, height);
 
-		setPadding(0, 0, 0, 0);
+		clear();
 	}
 
 	virtual ~BarShape() {
@@ -29,14 +28,7 @@ public:
 		return theme_;
 	}
 
-	void init(cairo_font_face_t *fontface, int width, int height, int size = 0) {
-		setOffset(0);
-		setSize(width, height, size);
-
-		fontface_ = fontface;
-	}
-
-	void setSize(int width, int height, int size) {
+	void setSize(int width, int height, int size = 0) {
 		// Vertical
 		size_ = size;
 		length_ = height;
@@ -54,6 +46,14 @@ public:
 		padding_right_ = right;
 		padding_top_ = top;
 		padding_bottom_ = bottom;
+	}
+
+	void setLabelExtents(int x, int y, int width, int height) {
+		label_x_ = x;
+		label_y_ = y;
+
+		label_width_ = width;
+		label_height_ = height;
 	}
 
 	double scale(double min, double max, double value, int rotate = 0) {
@@ -77,13 +77,23 @@ public:
 
 	void bar(cairo_t *cr, double v1, double v2, double width, double border,
 			const float *fill, const float *outline = NULL);
-	void cursor(cairo_t *cr, double v, double width);
-	void line(cairo_t *cr, double v, double d1, double d2, const float *fill);
-	void text(cairo_t *cr, double v, double d, int size, const float *color, std::string str);
-	void marker(cairo_t *cr, double v, 
-			int border, const float *color, const float *fill, const float *outline, std::string str);
+	void cursor(cairo_t *cr, double v, double width, const float *fill);
+	void line(cairo_t *cr, double v, double d1, double d2, double width, const float *fill);
+	void ticklabel(cairo_t *cr, double v, double d, Font &font, const float *fill, const float *outline, const char *text);
+//	void text(cairo_t *cr, double v, double d, int size, const float *color, std::string str);
 
-	void label(cairo_t *cr, int x, int y, const float *color, std::string str);
+	void label(cairo_t *cr, Font &font, 
+			const float *fill, const float *outline, const char *text);
+	void value(cairo_t *cr, double v, Font &font,
+			const float *fill, const float *outline, const char *text);
+
+	void clear(void) {
+		ShapeBase::clear();
+
+		setOffset(0);
+		setPadding(0, 0, 0, 0);
+		setLabelExtents(0, 0, 0, 0);
+	}
 
 	void xmlwrite(std::ostream &os);
 
@@ -98,7 +108,7 @@ private:
 	int padding_top_;
 	int padding_bottom_;
 
-	cairo_font_face_t *fontface_;
+	int label_x_, label_y_, label_width_, label_height_;
 };
 
 #endif

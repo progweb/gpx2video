@@ -42,6 +42,7 @@ public:
 	void update_boundaries(void);
 
 private:
+	Glib::RefPtr<Gtk::ListStore> gauge_orientation_model_;
 	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;
 	Glib::RefPtr<Gtk::ListStore> tick_align_model_;
 };

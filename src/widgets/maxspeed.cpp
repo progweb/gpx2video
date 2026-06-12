@@ -171,8 +171,6 @@ void MaxSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 
 void MaxSpeedTextShape::clear(void) {
-	is_initialized_ = false;
-
 	TextShape::clear();
 
 	no_value_ = false;

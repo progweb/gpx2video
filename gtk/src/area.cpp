@@ -961,6 +961,10 @@ void GPX2VideoArea::resize_viewport(gint width, gint height) {
 	}
 
 	// Apply viewport
+	log_info("OpenGL viewport %d - %d / %d x %d",
+			lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY,
+			widthOfViewport, heightOfViewport);
+
 	glViewport(lowerLeftCornerOfViewportX, lowerLeftCornerOfViewportY,
 			widthOfViewport, heightOfViewport);
 }
