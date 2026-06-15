@@ -151,6 +151,7 @@ void GPX2VideoWidgetStackPage::set_widget_selected(GPX2VideoWidget *widget) {
 			auto adjustment = this->get_vadjustment();
 
 			auto row = list->get_row_at_index(index);
+
 			list->select_row(*row);
 
 			// Scroll to row

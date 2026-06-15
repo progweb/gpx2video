@@ -261,6 +261,8 @@ TrackSettings::Icon TrackSettings::string2icon(std::string &s) {
 		icon = TrackSettings::IconNeedle;
 	else if (s == "internal:spot")
 		icon = TrackSettings::IconSpot;
+	else if (s == "internal:position-drone-potensic")
+		icon = TrackSettings::IconPositionDronePotensic;
 	else if (Utils::starts_with(s, "file:"))
 		icon = TrackSettings::IconUserFile;
 	else
@@ -302,6 +304,8 @@ std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 		return "internal:needle";
 	case TrackSettings::IconSpot:
 		return "internal:spot";
+	case TrackSettings::IconPositionDronePotensic:
+		return "internal:position-drone-potensic";
 
 	case TrackSettings::IconUserFile:
 		return "file:";
@@ -1438,6 +1442,8 @@ std::string Track::getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon
 		return path + "/needle.svg";
 	case TrackSettings::IconSpot:
 		return path + "/spot.svg";
+	case TrackSettings::IconPositionDronePotensic:
+		return path + "/position-drone-potensic.svg";
 	default:
 		return "";
 	}

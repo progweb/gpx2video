@@ -28,6 +28,7 @@ public:
 		IconFinish,
 		IconNeedle,
 		IconSpot,
+		IconPositionDronePotensic,
 
 		// At last user icons
 		IconUserFile,
