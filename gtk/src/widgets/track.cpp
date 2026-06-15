@@ -53,6 +53,11 @@ void GPX2VideoTrackWidgetSettingsBox::Icon::load_and_crop_svg(void) {
 	int width = static_cast<int>(bbox.width);
 	int height = static_cast<int>(bbox.height);
 
+	if ((width == 0) || (height == 0)) {
+		pixbuf_ = Gdk::Pixbuf::create_from_file(filename_);
+		return;
+	}
+
 	auto surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, width, height);
 	auto cairo = Cairo::Context::create(surface);
 
@@ -74,8 +79,6 @@ void GPX2VideoTrackWidgetSettingsBox::Icon::load_and_crop_svg(void) {
 	}
 
 	g_object_unref(handle);
-
-	surface->write_to_png(filename_ + ".png");
 
 	// Convert Cairo surface to Gdk::Pixbuf
 	pixbuf_ = Gdk::Pixbuf::create(surface, 0, 0, width, height);
