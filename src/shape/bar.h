@@ -15,6 +15,7 @@ public:
 
 	BarShape(VideoWidget::Theme &theme, int width = 0, int height = 0)
 		: ShapeBase(theme, VideoWidget::ShapeBar) {
+		setOrientation(VideoWidget::OrientationVertical);
 		setSize(width, height);
 
 		clear();
@@ -28,17 +29,38 @@ public:
 		return theme_;
 	}
 
-	void setSize(int width, int height, int size = 0) {
-		// Vertical
-		size_ = size;
-		length_ = height;
+	int size(void) {
+		return size_;
+	}
 
-		center_ = width / 2;
-//		margin_ = size / 10;
+	void setSize(int width, int height) {
+		width_ = width;
+		height_ = height;
+
+		size_ = std::min(width_, height_);
+
+		if (orientation_ == VideoWidget::OrientationVertical) {
+			// Vertical
+			length_ = height;
+
+			center_ = width / 2;
+		}
+		else {
+			// Horizontal
+			length_ = width;
+
+			center_ = height / 2;
+		}
 	}
 
 	void setOffset(int offset) {
 		offset_ = offset;
+	}
+
+	void setOrientation(VideoWidget::Orientation orientation) {
+		orientation_ = orientation;
+
+		setSize(width_, height_);
 	}
 
 	void setPadding(int left, int right, int top, int bottom) {
@@ -65,14 +87,32 @@ public:
 	}
 
 	struct point locate(double value, double distance) {
-//		double size = length_ - 3.0 * margin_ - (size_ / 9);
-		double size = length_ - padding_top_ - padding_bottom_; // - (size_ / 9);
+		double x, y;
 
-		return {
-			.x = center_ + offset_ + distance,
-//			.y = size + margin_ - value * size 
-			.y = size + padding_top_ - value * size 
-		};
+		double size = length_;
+
+		bool flip = theme().gaugeFlip();
+	   
+		if (orientation_ == VideoWidget::OrientationVertical) {
+			size -= (padding_top_ + padding_bottom_);
+
+			y = flip ? value * size : size - value * size;
+
+			return {
+				.x = center_ + offset_ + distance,
+				.y = padding_top_ + y
+			};
+		}
+		else {
+			size -= (padding_left_ + padding_right_);
+
+			x = flip ? size - value * size : value * size;
+
+			return {
+				.x = padding_left_ + x,
+				.y = center_ + offset_ + distance
+			};
+		}
 	}
 
 	void bar(cairo_t *cr, double v1, double v2, double width, double border,
@@ -102,6 +142,11 @@ private:
 	int length_;
 //	int margin_;
 	int offset_;
+
+	int width_;
+	int height_;
+
+	VideoWidget::Orientation orientation_;
 
 	int padding_left_;
 	int padding_right_;

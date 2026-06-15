@@ -19,7 +19,7 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 	loading_ = false;
 
 	// Default icon size
-	icon_pixel_size_ = 32;
+	icon_pixel_size_ = 40;
 	icon_pixel_minsize_ = 16;
 	icon_pixel_maxsize_ = 96;
 
@@ -56,7 +56,7 @@ void GPX2VideoTextShapeSettingsBox::load_models(void) {
 
 	for (guint i=0; i < n_items; i++) {
 		auto item = media_model_->get_item(i);
-		if (!item)
+		if (!item || (item->media() != GPX2VideoMedia::MediaIcon))
 			continue;
 
 		model->append(Icon::create(
@@ -305,6 +305,9 @@ void GPX2VideoTextShapeSettingsBox::create_popover(Gtk::MenuButton *menubutton) 
 	gridview->set_factory(icon_factory_);
 	gridview->set_min_columns(1);
 	gridview->set_max_columns(10);
+
+	// Icon gridview css
+	gridview->get_style_context()->add_class("icon-grid");
 
 	// Icon check button
 	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("icon_usedefault_checkbutton");

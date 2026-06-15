@@ -618,6 +618,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			settings.setTelemetryFilter(app.settings().telemetryFilter());
 
+			settings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
+			settings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+
 			settings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
 

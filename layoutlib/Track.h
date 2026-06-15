@@ -281,6 +281,13 @@ namespace layout
     ///
     String  &pathSecondaryColor() { return _path_secondary_color; }
 
+	/// 
+	/// Get follow
+	///
+	/// @return the follow attribute
+	///
+	Boolean  &followCourse() { return _follow_course; }
+
     ///
     /// Get icon name
     ///
@@ -351,6 +358,8 @@ namespace layout
 	String       _path_border_color;
 	String       _path_primary_color;
 	String       _path_secondary_color;
+
+	Boolean      _follow_course;
 
     String       _icon_end_name;
     String       _icon_start_name;

@@ -91,6 +91,8 @@ protected:
 
 	void bind_settings(void);
 
+	void load_css(void);
+
 	void update_stack(void);
 	void update_headerbar(void);
 

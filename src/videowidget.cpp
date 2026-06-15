@@ -75,6 +75,7 @@ VideoWidget::Theme::Theme() {
 	setGaugeFlip(false);
 	setGaugeWidth(10);
 	setGaugeCap(VideoWidget::Theme::GaugeCapSquare);
+	setGaugeOrientation(VideoWidget::OrientationVertical);
 	setGaugeBorder(0);
 	setGaugeBorderColor(1.0, 1.0, 1.0, 1.0);
 	setGaugeBackgroundColor(0.0, 0.0, 0.0, 0.0);
@@ -91,7 +92,7 @@ VideoWidget::Theme::Theme() {
 
 	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
 	setNeedleDistance(0);
-	setNeedleBorderColor(0.0, 0.0, 0.0, 1.0);
+	setNeedleBorderColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleBackgroundColor(0.0, 0.0, 0.0, 0.8);
 	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);

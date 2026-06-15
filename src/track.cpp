@@ -47,6 +47,8 @@ TrackSettings::TrackSettings() {
 	setPathPrimaryColor(0.9, 0.4, 0.2, 1.0);
 	setPathSecondaryColor(1.0, 1.0, 1.0, 1.0);
 
+	setFollowCourse(false);
+
 	setIcon(TrackSettings::IconStart, TrackSettings::IconDefault);
 	setIconColor(TrackSettings::IconStart, 0.0, 0.0, 0.0, 0.0);
 	setIconSize(TrackSettings::IconStart, 1.0);
@@ -195,6 +197,16 @@ bool TrackSettings::setPathSecondaryColor(double r, double g, double b, double a
 	path_secondary_color_[2] = b;
 	path_secondary_color_[3] = a;
 	return true;
+}
+
+
+bool TrackSettings::followCourse(void) const {
+	return follow_course_;
+}
+
+
+void TrackSettings::setFollowCourse(bool follow) {
+	follow_course_ = follow;
 }
 
 
@@ -1298,8 +1310,15 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		if (icon_end_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconEnd))
 			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
 
-		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition))
-			icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
+			if (settings().followCourse()) {
+				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.heading() * M_PI / 180.0);
+
+				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+			}
+			else
+				icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+		}
 	}
 
 	// Save last position
@@ -1443,6 +1462,8 @@ void Track::xmlwrite(std::ostream &os) {
 	os << "<path-border-color>" << VideoWidget::Theme::color2hex(settings().pathBorderColor()) << "</path-border-color>" << std::endl;
 	os << "<path-primary-color>" << VideoWidget::Theme::color2hex(settings().pathPrimaryColor()) << "</path-primary-color>" << std::endl;
 	os << "<path-secondary-color>" << VideoWidget::Theme::color2hex(settings().pathSecondaryColor()) << "</path-secondary-color>" << std::endl;
+
+	os << "<follow-course>" << VideoWidget::bool2string(settings().followCourse()) << "</follow-course>" << std::endl;
 
 	os << "<icon-start-name>" << TrackSettings::icon2string(settings().icon(TrackSettings::IconStart)) << settings().iconFile(TrackSettings::IconStart) << "</icon-start-name>" << std::endl;
 	os << "<icon-start-color>" << VideoWidget::Theme::color2hex(settings().iconColor(TrackSettings::IconStart)) << "</icon-start-color>" << std::endl;

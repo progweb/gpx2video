@@ -65,6 +65,8 @@ namespace layout
 	_path_primary_color(this, "path-primary-color", Node::ELEMENT, false),
 	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false),
 
+	_follow_course(this, "follow-course", Node::ELEMENT, false),
+
     _icon_end_name(this, "icon-end-name",   Node::ELEMENT, false),
     _icon_start_name(this, "icon-start-name",   Node::ELEMENT, false),
     _icon_position_name(this, "icon-position-name",   Node::ELEMENT, false),
@@ -112,6 +114,8 @@ namespace layout
     getInterfaces().push_back(&_path_primary_color);
     getInterfaces().push_back(&_path_secondary_color);
 
+	getInterfaces().push_back(&_follow_course);
+
     getInterfaces().push_back(&_icon_end_name);
     getInterfaces().push_back(&_icon_start_name);
     getInterfaces().push_back(&_icon_position_name);
@@ -147,6 +151,8 @@ namespace layout
 	_path_border_color.setValue("#000000ff");
 	_path_primary_color.setValue("#669df6ff");
 	_path_secondary_color.setValue("#ffffffff");
+
+	_follow_course.setValue("false");
 
 	_icon_end_color.setValue("#00000000");
 	_icon_start_color.setValue("#00000000");

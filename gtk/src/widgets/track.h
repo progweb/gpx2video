@@ -3,6 +3,9 @@
 
 #include <gtkmm/menubutton.h>
 
+#include <librsvg/rsvg.h>
+#include <cairomm/cairomm.h>
+
 #include "../../src/track.h"
 #include "../videowidget.h"
 #include "../media.h"
@@ -13,13 +16,12 @@ class GPX2VideoTrackWidgetSettingsBox : public GPX2VideoWidgetBaseSettingsBox {
 public:
 	class Icon : public Glib::Object {
 	public:
-		TrackSettings::Icon id_;
-		std::string filename_;
-
 		Icon(TrackSettings::Icon id, const std::string &filename)
 			: Glib::Object()
+			, pixbuf_(NULL) 
 			, id_(id)
 			, filename_(filename) {
+			load_and_crop_svg();
 		}
 
 		static Glib::RefPtr<Icon> create(TrackSettings::Icon id, const std::string &filename) {
@@ -33,6 +35,18 @@ public:
 		const std::string& filename(void) const {
 			return filename_;
 		}
+
+		const Glib::RefPtr<Gdk::Pixbuf>& pixbuf(void) const {
+			return pixbuf_;
+		}   
+
+	protected:
+		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
+
+		TrackSettings::Icon id_;
+		std::string filename_;
+
+		void load_and_crop_svg(void);
 	};
 
 	GPX2VideoTrackWidgetSettingsBox()
@@ -96,6 +110,8 @@ private:
 	sigc::connection icon_zoomin_connection_;
 	sigc::connection icon_zoomout_connection_;
 	sigc::connection icon_ok_connection_;
+
+	Glib::RefPtr<GPX2VideoTrackWidgetSettingsBox::Icon> find_icon(const std::string &filename);
 };
 
 #endif

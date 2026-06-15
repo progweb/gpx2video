@@ -96,6 +96,7 @@ set(RESOURCE_UI_LIST
 	shape/arc_box.ui
 	shape/bar_box.ui
 	shape/text_box.ui
+	widgets/image_box.ui
 	widgets/map_box.ui
 	widgets/text_box.ui
 	widgets/track_box.ui
@@ -196,6 +197,7 @@ set(GPX2VIDEO_SOURCES
 	src/shape/bar.cpp
 	src/shape/text.cpp
 	src/widgets/base.cpp
+	src/widgets/image.cpp
 	src/widgets/map.cpp
 	src/widgets/text.cpp
 	src/widgets/track.cpp

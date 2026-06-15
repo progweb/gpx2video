@@ -98,6 +98,7 @@ namespace layout
 
 	_gauge_angle(this, "gauge-angle", Node::ELEMENT, false),
 	_gauge_rotation(this, "gauge-rotation", Node::ELEMENT, false),
+	_gauge_orientation(this, "gauge-orientation", Node::ELEMENT, false),
 	_gauge_flip(this, "gauge-flip", Node::ELEMENT, false),
 	_gauge_width(this, "gauge-width", Node::ELEMENT, false),
 	_gauge_cap(this, "gauge-cap", Node::ELEMENT, false),
@@ -197,6 +198,7 @@ namespace layout
 
 	getInterfaces().push_back(&_gauge_angle);
 	getInterfaces().push_back(&_gauge_rotation);
+	getInterfaces().push_back(&_gauge_orientation);
 	getInterfaces().push_back(&_gauge_flip);
 	getInterfaces().push_back(&_gauge_width);
 	getInterfaces().push_back(&_gauge_cap);
@@ -256,6 +258,7 @@ namespace layout
 
 	_gauge_angle.setValue("-1");
 	_gauge_rotation.setValue("-1");
+	_gauge_orientation.setValue("vertical");
 	_gauge_flip.setValue("false");
 	_gauge_width.setValue("-1");
 

@@ -665,6 +665,14 @@ public:
 			gauge_rotation_ = rotation;
 		}
 
+		const VideoWidget::Orientation& gaugeOrientation(void) const {
+			return gauge_orientation_;
+		}
+
+		void setGaugeOrientation(VideoWidget::Orientation orientation) {
+			gauge_orientation_ = orientation;
+		}
+
 		const bool& gaugeFlip(void) const {
 			return gauge_flip_;
 		}
@@ -1019,6 +1027,7 @@ public:
 
 		int gauge_angle_;
 		int gauge_rotation_;
+		VideoWidget::Orientation gauge_orientation_;
 		bool gauge_flip_;
 		int gauge_width_;
 		GaugeCap gauge_cap_;
@@ -1290,6 +1299,7 @@ protected:
 		setMargin(MarginAll, 10);
 		setLabel(widget2string(type));
 		setValueUnit(TelemetryData::UnitNone);
+		setZoom(ZoomNone);
 	}
 
 	virtual void xmlopen(std::ostream &os);

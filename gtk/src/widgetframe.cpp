@@ -18,6 +18,7 @@
 #include "shape/arc.h"
 #include "shape/bar.h"
 #include "shape/text.h"
+#include "widgets/image.h"
 #include "widgets/map.h"
 #include "widgets/text.h"
 #include "widgets/track.h"
@@ -54,13 +55,25 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 	, widget_child_box_(NULL) {
 	log_call();
 
-	Glib::RefPtr<Gtk::ListStore> font_weight_model;
-
 	loading_ = false;
 	is_visible_ = false;
 
 	// Populate models
-	//-----------------
+	load_models();
+
+	// Binding
+	bind_content();
+
+	// Update ui
+	update_content();
+	update_boundaries();
+}
+
+
+void GPX2VideoWidgetFrame::load_models(void) {
+	log_call();
+
+	Glib::RefPtr<Gtk::ListStore> font_weight_model;
 
 	orientation_model_ = Gtk::ListStore::create(model_);
 
@@ -255,13 +268,6 @@ GPX2VideoWidgetFrame::GPX2VideoWidgetFrame(BaseObjectType *cobject, const Glib::
 
 	label_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
 	value_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
-
-	// Binding
-	bind_content();
-
-	// Update ui
-	update_content();
-	update_boundaries();
 }
 
 
@@ -388,6 +394,10 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 	if (widget_selected_) {
 		// Build widget settings box child
 		switch (widget_selected_->widget()->type()) {
+		case VideoWidget::WidgetImage:
+			widget_child_box_ = GPX2VideoImageWidgetSettingsBox::create(widget_selected_, media_model_);
+			break;
+
 		case VideoWidget::WidgetMap:
 			widget_child_box_ = GPX2VideoMapWidgetSettingsBox::create(widget_selected_, media_model_);
 			break;

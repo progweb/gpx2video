@@ -163,7 +163,6 @@ skip:
 private:
 	bool no_value_;
 
-	int size_;
 	int width_;
 	int height_;
 

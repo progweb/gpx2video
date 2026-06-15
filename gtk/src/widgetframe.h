@@ -82,6 +82,8 @@ protected:
 	void build_shape_settings(void);
 	void build_widget_settings(void);
 
+	void load_models(void);
+
 	void bind_content(void);
 
 	void update_content(void);

@@ -107,12 +107,10 @@ void GPX2VideoBarShapeSettingsBox::bind_content(void) {
 					[this](const Gtk::TreeModel::const_iterator &iter) {
 						int value = iter->get_value(model_.m_id);
 
-						int angle = ((VideoWidget::Orientation) value == VideoWidget::OrientationHorizontal) ? 90 : 0;
-
 						log_notice("Widget %s: gauge orientation changed to '%s'", 
 								widget_->name().c_str(), iter->get_value(model_.m_name).c_str());
 
-						widget_->theme().setGaugeRotation(angle);
+						widget_->theme().setGaugeOrientation((VideoWidget::Orientation) value);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
@@ -501,8 +499,6 @@ void GPX2VideoBarShapeSettingsBox::update_content(void) {
 
 	const float *color;
 
-	VideoWidget::Orientation orientation;
-
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
@@ -525,11 +521,9 @@ void GPX2VideoBarShapeSettingsBox::update_content(void) {
 	if (!combobox)
 		throw std::runtime_error("No \"gauge_orientation_spinbutton\" object in " + resource_file_);
 
-	orientation = (widget_->theme().gaugeRotation() != 0) ? VideoWidget::OrientationHorizontal : VideoWidget::OrientationVertical;
-
 	combobox->set_model(gauge_orientation_model_);
 
-	if (find_in_listtore(gauge_orientation_model_, orientation, iter))
+	if (find_in_listtore(gauge_orientation_model_, widget_->theme().gaugeOrientation(), iter))
 		combobox->set_active(iter);
 
 	// Widget gauge flip switch

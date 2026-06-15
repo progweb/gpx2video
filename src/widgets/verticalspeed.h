@@ -162,7 +162,6 @@ skip:
 private:
 	bool no_value_;
 
-	int size_;
 	int width_;
 	int height_;
 
@@ -171,6 +170,9 @@ private:
 
 	int tick_step_;
 	int tick_mstep_;
+
+	int tick_label_width_;
+	int tick_label_height_;
 
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;

@@ -25,6 +25,12 @@ public:
 		return this;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		(void) feature;
+
+		return false;
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 

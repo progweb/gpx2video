@@ -75,6 +75,9 @@ public:
 	bool setPathSecondaryColor(std::string color);
 	bool setPathSecondaryColor(double r, double g, double b, double a);
 
+	bool followCourse(void) const;
+	void setFollowCourse(bool follow);
+
 	Icon icon(Icon type) const {
 		switch (type) {
 		case IconStart:
@@ -237,6 +240,8 @@ protected:
 	float path_border_color_[4];
 	float path_primary_color_[4];
 	float path_secondary_color_[4];
+
+	bool follow_course_;
 
 	Icon icon_start_;
 	std::string icon_start_file_;

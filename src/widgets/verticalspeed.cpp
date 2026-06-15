@@ -188,22 +188,19 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 	int x, y;
 	int width, height;
 
+	int left, right;
+	int top, bottom;
+
+	char s[128];
+
 	TextShape::Font font;
 
 	width_ = theme().width();
 	height_ = theme().height();
 
-	size_ = std::min(width_, height_);
-
 	// Size
-	setSize(width_, height_, size_); //, size_);
-
-	// Padding
-	setPadding(
-		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
-		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
-   		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
-   		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+	setOrientation(theme().gaugeOrientation());
+	setSize(width_, height_); //, size_);
 
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -227,37 +224,120 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 	tick_step_ = 10;
 	tick_mstep_ = 10;
 
+	tick_label_width_ = 0;
+	tick_label_height_ = 0;
+
+	// Tick label space
+	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
+		int amin = theme().valueMin();
+		int amax = theme().valueMax();
+
+		int min = amin;
+		int max = amax;
+
+		bool first = true;
+
+		int step = tick_mstep_ * tick_step_;
+
+		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+			widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+		min /= step;
+		min *= step;
+
+		max /= step;
+		max *= step;
+
+		for (int value = min; value < max + step; value = value + step) {
+			int txtx, txty;
+			int txtw, txth;
+
+			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
+
+			if (theme().hasFlag(VideoWidget::Theme::FlagUnit) && (first || (value >= max)))
+				sprintf(s, "%d %s", value, unit.c_str());
+			else
+				sprintf(s, "%d", value);
+
+			if (value < amin)
+				continue;
+
+			font = (TextShape::Font) {
+				.size = (int) (theme().valueFontSize() * factor),
+				.border = (int) (theme().valueBorderWidth() * factor),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.family = theme().valueFontFamily(),
+				.align = VideoWidget::Theme::AlignCenter,
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			this->extents(cr, font, s, txtx, txty, txtw, txth);
+
+			tick_label_width_ = std::max(tick_label_width_, txtw - txtx);
+			tick_label_height_ = std::max(tick_label_height_, txth - txty);
+
+			first = false;
+		}
+	}
+
+	// Padding
+	if (theme().gaugeOrientation() == VideoWidget::OrientationHorizontal) {
+		left = tick_label_width_ / 2;
+		right = tick_label_width_ / 2;
+		top = 0;
+		bottom = 0;
+	}
+	else {
+		left = 0;
+		right = 0;
+		top = tick_label_height_ / 2;
+		bottom = tick_label_height_ / 2;
+	}
+
+	setPadding(
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft) + left,
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight) + right,
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop) + top,
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom) + bottom);
+
 	is_initialized_ = true;
 }
 
 
 void VerticalSpeedBarShape::ticklenwidth(int value, int *offset, int *len, int *width) {
-	int size = theme().tickSize(); // size_ / 8
+	int length;
+	int ticksize = theme().tickSize();
 
 	VideoWidget::Theme::Align align = theme().tickAlign();
 
 	if (value % 10 == 0) {
-		*len = size + (size_ / 25);
-		*width = size_ / 64;
+		*len = ticksize;
+		*width = size() / 64;
 		*offset = 0;
 	}
 	else if (value % 5 == 0) {
-		*len = size;
-		*width = size_ / 64;
-		if (align == VideoWidget::Theme::AlignCenter)
-			*offset = (size_ / 25) / 2;
+		length = ticksize - (ticksize / 6);
+
+		*len = length;
+		*width = size() / 64;
+		if (align == VideoWidget::Theme::AlignLeft)
+			*offset = -(ticksize - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = (size_ / 25);
+			*offset = (ticksize - length) / 2;
 		else
 			*offset = 0;
 	}
 	else {
-		*len = size - (size_ / 25);
-		*width = size_ / 128;
-		if (align == VideoWidget::Theme::AlignCenter)
-			*offset = (size_ / 25);
+		length = ticksize - (ticksize / 3);
+
+		*len = length;
+		*width = size() / 128;
+		if (align == VideoWidget::Theme::AlignLeft)
+			*offset = -(ticksize - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = 2 * (size_ / 25);
+			*offset = (ticksize - length) / 2;
 		else
 			*offset = 0;
 	}
@@ -272,7 +352,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	int offset = 0;
 	int rotate = 0;
 
-	int top = 0, bottom = 0;
+//	int top = 0, bottom = 0;
 
 	int amin, amax;
 
@@ -294,34 +374,36 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
 	// Apply padding
-	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
-		offset = (size_ / 14);
-	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
-		offset = (size_ / 14) / 2;
-	else
-		offset = 0;
-
-	if (theme().hasFlag(VideoWidget::Theme::FlagLabel))
-		bottom = size_ / 10;
-
-	setPadding(
-		theme().padding(VideoWidget::Theme::PaddingLeft),
-		theme().padding(VideoWidget::Theme::PaddingRight),
-		theme().padding(VideoWidget::Theme::PaddingTop) + offset + top,
-		theme().padding(VideoWidget::Theme::PaddingBottom) + offset + bottom
-	);
+//	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
+//		offset = (size_ / 14);
+//	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
+//		offset = (size_ / 14) / 2;
+//	else
+//		offset = 0;
+//
+//	if (theme().hasFlag(VideoWidget::Theme::FlagLabel))
+//		bottom = size_ / 10;
+//
+//	setPadding(
+//		theme().padding(VideoWidget::Theme::PaddingLeft),
+//		theme().padding(VideoWidget::Theme::PaddingRight),
+//		theme().padding(VideoWidget::Theme::PaddingTop) + offset + top,
+//		theme().padding(VideoWidget::Theme::PaddingBottom) + offset + bottom
+//	);
 
 	// Compute gauge position
-	offset = ((size_ / 8) + (size_ / 25)); // gauge width
-	offset /= 2;
+//	offset = ((size_ / 8) + (size_ / 25)); // gauge width
+//	offset /= 2;
 	setOffset(-offset);
 
 	// Draw background
 	background(cr);
 
 	// Draw gauge background
-	bar(cr, 0, 1, (size_ / 8) + (size_ / 25), theme().gaugeBorder(),
-			theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+	if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
+		bar(cr, 0, 1, theme().gaugeWidth(), theme().gaugeBorder(),
+				theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+	}
 
 	// Draw gauge
 	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (verticalspeed >= amin)) {
@@ -331,7 +413,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		xb1 = scale(amin, amax, from, rotate);
 		xb2 = scale(amin, amax, to, rotate);
 
-		bar(cr, xb1, xb2, size_ / 8 + size_ / 25, 0,
+		bar(cr, xb1, xb2, theme().gaugeWidth() - (2 * theme().gaugeBorder()), 0,
 				theme().gaugePrimaryColor());
 	}
 
@@ -339,7 +421,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((verticalspeed >= amin) && (verticalspeed <= amax))) {
 		double xb = scale(amin, amax, verticalspeed, rotate);
 
-		cursor(cr, xb, size_ / 8 + size_ / 25, theme().cursorColor());
+		cursor(cr, xb, theme().gaugeWidth() - (2 * theme().gaugeBorder()), theme().cursorColor());
 	}
 
 	// Draw tick lines on bar
@@ -359,7 +441,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int min = amin; // + (mstep_ * step_);
+		int min = amin;
 		int max = amax;
 
 		bool first = true;
@@ -372,12 +454,19 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		max /= step;
 		max *= step;
 
+		double distance = theme().tickLabelDistance();
+
+		int tick_width = theme().hasFlag(VideoWidget::Theme::FlagTick) ? theme().tickSize() : 0;
+		int gauge_width = theme().hasFlag(VideoWidget::Theme::FlagGauge) ? theme().gaugeWidth() : 0;
+
+		distance += std::max(tick_width / 2, gauge_width / 2);
+
 		for (int value = min; value < max + step; value = value + step) {
 			double xb = scale(amin, amax, value, rotate);
 
 			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
 
-			if (first || (value >= max))
+			if (theme().hasFlag(VideoWidget::Theme::FlagUnit) && (first || (value >= max)))
 				sprintf(s, "%d %s", value, unit.c_str());
 			else
 				sprintf(s, "%d", value);
@@ -396,20 +485,31 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.weight = theme().valueFontWeight(),
 			};
 
-			ticklabel(cr, xb, size_ / 2.75, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), s);
+			ticklabel(cr, xb, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), s);
 
 			first = false;
 		}
 	}
 
-//	// Draw marker value
-//	if (theme().hasFlag(VideoWidget::Theme::FlagValue) && ((verticalspeed >= amin) && (verticalspeed <= amax))) {
-//		double xb = scale(amin, amax, verticalspeed, rotate);
-//
-//		std::string value = std::to_string((int) std::round(verticalspeed));
-//
-//		marker(cr, xb, theme().valueBorderWidth(), theme().valueColor(), theme().valueBackgroundColor(), theme().valueBorderColor(), value);
-//	}
+	// Draw needle & value
+	if ((verticalspeed >= amin) && (verticalspeed <= amax)) {
+		double xb = scale(amin, amax, verticalspeed, rotate);
+
+		std::string str = std::to_string((int) std::round(verticalspeed));
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = VideoWidget::Theme::AlignCenter,
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+	}
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {

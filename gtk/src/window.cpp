@@ -94,6 +94,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	// Application settings
 	bind_settings();
 
+	// Load css
+	load_css();
+
 	// Media list
 	media_model_ = GPX2VideoMediaListStore::create();
 
@@ -415,6 +418,26 @@ void GPX2VideoApplicationWindow::bind_settings(void) {
 				Gio::Settings::BindFlags::DEFAULT
 		);
 	}
+}
+
+
+void GPX2VideoApplicationWindow::load_css(void) {
+	log_call();
+
+	// load css
+	auto css_provider = Gtk::CssProvider::create();
+	css_provider->load_from_data(
+		"gridview.icon-grid {"
+		"  background-color: #1d1d1d;"
+		"}"
+	);
+
+	// Apply CSS to the whole application
+	Gtk::StyleContext::add_provider_for_display(
+		Gdk::Display::get_default(),
+		css_provider,
+		GTK_STYLE_PROVIDER_PRIORITY_APPLICATION
+	);
 }
 
 

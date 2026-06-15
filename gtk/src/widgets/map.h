@@ -3,6 +3,9 @@
 
 #include <gtkmm/menubutton.h>
 
+#include <librsvg/rsvg.h>
+#include <cairomm/cairomm.h>
+
 #include "../../src/map.h"
 #include "../videowidget.h"
 #include "../media.h"
@@ -13,26 +16,37 @@ class GPX2VideoMapWidgetSettingsBox : public GPX2VideoWidgetBaseSettingsBox {
 public:
 	class Icon : public Glib::Object {
 	public:
-		TrackSettings::Icon id_;
-		std::string filename_;
-
 		Icon(TrackSettings::Icon id, const std::string &filename)
 			: Glib::Object()
+			, pixbuf_(NULL) 
 			, id_(id)
 			, filename_(filename) {
+			load_and_crop_svg();
 		}
 
-		static Glib::RefPtr<Icon> create(TrackSettings::Icon id, const std::string &filename) {
+		static Glib::RefPtr<Icon> create(MapSettings::Icon id, const std::string &filename) {
 			return Glib::make_refptr_for_instance<Icon>(new Icon(id, filename));
 		}
 
-		TrackSettings::Icon icon(void) const {
+		MapSettings::Icon icon(void) const {
 			return id_;
 		}
 
 		const std::string& filename(void) const {
 			return filename_;
 		}
+
+		const Glib::RefPtr<Gdk::Pixbuf>& pixbuf(void) const {
+			return pixbuf_;
+		}   
+
+	protected:
+		Glib::RefPtr<Gdk::Pixbuf> pixbuf_;
+
+		MapSettings::Icon id_;
+		std::string filename_;
+
+		void load_and_crop_svg(void);
 	};
 
 	GPX2VideoMapWidgetSettingsBox()
@@ -79,12 +93,12 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> view_model_;
 	Glib::RefPtr<Gtk::ListStore> source_model_;
 
-	void create_popover(Gtk::MenuButton *menubutton, TrackSettings::Icon type);
+	void create_popover(Gtk::MenuButton *menubutton, MapSettings::Icon type);
 
-	void on_icon_ok_clicked(TrackSettings::Icon type);
-	void on_icon_usedefault_toggled(TrackSettings::Icon type);
-	void on_icon_zoomin_clicked(TrackSettings::Icon type);
-	void on_icon_zoomout_clicked(TrackSettings::Icon type);
+	void on_icon_ok_clicked(MapSettings::Icon type);
+	void on_icon_usedefault_toggled(MapSettings::Icon type);
+	void on_icon_zoomin_clicked(MapSettings::Icon type);
+	void on_icon_zoomout_clicked(MapSettings::Icon type);
 
 	void on_model_changed(guint position, guint removed, guint added);
 
@@ -97,6 +111,8 @@ private:
 	sigc::connection icon_zoomin_connection_;
 	sigc::connection icon_zoomout_connection_;
 	sigc::connection icon_ok_connection_;
+
+	Glib::RefPtr<GPX2VideoMapWidgetSettingsBox::Icon> find_icon(const std::string &filename);
 };
 
 #endif

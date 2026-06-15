@@ -197,12 +197,11 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 	width_ = theme().width();
 	height_ = theme().height();
 
-	size_ = std::min(width_, height_);
-
 	// Size
-	setSize(width_, height_, size_); //, size_);
+	setOrientation(theme().gaugeOrientation());
+	setSize(width_, height_);
 
-	// Label height
+	// Label width / height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
 		font = (TextShape::Font) {
 			.size = theme().labelFontSize(),
@@ -283,12 +282,22 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 	}
 
 	// Padding
-	top = tick_label_height_ / 2;
-	bottom = tick_label_height_ / 2;
+	if (theme().gaugeOrientation() == VideoWidget::OrientationHorizontal) {
+		left = tick_label_width_ / 2;
+		right = tick_label_width_ / 2;
+		top = 0;
+		bottom = 0;
+	}
+	else {
+		left = 0;
+		right = 0;
+		top = tick_label_height_ / 2;
+		bottom = tick_label_height_ / 2;
+	}
 
 	setPadding(
-		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
-		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft) + left,
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight) + right,
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop) + top,
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom) + bottom);
 
@@ -298,36 +307,36 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 
 void ElevationBarShape::ticklenwidth(int value, int *offset, int *len, int *width) {
 	int length;
-	int size = theme().tickSize();
+	int ticksize = theme().tickSize();
 
 	VideoWidget::Theme::Align align = theme().tickAlign();
 
 	if (value % 10 == 0) {
-		*len = size;
-		*width = size_ / 64;
+		*len = ticksize;
+		*width = size() / 64;
 		*offset = 0;
 	}
 	else if (value % 5 == 0) {
-		length = size - (size / 6);
+		length = ticksize - (ticksize / 6);
 
 		*len = length;
-		*width = size_ / 64;
+		*width = size() / 64;
 		if (align == VideoWidget::Theme::AlignLeft)
-			*offset = -(size - length) / 2;
+			*offset = -(ticksize - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = (size - length) / 2;
+			*offset = (ticksize - length) / 2;
 		else
 			*offset = 0;
 	}
 	else {
-		length = size - (size / 3);
+		length = ticksize - (ticksize / 3);
 
 		*len = length;
-		*width = size_ / 128;
+		*width = size() / 128;
 		if (align == VideoWidget::Theme::AlignLeft)
-			*offset = -(size - length) / 2;
+			*offset = -(ticksize - length) / 2;
 		else if (align == VideoWidget::Theme::AlignRight)
-			*offset = (size - length) / 2;
+			*offset = (ticksize - length) / 2;
 		else
 			*offset = 0;
 	}
@@ -370,14 +379,6 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 //		offset = (size_ / 14) / 2;
 //	else
 //		offset = 0;
-
-//	// Update padding
-//	setPadding(
-//		theme().padding(VideoWidget::Theme::PaddingLeft),
-//		theme().padding(VideoWidget::Theme::PaddingRight),
-//		theme().padding(VideoWidget::Theme::PaddingTop) + offset + top,
-//		theme().padding(VideoWidget::Theme::PaddingBottom) + offset + bottom
-//	);
 
 	// Compute gauge position
 //	offset = ((size_ / 8) + (size_ / 25)); // gauge width

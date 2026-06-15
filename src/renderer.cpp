@@ -272,6 +272,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
 	mapSettings.setPathPrimaryColor((const char *) m->pathPrimaryColor());
 	mapSettings.setPathSecondaryColor((const char *) m->pathSecondaryColor());
+	mapSettings.setFollowCourse(m->followCourse());
 
 	// Map icon settings
 	mapSettings.setIcon(MapSettings::IconStart, icon_start);
@@ -454,6 +455,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathBorderColor((const char *) t->pathBorderColor());
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
+	trackSettings.setFollowCourse(t->followCourse());
 
 	// Track icon settings
 	trackSettings.setIcon(TrackSettings::IconStart, icon_start);
@@ -532,6 +534,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
+	VideoWidget::Orientation gauge_orientation = VideoWidget::OrientationNone;
 
 	VideoWidget::Theme::Align align;
 	VideoWidget::Theme::Align label_horizontal_align = VideoWidget::Theme::AlignLeft;
@@ -713,6 +716,17 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
+	// Gauge orientation
+	s = (const char *) w->gaugeOrientation();
+	gauge_orientation = VideoWidget::string2orientation(s);
+
+	if (gauge_orientation == VideoWidget::OrientationUnknown) {
+		log_error("Widget loading error, gauge orientation value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (gauge_orientation == VideoWidget::OrientationNone)
+		gauge_orientation = VideoWidget::OrientationVertical;
+
 	// Needle type
 	s = (const char *) w->needleType();
 	needle_type = VideoWidget::string2needletype(s);
@@ -833,6 +847,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Width gauge settings
 	widget->theme().setGaugeAngle(w->gaugeAngle());
 	widget->theme().setGaugeRotation(w->gaugeRotation());
+	widget->theme().setGaugeOrientation(gauge_orientation);
 	widget->theme().setGaugeFlip(w->gaugeFlip());
 	widget->theme().setGaugeWidth(w->gaugeWidth());
 	widget->theme().setGaugeCap(gauge_cap);

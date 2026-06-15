@@ -4,31 +4,106 @@
 
 void BarShape::bar(cairo_t *cr, double v1, double v2, double width, double border,
 		const float *fill, const float *outline) {
+	double w, h;
+	double a1, a2;
+
 	struct BarShape::point p1 = locate(v1, -width / 2);
 	struct BarShape::point p2 = locate(v2, -width / 2);
 
-	cairo_save(cr);
-	cairo_rectangle(cr, p1.x, p1.y, width, p2.y - p1.y);
-	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
-	cairo_fill_preserve(cr);
-	if ((border > 0) && (outline != NULL)) {
-		cairo_set_line_width(cr, border);
-		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
+	VideoWidget::Theme::GaugeCap cap = theme().gaugeCap();
+
+#define DEG2RAD(a) ((a) * M_PI / 180.0)
+
+	switch (cap) {
+	case VideoWidget::Theme::GaugeCapRound:
+		if (orientation_ == VideoWidget::OrientationVertical) {
+			a1 = 180;
+			a2 = 0;
+			w = width;
+			h = 0;
+		}
+		else {
+			a1 = -90;
+			a2 = 90;
+			w = 0;
+			h = width;
+		}
+
+		cairo_save(cr);
+
+		cairo_move_to(cr, p1.x, p1.y);
+		cairo_line_to(cr, p2.x, p2.y);
+		// OK V
+//		cairo_arc(cr, p2.x + (w / 2), p2.y + (h / 2), width / 2, DEG2RAD(180), DEG2RAD(0));
+		cairo_arc(cr, p2.x + (w / 2), p2.y + (h / 2), width / 2, DEG2RAD(a1), DEG2RAD(a2));
+//		cairo_line_to(cr, p2.x + w, p2.y + h);
+		cairo_line_to(cr, p1.x + w, p1.y + h);
+		// OK V
+//		cairo_arc_negative(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(180), DEG2RAD(0));
+//		cairo_arc(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(90), DEG2RAD(270));
+		cairo_arc_negative(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(a1), DEG2RAD(a2));
+
+
+		cairo_close_path(cr);
+		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
+		cairo_fill_preserve(cr);
+		if ((border > 0) && (outline != NULL)) {
+			cairo_set_line_width(cr, border);
+			cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
+		}
+		cairo_stroke(cr);
+		cairo_restore(cr);
+		break;
+
+	case VideoWidget::Theme::GaugeCapSquare:
+	default:
+		if (orientation_ == VideoWidget::OrientationVertical) {
+			w = width;
+			h = p2.y - p1.y;
+		}
+		else {
+			w = p2.x - p1.x;
+			h = width;
+		}
+
+		cairo_save(cr);
+		cairo_rectangle(cr, p1.x, p1.y, w, h);
+		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
+		cairo_fill_preserve(cr);
+		if ((border > 0) && (outline != NULL)) {
+			cairo_set_line_width(cr, border);
+			cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
+		}
+		cairo_stroke(cr);
+		cairo_restore(cr);
+		break;
 	}
-	cairo_stroke(cr);
-	cairo_restore(cr);
 }
 
 
 void BarShape::cursor(cairo_t *cr, double v, double width, const float *fill) {
+	double w, h;
 	double thick = width / 8.0;
 
 	struct BarShape::point p = locate(v, -width / 2);
 
 //	const float *fill = theme().cursorColor();
 
+	if (orientation_ == VideoWidget::OrientationVertical) {
+		p.y -= (thick / 2);
+
+		w = width;
+		h = thick;
+	}
+	else {
+		p.x -= (thick / 2);
+
+		w = thick;
+		h = width;
+	}
+
 	cairo_save(cr);
-	cairo_rectangle(cr, p.x, p.y - (thick / 2), width, thick);
+	cairo_rectangle(cr, p.x, p.y, w, h);
 	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
 	cairo_fill_preserve(cr);
 	cairo_stroke(cr);
@@ -122,16 +197,30 @@ void BarShape::value(cairo_t *cr, double v, BarShape::Font &font,
 	// Compute position
 	p = locate(v, 0);
 
-	p.x = p.x - (width / 2) - (2 * padding) - (height / 2) - distance;
+	if (orientation_ == VideoWidget::OrientationVertical)
+		p.x = p.x - (width / 2) - (2 * padding) - distance;
+	else
+		p.y  = p.y - (height / 2) - (2 * padding) - distance;
 
 	// Draw needle
 	if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
 		cairo_save(cr);
-		cairo_move_to(cr, p.x - (width / 2) - padding, p.y + (height / 2) + padding);
-		cairo_line_to(cr, p.x + (width / 2) + padding, p.y + (height / 2) + padding);
-		cairo_line_to(cr, p.x + (width / 2) + 2 * (height / 3), p.y);
-		cairo_line_to(cr, p.x + (width / 2) + padding, p.y - (height / 2) - padding);
-		cairo_line_to(cr, p.x - (width / 2) - padding, p.y - (height / 2) - padding);
+
+		if (orientation_ == VideoWidget::OrientationVertical) {
+			cairo_move_to(cr, p.x - (width / 2) - padding, p.y + (height / 2) + padding);
+			cairo_line_to(cr, p.x + (width / 2) + padding, p.y + (height / 2) + padding);
+			cairo_line_to(cr, p.x + (width / 2) + 2 * (height / 3), p.y);
+			cairo_line_to(cr, p.x + (width / 2) + padding, p.y - (height / 2) - padding);
+			cairo_line_to(cr, p.x - (width / 2) - padding, p.y - (height / 2) - padding);
+		}
+		else {
+			cairo_move_to(cr, p.x - (width / 2) - padding, p.y + (height / 2) + padding);
+			cairo_line_to(cr, p.x, p.y + (height / 2) + 2 * (height / 3));
+			cairo_line_to(cr, p.x + (width / 2) + padding, p.y + (height / 2) + padding);
+			cairo_line_to(cr, p.x + (width / 2) + padding, p.y - (height / 2) - padding);
+			cairo_line_to(cr, p.x - (width / 2) - padding, p.y - (height / 2) - padding);
+		}
+
 		cairo_close_path(cr);
 		cairo_set_source_rgba(cr, backgroundcolor[0], backgroundcolor[1], backgroundcolor[2], backgroundcolor[3]);
 		cairo_fill_preserve(cr);
@@ -208,7 +297,7 @@ void BarShape::xmlwrite(std::ostream &os) {
 	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeBar) << "</shape>" << std::endl;
 
 	os << "<with-gauge>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagGauge)) << "</with-gauge>" << std::endl;
-	os << "<gauge-rotation>" << theme().gaugeWidth() << "</gauge-rotation>" << std::endl;
+	os << "<gauge-orientation>" << VideoWidget::orientation2string(theme().gaugeOrientation()) << "</gauge-orientation>" << std::endl;
 	os << "<gauge-flip>" << VideoWidget::bool2string(theme().gaugeFlip()) << "</gauge-flip>" << std::endl;
 	os << "<gauge-width>" << theme().gaugeWidth() << "</gauge-width>" << std::endl;
 	os << "<gauge-cap>" << VideoWidget::gaugecap2string(theme().gaugeCap()) << "</gauge-cap>" << std::endl;

@@ -6,6 +6,82 @@
 #include "track.h"
 
 
+void GPX2VideoTrackWidgetSettingsBox::Icon::load_and_crop_svg(void) {
+	GError *error = nullptr;
+
+	// Load svg
+	RsvgHandle *handle = rsvg_handle_new_from_file(filename_.c_str(), &error);
+	if (!handle) {
+		log_error("Load svg '%s' file error: %s", 
+				filename_.c_str(), 
+				error ? error->message : "unknown error");
+
+		if (error)
+			g_error_free(error);
+
+		return;
+	}
+
+    // svg dimensions
+	double svg_width, svg_height;
+	rsvg_handle_get_intrinsic_size_in_pixels(handle, &svg_width, &svg_height);
+
+	// svg viewport
+	RsvgRectangle viewport = {
+		.x = 0,
+		.y = 0,
+		.width = svg_width,
+		.height = svg_height
+	};
+
+	// Get bounding box of the element
+	RsvgRectangle bbox;
+	if (!rsvg_handle_get_geometry_for_layer(handle, nullptr, &viewport, &bbox, nullptr, &error)) {
+		log_error("Get svg '%s' geometry error: %s", 
+				filename_.c_str(), 
+				error ? error->message : "unknown error");
+
+		if (error) 
+			g_error_free(error);
+		
+		g_object_unref(handle);
+	
+		return;
+	}
+
+	// Create Cairo surface for cropped area
+	int width = static_cast<int>(bbox.width);
+	int height = static_cast<int>(bbox.height);
+
+	auto surface = Cairo::ImageSurface::create(Cairo::Surface::Format::ARGB32, width, height);
+	auto cairo = Cairo::Context::create(surface);
+
+	// Translate so that the element is at (0,0)
+	cairo->translate(-bbox.x, -bbox.y);
+
+	// Render whole svg
+	if (!rsvg_handle_render_document(handle, cairo->cobj(), &viewport, &error)) {
+		log_error("Render svg '%s' error: %s", 
+				filename_.c_str(), 
+				error ? error->message : "unknown error");
+
+		if (error) 
+			g_error_free(error);
+
+		g_object_unref(handle);
+
+		return;
+	}
+
+	g_object_unref(handle);
+
+	surface->write_to_png(filename_ + ".png");
+
+	// Convert Cairo surface to Gdk::Pixbuf
+	pixbuf_ = Gdk::Pixbuf::create(surface, 0, 0, width, height);
+}
+
+
 GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType *cobject,
 	const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file, 
 	GPX2VideoWidget *widget, const Glib::RefPtr<GPX2VideoMediaListStore> &media_model) 
@@ -14,7 +90,7 @@ GPX2VideoTrackWidgetSettingsBox::GPX2VideoTrackWidgetSettingsBox(BaseObjectType 
 	log_call();
 
 	// Default icon size
-	icon_pixel_size_ = 32;
+	icon_pixel_size_ = 40;
 	icon_pixel_minsize_ = 16;
 	icon_pixel_maxsize_ = 96;
 
@@ -54,7 +130,7 @@ void GPX2VideoTrackWidgetSettingsBox::load_models(void) {
 
 	for (guint i=0; i < n_items; i++) {
 		auto item = media_model_->get_item(i);
-		if (!item)
+		if (!item || (item->media() != GPX2VideoMedia::MediaIcon))
 			continue;
 
 		model->append(Icon::create(
@@ -84,7 +160,7 @@ void GPX2VideoTrackWidgetSettingsBox::load_models(void) {
 
 		if (image && item) {
 			image->set_pixel_size(icon_pixel_size_);
-			image->set(item->filename());
+			image->set(item->pixbuf());
 		}
 	});
 
@@ -478,6 +554,10 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 
 	const float *color;
 
+	std::string filename;
+
+	Glib::RefPtr<GPX2VideoTrackWidgetSettingsBox::Icon> icon;
+
 	Gtk::Switch *sw;
 	Gtk::Image *image;
 	Gtk::ComboBox *combobox;
@@ -574,8 +654,11 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!image)
 		throw std::runtime_error("No \"icon_start_image\" object in " + resource_file_);
 
+	filename = ((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconStart), TrackSettings::IconStart);
+	icon = this->find_icon(filename);
+
 	image->set_pixel_size(24);
-	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconStart), TrackSettings::IconStart));
+	image->set(icon ? icon->pixbuf() : NULL);
 
 	// Icon start color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_start_color_button");
@@ -607,8 +690,11 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!image)
 		throw std::runtime_error("No \"icon_end_image\" object in " + resource_file_);
 
+	filename = ((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconEnd), TrackSettings::IconEnd);
+	icon = this->find_icon(filename);
+
 	image->set_pixel_size(24);
-	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconEnd), TrackSettings::IconEnd));
+	image->set(icon ? icon->pixbuf() : NULL);
 
 	// Icon end color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_end_color_button");
@@ -640,8 +726,11 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (!image)
 		throw std::runtime_error("No \"icon_position_image\" object in " + resource_file_);
 
+	filename = ((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconPosition), TrackSettings::IconPosition);
+	icon = this->find_icon(filename);
+
 	image->set_pixel_size(24);
-	image->set(((Track *) widget_->widget())->getIconFilename(settings.icon(TrackSettings::IconPosition), TrackSettings::IconPosition));
+	image->set(icon ? icon->pixbuf() : NULL);
 
 	// Icon position color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_position_color_button");
@@ -693,6 +782,28 @@ void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 		throw std::runtime_error("No \"icon_zoomout_button\" object in " + resource_file_);
 
 	button->set_sensitive(icon_pixel_size_ > icon_pixel_minsize_);
+}
+
+
+Glib::RefPtr<GPX2VideoTrackWidgetSettingsBox::Icon> GPX2VideoTrackWidgetSettingsBox::find_icon(const std::string &filename) {
+	log_call();
+
+	guint n_items;
+
+	auto model = icon_model_->get_model();
+
+	n_items = model->get_n_items();
+
+	for (guint i=0; i < n_items; i++) {
+		auto item = std::dynamic_pointer_cast<GPX2VideoTrackWidgetSettingsBox::Icon>(model->get_object(i));
+
+		if (!item || item->filename() != filename)
+			continue;
+
+		return item;
+	}
+
+	return NULL;
 }
 
 
@@ -758,6 +869,9 @@ void GPX2VideoTrackWidgetSettingsBox::create_popover(Gtk::MenuButton *menubutton
 	gridview->set_factory(icon_factory_);
 	gridview->set_min_columns(1);
 	gridview->set_max_columns(10);
+
+	// Icon gridview css
+	gridview->get_style_context()->add_class("icon-grid");
 
 	// Icon checkbutton
 	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("icon_usedefault_checkbutton");

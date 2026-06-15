@@ -102,7 +102,7 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --telemetry-filter=filter         : Telemetry filter" << std::endl;
 	std::cout << "\t-    --telemetry-method=method         : Telemetry interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate                  : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
-	std::cout << "\t-    --telemetry-smooth=value          : Number of points to smooth data (default '2', to disable set '0'))" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=smooth         : Data type, method and number of points to smooth data" << std::endl;
 //	std::cout << "\t- r, --rate                            : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --map-factor                      : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source                      : Map source" << std::endl;
@@ -140,6 +140,10 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t compute: Compute telemetry data from gpx, csv... data" << std::endl;
 	std::cout << "\t image  : Process alpha image each second" << std::endl;
 	std::cout << "\t video  : Process video" << std::endl;
+	std::cout << std::endl;
+	std::cout << "Command sample:" << std::endl;
+	std::cout << "\tgpx2video -m video.mp4 -l layout.xml -g activity.gpx --telemetry-smooth=data=all,method=0 \\" << std::endl;
+	std::cout << "\t\t--telemetry-smooth=speed,method=2,points=2 --telemetry-smooth=grade,method=1" << std::endl;
 
 	return;
 }
@@ -1221,6 +1225,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
 
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
 
@@ -1268,6 +1275,9 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryComputeTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
@@ -1337,6 +1347,9 @@ int main(int argc, char *argv[], char *envp[]) {
 					app.settings().telemetryComputeTo());
 
 			telemetrySettings.setTelemetryFilter(app.settings().telemetryFilter());
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));

@@ -485,6 +485,13 @@ namespace layout
     Decimal  &gaugeRotation() { return _gauge_rotation; }
 
     ///
+    /// Get gauge orientation
+    ///
+    /// @return the gauge orientation attribute
+    ///
+    String  &gaugeOrientation() { return _gauge_orientation; }
+
+    ///
     /// Get gauge flip
     ///
     /// @return the gauge flip attribute
@@ -726,6 +733,7 @@ namespace layout
 
 	Decimal      _gauge_angle;
 	Decimal      _gauge_rotation;
+	String       _gauge_orientation;
 	Boolean      _gauge_flip;
 	Decimal      _gauge_width;
 	String       _gauge_cap;
