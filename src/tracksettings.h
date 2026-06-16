@@ -20,14 +20,17 @@ public:
 		IconDefault = -1,
 
 		// Internal type icons
-		IconStart = 0,
-		IconEnd,
+		IconPlay = 0,
+		IconStop,
 		IconPosition,
 
 		// Other internal icons
 		IconFinish,
 		IconNeedle,
 		IconSpot,
+		IconPositionPlay,
+		IconPositionStop,
+		IconPositionBike,
 		IconPositionDronePotensic,
 
 		// At last user icons
@@ -35,6 +38,9 @@ public:
 
 		IconUnknown
 	};
+
+#define IconStart IconPlay
+#define IconEnd IconStop
 
 	TrackSettings();
 	virtual ~TrackSettings();

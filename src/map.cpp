@@ -945,23 +945,25 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		offsetX += (width_available / 2) - posX;
 		offsetY += (height_available / 2) - posY;
 
-		if (data_width > width) {
+		if (data_width > width_available) {
 			if ((posX - pos_lim_x1) < (width_available / 2))
 				offsetX += posX - pos_lim_x1 - (width_available / 2);
 			else if ((pos_lim_x2 - posX) < (width_available / 2))
 				offsetX += posX - pos_lim_x2 + (width_available / 2);
 		}
-		else
-			offsetX = (width_available - w) / 2;
+		else {
+			offsetX = theme().padding(VideoWidget::Theme::PaddingLeft) + (width_available - w) / 2;
+		}
 
-		if (data_height > height) {
+		if (data_height > height_available) {
 			if ((pos_lim_y2 - posY) < (height_available / 2))
 				offsetY += posY - pos_lim_y2 + (height_available / 2);
 			else if ((posY - pos_lim_y1) < (height_available / 2))
 				offsetY += posY - pos_lim_y1 - (height_available / 2);
 		}
-		else
-			offsetY = (height_available - h) / 2;
+		else {
+			offsetY = theme().padding(VideoWidget::Theme::PaddingTop) + (height_available - h) / 2;
+		}
 
 		break;
 	}
@@ -1002,8 +1004,16 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		if (icon_end_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconEnd))
 			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
 	
-		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition))
-			icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
+			if (settings().followCourse()) {
+				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.course() * M_PI / 180.0,
+						 OIIO::string_view(), 0.0f, true);
+
+				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+			}
+			else 
+				icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+		}
 	}
 
 	// Save last position
@@ -1227,8 +1237,7 @@ bool Map::Tile::download(void) {
 			return true;
 		}
 	}
-//printf("LOCK DOWNLOAD TILE\n");
-//exit(0);
+
 	// Downloading?
 	if (evtaskh_ != NULL)
 		return true;

@@ -608,6 +608,23 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Icon position follow
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_follow_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_position_follow_switch\" object in " + resource_file_);
+	sw->signal_state_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_switch_changed), sw, 
+					[this](const bool &state) {
+						log_notice("Widget %s: icon position follow  changed to '%s'",
+							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
+
+						((Map *) widget_->widget())->settings().setFollowCourse(state);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(false);
+					} 
+			), false);
+
 	// Icon model
 	media_model_->signal_items_changed().connect(sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_model_changed));
 }
@@ -833,6 +850,13 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 
 	spinbutton->set_value(settings.iconSize(MapSettings::IconPosition));
 
+	// Icon position follow
+	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_follow_switch");
+	if (!sw)
+		throw std::runtime_error("No \"icon_position_follow_switch\" object in " + resource_file_);
+
+	sw->set_active(((Map *) widget_->widget())->settings().followCourse());
+
 	// Unmask value changed
 	loading_ = false;
 }
@@ -921,6 +945,8 @@ void GPX2VideoMapWidgetSettingsBox::create_popover(Gtk::MenuButton *menubutton, 
 
 		auto model = icon_model_->get_model();
 
+		index = -1;
+
 		n_items = model->get_n_items();
 
 		for (guint i=0; i < n_items; i++) {
@@ -934,7 +960,7 @@ void GPX2VideoMapWidgetSettingsBox::create_popover(Gtk::MenuButton *menubutton, 
 		}
 
 		// Icon not found!
-		if (index == MapSettings::IconUserFile) {
+		if (index == -1) {
 			// Auto append
 			media_model_->append(GPX2VideoMedia::MediaIcon, settings.iconFile(type));
 

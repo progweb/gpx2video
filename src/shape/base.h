@@ -81,7 +81,7 @@ protected:
 	void renderCairoContext(OIIO::ImageBuf *buf, cairo_t *cairo);
 	void destroyCairoContext(cairo_t *cairo);
 
-	void background(cairo_t *cr);
+	void background(cairo_t *cr, double radius = 0.0);
 
 	void text(cairo_t *cr, int x, int y, Font &font, const float *fill, const float *outline, const char *text);
 

@@ -46,11 +46,12 @@ public:
 		DataAverageSpeed = (1 << 14),     // average computed for duration time
 		DataAverageRideSpeed = (1 << 15), // average computed for ride time
 		DataVerticalSpeed = (1 << 16),
-		DataHeading = (1 << 17),
-		DataHomeDistance = (1 << 18),
-		DataBatteryLevel = (1 << 19),
+		DataCourse = (1 << 17),
+		DataHeading = (1 << 18),
+		DataHomeDistance = (1 << 19),
+		DataBatteryLevel = (1 << 20),
 
-		DataAll = (1 << 20) -1
+		DataAll = (1 << 21) -1
 	};
 
 	enum Unit {
@@ -117,6 +118,7 @@ public:
 	int power(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double duration(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double distance(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double course(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double heading(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double grade(void) const;
 	double speed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
@@ -166,6 +168,7 @@ protected:
 
 	uint64_t datetime_;
 	double distance_;
+	double course_;
 	double heading_;
 	double duration_;
 	double grade_;

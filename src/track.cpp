@@ -249,20 +249,29 @@ TrackSettings::Icon TrackSettings::string2icon(std::string &s) {
 
 	if (s.empty() || (s == "default"))
 		icon = TrackSettings::IconDefault;
-	else if (s == "internal:start")
-		icon = TrackSettings::IconStart;
-	else if (s == "internal:end")
-		icon = TrackSettings::IconEnd;
+	// Internal type icons
+	else if (s == "internal:play")
+		icon = TrackSettings::IconPlay;
+	else if (s == "internal:stop")
+		icon = TrackSettings::IconStop;
 	else if (s == "internal:position")
 		icon = TrackSettings::IconPosition;
+	// Other internal icons
 	else if (s == "internal:finish")
 		icon = TrackSettings::IconFinish;
 	else if (s == "internal:needle")
 		icon = TrackSettings::IconNeedle;
 	else if (s == "internal:spot")
 		icon = TrackSettings::IconSpot;
+	else if (s == "internal:position-play")
+		icon = TrackSettings::IconPositionPlay;
+	else if (s == "internal:position-stop")
+		icon = TrackSettings::IconPositionStop;
+	else if (s == "internal:position-bike")
+		icon = TrackSettings::IconPositionBike;
 	else if (s == "internal:position-drone-potensic")
 		icon = TrackSettings::IconPositionDronePotensic;
+	// At last user icons
 	else if (Utils::starts_with(s, "file:"))
 		icon = TrackSettings::IconUserFile;
 	else
@@ -291,22 +300,31 @@ std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 	case TrackSettings::IconDefault:
 		return "default";
 
-	case TrackSettings::IconStart:
-		return "internal:start";
-	case TrackSettings::IconEnd:
-		return "internal:end";
+	// Internal type icons
+	case TrackSettings::IconPlay:
+		return "internal:play";
+	case TrackSettings::IconStop:
+		return "internal:stop";
 	case TrackSettings::IconPosition:
 		return "internal:position";
 
+	// Other internal icons
 	case TrackSettings::IconFinish:
 		return "internal:finish";
 	case TrackSettings::IconNeedle:
 		return "internal:needle";
 	case TrackSettings::IconSpot:
 		return "internal:spot";
+	case TrackSettings::IconPositionPlay:
+		return "internal:position-play";
+	case TrackSettings::IconPositionStop:
+		return "internal:position-stop";
+	case TrackSettings::IconPositionBike:
+		return "internal:position-bike";
 	case TrackSettings::IconPositionDronePotensic:
 		return "internal:position-drone-potensic";
 
+	// At last user icons
 	case TrackSettings::IconUserFile:
 		return "file:";
 
@@ -469,7 +487,7 @@ bool Track::preinit(void) {
 	last_data_ = TelemetryData();
 
 	// Assets path
-	assets_path_ = app_.assets("icon");
+	assets_path_ = app_.assets("icons");
 
 	// Check telemetry data
 	if (app_.settings().inputfile().empty()) {
@@ -654,8 +672,12 @@ void Track::init(void) {
 		data_height = (lim_py2_ - lim_py1_) * divider_;
 
 		// Apply padding
-		width -= 2 * theme().border();
-		height -= 2 * theme().border();
+		width -= padding_horizontal + 2 * space;
+		height -= padding_vertical + 2 * space;
+
+//		// Apply padding
+//		width -= 2 * theme().border();
+//		height -= 2 * theme().border();
 
 		// Adjust limit to append space around track
 		lim_px1_ -= ceilf(space / divider_);
@@ -1214,12 +1236,12 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	// Apply zoom fit - center track
 	case TrackSettings::ViewZoomFit:
 		// Apply padding
-		x += theme().padding(VideoWidget::Theme::PaddingLeft);
-		y += theme().padding(VideoWidget::Theme::PaddingTop);
+		offsetX = theme().padding(VideoWidget::Theme::PaddingLeft);
+		offsetY = theme().padding(VideoWidget::Theme::PaddingTop);
 
 		// Add offset to center the track
-		offsetX = (width_available - w) / 2;
-		offsetY = (height_available - h) / 2;
+		offsetX += (width_available - w) / 2;
+		offsetY += (height_available - h) / 2;
 
 		break;
 
@@ -1316,12 +1338,14 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 
 		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
 			if (settings().followCourse()) {
-				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.heading() * M_PI / 180.0);
+				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.course() * M_PI / 180.0,
+						 OIIO::string_view(), 0.0f, true);
 
 				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
 			}
-			else
+			else {
 				icon(*fg_buf_, *icon_position_buf_, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+			}
 		}
 	}
 
@@ -1430,11 +1454,13 @@ std::string Track::getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon
 		return settings().iconFile(bydefault);
 	
 	switch (icon) {
-	case TrackSettings::IconStart:
-		return path + "/start.svg";
-	case TrackSettings::IconEnd:
-		return path + "/end.svg";
+	// Internal type icons
+	case TrackSettings::IconPlay:
+		return path + "/play.svg";
+	case TrackSettings::IconStop:
+		return path + "/stop.svg";
 	case TrackSettings::IconPosition:
+	// Other internal icons
 		return path + "/position.svg";
 	case TrackSettings::IconFinish:
 		return path + "/finish.svg";
@@ -1442,6 +1468,12 @@ std::string Track::getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon
 		return path + "/needle.svg";
 	case TrackSettings::IconSpot:
 		return path + "/spot.svg";
+	case TrackSettings::IconPositionPlay:
+		return path + "/position-play.svg";
+	case TrackSettings::IconPositionStop:
+		return path + "/position-stop.svg";
+	case TrackSettings::IconPositionBike:
+		return path + "/position-bike.svg";
 	case TrackSettings::IconPositionDronePotensic:
 		return path + "/position-drone-potensic.svg";
 	default:
@@ -1456,8 +1488,8 @@ void Track::xmlwrite(std::ostream &os) {
 	ShapeBase::xmlwrite(os);
 
 	os << "<with-icon-start>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-start>" << std::endl;
-	os << "<with-icon-end>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-end>" << std::endl;
-	os << "<with-icon-position>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconStart)) << "</with-icon-position>" << std::endl;
+	os << "<with-icon-end>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconEnd)) << "</with-icon-end>" << std::endl;
+	os << "<with-icon-position>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) << "</with-icon-position>" << std::endl;
 
 	os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
 	os << "<factor>" << settings().divider() << "</factor>" << std::endl;

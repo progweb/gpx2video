@@ -142,11 +142,13 @@ void ShapeBase::destroyCairoContext(cairo_t *cairo) {
 }
 
 
-void ShapeBase::background(cairo_t *cr) {
+void ShapeBase::background(cairo_t *cr, double radius) {
 	int x, y;
 	int width, height;
 
 	int border = theme_.border();
+
+	double degrees = M_PI / 180.0;
 
 	const float *fill = theme_.backgroundColor();
 	const float *outline = theme_.borderColor();
@@ -158,7 +160,16 @@ void ShapeBase::background(cairo_t *cr) {
 	height = theme_.height() - border;
 
 	cairo_save(cr);
-	cairo_rectangle(cr, x, y, width, height);
+	if (radius > 0) {
+		cairo_new_sub_path(cr);
+		cairo_arc(cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
+		cairo_arc(cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
+		cairo_arc(cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
+		cairo_arc(cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
+		cairo_close_path(cr);
+	}
+	else
+		cairo_rectangle(cr, x, y, width, height);
 	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
 	cairo_fill_preserve(cr);
 	if ((border > 0) && (outline != NULL)) {

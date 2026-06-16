@@ -37,6 +37,8 @@ public:
 			int telemetry_smooth_grade_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_speed_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_speed_points=0,
+			TelemetrySettings::Smooth telemetry_smooth_course_method=TelemetrySettings::SmoothNone,
+			int telemetry_smooth_course_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_heading_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_heading_points=0,
 			TelemetrySettings::Smooth telemetry_smooth_elevation_method=TelemetrySettings::SmoothNone,
@@ -69,6 +71,9 @@ public:
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataSpeed, telemetry_smooth_speed_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataSpeed, telemetry_smooth_speed_points);
+
+			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataCourse, telemetry_smooth_course_method);
+			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataCourse, telemetry_smooth_course_points);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataHeading, telemetry_smooth_heading_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataHeading, telemetry_smooth_heading_points);

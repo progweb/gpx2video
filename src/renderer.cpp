@@ -1429,6 +1429,9 @@ VideoWidget * Renderer::create(VideoWidget::Widget type) {
 	case VideoWidget::WidgetGrade:
 		widget = GradeWidget::create(app_);
 		break;
+	case VideoWidget::WidgetCourse:
+		widget = CourseWidget::create(app_);
+		break;
 	case VideoWidget::WidgetHeading:
 		widget = HeadingWidget::create(app_);
 		break;

@@ -109,11 +109,15 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider,
 	cairo_surface_t *surface = NULL;
 	cairo_surface_t *masksurface = NULL;
 
+	int channelorder[] = { 2, 1, 0, 3 };
+	float channelvalues[] = { };
+	std::string channelnames[] = { "B", "G", "R", "A" };
+
 	RsvgRectangle viewport;
 
 	RsvgHandle *handle = NULL;
 
-	OIIO::ImageBuf *buf;
+	OIIO::ImageBuf *buf = NULL;
 
 	// Set color
 	apply_color = (color != NULL) && (color[3] != 0);
@@ -121,9 +125,13 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider,
 	// load svg data
     handle = rsvg_handle_new_from_file(filename, &error);
     if (!handle) {
-        log_error("Load svn image failure: %s", error->message);
-        g_error_free(error);
-        return NULL;
+		log_error("Load svg image '%s' error: %s", 
+				filename, 
+				error ? error->message : "unknown error");
+
+		if (error) 
+        	g_error_free(error);
+        goto error;
     }
 
     // svg dimensions
@@ -155,7 +163,15 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider,
 		.height = (double) height
 	};
 
-	rsvg_handle_render_document(handle, apply_color ? mask : cr, &viewport, NULL);
+	if (!rsvg_handle_render_document(handle, apply_color ? mask : cr, &viewport, &error)) {
+		log_error("Render svg '%s' error: %s", 
+				filename, 
+				error ? error->message : "unknown error");
+
+		if (error) 
+			g_error_free(error);
+		goto error;
+	}
 
 	if (apply_color) {
 		// Apply color
@@ -182,12 +198,9 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider,
 	}
 
 	// BGRA => RGBA
-	int channelorder[] = { 2, 1, 0, 3 };
-	float channelvalues[] = { };
-	std::string channelnames[] = { "B", "G", "R", "A" };
-
 	OIIO::ImageBufAlgo::channels(*buf, *buf, 4, channelorder, channelvalues, channelnames);
 
+error:
 	// Free
 	if (masksurface)
 		cairo_surface_destroy(masksurface);

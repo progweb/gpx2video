@@ -336,9 +336,9 @@ Other settings:
 
 **type** gauges supported are:
   - speed, maxspeed, avgspeed, avgridespeed
-  - heading, verticalspeed
-  - grade, elevation
+  - grade, elevation, verticalspeed
   - date, time, duration
+  - course, heading,
   - position
   - distance
   - cadence

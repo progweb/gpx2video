@@ -38,6 +38,7 @@ TelemetrySettings::TelemetrySettings(
 	telemetry_smooth_position_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_grade_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_speed_method_ = telemetry_smooth_default_method_;
+	telemetry_smooth_course_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_heading_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_elevation_method_ = telemetry_smooth_default_method_;
 	telemetry_smooth_acceleration_method_ = telemetry_smooth_default_method_;
@@ -47,6 +48,7 @@ TelemetrySettings::TelemetrySettings(
 	telemetry_smooth_position_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_grade_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_speed_points_ = telemetry_smooth_default_points_;
+	telemetry_smooth_course_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_heading_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_elevation_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_acceleration_points_ = telemetry_smooth_default_points_;
@@ -80,6 +82,7 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 	telemetry_smooth_position_method_ = settings.telemetrySmoothMethod(TelemetryData::DataPosition);
 	telemetry_smooth_grade_method_ = settings.telemetrySmoothMethod(TelemetryData::DataGrade);
 	telemetry_smooth_speed_method_ = settings.telemetrySmoothMethod(TelemetryData::DataSpeed);
+	telemetry_smooth_course_method_ = settings.telemetrySmoothMethod(TelemetryData::DataCourse);
 	telemetry_smooth_heading_method_ = settings.telemetrySmoothMethod(TelemetryData::DataHeading);
 	telemetry_smooth_elevation_method_ = settings.telemetrySmoothMethod(TelemetryData::DataElevation);
 	telemetry_smooth_acceleration_method_ = settings.telemetrySmoothMethod(TelemetryData::DataAcceleration);
@@ -88,6 +91,7 @@ void TelemetrySettings::copy(const TelemetrySettings &settings) {
 	telemetry_smooth_position_points_ = settings.telemetrySmoothPoints(TelemetryData::DataPosition);
 	telemetry_smooth_grade_points_ = settings.telemetrySmoothPoints(TelemetryData::DataGrade);
 	telemetry_smooth_speed_points_ = settings.telemetrySmoothPoints(TelemetryData::DataSpeed);
+	telemetry_smooth_course_points_ = settings.telemetrySmoothPoints(TelemetryData::DataCourse);
 	telemetry_smooth_heading_points_ = settings.telemetrySmoothPoints(TelemetryData::DataHeading);
 	telemetry_smooth_elevation_points_ = settings.telemetrySmoothPoints(TelemetryData::DataElevation);
 	telemetry_smooth_acceleration_points_ = settings.telemetrySmoothPoints(TelemetryData::DataAcceleration);
@@ -326,6 +330,10 @@ const TelemetrySettings::Smooth& TelemetrySettings::telemetrySmoothMethod(Teleme
 		return telemetry_smooth_speed_method_;
 		break;
 
+	case TelemetryData::DataCourse:
+		return telemetry_smooth_course_method_;
+		break;
+
 	case TelemetryData::DataHeading:
 		return telemetry_smooth_heading_method_;
 		break;
@@ -368,6 +376,10 @@ void TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::Data type, Telem
 		telemetry_smooth_speed_method_ = method;
 		break;
 
+	case TelemetryData::DataCourse:
+		telemetry_smooth_course_method_ = method;
+		break;
+
 	case TelemetryData::DataHeading:
 		telemetry_smooth_heading_method_ = method;
 		break;
@@ -405,6 +417,10 @@ const int& TelemetrySettings::telemetrySmoothPoints(TelemetryData::Data type) co
 		return telemetry_smooth_speed_points_;
 		break;
 
+	case TelemetryData::DataCourse:
+		return telemetry_smooth_course_points_;
+		break;
+
 	case TelemetryData::DataHeading:
 		return telemetry_smooth_heading_points_;
 		break;
@@ -439,6 +455,10 @@ void TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::Data type, int n
 
 	case TelemetryData::DataSpeed:
 		telemetry_smooth_speed_points_ = number;
+		break;
+
+	case TelemetryData::DataCourse:
+		telemetry_smooth_course_points_ = number;
 		break;
 
 	case TelemetryData::DataHeading:
@@ -641,7 +661,7 @@ bool Telemetry::start(void) {
 		break;
 
 	case TelemetrySettings::FormatCSV:
-		out_ << "Timestamp, Time, Total Duration, Partial Duration, Ride Time, Data, Lat, Lon, Ele, Grade, Distance, Heading, Speed, Max Speed, Average, Ride Average, Vertical Speed, Cadence, Heartrate, Temperature, Power, Lap, Home Distance, Battery Level" << std::endl;
+		out_ << "Timestamp, Time, Total Duration, Partial Duration, Ride Time, Data, Lat, Lon, Ele, Grade, Distance, Course, Heading, Speed, Max Speed, Average, Ride Average, Vertical Speed, Cadence, Heartrate, Temperature, Power, Lap, Home Distance, Battery Level" << std::endl;
 		break;
 
 	case TelemetrySettings::FormatDump:
@@ -714,6 +734,7 @@ bool Telemetry::run(void) {
 			out_ << ", " << data_.elevation();
 			out_ << ", " << data_.grade(); 
 			out_ << ", " << data_.distance(); 
+			out_ << ", " << data_.course(); 
 			out_ << ", " << data_.heading(); 
 			out_ << ", " << data_.speed(); 
 			out_ << ", " << data_.maxspeed(); 

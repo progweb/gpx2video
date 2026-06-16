@@ -77,9 +77,9 @@ namespace layout
     _icon_start_size(this, "icon-start-size", Node::ELEMENT, false),
     _icon_position_size(this, "icon-position-size", Node::ELEMENT, false),
 
-	_with_icon_end(this, "with-maker-end", Node::ELEMENT, false),
-	_with_icon_start(this, "with-maker-start", Node::ELEMENT, false),
-	_with_icon_position(this, "with-maker-position", Node::ELEMENT, false)
+	_with_icon_end(this, "with-icon-end", Node::ELEMENT, false),
+	_with_icon_start(this, "with-icon-start", Node::ELEMENT, false),
+	_with_icon_position(this, "with-icon-position", Node::ELEMENT, false)
   {
     getInterfaces().push_back(&_source);
 	getInterfaces().push_back(&_display);

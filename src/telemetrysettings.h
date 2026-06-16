@@ -137,6 +137,7 @@ private:
 	TelemetrySettings::Smooth telemetry_smooth_position_method_;
 	TelemetrySettings::Smooth telemetry_smooth_grade_method_;
 	TelemetrySettings::Smooth telemetry_smooth_speed_method_;
+	TelemetrySettings::Smooth telemetry_smooth_course_method_;
 	TelemetrySettings::Smooth telemetry_smooth_heading_method_;
 	TelemetrySettings::Smooth telemetry_smooth_elevation_method_;
 	TelemetrySettings::Smooth telemetry_smooth_acceleration_method_;
@@ -146,6 +147,7 @@ private:
 	int telemetry_smooth_position_points_;
 	int telemetry_smooth_grade_points_;
 	int telemetry_smooth_speed_points_;
+	int telemetry_smooth_course_points_;
 	int telemetry_smooth_heading_points_;
 	int telemetry_smooth_elevation_points_;
 	int telemetry_smooth_acceleration_points_;

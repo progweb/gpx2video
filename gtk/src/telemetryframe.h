@@ -53,6 +53,7 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> prediction_method_model_;
 	Glib::RefPtr<Gtk::ListStore> position_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> grade_smooth_method_model_;
+	Glib::RefPtr<Gtk::ListStore> course_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> heading_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> elevation_smooth_method_model_;
 	Glib::RefPtr<Gtk::ListStore> acceleration_smooth_method_model_;

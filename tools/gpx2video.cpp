@@ -437,6 +437,8 @@ int GPX2Video::parseTelemetrySmoothArg(char *arg,
 				type = TelemetryData::DataGrade;
 			else if (name == "speed")
 				type = TelemetryData::DataSpeed;
+			else if (name == "course")
+				type = TelemetryData::DataCourse;
 			else if (name == "heading")
 				type = TelemetryData::DataHeading;
 			else if (name == "elevation")
@@ -504,6 +506,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	// By default, enable speed smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_speed_method = TelemetrySettings::SmoothWindowedMovingAverage;
 	int telemetry_smooth_speed_points = 2;
+	// By default, enable course smooth filter
+	TelemetrySettings::Smooth telemetry_smooth_course_method = TelemetrySettings::SmoothWindowedMovingAverage;
+	int telemetry_smooth_course_points = 2;
 	// By default, enable heading smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_heading_method = TelemetrySettings::SmoothWindowedMovingAverage;
 	int telemetry_smooth_heading_points = 2;
@@ -674,6 +679,11 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 					telemetry_smooth_speed_points = number;
 					break;
 
+				case TelemetryData::DataCourse:
+					telemetry_smooth_course_method = method;
+					telemetry_smooth_course_points = number;
+					break;
+
 				case TelemetryData::DataHeading:
 					telemetry_smooth_heading_method = method;
 					telemetry_smooth_heading_points = number;
@@ -703,6 +713,9 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 					telemetry_smooth_speed_method = method;
 					telemetry_smooth_speed_points = number;
+
+					telemetry_smooth_course_method = method;
+					telemetry_smooth_course_points = number;
 
 					telemetry_smooth_heading_method = method;
 					telemetry_smooth_heading_points = number;
@@ -1031,6 +1044,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		telemetry_smooth_grade_points,
 		telemetry_smooth_speed_method,
 		telemetry_smooth_speed_points,
+		telemetry_smooth_course_method,
+		telemetry_smooth_course_points,
 		telemetry_smooth_heading_method,
 		telemetry_smooth_heading_points,
 		telemetry_smooth_elevation_method,
@@ -1234,6 +1249,9 @@ int main(int argc, char *argv[], char *envp[]) {
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
 
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataCourse, app.settings().telemetrySmoothMethod(TelemetryData::DataCourse));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataCourse, app.settings().telemetrySmoothPoints(TelemetryData::DataCourse));
+
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataHeading, app.settings().telemetrySmoothMethod(TelemetryData::DataHeading));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataHeading, app.settings().telemetrySmoothPoints(TelemetryData::DataHeading));
 
@@ -1284,6 +1302,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataCourse, app.settings().telemetrySmoothMethod(TelemetryData::DataCourse));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataCourse, app.settings().telemetrySmoothPoints(TelemetryData::DataCourse));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataHeading, app.settings().telemetrySmoothMethod(TelemetryData::DataHeading));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataHeading, app.settings().telemetrySmoothPoints(TelemetryData::DataHeading));
@@ -1356,6 +1377,9 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+
+			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataCourse, app.settings().telemetrySmoothMethod(TelemetryData::DataCourse));
+			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataCourse, app.settings().telemetrySmoothPoints(TelemetryData::DataCourse));
 
 			telemetrySettings.setTelemetrySmoothMethod(TelemetryData::DataHeading, app.settings().telemetrySmoothMethod(TelemetryData::DataHeading));
 			telemetrySettings.setTelemetrySmoothPoints(TelemetryData::DataHeading, app.settings().telemetrySmoothPoints(TelemetryData::DataHeading));

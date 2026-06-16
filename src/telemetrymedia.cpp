@@ -226,6 +226,13 @@ double TelemetryData::distance(TelemetryData::Unit unit) const {
 }
 
 
+double TelemetryData::course(TelemetryData::Unit unit) const {
+	(void) unit;
+
+	return course_;
+}
+
+
 double TelemetryData::heading(TelemetryData::Unit unit) const {
 	(void) unit;
 
@@ -434,7 +441,7 @@ void TelemetryData::dump(void) const {
 
 
 void TelemetryData::writeHeader(void) {
-	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Head | Grade   \n");
+	printf("      | Line  | T | Datetime (ms)           | Duration | Distance    | Speed  | Acceleration | S | Latitude     | Longitude    | Altitude | Cap. | Grade   \n");
 	printf("------+-------+---+-------------------------+----------+-------------+--------+--------------+---+--------------+--------------+----------+------+---------\n");
 }
 
@@ -448,7 +455,7 @@ void TelemetryData::writeData(size_t index) const {
 		(int) round(duration_), distance_/1000.0, speed_, acceleration_ / 9.81,
 		is_pause_ ? "S" : " ",
 		lat_, lon_,
-		ele_, (int) heading_, grade_);
+		ele_, (int) course_, grade_);
 }
 
 
@@ -464,7 +471,7 @@ double TelemetrySource::Point::distanceTo(const Point &to) {
 }
 
 
-double TelemetrySource::Point::headingTo(const Point &to) {
+double TelemetrySource::Point::courseTo(const Point &to) {
 	double azi1, azi2;
 
 	GeographicLib::Geodesic gsic(6378137.0, 1.0/298.2572);
@@ -572,7 +579,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 
 	double duration = 0;
 	double distance = 0;
-	double heading = 0;
+	double course = 0;
 	double ridetime = 0;
 	double elapsedtime = 0;
 	double speed = 0;
@@ -581,7 +588,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 	double verticalspeed = 0;
 	double homedistance = 0;
 
-	GeographicLib::Math::real d, h;
+	GeographicLib::Math::real c, d;
 
 	TelemetrySource::Point firstPoint;
 	TelemetrySource::Point prevPoint, curPoint;
@@ -605,8 +612,8 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 			return;
 
 		// Maths
+		c = prevPoint.courseTo(curPoint);
 		d = prevPoint.distanceTo(curPoint);
-		h = prevPoint.headingTo(curPoint);
 
 		dc = (curPoint.hasValue(TelemetryData::DataFix)) ? d : 0;
 		dt = curPoint.ts_ - prevPoint.ts_;
@@ -628,11 +635,11 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		else
 			homedistance = curPoint.homedistance();
 
-		// Heading
-		if (force || !curPoint.hasValue(TelemetryData::DataHeading))
-			heading = h;
+		// Course
+		if (force || !curPoint.hasValue(TelemetryData::DataCourse))
+			course = c;
 		else
-			heading = curPoint.heading();
+			course = curPoint.course();
 
 		// Elapsed time
 		if (force || !curPoint.hasValue(TelemetryData::DataElapsedTime)) {
@@ -723,8 +730,8 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 		// Home distance
 		curPoint.setHomeDistance(homedistance);
 
-		// Heading
-		curPoint.setHeading(heading);
+		// Course
+		curPoint.setCourse(course);
 
 		// Duration, elasped time, ride itme
 		curPoint.setDuration(duration);
@@ -796,7 +803,7 @@ void TelemetrySource::compute_i(TelemetryData &data, bool force) {
 			curPoint.setHomeDistance(0);
 			curPoint.setDuration(0);
 			curPoint.setRideTime(0);
-			curPoint.setHeading(pool_.next().heading());
+			curPoint.setCourse(pool_.next().course());
 		}
 
 		curPoint.setElapsedTime(0);
@@ -1000,7 +1007,7 @@ void TelemetrySource::compute(void) {
 	double dz = 0.0;
 
 	double sele = 0.0;
-	double sheading = 0.0;
+	double scourse = 0.0;
 
 	double grade = 0.0;
 	double distance = 0.0;
@@ -1084,7 +1091,7 @@ void TelemetrySource::compute(void) {
 
 			if (done == 0) {
 				sele = pool_.current().elevation();
-				sheading = pool_.current().heading();
+				scourse = pool_.current().course();
 			}
 		}
 
@@ -1096,7 +1103,7 @@ void TelemetrySource::compute(void) {
 					pool_.current().setPause(true);
 					pool_.current().setSpeed(0);
 					pool_.current().setAcceleration(0);
-					pool_.current().setHeading(sheading);
+					pool_.current().setCourse(scourse);
 					pool_.current().setElevation(sele);
 					pool_.current().setGrade(grade);
 
@@ -1106,7 +1113,7 @@ void TelemetrySource::compute(void) {
 						if (pool_.previous(k).hasValue(TelemetryData::DataFix)) {
 							pool_.previous(k).setSpeed(0);
 							pool_.previous(k).setAcceleration(0);
-							pool_.previous(k).setHeading(sheading);
+							pool_.previous(k).setCourse(scourse);
 							pool_.previous(k).setElevation(sele);
 							pool_.previous(k).setGrade(grade);
 						}
@@ -1144,11 +1151,13 @@ void TelemetrySource::smooth_step_one(void) {
 	double dz = 0;
 
 	int speed_count = 0;
+	int course_count = 0;
 	int heading_count = 0;
 	int elevation_count = 0;
 	int acceleration_count = 0;
 
 	size_t speed_window = 0;
+	size_t course_window = 0;
 	size_t heading_window = 0;
 	size_t elevation_window = 0;
 	size_t acceleration_window = 0;
@@ -1159,16 +1168,19 @@ void TelemetrySource::smooth_step_one(void) {
 	double maxspeed = 0;
 
 	double speed_sum = 0;
+	double course_sum = 0;
 	double heading_sum = 0;
 	double elevation_sum = 0;
 	double acceleration_sum = 0;
 
 	TelemetrySettings::Smooth speed_method;
+	TelemetrySettings::Smooth course_method;
 	TelemetrySettings::Smooth heading_method;
 	TelemetrySettings::Smooth elevation_method;
 	TelemetrySettings::Smooth acceleration_method;
 
 	std::deque<Point> speed_points;
+	std::deque<Point> course_points;
 	std::deque<Point> heading_points;
 	std::deque<Point> elevation_points;
 	std::deque<Point> acceleration_points;
@@ -1178,12 +1190,15 @@ void TelemetrySource::smooth_step_one(void) {
 	log_call();
 
 	speed_method = settings().telemetrySmoothMethod(TelemetryData::DataSpeed);
+	course_method = settings().telemetrySmoothMethod(TelemetryData::DataCourse);
 	heading_method = settings().telemetrySmoothMethod(TelemetryData::DataHeading);
 	elevation_method = settings().telemetrySmoothMethod(TelemetryData::DataElevation);
 	acceleration_method = settings().telemetrySmoothMethod(TelemetryData::DataAcceleration);
 
 	speed_window = (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1 : 0;
+	course_window = (settings().telemetrySmoothMethod(TelemetryData::DataCourse) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
+		(settings().telemetrySmoothPoints(TelemetryData::DataCourse) * 2) + 1 : 0;
 	heading_window = (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
 		(settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1 : 0;
 	elevation_window = (settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
@@ -1204,6 +1219,22 @@ void TelemetrySource::smooth_step_one(void) {
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
 			speed_sum += nextPoint.speed();
 			speed_count += 1;
+		}
+	}
+
+	// Fill 'course' window
+	for (size_t i=0; i<course_window/2; i++) {
+		nextPoint = pool_.next(i);
+
+		if (nextPoint.type() == TelemetryData::TypeUnknown)
+			break;
+
+		// Save point
+		course_points.emplace_back(nextPoint);
+
+		if (nextPoint.hasValue(TelemetryData::DataFix)) {
+			course_sum += nextPoint.course();
+			course_count += 1;
 		}
 	}
 
@@ -1333,6 +1364,59 @@ void TelemetrySource::smooth_step_one(void) {
 				}
 			}
 
+			// course
+			//--------
+
+			if (course_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+				if (course_window > 1) {
+					// Add new point
+					nextPoint = pool_.next(course_window/2 - 1);
+
+					// Save point
+					course_points.emplace_back(nextPoint);
+
+					if (nextPoint.type() != TelemetryData::TypeUnknown) {
+						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+							course_sum += nextPoint.course();
+							course_count += 1;
+						}
+					}
+
+					// Remove old point
+					if (course_points.size() > course_window) {
+						previousPoint = course_points.front();
+						course_points.pop_front();
+
+						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+							course_sum -= previousPoint.course();
+							course_count -= 1;
+						}
+					}
+
+					// Compute 'course' smooth values
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setCourse(course_sum / course_count);
+						}
+					}
+				}
+			}
+			else if (course_method == TelemetrySettings::SmoothButterworth) {
+				if (pool_.tell() > 2) {
+					double a = 4.0;
+					double z = 0.7;
+
+					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+						if (!pool_.current().isPause()) {
+							pool_.current().setCourse(
+									(pool_.current().course() + (pool_.previous().course() * (a + ((a * a) / (2 * z * z)))) \
+									- (pool_.previous(1).course() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
+							);
+						}
+					}
+				}
+			}
+
 			// heading
 			//---------
 
@@ -1345,7 +1429,7 @@ void TelemetrySource::smooth_step_one(void) {
 					heading_points.emplace_back(nextPoint);
 
 					if (nextPoint.type() != TelemetryData::TypeUnknown) {
-						if (nextPoint.hasValue(TelemetryData::DataFix)) {
+						if (nextPoint.hasValue(TelemetryData::DataHeading)) {
 							heading_sum += nextPoint.heading();
 							heading_count += 1;
 						}
@@ -1356,14 +1440,14 @@ void TelemetrySource::smooth_step_one(void) {
 						previousPoint = heading_points.front();
 						heading_points.pop_front();
 
-						if (previousPoint.hasValue(TelemetryData::DataFix)) {
+						if (previousPoint.hasValue(TelemetryData::DataHeading)) {
 							heading_sum -= previousPoint.heading();
 							heading_count -= 1;
 						}
 					}
 
 					// Compute 'heading' smooth values
-					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					if (pool_.current().hasValue(TelemetryData::DataHeading)) {
 						if (!pool_.current().isPause()) {
 							pool_.current().setHeading(heading_sum / heading_count);
 						}
@@ -1375,7 +1459,7 @@ void TelemetrySource::smooth_step_one(void) {
 					double a = 4.0;
 					double z = 0.7;
 
-					if (pool_.current().hasValue(TelemetryData::DataFix)) {
+					if (pool_.current().hasValue(TelemetryData::DataHeading)) {
 						if (!pool_.current().isPause()) {
 							pool_.current().setHeading(
 									(pool_.current().heading() + (pool_.previous().heading() * (a + ((a * a) / (2 * z * z)))) \
@@ -1897,6 +1981,7 @@ void TelemetrySource::smooth(void) {
 	size_t position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
 	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
 	size_t speed_window = (settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1;
+	size_t course_window = (settings().telemetrySmoothPoints(TelemetryData::DataCourse) * 2) + 1;
 	size_t heading_window = (settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1;
 	size_t elevation_window = (settings().telemetrySmoothPoints(TelemetryData::DataElevation) * 2) + 1;
 	size_t acceleration_window = (settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1;
@@ -1925,6 +2010,12 @@ void TelemetrySource::smooth(void) {
 					speed_window, settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
 		else
 			printf("     - speed: no\n");
+
+		if ((settings().telemetrySmoothMethod(TelemetryData::DataCourse) == TelemetrySettings::SmoothWindowedMovingAverage) && (course_window > 1))
+			printf("     - course: window size '%ld' (+/- %d points)\n", 
+					course_window, settings().telemetrySmoothPoints(TelemetryData::DataCourse));
+		else
+			printf("     - course: no\n");
 
 		if ((settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) && (heading_window > 1))
 			printf("     - heading: window size '%ld' (+/- %d points)\n", 
@@ -1968,6 +2059,11 @@ void TelemetrySource::smooth(void) {
 		else
 			printf("     - speed: no\n");
 
+		if (settings().telemetrySmoothMethod(TelemetryData::DataCourse) == TelemetrySettings::SmoothButterworth)
+			printf("     - course: a = 4.0 / z = 0.7\n");
+		else
+			printf("     - course: no\n");
+
 		if (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothButterworth)
 			printf("     - heading: a = 4.0 / z = 0.7\n");
 		else
@@ -2003,6 +2099,7 @@ void TelemetrySource::smooth(void) {
  *  - elevation
  * So compute:
  *  - grade
+ *  - course
  *  - heading
  *  - maxspeed
  *  - verticalspeed
@@ -2075,6 +2172,11 @@ void TelemetrySource::fix(void) {
 //				// Upgrade grade for next point
 //				if (!nextPoint.isPause())
 //					nextPoint.setGrade(grade);
+			}
+
+			if (currentPoint.hasValue(TelemetryData::DataCourse)) {
+				double course = prevPoint.course_ + k * (nextPoint.course_ - prevPoint.course_);
+				currentPoint.setCourse(course);
 			}
 
 			if (currentPoint.hasValue(TelemetryData::DataHeading)) {
@@ -2234,6 +2336,9 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 
 	log_call();
 
+	if (!quiet_)
+		log_info("%s: Load telemetry data.", name().c_str());
+
 	reset();
 	clear();
 	config();
@@ -2246,6 +2351,19 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 	trim();
 
 	return type;
+}
+
+
+enum TelemetrySource::Data TelemetrySource::loadData(bool verbose) {
+	bool save = quiet_;
+
+	enum TelemetrySource::Data result;
+
+	setQuiet(!verbose);
+	result = loadData();
+	setQuiet(save);
+
+	return result;
 }
 
 
@@ -2403,6 +2521,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataGrade) && nextPoint.hasValue(TelemetryData::DataGrade))
 			point.setGrade(prevPoint.grade_ + k * (nextPoint.grade_ - prevPoint.grade_));
 
+		if (prevPoint.hasValue(TelemetryData::DataCourse) && nextPoint.hasValue(TelemetryData::DataCourse))
+			point.setCourse(prevPoint.course_ + k * (nextPoint.course_ - prevPoint.course_));
+
 		if (prevPoint.hasValue(TelemetryData::DataHeading) && nextPoint.hasValue(TelemetryData::DataHeading))
 			point.setHeading(prevPoint.heading_ + k * (nextPoint.heading_ - prevPoint.heading_));
 
@@ -2474,6 +2595,9 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 
 		if (prevPoint.hasValue(TelemetryData::DataGrade) && curPoint.hasValue(TelemetryData::DataGrade))
 			point.setGrade(curPoint.grade_ + k * (curPoint.grade_ - prevPoint.grade_));
+
+		if (prevPoint.hasValue(TelemetryData::DataCourse) && curPoint.hasValue(TelemetryData::DataCourse))
+			point.setCourse(curPoint.course_ + k * (curPoint.course_ - prevPoint.course_));
 
 		if (prevPoint.hasValue(TelemetryData::DataHeading) && curPoint.hasValue(TelemetryData::DataHeading))
 			point.setHeading(curPoint.heading_ + k * (curPoint.heading_ - prevPoint.heading_));
@@ -2573,7 +2697,7 @@ void TelemetrySource::cleanData(TelemetryData &data, uint64_t timestamp) {
 
 			| TelemetryData::DataSpeed
 			| TelemetryData::DataGrade
-			| TelemetryData::DataHeading
+			| TelemetryData::DataCourse
 			| TelemetryData::DataAcceleration
 		);
 

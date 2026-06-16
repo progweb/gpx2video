@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-06-12 20:12+0200\n"
+"POT-Creation-Date: 2026-06-16 20:13+0200\n"
 "PO-Revision-Date: 2026-05-17 11:33+0200\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -15,117 +15,121 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/videowidget.cpp:999
+#: ../src/videowidget.cpp:1010
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:1001
+#: ../src/videowidget.cpp:1012
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:1003 ../src/videowidget.cpp:1056
+#: ../src/videowidget.cpp:1014 ../src/videowidget.cpp:1069
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:1012
+#: ../src/videowidget.cpp:1023
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1014
+#: ../src/videowidget.cpp:1025
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1016
+#: ../src/videowidget.cpp:1027
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:1018
+#: ../src/videowidget.cpp:1029
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:1020 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:1031 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:1022
+#: ../src/videowidget.cpp:1033
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:1024 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:1035 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:1026
+#: ../src/videowidget.cpp:1037
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:1028
+#: ../src/videowidget.cpp:1039
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:1030
+#: ../src/videowidget.cpp:1041
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:1032
+#: ../src/videowidget.cpp:1043
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:1034
+#: ../src/videowidget.cpp:1045
+msgid "Course"
+msgstr ""
+
+#: ../src/videowidget.cpp:1047
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:1036
+#: ../src/videowidget.cpp:1049
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:1038
+#: ../src/videowidget.cpp:1051
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:1040 ../gtk/src/ui/media_stackpage.ui:102
+#: ../src/videowidget.cpp:1053 ../gtk/src/ui/media_stackpage.ui:102
 #: ../gtk/src/media.cpp:14
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:1042
+#: ../src/videowidget.cpp:1055
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:1044 ../gtk/src/ui/widgets/map_box.ui:175
+#: ../src/videowidget.cpp:1057 ../gtk/src/ui/widgets/map_box.ui:175
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:1046
+#: ../src/videowidget.cpp:1059
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1048
+#: ../src/videowidget.cpp:1061
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:1050
+#: ../src/videowidget.cpp:1063
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:1052
+#: ../src/videowidget.cpp:1065
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:1054
+#: ../src/videowidget.cpp:1067
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:1058 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:1071 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:1060 ../gtk/src/ui/widgets/map_box.ui:307
+#: ../src/videowidget.cpp:1073 ../gtk/src/ui/widgets/map_box.ui:307
 #: ../gtk/src/ui/widgets/track_box.ui:168
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:1062
+#: ../src/videowidget.cpp:1075
 msgid "Vertical speed"
 msgstr ""
 
@@ -142,9 +146,10 @@ msgid "Search by name"
 msgstr ""
 
 #: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
-#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/map_box.ui:143
-#: ../gtk/src/ui/widgets/track_box.ui:136 ../gtk/src/window.cpp:804
-#: ../gtk/src/window.cpp:858 ../gtk/src/window.cpp:937
+#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/image_box.ui:105
+#: ../gtk/src/ui/widgets/map_box.ui:143 ../gtk/src/ui/widgets/track_box.ui:136
+#: ../gtk/src/window.cpp:827 ../gtk/src/window.cpp:881
+#: ../gtk/src/window.cpp:960
 msgid "Ok"
 msgstr ""
 
@@ -182,77 +187,81 @@ msgstr ""
 msgid "Preferences"
 msgstr "Preferences"
 
-#: ../gtk/src/ui/telemetry_frame.ui:99
+#: ../gtk/src/ui/telemetry_frame.ui:106
 msgid "Telemetry properties"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:107
+#: ../gtk/src/ui/telemetry_frame.ui:114
 msgid "Filter"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:127
+#: ../gtk/src/ui/telemetry_frame.ui:134
 msgid "Time offset (in ms):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:151
+#: ../gtk/src/ui/telemetry_frame.ui:158
 msgid "Check & drop invalid points"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:159
+#: ../gtk/src/ui/telemetry_frame.ui:166
 msgid "Enable pause detection"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:167
+#: ../gtk/src/ui/telemetry_frame.ui:174
 msgid "Apply 'Iglewicz & Hoaglin' modified z-scores"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:182
+#: ../gtk/src/ui/telemetry_frame.ui:189
 msgid "Prediction method:"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:207
+#: ../gtk/src/ui/telemetry_frame.ui:214
 msgid "Rate (in ms):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:233
+#: ../gtk/src/ui/telemetry_frame.ui:240
 msgid "Position filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:254 ../gtk/src/ui/telemetry_frame.ui:326
-#: ../gtk/src/ui/telemetry_frame.ui:398 ../gtk/src/ui/telemetry_frame.ui:470
-#: ../gtk/src/ui/telemetry_frame.ui:542 ../gtk/src/ui/telemetry_frame.ui:614
-#: ../gtk/src/ui/telemetry_frame.ui:686
+#: ../gtk/src/ui/telemetry_frame.ui:261 ../gtk/src/ui/telemetry_frame.ui:333
+#: ../gtk/src/ui/telemetry_frame.ui:405 ../gtk/src/ui/telemetry_frame.ui:477
+#: ../gtk/src/ui/telemetry_frame.ui:549 ../gtk/src/ui/telemetry_frame.ui:621
+#: ../gtk/src/ui/telemetry_frame.ui:693 ../gtk/src/ui/telemetry_frame.ui:765
 msgid "Method:"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:279 ../gtk/src/ui/telemetry_frame.ui:351
-#: ../gtk/src/ui/telemetry_frame.ui:423 ../gtk/src/ui/telemetry_frame.ui:495
-#: ../gtk/src/ui/telemetry_frame.ui:567 ../gtk/src/ui/telemetry_frame.ui:639
-#: ../gtk/src/ui/telemetry_frame.ui:711
+#: ../gtk/src/ui/telemetry_frame.ui:286 ../gtk/src/ui/telemetry_frame.ui:358
+#: ../gtk/src/ui/telemetry_frame.ui:430 ../gtk/src/ui/telemetry_frame.ui:502
+#: ../gtk/src/ui/telemetry_frame.ui:574 ../gtk/src/ui/telemetry_frame.ui:646
+#: ../gtk/src/ui/telemetry_frame.ui:718 ../gtk/src/ui/telemetry_frame.ui:790
 msgid "Window size (in points):"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:305
+#: ../gtk/src/ui/telemetry_frame.ui:312
 msgid "Grade filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:377
+#: ../gtk/src/ui/telemetry_frame.ui:384
+msgid "Course filter & smooth"
+msgstr ""
+
+#: ../gtk/src/ui/telemetry_frame.ui:456
 msgid "Heading filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:449
+#: ../gtk/src/ui/telemetry_frame.ui:528
 msgid "Elevation filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:521
+#: ../gtk/src/ui/telemetry_frame.ui:600
 msgid "Acceleration filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:593
+#: ../gtk/src/ui/telemetry_frame.ui:672
 msgid "Speed filter & smooth"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:665
+#: ../gtk/src/ui/telemetry_frame.ui:744
 msgid "Vertical speed filter & smooth"
 msgstr ""
 
@@ -734,6 +743,18 @@ msgstr ""
 msgid "Text line space:"
 msgstr ""
 
+#: ../gtk/src/ui/widgets/image_box.ui:18
+msgid "Image properties"
+msgstr ""
+
+#: ../gtk/src/ui/widgets/image_box.ui:29
+msgid "Set the image"
+msgstr ""
+
+#: ../gtk/src/ui/widgets/image_box.ui:134
+msgid "Image zoom:"
+msgstr ""
+
 #: ../gtk/src/ui/widgets/map_box.ui:166
 msgid "Map properties"
 msgstr ""
@@ -826,6 +847,10 @@ msgstr ""
 msgid "Icon position size:"
 msgstr ""
 
+#: ../gtk/src/ui/widgets/map_box.ui:885 ../gtk/src/ui/widgets/track_box.ui:803
+msgid "Icon position follow:"
+msgstr ""
+
 #: ../gtk/src/ui/widgets/text_box.ui:18
 msgid "Text properties"
 msgstr ""
@@ -835,7 +860,8 @@ msgid "Track properties"
 msgstr ""
 
 #: ../gtk/src/telemetryframe.cpp:46 ../gtk/src/telemetryframe.cpp:71
-#: ../gtk/src/widgetframe.cpp:71 ../gtk/src/widgetframe.cpp:93
+#: ../gtk/src/widgetframe.cpp:84 ../gtk/src/widgetframe.cpp:106
+#: ../gtk/src/widgets/image.cpp:87
 msgid "None"
 msgstr ""
 
@@ -859,143 +885,139 @@ msgstr ""
 msgid "Butterworth"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:76 ../gtk/src/shape/bar.cpp:31
+#: ../gtk/src/widgetframe.cpp:89 ../gtk/src/shape/bar.cpp:31
 msgid "Horizontal"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:81 ../gtk/src/shape/bar.cpp:36
+#: ../gtk/src/widgetframe.cpp:94 ../gtk/src/shape/bar.cpp:36
 msgid "Vertical"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:98 ../gtk/src/widgetframe.cpp:218
+#: ../gtk/src/widgetframe.cpp:111 ../gtk/src/widgetframe.cpp:231
 #: ../gtk/src/shape/bar.cpp:59
 msgid "Left"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:103 ../gtk/src/widgetframe.cpp:228
+#: ../gtk/src/widgetframe.cpp:116 ../gtk/src/widgetframe.cpp:241
 #: ../gtk/src/shape/bar.cpp:67
 msgid "Right"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:108 ../gtk/src/widgetframe.cpp:248
+#: ../gtk/src/widgetframe.cpp:121 ../gtk/src/widgetframe.cpp:261
 msgid "Bottom"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:113 ../gtk/src/widgetframe.cpp:238
+#: ../gtk/src/widgetframe.cpp:126 ../gtk/src/widgetframe.cpp:251
 msgid "Top"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:118
+#: ../gtk/src/widgetframe.cpp:131
 msgid "Bottom - Left"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:123
+#: ../gtk/src/widgetframe.cpp:136
 msgid "Bottom - Right"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:128
+#: ../gtk/src/widgetframe.cpp:141
 msgid "Top - Left"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:133
+#: ../gtk/src/widgetframe.cpp:146
 msgid "Top - Right"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:143
+#: ../gtk/src/widgetframe.cpp:156
 msgid "Normal"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:148
+#: ../gtk/src/widgetframe.cpp:161
 msgid "Italic"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:158
+#: ../gtk/src/widgetframe.cpp:171
 msgid "Thin (100)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:163
+#: ../gtk/src/widgetframe.cpp:176
 msgid "Ultra light (200)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:168
+#: ../gtk/src/widgetframe.cpp:181
 msgid "Light (300)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:173
+#: ../gtk/src/widgetframe.cpp:186
 msgid "Semi light (350)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:178
+#: ../gtk/src/widgetframe.cpp:191
 msgid "Book (380)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:183
+#: ../gtk/src/widgetframe.cpp:196
 msgid "Normal (400)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:188
+#: ../gtk/src/widgetframe.cpp:201
 msgid "Medium (500)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:193
+#: ../gtk/src/widgetframe.cpp:206
 msgid "Semi bold (600)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:198
+#: ../gtk/src/widgetframe.cpp:211
 msgid "Ultra bold (800)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:203
+#: ../gtk/src/widgetframe.cpp:216
 msgid "Heavy (900)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:208
+#: ../gtk/src/widgetframe.cpp:221
 msgid "Ultra heavy (1000)"
 msgstr ""
 
-#: ../gtk/src/widgetframe.cpp:223 ../gtk/src/widgetframe.cpp:243
-#: ../gtk/src/shape/bar.cpp:63 ../gtk/src/widgets/map.cpp:103
-#: ../gtk/src/widgets/track.cpp:103
+#: ../gtk/src/widgetframe.cpp:236 ../gtk/src/widgetframe.cpp:256
+#: ../gtk/src/shape/bar.cpp:63 ../gtk/src/widgets/map.cpp:182
+#: ../gtk/src/widgets/track.cpp:182
 msgid "Center"
 msgstr ""
 
-#: ../gtk/src/window.cpp:760
+#: ../gtk/src/window.cpp:783
 msgid "All video files"
 msgstr "All video files"
 
-#: ../gtk/src/window.cpp:764 ../gtk/src/window.cpp:823
+#: ../gtk/src/window.cpp:787 ../gtk/src/window.cpp:846
 msgid "All layout files"
 msgstr "All layout files"
 
-#: ../gtk/src/window.cpp:778 ../gtk/src/window.cpp:795
+#: ../gtk/src/window.cpp:801 ../gtk/src/window.cpp:818
 msgid "Open a file"
 msgstr ""
 
-#: ../gtk/src/window.cpp:833 ../gtk/src/window.cpp:850
+#: ../gtk/src/window.cpp:856 ../gtk/src/window.cpp:873
 msgid "Export layout"
 msgstr ""
 
-#: ../gtk/src/window.cpp:882
-#, fuzzy
+#: ../gtk/src/window.cpp:905
 msgid "All GPX files"
-msgstr "All video files"
+msgstr ""
 
-#: ../gtk/src/window.cpp:886
-#, fuzzy
+#: ../gtk/src/window.cpp:909
 msgid "All CSV files"
-msgstr "All video files"
+msgstr ""
 
-#: ../gtk/src/window.cpp:890
-#, fuzzy
+#: ../gtk/src/window.cpp:913
 msgid "All icon files"
-msgstr "All video files"
+msgstr ""
 
-#: ../gtk/src/window.cpp:894
-#, fuzzy
+#: ../gtk/src/window.cpp:917
 msgid "All image files"
-msgstr "All video files"
+msgstr ""
 
-#: ../gtk/src/window.cpp:908 ../gtk/src/window.cpp:927
+#: ../gtk/src/window.cpp:931 ../gtk/src/window.cpp:950
 msgid "Open an image or a telemetry file"
 msgstr ""
 
@@ -1023,10 +1045,22 @@ msgstr ""
 msgid "Design"
 msgstr ""
 
-#: ../gtk/src/widgets/map.cpp:98 ../gtk/src/widgets/track.cpp:98
+#: ../gtk/src/widgets/image.cpp:92
+msgid "Fit"
+msgstr ""
+
+#: ../gtk/src/widgets/image.cpp:97
+msgid "Fill"
+msgstr ""
+
+#: ../gtk/src/widgets/image.cpp:102
+msgid "Stretch"
+msgstr ""
+
+#: ../gtk/src/widgets/map.cpp:177 ../gtk/src/widgets/track.cpp:177
 msgid "Default"
 msgstr ""
 
-#: ../gtk/src/widgets/map.cpp:108 ../gtk/src/widgets/track.cpp:108
+#: ../gtk/src/widgets/map.cpp:187 ../gtk/src/widgets/track.cpp:187
 msgid "Zoom fit"
 msgstr ""

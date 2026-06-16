@@ -50,7 +50,10 @@ void GPX2VideoTelemetryStackPage::set_telemetry(TelemetrySource *source) {
 	// Populate filename label
 	std::string filename = Glib::path_get_basename(Glib::StdStringView(source->filename()));
 	label = ref_builder_->get_widget<Gtk::Label>("filename_label");
+	label->set_max_width_chars(20);
+	label->set_ellipsize(Pango::EllipsizeMode::MIDDLE);
 	label->set_label(filename);
+	label->set_tooltip_text(filename);
 
 	// Get first gpx point
 	source->retrieveFirst(data);

@@ -32,6 +32,7 @@ public:
 
 		index_grade_ = -1;
 		index_distance_ = -1;
+		index_course_ = -1;
 		index_heading_ = -1;
 		index_speed_ = -1;
 		index_maxspeed_ = -1;
@@ -121,7 +122,7 @@ eof:
 		// Timestamp, Time, Total duration, Partial duration, RideTime, 
 		// Data, 
 		// Lat, Lon, Ele, 
-		// Grade, Distance, Heading, Speed, MaxSpeed, Average, Ride Average, 
+		// Grade, Distance, Course, Heading, Speed, MaxSpeed, Average, Ride Average, 
 		// Cadence, Heartrate, Power, Lap
 		for (size_t i=0; i<columns.size(); i++) {
 			name = Utils::capitalize(columns[i]);
@@ -146,6 +147,8 @@ eof:
 				index_grade_ = i;
 			else if (name == "Distance")
 				index_distance_ = i;
+			else if (name == "Course")
+				index_course_ = i;
 			else if (name == "Heading")
 				index_heading_ = i;
 			else if (name == "Speed")
@@ -293,6 +296,9 @@ eof:
 		if (index_distance_ != -1)
 			point.setDistance(str2double(columns[index_distance_]));
 
+		if (index_course_ != -1)
+			point.setCourse(str2double(columns[index_course_]));
+
 		if (index_heading_ != -1)
 			point.setHeading(str2double(columns[index_heading_]));
 
@@ -351,6 +357,7 @@ private:
 
 	int index_grade_;
 	int index_distance_;
+	int index_course_;
 	int index_heading_;
 	int index_speed_;
 	int index_maxspeed_;

@@ -140,6 +140,12 @@ public:
 			addValue(Data::DataDistance);
 		}
 
+		void setCourse(double course) {
+			course_ = course;
+
+			addValue(Data::DataCourse);
+		}
+
 		void setHeading(double heading) {
 			heading_ = heading;
 
@@ -281,6 +287,11 @@ public:
 				mask |= (point.has_value_ & DataDistance);
 			}
 
+			if (!hasValue(TelemetryData::DataCourse)) {
+				course_ = point.course_;
+				mask |= (point.has_value_ & DataCourse);
+			}
+
 			if (!hasValue(TelemetryData::DataHeading)) {
 				heading_ = point.heading_;
 				mask |= (point.has_value_ & DataHeading);
@@ -349,7 +360,7 @@ public:
 		}
 
 		double distanceTo(const Point &to);
-		double headingTo(const Point &to);
+		double courseTo(const Point &to);
 	};
 
 	class PointPool {
@@ -555,6 +566,7 @@ public:
 	bool isOpen(void) const;
 
 	enum Data loadData(void);
+	enum Data loadData(bool verbose);
 
 	enum Data retrieveFirst(TelemetryData &data);
 	enum Data retrieveFrom(TelemetryData &data);

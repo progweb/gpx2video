@@ -144,6 +144,7 @@ set(GPX2VIDEO_SOURCES
 	src/widgets/avgspeed.cpp
 	src/widgets/batterylevel.cpp
 	src/widgets/cadence.cpp
+	src/widgets/course.cpp
 	src/widgets/date.cpp
 	src/widgets/distance.cpp
 	src/widgets/duration.cpp

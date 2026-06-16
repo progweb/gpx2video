@@ -12,6 +12,7 @@
 #include "widgets/gforce.h"
 #include "widgets/gpx.h"
 #include "widgets/grade.h"
+#include "widgets/course.h"
 #include "widgets/heading.h"
 #include "widgets/heartrate.h"
 #include "widgets/homedistance.h"

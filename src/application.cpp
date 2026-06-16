@@ -180,6 +180,7 @@ std::string GPXApplication::assets(const std::string &path) {
 
 		// <builddir>/assets/<path>
 		exepath = std::filesystem::path(exepath).parent_path();
+		fullpath = exepath + assets;
 		if (::stat(fullpath.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode))
 			return fullpath;
 

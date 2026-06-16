@@ -168,6 +168,8 @@ VideoWidget::Widget VideoWidget::string2widget(std::string &s) {
 		type = VideoWidget::WidgetGPX;
 	else if (s == "grade")
 		type = VideoWidget::WidgetGrade;
+	else if (s == "course")
+		type = VideoWidget::WidgetCourse;
 	else if (s == "heading")
 		type = VideoWidget::WidgetHeading;
 	else if (s == "heartrate")
@@ -471,6 +473,8 @@ VideoWidget::Theme::Icon VideoWidget::string2icon(std::string &s) {
 		icon = VideoWidget::Theme::IconGPX;
 	else if (s == "internal:grade")
 		icon = VideoWidget::Theme::IconGrade;
+	else if (s == "internal:course")
+		icon = VideoWidget::Theme::IconCourse;
 	else if (s == "internal:heading")
 		icon = VideoWidget::Theme::IconHeading;
 	else if (s == "internal:heartrate")
@@ -575,6 +579,8 @@ std::string VideoWidget::widget2string(VideoWidget::Widget type) {
 		return "gpx";
 	case VideoWidget::WidgetGrade:
 		return "grade";
+	case VideoWidget::WidgetCourse:
+		return "course";
 	case VideoWidget::WidgetHeading:
 		return "heading";
 	case VideoWidget::WidgetHeartRate:
@@ -821,6 +827,8 @@ std::string VideoWidget::icon2string(VideoWidget::Theme::Icon icon) {
 		return "internal:gpx";
 	case VideoWidget::Theme::IconGrade:
 		return "internal:grade";
+	case VideoWidget::Theme::IconCourse:
+		return "internal:course";
 	case VideoWidget::Theme::IconHeading:
 		return "internal:heading";
 	case VideoWidget::Theme::IconHeartRate:
@@ -937,6 +945,8 @@ std::string VideoWidget::getIconFilename(VideoWidget::Widget type) {
 		return path + "/position.svg";
 	case VideoWidget::WidgetGrade:
 		return path + "/grade.svg";
+	case VideoWidget::WidgetCourse:
+		return path + "/compass.svg";
 	case VideoWidget::WidgetHeading:
 		return path + "/compass.svg";
 	case VideoWidget::WidgetHeartRate:
@@ -1031,6 +1041,8 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 		return _("GPX");
 	case VideoWidget::WidgetGrade:
 		return _("Grade / Slope");
+	case VideoWidget::WidgetCourse:
+		return _("Course");
 	case VideoWidget::WidgetHeading:
 		return _("Heading");
 	case VideoWidget::WidgetHeartRate:

@@ -84,6 +84,7 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 
 	position_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	grade_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
+	course_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	heading_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	elevation_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	acceleration_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
@@ -335,6 +336,41 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for grade data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataGrade, value);
+					}
+			));
+
+	// Course smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("course_method_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"course_method_combobox\" object in telemetry_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Telemetry smooth method changed to '%s' for course data", 
+								iter->get_value(model_.m_name).c_str());
+
+						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataCourse, (TelemetrySettings::Smooth) value);
+					}
+			));
+
+	// Course window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("course_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"course_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry window size value changed to '%d' for course data", value);
+
+						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataCourse, value);
 					}
 			));
 
@@ -616,6 +652,23 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataGrade));
 
+	// Course smooth method
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("course_method_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"course_method_combobox\" object in telemetry_frame.ui");
+
+	combobox->set_model(course_smooth_method_model_);
+
+	if (find_in_listtore(course_smooth_method_model_, source_->settings().telemetrySmoothMethod(TelemetryData::DataCourse), iter))
+		combobox->set_active(iter);
+
+	// Course window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("course_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"course_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataCourse));
+
 	// Heading smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("heading_method_combobox");
 	if (!combobox)
@@ -731,7 +784,7 @@ void GPX2VideoTelemetryFrame::on_telemetry_spin_changed(Gtk::SpinButton *button,
 	set(value);
 
 	// Compute
-	source_->loadData();
+	source_->loadData(true);
 
 	// Telemetry compute reset
 	dispatcher_.emit();
@@ -748,7 +801,7 @@ void GPX2VideoTelemetryFrame::on_telemetry_combobox_changed(Gtk::ComboBox *combo
 	set(combobox->get_active());
 
 	// Compute
-	source_->loadData();
+	source_->loadData(true);
 
 	// Telemetry compute reset
 	dispatcher_.emit();
@@ -769,7 +822,7 @@ void GPX2VideoTelemetryFrame::on_telemetry_checkbutton_toggled(Gtk::CheckButton 
 	set(active);
 
 	// Compute
-	source_->loadData();
+	source_->loadData(true);
 
 	// Telemetry compute reset
 	dispatcher_.emit();
