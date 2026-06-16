@@ -18,6 +18,8 @@ public:
 
 		sep_ = ',';
 
+		headers_size_ = -1;
+
 		// Column index
 		index_timestamp_ = -1;
 		index_total_duration_ = -1;
@@ -89,14 +91,31 @@ failure:
 
 		log_call();
 
-		type = readLine(line);
-		parseLine(columns, line);
+		for (;;) {
+			type = readLine(line);
 
-		if (type == TelemetrySource::DataEof)
-			goto eof;
+			// End of file
+			if (type == TelemetrySource::DataEof)
+				goto eof;
 
-		writePoint(columns, point);
+			// Parsing
+			parseLine(columns, line);
 
+			// Ignore empty lines
+			if (columns.empty())
+				continue;
+
+			// Skip malformed lines
+			if (columns.size() != headers_size_) {
+				log_warn("Skip malformed line at %d (columns: %ld)", 
+						line_, columns.size());
+				continue;
+			}
+
+			writePoint(columns, point);
+
+			break;
+		}
 eof:
 		return type;
 	}
@@ -118,6 +137,9 @@ eof:
 
 		if (type == TelemetrySource::DataEof)
 			goto eof;
+
+		// Save number of columns
+		headers_size_ = columns.size();
 
 		// Timestamp, Time, Total duration, Partial duration, RideTime, 
 		// Data, 
@@ -343,6 +365,8 @@ private:
 	uint32_t line_;
 
 	char sep_;
+
+	size_t headers_size_;
 
 	int index_timestamp_;
 	int index_total_duration_;
