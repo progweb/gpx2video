@@ -21,6 +21,18 @@ public:
 		return theme_;
 	}
 
+	virtual bool hasFeature(Feature feature) const {
+		switch (feature) {
+		case FeatureNeedle:
+			return false;
+
+		default:
+			break;
+		}
+
+		return true;
+	}
+
 	void setSize(int size) {
 		size_ = size;
 	}

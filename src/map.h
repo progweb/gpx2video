@@ -67,6 +67,18 @@ public:
 	MapSettings& settings(void);
 	const MapSettings& settings(void) const;
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+//		case FeatureRoundCorner:
+//			return true;
+
+		default:
+			break;
+		}
+
+		return false;
+	}
+
 	void setSize(int width, int height);
 
 	bool start(void) {

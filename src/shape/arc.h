@@ -41,6 +41,7 @@ public:
 	virtual bool hasFeature(Feature feature) const {
 		switch (feature) {
 		case FeatureLabel:
+		case FeatureRoundCorner:
 			return false;
 
 		default:

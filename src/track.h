@@ -36,7 +36,13 @@ public:
 	const TrackSettings& settings() const;
 
 	bool hasFeature(ShapeBase::Feature feature) const {
-		(void) feature;
+		switch (feature) {
+		case FeatureRoundCorner:
+			return true;
+
+		default:
+			break;
+		}
 
 		return false;
 	}

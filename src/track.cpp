@@ -47,7 +47,7 @@ TrackSettings::TrackSettings() {
 	setPathPrimaryColor(0.9, 0.4, 0.2, 1.0);
 	setPathSecondaryColor(1.0, 1.0, 1.0, 1.0);
 
-	setFollowCourse(false);
+	setFollow(TrackSettings::FollowNone);
 
 	setIcon(TrackSettings::IconStart, TrackSettings::IconDefault);
 	setIconColor(TrackSettings::IconStart, 0.0, 0.0, 0.0, 0.0);
@@ -200,13 +200,13 @@ bool TrackSettings::setPathSecondaryColor(double r, double g, double b, double a
 }
 
 
-bool TrackSettings::followCourse(void) const {
-	return follow_course_;
+const TrackSettings::Follow& TrackSettings::follow(void) const {
+	return follow_;
 }
 
 
-void TrackSettings::setFollowCourse(bool follow) {
-	follow_course_ = follow;
+void TrackSettings::setFollow(const TrackSettings::Follow &follow) {
+	follow_ = follow;
 }
 
 
@@ -241,6 +241,22 @@ TrackSettings::View TrackSettings::string2view(std::string &s) {
 		view = TrackSettings::ViewUnknown;
 
 	return view;
+}
+
+
+TrackSettings::Follow TrackSettings::string2follow(std::string &s) {
+	TrackSettings::Follow follow;
+
+	if (s.empty() || (s == "none"))
+		follow = TrackSettings::FollowNone;
+	else if (s == "course")
+		follow = TrackSettings::FollowCourse;
+	else if (s == "heading")
+		follow = TrackSettings::FollowHeading;
+	else 
+		follow = TrackSettings::FollowUnknown;
+
+	return follow;
 }
 
 
@@ -291,6 +307,19 @@ std::string TrackSettings::view2string(View view) {
 		return "default";
 	default:
 		return "";
+	}
+}
+
+
+std::string TrackSettings::follow2string(Follow follow) {
+	switch (follow) {
+	case TrackSettings::FollowCourse:
+		return "course";
+	case TrackSettings::FollowHeading:
+		return "heading";
+	case TrackSettings::FollowNone:
+	default:
+		return "none";
 	}
 }
 
@@ -1337,9 +1366,10 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
 
 		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
-			if (settings().followCourse()) {
-				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.course() * M_PI / 180.0,
-						 OIIO::string_view(), 0.0f, true);
+			if (settings().follow() != TrackSettings::FollowNone) {
+				double angle = (settings().follow() == TrackSettings::FollowCourse) ? data.course() : data.heading();
+
+				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, angle * M_PI / 180.0);
 
 				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
 			}
@@ -1401,7 +1431,7 @@ void Track::draw(cairo_t *cr, const TelemetryData &data) {
 	(void) data;
 
 	// Draw
-	background(cr);
+	background(cr, theme().roundCorner());
 }
 
 
@@ -1501,7 +1531,7 @@ void Track::xmlwrite(std::ostream &os) {
 	os << "<path-primary-color>" << VideoWidget::Theme::color2hex(settings().pathPrimaryColor()) << "</path-primary-color>" << std::endl;
 	os << "<path-secondary-color>" << VideoWidget::Theme::color2hex(settings().pathSecondaryColor()) << "</path-secondary-color>" << std::endl;
 
-	os << "<follow-course>" << VideoWidget::bool2string(settings().followCourse()) << "</follow-course>" << std::endl;
+	os << "<follow>" << TrackSettings::follow2string(settings().follow()) << "</follow>" << std::endl;
 
 	os << "<icon-start-name>" << TrackSettings::icon2string(settings().icon(TrackSettings::IconStart)) << settings().iconFile(TrackSettings::IconStart) << "</icon-start-name>" << std::endl;
 	os << "<icon-start-color>" << VideoWidget::Theme::color2hex(settings().iconColor(TrackSettings::IconStart)) << "</icon-start-color>" << std::endl;

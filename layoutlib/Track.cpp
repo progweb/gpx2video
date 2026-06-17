@@ -57,7 +57,9 @@ namespace layout
     _factor(this, "factor", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
+	_round_corner(this, "round-corner", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
+
 	_path_smooth(this, "path-smooth", Node::ELEMENT, false),
 	_path_thick(this, "path-thick", Node::ELEMENT, false),
 	_path_border(this, "path-border", Node::ELEMENT, false),
@@ -65,7 +67,7 @@ namespace layout
 	_path_primary_color(this, "path-primary-color", Node::ELEMENT, false),
 	_path_secondary_color(this, "path-secondary-color", Node::ELEMENT, false),
 
-	_follow_course(this, "follow-course", Node::ELEMENT, false),
+	_follow(this, "follow", Node::ELEMENT, false),
 
     _icon_end_name(this, "icon-end-name",   Node::ELEMENT, false),
     _icon_start_name(this, "icon-start-name",   Node::ELEMENT, false),
@@ -106,7 +108,9 @@ namespace layout
     getInterfaces().push_back(&_factor);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
+    getInterfaces().push_back(&_round_corner);
     getInterfaces().push_back(&_bgcolor);
+
     getInterfaces().push_back(&_path_smooth);
     getInterfaces().push_back(&_path_thick);
     getInterfaces().push_back(&_path_border);
@@ -114,7 +118,7 @@ namespace layout
     getInterfaces().push_back(&_path_primary_color);
     getInterfaces().push_back(&_path_secondary_color);
 
-	getInterfaces().push_back(&_follow_course);
+	getInterfaces().push_back(&_follow);
 
     getInterfaces().push_back(&_icon_end_name);
     getInterfaces().push_back(&_icon_start_name);
@@ -152,7 +156,7 @@ namespace layout
 	_path_primary_color.setValue("#669df6ff");
 	_path_secondary_color.setValue("#ffffffff");
 
-	_follow_course.setValue("false");
+	_follow.setValue("none");
 
 	_icon_end_color.setValue("#00000000");
 	_icon_start_color.setValue("#00000000");

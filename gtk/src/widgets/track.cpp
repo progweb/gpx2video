@@ -187,6 +187,27 @@ void GPX2VideoTrackWidgetSettingsBox::load_models(void) {
 		row[model_.m_name] = _("Zoom fit");
 		row[model_.m_enable] = true;
 	}
+
+	// Track follow model
+	follow_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = follow_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = TrackSettings::FollowNone;
+		row[model_.m_name] = _("None");
+		row[model_.m_enable] = true;
+
+		row = *(follow_model_->append());
+		row[model_.m_id] = TrackSettings::FollowCourse;
+		row[model_.m_name] = _("Course");
+		row[model_.m_enable] = true;
+
+		row = *(follow_model_->append());
+		row[model_.m_id] = TrackSettings::FollowHeading;
+		row[model_.m_name] = _("Heading");
+		row[model_.m_enable] = true;
+	}
 }
 
 
@@ -546,21 +567,28 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 			));
 
 	// Icon position follow
-	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_follow_switch");
-	if (!sw)
-		throw std::runtime_error("No \"icon_position_follow_switch\" object in " + resource_file_);
-	sw->signal_state_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_switch_changed), sw, 
-					[this](const bool &state) {
-						log_notice("Widget %s: icon position follow  changed to '%s'",
-							   widget_->widget()->name().c_str(), state ? "enabled" : "disabled");
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("icon_position_follow_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"icon_position_follow_combobox\" object in" + resource_file_);
 
-						((Track *) widget_->widget())->settings().setFollowCourse(state);
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: icon position follow changed to '%s'", 
+								widget_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						((Track *) widget_->widget())->settings().setFollow((TrackSettings::Follow) value);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(false);
-					} 
-			), false);
+					}
+			));
 
 	// Icon model
 	media_model_->signal_items_changed().connect(sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_model_changed));
@@ -771,11 +799,14 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	spinbutton->set_value(settings.iconSize(TrackSettings::IconPosition));
 
 	// Icon position follow
-	sw = ref_builder_->get_widget<Gtk::Switch>("icon_position_follow_switch");
-	if (!sw)
-		throw std::runtime_error("No \"icon_position_follow_switch\" object in " + resource_file_);
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("icon_position_follow_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"icon_position_follow_combobox\" object in " + resource_file_);
 
-	sw->set_active(((Track *) widget_->widget())->settings().followCourse());
+	combobox->set_model(follow_model_);
+
+	if (find_in_listtore(follow_model_, settings.follow(), iter))
+		combobox->set_active(iter);
 
 	// Unmask value changed
 	loading_ = false;

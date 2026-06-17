@@ -107,7 +107,7 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
  		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
@@ -189,6 +189,8 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 
 	int left, right;
 	int top, bottom;
+
+	int terminaison;
 
 	char s[128];
 
@@ -281,18 +283,21 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 		}
 	}
 
+	// Bar with round terminaison
+	terminaison = (theme().gaugeCap() == VideoWidget::Theme::GaugeCapRound) ? theme().gaugeWidth() / 2 : 0;
+
 	// Padding
 	if (theme().gaugeOrientation() == VideoWidget::OrientationHorizontal) {
-		left = tick_label_width_ / 2;
-		right = tick_label_width_ / 2;
+		left = std::max(tick_label_width_ / 2, terminaison);
+		right = std::max(tick_label_width_ / 2, terminaison);
 		top = 0;
 		bottom = 0;
 	}
 	else {
 		left = 0;
 		right = 0;
-		top = tick_label_height_ / 2;
-		bottom = tick_label_height_ / 2;
+		top = std::max(tick_label_height_ / 2, terminaison);
+		bottom = std::max(tick_label_height_ / 2, terminaison);
 	}
 
 	setPadding(

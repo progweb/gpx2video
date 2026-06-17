@@ -246,6 +246,13 @@ namespace layout
     ///
     String &borderColor() { return _bordercolor; }
 
+	///
+	/// Get round corner 
+	/// 
+	/// @return the round corner attribute
+	///
+	Unsigned  &roundCorner() { return _round_corner; }
+
     ///
     /// Get background color
     ///
@@ -511,6 +518,25 @@ namespace layout
 	///
     String &gaugeCap() { return _gauge_cap; }
 
+    ///
+    /// Get gauge border
+    ///
+    /// @return the gauge border attribute
+    ///
+    Decimal  &gaugeBorder() { return _gauge_border; }
+
+	///
+	/// Get gauge border color
+	/// @return the gauge border color element
+	///
+    String &gaugeBorderColor() { return _gauge_border_color; }
+
+	///
+	/// Get gauge background color
+	/// @return the gauge background color element
+	///
+    String &gaugeBackgroundColor() { return _gauge_background_color; }
+
 	///
 	/// Get gauge primary color
 	/// @return the gauge primary color element
@@ -692,6 +718,7 @@ namespace layout
 
 	Unsigned     _border;
 	String       _bordercolor;
+	Unsigned     _round_corner;
 	String       _bgcolor;
 
 	String       _text;
@@ -737,6 +764,9 @@ namespace layout
 	Boolean      _gauge_flip;
 	Decimal      _gauge_width;
 	String       _gauge_cap;
+	Decimal      _gauge_border;
+	String       _gauge_border_color;
+	String       _gauge_background_color;
 	String       _gauge_primary_color;
 	String       _gauge_secondary_color;
 

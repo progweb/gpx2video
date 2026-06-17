@@ -102,7 +102,7 @@ void CadenceTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		sprintf(s, "-- %s", unit.c_str());
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

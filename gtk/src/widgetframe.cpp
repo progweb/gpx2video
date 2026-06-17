@@ -725,6 +725,23 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
+	// Round corner
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"round_corner_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: round corner changed to '%d'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setRoundCorner(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(true);
+					}
+			));
+
 	// Background color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
 	if (!colorbutton)
@@ -1707,6 +1724,13 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
+	// Widget round corner
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"round_corner_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().roundCorner());
+
 	// Widget background color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
 	if (!colorbutton)
@@ -2070,6 +2094,7 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 
 //	VideoWidget::Widget type;
 
+	Gtk::Box *box;
 	Gtk::Expander *expander;
 	Gtk::SpinButton *spinbutton;
 
@@ -2145,11 +2170,23 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 
 	spinbutton->set_range(0, height - margin);
 
+	// Round corner box
+	box = ref_builder_->get_widget<Gtk::Box>("round_corner_box");
+	if (!box)
+		throw std::runtime_error("No \"round_corner_box\" object in widget_frame.ui");
+	box->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureRoundCorner));
+
+	// Round corner
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"round_cornder_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_range(0, (std::min(width, height) / 2));
+
 	// Label expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
 	if (!expander)
 		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
-//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
 
 	// Label font size
@@ -2163,7 +2200,6 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
 	if (!expander)
 		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
-//	expander->set_visible((type != VideoWidget::WidgetTrack) && (type != VideoWidget::WidgetMap));
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
 
 	// Value font size

@@ -335,6 +335,14 @@ public:
 			return true;
 		}
 
+		int roundCorner(void) const {
+			return round_corner_;
+		}
+
+		void setRoundCorner(int size) {
+			round_corner_ = size;
+		}
+
 		const float * iconColor(void) const {
 			return icon_color_;
 		}
@@ -984,6 +992,8 @@ public:
 		int border_;
 		float border_color_[4];
 
+		int round_corner_;
+
 		float cursor_color_[4];
 
 		Icon icon_;
@@ -1278,6 +1288,7 @@ public:
 	static std::string needletype2string(Theme::NeedleType type);
 	static std::string unit2string(TelemetryData::Unit unit);
 	static std::string icon2string(Theme::Icon icon);
+	static std::string zoom2string(VideoWidget::Zoom zoom);
 
 	static std::string getIconFilename(Widget type);
 	static std::string getFriendlyName(Shape shape);

@@ -111,7 +111,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		strncpy(s, "--:--:--", sizeof(s));
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

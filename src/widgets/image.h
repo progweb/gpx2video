@@ -11,6 +11,13 @@
 class ImageWidget : public VideoWidget, public ShapeBase {
 public:
 	virtual ~ImageWidget() {
+		if (mask_ != NULL)
+			delete mask_;
+
+		if (fg_buf_ != NULL)
+			delete fg_buf_;
+		if (bg_buf_ != NULL)
+			delete bg_buf_;
 	}
 
 	static ImageWidget * create(GPXApplication &app) {
@@ -26,13 +33,21 @@ public:
 	}
 
 	bool hasFeature(ShapeBase::Feature feature) const {
-		(void) feature;
+		switch (feature) {
+		case FeatureRoundCorner:
+			return true;
+
+		default:
+			break;
+		}
 
 		return false;
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
+
+		OIIO::ImageBuf *img;
 
 		(void) data;
 
@@ -58,11 +73,21 @@ public:
 		// Data bytes
 		this->renderCairoContext(fg_buf_, cairo);
 
+		// Draw image
+		this->createBox(&img, theme().width(), theme().height());
+		this->drawImage(img, theme().border(), theme().border(), this->source().c_str(), this->zoom());
+
+		// Apply mask
+		if (mask_ != NULL)
+	    	OIIO::ImageBufAlgo::mul(*img, *img, *mask_);
+
 		// Append image
-		this->drawImage(fg_buf_, theme().border(), theme().border(), this->source().c_str(), this->zoom());
+		OIIO::ImageBufAlgo::over(*fg_buf_, *img, *fg_buf_, OIIO::ROI::All());
 
 		// Release
 		this->destroyCairoContext(cairo);
+
+		delete img;
 
 		is_update = true;
 skip:
@@ -82,12 +107,16 @@ protected:
 		VideoWidget::xmlwrite(os);
 
 		ShapeBase::xmlwrite(os);
+
+		os << "<zoom>" << VideoWidget::zoom2string(zoom()) << "</zoom>" << std::endl;
+		os << "<source>" << source() << "</source>" << std::endl;
 	}
 
 
 private:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
+	OIIO::ImageBuf *mask_;
 
 	ImageWidget(GPXApplication &app);
 

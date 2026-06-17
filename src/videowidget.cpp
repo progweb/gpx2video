@@ -35,6 +35,8 @@ VideoWidget::Theme::Theme() {
 	setBorderColor(0.0, 0.0, 0.0, 1.0);
 	setBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
+	setRoundCorner(0);
+
 	setIcon(VideoWidget::Theme::IconDefault);
 	setIconColor(1.0, 1.0, 1.0, 1.0);
 
@@ -866,6 +868,24 @@ std::string VideoWidget::icon2string(VideoWidget::Theme::Icon icon) {
 	case VideoWidget::Theme::IconUserFile:
 		return "file:";
 
+	default:
+		return "";
+	}
+}
+
+
+std::string VideoWidget::zoom2string(VideoWidget::Zoom zoom) {
+	switch (zoom) {
+	case VideoWidget::ZoomNone:
+		return "none";
+	case VideoWidget::ZoomFit:
+		return "fit";
+	case VideoWidget::ZoomFill:
+		return "fill";
+	case VideoWidget::ZoomCrop:
+		return "crop";
+	case VideoWidget::ZoomStretch:
+		return "stretch";
 	default:
 		return "";
 	}

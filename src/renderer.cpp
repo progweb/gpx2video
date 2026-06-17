@@ -153,6 +153,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	int flags = VideoWidget::Theme::FlagNone;
 
 	MapSettings::View view;
+	MapSettings::Follow follow;
 
 	MapSettings mapSettings;
 
@@ -195,6 +196,13 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	if (view == MapSettings::ViewUnknown)
 		log_error("Map view value '%s' unknown", s.c_str());
+
+	// Follow
+	s = (const char *) m->follow();
+	follow = MapSettings::string2follow(s);
+
+	if (follow == MapSettings::FollowUnknown)
+		log_error("Map follow value '%s' unknown", s.c_str());
 
 	// Position
 	s = (const char *) m->position();
@@ -272,7 +280,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
 	mapSettings.setPathPrimaryColor((const char *) m->pathPrimaryColor());
 	mapSettings.setPathSecondaryColor((const char *) m->pathSecondaryColor());
-	mapSettings.setFollowCourse(m->followCourse());
+	mapSettings.setFollow((MapSettings::Follow) follow);
 
 	// Map icon settings
 	mapSettings.setIcon(MapSettings::IconStart, icon_start);
@@ -313,6 +321,7 @@ bool Renderer::loadMap(layout::Map *m) {
 	map->theme().setPadding(VideoWidget::Theme::PaddingBottom, m->paddingBottom());
 	map->theme().setBorder(m->border());
 	map->theme().setBorderColor((const char *) m->borderColor());
+	map->theme().setRoundCorner(m->roundCorner());
 	map->theme().setBackgroundColor((const char *) m->backgroundColor());
 
 	// Append
@@ -345,6 +354,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	int flags = VideoWidget::Theme::FlagNone;
 
 	TrackSettings::View view;
+	TrackSettings::Follow follow;
 
 	TrackSettings trackSettings;
 
@@ -379,6 +389,13 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	if (view == TrackSettings::ViewUnknown)
 		log_error("Track view value '%s' unknown", s.c_str());
+
+	// Follow
+	s = (const char *) t->follow();
+	follow = TrackSettings::string2follow(s);
+
+	if (follow == TrackSettings::FollowUnknown)
+		log_error("Track follow value '%s' unknown", s.c_str());
 
 	// Position
 	s = (const char *) t->position();
@@ -422,7 +439,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	else
 		icon_end_file = "";
 
-	// Icon  position
+	// Icon position
 	s = (const char *) t->iconPosition();
 	icon_position = TrackSettings::string2icon(s);
 
@@ -446,7 +463,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	// Track settings
 	trackSettings.setSize(width, height);
-	trackSettings.setView((MapSettings::View) view);
+	trackSettings.setView((TrackSettings::View) view);
 	trackSettings.setDivider(t->factor());
 	trackSettings.setPathSmooth((int) t->pathSmooth());
 	trackSettings.setPathThick((double) t->pathThick());
@@ -455,7 +472,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setPathBorderColor((const char *) t->pathBorderColor());
 	trackSettings.setPathPrimaryColor((const char *) t->pathPrimaryColor());
 	trackSettings.setPathSecondaryColor((const char *) t->pathSecondaryColor());
-	trackSettings.setFollowCourse(t->followCourse());
+	trackSettings.setFollow((TrackSettings::Follow) follow);
 
 	// Track icon settings
 	trackSettings.setIcon(TrackSettings::IconStart, icon_start);
@@ -496,6 +513,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	track->theme().setPadding(VideoWidget::Theme::PaddingBottom, t->paddingBottom());
 	track->theme().setBorder(t->border());
 	track->theme().setBorderColor((const char *) t->borderColor());
+	track->theme().setRoundCorner(t->roundCorner());
 	track->theme().setBackgroundColor((const char *) t->backgroundColor());
 
 	// Append
@@ -803,6 +821,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setPadding(VideoWidget::Theme::PaddingBottom, w->paddingBottom());
 	widget->theme().setBorder(w->border());
 	widget->theme().setBorderColor((const char *) w->borderColor());
+	widget->theme().setRoundCorner(w->roundCorner());
 	widget->theme().setBackgroundColor((const char *) w->backgroundColor());
 
 	// Widget icon settings
@@ -851,6 +870,9 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setGaugeFlip(w->gaugeFlip());
 	widget->theme().setGaugeWidth(w->gaugeWidth());
 	widget->theme().setGaugeCap(gauge_cap);
+	widget->theme().setGaugeBorder(w->gaugeBorder());
+	widget->theme().setGaugeBorderColor((const char *) w->gaugeBorderColor());
+	widget->theme().setGaugeBackgroundColor((const char *) w->gaugeBackgroundColor());
 	widget->theme().setGaugePrimaryColor((const char *) w->gaugePrimaryColor());
 	widget->theme().setGaugeSecondaryColor((const char *) w->gaugeSecondaryColor());
 

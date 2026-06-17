@@ -1005,9 +1005,10 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
 	
 		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
-			if (settings().followCourse()) {
-				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, data.course() * M_PI / 180.0,
-						 OIIO::string_view(), 0.0f, true);
+			if (settings().follow() != TrackSettings::FollowNone) {
+				double angle = (settings().follow() == TrackSettings::FollowCourse) ? data.course() : data.heading();
+
+				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, angle * M_PI / 180.0);
 
 				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
 			}

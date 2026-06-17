@@ -888,7 +888,7 @@
 									</object>
 								</child>
 								<child>
-									<object class="GtkSwitch" id="icon_position_follow_switch">
+									<object class="GtkComboBox" id="icon_position_follow_combobox">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="valign">center</property>

@@ -135,7 +135,7 @@ void TextWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	initialize(cr);
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

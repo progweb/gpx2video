@@ -19,10 +19,15 @@
 
 static float vertices[] = {
 	// points             // texture coords
-	0.5f, 0.5f, 0.0f,     1.0f, 0.0f,   // top right
-	0.5f, -0.5f, 0.0f,    1.0f, 1.0f,   // bottom right
-	-0.5f, -0.5f, 0.0f,   0.0f, 1.0f,   // bottom left
-	-0.5f, 0.5f, 0.0f,    0.0f, 0.0f    // top left
+//	0.5f, 0.5f, 0.0f,     1.0f, 0.0f,   // top right
+//	0.5f, -0.5f, 0.0f,    1.0f, 1.0f,   // bottom right
+//	-0.5f, -0.5f, 0.0f,   0.0f, 1.0f,   // bottom left
+//	-0.5f, 0.5f, 0.0f,    0.0f, 0.0f    // top left
+										//
+	1.0f, 1.0f, 0.0f,     1.0f, 0.0f,   // top right
+	1.0f, -1.0f, 0.0f,    1.0f, 1.0f,   // bottom right
+	-1.0f, -1.0f, 0.0f,   0.0f, 1.0f,   // bottom left
+	-1.0f, 1.0f, 0.0f,    0.0f, 0.0f    // top left
 };
 
 static unsigned int indices[] = {
@@ -151,8 +156,8 @@ VideoWidget * GPX2VideoWidget::widget(void) {
 bool GPX2VideoWidget::is_over(const double &x, const double &y) {
 	log_call();
 
-	double width = glWidth() / 2.0;
-	double height = glHeight() / 2.0;
+	double width = glWidth(); // / 2.0;
+	double height = glHeight(); //  / 2.0;
 
 	if ((x < (glX() - width)) || (x > (glX() + width)))
 		return false;
@@ -759,14 +764,16 @@ double GPX2VideoWidget::glY(void) const {
 double GPX2VideoWidget::glWidth(void) const {
 	log_call();
 
-	return widget_->theme().width() * 2.0 / layout_width_;
+//	return widget_->theme().width() * 2.0 / layout_width_;
+	return (double) widget_->theme().width() / layout_width_;
 }
 
 
 double GPX2VideoWidget::glHeight(void) const {
 	log_call();
 
-	return widget_->theme().height() * 2.0 / layout_height_;
+//	return widget_->theme().height() * 2.0 / layout_height_;
+	return (double) widget_->theme().height() / layout_height_;
 }
 
 

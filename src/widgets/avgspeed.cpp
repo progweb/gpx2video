@@ -128,7 +128,7 @@ void AvgSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		sprintf(s, "%.1f %s", speed, unit.c_str());
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

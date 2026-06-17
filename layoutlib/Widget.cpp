@@ -57,6 +57,7 @@ namespace layout
 
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
+	_round_corner(this, "round-corner", Node::ELEMENT, false),
 	_bgcolor(this, "background-color", Node::ELEMENT, false),
 
 	_text(this, "text", Node::ELEMENT, false),
@@ -102,6 +103,9 @@ namespace layout
 	_gauge_flip(this, "gauge-flip", Node::ELEMENT, false),
 	_gauge_width(this, "gauge-width", Node::ELEMENT, false),
 	_gauge_cap(this, "gauge-cap", Node::ELEMENT, false),
+	_gauge_border(this, "gauge-border", Node::ELEMENT, false),
+	_gauge_border_color(this, "gauge-border-color", Node::ELEMENT, false),
+	_gauge_background_color(this, "gauge-background-color", Node::ELEMENT, false),
 	_gauge_primary_color(this, "gauge-primary-color", Node::ELEMENT, false),
 	_gauge_secondary_color(this, "gauge-secondary-color", Node::ELEMENT, false),
 
@@ -157,6 +161,7 @@ namespace layout
 
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
+    getInterfaces().push_back(&_round_corner);
     getInterfaces().push_back(&_bgcolor);
 
     getInterfaces().push_back(&_text);
@@ -202,6 +207,9 @@ namespace layout
 	getInterfaces().push_back(&_gauge_flip);
 	getInterfaces().push_back(&_gauge_width);
 	getInterfaces().push_back(&_gauge_cap);
+	getInterfaces().push_back(&_gauge_border);
+    getInterfaces().push_back(&_gauge_border_color);
+    getInterfaces().push_back(&_gauge_background_color);
     getInterfaces().push_back(&_gauge_primary_color);
     getInterfaces().push_back(&_gauge_secondary_color);
 
@@ -261,6 +269,7 @@ namespace layout
 	_gauge_orientation.setValue("vertical");
 	_gauge_flip.setValue("false");
 	_gauge_width.setValue("-1");
+	_gauge_border.setValue("-1");
 
 	_tick_size.setValue("-1");
 	_tick_label_fontsize.setValue("-1");

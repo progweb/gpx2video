@@ -13,7 +13,14 @@ public:
 		ViewDefault,
 		ViewLockCenter,
 		ViewZoomFit,
-		ViewUnknown,
+		ViewUnknown
+	};
+
+	enum Follow {
+		FollowNone,
+		FollowCourse,
+		FollowHeading,
+		FollowUnknown
 	};
 
 	enum Icon {
@@ -82,8 +89,8 @@ public:
 	bool setPathSecondaryColor(std::string color);
 	bool setPathSecondaryColor(double r, double g, double b, double a);
 
-	bool followCourse(void) const;
-	void setFollowCourse(bool follow);
+	const Follow& follow(void) const;
+	void setFollow(const Follow &follow);
 
 	Icon icon(Icon type) const {
 		switch (type) {
@@ -228,9 +235,11 @@ public:
 	void setBoundingBox(double lat1, double lon1, double lat2, double lon2);
 
 	static View string2view(std::string &s);
+	static Follow string2follow(std::string &s);
 	static Icon string2icon(std::string &s);
 
 	static std::string view2string(View view);
+	static std::string follow2string(Follow follow);
 	static std::string icon2string(Icon icon);
 
 protected:
@@ -248,7 +257,7 @@ protected:
 	float path_primary_color_[4];
 	float path_secondary_color_[4];
 
-	bool follow_course_;
+	Follow follow_;
 
 	Icon icon_start_;
 	std::string icon_start_file_;

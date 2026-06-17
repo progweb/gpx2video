@@ -30,20 +30,11 @@ void BarShape::bar(cairo_t *cr, double v1, double v2, double width, double borde
 		}
 
 		cairo_save(cr);
-
 		cairo_move_to(cr, p1.x, p1.y);
 		cairo_line_to(cr, p2.x, p2.y);
-		// OK V
-//		cairo_arc(cr, p2.x + (w / 2), p2.y + (h / 2), width / 2, DEG2RAD(180), DEG2RAD(0));
 		cairo_arc(cr, p2.x + (w / 2), p2.y + (h / 2), width / 2, DEG2RAD(a1), DEG2RAD(a2));
-//		cairo_line_to(cr, p2.x + w, p2.y + h);
 		cairo_line_to(cr, p1.x + w, p1.y + h);
-		// OK V
-//		cairo_arc_negative(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(180), DEG2RAD(0));
-//		cairo_arc(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(90), DEG2RAD(270));
 		cairo_arc_negative(cr, p1.x + (w / 2), p1.y + (h / 2), width / 2, DEG2RAD(a1), DEG2RAD(a2));
-
-
 		cairo_close_path(cr);
 		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
 		cairo_fill_preserve(cr);

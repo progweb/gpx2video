@@ -14,6 +14,7 @@ public:
 		FeatureLabel,
 		FeatureValue,
 		FeatureNeedle,
+		FeatureRoundCorner,
 		FeatureUnknown
 	};
 

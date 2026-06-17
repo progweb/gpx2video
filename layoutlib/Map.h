@@ -246,6 +246,13 @@ namespace layout
     ///
     String  &backgroundColor() { return _bgcolor; }
 
+	///
+	/// Get round corner 
+	/// 
+	/// @return the round corner attribute
+	///
+	Unsigned  &roundCorner() { return _round_corner; }
+
     ///
     /// Get path smooth
     ///
@@ -293,7 +300,7 @@ namespace layout
 	///
 	/// @return the follow attribute
 	///
-	Boolean  &followCourse() { return _follow_course; }
+	String  &follow() { return _follow; }
 
     ///
     /// Get icon name
@@ -359,7 +366,9 @@ namespace layout
 	Decimal      _factor;
 	Unsigned     _border;
 	String       _bordercolor;
+	Unsigned     _round_corner;
 	String       _bgcolor;
+
 	Unsigned     _path_smooth;
 	Decimal      _path_thick;
 	Decimal      _path_border;
@@ -367,7 +376,7 @@ namespace layout
 	String       _path_primary_color;
 	String       _path_secondary_color;
     
-	Boolean      _follow_course;
+	String       _follow;
 
     String       _icon_end_name;
     String       _icon_start_name;

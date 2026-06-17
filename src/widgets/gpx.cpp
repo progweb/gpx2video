@@ -97,7 +97,7 @@ void GPXWidget::draw(cairo_t *cr, const TelemetryData &data) {
 	y += padding_top_;
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {

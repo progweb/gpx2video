@@ -174,40 +174,6 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Gauge primary color
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_primary_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"gauge_primary_color_button\" object in " + resource_file_);
-	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
-					[this](const std::string &color) {
-						log_notice("Widget %s: gauge primary color changed to '%s'", 
-								widget_->name().c_str(), color.c_str());
-
-						widget_->theme().setGaugePrimaryColor(color);
-
-						// Broadcast widget change
-						widget_->dispatchEvent();
-					}
-			));
-
-	// Gauge secondary color
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_secondary_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"gauge_secondary_color_button\" object in " + resource_file_);
-	colorbutton->signal_color_set().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
-					[this](const std::string &color) {
-						log_notice("Widget %s: gauge secondary color changed to '%s'", 
-								widget_->name().c_str(), color.c_str());
-
-						widget_->theme().setGaugeSecondaryColor(color);
-
-						// Broadcast widget change
-						widget_->dispatchEvent();
-					}
-			));
-
 	// Gauge border width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("gauge_border_width_spinbutton");
 	if (!spinbutton)
@@ -253,6 +219,40 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 								widget_->name().c_str(), color.c_str());
 
 						widget_->theme().setGaugeBackgroundColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Gauge primary color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_primary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"gauge_primary_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: gauge primary color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setGaugePrimaryColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Gauge secondary color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_secondary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"gauge_secondary_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: gauge secondary color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setGaugeSecondaryColor(color);
 
 						// Broadcast widget change
 						widget_->dispatchEvent();
@@ -539,28 +539,6 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 	if (find_in_listtore(gauge_cap_model_, widget_->theme().gaugeCap(), iter))
 		combobox->set_active(iter);
 
-	// Widget gauge primary color button
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_primary_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"gauge_primary_color_button\" object in " + resource_file_);
-
-	color = widget_->theme().gaugePrimaryColor();
-
-	rgba.set_rgba(color[0], color[1], color[2], color[3]);
-
-	colorbutton->set_rgba(rgba);
-
-	// Widget gauge secondary color button
-	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_secondary_color_button");
-	if (!colorbutton)
-		throw std::runtime_error("No \"gauge_secondary_color_button\" object in " + resource_file_);
-
-	color = widget_->theme().gaugeSecondaryColor();
-
-	rgba.set_rgba(color[0], color[1], color[2], color[3]);
-
-	colorbutton->set_rgba(rgba);
-
 	// Widget gauge border width button
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("gauge_border_width_spinbutton");
 	if (!spinbutton)
@@ -585,6 +563,28 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 		throw std::runtime_error("No \"gauge_background_color_button\" object in " + resource_file_);
 
 	color = widget_->theme().gaugeBackgroundColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Widget gauge primary color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_primary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"gauge_primary_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().gaugePrimaryColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Widget gauge secondary color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("gauge_secondary_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"gauge_secondary_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().gaugeSecondaryColor();
 
 	rgba.set_rgba(color[0], color[1], color[2], color[3]);
 

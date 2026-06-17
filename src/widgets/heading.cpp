@@ -97,7 +97,7 @@ void HeadingTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		sprintf(s, "--°");
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw icon
 	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {

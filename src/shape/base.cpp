@@ -287,6 +287,9 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	os << "<border>" << theme_.border() << "</border>" << std::endl;
 	os << "<border-color>" << VideoWidget::Theme::color2hex(theme_.borderColor()) << "</border-color>" << std::endl;
 
+	if (hasFeature(ShapeBase::FeatureRoundCorner))
+		os << "<round-corner>" << theme_.roundCorner() << "</round-corner>" << std::endl;
+
 	os << "<background-color>" << VideoWidget::Theme::color2hex(theme_.backgroundColor()) << "</background-color>" << std::endl;
 
 	if (hasFeature(ShapeBase::FeatureLabel)) {
