@@ -1108,7 +1108,7 @@ int main(int argc, char *argv[], char *envp[]) {
 
 	// ::TMP:: Check assets directory 
 	{
-    	std::ifstream stream = std::ifstream(GPXApplication::assets("marker") + "/position.png");
+    	std::ifstream stream = std::ifstream(GPXApplication::assets("marker") + "/position.svg");
 
 		if (!stream.is_open()) {
 			log_error("Can't read assets directory");
