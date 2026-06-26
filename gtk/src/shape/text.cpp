@@ -148,7 +148,7 @@ void GPX2VideoTextShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"linespace_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: linespace changed to '%d'",
 							   widget_->name().c_str(), value);
@@ -242,6 +242,30 @@ void GPX2VideoTextShapeSettingsBox::update_boundaries(void) {
 		throw std::runtime_error("No \"icon_zoomout_button\" object in " + resource_file_);
 
 	button->set_sensitive(icon_pixel_size_ > icon_pixel_minsize_);
+}
+
+
+void GPX2VideoTextShapeSettingsBox::set_default(void) {
+	log_call();
+
+	widget_->theme().setIcon(VideoWidget::Theme::IconDefault);
+	widget_->theme().setIconSize(50.0);
+
+	widget_->theme().setLabelFontSize(30.0);
+	widget_->theme().setLabelShadowOpacity(80);
+	widget_->theme().setLabelShadowDistance(5.05);
+	widget_->theme().setLabelHorizontalAlign(VideoWidget::Theme::AlignLeft);
+	widget_->theme().setLabelVerticalAlign(VideoWidget::Theme::AlignTop);
+	widget_->theme().setLabelBorderWidth(5.0);
+
+	widget_->theme().setValueFontSize(50.0);
+	widget_->theme().setValueShadowOpacity(80);
+	widget_->theme().setValueShadowDistance(5.0);
+	widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignLeft);
+	widget_->theme().setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
+	widget_->theme().setValueBorderWidth(5.0);
+
+	widget_->theme().setUnitFontSize(50.0);
 }
 
 

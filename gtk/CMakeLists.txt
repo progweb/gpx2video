@@ -95,6 +95,7 @@ set(RESOURCE_UI_LIST
 	telemetry_stackpage.ui
 	shape/arc_box.ui
 	shape/bar_box.ui
+	shape/chart_box.ui
 	shape/text_box.ui
 	widgets/image_box.ui
 	widgets/map_box.ui
@@ -195,6 +196,7 @@ set(GPX2VIDEO_SOURCES
 	src/shape/base.cpp
 	src/shape/arc.cpp
 	src/shape/bar.cpp
+	src/shape/chart.cpp
 	src/shape/text.cpp
 	src/widgets/base.cpp
 	src/widgets/image.cpp

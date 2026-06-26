@@ -23,6 +23,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -108,6 +120,21 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureLabel:
+		case FeatureUnit:
+		case FeatureGauge:
+		case FeatureRoundCorner:
+			return false;
+
+		default:
+			break;
+		}
+
+		return ArcShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -156,10 +183,6 @@ skip:
 	void clear(void);
 
 private:
-	int size_;
-	int width_;
-	int height_;
-
 	int tick_step_;
 	int tick_mstep_;
 
@@ -180,7 +203,7 @@ private:
 
 	void initialize(cairo_t *cr);
 	void tickinit(int min, int max);
-	void ticklenwidth(int value, int *len, int *width);
+	void ticklenwidth(int value, double *len, double *width);
 };
 
 
@@ -194,10 +217,10 @@ public:
 		delete shape_;
 	}
 
-	static TimeWidget * create(GPXApplication &app) {
+	static TimeWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		TimeWidget *widget;
 
-		widget = new TimeWidget(app);
+		widget = new TimeWidget(app, source);
 
 		return widget;
 	}
@@ -248,12 +271,14 @@ protected:
 		VideoWidget::xmlwrite(os);
 
 		shape_->xmlwrite(os);
+
+		os << "<value-format>" << valueFormat() << "</value-format>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	TimeWidget(GPXApplication &app);
+	TimeWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

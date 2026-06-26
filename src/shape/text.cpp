@@ -92,7 +92,7 @@ void TextShape::label(cairo_t *cr, TextShape::Font &font,
 		x += (with_icon) ? size_ + padding_left_ : 0;
 	}
 	else if (halign == VideoWidget::Theme::AlignCenter) {
-		x += (with_icon) ? (theme().width() - size_)/2 : theme().width()/2;
+		x += (with_icon) ? (theme().width() - size_) / 2 : theme().width() / 2;
 		x += (with_icon) ? size_ : 0;
 		x -= label_width_ / 2;
 	}
@@ -198,10 +198,11 @@ void TextShape::xmlwrite(std::ostream &os) {
 	ShapeBase::xmlwrite(os);
 
 	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeText) << "</shape>" << std::endl;
-	os << "<icon-name>" << VideoWidget::icon2string(theme_.icon()) << theme_.iconFile() << "</icon-name>" << std::endl;
-	os << "<icon-color>" << VideoWidget::Theme::color2hex(theme_.iconColor()) << "</icon-color>" << std::endl;
+
 	os << "<line-space>" << theme_.lineSpace() << "</line-space>" << std::endl;
 
 	os << "<with-icon>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIcon)) << "</with-icon>" << std::endl;
+	os << "<icon-name>" << VideoWidget::icon2string(theme_.icon()) << theme_.iconFile() << "</icon-name>" << std::endl;
+	os << "<icon-color>" << VideoWidget::Theme::color2hex(theme_.iconColor()) << "</icon-color>" << std::endl;
 }
 

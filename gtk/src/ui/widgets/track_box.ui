@@ -6,7 +6,7 @@
 		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
-		<property name="page-increment">10</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="path_smooth_adjustment">
 		<property name="lower">0</property>
@@ -17,35 +17,35 @@
 	</object>
 	<object class="GtkAdjustment" id="path_thick_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">99</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="path_border_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">99</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="icon_start_size_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">10</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="icon_end_size_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">10</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="icon_position_size_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">10</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>

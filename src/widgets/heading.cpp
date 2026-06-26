@@ -27,7 +27,7 @@ void HeadingTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -154,8 +154,8 @@ void HeadingTextShape::clear(void) {
 }
 
 
-HeadingWidget::HeadingWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetHeading) 
+HeadingWidget::HeadingWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetHeading, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

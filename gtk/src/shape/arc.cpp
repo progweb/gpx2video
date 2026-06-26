@@ -1,5 +1,7 @@
 #include <glibmm/i18n.h>
 
+#include <gtkmm/expander.h>
+
 #include "../log_i.h"
 #include "arc.h"
 
@@ -91,7 +93,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"gauge_angle_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: gauge angle changed to '%d'",
 							   widget_->name().c_str(), value);
@@ -108,7 +110,7 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"gauge_rotation_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: gauge rotation changed to '%d'",
 							   widget_->name().c_str(), value);
@@ -142,9 +144,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"gauge_width_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: gauge width changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: gauge width changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setGaugeWidth(value);
@@ -179,9 +181,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"gauge_border_width_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: gauge border changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: gauge border changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setGaugeBorder(value);
@@ -284,9 +286,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"tick_size_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: tick size changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: tick size changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setTickSize(value);
@@ -338,9 +340,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"tick_label_distance_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: tick label distance changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: tick label distance changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setTickLabelDistance(value);
@@ -355,9 +357,9 @@ void GPX2VideoArcShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"tick_label_font_size_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: tick label font size changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoArcShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: tick label font size changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setTickLabelFontSize(value);
@@ -706,6 +708,32 @@ void GPX2VideoArcShapeSettingsBox::update_content(void) {
 
 
 void GPX2VideoArcShapeSettingsBox::update_boundaries(void) {
+	Gtk::Expander *expander;
+
 	log_call();
+
+	// Gauge expander
+	expander = ref_builder_->get_widget<Gtk::Expander>("gauge_expander");
+	if (!expander)
+		throw std::runtime_error("No \"gauge_expander\" object in " + resource_file_);
+	expander->set_visible(widget_->shape()->hasFeature(ShapeBase::FeatureGauge));
+}
+
+
+void GPX2VideoArcShapeSettingsBox::set_default(void) {
+	log_call();
+
+	widget_->theme().setValueFontSize(8.0);
+	widget_->theme().setValueShadowOpacity(80);
+	widget_->theme().setValueShadowDistance(5.0);
+	widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignCenter);
+	widget_->theme().setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
+	widget_->theme().setValueBorderWidth(5.0);
+
+	widget_->theme().setUnitFontSize(50.0);
+
+	widget_->theme().setTickSize(10.0);
+	widget_->theme().setTickLabelDistance(2.0);
+	widget_->theme().setTickLabelFontSize(8.0);
 }
 

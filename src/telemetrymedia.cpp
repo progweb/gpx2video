@@ -142,18 +142,33 @@ const double& TelemetryData::longitude(bool raw) const {
 }
 
 
-double TelemetryData::elevation(TelemetryData::Unit unit) const {
+double TelemetryData::elevation(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double ele;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		ele = ele_min_;
+		break;
+	case TelemetryData::RangeMax:
+		ele = ele_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		ele = ele_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitFeet:
-		return ele_ * 3.28084;
+		return ele * 3.28084;
 
 	case TelemetryData::UnitMiles:
-		return (ele_ * 0.6213711922) / 1000.0;
+		return (ele * 0.6213711922) / 1000.0;
 
 	case TelemetryData::UnitMeter:
 	case TelemetryData::UnitDefault:
 	default:
-		return ele_;
+		return ele;
 	}
 }
 
@@ -207,21 +222,36 @@ double TelemetryData::duration(TelemetryData::Unit unit) const {
 }
 
 
-double TelemetryData::distance(TelemetryData::Unit unit) const {
+double TelemetryData::distance(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double distance;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		distance = distance_min_;
+		break;
+	case TelemetryData::RangeMax:
+		distance = distance_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		distance = distance_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitFeet:
-		return distance_ * 3.28084;
+		return distance * 3.28084;
 
 	case TelemetryData::UnitMiles:
-		return (distance_ * 0.6213711922) / 1000.0;
+		return (distance * 0.6213711922) / 1000.0;
 
 	case TelemetryData::UnitKm:
-		return distance_ / 1000.0;
+		return distance / 1000.0;
 
 	case TelemetryData::UnitMeter:
 	case TelemetryData::UnitDefault:
 	default:
-		return distance_;
+		return distance;
 	}
 }
 
@@ -2261,6 +2291,55 @@ void TelemetrySource::trim(void) {
 }
 
 
+void TelemetrySource::bounds(void) {
+	TelemetrySource::Point point;
+	TelemetrySource::Point prevPoint;
+
+	// Move to first point
+	pool_.seek(1);
+
+	if (pool_.empty())
+		return;
+
+	// Initialize
+	point = pool_.current();
+
+	point.ele_min_ = point.ele_;
+	point.ele_max_ = point.ele_;
+
+	point.distance_min_ = point.distance_;
+	point.distance_max_ = point.distance_;
+
+	// Save point
+	pool_.current() = point;
+
+	prevPoint = point;
+
+	// Move to second point
+	pool_.seek(1);
+
+	// For each point
+	while (!pool_.empty()) {
+		point = pool_.current();
+
+		point.ele_min_ = std::min(prevPoint.ele_min_, point.ele_);
+		point.ele_max_ = std::max(prevPoint.ele_max_, point.ele_);
+
+		point.distance_min_ = std::min(prevPoint.distance_min_, point.distance_);
+		point.distance_max_ = std::max(prevPoint.distance_max_, point.distance_);
+
+		// Save point
+		pool_.current() = point;
+
+		prevPoint = point;
+
+		pool_.seek(1);
+	}
+
+	pool_.reset();
+}
+
+
 void TelemetrySource::dump(bool content) {
 	std::cout << "Telemetry settings:" << std::endl;
 	std::cout << "  offset:               " << offset_ << std::endl;
@@ -2349,6 +2428,7 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 	smooth();
 	fix();
 	trim();
+	bounds();
 
 	return type;
 }

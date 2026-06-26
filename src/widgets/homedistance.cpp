@@ -27,7 +27,7 @@ void HomeDistanceTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -174,8 +174,8 @@ void HomeDistanceTextShape::clear(void) {
 }
 
 
-HomeDistanceWidget::HomeDistanceWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetHomeDistance)
+HomeDistanceWidget::HomeDistanceWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetHomeDistance, source)
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

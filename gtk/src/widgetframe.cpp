@@ -17,6 +17,7 @@
 #include "log_i.h"
 #include "shape/arc.h"
 #include "shape/bar.h"
+#include "shape/chart.h"
 #include "shape/text.h"
 #include "widgets/image.h"
 #include "widgets/map.h"
@@ -345,14 +346,17 @@ void GPX2VideoWidgetFrame::build_shape_settings(void) {
 
 	if (widget_selected_) {
 		// Build shape settings box child
-//		switch (widget_selected_->widget()->shape()) {
 		switch (widget_selected_->shape()->type()) {
 		case VideoWidget::ShapeArc:
 			shape_child_box_ = GPX2VideoArcShapeSettingsBox::create(widget_selected_);
 			break;
 
 		case VideoWidget::ShapeBar:
-			shape_child_box_ = GPX2VideoBarShapeSettingsBox::create(widget_selected_);
+			shape_child_box_ = GPX2VideoBarShapeSettingsBox::create(widget_selected_, media_model_);
+			break;
+
+		case VideoWidget::ShapeChart:
+			shape_child_box_ = GPX2VideoChartShapeSettingsBox::create(widget_selected_, media_model_);
 			break;
 
 		case VideoWidget::ShapeText:
@@ -459,12 +463,23 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 
 	Gtk::Entry *entry;
 	Gtk::Switch *sw;
+	Gtk::Button *button;
 	Gtk::ComboBox *combobox;
 	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
 	auto renderer = Gtk::make_managed<Gtk::CellRendererText>();
+
+	// Connect reset button
+	//----------------------
+
+	button = ref_builder_->get_widget<Gtk::Button>("reset_button");
+	if (!button)
+		throw std::runtime_error("No \"reset_button\" object in widget_frame.ui");
+
+	button->signal_clicked().connect(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_reset_clicked), true);
 
 	// Connect widgets button
 	//------------------------
@@ -508,7 +523,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"x_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						int y = widget_selected_->widget()->y();
 
@@ -526,7 +541,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"y_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						int x = widget_selected_->widget()->x();
 
@@ -603,7 +618,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						int height = widget_selected_->widget()->theme().height();
 
@@ -624,7 +639,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"height_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						int width = widget_selected_->widget()->theme().width();
 
@@ -696,9 +711,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"border_width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: border changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double  &value) {
+						log_notice("Widget %s: border changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setBorder(value);
@@ -730,9 +745,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"round_corner_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: round corner changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: round corner changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setRoundCorner(value);
@@ -831,13 +846,13 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
 						Gtk::FontButton *button;
 
 						Pango::FontDescription description;
 
-						log_notice("Widget %s: label font size changed to '%d'",
+						log_notice("Widget %s: label font size changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						// Update label font family button
@@ -865,7 +880,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_shadow_opacity_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: label shadow opacity changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
@@ -882,9 +897,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_shadow_distance_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: label shadow distance changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: label shadow distance changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelShadowDistance(value);
@@ -1048,9 +1063,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_border_width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: label border width changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: label border width changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setLabelBorderWidth(value);
@@ -1125,13 +1140,13 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
 						Gtk::FontButton *button;
 
 						Pango::FontDescription description;
 
-						log_notice("Widget %s: value font size changed to '%d'",
+						log_notice("Widget %s: value font size changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						// Update value font family button
@@ -1159,7 +1174,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_shadow_opacity_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: value shadow opacity_changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
@@ -1176,9 +1191,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_shadow_distance_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: value shadow distance_changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: value shadow distance_changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueShadowDistance(value);
@@ -1342,9 +1357,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_border_width_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: value border width changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: value border width changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setValueBorderWidth(value);
@@ -1376,7 +1391,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_min_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: value min. changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
@@ -1396,7 +1411,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
 						log_notice("Widget %s: value max. changed to '%d'",
 							   widget_selected_->widget()->name().c_str(), value);
@@ -1495,9 +1510,9 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"unit_font_size_spinbutton\" object in widget_frame.ui");
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: unit font size changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: unit font size changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
 						widget_selected_->widget()->theme().setUnitFontSize(value);
@@ -2176,12 +2191,12 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		throw std::runtime_error("No \"round_corner_box\" object in widget_frame.ui");
 	box->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureRoundCorner));
 
-	// Round corner
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"round_cornder_spinbutton\" object in widget_frame.ui");
-
-	spinbutton->set_range(0, (std::min(width, height) / 2));
+//	// Round corner
+//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
+//	if (!spinbutton)
+//		throw std::runtime_error("No \"round_cornder_spinbutton\" object in widget_frame.ui");
+//
+//	spinbutton->set_range(0, (std::min(width, height) / 2));
 
 	// Label expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
@@ -2189,12 +2204,12 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
 
-	// Label font size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
-
-	spinbutton->set_range(0, height - margin);
+//	// Label font size
+//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
+//	if (!spinbutton)
+//		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
+//
+//	spinbutton->set_range(0, height - margin);
 
 	// Value expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
@@ -2202,12 +2217,12 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
 
-	// Value font size
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
-
-	spinbutton->set_range(0, height - margin);
+//	// Value font size
+//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
+//	if (!spinbutton)
+//		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
+//
+//	spinbutton->set_range(0, height - margin);
 
 	// Value min.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
@@ -2379,7 +2394,7 @@ void GPX2VideoWidgetFrame::on_widget_font_changed(Gtk::FontButton *button, std::
 }
 
 
-void GPX2VideoWidgetFrame::on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
+void GPX2VideoWidgetFrame::on_widget_spin_int_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
 	log_call();
 
 	int value;
@@ -2392,6 +2407,25 @@ void GPX2VideoWidgetFrame::on_widget_spin_changed(Gtk::SpinButton *button, std::
 
 	// Read value
 	value = button->get_value_as_int();
+
+	// Set value
+	set(value);
+}
+
+
+void GPX2VideoWidgetFrame::on_widget_spin_double_changed(Gtk::SpinButton *button, std::function<void(const double&)> set) {
+	log_call();
+
+	double value;
+
+	if (loading_)
+		return;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
+	// Read value
+	value = button->get_value();
 
 	// Set value
 	set(value);
@@ -2454,6 +2488,7 @@ void GPX2VideoWidgetFrame::on_widget_combobox_changed(Gtk::ComboBox *combobox, s
 	set(combobox->get_active());
 }
 
+
 bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set) {
 	log_call();
 
@@ -2470,6 +2505,32 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 	set(state);
 
 	return true;
+}
+
+
+void GPX2VideoWidgetFrame::on_widget_reset_clicked(void) {
+	log_call();
+
+	if (!shape_child_box_)
+		return;
+
+	log_info("Widget %s: use default settings", 
+			widget_selected_->widget()->name().c_str());
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
+
+	// Reset to default settings
+	shape_child_box_->set_default();
+
+	// Refresh widget required
+	renderer_->refresh(widget_selected_, true);
+
+	// Update UI
+	update_content();
+
+	// Refresh video preview
+	dispatcher_.emit();
 }
 
 

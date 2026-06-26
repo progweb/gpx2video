@@ -222,6 +222,8 @@ You can append your widget.
 
 Then customize the widget rendering.
 
+![gpx2video-showcase](./assets/showcase.png)
+
 ## gpx2video command line tools
 
 The gpx2video interface permits to select widgets and edit your layout.

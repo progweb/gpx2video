@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static AvgSpeedWidget * create(GPXApplication &app) {
+	static AvgSpeedWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		AvgSpeedWidget *widget;
 
-		widget = new AvgSpeedWidget(app);
+		widget = new AvgSpeedWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitMilesPerHour);
 
@@ -152,14 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	AvgSpeedWidget(GPXApplication &app);
+	AvgSpeedWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

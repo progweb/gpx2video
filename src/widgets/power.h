@@ -22,6 +22,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -101,10 +113,10 @@ public:
 		delete shape_;
 	}
 
-	static PowerWidget * create(GPXApplication &app) {
+	static PowerWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		PowerWidget *widget;
 
-		widget = new PowerWidget(app);
+		widget = new PowerWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitWatt);
 
@@ -152,13 +164,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	PowerWidget(GPXApplication &app);
+	PowerWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

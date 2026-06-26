@@ -27,7 +27,7 @@ void VerticalSpeedTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -197,12 +197,12 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	width_ = theme().width();
-	height_ = theme().height();
+	// Icon
+	icon_filename_ = widget_->getIconFilename(theme().icon());
 
 	// Size
 	setOrientation(theme().gaugeOrientation());
-	setSize(width_, height_); //, size_);
+	setSize(theme().width(), theme().height());
 
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -265,10 +265,10 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 				continue;
 
 			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -285,7 +285,7 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 	}
 
 	// Bar with round terminaison
-	terminaison = (theme().gaugeCap() == VideoWidget::Theme::GaugeCapRound) ? theme().gaugeWidth() / 2 : 0;
+	terminaison = (theme().gaugeCap() == VideoWidget::Theme::GaugeCapRound) ? size2pixels(theme().gaugeWidth() / 2) : 0;
 
 	// Padding
 	if (theme().gaugeOrientation() == VideoWidget::OrientationHorizontal) {
@@ -311,7 +311,7 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 }
 
 
-void VerticalSpeedBarShape::ticklenwidth(int value, int *offset, int *len, int *width) {
+void VerticalSpeedBarShape::ticklenwidth(int value, double *offset, double *len, double *width) {
 	int length;
 	int ticksize = theme().tickSize();
 
@@ -354,10 +354,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	BarShape::Font font;
 
-	int offset = 0;
 	int rotate = 0;
-
-//	int top = 0, bottom = 0;
 
 	int amin, amax;
 
@@ -378,21 +375,11 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
 
-	// Apply padding
-//	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
-//		offset = (size_ / 14);
-//	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
-//		offset = (size_ / 14) / 2;
-//	else
-//		offset = 0;
-
 	// Compute gauge position
-//	offset = ((size_ / 8) + (size_ / 25)); // gauge width
-//	offset /= 2;
-	setOffset(-offset);
+	setOffset(theme().gaugeOffset());
 
 	// Draw background
-	background(cr);
+	background(cr, theme().roundCorner());
 
 	// Draw gauge background
 	if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
@@ -412,19 +399,12 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				theme().gaugePrimaryColor());
 	}
 
-	// Draw cursor
-	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((verticalspeed >= amin) && (verticalspeed <= amax))) {
-		double xb = scale(amin, amax, verticalspeed, rotate);
-
-		cursor(cr, xb, theme().gaugeWidth() - (2 * theme().gaugeBorder()), theme().cursorColor());
-	}
-
 	// Draw tick lines on bar
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
 		for (int value = amin; value < amax + tick_step_; value = value + tick_step_) {
-			int ticklen;
-			int tickwidth;
-			int tickoffset;
+			double ticklen;
+			double tickwidth;
+			double tickoffset;
 
 			double xb = scale(amin, amax, value, rotate);
 
@@ -470,10 +450,10 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				continue;
 
 			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -486,24 +466,51 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		}
 	}
 
-	// Draw needle & value
+	// Draw cursor
+	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((verticalspeed >= amin) && (verticalspeed <= amax))) {
+		double xb = scale(amin, amax, verticalspeed, rotate);
+
+		cursor(cr, xb, theme().cursorWidth(), theme().cursorColor());
+	}
+
+	// Value
+	std::string str = std::to_string((int) std::round(verticalspeed));
+
+	font = (TextShape::Font) {
+		.size = theme().valueFontSize(),
+		.border = theme().valueBorderWidth(),
+		.shadow_opacity = theme().valueShadowOpacity(),
+		.shadow_distance = theme().valueShadowDistance(),
+		.family = theme().valueFontFamily(),
+		.align = VideoWidget::Theme::AlignCenter,
+		.style = theme().valueFontStyle(),
+		.weight = theme().valueFontWeight(),
+	};
+
+	// Draw needle / icon / value
 	if ((verticalspeed >= amin) && (verticalspeed <= amax)) {
 		double xb = scale(amin, amax, verticalspeed, rotate);
 
-		std::string str = std::to_string((int) std::round(verticalspeed));
+		if (theme().hasFlag(VideoWidget::Theme::FlagNeedle))
+			needle(cr, theme().needleType(),
+					xb, font, str.c_str(),
+					theme().needleBorder(), theme().needleBackgroundColor(), theme().needleBorderColor());
 
-		font = (TextShape::Font) {
-			.size = theme().valueFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = VideoWidget::Theme::AlignCenter,
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
-		};
+		switch (theme().needleType()) {
+		case VideoWidget::Theme::NeedleTypeIcon:
+			icon(cr, xb, icon_filename_, theme().iconColor());
+			break;
 
-		value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+		case VideoWidget::Theme::NeedleTypeValue:
+			value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+			break;
+
+		case VideoWidget::Theme::NeedleTypeBasic:
+		default:
+			if (theme().hasFlag(VideoWidget::Theme::FlagValue))
+				value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+			break;
+		}
 	}
 
 	// Draw label
@@ -540,8 +547,8 @@ void VerticalSpeedBarShape::clear(void) {
 }
 
 
-VerticalSpeedWidget::VerticalSpeedWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetVerticalSpeed) 
+VerticalSpeedWidget::VerticalSpeedWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetVerticalSpeed, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

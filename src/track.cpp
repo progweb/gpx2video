@@ -27,6 +27,9 @@
 #define TILESIZE 256
 
 
+/**
+ * TrackSettings
+ */
 
 TrackSettings::TrackSettings() {
 	width_ = 320;
@@ -363,12 +366,15 @@ std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 }
 
 
-Track::Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase)
-	: VideoWidget(app, type)
+/**
+ * Track
+ */
+
+Track::Track(GPXApplication &app, const TrackSettings &track_settings, VideoWidget::Widget type, TelemetrySource *telemetry_source, struct event_base *evbase)
+	: VideoWidget(app, type, telemetry_source)
 	, ShapeBase(VideoWidget::theme())
 	, app_(app)
 	, track_settings_(track_settings)
-	, telemetry_settings_(telemetry_settings)
 	, evbase_(evbase) {
 	log_call();
 
@@ -440,12 +446,12 @@ void Track::setSettings(const TrackSettings &settings) {
 }
 
 
-Track * Track::create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings) {
+Track * Track::create(GPXApplication &app, const TrackSettings &track_settings, TelemetrySource *telemetry_source) {
 	Track *track;
 
 	log_call();
 
-	track = new Track(app, telemetry_settings, track_settings, VideoWidget::WidgetTrack, app.evbase());
+	track = new Track(app, track_settings, VideoWidget::WidgetTrack, telemetry_source, app.evbase());
 
 	return track;
 }
@@ -499,7 +505,7 @@ bool Track::preinit(void) {
 
 	TelemetryData p1, p2;
 
-	TelemetrySource *source;
+//	TelemetrySource *source;
    
 	log_call();
 
@@ -518,29 +524,21 @@ bool Track::preinit(void) {
 	// Assets path
 	assets_path_ = app_.assets("icons");
 
-	// Check telemetry data
-	if (app_.settings().inputfile().empty()) {
-		log_warn("Track init aborted due to missing telemetry data!");
-		goto abort;
-	}
-
-	// Open telemetry data file
-	source = TelemetryMedia::open(app_.settings().inputfile(), telemetry_settings_, true);
-
-	if (source == NULL) {
+	// Read telemetry data
+	if (telemetry_source_ == NULL) {
 		log_warn("Can't read telemetry data, skip %s widget initialization", name().c_str());
 		goto abort;
 	}
 
 	// Create map bounding box
-	source->getBoundingBox(
+	telemetry_source_->getBoundingBox(
 			zoomfit ? TelemetrySource::RangeData : TelemetrySource::RangeView, &p1, &p2);
 
 	// Track settings
 	track_settings_.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 
 	// Get data range
-	source->getBoundingBox(TelemetrySource::RangeData, &lim_p1_, &lim_p2_);
+	telemetry_source_->getBoundingBox(TelemetrySource::RangeData, &lim_p1_, &lim_p2_);
 
 	// Completed with success
 	ok = true;
@@ -583,13 +581,14 @@ void Track::init(void) {
 
 	log_call();
 
-	if (!preinit()) {
-		log_warn("Track init failure!");
+	if (!preinit())
 		return;
-	}
 
 	zoom = settings().zoom();
 	divider_ = settings().divider();
+
+	// Size
+	ShapeBase::setSize(width, height);
 
 	// Compute track area
 	settings().getBoundingBox(&lat1, &lon1, &lat2, &lon2);
@@ -790,17 +789,17 @@ void Track::init(void) {
 		delete icon_position_buf_;
 
 	// Load icons
-	size = settings().iconSize(TrackSettings::IconEnd);
+	size = 2 * size2pixels(settings().iconSize(TrackSettings::IconEnd));
 	color = settings().iconColor(TrackSettings::IconEnd);
 	filename = getIconFilename(settings().icon(TrackSettings::IconEnd), TrackSettings::IconEnd);
 	icon_end_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
 
-	size = settings().iconSize(TrackSettings::IconStart);
+	size = 2 * size2pixels(settings().iconSize(TrackSettings::IconStart));
 	color = settings().iconColor(TrackSettings::IconStart);
 	filename = getIconFilename(settings().icon(TrackSettings::IconStart), TrackSettings::IconStart);
 	icon_start_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
 
-	size = settings().iconSize(TrackSettings::IconPosition);
+	size = 2 * size2pixels(settings().iconSize(TrackSettings::IconPosition));
 	color = settings().iconColor(TrackSettings::IconPosition);
 	filename = getIconFilename(settings().icon(TrackSettings::IconPosition), TrackSettings::IconPosition);
 	icon_position_buf_ = OIIOUtils::loadsvg(filename.c_str(), size, color);
@@ -960,9 +959,10 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 	if (last_data_.type() == TelemetryData::TypeUnknown) {
 		int n = 0;
 
-		std::string filename = app_.settings().inputfile();
-
-		TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
+		if (telemetry_source_ == NULL) {
+			log_warn("Can't read telemetry data");
+			goto skip;
+		}
 
 		// Cairo buffer
 		buf = OIIO::ImageBuf(outbuf.spec());
@@ -978,7 +978,7 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		cairo_set_line_width(cairo, path_thick); //3.0); //40.96);
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
-		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+		for (result = telemetry_source_->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = telemetry_source_->retrieveNext(wpt)) {
 			if ((path_smooth > 1) && ((n++ % path_smooth) != 0))
 				continue;
 
@@ -1135,41 +1135,36 @@ bool Track::load(void) {
 	height = ceilf((pevy2_ - pevy1_) * divider_);
 
 	// Load telemetry data
-	TelemetrySource *source = TelemetryMedia::open(filename, telemetry_settings_, true);
-
-	if (source != NULL) {
+	if (telemetry_source_ != NULL) {
 		// Create background track buffer
 		trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
 		// Draw background path
-		path(*trackbuf_, source, divider_);
+		path(*trackbuf_, telemetry_source_, divider_);
 
 		// Compute begin
-		source->retrieveFirst(wpt);
+		telemetry_source_->retrieveFirst(wpt);
 
 		x_start_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
 		y_start_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 		x_start_ *= divider_;
 		y_start_ *= divider_;
-		ts_start_ = source->beginTimestamp();
+		ts_start_ = telemetry_source_->beginTimestamp();
 
 		// Compute end
-		source->retrieveLast(wpt);
+		telemetry_source_->retrieveLast(wpt);
 
 		x_end_ = floorf((float) Track::lon2pixel(zoom, wpt.longitude())) - pevx1_;
 		y_end_ = floorf((float) Track::lat2pixel(zoom, wpt.latitude())) - pevy1_;
 
 		x_end_ *= divider_;
 		y_end_ *= divider_;
-		ts_end_ = source->endTimestamp();
+		ts_end_ = telemetry_source_->endTimestamp();
 	}
 	else {
-		log_warn("Can't open '%s' telemetry data file", filename.c_str());
+		log_warn("Can't read telemetry data");
 	}
-
-	if (source != NULL)
-		delete source;
 
 	// Init
 	last_data_ = TelemetryData();
@@ -1179,6 +1174,8 @@ bool Track::load(void) {
 
 
 OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
+	bool is_move = true;
+
 	int x, y;
 
 	int w, width;
@@ -1235,9 +1232,13 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = (posY + last_posY_) / 2;
 
 		// Move ?
-		if ((posX == last_posX_) && (posY == last_posY_)) {
-			is_update = false;
-			goto skip;
+		is_move = (posX == last_posX_) && (posY == last_posY_);
+
+		if (is_move) {
+			if (settings().follow() != TrackSettings::FollowHeading) {
+				is_update = false;
+				goto skip;
+			}
 		}
 	}
 
@@ -1350,9 +1351,11 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	// Path
 	if (trackbuf_ != NULL) {
 		// Update path progress
-		trackbuf_->specmod().x = 0;
-		trackbuf_->specmod().y = 0;
-		path(*trackbuf_, data, divider_);
+		if (is_move) {
+			trackbuf_->specmod().x = 0;
+			trackbuf_->specmod().y = 0;
+			path(*trackbuf_, data, divider_);
+		}
 
 		// Draw track image over
 		trackbuf_->specmod().x = x + offsetX;

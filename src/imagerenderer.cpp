@@ -201,6 +201,10 @@ bool ImageRenderer::run(void) {
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
 
+		if (!widget->visible())
+			continue;
+
+		// Visible on time range
 		if ((begin != 0) && (timecode_ms < begin))
 			continue;
 

@@ -51,8 +51,14 @@ public:
 		return true;
 	}
 
-	void setSize(int width, int height, int size = 0) {
-		size_ = size;
+	int size(void) {
+		return size_;
+	}
+
+	void setSize(int width, int height) {
+		ShapeBase::setSize(width, height);
+
+		size_ = std::min(width, height);
 
 		center_x_ = width / 2;
 		center_y_ = height / 2;

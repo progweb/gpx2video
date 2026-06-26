@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static HomeDistanceWidget * create(GPXApplication &app) {
+	static HomeDistanceWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		HomeDistanceWidget *widget;
 
-		widget = new HomeDistanceWidget(app);
+		widget = new HomeDistanceWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitMiles);
 
@@ -152,14 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	HomeDistanceWidget(GPXApplication &app);
+	HomeDistanceWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

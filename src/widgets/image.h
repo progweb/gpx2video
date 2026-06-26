@@ -20,10 +20,10 @@ public:
 			delete bg_buf_;
 	}
 
-	static ImageWidget * create(GPXApplication &app) {
+	static ImageWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		ImageWidget *widget;
 
-		widget = new ImageWidget(app);
+		widget = new ImageWidget(app, source);
 
 		return widget;
 	}
@@ -118,7 +118,7 @@ private:
 	OIIO::ImageBuf *fg_buf_;
 	OIIO::ImageBuf *mask_;
 
-	ImageWidget(GPXApplication &app);
+	ImageWidget(GPXApplication &app, TelemetrySource *source);
 
 	void initialize(cairo_t *cr);
 };

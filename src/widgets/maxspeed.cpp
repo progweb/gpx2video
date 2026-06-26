@@ -27,7 +27,7 @@ void MaxSpeedTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -186,8 +186,8 @@ void MaxSpeedTextShape::clear(void) {
 }
 
 
-MaxSpeedWidget::MaxSpeedWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetMaxSpeed) 
+MaxSpeedWidget::MaxSpeedWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetMaxSpeed, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

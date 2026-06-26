@@ -98,11 +98,14 @@ protected:
 	void on_widget_padding_value_changed(const VideoWidget::Theme::Padding &padding);
 
 	void on_widget_font_changed(Gtk::FontButton *button, std::function<void(const Pango::FontDescription&)> set);
-	void on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
+	void on_widget_spin_int_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
+	void on_widget_spin_double_changed(Gtk::SpinButton *button, std::function<void(const double&)> set);
 	void on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set);
 	void on_widget_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set);
 	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
 	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);
+
+	void on_widget_reset_clicked(void);
 
 	void on_widget_changed(bool schedule);
 

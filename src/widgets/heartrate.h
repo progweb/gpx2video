@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static HeartRateWidget * create(GPXApplication &app) {
+	static HeartRateWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		HeartRateWidget *widget;
 
-		widget = new HeartRateWidget(app);
+		widget = new HeartRateWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitBPM);
 
@@ -152,13 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	HeartRateWidget(GPXApplication &app);
+	HeartRateWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

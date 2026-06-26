@@ -59,7 +59,8 @@ void GPX2VideoWidgetStackPage::append(GPX2VideoWidget *widget) {
 	// Build & append widget item
 	auto box = Gtk::Box(Gtk::Orientation::HORIZONTAL, 0);
 	auto label = Gtk::Label(widget->widget()->name());
-	auto button = Gtk::make_managed<Gtk::Button>(); //(new Gtk::Button());
+	auto button_view = Gtk::make_managed<Gtk::Button>(); //(new Gtk::Button());
+	auto button_trash = Gtk::make_managed<Gtk::Button>(); //(new Gtk::Button());
 
 	label.set_halign(Gtk::Align::START);
 	label.set_hexpand(true);
@@ -67,16 +68,25 @@ void GPX2VideoWidgetStackPage::append(GPX2VideoWidget *widget) {
 	label.set_xalign(0.0);
 	label.set_yalign(1.0);
 
-	button->set_halign(Gtk::Align::END);
-	button->set_valign(Gtk::Align::CENTER);
-	button->set_icon_name("user-trash-symbolic");
+	button_view->set_halign(Gtk::Align::END);
+	button_view->set_valign(Gtk::Align::CENTER);
+	button_view->set_icon_name(
+			widget->widget()->visible() ? "view-conceal-symbolic" : "view-reveal-symbolic");
 
-	button->signal_clicked().connect(sigc::bind(
+	button_view->signal_clicked().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_visible_clicked), widget, button_view), true);
+
+	button_trash->set_halign(Gtk::Align::END);
+	button_trash->set_valign(Gtk::Align::CENTER);
+	button_trash->set_icon_name("user-trash-symbolic");
+
+	button_trash->signal_clicked().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetStackPage::on_remove_clicked), widget), true);
 
 	box.set_hexpand(true);
 	box.append(label);
-	box.append(*button);
+	box.append(*button_view);
+	box.append(*button_trash);
 
 	list->append(box);
 }
@@ -255,6 +265,31 @@ void GPX2VideoWidgetStackPage::on_remove_clicked(GPX2VideoWidget *widget) {
 }
 
 
+/**
+ * Show/hide widget
+ *
+ * User toggles a widget.
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoWidgetStackPage::on_visible_clicked(GPX2VideoWidget *widget, Gtk::Button *button) {
+	log_call();
+
+	bool visible = !widget->widget()->visible();
+
+	log_info("%s widget '%s'", 
+			visible ? "Show" : "Hide",
+			widget->widget()->name().c_str());
+
+	button->set_icon_name(
+			visible ? "view-conceal-symbolic" : "view-reveal-symbolic");
+
+	widget->widget()->setVisible(visible);
+
+	m_signal_widget_visible_changed.emit(widget);
+}
+
+
 GPX2VideoWidgetStackPage::type_signal_widget_selected GPX2VideoWidgetStackPage::signal_widget_selected() {
 	return m_signal_widget_selected;
 }
@@ -262,6 +297,11 @@ GPX2VideoWidgetStackPage::type_signal_widget_selected GPX2VideoWidgetStackPage::
 
 GPX2VideoWidgetStackPage::type_signal_widget_remove_clicked GPX2VideoWidgetStackPage::signal_widget_remove_clicked() {
 	return m_signal_widget_remove_clicked;
+}
+
+
+GPX2VideoWidgetStackPage::type_signal_widget_visible_changed GPX2VideoWidgetStackPage::signal_widget_visible_changed() {
+	return m_signal_widget_visible_changed;
 }
 
 

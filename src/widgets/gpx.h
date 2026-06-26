@@ -14,10 +14,10 @@ public:
 	virtual ~GPXWidget() {
 	}
 
-	static GPXWidget * create(GPXApplication &app) {
+	static GPXWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		GPXWidget *widget;
 
-		widget = new GPXWidget(app);
+		widget = new GPXWidget(app, source);
 
 		return widget;
 	}
@@ -47,6 +47,20 @@ public:
 
 		value_width_ = width;
 		value_height_ = height;
+	}
+
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureLabel:
+		case FeatureValue:
+		case FeatureRoundCorner:
+			return true;
+
+		default:
+			break;
+		}
+
+		return false;
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
@@ -107,7 +121,7 @@ private:
 	int label_x_, label_y_, label_width_, label_height_;
 	int value_x_, value_y_, value_width_, value_height_;
 
-	GPXWidget(GPXApplication &app);
+	GPXWidget(GPXApplication &app, TelemetrySource *source);
 
 	void initialize(cairo_t *cr);
 

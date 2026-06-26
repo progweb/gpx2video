@@ -29,31 +29,34 @@ public:
 		return theme_;
 	}
 
+	virtual bool hasFeature(Feature feature) const {
+		(void) feature;
+
+		return true;
+	}
+
 	int size(void) {
 		return size_;
 	}
 
 	void setSize(int width, int height) {
-		width_ = width;
-		height_ = height;
-
-		size_ = std::min(width_, height_);
+		ShapeBase::setSize(width, height);
 
 		if (orientation_ == VideoWidget::OrientationVertical) {
-			// Vertical
+			size_ = width_;
 			length_ = height;
 
 			center_ = width / 2;
 		}
 		else {
-			// Horizontal
+			size_ = height_;
 			length_ = width;
 
 			center_ = height / 2;
 		}
 	}
 
-	void setOffset(int offset) {
+	void setOffset(double offset) {
 		offset_ = offset;
 	}
 
@@ -99,7 +102,7 @@ public:
 			y = flip ? value * size : size - value * size;
 
 			return {
-				.x = center_ + offset_ + distance,
+				.x = center_ + distance + (size2pixels(offset_) / 2.0),
 				.y = padding_top_ + y
 			};
 		}
@@ -110,7 +113,7 @@ public:
 
 			return {
 				.x = padding_left_ + x,
-				.y = center_ + offset_ + distance
+				.y = center_ + distance + (size2pixels(offset_) / 2.0)
 			};
 		}
 	}
@@ -127,6 +130,12 @@ public:
 	void value(cairo_t *cr, double v, Font &font,
 			const float *fill, const float *outline, const char *text);
 
+	void needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
+		double v, Font &font, const char *text,
+		double border, const float *fill, const float *outline);
+
+	void icon(cairo_t *cr, double v, const std::string &filename, const float *fill);
+
 	void clear(void) {
 		ShapeBase::clear();
 
@@ -141,10 +150,7 @@ private:
 	int size_;
 	int length_;
 //	int margin_;
-	int offset_;
-
-	int width_;
-	int height_;
+	double offset_;
 
 	VideoWidget::Orientation orientation_;
 

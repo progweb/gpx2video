@@ -37,7 +37,7 @@ void DateTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -181,8 +181,8 @@ void DateTextShape::clear(void) {
 }
 
 
-DateWidget::DateWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetDate) 
+DateWidget::DateWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetDate, source) 
 	, ShapeBase(VideoWidget::theme())
    	, shape_(NULL) {
 

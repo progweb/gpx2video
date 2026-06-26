@@ -52,6 +52,7 @@ public:
 		ShapeText,
 		ShapeArc,
 		ShapeBar,
+		ShapeChart,
 		ShapeUnknown
 	};
 
@@ -138,7 +139,8 @@ public:
 			FlagIconStart = (1 << 9),
 			FlagIconEnd = (1 << 10),
 			FlagIconPosition = (1 << 11),
-			FlagUnknown = (1 << 12),
+			FlagAxis = (1 << 12),
+			FlagUnknown = (1 << 13),
 			FlagAll = ~0x0
 		};
 
@@ -199,7 +201,9 @@ public:
 			// End match VideoWidget::Type
 
 			// Other internal icons
+			IconSpot,
 			IconRunning,
+			IconBike,
 
 			// At last user icons
 			IconUserFile,
@@ -218,757 +222,261 @@ public:
 			NeedleTypeLight,
 			NeedleTypeBasic,
 			NeedleTypeDesign,
+			NeedleTypeIcon,
+			NeedleTypeValue,
 			NeedleTypeUnknown
 		};
 
 		Theme();
 
-		void setSize(int width, int height) {
-			width_ = width;
-			height_ = height;
-		}
-
-		const int& width(void) const {
-			return width_;
-		}
-
-		const int& height(void) const {
-			return height_;
-		}
-
-		void setFlags(int flags) {
-			flags_ = flags;
-		}
-
-		void addFlag(VideoWidget::Theme::Flag flag) {
-			flags_ |= flag;
-		}
-
-		void removeFlag(VideoWidget::Theme::Flag flag) {
-			flags_ &= ~flag;
-		}
-
-		bool hasFlag(VideoWidget::Theme::Flag flag) {
-			return ((flags_ & flag) != 0);
-		}
-
-		const int& padding(enum Padding side) const {
-			switch (side) {
-			case PaddingLeft:
-				return padding_left_;
-			case PaddingRight:
-				return padding_right_;
-			case PaddingTop:
-				return padding_top_;
-			case PaddingBottom:
-				return padding_bottom_;
-			default:
-				return null_;
-			}
-		}
-
-		virtual void setPadding(enum Padding side, int padding) {
-			if (padding < 0)
-				return;
-
-			switch (side) {
-			case PaddingAll:
-				padding_left_ = padding;
-				padding_right_ = padding;
-				padding_top_ = padding;
-				padding_bottom_ = padding;
-				break;
-			case PaddingLeft:
-				padding_left_ = padding;
-				break;
-			case PaddingRight:
-				padding_right_ = padding;
-				break;
-			case PaddingTop:
-				padding_top_ = padding;
-				break;
-			case PaddingBottom:
-				padding_bottom_ = padding;
-				break;
-			default:
-				break;
-			}
-		}
-
-		const float * backgroundColor(void) const {
-			return bg_color_;
-		}
-
-		bool setBackgroundColor(std::string color) {
-			return hex2color(bg_color_, color);
-		}
-
-		bool setBackgroundColor(double r, double g, double b, double a) {
-			bg_color_[0] = r;
-			bg_color_[1] = g;
-			bg_color_[2] = b;
-			bg_color_[3] = a;
-			return true;
-		}
-
-		int border(void) const {
-			return border_;
-		}
-
-		void setBorder(int border) {
-			border_ = border;
-		}
-
-		const float * borderColor(void) const {
-			return border_color_;
-		}
-
-		bool setBorderColor(std::string color) {
-			return hex2color(border_color_, color);
-		}
-
-		bool setBorderColor(double r, double g, double b, double a) {
-			border_color_[0] = r;
-			border_color_[1] = g;
-			border_color_[2] = b;
-			border_color_[3] = a;
-			return true;
-		}
-
-		int roundCorner(void) const {
-			return round_corner_;
-		}
-
-		void setRoundCorner(int size) {
-			round_corner_ = size;
-		}
-
-		const float * iconColor(void) const {
-			return icon_color_;
-		}
-
-		const Icon& icon(void) const {
-			return icon_;
-		}
-
-		void setIcon(const Icon &icon) {
-			icon_ = icon;
-		}
-
-		const std::string& iconFile(void) const {
-			return icon_file_;
-		}
-
-		void setIconFile(const std::string &file) {
-			icon_file_ = file;
-		}
-
-		bool setIconColor(std::string color) {
-			return hex2color(icon_color_, color);
-		}
-
-		bool setIconColor(double r, double g, double b, double a) {
-			icon_color_[0] = r;
-			icon_color_[1] = g;
-			icon_color_[2] = b;
-			icon_color_[3] = a;
-			return true;
-		}
-
-		enum Align labelHorizontalAlign(void) const {
-			return label_horizontal_align_;
-		}
-
-		virtual void setLabelHorizontalAlign(Align align) {
-			label_horizontal_align_ = align;
-		}
-
-		enum Align labelVerticalAlign(void) const {
-			return label_vertical_align_;
-		}
-
-		virtual void setLabelVerticalAlign(Align align) {
-			label_vertical_align_ = align;
-		}
-
-		const std::string& labelFontFamily(void) const {
-			return label_font_family_;
-		}
-
-		virtual void setLabelFontFamily(std::string family) {
-			if (family.empty())
-				return;
-
-			label_font_family_ = family;
-		};
-
-		int labelFontSize(void) const {
-			return label_font_size_;
-		}
-
-		void setLabelFontSize(int size) {
-			if (size < 0)
-				return;
-
-			label_font_size_ = size;
-		}
-
-		enum FontStyle labelFontStyle(void) const {
-			return label_font_style_;
-		}
-
-		void setLabelFontStyle(FontStyle style) {
-			label_font_style_ = style;
-		}
-
-		enum FontWeight labelFontWeight(void) const {
-			return label_font_weight_;
-		}
-
-		void setLabelFontWeight(FontWeight weight) {
-			label_font_weight_ = weight;
-		}
-
-		const float * labelColor(void) const {
-			return label_color_;
-		}
-
-		bool setLabelColor(std::string color) {
-			return hex2color(label_color_, color);
-		}
-
-		bool setLabelColor(double r, double g, double b, double a) {
-			label_color_[0] = r;
-			label_color_[1] = g;
-			label_color_[2] = b;
-			label_color_[3] = a;
-			return true;
-		}
-
-		int labelShadowDistance(void) const {
-			return label_shadow_distance_;
-		}
-
-		void setLabelShadowDistance(int distance) {
-			if (distance < 0)
-				return;
-
-			label_shadow_distance_ = distance;
-		}
-
-		int labelShadowOpacity(void) const {
-			return label_shadow_opacity_;
-		}
-
-		void setLabelShadowOpacity(int opacity) {
-			if (opacity < 0)
-				return;
-
-			label_shadow_opacity_ = opacity;
-		}
-
-		int labelBorderWidth(void) const {
-			return label_border_width_;
-		}
-
-		void setLabelBorderWidth(int width) {
-			if (width < 0)
-				return;
-
-			label_border_width_ = width;
-		}
-
-		const float * labelBorderColor(void) const {
-			return label_border_color_;
-		}
-
-		bool setLabelBorderColor(std::string color) {
-			return hex2color(label_border_color_, color);
-		}
-
-		bool setLabelBorderColor(double r, double g, double b, double a) {
-			label_border_color_[0] = r;
-			label_border_color_[1] = g;
-			label_border_color_[2] = b;
-			label_border_color_[3] = a;
-			return true;
-		}
-
-		const int& valueMin(void) const {
-			return value_min_;
-		}
-
-		void setValueMin(int value) {
-			if (value < value_max_)
-				value_min_ = value;
-		}
-
-		const int& valueMax(void) const {
-			return value_max_;
-		}
-
-		void setValueMax(int value) {
-			if (value > value_min_)
-				value_max_ = value;
-		}
-
-		enum Align valueHorizontalAlign(void) const {
-			return value_horizontal_align_;
-		}
-
-		virtual void setValueHorizontalAlign(Align align) {
-			value_horizontal_align_ = align;
-		}
-
-		enum Align valueVerticalAlign(void) const {
-			return value_vertical_align_;
-		}
-
-		virtual void setValueVerticalAlign(Align align) {
-			value_vertical_align_ = align;
-		}
-
-		const std::string& valueFontFamily(void) const {
-			return value_font_family_;
-		}
-
-		virtual void setValueFontFamily(std::string family) {
-			if (family.empty())
-				return;
-
-			value_font_family_ = family;
-		};
-
-		int valueFontSize(void) const {
-			return value_font_size_;
-		}
-
-		void setValueFontSize(int size) {
-			if (size < 0)
-				return;
-
-			value_font_size_ = size;
-		}
-
-		enum FontStyle valueFontStyle(void) const {
-			return value_font_style_;
-		}
-
-		void setValueFontStyle(FontStyle style) {
-			value_font_style_ = style;
-		}
-
-		enum FontWeight valueFontWeight(void) const {
-			return value_font_weight_;
-		}
-
-		void setValueFontWeight(FontWeight weight) {
-			value_font_weight_ = weight;
-		}
-
-		const float * valueColor(void) const {
-			return value_color_;
-		}
-
-		bool setValueColor(std::string color) {
-			return hex2color(value_color_, color);
-		}
-
-		bool setValueColor(double r, double g, double b, double a) {
-			value_color_[0] = r;
-			value_color_[1] = g;
-			value_color_[2] = b;
-			value_color_[3] = a;
-			return true;
-		}
-
-		int valueShadowDistance(void) const {
-			return value_shadow_distance_;
-		}
-
-		void setValueShadowDistance(int distance) {
-			if (distance < 0)
-				return;
-
-			value_shadow_distance_ = distance;
-		}
-
-		int valueShadowOpacity(void) const {
-			return value_shadow_opacity_;
-		}
-
-		void setValueShadowOpacity(int opacity) {
-			if (opacity < 0)
-				return;
-
-			value_shadow_opacity_ = opacity;
-		}
-
-		const int& valueBorderWidth(void) const {
-			return value_border_width_;
-		}
-
-		void setValueBorderWidth(int width) {
-			if (width < 0)
-				return;
-
-			value_border_width_ = width;
-		}
-
-		const float * valueBorderColor(void) const {
-			return value_border_color_;
-		}
-
-		bool setValueBorderColor(std::string color) {
-			return hex2color(value_border_color_, color);
-		}
-
-		bool setValueBorderColor(double r, double g, double b, double a) {
-			value_border_color_[0] = r;
-			value_border_color_[1] = g;
-			value_border_color_[2] = b;
-			value_border_color_[3] = a;
-			return true;
-		}
-
-		int unitFontSize(void) const {
-			return unit_font_size_;
-		}
-
-		void setUnitFontSize(int size) {
-			if (size < 0)
-				return;
-
-			unit_font_size_ = size;
-		}
-
-		int lineSpace(void) const {
-			return line_space_;
-		}
-
-		void setLineSpace(int size) {
-			if (size < 0)
-				return;
-
-			line_space_ = size;
-		}
-
-		const int& gaugeAngle(void) const {
-			return gauge_angle_;
-		}
-
-		void setGaugeAngle(int angle) {
-			if (angle < 0)
-				return;
-
-			gauge_angle_ = angle;
-		}
-
-		const int& gaugeRotation(void) const {
-			return gauge_rotation_;
-		}
-
-		void setGaugeRotation(int rotation) {
-			if (rotation < 0)
-				return;
-
-			gauge_rotation_ = rotation;
-		}
-
-		const VideoWidget::Orientation& gaugeOrientation(void) const {
-			return gauge_orientation_;
-		}
-
-		void setGaugeOrientation(VideoWidget::Orientation orientation) {
-			gauge_orientation_ = orientation;
-		}
-
-		const bool& gaugeFlip(void) const {
-			return gauge_flip_;
-		}
-
-		void setGaugeFlip(bool flip) {
-			gauge_flip_ = flip;
-		}
-
-		const int& gaugeWidth(void) const {
-			return gauge_width_;
-		}
-
-		void setGaugeWidth(int width) {
-			if (width < 0)
-				return;
-
-			gauge_width_ = width;
-		}
-
-		GaugeCap gaugeCap(void) const {
-			return gauge_cap_;
-		}
-
-		void setGaugeCap(GaugeCap cap) {
-			gauge_cap_ = cap;
-		}
-
-		const int& gaugeBorder(void) const {
-			return gauge_border_;
-		}
-
-		void setGaugeBorder(int border) {
-			gauge_border_ = border;
-		}
-
-		const float * gaugeBorderColor(void) const {
-			return gauge_border_color_;
-		}
-
-		bool setGaugeBorderColor(std::string color) {
-			return hex2color(gauge_border_color_, color);
-		}
-
-		bool setGaugeBorderColor(double r, double g, double b, double a) {
-			gauge_border_color_[0] = r;
-			gauge_border_color_[1] = g;
-			gauge_border_color_[2] = b;
-			gauge_border_color_[3] = a;
-			return true;
-		}
-
-		const float * gaugePrimaryColor() const {
-			return gauge_primary_color_;
-		}
-
-		bool setGaugePrimaryColor(std::string color) {
-			return hex2color(gauge_primary_color_, color);
-		}
-
-		bool setGaugePrimaryColor(double r, double g, double b, double a) {
-			gauge_primary_color_[0] = r;
-			gauge_primary_color_[1] = g;
-			gauge_primary_color_[2] = b;
-			gauge_primary_color_[3] = a;
-			return true;
-		}
-
-		const float * gaugeSecondaryColor() const {
-			return gauge_secondary_color_;
-		}
-
-		bool setGaugeSecondaryColor(std::string color) {
-			return hex2color(gauge_secondary_color_, color);
-		}
-
-		bool setGaugeSecondaryColor(double r, double g, double b, double a) {
-			gauge_secondary_color_[0] = r;
-			gauge_secondary_color_[1] = g;
-			gauge_secondary_color_[2] = b;
-			gauge_secondary_color_[3] = a;
-			return true;
-		}
-
-		const float * gaugeBackgroundColor(void) const {
-			return gauge_bg_color_;
-		}
-
-		bool setGaugeBackgroundColor(std::string color) {
-			return hex2color(gauge_bg_color_, color);
-		}
-
-		bool setGaugeBackgroundColor(double r, double g, double b, double a) {
-			gauge_bg_color_[0] = r;
-			gauge_bg_color_[1] = g;
-			gauge_bg_color_[2] = b;
-			gauge_bg_color_[3] = a;
-			return true;
-		}
-
-		const int& tickSize(void) const {
-			return tick_size_;
-		}
-
-		void setTickSize(int size) {
-			if (size < 0)
-				return;
-
-			tick_size_ = size;
-		}
-
-		const Align& tickAlign(void) const {
-			return tick_align_;
-		}
-
-		void setTickAlign(Align align) {
-			tick_align_ = align;
-		}
-
-		const float * tickColor(void) const {
-			return tick_color_;
-		}
-
-		bool setTickColor(std::string color) {
-			return hex2color(tick_color_, color);
-		}
-
-		bool setTickColor(double r, double g, double b, double a) {
-			tick_color_[0] = r;
-			tick_color_[1] = g;
-			tick_color_[2] = b;
-			tick_color_[3] = a;
-			return true;
-		}
-
-		const int& tickLabelDistance(void) const {
-			return tick_label_distance_;
-		}
-
-		void setTickLabelDistance(int distance) {
-			if (distance < 0)
-				return;
-
-			tick_label_distance_ = distance;
-		}
-
-		int tickLabelFontSize(void) const {
-			return tick_label_font_size_;
-		}
-
-		void setTickLabelFontSize(int size) {
-			if (size < 0)
-				return;
-
-			tick_label_font_size_ = size;
-		}
-
-		const float * tickLabelColor(void) const {
-			return tick_label_color_;
-		}
-
-		bool setTickLabelColor(std::string color) {
-			return hex2color(tick_label_color_, color);
-		}
-
-		bool setTickLabelColor(double r, double g, double b, double a) {
-			tick_label_color_[0] = r;
-			tick_label_color_[1] = g;
-			tick_label_color_[2] = b;
-			tick_label_color_[3] = a;
-			return true;
-		}
-
-		const float * tickLabelBorderColor(void) const {
-			return tick_label_border_color_;
-		}
-
-		bool setTickLabelBorderColor(std::string color) {
-			return hex2color(tick_label_border_color_, color);
-		}
-
-		bool setTickLabelBorderColor(double r, double g, double b, double a) {
-			tick_label_border_color_[0] = r;
-			tick_label_border_color_[1] = g;
-			tick_label_border_color_[2] = b;
-			tick_label_border_color_[3] = a;
-			return true;
-		}
-
-		NeedleType needleType(void) const {
-			return needle_type_;
-		}
-
-		void setNeedleType(NeedleType type) {
-			needle_type_ = type;
-		}
-
-		const int& needleDistance(void) const {
-			return needle_distance_;
-		}
-
-		void setNeedleDistance(int distance) {
-			if (distance < 0)
-				return;
-
-			needle_distance_ = distance;
-		}
-
-		const float * needleBorderColor(void) const {
-			return needle_border_color_;
-		}
-
-		bool setNeedleBorderColor(std::string color) {
-			return hex2color(needle_border_color_, color);
-		}
-
-		bool setNeedleBorderColor(double r, double g, double b, double a) {
-			needle_border_color_[0] = r;
-			needle_border_color_[1] = g;
-			needle_border_color_[2] = b;
-			needle_border_color_[3] = a;
-			return true;
-		}
-
-		const float * needleBackgroundColor(void) const {
-			return needle_background_color_;
-		}
-
-		bool setNeedleBackgroundColor(std::string color) {
-			return hex2color(needle_background_color_, color);
-		}
-
-		bool setNeedleBackgroundColor(double r, double g, double b, double a) {
-			needle_background_color_[0] = r;
-			needle_background_color_[1] = g;
-			needle_background_color_[2] = b;
-			needle_background_color_[3] = a;
-			return true;
-		}
-
-		const float * needlePrimaryColor(void) const {
-			return needle_primary_color_;
-		}
-
-		bool setNeedlePrimaryColor(std::string color) {
-			return hex2color(needle_primary_color_, color);
-		}
-
-		bool setNeedlePrimaryColor(double r, double g, double b, double a) {
-			needle_primary_color_[0] = r;
-			needle_primary_color_[1] = g;
-			needle_primary_color_[2] = b;
-			needle_primary_color_[3] = a;
-			return true;
-		}
-
-		const float * needleSecondaryColor(void) const {
-			return needle_secondary_color_;
-		}
-
-		bool setNeedleSecondaryColor(std::string color) {
-			return hex2color(needle_secondary_color_, color);
-		}
-
-		bool setNeedleSecondaryColor(double r, double g, double b, double a) {
-			needle_secondary_color_[0] = r;
-			needle_secondary_color_[1] = g;
-			needle_secondary_color_[2] = b;
-			needle_secondary_color_[3] = a;
-			return true;
-		}
-
-		const float * cursorColor(void) const {
-			return cursor_color_;
-		}
-
-		bool setCursorColor(std::string color) {
-			return hex2color(cursor_color_, color);
-		}
-
-		bool setCursorColor(double r, double g, double b, double a) {
-			cursor_color_[0] = r;
-			cursor_color_[1] = g;
-			cursor_color_[2] = b;
-			cursor_color_[3] = a;
-			return true;
-		}
+		void setSize(int width, int height);
+		const int& width(void) const;
+		const int& height(void) const;
+
+		void setFlags(int flags);
+		void addFlag(VideoWidget::Theme::Flag flag);
+		void removeFlag(VideoWidget::Theme::Flag flag);
+		bool hasFlag(VideoWidget::Theme::Flag flag);
+
+		const int& padding(enum Padding side) const;
+		virtual void setPadding(enum Padding side, int padding);
+
+		const float * backgroundColor(void) const;
+		bool setBackgroundColor(std::string color);
+		bool setBackgroundColor(double r, double g, double b, double a);
+
+		double border(void) const;
+		void setBorder(double border);
+
+		const float * borderColor(void) const;
+		bool setBorderColor(std::string color);
+		bool setBorderColor(double r, double g, double b, double a);
+
+		double roundCorner(void) const;
+		void setRoundCorner(double size);
+
+		const Icon& icon(void) const;
+		void setIcon(const Icon &icon);
+
+		const std::string& iconFile(void) const;
+		void setIconFile(const std::string &file);
+
+		const double& iconSize(void) const;
+		void setIconSize(const double &size);
+
+		const float * iconColor(void) const;
+		bool setIconColor(std::string color);
+		bool setIconColor(double r, double g, double b, double a);
+
+		enum Align labelHorizontalAlign(void) const;
+		virtual void setLabelHorizontalAlign(Align align);
+
+		enum Align labelVerticalAlign(void) const;
+		virtual void setLabelVerticalAlign(Align align);
+
+		const std::string& labelFontFamily(void) const;
+		virtual void setLabelFontFamily(std::string family);
+
+		double labelFontSize(void) const;
+		void setLabelFontSize(double size);
+
+		enum FontStyle labelFontStyle(void) const;
+		void setLabelFontStyle(FontStyle style);
+
+		enum FontWeight labelFontWeight(void) const;
+		void setLabelFontWeight(FontWeight weight);
+
+		const float * labelColor(void) const;
+		bool setLabelColor(std::string color);
+		bool setLabelColor(double r, double g, double b, double a);
+
+		double labelShadowDistance(void) const;
+		void setLabelShadowDistance(double distance);
+
+		int labelShadowOpacity(void) const;
+		void setLabelShadowOpacity(int opacity);
+
+		double labelBorderWidth(void) const;
+		void setLabelBorderWidth(double width);
+
+		const float * labelBorderColor(void) const;
+		bool setLabelBorderColor(std::string color);
+		bool setLabelBorderColor(double r, double g, double b, double a);
+
+		const int& valueMin(void) const;
+		void setValueMin(int value);
+
+		const int& valueMax(void) const;
+		void setValueMax(int value);
+
+		enum Align valueHorizontalAlign(void) const;
+		virtual void setValueHorizontalAlign(Align align);
+
+		enum Align valueVerticalAlign(void) const;
+		virtual void setValueVerticalAlign(Align align);
+
+		const std::string& valueFontFamily(void) const;
+		virtual void setValueFontFamily(std::string family);
+
+		double valueFontSize(void) const;
+		void setValueFontSize(double size);
+
+		enum FontStyle valueFontStyle(void) const;
+		void setValueFontStyle(FontStyle style);
+
+		enum FontWeight valueFontWeight(void) const;
+		void setValueFontWeight(FontWeight weight);
+
+		const float * valueColor(void) const;
+		bool setValueColor(std::string color);
+		bool setValueColor(double r, double g, double b, double a);
+
+		double valueShadowDistance(void) const;
+		void setValueShadowDistance(double distance);
+
+		int valueShadowOpacity(void) const;
+		void setValueShadowOpacity(int opacity);
+
+		const double& valueBorderWidth(void) const;
+		void setValueBorderWidth(double width);
+
+		const float * valueBorderColor(void) const;
+		bool setValueBorderColor(std::string color);
+		bool setValueBorderColor(double r, double g, double b, double a);
+
+		double unitFontSize(void) const;
+		void setUnitFontSize(double size);
+
+		double lineSpace(void) const;
+		void setLineSpace(double size);
+
+		const int& gaugeAngle(void) const;
+		void setGaugeAngle(int angle);
+
+		const int& gaugeRotation(void) const;
+		void setGaugeRotation(int rotation);
+
+		const VideoWidget::Orientation& gaugeOrientation(void) const;
+		void setGaugeOrientation(VideoWidget::Orientation orientation);
+
+		const bool& gaugeFlip(void) const;
+		void setGaugeFlip(bool flip);
+
+		const double& gaugeWidth(void) const;
+		void setGaugeWidth(double width);
+
+		const double& gaugeOffset(void) const;
+		void setGaugeOffset(double offset);
+
+		GaugeCap gaugeCap(void) const;
+		void setGaugeCap(GaugeCap cap);
+
+		const double& gaugeBorder(void) const;
+		void setGaugeBorder(double border);
+
+		const float * gaugeBorderColor(void) const;
+		bool setGaugeBorderColor(std::string color);
+		bool setGaugeBorderColor(double r, double g, double b, double a);
+
+		const float * gaugePrimaryColor() const;
+		bool setGaugePrimaryColor(std::string color);
+		bool setGaugePrimaryColor(double r, double g, double b, double a);
+
+		const float * gaugeSecondaryColor() const;
+		bool setGaugeSecondaryColor(std::string color);
+		bool setGaugeSecondaryColor(double r, double g, double b, double a);
+
+		const float * gaugeBackgroundColor(void) const;
+		bool setGaugeBackgroundColor(std::string color);
+		bool setGaugeBackgroundColor(double r, double g, double b, double a);
+
+		const double& tickSize(void) const;
+		void setTickSize(double size);
+
+		const Align& tickAlign(void) const;
+		void setTickAlign(Align align);
+
+		const float * tickColor(void) const;
+		bool setTickColor(std::string color);
+		bool setTickColor(double r, double g, double b, double a);
+
+		const double& tickLabelDistance(void) const;
+		void setTickLabelDistance(double distance);
+
+		double tickLabelFontSize(void) const;
+		void setTickLabelFontSize(double size);
+
+		const float * tickLabelColor(void) const;
+		bool setTickLabelColor(std::string color);
+		bool setTickLabelColor(double r, double g, double b, double a);
+
+		const float * tickLabelBorderColor(void) const;
+		bool setTickLabelBorderColor(std::string color);
+		bool setTickLabelBorderColor(double r, double g, double b, double a);
+
+		NeedleType needleType(void) const;
+		void setNeedleType(NeedleType type);
+
+		const double& needleDistance(void) const;
+		void setNeedleDistance(double distance);
+
+		const double& needleBorder(void) const;
+		void setNeedleBorder(double border);
+
+		const float * needleBorderColor(void) const;
+		bool setNeedleBorderColor(std::string color);
+		bool setNeedleBorderColor(double r, double g, double b, double a);
+
+		const float * needleBackgroundColor(void) const;
+		bool setNeedleBackgroundColor(std::string color);
+		bool setNeedleBackgroundColor(double r, double g, double b, double a);
+
+		const float * needlePrimaryColor(void) const;
+		bool setNeedlePrimaryColor(std::string color);
+		bool setNeedlePrimaryColor(double r, double g, double b, double a);
+
+		const float * needleSecondaryColor(void) const;
+		bool setNeedleSecondaryColor(std::string color);
+		bool setNeedleSecondaryColor(double r, double g, double b, double a);
+
+		const double &cursorWidth(void) const;
+		void setCursorWidth(double width);
+
+		const float * cursorColor(void) const;
+		bool setCursorColor(std::string color);
+		bool setCursorColor(double r, double g, double b, double a);
+
+		const double& axisThick(void) const;
+		void setAxisThick(double thick);
+
+		const double& axisBorder(void) const;
+		void setAxisBorder(double border);
+
+		const float * axisColor(void) const;
+		bool setAxisColor(std::string color);
+		bool setAxisColor(double r, double g, double b, double a);
+
+		const float * axisBorderColor(void) const;
+		bool setAxisBorderColor(std::string color);
+		bool setAxisBorderColor(double r, double g, double b, double a);
+
+		const double& curveThick(void) const;
+		void setCurveThick(double thick);
+
+		const double& curveBorder(void) const;
+		void setCurveBorder(double border);
+
+		const float * curveColor(void) const;
+		bool setCurveColor(std::string color);
+		bool setCurveColor(double r, double g, double b, double a);
+
+		const float * curveBorderColor(void) const;
+		bool setCurveBorderColor(std::string color);
+		bool setCurveBorderColor(double r, double g, double b, double a);
+
+		const float * curveFillColor(void) const;
+		bool setCurveFillColor(std::string color);
+		bool setCurveFillColor(double r, double g, double b, double a);
 
 		static bool hex2color(float color[4], std::string html);
 		static std::string color2hex(const float color[4]);
@@ -989,31 +497,34 @@ public:
 
 		float bg_color_[4];
 
-		int border_;
+		double border_;
 		float border_color_[4];
 
-		int round_corner_;
+		double round_corner_;
 
+		double cursor_width_;
 		float cursor_color_[4];
 
 		Icon icon_;
 		std::string icon_file_;
+		double icon_size_;
 		float icon_color_[4];
 
 		Align label_horizontal_align_;
 		Align label_vertical_align_;
 		std::string label_font_family_;
-		int label_font_size_;
+		double label_font_size_;
 		FontStyle label_font_style_;
 		FontWeight label_font_weight_;
-		int label_border_width_;
+		double label_border_width_;
 		int label_shadow_opacity_;
-		int label_shadow_distance_;
+		double label_shadow_distance_;
 		float label_color_[4];
 		float label_border_color_[4];
 
 		NeedleType needle_type_;
-		int needle_distance_;
+		double needle_distance_;
+		double needle_border_;
 		float needle_border_color_[4];
 		float needle_background_color_[4];
 		float needle_primary_color_[4];
@@ -1024,43 +535,51 @@ public:
 		Align value_horizontal_align_;
 		Align value_vertical_align_;
 		std::string value_font_family_;
-		int value_font_size_;
+		double value_font_size_;
 		FontStyle value_font_style_;
 		FontWeight value_font_weight_;
-		int value_border_width_;
+		double value_border_width_;
 		int value_shadow_opacity_;
-		int value_shadow_distance_;
+		double value_shadow_distance_;
 		float value_color_[4];
 		float value_border_color_[4];
 
-		int unit_font_size_;
+		double unit_font_size_;
 
-		int line_space_;
+		double line_space_;
 
 		int gauge_angle_;
 		int gauge_rotation_;
 		VideoWidget::Orientation gauge_orientation_;
 		bool gauge_flip_;
-		int gauge_width_;
+		double gauge_width_;
+		double gauge_offset_;
 		GaugeCap gauge_cap_;
-		int gauge_border_;
+		double gauge_border_;
 		float gauge_border_color_[4];
 		float gauge_bg_color_[4];
 		float gauge_primary_color_[4];
 		float gauge_secondary_color_[4];
 
-		int tick_size_;
+		double tick_size_;
 		Align tick_align_;
 		float tick_color_[4];
-		int tick_label_distance_;
-		int tick_label_font_size_;
+		double tick_label_distance_;
+		double tick_label_font_size_;
 		float tick_label_color_[4];
 		float tick_label_border_color_[4];
-	};
 
-//	Shape& shape(void) {
-//		return shape_;
-//	}
+		double axis_thick_;
+		double axis_border_;
+		float axis_color_[4];
+		float axis_border_color_[4];
+
+		double curve_thick_;
+		double curve_border_;
+		float curve_color_[4];
+		float curve_border_color_[4];
+		float curve_fill_color_[4];
+	};
 
 	virtual ShapeBase * shape(void) = 0;
 
@@ -1074,6 +593,22 @@ public:
 
 	virtual void setShape(Shape shape) {
 		shape_ = shape;
+	}
+
+	TelemetrySource * telemetrySource(void) const {
+		return telemetry_source_;
+	}
+
+	void setTelemetrySource(TelemetrySource *source) {
+		telemetry_source_ = source;
+	}
+
+	const bool& visible(void) const {
+		return visible_;
+	}
+
+	void setVisible(bool visible) {
+		visible_ = visible;
 	}
 
 	const uint64_t& timestamp(void) const {
@@ -1296,15 +831,17 @@ public:
 	static std::string getFriendlyName(TelemetryData::Unit unit);
 
 protected:
-	VideoWidget(GPXApplication &app, Widget type)  
+	VideoWidget(GPXApplication &app, Widget type, TelemetrySource *source = NULL)  
 		: GPXApplication::Task(app, widget2string(type))
 		, app_(app) 
+		, telemetry_source_(source)
 		, at_begin_time_(0)
 		, at_end_time_(0)
 		, name_(widget2string(type))
 		, type_(type) {
-		setTimestamp(0),
-		setShape(ShapeNone),
+		setVisible(true);
+		setTimestamp(0);
+		setShape(ShapeNone);
 		setPosition(PositionNone);
 		setOrientation(OrientationNone);
 		setAtTime(0, 0);
@@ -1320,6 +857,7 @@ protected:
 	virtual void xmlclose(std::ostream &os);
 
 	GPXApplication &app_;
+	TelemetrySource *telemetry_source_;
 	Shape shape_;
 	Position position_;
 	Orientation orientation_;
@@ -1329,6 +867,8 @@ protected:
 	std::string source_;
 
 	const int null_ = 0;
+
+	bool visible_;
 
 	// Used only to store video timestamp for profiling
 	uint64_t timestamp_;

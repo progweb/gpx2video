@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static TemperatureWidget * create(GPXApplication &app) {
+	static TemperatureWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		TemperatureWidget *widget;
 
-		widget = new TemperatureWidget(app);
+		widget = new TemperatureWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitCelsius);
 
@@ -152,14 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	TemperatureWidget(GPXApplication &app);
+	TemperatureWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

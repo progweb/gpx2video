@@ -94,7 +94,7 @@ error:
 }
 
 
-OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider, const float *color) {
+OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, const float *color) {
 	bool apply_color;
 
 	int stride;
@@ -138,8 +138,8 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &divider,
 	rsvg_handle_get_intrinsic_size_in_pixels(handle, &width, &height);
 
 	// Compute size
-	width *= divider;
-	height *= divider;
+	width = width * size / height;
+	height = size;
 
 	// Create cairo surface (ARGB32)
 	surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);

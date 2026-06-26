@@ -237,7 +237,7 @@ namespace layout
     ///
     /// @return the border attribute
     ///
-    Unsigned  &border() { return _border; }
+    Decimal  &border() { return _border; }
 
     ///
     /// Get border color
@@ -251,7 +251,7 @@ namespace layout
 	/// 
 	/// @return the round corner attribute
 	///
-	Unsigned  &roundCorner() { return _round_corner; }
+	Decimal  &roundCorner() { return _round_corner; }
 
     ///
     /// Get background color
@@ -272,7 +272,7 @@ namespace layout
     ///
     /// @return the line space element
     ///
-    Unsigned &lineSpace() { return _line_space; }
+    Decimal &lineSpace() { return _line_space; }
 
     ///
     /// Get icon name
@@ -280,6 +280,13 @@ namespace layout
     /// @return the icon name element
     ///
     String &icon() { return _icon_name; }
+
+	///
+	/// Get icon size
+	/// 
+	/// @return the icon size elememnt
+	///
+	Decimal &iconSize() { return _icon_size; }
 
     ///
     /// Get icon color
@@ -512,6 +519,13 @@ namespace layout
     ///
     Decimal  &gaugeWidth() { return _gauge_width; }
 
+    ///
+    /// Get gauge offset
+    ///
+    /// @return the gauge offset attribute
+    ///
+    Decimal  &gaugeOffset() { return _gauge_offset; }
+
 	///
 	/// Get gauge cap
 	/// @return the gauge cap element
@@ -561,6 +575,13 @@ namespace layout
     /// @return the needle distance attribute
     ///
     Decimal &needleDistance() { return _needle_distance; }
+
+    ///
+    /// Get needle border
+    ///
+    /// @return the needle border attribute
+    ///
+    Decimal  &needleBorder() { return _needle_border; }
 
 	///
 	/// Get needle border color
@@ -716,16 +737,17 @@ namespace layout
 	Decimal      _padding_top;
 	Decimal      _padding_bottom;
 
-	Unsigned     _border;
+	Decimal      _border;
 	String       _bordercolor;
-	Unsigned     _round_corner;
+	Decimal      _round_corner;
 	String       _bgcolor;
 
 	String       _text;
 
-	Unsigned     _line_space;
+	Decimal      _line_space;
 
     String       _icon_name;
+	Decimal      _icon_size;
 	String       _icon_color;
 
 	String       _label_fontfamily;
@@ -763,6 +785,7 @@ namespace layout
 	String       _gauge_orientation;
 	Boolean      _gauge_flip;
 	Decimal      _gauge_width;
+	Decimal      _gauge_offset;
 	String       _gauge_cap;
 	Decimal      _gauge_border;
 	String       _gauge_border_color;
@@ -772,6 +795,7 @@ namespace layout
 
 	String       _needle_type;
 	Decimal      _needle_distance;
+	Decimal      _needle_border;
 	String       _needle_border_color;
 	String       _needle_background_color;
 	String       _needle_primary_color;

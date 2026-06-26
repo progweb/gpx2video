@@ -114,10 +114,10 @@ public:
 		delete shape_;
 	}
 
-	static MaxSpeedWidget * create(GPXApplication &app) {
+	static MaxSpeedWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		MaxSpeedWidget *widget;
 
-		widget = new MaxSpeedWidget(app);
+		widget = new MaxSpeedWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitMilesPerHour);
 
@@ -165,14 +165,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	MaxSpeedWidget(GPXApplication &app);
+	MaxSpeedWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

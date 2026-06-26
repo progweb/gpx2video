@@ -1,8 +1,8 @@
 #include "text.h"
 
 
-TextWidget::TextWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetText) 
+TextWidget::TextWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetText, source) 
 	, TextShape(theme())
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) {
@@ -36,7 +36,7 @@ void TextWidget::initialize(cairo_t *cr) {
 
 	ShapeBase::Font font;
 
-	TextShape::setSize(theme().height());
+	TextShape::setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),

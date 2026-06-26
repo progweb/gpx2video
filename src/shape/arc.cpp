@@ -3,6 +3,10 @@
 
 
 void ArcShape::background(cairo_t *cr, double border, const float *fill, const float *outline) {
+	// Scaling
+	border = size2pixels(border) / 2.0;
+
+	// Draw
 	cairo_save(cr);
 	cairo_arc(cr, center_x_, center_y_, size_ / 2, 0, 2 * M_PI);
 	cairo_close_path(cr);
@@ -65,13 +69,26 @@ void ArcShape::arc_i(cairo_t *cr, double a1, double a2, double offset, double wi
 
 
 void ArcShape::arc(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline) {
+	// Append border
+	offset += theme().border();
+
+	// Scaling
+	width = size2pixels(width) / 2.0;
+	border = size2pixels(border) / 2.0;
+	offset = size2pixels(offset) / 2.0;
+
+	// Draw
 	arc_i(cr, std::min(a1, a2), std::max(a1, a2), offset, width, border, fill, outline);
 }
 
 
 void ArcShape::pieslice(cairo_t *cr, double a1, double a2, double border, const float *fill, const float *outline) {
+	// Scaling
+	border = size2pixels(border) / 2.0;
+
+	// Draw
 	cairo_save(cr);
-	cairo_arc(cr, center_x_, center_y_, size_ / 2, DEG2RAD(a1 - correction_), DEG2RAD(a2 - correction_));
+	cairo_arc(cr, center_x_, center_y_, (size_ - border) / 2.0, DEG2RAD(a1 - correction_), DEG2RAD(a2 - correction_));
 	cairo_close_path(cr);
 	cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
 	cairo_fill_preserve(cr);
@@ -85,9 +102,17 @@ void ArcShape::pieslice(cairo_t *cr, double a1, double a2, double border, const 
 
 
 void ArcShape::line(cairo_t *cr, double a, double d1, double d2, double width, const float *fill) {
-	struct point p1 = locate(a, d1);
-	struct point p2 = locate(a, d2);
+	struct ArcShape::point p1, p2;
 
+	// Scaling
+	d1 = size2pixels(d1);
+	d2 = size2pixels(d2);
+   
+	// Compute position
+	p1 = locate(a, d1 / 2.0);
+	p2 = locate(a, d2 / 2.0);
+
+	// Draw
 	cairo_save(cr);
 	cairo_set_line_width(cr, width);
 	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
@@ -110,7 +135,7 @@ void ArcShape::ticklabel(cairo_t *cr, double a, double d, ArcShape::Font &font,
 	this->extents(cr, font, text, x, y, width, height);
 
 	// Compute position
-	p = locate(a, (height / 2) + d);
+	p = locate(a, (height / 2) + size2pixels(d));
 
 	// Text offset
 	x = -x;
@@ -129,28 +154,41 @@ void ArcShape::value(cairo_t *cr, ArcShape::Font &font,
 	int x, y;
 	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().valueHorizontalAlign();
+	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
+	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
 
+	// Text dimensions
 	this->extents(cr, font, text, x, y, width, height);
 
 	// Text offset
 	x = -x;
 	y = -y;
 
-	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
+	// Text horizontal position
+	if (halign == VideoWidget::Theme::AlignLeft) {
 		x += padding_left_;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
+	else if (halign == VideoWidget::Theme::AlignCenter) {
 		x += theme().width() / 2;
 		x -= width / 2;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
+	else if (halign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
 		x -= width;
 	}
 
-	y += theme().height() - padding_bottom_ - height;
+	// Text vertical position
+	if (valign == VideoWidget::Theme::AlignTop) {
+		y += theme().border() + theme().padding(VideoWidget::Theme::PaddingTop);
+	}
+	else if (valign == VideoWidget::Theme::AlignCenter) {
+		y += theme().height() / 2 + theme().padding(VideoWidget::Theme::PaddingTop) - theme().padding(VideoWidget::Theme::PaddingBottom);
+		y -= height / 2;
+	}
+	else if (valign == VideoWidget::Theme::AlignBottom) {
+		y += theme().height() - theme().border() - theme().padding(VideoWidget::Theme::PaddingBottom);
+		y -= height;
+	}
 
 	ShapeBase::text(cr, x, y, font, fill, outline, text);
 }
@@ -389,7 +427,8 @@ void ArcShape::xmlwrite(std::ostream &os) {
 	os << "<shape>" << VideoWidget::shape2string(VideoWidget::ShapeArc) << "</shape>" << std::endl;
 
 	os << "<with-gauge>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagGauge)) << "</with-gauge>" << std::endl;
-	os << "<gauge-rotation>" << theme().gaugeWidth() << "</gauge-rotation>" << std::endl;
+	os << "<gauge-angle>" << theme().gaugeAngle() << "</gauge-angle>" << std::endl;
+	os << "<gauge-rotation>" << theme().gaugeRotation() << "</gauge-rotation>" << std::endl;
 	os << "<gauge-flip>" << VideoWidget::bool2string(theme().gaugeFlip()) << "</gauge-flip>" << std::endl;
 	os << "<gauge-width>" << theme().gaugeWidth() << "</gauge-width>" << std::endl;
 	os << "<gauge-cap>" << VideoWidget::gaugecap2string(theme().gaugeCap()) << "</gauge-cap>" << std::endl;

@@ -18,7 +18,7 @@ bool GPX2VideoShapeBaseSettingsBox::find_in_listtore(const Glib::RefPtr<Gtk::Lis
 }
 
 
-void GPX2VideoShapeBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
+void GPX2VideoShapeBaseSettingsBox::on_widget_spin_int_changed(Gtk::SpinButton *button, std::function<void(const int&)> set) {
 	log_call();
 
 	int value;
@@ -31,6 +31,25 @@ void GPX2VideoShapeBaseSettingsBox::on_widget_spin_changed(Gtk::SpinButton *butt
 
 	// Read value
 	value = button->get_value_as_int();
+
+	// Set value
+	set(value);
+}
+
+
+void GPX2VideoShapeBaseSettingsBox::on_widget_spin_double_changed(Gtk::SpinButton *button, std::function<void(const double&)> set) {
+	log_call();
+
+	double value;
+
+	if (loading_)
+		return;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Read value
+	value = button->get_value();
 
 	// Set value
 	set(value);

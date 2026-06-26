@@ -229,6 +229,9 @@ void VideoRenderer::computeWidgetsPosition(void) {
 
 	// At last, apply layout rotation
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		switch (orientation) {
 		case 180:
 		case -180:
@@ -376,6 +379,10 @@ bool VideoRenderer::run(void) {
 		uint64_t begin = widget->atBeginTime();
 		uint64_t end = widget->atEndTime();
 
+		if (!widget->visible())
+			continue;
+
+		// Visible on this time range
 		if ((begin != 0) && (timecode_ms < begin))
 			continue;
 

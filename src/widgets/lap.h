@@ -28,6 +28,18 @@ public:
 		nbr_target_lap_ = target;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -111,10 +123,10 @@ public:
 		delete shape_;
 	}
 
-	static LapWidget * create(GPXApplication &app) {
+	static LapWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		LapWidget *widget;
 
-		widget = new LapWidget(app);
+		widget = new LapWidget(app, source);
 
 		return widget;
 	}
@@ -168,7 +180,7 @@ private:
 
 	int nbr_target_lap_;
 
-	LapWidget(GPXApplication &app);
+	LapWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

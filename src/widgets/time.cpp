@@ -31,7 +31,7 @@ void TimeTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -92,23 +92,29 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	time_t t;
 	struct tm time;
 
+	std::string format;
+
 	// Initialize
 	initialize(cr);
 
+	// Compute time
+	t = data.datetime() / 1000;
+
 	// Format data
-	if (data.datetime() != 0) {
-		// Compute time
-		t = data.datetime() / 1000;
+	// Don't use gps time, but camera time!
+	// Indeed, with garmin devices, gpx time has an offset.
+	localtime_r(&t, &time);
 
-		// Format data
-		// Don't use gps time, but camera time!
-		// Indeed, with garmin devices, gpx time has an offset.
-		localtime_r(&t, &time);
+	format = Utils::replace(widget_->valueFormat(), "%p", (time.tm_hour < 12) ? "AM" : "PM");
 
-		strftime(s, sizeof(s), "%H:%M:%S", &time);
+	strftime(s, sizeof(s), format.c_str(), &time);
+
+	// Format data
+	if (data.datetime() == 0) {
+		for (size_t i=0; i<strlen(s); i++) 
+			if (std::isdigit(static_cast<unsigned char>(s[i])))
+				s[i] = '-';
 	}
-	else
-		strncpy(s, "--:--:--", sizeof(s));
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -193,14 +199,12 @@ bool TimeArcShape::updated(const TelemetryData &data) const {
 
 
 void TimeArcShape::initialize(cairo_t *cr) {
+	if (is_initialized_)
+		return;
+
 	(void) cr;
 
-	width_ = theme().width();
-	height_ = theme().height();
-
-	size_ = std::min(width_, height_);
-
-	setSize(width_, height_, size_);
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -221,16 +225,20 @@ void TimeArcShape::tickinit(int min, int max) {
 }
 
 
-void TimeArcShape::ticklenwidth(int value, int *len, int *width) {
-	int size = theme().tickSize(); // size_ / 15
+void TimeArcShape::ticklenwidth(int value, double *len, double *width) {
+	double ticksize = theme().tickSize();
 	
-	if (value % 5 == 0) {
-		*len = size + size_ / 51;
-		*width = size_ / 96;
+	if (value % 10 == 0) {
+		*len = ticksize;
+		*width = size() / 128;
+	}
+	else if (value % 5 == 0) {
+		*len = ticksize - (ticksize / 3);
+		*width = size() / 128;
 	}
 	else {
-		*len = size - size_ / 51;
-		*width = size_ / 128;
+		*len = ticksize - (ticksize / 6);
+		*width = size() / 256;
 	}
 }
 
@@ -291,8 +299,8 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Draw tick lines around arc line
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
 		for (int value = tmin; value < tmax + tick_step_; value = value + tick_step_) {
-			int ticklen;
-			int tickwidth;
+			double ticklen;
+			double tickwidth;
 
 			xa = scale(tmin, tmax, value, rotate);
 
@@ -305,14 +313,14 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		}
 	}
 
-	// Draw arc label
+	// Draw tick label
 	// 1 2 3 4 5 6...
 	// 1 3 6...
 	// 1 6...
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
 		int mstep = (tick_mstep_ > 0) ? 3 * tick_mstep_ : 1;
 
-		double distance = theme().tickSize();
+		double distance = theme().tickSize() / 2.0;
 		
 		distance += theme().tickLabelDistance();
 
@@ -326,13 +334,11 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			std::string str = std::to_string(value + 1);
 
-//			text(cr, xa, distance, theme().tickLabelColor(), str);
-
 			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -341,6 +347,48 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			ticklabel(cr, xa, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), str.c_str());
 		}
+	}
+
+	// Write time value
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		char s[128];
+
+		time_t t;
+		struct tm time;
+
+		std::string format;
+
+		// Compute time
+		t = data.datetime() / 1000;
+
+		// Format data
+		// Don't use gps time, but camera time!
+		// Indeed, with garmin devices, gpx time has an offset.
+		localtime_r(&t, &time);
+
+		format = Utils::replace(widget_->valueFormat(), "%p", (time.tm_hour < 12) ? "AM" : "PM");
+
+		strftime(s, sizeof(s), format.c_str(), &time);
+
+		// Format data
+		if (data.datetime() == 0) {
+			for (size_t i=0; i<strlen(s); i++) 
+				if (std::isdigit(static_cast<unsigned char>(s[i])))
+					s[i] = '-';
+		}
+
+		font = (ArcShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
 
 	// Draw needle
@@ -354,11 +402,11 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		// Draw minute needle
 		xa = scale(tmin, tmax, time.tm_min, rotate);
-		needle(cr, type, xa, (size_ / 72), false, primary_color, secondary_color);
+		needle(cr, type, xa, (size() / 72), false, primary_color, secondary_color);
 
 		// Draw hour needle
 		xa = scale(tmin, tmax, time.tm_hour * 5, rotate);
-		needle(cr, type, xa, (size_ / 4), false, primary_color, secondary_color);
+		needle(cr, type, xa, (size() / 4), false, primary_color, secondary_color);
 
 		// Draw second needle
 		xa = scale(tmin, tmax, time.tm_sec, rotate);
@@ -386,8 +434,8 @@ void TimeArcShape::clear(void) {
 }
 
 
-TimeWidget::TimeWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetTime) 
+TimeWidget::TimeWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetTime, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
@@ -398,6 +446,12 @@ TimeWidget::TimeWidget(GPXApplication &app)
 
 	ADD_SHAPE(VideoWidget::ShapeArc);
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+	// Append format supported
+	formats_supported_.push_back((VideoWidget::ListItem) { 0, "HH:MM", "%H:%M" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 1, "HH:MM:SS", "%H:%M:%S" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 2, "HH:MM AM/PM", "%I:%M %p" });
+	formats_supported_.push_back((VideoWidget::ListItem) { 3, "HH:MM:SS AM/PM", "%I:%M:%S %p" });
 
 	setShape(VideoWidget::ShapeText);
 }

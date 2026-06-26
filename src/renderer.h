@@ -169,13 +169,10 @@ protected:
 	int layout_width_;
 	int layout_height_;
 
-//	OIIO::ImageBuf *overlay_;
-
 	Renderer(GPXApplication &app,
 			RendererSettings &rendererSettings, TelemetrySettings &telemetrySettings);
 
 	bool init(MediaContainer *container);
-	bool start(void);
 	bool load(void);
 	bool loadMap(layout::Map *m);
 	bool loadTrack(layout::Track *t);
@@ -183,7 +180,7 @@ protected:
 
 	void computeWidgetsPosition(void);
 
-	VideoWidget * create(VideoWidget::Widget type);
+	VideoWidget * create(VideoWidget::Widget type, TelemetrySource *source = NULL);
 
 	void rotate(OIIO::ImageBuf *buf, int orientation);
 	void resize(OIIO::ImageBuf *buf, int width, int height);

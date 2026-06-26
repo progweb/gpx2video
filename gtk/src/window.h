@@ -129,6 +129,7 @@ protected:
 	void on_widget_clicked(GPX2VideoWidget *widget);
 	void on_widget_selected(GPX2VideoWidget *widget);
 	void on_widget_remove_clicked(GPX2VideoWidget *widget);
+	void on_widget_visible_changed(GPX2VideoWidget *widget);
 
 #if GTKMM_CHECK_VERSION(4, 10, 0)
 	void on_file_dialog_open_clicked(const Glib::RefPtr<Gio::AsyncResult> &result,

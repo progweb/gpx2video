@@ -1,152 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<requires lib="gtk" version="4.0"/>
-	<object class="GtkAdjustment" id="zoom_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">14</property>
-		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="factor_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">10</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="path_smooth_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
-	</object>
-	<object class="GtkAdjustment" id="path_thick_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="path_border_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="icon_start_size_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="icon_end_size_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
-	<object class="GtkAdjustment" id="icon_position_size_adjustment">
-		<property name="lower">0</property>
-		<property name="upper">100</property>
-		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
-		<property name="page-increment">1</property>
-	</object>
 
-	<object class="GtkPopover" id="icon_popover">
-		<property name="position">top</property>
-		<property name="margin-bottom">12</property>
-		<property name="margin-end">12</property>
-		<property name="margin-start">12</property>
-		<property name="margin-top">12</property>
-		<child>
-			<object class="GtkBox">
-				<property name="orientation">vertical</property>
-				<property name="halign">fill</property>
-				<property name="hexpand">True</property>
-				<property name="valign">start</property>
-				<property name="vexpand">False</property>
-				<child>
-					<object class="GtkBox">
-						<property name="orientation">horizontal</property>
-						<property name="halign">fill</property>
-						<property name="hexpand">True</property>
-						<property name="valign">end</property>
-						<property name="vexpand">False</property>
-						<property name="margin-bottom">4</property>
-						<property name="margin-end">4</property>
-						<property name="margin-start">0</property>
-						<property name="margin-top">4</property>
-						<child>
-							<object class="GtkButton" id="icon_zoomout_button">
-								<property name="icon-name">zoom-out-symbolic</property>
-								<property name="halign">end</property>
-								<property name="hexpand">True</property>
-								<property name="valign">center</property>
-							</object>
-						</child>
-						<child>
-							<object class="GtkButton" id="icon_zoomin_button">
-								<property name="icon-name">zoom-in-symbolic</property>
-								<property name="halign">end</property>
-								<property name="hexpand">False</property>
-								<property name="valign">center</property>
-							</object>
-						</child>
-					</object>
-				</child>
-				<child>
-					<object class="GtkScrolledWindow">
-						<property name="can-focus">1</property>
-						<property name="margin-top">6</property>
-						<property name="width-request">300</property>
-						<property name="height-request">226</property>
-						<child>
-							<object class="GtkGridView" id="icon_gridview">
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">fill</property>
-								<property name="vexpand">True</property>
-							</object>
-						</child>
-					</object>
-				</child>
-				<child>
-					<object class="GtkBox">
-						<property name="orientation">horizontal</property>
-						<property name="halign">fill</property>
-						<property name="hexpand">True</property>
-						<property name="valign">end</property>
-						<property name="vexpand">False</property>
-						<property name="margin-bottom">4</property>
-						<property name="margin-end">4</property>
-						<property name="margin-start">0</property>
-						<property name="margin-top">4</property>
-						<child>
-							<object class="GtkCheckButton" id="icon_usedefault_checkbutton">
-								<property name="halign">start</property>
-								<property name="hexpand">False</property>
-								<property name="valign">center</property>
-								<property name="label" translatable="yes">Use default</property>
-							</object>
-						</child>
-						<child>
-							<object class="GtkButton" id="icon_ok_button">
-								<property name="halign">end</property>
-								<property name="hexpand">True</property>
-								<property name="valign">center</property>
-								<property name="label" translatable="yes">Ok</property>
-							</object>
-						</child>
-					</object>
-				</child>
-			</object>
-		</child>
+	<object class="GtkAdjustment" id="axis_thick_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="axis_border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="curve_thick_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="curve_border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="cursor_width_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="needle_distance_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="needle_border_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
+	</object>
+	<object class="GtkAdjustment" id="icon_size_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 
 	<object class="GtkBox" id="settings_box">
@@ -163,7 +73,7 @@
 			<object class="GtkLabel">
 				<property name="can-focus">False</property>
 				<property name="justify">center</property>
-				<property name="label" translatable="yes">Map properties</property>
+				<property name="label" translatable="yes">Chart extension</property>
 				<property name="valign">baseline</property>
 				<property name="xalign">0.5</property>
 				<property name="margin-bottom">6</property>
@@ -171,8 +81,8 @@
 		</child>
 
 		<child>
-			<object class="GtkExpander" id="map_expander">
-				<property name="label" translatable="yes">Map</property>
+			<object class="GtkExpander" id="axis_expander">
+				<property name="label" translatable="yes">Axis</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -193,13 +103,13 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Source:</property>
+										<property name="label" translatable="yes">Axis enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkComboBox" id="source_combobox">
+									<object class="GtkSwitch" id="axis_enable_switch">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="valign">center</property>
@@ -219,92 +129,124 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">View:</property>
+										<property name="label" translatable="yes">Axis thick:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkComboBox" id="view_combobox">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Zoom:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="zoom_spinbutton">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="width-chars">2</property>
-										<property name="max-width-chars">2</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
-										<property name="valign">center</property>
-										<property name="adjustment">zoom_adjustment</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Factor:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="factor_spinbutton">
+									<object class="GtkSpinButton" id="axis_thick_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="digits">1</property>
-										<property name="width-chars">3</property>
-										<property name="max-width-chars">3</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
-										<property name="adjustment">factor_adjustment</property>
+										<property name="adjustment">axis_thick_adjustment</property>
 									</object>
 								</child>
 							</object>
 						</child>
-
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Axis border:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="axis_border_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">axis_border_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Axis border color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="axis_border_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Axis color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="axis_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
 					</object>
 				</child>
 			</object>
-
 		</child>
+
 		<child>
-			<object class="GtkExpander" id="track_expander">
-				<property name="label" translatable="yes">Track</property>
+			<object class="GtkExpander" id="curve_expander">
+				<property name="label" translatable="yes">Curve</property>
 				<child>
 					<object class="GtkBox">
 						<property name="orientation">vertical</property>
@@ -313,7 +255,173 @@
 						<property name="valign">start</property>
 						<property name="vexpand">True</property>
 						<property name="spacing">6</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Curve thick:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="curve_thick_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">curve_thick_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Curve border:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="curve_border_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">curve_border_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Curve border color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="curve_border_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Curve color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="curve_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Curve fill color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="curve_fill_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
 
+		<child>
+			<object class="GtkExpander" id="cursor_expander">
+				<property name="label" translatable="yes">Cursor</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
 						<child>
 							<object class="GtkBox">
 								<property name="orientation">horizontal</property>
@@ -326,22 +434,16 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path smooth:</property>
+										<property name="label" translatable="yes">Cursor enable:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkSpinButton" id="path_smooth_spinbutton">
+									<object class="GtkSwitch" id="cursor_enable_switch">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
-										<property name="digits">0</property>
-										<property name="width-chars">4</property>
-										<property name="max-width-chars">4</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
-										<property name="adjustment">path_smooth_adjustment</property>
 									</object>
 								</child>
 							</object>
@@ -358,45 +460,13 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path thick:</property>
+										<property name="label" translatable="yes">Cursor width:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkSpinButton" id="path_thick_spinbutton">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="digits">1</property>
-										<property name="width-chars">4</property>
-										<property name="max-width-chars">4</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
-										<property name="valign">center</property>
-										<property name="adjustment">path_thick_adjustment</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path border:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="path_border_spinbutton">
+									<object class="GtkSpinButton" id="cursor_width_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="digits">1</property>
@@ -405,7 +475,7 @@
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>
-										<property name="adjustment">path_border_adjustment</property>
+										<property name="adjustment">cursor_width_adjustment</property>
 									</object>
 								</child>
 							</object>
@@ -417,17 +487,180 @@
 								<property name="hexpand">True</property>
 								<property name="valign">start</property>
 								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
 								<child>
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path border color:</property>
+										<property name="label" translatable="yes">Cursor color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkColorButton" id="path_border_color_button">
+									<object class="GtkColorButton" id="cursor_color_button">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+										<property name="rgba">#9141AC</property>
+										<property name="show-editor">False</property>
+										<property name="use-alpha">True</property>
+										<property name="tooltip-text" translatable="yes">Select a color</property>
+									</object>
+								</child>
+							</object>
+						</child>
+					</object>
+				</child>
+			</object>
+		</child>
+
+		<child>
+			<object class="GtkExpander" id="needle_expander">
+				<property name="label" translatable="yes">Needle</property>
+				<child>
+					<object class="GtkBox">
+						<property name="orientation">vertical</property>
+						<property name="halign">fill</property>
+						<property name="hexpand">True</property>
+						<property name="valign">start</property>
+						<property name="vexpand">True</property>
+						<property name="spacing">6</property>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Needle enable:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSwitch" id="needle_enable_switch">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Needle type:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkComboBox" id="needle_type_combobox">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="valign">center</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Needle distance:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="needle_distance_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">needle_distance_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Needle border:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkSpinButton" id="needle_border_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">needle_border_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Needle border color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="needle_border_color_button">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="valign">center</property>
@@ -446,46 +679,18 @@
 								<property name="hexpand">True</property>
 								<property name="valign">start</property>
 								<property name="vexpand">False</property>
+								<property name="spacing">6</property>
 								<child>
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path primary color:</property>
+										<property name="label" translatable="yes">Needle background color:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkColorButton" id="path_primary_color_button">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-										<property name="rgba">#9141AC</property>
-										<property name="show-editor">False</property>
-										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="yes">Select a color</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Path secondary color:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkColorButton" id="path_secondary_color_button">
+									<object class="GtkColorButton" id="needle_background_color_button">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="valign">center</property>
@@ -520,37 +725,11 @@
 								<property name="hexpand">True</property>
 								<property name="valign">start</property>
 								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
 								<child>
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon start enable:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSwitch" id="icon_start_enable_switch">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon start image:</property>
+										<property name="label" translatable="yes">Icon:</property>
 										<property name="halign">start</property>
 										<property name="hexpand">True</property>
 										<property name="valign">baseline</property>
@@ -558,12 +737,104 @@
 									</object>
 								</child>
 								<child>
-									<object class="GtkMenuButton" id="icon_start_menubutton">
+									<object class="GtkMenuButton" id="icon_menubutton">
 										<property name="halign">end</property>
 										<property name="hexpand">False</property>
 										<property name="tooltip-text" translatable="yes">Set the icon</property>
+										<property name="popover">
+											<object class="GtkPopover" id="icon_popover">
+												<property name="position">top</property>
+												<property name="margin-bottom">12</property>
+												<property name="margin-end">12</property>
+												<property name="margin-start">12</property>
+												<property name="margin-top">12</property>
+												<child>
+													<object class="GtkBox">
+														<property name="orientation">vertical</property>
+														<property name="halign">fill</property>
+														<property name="hexpand">True</property>
+														<property name="valign">start</property>
+														<property name="vexpand">False</property>
+														<child>
+															<object class="GtkBox">
+																<property name="orientation">horizontal</property>
+																<property name="halign">fill</property>
+																<property name="hexpand">True</property>
+																<property name="valign">end</property>
+																<property name="vexpand">False</property>
+																<property name="margin-bottom">4</property>
+																<property name="margin-end">4</property>
+																<property name="margin-start">0</property>
+																<property name="margin-top">4</property>
+																<child>
+																	<object class="GtkButton" id="icon_zoomout_button">
+																		<property name="icon-name">zoom-out-symbolic</property>
+																		<property name="halign">end</property>
+																		<property name="hexpand">True</property>
+																		<property name="valign">center</property>
+																	</object>
+																</child>
+																<child>
+																	<object class="GtkButton" id="icon_zoomin_button">
+																		<property name="icon-name">zoom-in-symbolic</property>
+																		<property name="halign">end</property>
+																		<property name="hexpand">False</property>
+																		<property name="valign">center</property>
+																	</object>
+																</child>
+															</object>
+														</child>
+														<child>
+															<object class="GtkScrolledWindow">
+																<property name="can-focus">1</property>
+																<property name="margin-top">6</property>
+																<property name="width-request">300</property>
+																<property name="height-request">226</property>
+																<child>
+																	<object class="GtkGridView" id="icon_gridview">
+																		<property name="halign">fill</property>
+																		<property name="hexpand">True</property>
+																		<property name="valign">fill</property>
+																		<property name="vexpand">True</property>
+																	</object>
+																</child>
+															</object>
+														</child>
+														<child>
+															<object class="GtkBox">
+																<property name="orientation">horizontal</property>
+																<property name="halign">fill</property>
+																<property name="hexpand">True</property>
+																<property name="valign">end</property>
+																<property name="vexpand">False</property>
+																<property name="margin-bottom">4</property>
+																<property name="margin-end">4</property>
+																<property name="margin-start">0</property>
+																<property name="margin-top">4</property>
+																<child>
+																	<object class="GtkCheckButton" id="icon_usedefault_checkbutton">
+																		<property name="halign">start</property>
+																		<property name="hexpand">False</property>
+																		<property name="valign">center</property>
+																		<property name="label" translatable="yes">Use default</property>
+																	</object>
+																</child>
+																<child>
+																	<object class="GtkButton" id="icon_ok_button">
+																		<property name="halign">end</property>
+																		<property name="hexpand">True</property>
+																		<property name="valign">center</property>
+																		<property name="label" translatable="yes">Ok</property>
+																	</object>
+																</child>
+															</object>
+														</child>
+													</object>
+												</child>
+											</object>
+										</property>
 										<property name="child">
-											<object class="GtkImage" id="icon_start_image">
+											<object class="GtkImage" id="icon_image">
 												<property name="icon-name">image-x-generic-symbolic</property>
 											</object>
 										</property>
@@ -582,13 +853,44 @@
 									<object class="GtkLabel">
 										<property name="can-focus">False</property>
 										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon start color:</property>
+										<property name="label" translatable="yes">Icon size:</property>
 										<property name="valign">baseline</property>
 										<property name="xalign">0.5</property>
 									</object>
 								</child>
 								<child>
-									<object class="GtkColorButton" id="icon_start_color_button">
+									<object class="GtkSpinButton" id="icon_size_spinbutton">
+										<property name="halign">end</property>
+										<property name="hexpand">True</property>
+										<property name="digits">1</property>
+										<property name="width-chars">4</property>
+										<property name="max-width-chars">4</property>
+										<property name="numeric">True</property>
+										<property name="orientation">horizontal</property>
+										<property name="valign">center</property>
+										<property name="adjustment">icon_size_adjustment</property>
+									</object>
+								</child>
+							</object>
+						</child>
+						<child>
+							<object class="GtkBox">
+								<property name="orientation">horizontal</property>
+								<property name="halign">fill</property>
+								<property name="hexpand">True</property>
+								<property name="valign">start</property>
+								<property name="vexpand">False</property>
+								<child>
+									<object class="GtkLabel">
+										<property name="can-focus">False</property>
+										<property name="justify">left</property>
+										<property name="label" translatable="yes">Icon color:</property>
+										<property name="valign">baseline</property>
+										<property name="xalign">0.5</property>
+									</object>
+								</child>
+								<child>
+									<object class="GtkColorButton" id="icon_color_button">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
 										<property name="valign">center</property>
@@ -600,302 +902,7 @@
 								</child>
 							</object>
 						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon start size:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="icon_start_size_spinbutton">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="digits">1</property>
-										<property name="width-chars">5</property>
-										<property name="max-width-chars">5</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
-										<property name="valign">center</property>
-										<property name="adjustment">icon_start_size_adjustment</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon end enable:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSwitch" id="icon_end_enable_switch">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon end image:</property>
-										<property name="halign">start</property>
-										<property name="hexpand">True</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkMenuButton" id="icon_end_menubutton">
-										<property name="halign">end</property>
-										<property name="hexpand">False</property>
-										<property name="tooltip-text" translatable="yes">Set the icon</property>
-										<property name="child">
-											<object class="GtkImage" id="icon_end_image">
-												<property name="icon-name">image-x-generic-symbolic</property>
-											</object>
-										</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon end color:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkColorButton" id="icon_end_color_button">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-										<property name="rgba">#9141AC</property>
-										<property name="show-editor">False</property>
-										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="yes">Select a color</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon end size:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="icon_end_size_spinbutton">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="digits">1</property>
-										<property name="width-chars">5</property>
-										<property name="max-width-chars">5</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
-										<property name="valign">center</property>
-										<property name="adjustment">icon_end_size_adjustment</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon position enable:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSwitch" id="icon_position_enable_switch">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon position image:</property>
-										<property name="halign">start</property>
-										<property name="hexpand">True</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkMenuButton" id="icon_position_menubutton">
-										<property name="halign">end</property>
-										<property name="hexpand">False</property>
-										<property name="tooltip-text" translatable="yes">Set the icon</property>
-										<property name="child">
-											<object class="GtkImage" id="icon_position_image">
-												<property name="icon-name">image-x-generic-symbolic</property>
-											</object>
-										</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon position color:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkColorButton" id="icon_position_color_button">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-										<property name="rgba">#9141AC</property>
-										<property name="show-editor">False</property>
-										<property name="use-alpha">True</property>
-										<property name="tooltip-text" translatable="yes">Select a color</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon position size:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkSpinButton" id="icon_position_size_spinbutton">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="digits">1</property>
-										<property name="width-chars">5</property>
-										<property name="max-width-chars">5</property>
-										<property name="numeric">True</property>
-										<property name="orientation">horizontal</property>
-										<property name="valign">center</property>
-										<property name="adjustment">icon_position_size_adjustment</property>
-									</object>
-								</child>
-							</object>
-						</child>
-						<child>
-							<object class="GtkBox">
-								<property name="orientation">horizontal</property>
-								<property name="halign">fill</property>
-								<property name="hexpand">True</property>
-								<property name="valign">start</property>
-								<property name="vexpand">False</property>
-								<property name="spacing">6</property>
-								<child>
-									<object class="GtkLabel">
-										<property name="can-focus">False</property>
-										<property name="justify">left</property>
-										<property name="label" translatable="yes">Icon position follow:</property>
-										<property name="valign">baseline</property>
-										<property name="xalign">0.5</property>
-									</object>
-								</child>
-								<child>
-									<object class="GtkComboBox" id="icon_position_follow_combobox">
-										<property name="halign">end</property>
-										<property name="hexpand">True</property>
-										<property name="valign">center</property>
-									</object>
-								</child>
-							</object>
-						</child>
+
 					</object>
 				</child>
 			</object>
@@ -903,4 +910,3 @@
 
 	</object>
 </interface>
-

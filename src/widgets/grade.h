@@ -22,6 +22,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -101,10 +113,10 @@ public:
 		delete shape_;
 	}
 
-	static GradeWidget * create(GPXApplication &app) {
+	static GradeWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		GradeWidget *widget;
 
-		widget = new GradeWidget(app);
+		widget = new GradeWidget(app, source);
 
 		return widget;
 	}
@@ -151,7 +163,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	GradeWidget(GPXApplication &app);
+	GradeWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

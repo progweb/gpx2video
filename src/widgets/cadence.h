@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static CadenceWidget * create(GPXApplication &app) {
+	static CadenceWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		CadenceWidget *widget;
 
-		widget = new CadenceWidget(app);
+		widget = new CadenceWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitTrPerMin);
 
@@ -152,13 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	CadenceWidget(GPXApplication &app);
+	CadenceWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

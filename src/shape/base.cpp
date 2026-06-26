@@ -1,5 +1,3 @@
-#include <pango/pangocairo.h>
-
 #include "../log_i.h"
 #include "base.h"
 
@@ -137,8 +135,44 @@ void ShapeBase::renderCairoContext(OIIO::ImageBuf *buf, cairo_t *cairo) {
 void ShapeBase::destroyCairoContext(cairo_t *cairo) {
 	cairo_surface_t *surface = cairo_get_target(cairo);
 
-	cairo_surface_destroy(surface);
+	if (surface_ != NULL)
+		cairo_surface_destroy(surface);
+
 	cairo_destroy(cairo);
+}
+
+
+void ShapeBase::saveCairoSurface(cairo_t *cairo) {
+	int width, height;
+
+	cairo_surface_t *src, *dst;
+
+	// Get surface
+	src = cairo_get_target(cairo);
+
+	width = cairo_image_surface_get_width(src);
+	height = cairo_image_surface_get_height(src);
+
+	// Create & copy new surface
+	dst = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+
+	cairo_t *cr = cairo_create(dst);
+	cairo_set_source_surface(cr, src, 0, 0);
+	cairo_paint(cr);
+	cairo_destroy(cr);
+
+	surface_ = dst;
+}
+
+
+bool ShapeBase::restoreCairoSurface(cairo_t *cairo) {
+	if (surface_ == NULL)
+		return false;
+
+	cairo_set_source_surface(cairo, surface_, 0, 0);
+	cairo_paint(cairo);
+
+	return true;
 }
 
 
@@ -146,18 +180,22 @@ void ShapeBase::background(cairo_t *cr, double radius) {
 	int x, y;
 	int width, height;
 
-	int border = theme_.border();
+	int border;
 
 	double degrees = M_PI / 180.0;
 
 	const float *fill = theme_.backgroundColor();
 	const float *outline = theme_.borderColor();
 
-	x = border / 2;
-	y = border / 2;
+	border = size2pixels(theme_.border()) / 2.0;
 
 	width = theme_.width() - border;
 	height = theme_.height() - border;
+
+	radius = size2pixels(radius) / 2.0;
+
+	x = border / 2;
+	y = border / 2;
 
 	cairo_save(cr);
 	if (radius > 0) {
@@ -198,7 +236,7 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 	pango_font_description_set_weight(desc, (PangoWeight) font.weight);
 	pango_font_description_set_stretch(desc, PANGO_STRETCH_NORMAL);
 //	pango_font_description_set_size(desc, fontsize * PANGO_SCALE);
-	pango_font_description_set_absolute_size(desc, font.size * PANGO_SCALE);
+	pango_font_description_set_absolute_size(desc, fontsize2pixels(font.size));
 
 	// Draw text into layout
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
@@ -208,8 +246,10 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 
 	// Apply shadow effect
 	if (font.shadow_distance > 0) {
+		double distance = shadow2pixels(font);
+
 		cairo_save(cr);
-		cairo_move_to(cr, x + font.shadow_distance, y + font.shadow_distance);
+		cairo_move_to(cr, x + distance, y + distance);
 		pango_cairo_layout_path(cr, layout);
 		cairo_set_source_rgba(cr, 0.0, 0.0, 0.0, font.shadow_opacity / 100.0);
 		cairo_fill(cr);
@@ -225,7 +265,7 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 
 	// Draw text border
 	if (font.border > 0) {
-		cairo_set_line_width(cr, font.border / 10.0);
+		cairo_set_line_width(cr, font.border * fontsize2pixels(font.size) / 100000.0);
 		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
 	}
 	cairo_stroke(cr);
@@ -256,7 +296,7 @@ void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
 	pango_font_description_set_weight(desc, (PangoWeight) font.weight);
 	pango_font_description_set_stretch(desc, PANGO_STRETCH_NORMAL);
 //	pango_font_description_set_size(desc, fontsize * PANGO_SCALE);
-	pango_font_description_set_absolute_size(desc, font.size * PANGO_SCALE);
+	pango_font_description_set_absolute_size(desc, fontsize2pixels(font.size));
 
 	// Draw text into layout
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
@@ -322,6 +362,11 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 		os << "<value-border-color>" << VideoWidget::Theme::color2hex(theme_.valueBorderColor()) << "</value-border-color>" << std::endl;
 		os << "<value-min>" << theme_.valueMin() << "</value-min>" << std::endl;
 		os << "<value-max>" << theme_.valueMax() << "</value-max>" << std::endl;
+	}
+
+	if (hasFeature(ShapeBase::FeatureUnit)) {
+		os << "<with-unit>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<unit-font-size>" << theme_.unitFontSize() << "</unit-font-size>" << std::endl;
 	}
 }
 

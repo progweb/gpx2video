@@ -163,10 +163,6 @@ skip:
 private:
 	bool no_value_;
 
-	int size_;
-	int width_;
-	int height_;
-
 	int tick_step_;
 	int tick_mstep_;
 
@@ -185,7 +181,7 @@ private:
 
 	void initialize(cairo_t *cr);
 	void tickinit(int min, int max);
-	void ticklenwidth(int value, int *len, int *width);
+	void ticklenwidth(int value, double *len, double *width);
 };
 
 
@@ -199,10 +195,10 @@ public:
 		delete shape_;
 	}
 
-	static SpeedWidget * create(GPXApplication &app) {
+	static SpeedWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		SpeedWidget *widget;
 
-		widget = new SpeedWidget(app);
+		widget = new SpeedWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitMilesPerHour);
 
@@ -256,14 +252,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	SpeedWidget(GPXApplication &app);
+	SpeedWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

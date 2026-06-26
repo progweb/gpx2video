@@ -6,9 +6,9 @@
 
 class TextShape : public ShapeBase {
 public:
-	TextShape(VideoWidget::Theme &theme) 
+	TextShape(VideoWidget::Theme &theme, int width = 0, int height = 0) 
 		: ShapeBase(theme, VideoWidget::ShapeText) {
-		setSize(0);
+		setSize(width, height);
 
 		clear();
 	}
@@ -23,6 +23,7 @@ public:
 
 	virtual bool hasFeature(Feature feature) const {
 		switch (feature) {
+		case FeatureGauge:
 		case FeatureNeedle:
 			return false;
 
@@ -33,8 +34,14 @@ public:
 		return true;
 	}
 
-	void setSize(int size) {
-		size_ = size;
+	int size(void) {
+		return size_;
+	}
+
+	void setSize(int width, int height) {
+		ShapeBase::setSize(width, height);
+
+		size_ = height;
 	}
 
 	void setPadding(int left, int right, int top, int bottom) {
@@ -62,10 +69,6 @@ public:
 
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
-//	void initialize(void);
-//	void drawLabel(OIIO::ImageBuf *buf, const char *label);
-//	void drawValue(OIIO::ImageBuf *buf, const char *value);
-
 	void icon(cairo_t *cr, const std::string &filename, const float *fill);
 	void label(cairo_t *cr, TextShape::Font &font, 
 			const float *fill, const float *outline, const char *text);
@@ -92,13 +95,6 @@ private:
 
 	int label_x_, label_y_, label_width_, label_height_;
 	int value_x_, value_y_, value_width_, value_height_;
-
-//	int label_px_;
-//	int label_size_;
-//	int value_px_;
-//	int value_size_;
-//	int value_offset_;
-//	std::string text_;
 };
 
 #endif

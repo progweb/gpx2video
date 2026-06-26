@@ -23,11 +23,9 @@ Renderer::Renderer(GPXApplication &app,
 		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
 	: Task(app, "renderer") 
 	, app_(app)
-	, renderer_settings_(renderer_settings) 
+	, renderer_settings_(renderer_settings)
 	, telemetry_settings_(telemetry_settings) {
 	container_ = NULL;
-
-//	overlay_ = NULL;
 
 	source_ = NULL;
 }
@@ -49,23 +47,6 @@ bool Renderer::init(MediaContainer *container) {
 	// Compute telemetry range
 	computeTelemetryRange();
 
-	return true;
-}
-
-
-bool Renderer::start(void) {
-	log_call();
-
-	// Register task status
-	Task::start();
-
-	if (source_)
-		goto skip;
-
-	// Load telemetry data
-	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
-
-skip:
 	return true;
 }
 
@@ -109,6 +90,9 @@ bool Renderer::load(void) {
 	}
 
 	std::cout << "Parsing '" << filename << "' layout file" << std::endl;
+
+	// Load telemetry data
+	source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
 
 	// For each layout elements
 	nodes = root->getElements();
@@ -167,12 +151,6 @@ bool Renderer::loadMap(layout::Map *m) {
 	MapSettings::Icon icon_position = MapSettings::IconDefault;
 
 	log_call();
-
-	// Display
-	if ((bool) m->display() == false) {
-		log_info("Skip map widget");
-		goto skip;
-	}
 
 	// Map source
 	mapsource = m->source();
@@ -296,11 +274,12 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setIconColor(MapSettings::IconPosition, (const char *) m->iconPositionColor());
 	mapSettings.setIconSize(MapSettings::IconPosition, (double) m->iconPositionSize());
 
-	map = Map::create(app_, telemetrySettings(), mapSettings);
+	map = Map::create(app_, mapSettings, source_);
 
 	log_info("Load map widget at %dx%d", (int) m->x(), (int) m->y());
 
 	// Widget settings
+	map->setVisible(m->display());
 	map->setPosition(position);
 	map->setOrientation(orientation);
 	map->setPosition(m->x(), m->y());
@@ -329,7 +308,7 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	this->append(map);
 
-skip:
+//skip:
 	return true;
 
 error:
@@ -368,12 +347,6 @@ bool Renderer::loadTrack(layout::Track *t) {
 	TrackSettings::Icon icon_position = TrackSettings::IconDefault;
 
 	log_call();
-
-	// Display
-	if ((bool) t->display() == false) {
-		log_info("Skip track widget");
-		goto skip;
-	}
 
 	video_stream = container_->getVideoStream();
 
@@ -488,11 +461,12 @@ bool Renderer::loadTrack(layout::Track *t) {
 	trackSettings.setIconColor(TrackSettings::IconPosition, (const char *) t->iconPositionColor());
 	trackSettings.setIconSize(TrackSettings::IconPosition, (double) t->iconPositionSize());
 
-	track = Track::create(app_, telemetrySettings(), trackSettings);
+	track = Track::create(app_, trackSettings, source_);
 
 	log_info("Load track widget at %dx%d", (int) t->x(), (int) t->y());
 
 	// Widget settings
+	track->setVisible(t->display());
 	track->setPosition(position);
 	track->setOrientation(orientation);
 	track->setPosition(t->x(), t->y());
@@ -521,7 +495,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	this->append(track);
 
-skip:
+//skip:
 	return true;
 
 error:
@@ -576,12 +550,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	if (type == VideoWidget::WidgetUnknown) {
 		log_info("Widget '%s' unknown type", (const char *) w->type());
-		goto skip;
-	}
-
-	// Display
-	if ((bool) w->display() == false) {
-		log_info("Skip widget '%s'", (const char *) w->type());
 		goto skip;
 	}
 
@@ -782,7 +750,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	flags |= VideoWidget::Theme::FlagCursor;
 
 	// Create widget
-	if ((widget = this->create(type)) == NULL)
+	if ((widget = this->create(type, source_)) == NULL)
 		goto skip;
 
 	// Use default values if undefined
@@ -792,6 +760,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		format = widget->valueFormat();
 
 	// Widget common settings
+	widget->setVisible(w->display());
 	widget->setShape(shape);
 	widget->setPosition(position);
 	widget->setOrientation(orientation);
@@ -827,6 +796,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Widget icon settings
 	widget->theme().setIcon(icon);
 	widget->theme().setIconFile(icon_file);
+	widget->theme().setIconSize(w->iconSize());
 	widget->theme().setIconColor((const char *) w->iconColor());
 
 	// Widget misc. settings
@@ -869,6 +839,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setGaugeOrientation(gauge_orientation);
 	widget->theme().setGaugeFlip(w->gaugeFlip());
 	widget->theme().setGaugeWidth(w->gaugeWidth());
+	widget->theme().setGaugeOffset(w->gaugeOffset());
 	widget->theme().setGaugeCap(gauge_cap);
 	widget->theme().setGaugeBorder(w->gaugeBorder());
 	widget->theme().setGaugeBorderColor((const char *) w->gaugeBorderColor());
@@ -886,6 +857,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Widget needle settings
 	widget->theme().setNeedleType(needle_type);
 	widget->theme().setNeedleDistance(w->needleDistance());
+	widget->theme().setNeedleBorder(w->needleBorder());
 	widget->theme().setNeedleBorderColor((const char *) w->needleBorderColor());
 	widget->theme().setNeedleBackgroundColor((const char *) w->needleBackgroundColor());
 	widget->theme().setNeedlePrimaryColor((const char *) w->needlePrimaryColor());
@@ -969,6 +941,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Get position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionTopLeft)
 			continue;
 
@@ -1007,6 +982,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Get position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionTopRight)
 			continue;
 
@@ -1045,6 +1023,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Get position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionBottomLeft)
 			continue;
 
@@ -1083,6 +1064,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Get position (left, top, bottom, right)
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionBottomRight)
 			continue;
 
@@ -1121,6 +1105,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Compute available height on the left side
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() == VideoWidget::PositionTopLeft) {
 			if ((margintop == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
 				margintop = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
@@ -1158,6 +1145,9 @@ void Renderer::computeWidgetsPosition(void) {
 	is_first = true;
 
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionLeft)
 			continue;
 
@@ -1196,6 +1186,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Compute available height on the right side
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() == VideoWidget::PositionTopRight) {
 			if ((margintop == 0) || (widget->orientation() == VideoWidget::OrientationVertical)) {
 				margintop = MAX(widget->theme().height() + widget->margin(VideoWidget::MarginTop) + widget->margin(VideoWidget::MarginBottom), margintop);
@@ -1233,6 +1226,9 @@ void Renderer::computeWidgetsPosition(void) {
 	is_first = true;
 
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionRight)
 			continue;
 
@@ -1271,6 +1267,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Compute available width on the top side
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() == VideoWidget::PositionTopLeft) {
 			if ((marginleft == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
 				marginleft = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
@@ -1308,6 +1307,9 @@ void Renderer::computeWidgetsPosition(void) {
 	is_first = true;
 
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionTop)
 			continue;
 
@@ -1346,6 +1348,9 @@ void Renderer::computeWidgetsPosition(void) {
 
 	// Compute available width on the bottom side
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() == VideoWidget::PositionBottomLeft) {
 			if ((marginleft == 0) || (widget->orientation() == VideoWidget::OrientationHorizontal)) {
 				marginleft = MAX(widget->theme().width() + widget->margin(VideoWidget::MarginLeft) + widget->margin(VideoWidget::MarginRight), marginleft);
@@ -1383,6 +1388,9 @@ void Renderer::computeWidgetsPosition(void) {
 	is_first = true;
 
 	for (VideoWidget *widget : widgets_) {
+		if (!widget->visible())
+			continue;
+
 		if (widget->position() != VideoWidget::PositionBottom)
 			continue;
 
@@ -1414,93 +1422,93 @@ void Renderer::computeWidgetsPosition(void) {
 }
 
 
-VideoWidget * Renderer::create(VideoWidget::Widget type) {
+VideoWidget * Renderer::create(VideoWidget::Widget type, TelemetrySource *source) {
 	VideoWidget *widget = NULL;
 
 	switch (type) {
 	case VideoWidget::WidgetAverageSpeed: 
-		widget = AvgSpeedWidget::create(app_);
+		widget = AvgSpeedWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetAverageRideSpeed: 
-		widget = AvgRideSpeedWidget::create(app_);
+		widget = AvgRideSpeedWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetBatteryLevel:
-		widget = BatteryLevelWidget::create(app_);
+		widget = BatteryLevelWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetCadence:
-		widget = CadenceWidget::create(app_);
+		widget = CadenceWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetDate:
-		widget = DateWidget::create(app_);
+		widget = DateWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetDistance:
-		widget = DistanceWidget::create(app_);
+		widget = DistanceWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetDuration: 
-		widget = DurationWidget::create(app_);
+		widget = DurationWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetElevation:
-		widget = ElevationWidget::create(app_);
+		widget = ElevationWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetGForce:
-		widget = GForceWidget::create(app_);
+		widget = GForceWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetGPX:
-		widget = GPXWidget::create(app_);
+		widget = GPXWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetGrade:
-		widget = GradeWidget::create(app_);
+		widget = GradeWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetCourse:
-		widget = CourseWidget::create(app_);
+		widget = CourseWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetHeading:
-		widget = HeadingWidget::create(app_);
+		widget = HeadingWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetHeartRate:
-		widget = HeartRateWidget::create(app_);
+		widget = HeartRateWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetHomeDistance:
-		widget = HomeDistanceWidget::create(app_);
+		widget = HomeDistanceWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetImage:
-		widget = ImageWidget::create(app_);
+		widget = ImageWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetLap:
-		widget = LapWidget::create(app_);
+		widget = LapWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetMaxSpeed: 
-		widget = MaxSpeedWidget::create(app_);
+		widget = MaxSpeedWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetPosition: 
-		widget = PositionWidget::create(app_);
+		widget = PositionWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetPower: 
-		widget = PowerWidget::create(app_);
+		widget = PowerWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetSpeed: 
-		widget = SpeedWidget::create(app_);
+		widget = SpeedWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetTemperature:
-		widget = TemperatureWidget::create(app_);
+		widget = TemperatureWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetText:
-		widget = TextWidget::create(app_);
+		widget = TextWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetTime:
-		widget = TimeWidget::create(app_);
+		widget = TimeWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetVerticalSpeed:
-		widget = VerticalSpeedWidget::create(app_);
+		widget = VerticalSpeedWidget::create(app_, source);
 		break;
 	case VideoWidget::WidgetMap: {
 			MapSettings mapSettings;
-			widget = Map::create(app_, telemetrySettings(), mapSettings);
+			widget = Map::create(app_, mapSettings, source);
 		}
 		break;
 	case VideoWidget::WidgetTrack: {
 			TrackSettings trackSettings;
-			widget = Track::create(app_, telemetrySettings(), trackSettings);
+			widget = Track::create(app_, trackSettings, source);
 		}
 		break;
 	default:
@@ -1573,8 +1581,6 @@ void Renderer::add(OIIO::ImageBuf *frame, int x, int y, const char *picto, const
 	OIIO::ImageBuf dst(OIIO::ImageSpec(spec.width * divider, spec.height * divider, spec.nchannels, type)); //, OIIO::InitializePixels::No);
 	OIIO::ImageBufAlgo::resize(dst, *buf);
 
-//	x = 50;
-//	y = 900;
 	w = spec.width * divider;
 	h = spec.height * divider;
 

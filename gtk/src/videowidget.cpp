@@ -803,7 +803,7 @@ printf("WIDGET::RENDER %s\n", widget()->name().c_str());
 	std::lock_guard<std::mutex> lock(queue_mutex_);
 
 	if (!texture_) {
-		log_warn("Widget %s can't rendered, no texture", widget()->name().c_str());
+		log_warn("Widget %s can't be rendered, no texture", widget()->name().c_str());
 		return;
 	}
 

@@ -256,8 +256,8 @@ int MapSettings::getMaxZoom(const MapSettings::Source &source) {
 
 
 
-Map::Map(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings &map_settings, struct event_base *evbase)
-	: Track(app, telemetry_settings, map_settings, VideoWidget::WidgetMap, evbase)
+Map::Map(GPXApplication &app, const MapSettings &map_settings, TelemetrySource *telemetry_source, struct event_base *evbase)
+	: Track(app, map_settings, VideoWidget::WidgetMap, telemetry_source, evbase)
 	, map_settings_(map_settings)
 	, nbr_downloads_(0) {
 	log_call();
@@ -309,12 +309,12 @@ const MapSettings& Map::settings(void) const {
 }
 
 
-Map * Map::create(GPXApplication &app, const TelemetrySettings &telemetry_settings, const MapSettings &map_settings) {
+Map * Map::create(GPXApplication &app, const MapSettings &map_settings, TelemetrySource *telemetry_source) {
 	Map *map;
 
 	log_call();
 
-	map = new Map(app, telemetry_settings, map_settings, app.evbase());
+	map = new Map(app, map_settings, telemetry_source,  app.evbase());
 
 	return map;
 }
@@ -816,6 +816,8 @@ bool Map::load(void) {
 
 
 OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
+	bool is_move = true;
+
 	int x, y;
 
 	int w, width;
@@ -878,9 +880,13 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		posY = (posY + last_posY_) / 2;
 
 		// Move ?
-		if ((posX == last_posX_) && (posY == last_posY_)) {
-			is_update = false;
-			goto skip;
+		is_move = (posX == last_posX_) && (posY == last_posY_);
+
+		if (is_move) {
+			if (settings().follow() != TrackSettings::FollowHeading) {
+				is_update = false;
+				goto skip;
+			}
 		}
 	}
 
@@ -989,9 +995,11 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 	if (mapbuf_ != NULL) {
 		// Update path progress
-		mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE)) * divider_;
-		mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE)) * divider_;
-		path(*mapbuf_, data, divider_);
+		if (is_move) {
+			mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE)) * divider_;
+			mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE)) * divider_;
+			path(*mapbuf_, data, divider_);
+		}
 
 		// Map & track image over
 		mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE)) * divider_);

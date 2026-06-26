@@ -92,8 +92,12 @@ void GPX2VideoRenderer::restart(void) {
 	app_.purge();
 
 	// Append each widget task
-	for (GPX2VideoWidget *item : widgets_)
+	for (GPX2VideoWidget *item : widgets_) {
+		if (!item->widget()->visible())
+			continue;
+
 		app_.append(item->widget());
+	}
 
 	// Finaly append renderer
 	app_.append(this);
@@ -150,11 +154,10 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	// Reset telemetry data
 	data_ = TelemetryData();
 
-//	// Need to start widget again
-//	restart();
+	// TMP. Assign source to widgets
+	for (GPX2VideoWidget *item : widgets_)
+		item->widget()->setTelemetrySource(source);
 
-//	// Request buffering
-//	refresh();
 	// Restart each widget & request buffering
 	refresh(NULL, true);
 }
@@ -260,7 +263,7 @@ void GPX2VideoRenderer::append(VideoWidget::Widget type) {
 	app_.remove(this);
 
 	// Create widget from type
-	widget = Renderer::create(type);
+	widget = Renderer::create(type, source_);
 
 	// Create gtk widget widget item
 	item = GPX2VideoWidget::create(widget);
@@ -323,6 +326,9 @@ GPX2VideoWidget * GPX2VideoRenderer::get_at(const double &x, const double &y) {
 //	for (GPX2VideoWidget *item : widgets_ | std::views::reverse) {
 	for (auto it = widgets_.rbegin(); it != widgets_.rend(); ++it) {
 		item = *it;
+
+		if (!item->widget()->visible())
+			continue;
 
 		if (!item->is_over(x, y))
 			continue;
@@ -405,6 +411,9 @@ void GPX2VideoRenderer::draw(void) {
 
 			TelemetrySource::Data type = TelemetrySource::DataUnknown;
 
+			if (!item->widget()->visible())
+				continue;
+
 			while (loop && !item->full() && (type != TelemetrySource::DataEof) && (max-- > 0)) {
 				TelemetryData data = item->data();
 
@@ -447,6 +456,9 @@ void GPX2VideoRenderer::draw(void) {
 		data.setDatetime(timestamp_);
 
 		for (GPX2VideoWidget *item : widgets_) {
+			if (!item->widget()->visible())
+				continue;
+
 			item->write_buffers(data, loop);
 		}
 	}
@@ -487,8 +499,12 @@ void GPX2VideoRenderer::refresh(GPX2VideoWidget *widget, bool schedule) {
 		Task::reset();
 
 		if (widget == NULL) {
-			for (GPX2VideoWidget *item : widgets_)
+			for (GPX2VideoWidget *item : widgets_) {
+				if (!item->widget()->visible())
+					continue;
+
 				app_.insert(item->widget(), this);
+			}
 		}
 		else
 			app_.insert(widget->widget(), this);
@@ -506,6 +522,9 @@ void GPX2VideoRenderer::stats(void) {
 	log_call();
 
 	for (GPX2VideoWidget *item : widgets_) {
+		if (!item->widget()->visible())
+			continue;
+
 		item->stats();
 	}
 }
@@ -534,6 +553,9 @@ void GPX2VideoRenderer::load_texture(void) {
 	uint64_t timestamp;
 
 	for (GPX2VideoWidget *item : widgets_) {
+		if (!item->widget()->visible())
+			continue;
+
 		timestamp = item->load_texture();
 
 		if ((timestamp > 0) && (timestamp_ > (timestamp + rate_)))
@@ -554,8 +576,12 @@ void GPX2VideoRenderer::load_texture(void) {
 void GPX2VideoRenderer::render(GPX2VideoShader *shader) {
 	log_call();
 
-	for (GPX2VideoWidget *item : widgets_)
+	for (GPX2VideoWidget *item : widgets_) {
+		if (!item->widget()->visible())
+			continue;
+
 		item->render(shader);
+	}
 }
 
 

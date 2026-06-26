@@ -22,6 +22,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -101,10 +113,10 @@ public:
 		delete shape_;
 	}
 
-	static PositionWidget * create(GPXApplication &app) {
+	static PositionWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		PositionWidget *widget;
 
-		widget = new PositionWidget(app);
+		widget = new PositionWidget(app, source);
 
 		return widget;
 	}
@@ -154,7 +166,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	PositionWidget(GPXApplication &app);
+	PositionWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

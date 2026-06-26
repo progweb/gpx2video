@@ -27,7 +27,7 @@ void GForceTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -164,8 +164,8 @@ void GForceTextShape::clear(void) {
 }
 
 
-GForceWidget::GForceWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetGForce) 
+GForceWidget::GForceWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetGForce, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

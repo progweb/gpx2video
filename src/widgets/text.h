@@ -16,10 +16,10 @@ public:
 	virtual ~TextWidget() {
 	}
 
-	static TextWidget * create(GPXApplication &app) {
+	static TextWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		TextWidget *widget;
 
-		widget = new TextWidget(app);
+		widget = new TextWidget(app, source);
 
 		return widget;
 	}
@@ -30,6 +30,18 @@ public:
 
 	VideoWidget::Theme& theme(void) {
 		return VideoWidget::theme();
+	}
+
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
 	}
 
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
@@ -83,7 +95,7 @@ private:
 
 	std::string icon_filename_;
 
-	TextWidget(GPXApplication &app);
+	TextWidget(GPXApplication &app, TelemetrySource *source);
 
 	void initialize(cairo_t *cr);
 };

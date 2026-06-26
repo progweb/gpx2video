@@ -27,7 +27,7 @@ void CourseTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -154,8 +154,8 @@ void CourseTextShape::clear(void) {
 }
 
 
-CourseWidget::CourseWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetCourse) 
+CourseWidget::CourseWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetCourse, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

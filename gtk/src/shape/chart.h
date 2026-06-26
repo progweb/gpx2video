@@ -1,5 +1,5 @@
-#ifndef __GPX2VIDEO__GTK__BARSHAPESETTINGSBOX_H__
-#define __GPX2VIDEO__GTK__BARSHAPESETTINGSBOX_H__
+#ifndef __GPX2VIDEO__GTK__CHARTSHAPESETTINGSBOX_H__
+#define __GPX2VIDEO__GTK__CHARTSHAPESETTINGSBOX_H__
 
 #include <gtkmm/liststore.h>
 #include <gtkmm/singleselection.h>
@@ -9,7 +9,7 @@
 #include "base.h"
 
 
-class GPX2VideoBarShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
+class GPX2VideoChartShapeSettingsBox : public GPX2VideoShapeBaseSettingsBox {
 public:
 	class Icon : public Glib::Object {
 	public:
@@ -35,24 +35,24 @@ public:
 		}
 	};
 
-	GPX2VideoBarShapeSettingsBox()
-		: GPX2VideoShapeBaseSettingsBox("GPX2VideoBarShapeSettingsBox")
+	GPX2VideoChartShapeSettingsBox()
+		: GPX2VideoShapeBaseSettingsBox("GPX2VideoChartShapeSettingsBox")
 		, media_model_(NULL) {
 	}
 
-	GPX2VideoBarShapeSettingsBox(BaseObjectType *cobject,
+	GPX2VideoChartShapeSettingsBox(BaseObjectType *cobject,
 		const Glib::RefPtr<Gtk::Builder> &ref_builder, std::string resource_file,
 		GPX2VideoWidget *widget, const Glib::RefPtr<GPX2VideoMediaListStore> &media_model);
 
-	static GPX2VideoBarShapeSettingsBox * create(GPX2VideoWidget *widget, const Glib::RefPtr<GPX2VideoMediaListStore> &media_model) {
+	static GPX2VideoChartShapeSettingsBox * create(GPX2VideoWidget *widget, const Glib::RefPtr<GPX2VideoMediaListStore> &media_model) {
 		log_call();
 
-		const std::string resource_file = "shape/bar_box.ui";
+		const std::string resource_file = "shape/chart_box.ui";
 
 		// Load the Builder file and instantiate its widgets.
 		auto ref_builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/" + resource_file);
 
-		auto box = Gtk::Builder::get_widget_derived<GPX2VideoBarShapeSettingsBox>(ref_builder, "settings_box", resource_file, 
+		auto box = Gtk::Builder::get_widget_derived<GPX2VideoChartShapeSettingsBox>(ref_builder, "settings_box", resource_file, 
 				widget, media_model);
 
 		if (!box)
@@ -61,7 +61,7 @@ public:
 		return box;
 	}
 
-	virtual ~GPX2VideoBarShapeSettingsBox() {
+	virtual ~GPX2VideoChartShapeSettingsBox() {
 		log_call();
 	}
 
@@ -72,15 +72,12 @@ public:
 
 	void set_default(void);
 
-protected:
+private:
 	Glib::RefPtr<GPX2VideoMediaListStore> media_model_;
 
 	Glib::RefPtr<Gtk::SingleSelection> icon_model_;
 	Glib::RefPtr<Gtk::SignalListItemFactory> icon_factory_;
 
-	Glib::RefPtr<Gtk::ListStore> gauge_orientation_model_;
-	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;
-	Glib::RefPtr<Gtk::ListStore> tick_align_model_;
 	Glib::RefPtr<Gtk::ListStore> needle_type_model_;
 
 	void create_popover(Gtk::MenuButton *menubutton);

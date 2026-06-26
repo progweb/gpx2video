@@ -27,7 +27,7 @@ void ElevationTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -196,12 +196,12 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	width_ = theme().width();
-	height_ = theme().height();
+	// Icon
+	icon_filename_ = widget_->getIconFilename(theme().icon());
 
 	// Size
 	setOrientation(theme().gaugeOrientation());
-	setSize(width_, height_);
+	setSize(theme().width(), theme().height());
 
 	// Label width / height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -264,10 +264,10 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 				continue;
 
 			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -284,7 +284,7 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 	}
 
 	// Bar with round terminaison
-	terminaison = (theme().gaugeCap() == VideoWidget::Theme::GaugeCapRound) ? theme().gaugeWidth() / 2 : 0;
+	terminaison = (theme().gaugeCap() == VideoWidget::Theme::GaugeCapRound) ? size2pixels(theme().gaugeWidth() / 2) : 0;
 
 	// Padding
 	if (theme().gaugeOrientation() == VideoWidget::OrientationHorizontal) {
@@ -310,9 +310,9 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 }
 
 
-void ElevationBarShape::ticklenwidth(int value, int *offset, int *len, int *width) {
-	int length;
-	int ticksize = theme().tickSize();
+void ElevationBarShape::ticklenwidth(int value, double *offset, double *len, double *width) {
+	double length;
+	double ticksize = theme().tickSize();
 
 	VideoWidget::Theme::Align align = theme().tickAlign();
 
@@ -353,10 +353,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	BarShape::Font font;
 
-	int offset = 0;
 	int rotate = 0;
-
-//	int top = 0, bottom = 0;
 
 	int amin, amax;
 
@@ -377,26 +374,18 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataElevation);
 
-	// Apply padding
-//	if (theme().hasFlag(VideoWidget::Theme::FlagValue))
-//		offset = (size_ / 14);
-//	else if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel))
-//		offset = (size_ / 14) / 2;
-//	else
-//		offset = 0;
-
 	// Compute gauge position
-//	offset = ((size_ / 8) + (size_ / 25)); // gauge width
-//	offset /= 2;
-	setOffset(-offset);
+	setOffset(theme().gaugeOffset());
 
-	// Draw background
-	background(cr);
+	if (!restoreCairoSurface(cr)) {
+		// Draw background
+		background(cr, theme().roundCorner());
 
-	// Draw gauge background
-	if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
-		bar(cr, 0, 1, theme().gaugeWidth(), theme().gaugeBorder(),
-				theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+		// Draw gauge background
+		if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
+			bar(cr, 0, 1, theme().gaugeWidth(), theme().gaugeBorder(),
+					theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
+		}
 	}
 
 	// Draw gauge
@@ -411,19 +400,12 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				theme().gaugePrimaryColor());
 	}
 
-	// Draw cursor
-	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((elevation >= amin) && (elevation <= amax))) {
-		double xb = scale(amin, amax, elevation, rotate);
-
-		cursor(cr, xb, theme().gaugeWidth() - (2 * theme().gaugeBorder()), theme().cursorColor());
-	}
-
 	// Draw tick lines on bar
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
 		for (int value = amin; value < amax + tick_step_; value = value + tick_step_) {
-			int ticklen;
-			int tickwidth;
-			int tickoffset;
+			double ticklen;
+			double tickwidth;
+			double tickoffset;
 
 			double xb = scale(amin, amax, value, rotate);
 
@@ -468,11 +450,11 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			if (value < amin)
 				continue;
 
-			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+			font = (BarShape::Font) {
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -485,29 +467,56 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		}
 	}
 
-	// Draw needle & value
+	// Draw cursor
+	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((elevation >= amin) && (elevation <= amax))) {
+		double xb = scale(amin, amax, elevation, rotate);
+
+		cursor(cr, xb, theme().cursorWidth(), theme().cursorColor());
+	}
+
+	// Value
+	std::string str = std::to_string((int) std::round(elevation));
+
+	font = (BarShape::Font) {
+		.size = theme().valueFontSize(),
+		.border = theme().valueBorderWidth(),
+		.shadow_opacity = theme().valueShadowOpacity(),
+		.shadow_distance = theme().valueShadowDistance(),
+		.family = theme().valueFontFamily(),
+		.align = VideoWidget::Theme::AlignCenter,
+		.style = theme().valueFontStyle(),
+		.weight = theme().valueFontWeight(),
+	};
+
+	// Draw needle / icon / value
 	if ((elevation >= amin) && (elevation <= amax)) {
 		double xb = scale(amin, amax, elevation, rotate);
 
-		std::string str = std::to_string((int) std::round(elevation));
+		if (theme().hasFlag(VideoWidget::Theme::FlagNeedle))
+			needle(cr, theme().needleType(),
+					xb, font, str.c_str(),
+					theme().needleBorder(), theme().needleBackgroundColor(), theme().needleBorderColor());
 
-		font = (TextShape::Font) {
-			.size = theme().valueFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = VideoWidget::Theme::AlignCenter,
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
-		};
+		switch (theme().needleType()) {
+		case VideoWidget::Theme::NeedleTypeIcon:
+			icon(cr, xb, icon_filename_, theme().iconColor());
+			break;
 
-		value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+		case VideoWidget::Theme::NeedleTypeValue:
+			value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+			break;
+
+		case VideoWidget::Theme::NeedleTypeBasic:
+		default:
+			if (theme().hasFlag(VideoWidget::Theme::FlagValue))
+				value(cr, xb, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+			break;
+		}
 	}
 
 	// Draw label
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
-		font = (TextShape::Font) {
+		font = (BarShape::Font) {
 			.size = theme().labelFontSize(),
 			.border = theme().labelBorderWidth(),
 			.shadow_opacity = theme().labelShadowOpacity(),
@@ -539,8 +548,238 @@ void ElevationBarShape::clear(void) {
 }
 
 
-ElevationWidget::ElevationWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetElevation) 
+/**
+ * Chart shape
+ */
+
+bool ElevationChartShape::updated(const TelemetryData &data) const {
+	if (is_initialized_) {
+		if ((data.type() == TelemetryData::TypeUnchanged))
+			return false;
+
+		if (no_value_ && !data.hasValue(TelemetryData::DataElevation))
+			return false;
+	}
+
+	return true;
+}
+
+
+void ElevationChartShape::initialize(cairo_t *cr) {
+	if (is_initialized_)
+		return;
+	
+	int left, right;
+	int top, bottom;
+
+	double x_min = 0, x_max = 0;
+	double y_min = 0, y_max = 0;
+
+	TelemetrySource *source;
+
+	// Icon
+	icon_filename_ = widget_->getIconFilename(theme().icon());
+
+	// Last point
+	source = widget_->telemetrySource();
+
+	if (source) {
+		TelemetryData data;
+
+		source->retrieveLast(data);
+
+		x_min = data.distance(TelemetryData::UnitKm, TelemetryData::RangeMin);
+		x_max = data.distance(TelemetryData::UnitKm, TelemetryData::RangeMax);
+
+		y_min = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin);
+		y_max = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+	}
+
+	// Size
+	setSize(theme().width(), theme().height());
+
+	// Data range
+	setXRange(x_min, x_max);
+	setYRange(y_min, y_max);
+
+	// Padding
+	left = right = 0;
+	top = bottom = 0;
+
+	setPadding(
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft) + left,
+		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight) + right,
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop) + top,
+   		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom) + bottom);
+
+	is_initialized_ = true;
+}
+
+
+void ElevationChartShape::draw(cairo_t *cr, const TelemetryData &data) {
+	double x, y;
+
+	ChartShape::Font font;
+
+	double x_min, x_max;
+	double y_min, y_max;
+
+	double thick = size2pixels(theme().curveThick());
+	double border = size2pixels(theme().curveBorder());
+
+	const float *color = theme().curveColor();
+	const float *outline = theme().curveBorderColor();
+	const float *fill = theme().curveFillColor();
+
+	struct curve *curve;
+
+	TelemetryData wpt;
+
+	TelemetrySource *source;
+
+	enum TelemetrySource::Data result;
+
+	double elevation = data.elevation(widget_->valueUnit());
+
+	// Initialize
+	initialize(cr);
+
+	// Range
+	getXRange(x_min, x_max);
+	getYRange(y_min, y_max);
+
+	if (!restoreCairoSurface(cr)) {
+		// Draw background
+		background(cr, theme().roundCorner());
+
+		// Draw axis
+		if (theme().hasFlag(VideoWidget::Theme::FlagAxis))
+			axis(cr, theme().axisThick(), theme().axisBorder(), theme().axisColor(), theme().axisBorderColor());
+
+		// Draw curve
+		source = widget_->telemetrySource();
+
+		curve_create(&curve, cr, thick, border, color, outline, fill);
+
+		if (source) {
+			for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
+				double d = wpt.distance(TelemetryData::UnitKm);
+				double e = wpt.elevation(widget_->valueUnit());
+
+				// Compute position
+				x = scale(x_min, x_max, d);
+				y = scale(y_min, y_max, e);
+
+				curve_point(curve, x, y);
+			}
+		}
+
+		curve_stroke(curve);
+		curve_free(curve);
+
+		// Draw unit
+		if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+			double factor = (double) theme().unitFontSize() / (double) theme().valueFontSize();
+
+			std::string str = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+				widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+			font = (ChartShape::Font) {
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
+				.shadow_opacity = theme().valueShadowOpacity(),
+				.shadow_distance = theme().valueShadowDistance(),
+				.family = theme().valueFontFamily(),
+				.align = theme().valueHorizontalAlign(),
+				.style = theme().valueFontStyle(),
+				.weight = theme().valueFontWeight(),
+			};
+
+			unit(cr, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+		}
+
+		// Save surface
+		saveCairoSurface(cr);
+	}
+
+	// Draw cursor
+	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((elevation >= y_min) && (elevation <= y_max))) {
+		// Compute position
+		x = scale(x_min, x_max, data.distance(TelemetryData::UnitKm));
+		y = scale(y_min, y_max, data.elevation(widget_->valueUnit()));
+
+		cursor(cr, x, y, theme().cursorWidth(), theme().cursorColor());
+	}
+
+	// Value
+	std::string str = std::to_string((int) std::round(elevation));
+
+	font = (BarShape::Font) {
+		.size = theme().valueFontSize(),
+		.border = theme().valueBorderWidth(),
+		.shadow_opacity = theme().valueShadowOpacity(),
+		.shadow_distance = theme().valueShadowDistance(),
+		.family = theme().valueFontFamily(),
+		.align = VideoWidget::Theme::AlignCenter,
+		.style = theme().valueFontStyle(),
+		.weight = theme().valueFontWeight(),
+	};
+
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		y = scale(y_min, y_max, data.elevation(widget_->valueUnit()));
+
+		value(cr, y, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+	}
+
+	// Draw needle / icon / value
+	if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
+		if ((elevation >= y_min) && (elevation <= y_max)) {
+			// Compute position
+			x = scale(x_min, x_max, data.distance(TelemetryData::UnitKm));
+			y = scale(y_min, y_max, data.elevation(widget_->valueUnit()));
+
+			needle(cr, theme().needleType(),
+					x, y, font, str.c_str(),
+					theme().needleBorder(), theme().needleBackgroundColor(), theme().needleBorderColor());
+
+			switch (theme().needleType()) {
+			case VideoWidget::Theme::NeedleTypeIcon:
+				icon(cr, x, y, icon_filename_, theme().iconColor());
+				break;
+
+			case VideoWidget::Theme::NeedleTypeValue:
+				value(cr, x, y, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+				break;
+
+			case VideoWidget::Theme::NeedleTypeBasic:
+			default:
+				if (theme().hasFlag(VideoWidget::Theme::FlagValue))
+					value(cr, x, y, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+				break;
+			}
+		}
+	}
+}
+
+
+void ElevationChartShape::clear(void) {
+	ChartShape::clear();
+
+	no_value_ = false;
+
+	if (bg_buf_)
+		delete bg_buf_;
+
+	if (fg_buf_)
+		delete fg_buf_;
+
+	bg_buf_ = NULL;
+	fg_buf_ = NULL;
+}
+
+
+ElevationWidget::ElevationWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetElevation, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
@@ -550,6 +789,7 @@ ElevationWidget::ElevationWidget(GPXApplication &app)
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeBar);
+	ADD_SHAPE(VideoWidget::ShapeChart);
 	ADD_SHAPE(VideoWidget::ShapeText);
 
 #define ADD_UNIT(unit) \

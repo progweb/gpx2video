@@ -5,8 +5,8 @@
  * Text shape
  */
 
-ImageWidget::ImageWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetImage) 
+ImageWidget::ImageWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetImage, source) 
 	, ShapeBase(theme()) 
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) 
@@ -37,8 +37,8 @@ void ImageWidget::initialize(cairo_t *cr) {
 
 	(void) cr;
 
-//	setSize(theme().height());
-//
+	ShapeBase::setSize(theme().width(), theme().height());
+
 //	setPadding(
 //		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
 //		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),

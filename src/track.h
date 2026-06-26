@@ -26,7 +26,7 @@ class Track : public VideoWidget, public ShapeBase {
 public:
 	virtual ~Track();
 
-	static Track * create(GPXApplication &app, const TelemetrySettings& telemetry_settings, const TrackSettings& track_settings);
+	static Track * create(GPXApplication &app, const TrackSettings& track_settings, TelemetrySource *telemetry_source = NULL);
 
 	ShapeBase * shape(void) {
 		return this;
@@ -86,7 +86,7 @@ protected:
 	OIIO::ImageBuf *bg_buf_;
 	OIIO::ImageBuf *fg_buf_;
 
-	Track(GPXApplication &app, const TelemetrySettings &telemetry_settings, const TrackSettings &track_settings, VideoWidget::Widget type, struct event_base *evbase);
+	Track(GPXApplication &app, const TrackSettings &track_settings, VideoWidget::Widget type, TelemetrySource *telemetry_source, struct event_base *evbase);
 
 	bool isInitialized(void) {
 		return is_init_;
@@ -120,7 +120,6 @@ protected:
 
 	GPXApplication &app_;
 	TrackSettings track_settings_;
-	const TelemetrySettings &telemetry_settings_;
 
 	struct event_base *evbase_;
 

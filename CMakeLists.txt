@@ -138,6 +138,7 @@ set(GPX2VIDEO_SOURCES
 	src/shape/arc.cpp
 	src/shape/bar.cpp
 	src/shape/base.cpp
+	src/shape/chart.cpp
 	src/shape/text.cpp
 
 	src/widgets/avgridespeed.cpp

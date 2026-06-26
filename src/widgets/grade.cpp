@@ -27,7 +27,7 @@ void GradeTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -85,6 +85,9 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
+	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+		"%" : "";
+
 	// Initialize
 	initialize(cr);
 
@@ -92,9 +95,9 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataGrade);
 
 	if (!no_value_)
-		sprintf(s, "%d%%", (int) std::round(data.grade()));
+		sprintf(s, "%d%s", (int) std::round(data.grade()), unit.c_str());
 	else
-		sprintf(s, "--%%");
+		sprintf(s, "--%s", unit.c_str());
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -154,8 +157,8 @@ void GradeTextShape::clear(void) {
 }
 
 
-GradeWidget::GradeWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetGrade) 
+GradeWidget::GradeWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetGrade, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 
@@ -165,6 +168,13 @@ GradeWidget::GradeWidget(GPXApplication &app)
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(TelemetryData::UnitPercent);
 
 	setShape(VideoWidget::ShapeText);
 }

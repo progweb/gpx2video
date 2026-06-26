@@ -280,6 +280,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	// Connect widget list
 	widget_stackpage_->signal_widget_selected().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_selected));
 	widget_stackpage_->signal_widget_remove_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_remove_clicked));
+	widget_stackpage_->signal_widget_visible_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_visible_changed));
 
 	// Listen stack changes
 	info_stack_->property_visible_child().signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_stack_changed));
@@ -1321,9 +1322,9 @@ void GPX2VideoApplicationWindow::on_widget_selected(GPX2VideoWidget *widget) {
 
 
 /**
- * Notification widget selected
+ * Notification widget removed
  *
- * Update the UI from the selected widget
+ * Destroy & update the UI
  *
  * Called from GTK main thread by GPX2VideoWidgetStackPage
  */
@@ -1341,6 +1342,29 @@ void GPX2VideoApplicationWindow::on_widget_remove_clicked(GPX2VideoWidget *widge
 
 	// At last, remove & destroy widget
 	renderer_->remove(widget);
+}
+
+
+/**
+ * Notification widget visible changed
+ *
+ * Update the widget visibility
+ *
+ * Called from GTK main thread by GPX2VideoWidgetStackPage
+ */
+void GPX2VideoApplicationWindow::on_widget_visible_changed(GPX2VideoWidget *widget) {
+	log_call();
+
+	bool visible = widget->widget()->visible();
+
+	log_notice("Widget '%s' visible: %s", widget->name().c_str(), 
+			visible ? "true" : "false");
+
+	// Compute new position
+	renderer_->compute();
+
+	// Refresh
+	renderer_->refresh(widget);
 }
 
 

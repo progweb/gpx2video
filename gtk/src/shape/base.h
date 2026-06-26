@@ -42,6 +42,8 @@ public:
 
 	virtual void update_content(void) = 0;
 
+	virtual void set_default(void) = 0;
+
 protected:
 	class Model : public Gtk::TreeModel::ColumnRecord {
 	public:
@@ -68,7 +70,8 @@ protected:
 
 	bool find_in_listtore(const Glib::RefPtr<Gtk::ListStore> &store, const int &value, Gtk::TreeModel::iterator &result);
 
-	void on_widget_spin_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
+	void on_widget_spin_int_changed(Gtk::SpinButton *button, std::function<void(const int&)> set);
+	void on_widget_spin_double_changed(Gtk::SpinButton *button, std::function<void(const double&)> set);
 	void on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set);
 	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
 	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);

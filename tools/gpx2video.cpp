@@ -367,9 +367,7 @@ Map * GPX2Video::buildMap(void) {
 	TelemetryData p1, p2;
 	source->getBoundingBox(TelemetrySource::RangeData, &p1, &p2);
 
-	// Free
-	delete source;
-
+	// Map settings
 	MapSettings mapSettings;
 	mapSettings.setSource(settings().mapsource());
 	mapSettings.setZoom(settings().mapzoom());
@@ -379,7 +377,7 @@ Map * GPX2Video::buildMap(void) {
 	mapSettings.setPathThick(settings().paththick());
 	mapSettings.setPathBorder(settings().pathborder());
 
-	Map *map = Map::create(*this, settings(), mapSettings);
+	Map *map = Map::create(*this, mapSettings, source);
 
 	return map;
 }

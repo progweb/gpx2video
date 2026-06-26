@@ -22,6 +22,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -95,10 +107,10 @@ public:
 		delete shape_;
 	}
 
-	static DateWidget * create(GPXApplication &app) {
+	static DateWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		DateWidget *widget;
 
-		widget = new DateWidget(app);
+		widget = new DateWidget(app, source);
 
 		widget->setValueFormat("%Y-%m-%d");
 
@@ -152,7 +164,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DateWidget(GPXApplication &app);
+	DateWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

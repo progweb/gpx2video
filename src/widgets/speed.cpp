@@ -27,7 +27,7 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -209,18 +209,7 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 
 	(void) cr;
 
-//	double start = 105; //30 - 330
-//	double end = 255;
-
-	width_ = theme().width();
-	height_ = theme().height();
-
-	size_ = std::min(width_, height_);
-
-//	arc_start_ = 150;
-//	arc_end_ = 290;
-
-	setSize(width_, height_, size_);
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -256,16 +245,20 @@ void SpeedArcShape::tickinit(int min, int max) {
 }
 
 
-void SpeedArcShape::ticklenwidth(int value, int *len, int *width) {
-	int size = theme().tickSize(); // size_ / 15
+void SpeedArcShape::ticklenwidth(int value, double *len, double *width) {
+	double ticksize = theme().tickSize();
 
 	if (value % 10 == 0) {
-		*len = size + size_ / 51;
-		*width = size_ / 128;
+		*len = ticksize;
+		*width = size() / 128;
+	}
+	else if (value % 5 == 0) {
+		*len = ticksize - (ticksize / 3);
+		*width = size() / 128;
 	}
 	else {
-		*len = size - size_ / 51;
-		*width = size_ / 256;
+		*len = ticksize - (ticksize / 6);
+		*width = size() / 256;
 	}
 }
 
@@ -293,15 +286,12 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	vmax = theme().valueMax();
 
 	// Arc size
-	// 30:330 = 300
-	int arc_size = theme().gaugeAngle(); //300; //180; //300; //60;
-	int arc_rotate = theme().gaugeRotation(); //0;
+	int arc_size = theme().gaugeAngle();
+	int arc_rotate = theme().gaugeRotation();
 
 	rotate += arc_rotate;
 
 	setArcRange(180 - (arc_size / 2), 180 + (arc_size / 2));
-
-//50 : 310 = 260	
 
 	// Tick init
 	tickinit(vmin, vmax);
@@ -330,8 +320,8 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw gauge background
 	if (theme().hasFlag(VideoWidget::Theme::FlagGauge)) {
-		int width = theme().gaugeWidth();
-		int border = theme().gaugeBorder();
+		double width = theme().gaugeWidth();
+		double border = theme().gaugeBorder();
 
 		double width1, width2;
 
@@ -342,11 +332,11 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		switch (cap) {
 		case VideoWidget::Theme::GaugeCapRound:
-			width1 = (theme().gaugePrimaryColor()[3] > 0) ? width - 2 - border : 0;
-			width2 = (theme().gaugeSecondaryColor()[3] > 0) ? width - 2 - border : 0;
+			width1 = (theme().gaugePrimaryColor()[3] > 0) ? width - border : 0;
+			width2 = (theme().gaugeSecondaryColor()[3] > 0) ? width - border : 0;
 
 			// Draw background
-			arc(cr, xa1, xa2, border / 2.0 + size_ / 150.0, width, border,
+			arc(cr, xa1, xa2, border / 2.0, width, border,
 					theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
 
 			// Draw color gauge (max speed) - width / 2.6
@@ -354,7 +344,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 				xa1 = scale(vmin, vmax, 0, rotate);
 				xa2 = scale(vmin, vmax, maxspeed, rotate);
 
-				arc(cr, xa1, xa2, 1 + border + size_ / 150.0, width2, 0.0,
+				arc(cr, xa1, xa2, border, width2, 0.0,
 						theme().gaugeSecondaryColor());
 			}
 
@@ -364,7 +354,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 					xa1 = scale(vmin, vmax, 0, rotate);
 					xa2 = scale(vmin, vmax, avgspeed, rotate);
 
-					arc(cr, xa1, xa2, 1 + border + size_ / 150.0, width1, 0.0,
+					arc(cr, xa1, xa2, border, width1, 0.0,
 							theme().gaugePrimaryColor());
 				}
 			}
@@ -374,7 +364,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 					xa1 = scale(vmin, vmax, 0, rotate);
 					xa2 = scale(vmin, vmax, speed, rotate);
 
-					arc(cr, xa1, xa2, 1 + border + size_ / 150.0, width1, 0.0,
+					arc(cr, xa1, xa2, border, width1, 0.0,
 							theme().gaugePrimaryColor());
 				}
 			}
@@ -384,16 +374,16 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		case VideoWidget::Theme::GaugeCapSquare:
 		default:
 			if ((theme().gaugePrimaryColor()[3] > 0) && (theme().gaugeSecondaryColor()[3] > 0)) {
-				width1 = (width / 1.625) - 1 - (border / 2.0);
-				width2 = (width / 2.6) - 1 - (border / 2.0);
+				width1 = width - (border / 2.0);
+				width2 = (width / 2.6) - (border / 2.0);
 			}
 			else if (theme().gaugePrimaryColor()[3] > 0) {
-				width1 = width - 2 - border;
+				width1 = width - border;
 				width2 = 0;
 			}
 			else if (theme().gaugeSecondaryColor()[3] > 0) {
 				width1 = 0;
-				width2 = width - 2 - border;
+				width2 = width - border;
 			}
 			else {
 				width1 = 0;
@@ -401,7 +391,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 			}
 
 			// Draw background
-			arc(cr, xa1, xa2, (border / 2.0) + (size_ / 150.0), width, border,
+			arc(cr, xa1, xa2, (border / 2.0), width, border,
 					theme().gaugeBackgroundColor(), theme().gaugeBorderColor());
 
 			if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
@@ -410,7 +400,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 					xa1 = scale(vmin, vmax, 0, rotate);
 					xa2 = scale(vmin, vmax, avgspeed, rotate);
 
-					arc(cr, xa1, xa2, border + 1 + (size_ / 150.0) + width2, width1, 0.0,
+					arc(cr, xa1, xa2, border, width1 - (border / 2.0), 0.0,
 							theme().gaugePrimaryColor());
 				}
 			}
@@ -420,7 +410,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 					xa1 = scale(vmin, vmax, 0, rotate);
 					xa2 = scale(vmin, vmax, speed, rotate);
 
-					arc(cr, xa1, xa2, border + 1 + (size_ / 150.0) + width2, width1, 0.0,
+					arc(cr, xa1, xa2, border, width1, 0.0,
 							theme().gaugePrimaryColor());
 				}
 			}
@@ -430,7 +420,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 				xa1 = scale(vmin, vmax, 0, rotate);
 				xa2 = scale(vmin, vmax, maxspeed, rotate);
 
-				arc(cr, xa1, xa2, border + 1 + (size_ / 150.0), width2, 0.0,
+				arc(cr, xa1, xa2, border, width2, 0.0,
 						theme().gaugeSecondaryColor());
 			}
 
@@ -441,8 +431,8 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Draw tick lines around arc line
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
 		for (int value = vmin; value < vmax + tick_step_; value = value + tick_step_) {
-			int ticklen;
-			int tickwidth;
+			double ticklen;
+			double tickwidth;
 
 			double xa = scale(vmin, vmax, value, rotate);
 
@@ -457,10 +447,9 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		double distance = std::max(theme().gaugeWidth(), theme().tickSize());
+		double distance = std::max(theme().gaugeWidth() / 2.0, theme().tickSize() / 2.0);
 		
 		distance += theme().tickLabelDistance();
-		//size_ / 6.5;
 
 		for (int value = vmin; value < vmax + (tick_mstep_ * tick_step_); value = value + (tick_mstep_ * tick_step_)) {
 			double xa = scale(vmin, vmax, value, rotate);
@@ -472,13 +461,11 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			std::string str = std::to_string(value);
 
-//			text(cr, xa, distance, theme().tickLabelColor(), str);
-
-			font = (TextShape::Font) {
-				.size = (int) (theme().valueFontSize() * factor),
-				.border = (int) (theme().valueBorderWidth() * factor),
+			font = (ArcShape::Font) {
+				.size = theme().valueFontSize() * factor,
+				.border = theme().valueBorderWidth(),
 				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+				.shadow_distance = theme().valueShadowDistance(),
 				.family = theme().valueFontFamily(),
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
@@ -504,7 +491,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 		else
 			sprintf(s, "%d", int(std::round(speed)));
 
-		font = (TextShape::Font) {
+		font = (ArcShape::Font) {
 			.size = theme().valueFontSize(),
 			.border = theme().valueBorderWidth(),
 			.shadow_opacity = theme().valueShadowOpacity(),
@@ -524,11 +511,11 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		double factor = (double) theme().unitFontSize() / (double) theme().valueFontSize();
 
-		font = (TextShape::Font) {
-			.size = (int) (theme().valueFontSize() * factor),
-			.border = (int) (theme().valueBorderWidth() * factor),
+		font = (ArcShape::Font) {
+			.size = theme().valueFontSize() * factor,
+			.border = theme().valueBorderWidth(),
 			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = (int) (theme().valueShadowDistance() * factor),
+			.shadow_distance = theme().valueShadowDistance(),
 			.family = theme().valueFontFamily(),
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
@@ -564,8 +551,8 @@ void SpeedArcShape::clear(void) {
 }
 
 
-SpeedWidget::SpeedWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetSpeed) 
+SpeedWidget::SpeedWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetSpeed, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

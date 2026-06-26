@@ -56,6 +56,9 @@ public:
 	using type_signal_widget_remove_clicked = sigc::signal<void(GPX2VideoWidget *)>;
 	type_signal_widget_remove_clicked signal_widget_remove_clicked();
 
+	using type_signal_widget_visible_changed = sigc::signal<void(GPX2VideoWidget *)>;
+	type_signal_widget_visible_changed signal_widget_visible_changed();
+
 protected:
 	Glib::RefPtr<Gtk::Builder> ref_builder_;
 
@@ -65,6 +68,7 @@ protected:
 
 	type_signal_widget_selected m_signal_widget_selected;
 	type_signal_widget_remove_clicked m_signal_widget_remove_clicked;
+	type_signal_widget_visible_changed m_signal_widget_visible_changed;
 
 private:
 	Gtk::Window &parent_window_;
@@ -77,6 +81,7 @@ private:
 	void on_selected(Gtk::ListBoxRow *row);
 
 	void on_remove_clicked(GPX2VideoWidget *widget);
+	void on_visible_clicked(GPX2VideoWidget *widget, Gtk::Button *button);
 };
 
 #endif

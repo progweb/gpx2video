@@ -16,6 +16,7 @@
 ../gtk/src/ui/window.ui
 ../gtk/src/ui/shape/arc_box.ui
 ../gtk/src/ui/shape/bar_box.ui
+../gtk/src/ui/shape/chart_box.ui
 ../gtk/src/ui/shape/text_box.ui
 ../gtk/src/ui/widgets/image_box.ui
 ../gtk/src/ui/widgets/map_box.ui
@@ -30,6 +31,7 @@
 ../gtk/src/window.cpp
 ../gtk/src/shape/arc.cpp
 ../gtk/src/shape/bar.cpp
+../gtk/src/shape/chart.cpp
 ../gtk/src/shape/text.cpp
 ../gtk/src/widgets/image.cpp
 ../gtk/src/widgets/map.cpp

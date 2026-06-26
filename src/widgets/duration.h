@@ -22,6 +22,18 @@ public:
 		return shape;
 	}
 
+	bool hasFeature(ShapeBase::Feature feature) const {
+		switch (feature) {
+		case FeatureUnit:
+			return false;
+
+		default:
+			break;
+		}
+
+		return TextShape::hasFeature(feature);
+	}
+
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 
@@ -116,10 +128,10 @@ public:
 		delete shape_;
 	}
 
-	static DurationWidget * create(GPXApplication &app) {
+	static DurationWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		DurationWidget *widget;
 
-		widget = new DurationWidget(app);
+		widget = new DurationWidget(app, source);
 
 		return widget;
 	}
@@ -169,7 +181,7 @@ protected:
 private:
 	ShapeBase *shape_;
 
-	DurationWidget(GPXApplication &app);
+	DurationWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

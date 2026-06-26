@@ -31,51 +31,54 @@ VideoWidget::Theme::Theme() {
 
 	setPadding(VideoWidget::Theme::PaddingAll, 3);
 
-	setBorder(1);
+	setBorder(0.5);
 	setBorderColor(0.0, 0.0, 0.0, 1.0);
 	setBackgroundColor(0.0, 0.0, 0.0, 0.8);
 
 	setRoundCorner(0);
 
 	setIcon(VideoWidget::Theme::IconDefault);
+	setIconSize(50.0);
 	setIconColor(1.0, 1.0, 1.0, 1.0);
 
+	setCursorWidth(1.0);
 	setCursorColor(0.8, 0.0, 0.0, 0.8);
 
 	setLabelFontFamily("Sans");
-	setLabelFontSize(15);
+	setLabelFontSize(30.0);
 	setLabelFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setLabelFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setLabelShadowOpacity(80);
-	setLabelShadowDistance(3);
+	setLabelShadowDistance(1.0);
 	setLabelHorizontalAlign(VideoWidget::Theme::AlignLeft);
 	setLabelVerticalAlign(VideoWidget::Theme::AlignTop);
 	setLabelColor(1.0, 1.0, 1.0, 1.0);
-	setLabelBorderWidth(1);
+	setLabelBorderWidth(1.0);
 	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setValueMin(0);
 	setValueMax(100);
 	setValueFontFamily("Sans");
-	setValueFontSize(25);
+	setValueFontSize(50.0);
 	setValueFontStyle(VideoWidget::Theme::FontStyleNormal);
 	setValueFontWeight(VideoWidget::Theme::FontWeightNormal);
 	setValueShadowOpacity(80);
-	setValueShadowDistance(3);
+	setValueShadowDistance(1.0);
 	setValueHorizontalAlign(VideoWidget::Theme::AlignLeft);
 	setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
 	setValueColor(1.0, 1.0, 1.0, 1.0);
-	setValueBorderWidth(1);
+	setValueBorderWidth(1.0);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 
-	setUnitFontSize(25);
+	setUnitFontSize(50.0);
 
-	setLineSpace(10);
+	setLineSpace(20.0);
 
 	setGaugeAngle(300);
 	setGaugeRotation(0);
 	setGaugeFlip(false);
-	setGaugeWidth(10);
+	setGaugeWidth(20.0);
+	setGaugeOffset(0.0);
 	setGaugeCap(VideoWidget::Theme::GaugeCapSquare);
 	setGaugeOrientation(VideoWidget::OrientationVertical);
 	setGaugeBorder(0);
@@ -84,22 +87,946 @@ VideoWidget::Theme::Theme() {
 	setGaugePrimaryColor(0.0, 0.8, 0.0, 0.8);
 	setGaugeSecondaryColor(1.0, 0.0, 0.0, 1.0);
 
-	setTickSize(10);
+	setTickSize(20.0);
 	setTickAlign(VideoWidget::Theme::AlignCenter);
 	setTickColor(1.0, 1.0, 1.0, 1.0);
-	setTickLabelDistance(5);
-	setTickLabelFontSize(10);
+	setTickLabelDistance(20.0);
+	setTickLabelFontSize(20.0);
 	setTickLabelColor(1.0, 1.0, 1.0, 1.0);
 	setTickLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
 	setNeedleDistance(0);
+	setNeedleBorder(0);
 	setNeedleBorderColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleBackgroundColor(0.0, 0.0, 0.0, 0.8);
 	setNeedlePrimaryColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleSecondaryColor(1.0, 0.0, 0.0, 1.0);
 
-//	setTextLineSpace(10);
+	setAxisThick(1.0);
+	setAxisBorder(0.2);
+	setAxisColor(1.0, 1.0, 1.0, 1.0);
+	setAxisBorderColor(0.0, 0.0, 0.0, 1.0);
+
+	setCurveThick(1.0);
+	setCurveBorder(0.2);
+	setCurveColor(1.0, 1.0, 1.0, 1.0);
+	setCurveBorderColor(0.0, 0.0, 0.0, 1.0);
+	setCurveFillColor(0.3, 0.3, 0.3, 1.0);
+}
+
+
+void VideoWidget::Theme::setSize(int width, int height) {
+	width_ = width;
+	height_ = height;
+}
+
+const int& VideoWidget::Theme::width(void) const {
+	return width_;
+}
+
+const int& VideoWidget::Theme::height(void) const {
+	return height_;
+}
+
+void VideoWidget::Theme::setFlags(int flags) {
+	flags_ = flags;
+}
+
+void VideoWidget::Theme::addFlag(VideoWidget::Theme::Flag flag) {
+	flags_ |= flag;
+}
+
+void VideoWidget::Theme::removeFlag(VideoWidget::Theme::Flag flag) {
+	flags_ &= ~flag;
+}
+
+bool VideoWidget::Theme::hasFlag(VideoWidget::Theme::Flag flag) {
+	return ((flags_ & flag) != 0);
+}
+
+const int& VideoWidget::Theme::padding(enum Padding side) const {
+	switch (side) {
+	case PaddingLeft:
+		return padding_left_;
+	case PaddingRight:
+		return padding_right_;
+	case PaddingTop:
+		return padding_top_;
+	case PaddingBottom:
+		return padding_bottom_;
+	default:
+		return null_;
+	}
+}
+
+void VideoWidget::Theme::setPadding(enum Padding side, int padding) {
+	if (padding < 0)
+		return;
+
+	switch (side) {
+	case PaddingAll:
+		padding_left_ = padding;
+		padding_right_ = padding;
+		padding_top_ = padding;
+		padding_bottom_ = padding;
+		break;
+	case PaddingLeft:
+		padding_left_ = padding;
+		break;
+	case PaddingRight:
+		padding_right_ = padding;
+		break;
+	case PaddingTop:
+		padding_top_ = padding;
+		break;
+	case PaddingBottom:
+		padding_bottom_ = padding;
+		break;
+	default:
+		break;
+	}
+}
+
+const float * VideoWidget::Theme::backgroundColor(void) const {
+	return bg_color_;
+}
+
+bool VideoWidget::Theme::setBackgroundColor(std::string color) {
+	return hex2color(bg_color_, color);
+}
+
+bool VideoWidget::Theme::setBackgroundColor(double r, double g, double b, double a) {
+	bg_color_[0] = r;
+	bg_color_[1] = g;
+	bg_color_[2] = b;
+	bg_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::border(void) const {
+	return border_;
+}
+
+void VideoWidget::Theme::setBorder(double border) {
+	border_ = border;
+}
+
+const float * VideoWidget::Theme::borderColor(void) const {
+	return border_color_;
+}
+
+bool VideoWidget::Theme::setBorderColor(std::string color) {
+	return hex2color(border_color_, color);
+}
+
+bool VideoWidget::Theme::setBorderColor(double r, double g, double b, double a) {
+	border_color_[0] = r;
+	border_color_[1] = g;
+	border_color_[2] = b;
+	border_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::roundCorner(void) const {
+	return round_corner_;
+}
+
+void VideoWidget::Theme::setRoundCorner(double size) {
+	round_corner_ = size;
+}
+
+const VideoWidget::Theme::Icon& VideoWidget::Theme::icon(void) const {
+	return icon_;
+}
+
+void VideoWidget::Theme::setIcon(const VideoWidget::Theme::Icon &icon) {
+	icon_ = icon;
+}
+
+const std::string& VideoWidget::Theme::iconFile(void) const {
+	return icon_file_;
+}
+
+void VideoWidget::Theme::setIconFile(const std::string &file) {
+	icon_file_ = file;
+}
+
+const double& VideoWidget::Theme::iconSize(void) const {
+	return icon_size_;
+}
+
+void VideoWidget::Theme::setIconSize(const double &size) {
+	icon_size_ = size;
+}
+
+const float * VideoWidget::Theme::iconColor(void) const {
+	return icon_color_;
+}
+
+bool VideoWidget::Theme::setIconColor(std::string color) {
+	return hex2color(icon_color_, color);
+}
+
+bool VideoWidget::Theme::setIconColor(double r, double g, double b, double a) {
+	icon_color_[0] = r;
+	icon_color_[1] = g;
+	icon_color_[2] = b;
+	icon_color_[3] = a;
+	return true;
+}
+
+enum VideoWidget::Theme::Align VideoWidget::Theme::labelHorizontalAlign(void) const {
+	return label_horizontal_align_;
+}
+
+void VideoWidget::Theme::setLabelHorizontalAlign(VideoWidget::Theme::Align align) {
+	label_horizontal_align_ = align;
+}
+
+enum VideoWidget::Theme::Align VideoWidget::Theme::labelVerticalAlign(void) const {
+	return label_vertical_align_;
+}
+
+void VideoWidget::Theme::setLabelVerticalAlign(VideoWidget::Theme::Align align) {
+	label_vertical_align_ = align;
+}
+
+const std::string& VideoWidget::Theme::labelFontFamily(void) const {
+	return label_font_family_;
+}
+
+void VideoWidget::Theme::setLabelFontFamily(std::string family) {
+	if (family.empty())
+		return;
+
+	label_font_family_ = family;
+};
+
+double VideoWidget::Theme::labelFontSize(void) const {
+	return label_font_size_;
+}
+
+void VideoWidget::Theme::setLabelFontSize(double size) {
+	if (size < 0)
+		return;
+
+	label_font_size_ = size;
+}
+
+enum VideoWidget::Theme::FontStyle VideoWidget::Theme::labelFontStyle(void) const {
+	return label_font_style_;
+}
+
+void VideoWidget::Theme::setLabelFontStyle(VideoWidget::Theme::FontStyle style) {
+	label_font_style_ = style;
+}
+
+enum VideoWidget::Theme::FontWeight VideoWidget::Theme::labelFontWeight(void) const {
+	return label_font_weight_;
+}
+
+void VideoWidget::Theme::setLabelFontWeight(VideoWidget::Theme::FontWeight weight) {
+	label_font_weight_ = weight;
+}
+
+const float * VideoWidget::Theme::labelColor(void) const {
+	return label_color_;
+}
+
+bool VideoWidget::Theme::setLabelColor(std::string color) {
+	return hex2color(label_color_, color);
+}
+
+bool VideoWidget::Theme::setLabelColor(double r, double g, double b, double a) {
+	label_color_[0] = r;
+	label_color_[1] = g;
+	label_color_[2] = b;
+	label_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::labelShadowDistance(void) const {
+	return label_shadow_distance_;
+}
+
+void VideoWidget::Theme::setLabelShadowDistance(double distance) {
+	if (distance < 0)
+		return;
+
+	label_shadow_distance_ = distance;
+}
+
+int VideoWidget::Theme::labelShadowOpacity(void) const {
+	return label_shadow_opacity_;
+}
+
+void VideoWidget::Theme::setLabelShadowOpacity(int opacity) {
+	if (opacity < 0)
+		return;
+
+	label_shadow_opacity_ = opacity;
+}
+
+double VideoWidget::Theme::labelBorderWidth(void) const {
+	return label_border_width_;
+}
+
+void VideoWidget::Theme::setLabelBorderWidth(double width) {
+	if (width < 0)
+		return;
+
+	label_border_width_ = width;
+}
+
+const float * VideoWidget::Theme::labelBorderColor(void) const {
+	return label_border_color_;
+}
+
+bool VideoWidget::Theme::setLabelBorderColor(std::string color) {
+	return hex2color(label_border_color_, color);
+}
+
+bool VideoWidget::Theme::setLabelBorderColor(double r, double g, double b, double a) {
+	label_border_color_[0] = r;
+	label_border_color_[1] = g;
+	label_border_color_[2] = b;
+	label_border_color_[3] = a;
+	return true;
+}
+
+const int& VideoWidget::Theme::valueMin(void) const {
+	return value_min_;
+}
+
+void VideoWidget::Theme::setValueMin(int value) {
+	if (value < value_max_)
+		value_min_ = value;
+}
+
+const int& VideoWidget::Theme::valueMax(void) const {
+	return value_max_;
+}
+
+void VideoWidget::Theme::setValueMax(int value) {
+	if (value > value_min_)
+		value_max_ = value;
+}
+
+enum VideoWidget::Theme::Align VideoWidget::Theme::valueHorizontalAlign(void) const {
+	return value_horizontal_align_;
+}
+
+void VideoWidget::Theme::setValueHorizontalAlign(VideoWidget::Theme::Align align) {
+	value_horizontal_align_ = align;
+}
+
+enum VideoWidget::Theme::Align VideoWidget::Theme::valueVerticalAlign(void) const {
+	return value_vertical_align_;
+}
+
+void VideoWidget::Theme::setValueVerticalAlign(VideoWidget::Theme::Align align) {
+	value_vertical_align_ = align;
+}
+
+const std::string& VideoWidget::Theme::valueFontFamily(void) const {
+	return value_font_family_;
+}
+
+void VideoWidget::Theme::setValueFontFamily(std::string family) {
+	if (family.empty())
+		return;
+
+	value_font_family_ = family;
+};
+
+double VideoWidget::Theme::valueFontSize(void) const {
+	return value_font_size_;
+}
+
+void VideoWidget::Theme::setValueFontSize(double size) {
+	if (size < 0)
+		return;
+
+	value_font_size_ = size;
+}
+
+enum VideoWidget::Theme::FontStyle VideoWidget::Theme::valueFontStyle(void) const {
+	return value_font_style_;
+}
+
+void VideoWidget::Theme::setValueFontStyle(VideoWidget::Theme::FontStyle style) {
+	value_font_style_ = style;
+}
+
+enum VideoWidget::Theme::FontWeight VideoWidget::Theme::valueFontWeight(void) const {
+	return value_font_weight_;
+}
+
+void VideoWidget::Theme::setValueFontWeight(VideoWidget::Theme::FontWeight weight) {
+	value_font_weight_ = weight;
+}
+
+const float * VideoWidget::Theme::valueColor(void) const {
+	return value_color_;
+}
+
+bool VideoWidget::Theme::setValueColor(std::string color) {
+	return hex2color(value_color_, color);
+}
+
+bool VideoWidget::Theme::setValueColor(double r, double g, double b, double a) {
+	value_color_[0] = r;
+	value_color_[1] = g;
+	value_color_[2] = b;
+	value_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::valueShadowDistance(void) const {
+	return value_shadow_distance_;
+}
+
+void VideoWidget::Theme::setValueShadowDistance(double distance) {
+	if (distance < 0)
+		return;
+
+	value_shadow_distance_ = distance;
+}
+
+int VideoWidget::Theme::valueShadowOpacity(void) const {
+	return value_shadow_opacity_;
+}
+
+void VideoWidget::Theme::setValueShadowOpacity(int opacity) {
+	if (opacity < 0)
+		return;
+
+	value_shadow_opacity_ = opacity;
+}
+
+const double& VideoWidget::Theme::valueBorderWidth(void) const {
+	return value_border_width_;
+}
+
+void VideoWidget::Theme::setValueBorderWidth(double width) {
+	if (width < 0)
+		return;
+
+	value_border_width_ = width;
+}
+
+const float * VideoWidget::Theme::valueBorderColor(void) const {
+	return value_border_color_;
+}
+
+bool VideoWidget::Theme::setValueBorderColor(std::string color) {
+	return hex2color(value_border_color_, color);
+}
+
+bool VideoWidget::Theme::setValueBorderColor(double r, double g, double b, double a) {
+	value_border_color_[0] = r;
+	value_border_color_[1] = g;
+	value_border_color_[2] = b;
+	value_border_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::unitFontSize(void) const {
+	return unit_font_size_;
+}
+
+void VideoWidget::Theme::setUnitFontSize(double size) {
+	if (size < 0)
+		return;
+
+	unit_font_size_ = size;
+}
+
+double VideoWidget::Theme::lineSpace(void) const {
+	return line_space_;
+}
+
+void VideoWidget::Theme::setLineSpace(double size) {
+	if (size < 0)
+		return;
+
+	line_space_ = size;
+}
+
+const int& VideoWidget::Theme::gaugeAngle(void) const {
+	return gauge_angle_;
+}
+
+void VideoWidget::Theme::setGaugeAngle(int angle) {
+	if (angle < 0)
+		return;
+
+	gauge_angle_ = angle;
+}
+
+const int& VideoWidget::Theme::gaugeRotation(void) const {
+	return gauge_rotation_;
+}
+
+void VideoWidget::Theme::setGaugeRotation(int rotation) {
+	if (rotation < 0)
+		return;
+
+	gauge_rotation_ = rotation;
+}
+
+const VideoWidget::Orientation& VideoWidget::Theme::gaugeOrientation(void) const {
+	return gauge_orientation_;
+}
+
+void VideoWidget::Theme::setGaugeOrientation(VideoWidget::Orientation orientation) {
+	gauge_orientation_ = orientation;
+}
+
+const bool& VideoWidget::Theme::gaugeFlip(void) const {
+	return gauge_flip_;
+}
+
+void VideoWidget::Theme::setGaugeFlip(bool flip) {
+	gauge_flip_ = flip;
+}
+
+const double& VideoWidget::Theme::gaugeWidth(void) const {
+	return gauge_width_;
+}
+
+void VideoWidget::Theme::setGaugeWidth(double width) {
+	if (width < 0)
+		return;
+
+	gauge_width_ = width;
+}
+
+const double& VideoWidget::Theme::gaugeOffset(void) const {
+	return gauge_offset_;
+}
+
+void VideoWidget::Theme::setGaugeOffset(double offset) {
+	gauge_offset_ = offset;
+}
+
+VideoWidget::Theme::GaugeCap VideoWidget::Theme::gaugeCap(void) const {
+	return gauge_cap_;
+}
+
+void VideoWidget::Theme::setGaugeCap(VideoWidget::Theme::GaugeCap cap) {
+	gauge_cap_ = cap;
+}
+
+const double& VideoWidget::Theme::gaugeBorder(void) const {
+	return gauge_border_;
+}
+
+void VideoWidget::Theme::setGaugeBorder(double border) {
+	gauge_border_ = border;
+}
+
+const float * VideoWidget::Theme::gaugeBorderColor(void) const {
+	return gauge_border_color_;
+}
+
+bool VideoWidget::Theme::setGaugeBorderColor(std::string color) {
+	return hex2color(gauge_border_color_, color);
+}
+
+bool VideoWidget::Theme::setGaugeBorderColor(double r, double g, double b, double a) {
+	gauge_border_color_[0] = r;
+	gauge_border_color_[1] = g;
+	gauge_border_color_[2] = b;
+	gauge_border_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::gaugePrimaryColor() const {
+	return gauge_primary_color_;
+}
+
+bool VideoWidget::Theme::setGaugePrimaryColor(std::string color) {
+	return hex2color(gauge_primary_color_, color);
+}
+
+bool VideoWidget::Theme::setGaugePrimaryColor(double r, double g, double b, double a) {
+	gauge_primary_color_[0] = r;
+	gauge_primary_color_[1] = g;
+	gauge_primary_color_[2] = b;
+	gauge_primary_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::gaugeSecondaryColor() const {
+	return gauge_secondary_color_;
+}
+
+bool VideoWidget::Theme::setGaugeSecondaryColor(std::string color) {
+	return hex2color(gauge_secondary_color_, color);
+}
+
+bool VideoWidget::Theme::setGaugeSecondaryColor(double r, double g, double b, double a) {
+	gauge_secondary_color_[0] = r;
+	gauge_secondary_color_[1] = g;
+	gauge_secondary_color_[2] = b;
+	gauge_secondary_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::gaugeBackgroundColor(void) const {
+	return gauge_bg_color_;
+}
+
+bool VideoWidget::Theme::setGaugeBackgroundColor(std::string color) {
+	return hex2color(gauge_bg_color_, color);
+}
+
+bool VideoWidget::Theme::setGaugeBackgroundColor(double r, double g, double b, double a) {
+	gauge_bg_color_[0] = r;
+	gauge_bg_color_[1] = g;
+	gauge_bg_color_[2] = b;
+	gauge_bg_color_[3] = a;
+	return true;
+}
+
+const double& VideoWidget::Theme::tickSize(void) const {
+	return tick_size_;
+}
+
+void VideoWidget::Theme::setTickSize(double size) {
+	if (size < 0)
+		return;
+
+	tick_size_ = size;
+}
+
+const VideoWidget::Theme::Align& VideoWidget::Theme::tickAlign(void) const {
+	return tick_align_;
+}
+
+void VideoWidget::Theme::setTickAlign(VideoWidget::Theme::Align align) {
+	tick_align_ = align;
+}
+
+const float * VideoWidget::Theme::tickColor(void) const {
+	return tick_color_;
+}
+
+bool VideoWidget::Theme::setTickColor(std::string color) {
+	return hex2color(tick_color_, color);
+}
+
+bool VideoWidget::Theme::setTickColor(double r, double g, double b, double a) {
+	tick_color_[0] = r;
+	tick_color_[1] = g;
+	tick_color_[2] = b;
+	tick_color_[3] = a;
+	return true;
+}
+
+const double& VideoWidget::Theme::tickLabelDistance(void) const {
+	return tick_label_distance_;
+}
+
+void VideoWidget::Theme::setTickLabelDistance(double distance) {
+	if (distance < 0)
+		return;
+
+	tick_label_distance_ = distance;
+}
+
+double VideoWidget::Theme::tickLabelFontSize(void) const {
+	return tick_label_font_size_;
+}
+
+void VideoWidget::Theme::setTickLabelFontSize(double size) {
+	if (size < 0)
+		return;
+
+	tick_label_font_size_ = size;
+}
+
+const float * VideoWidget::Theme::tickLabelColor(void) const {
+	return tick_label_color_;
+}
+
+bool VideoWidget::Theme::setTickLabelColor(std::string color) {
+	return hex2color(tick_label_color_, color);
+}
+
+bool VideoWidget::Theme::setTickLabelColor(double r, double g, double b, double a) {
+	tick_label_color_[0] = r;
+	tick_label_color_[1] = g;
+	tick_label_color_[2] = b;
+	tick_label_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::tickLabelBorderColor(void) const {
+	return tick_label_border_color_;
+}
+
+bool VideoWidget::Theme::setTickLabelBorderColor(std::string color) {
+	return hex2color(tick_label_border_color_, color);
+}
+
+bool VideoWidget::Theme::setTickLabelBorderColor(double r, double g, double b, double a) {
+	tick_label_border_color_[0] = r;
+	tick_label_border_color_[1] = g;
+	tick_label_border_color_[2] = b;
+	tick_label_border_color_[3] = a;
+	return true;
+}
+
+VideoWidget::Theme::NeedleType VideoWidget::Theme::needleType(void) const {
+	return needle_type_;
+}
+
+void VideoWidget::Theme::setNeedleType(VideoWidget::Theme::NeedleType type) {
+	needle_type_ = type;
+}
+
+const double& VideoWidget::Theme::needleDistance(void) const {
+	return needle_distance_;
+}
+
+void VideoWidget::Theme::setNeedleDistance(double distance) {
+	if (distance < 0)
+		return;
+
+	needle_distance_ = distance;
+}
+
+const double& VideoWidget::Theme::needleBorder(void) const {
+	return needle_border_;
+}
+
+void VideoWidget::Theme::setNeedleBorder(double border) {
+	needle_border_ = border;
+}
+
+const float * VideoWidget::Theme::needleBorderColor(void) const {
+	return needle_border_color_;
+}
+
+bool VideoWidget::Theme::setNeedleBorderColor(std::string color) {
+	return hex2color(needle_border_color_, color);
+}
+
+bool VideoWidget::Theme::setNeedleBorderColor(double r, double g, double b, double a) {
+	needle_border_color_[0] = r;
+	needle_border_color_[1] = g;
+	needle_border_color_[2] = b;
+	needle_border_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::needleBackgroundColor(void) const {
+	return needle_background_color_;
+}
+
+bool VideoWidget::Theme::setNeedleBackgroundColor(std::string color) {
+	return hex2color(needle_background_color_, color);
+}
+
+bool VideoWidget::Theme::setNeedleBackgroundColor(double r, double g, double b, double a) {
+	needle_background_color_[0] = r;
+	needle_background_color_[1] = g;
+	needle_background_color_[2] = b;
+	needle_background_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::needlePrimaryColor(void) const {
+	return needle_primary_color_;
+}
+
+bool VideoWidget::Theme::setNeedlePrimaryColor(std::string color) {
+	return hex2color(needle_primary_color_, color);
+}
+
+bool VideoWidget::Theme::setNeedlePrimaryColor(double r, double g, double b, double a) {
+	needle_primary_color_[0] = r;
+	needle_primary_color_[1] = g;
+	needle_primary_color_[2] = b;
+	needle_primary_color_[3] = a;
+	return true;
+}
+
+const float * VideoWidget::Theme::needleSecondaryColor(void) const {
+	return needle_secondary_color_;
+}
+
+bool VideoWidget::Theme::setNeedleSecondaryColor(std::string color) {
+	return hex2color(needle_secondary_color_, color);
+}
+
+bool VideoWidget::Theme::setNeedleSecondaryColor(double r, double g, double b, double a) {
+	needle_secondary_color_[0] = r;
+	needle_secondary_color_[1] = g;
+	needle_secondary_color_[2] = b;
+	needle_secondary_color_[3] = a;
+	return true;
+}
+
+
+const double& VideoWidget::Theme::cursorWidth(void) const {
+	return cursor_width_;
+}
+
+void VideoWidget::Theme::setCursorWidth(double width) {
+	cursor_width_ = width;
+}
+
+const float * VideoWidget::Theme::cursorColor(void) const {
+	return cursor_color_;
+}
+
+bool VideoWidget::Theme::setCursorColor(std::string color) {
+	return hex2color(cursor_color_, color);
+}
+
+bool VideoWidget::Theme::setCursorColor(double r, double g, double b, double a) {
+	cursor_color_[0] = r;
+	cursor_color_[1] = g;
+	cursor_color_[2] = b;
+	cursor_color_[3] = a;
+	return true;
+}
+
+
+const double& VideoWidget::Theme::axisThick(void) const {
+	return axis_thick_;
+}
+
+
+void VideoWidget::Theme::setAxisThick(double thick) {
+	axis_thick_ = thick;
+}
+
+const double& VideoWidget::Theme::axisBorder(void) const {
+	return axis_border_;
+}
+
+
+void VideoWidget::Theme::setAxisBorder(double border) {
+	axis_border_ = border;
+}
+
+
+const float * VideoWidget::Theme::axisColor(void) const {
+	return axis_color_;
+}
+
+
+bool VideoWidget::Theme::setAxisColor(std::string color) {
+	return hex2color(axis_color_, color);
+}
+
+
+bool VideoWidget::Theme::setAxisColor(double r, double g, double b, double a) {
+	axis_color_[0] = r;
+	axis_color_[1] = g;
+	axis_color_[2] = b;
+	axis_color_[3] = a;
+	return true;
+}
+
+
+const float * VideoWidget::Theme::axisBorderColor(void) const {
+	return axis_border_color_;
+}
+
+
+bool VideoWidget::Theme::setAxisBorderColor(std::string color) {
+	return hex2color(axis_border_color_, color);
+}
+
+
+bool VideoWidget::Theme::setAxisBorderColor(double r, double g, double b, double a) {
+	axis_border_color_[0] = r;
+	axis_border_color_[1] = g;
+	axis_border_color_[2] = b;
+	axis_border_color_[3] = a;
+	return true;
+}
+
+
+const double& VideoWidget::Theme::curveThick(void) const {
+	return curve_thick_;
+}
+
+
+void VideoWidget::Theme::setCurveThick(double thick) {
+	curve_thick_ = thick;
+}
+
+const double& VideoWidget::Theme::curveBorder(void) const {
+	return curve_border_;
+}
+
+
+void VideoWidget::Theme::setCurveBorder(double border) {
+	curve_border_ = border;
+}
+
+
+const float * VideoWidget::Theme::curveColor(void) const {
+	return curve_color_;
+}
+
+
+bool VideoWidget::Theme::setCurveColor(std::string color) {
+	return hex2color(curve_color_, color);
+}
+
+
+bool VideoWidget::Theme::setCurveColor(double r, double g, double b, double a) {
+	curve_color_[0] = r;
+	curve_color_[1] = g;
+	curve_color_[2] = b;
+	curve_color_[3] = a;
+	return true;
+}
+
+
+const float * VideoWidget::Theme::curveBorderColor(void) const {
+	return curve_border_color_;
+}
+
+
+bool VideoWidget::Theme::setCurveBorderColor(std::string color) {
+	return hex2color(curve_border_color_, color);
+}
+
+
+bool VideoWidget::Theme::setCurveBorderColor(double r, double g, double b, double a) {
+	curve_border_color_[0] = r;
+	curve_border_color_[1] = g;
+	curve_border_color_[2] = b;
+	curve_border_color_[3] = a;
+	return true;
+}
+
+
+const float * VideoWidget::Theme::curveFillColor(void) const {
+	return curve_fill_color_;
+}
+
+
+bool VideoWidget::Theme::setCurveFillColor(std::string color) {
+	return hex2color(curve_fill_color_, color);
+}
+
+
+bool VideoWidget::Theme::setCurveFillColor(double r, double g, double b, double a) {
+	curve_fill_color_[0] = r;
+	curve_fill_color_[1] = g;
+	curve_fill_color_[2] = b;
+	curve_fill_color_[3] = a;
+	return true;
 }
 
 
@@ -220,6 +1147,8 @@ VideoWidget::Shape VideoWidget::string2shape(std::string &s) {
 		shape = VideoWidget::ShapeArc;
 	else if (s == "bar")
 		shape = VideoWidget::ShapeBar;
+	else if (s == "chart")
+		shape = VideoWidget::ShapeChart;
 	else
 		shape = VideoWidget::ShapeUnknown;
 
@@ -375,7 +1304,7 @@ VideoWidget::Theme::GaugeCap VideoWidget::string2gaugecap(std::string &s) {
 VideoWidget::Theme::NeedleType VideoWidget::string2needletype(std::string &s) {
 	VideoWidget::Theme::NeedleType type;
 
-	if (s.empty() || (s == "none") || (s == "baisc"))
+	if (s.empty() || (s == "none") || (s == "basic"))
 		type = VideoWidget::Theme::NeedleTypeBasic;
 	else if (s == "thin")
 		type = VideoWidget::Theme::NeedleTypeThin;
@@ -383,6 +1312,10 @@ VideoWidget::Theme::NeedleType VideoWidget::string2needletype(std::string &s) {
 		type = VideoWidget::Theme::NeedleTypeLight;
 	else if (s == "design")
 		type = VideoWidget::Theme::NeedleTypeDesign;
+	else if (s == "icon")
+		type = VideoWidget::Theme::NeedleTypeIcon;
+	else if (s == "value")
+		type = VideoWidget::Theme::NeedleTypeValue;
 	else
 		type = VideoWidget::Theme::NeedleTypeUnknown;
 
@@ -507,8 +1440,12 @@ VideoWidget::Theme::Icon VideoWidget::string2icon(std::string &s) {
 		icon = VideoWidget::Theme::IconTrack;
 	else if (s == "internal:verticalspeed")
 		icon = VideoWidget::Theme::IconVerticalSpeed;
+	else if (s == "internal:spot")
+		icon = VideoWidget::Theme::IconSpot;
 	else if (s == "internal:running")
 		icon = VideoWidget::Theme::IconRunning;
+	else if (s == "internal:bike")
+		icon = VideoWidget::Theme::IconBike;
 	else if (Utils::starts_with(s, "file:"))
 		icon = VideoWidget::Theme::IconUserFile;
 	else
@@ -549,6 +1486,8 @@ std::string VideoWidget::shape2string(VideoWidget::Shape shape) {
 		return "arc";
 	case VideoWidget::ShapeBar:
 		return "bar";
+	case VideoWidget::ShapeChart:
+		return "chart";
 	case VideoWidget::ShapeText:
 		return "text";
 	default:
@@ -740,6 +1679,10 @@ std::string VideoWidget::needletype2string(Theme::NeedleType type) {
 		return "basic";
 	case Theme::NeedleTypeDesign:
 		return "design";
+	case Theme::NeedleTypeIcon:
+		return "icon";
+	case Theme::NeedleTypeValue:
+		return "value";
 	default:
 		return "";
 	}
@@ -862,8 +1805,12 @@ std::string VideoWidget::icon2string(VideoWidget::Theme::Icon icon) {
 	case VideoWidget::Theme::IconVerticalSpeed:
 		return "internal:verticalspeed";
 
+	case VideoWidget::Theme::IconSpot:
+		return "internal:spot";
 	case VideoWidget::Theme::IconRunning:
 		return "internal:running";
+	case VideoWidget::Theme::IconBike:
+		return "internal:bike";
 
 	case VideoWidget::Theme::IconUserFile:
 		return "file:";
@@ -917,7 +1864,7 @@ void VideoWidget::xmlopen(std::ostream &os) {
 	os <<   " width=\"" << theme().width() << "\" height=\"" << theme().height() << "\"";
 	os <<   " position=\"" << position2string(position()) << "\"";
 	os <<   " orientation=\"" << orientation2string(orientation()) << "\"";
-	os <<   " display=\"true\"";
+	os <<   " display=\"" << bool2string(visible()) << "\"";
    	os <<   ">" << std::endl;
 }
 
@@ -1016,8 +1963,12 @@ std::string VideoWidget::getIconFilename(VideoWidget::Theme::Icon icon) {
 		return theme().iconFile();
 
 	switch (icon) {
+	case VideoWidget::Theme::IconSpot:
+		return path + "/spot.svg";
 	case VideoWidget::Theme::IconRunning:
 		return path + "/running.svg";
+	case VideoWidget::Theme::IconBike:
+		return path + "/bike.svg";
 	default:
 		return "";
 	}
@@ -1030,6 +1981,8 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Shape shape) {
 		return _("Arc");
 	case VideoWidget::ShapeBar:
 		return _("Bar");
+	case VideoWidget::ShapeChart:
+		return _("Chart");
 	case VideoWidget::ShapeText:
 		return _("Text");
 	default:

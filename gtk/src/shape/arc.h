@@ -41,6 +41,8 @@ public:
 	void update_content(void);
 	void update_boundaries(void);
 
+	void set_default(void);
+
 private:
 	Glib::RefPtr<Gtk::ListStore> gauge_cap_model_;
 	Glib::RefPtr<Gtk::ListStore> needle_type_model_;

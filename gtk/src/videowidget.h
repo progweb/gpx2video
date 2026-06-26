@@ -9,6 +9,7 @@
 
 #include "../../src/decoder.h"
 #include "../../src/videowidget.h"
+#include "../../src/shape/base.h"
 #include "shader.h"
 
 

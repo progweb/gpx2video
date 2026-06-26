@@ -27,9 +27,7 @@ void HeartRateTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
-
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -166,8 +164,8 @@ void HeartRateTextShape::clear(void) {
 }
 
 
-HeartRateWidget::HeartRateWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetHeartRate) 
+HeartRateWidget::HeartRateWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetHeartRate, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

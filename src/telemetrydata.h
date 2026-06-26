@@ -21,7 +21,13 @@ public:
 		TypeFixed,
 		TypePredicted,
 		TypeUnchanged,
-		TypeError,
+		TypeError
+	};
+
+	enum Range {
+		RangeMin,
+		RangeMax,
+		RangeNone
 	};
 
 	enum Data {
@@ -58,6 +64,8 @@ public:
 		UnitNone,
 
 		UnitDefault,
+
+		UnitPercent,
 
 		UnitMeterPerSec, // Meter / Sec
 		UnitMilesPerSec, // Miles / Sec
@@ -111,13 +119,13 @@ public:
 	const double& latitude(bool raw=false) const;
 	const double& longitude(bool raw=false) const;
 
-	double elevation(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double elevation(TelemetryData::Unit unit = TelemetryData::UnitDefault, TelemetryData::Range range = TelemetryData::RangeNone) const;
 	int cadence(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	int heartrate(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double temperature(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	int power(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double duration(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
-	double distance(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double distance(TelemetryData::Unit unit = TelemetryData::UnitDefault, TelemetryData::Range range = TelemetryData::RangeNone) const;
 	double course(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double heading(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double grade(void) const;
@@ -160,14 +168,14 @@ protected:
 	uint64_t ts_;
 	double lat_, lon_;
 	double raw_lat_, raw_lon_;
-	double ele_;
+	double ele_, ele_min_, ele_max_;
 	double temperature_;
 	int heartrate_;
 	int cadence_;
 	int power_;
 
 	uint64_t datetime_;
-	double distance_;
+	double distance_, distance_min_, distance_max_;
 	double course_;
 	double heading_;
 	double duration_;

@@ -27,7 +27,7 @@ void BatteryLevelTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -154,8 +154,8 @@ void BatteryLevelTextShape::clear(void) {
 }
 
 
-BatteryLevelWidget::BatteryLevelWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetBatteryLevel) 
+BatteryLevelWidget::BatteryLevelWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetBatteryLevel, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

@@ -598,6 +598,7 @@ private:
 	void smooth(void);
 	void fix(void);
 	void trim(void);
+	void bounds(void);
 
 	void insertData(uint64_t timestamp);
 	void updateData(TelemetryData &data);

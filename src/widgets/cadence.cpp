@@ -27,7 +27,7 @@ void CadenceTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -158,8 +158,8 @@ void CadenceTextShape::clear(void) {
 }
 
 
-CadenceWidget::CadenceWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetCadence) 
+CadenceWidget::CadenceWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetCadence, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

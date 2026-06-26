@@ -101,10 +101,10 @@ public:
 		delete shape_;
 	}
 
-	static GForceWidget * create(GPXApplication &app) {
+	static GForceWidget * create(GPXApplication &app, TelemetrySource *source = NULL) {
 		GForceWidget *widget;
 
-		widget = new GForceWidget(app);
+		widget = new GForceWidget(app, source);
 
 		widget->setValueUnit(TelemetryData::UnitG);
 
@@ -152,14 +152,13 @@ protected:
 
 		shape_->xmlwrite(os);
 
-		os << "<with-unit>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<value-unit>" << unit2string(valueUnit()) << "</value-unit>" << std::endl;
 	}
 
 private:
 	ShapeBase *shape_;
 
-	GForceWidget(GPXApplication &app);
+	GForceWidget(GPXApplication &app, TelemetrySource *source);
 };
 
 #endif

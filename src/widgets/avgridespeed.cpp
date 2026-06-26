@@ -27,7 +27,7 @@ void AvgRideSpeedTextShape::initialize(cairo_t *cr) {
 
 	TextShape::Font font;
 
-	setSize(theme().height());
+	setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
@@ -186,8 +186,8 @@ void AvgRideSpeedTextShape::clear(void) {
 }
 
 
-AvgRideSpeedWidget::AvgRideSpeedWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetAverageRideSpeed) 
+AvgRideSpeedWidget::AvgRideSpeedWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetAverageRideSpeed, source) 
 	, ShapeBase(VideoWidget::theme())
 	, shape_(NULL) {
 

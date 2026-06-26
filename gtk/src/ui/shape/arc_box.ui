@@ -17,38 +17,38 @@
 	</object>
 	<object class="GtkAdjustment" id="gauge_width_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="gauge_border_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="tick_size_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="tick_label_distance_adjustment">
 		<property name="lower">0</property>
-		<property name="upper">1000</property>
+		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="tick_label_font_size_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">100</property>
 		<property name="value">0</property>
-		<property name="step-increment">1</property>
-		<property name="page-increment">10</property>
+		<property name="step-increment">0.1</property>
+		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkBox" id="settings_box">
 		<property name="orientation">vertical</property>
@@ -72,7 +72,7 @@
 		</child>
 
 		<child>
-			<object class="GtkExpander" id="arc_expander">
+			<object class="GtkExpander" id="gauge_expander">
 				<property name="label" translatable="yes">Gauge</property>
 				<child>
 					<object class="GtkBox">
@@ -214,6 +214,7 @@
 									<object class="GtkSpinButton" id="gauge_width_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
+										<property name="digits">1</property>
 										<property name="width-chars">4</property>
 										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
@@ -270,6 +271,7 @@
 									<object class="GtkSpinButton" id="gauge_border_width_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
+										<property name="digits">1</property>
 										<property name="width-chars">4</property>
 										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
@@ -458,6 +460,7 @@
 									<object class="GtkSpinButton" id="tick_size_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
+										<property name="digits">1</property>
 										<property name="width-chars">4</property>
 										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
@@ -544,6 +547,7 @@
 									<object class="GtkSpinButton" id="tick_label_distance_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
+										<property name="digits">1</property>
 										<property name="width-chars">4</property>
 										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>
@@ -574,6 +578,7 @@
 									<object class="GtkSpinButton" id="tick_label_font_size_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
+										<property name="digits">1</property>
 										<property name="width-chars">4</property>
 										<property name="max-width-chars">4</property>
 										<property name="numeric">True</property>

@@ -1,8 +1,8 @@
 #include "gpx.h"
 
 
-GPXWidget::GPXWidget(GPXApplication &app)
-	: VideoWidget(app, VideoWidget::WidgetGPX)
+GPXWidget::GPXWidget(GPXApplication &app, TelemetrySource *source)
+	: VideoWidget(app, VideoWidget::WidgetGPX, source)
 	, ShapeBase(theme(), VideoWidget::ShapeText)
 	, bg_buf_(NULL)
 	, fg_buf_(NULL) {
@@ -34,6 +34,8 @@ void GPXWidget::initialize(cairo_t *cr) {
 	int width, height;
 
 	ShapeBase::Font font;
+
+	ShapeBase::setSize(theme().width(), theme().height());
 
 	setPadding(
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingLeft),
