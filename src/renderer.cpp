@@ -526,6 +526,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	VideoWidget::Position position = VideoWidget::PositionNone;
 	VideoWidget::Orientation orientation = VideoWidget::OrientationNone;
+	VideoWidget::Orientation text_orientation = VideoWidget::OrientationNone;
 	VideoWidget::Orientation gauge_orientation = VideoWidget::OrientationNone;
 
 	VideoWidget::Theme::Align align;
@@ -693,6 +694,17 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	else if (align != VideoWidget::Theme::AlignNone)
 		value_vertical_align = align;
 
+	// Text orientation
+	s = (const char *) w->textOrientation();
+	text_orientation = VideoWidget::string2orientation(s);
+
+	if (text_orientation == VideoWidget::OrientationUnknown) {
+		log_error("Widget loading error, text orientation value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (text_orientation == VideoWidget::OrientationNone)
+		text_orientation = VideoWidget::OrientationHorizontal;
+
 	// Gauge cap
 	s = (const char *) w->gaugeCap();
 	gauge_cap = VideoWidget::string2gaugecap(s);
@@ -801,6 +813,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Widget misc. settings
 	widget->theme().setLineSpace(w->lineSpace());
+	widget->theme().setTextOrientation(text_orientation);
 
 	// Widget label settings
 	widget->theme().setLabelFontFamily((const char *) w->labelFontFamily());
@@ -832,6 +845,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 
 	// Widget unit settings
 	widget->theme().setUnitFontSize(w->unitFontSize());
+	widget->theme().setUnitDistance(w->unitDistance());
 
 	// Width gauge settings
 	widget->theme().setGaugeAngle(w->gaugeAngle());

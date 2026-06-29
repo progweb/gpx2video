@@ -78,6 +78,8 @@ protected:
 	Glib::RefPtr<Gtk::SingleSelection> icon_model_;
 	Glib::RefPtr<Gtk::SignalListItemFactory> icon_factory_;
 
+	Glib::RefPtr<Gtk::ListStore> text_orientation_model_;
+
 	void create_popover(Gtk::MenuButton *menubutton);
 
 	void on_icon_ok_clicked(void);

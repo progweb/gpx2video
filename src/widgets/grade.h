@@ -118,6 +118,8 @@ public:
 
 		widget = new GradeWidget(app, source);
 
+		widget->setValueUnit(TelemetryData::UnitPercent);
+
 		return widget;
 	}
 

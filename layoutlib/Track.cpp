@@ -162,9 +162,9 @@ namespace layout
 	_icon_start_color.setValue("#00000000");
 	_icon_position_color.setValue("#00000000");
 
-	_icon_end_size.setValue("1.0");
-	_icon_start_size.setValue("1.0");
-	_icon_position_size.setValue("1.0");
+	_icon_end_size.setValue("-1");
+	_icon_start_size.setValue("-1");
+	_icon_position_size.setValue("-1");
 
 	_with_icon_end.setValue("true");
 	_with_icon_start.setValue("true");

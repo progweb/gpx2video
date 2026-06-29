@@ -58,7 +58,7 @@ void BatteryLevelTextShape::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888) + "%";
+		std::string txt = std::to_string(888);
 
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
@@ -74,6 +74,26 @@ void BatteryLevelTextShape::initialize(cairo_t *cr) {
 		extents(cr, font, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
 	}
 
 	is_initialized_ = true;
@@ -92,9 +112,9 @@ void BatteryLevelTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataBatteryLevel);
 
 	if (data.hasValue(TelemetryData::DataBatteryLevel))
-		sprintf(s, "%d %%", (int) std::round(100.0 * data.batterylevel()));
+		sprintf(s, "%d", (int) std::round(100.0 * data.batterylevel()));
 	else
-		sprintf(s, "-- %%");
+		sprintf(s, "--");
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -135,6 +155,24 @@ void BatteryLevelTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+	}
 }
 
 
@@ -165,6 +203,13 @@ BatteryLevelWidget::BatteryLevelWidget(GPXApplication &app, TelemetrySource *sou
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(TelemetryData::UnitPercent);
 
 	setShape(VideoWidget::ShapeText);
 }

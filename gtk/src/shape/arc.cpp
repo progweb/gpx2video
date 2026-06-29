@@ -723,17 +723,42 @@ void GPX2VideoArcShapeSettingsBox::update_boundaries(void) {
 void GPX2VideoArcShapeSettingsBox::set_default(void) {
 	log_call();
 
-	widget_->theme().setValueFontSize(8.0);
+	widget_->theme().addFlag(VideoWidget::Theme::FlagValue);
+	widget_->theme().setValueFontSize(10.0);
 	widget_->theme().setValueShadowOpacity(80);
 	widget_->theme().setValueShadowDistance(5.0);
+	widget_->theme().setValueBorderWidth(2.0);
 	widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignCenter);
 	widget_->theme().setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
-	widget_->theme().setValueBorderWidth(5.0);
 
-	widget_->theme().setUnitFontSize(50.0);
+	if (widget_->widget()->type() == VideoWidget::WidgetTime) {
+		widget_->theme().addFlag(VideoWidget::Theme::FlagTick);
+		widget_->theme().addFlag(VideoWidget::Theme::FlagTickLabel);
+		widget_->theme().setTickSize(10.0);
+		widget_->theme().setTickLabelDistance(2.0);
+		widget_->theme().setTickLabelFontSize(8.0);
 
-	widget_->theme().setTickSize(10.0);
-	widget_->theme().setTickLabelDistance(2.0);
-	widget_->theme().setTickLabelFontSize(8.0);
+		widget_->theme().addFlag(VideoWidget::Theme::FlagNeedle);
+		widget_->theme().setNeedleType(VideoWidget::Theme::NeedleTypeDesign);
+
+		widget_->widget()->setValueFormat("%H:%M");
+	}
+	else {
+		widget_->theme().addFlag(VideoWidget::Theme::FlagUnit);
+		widget_->theme().setUnitFontSize(4.0);
+
+		widget_->theme().addFlag(VideoWidget::Theme::FlagGauge);
+		widget_->theme().setGaugeWidth(17.0);
+		widget_->theme().setGaugeBorder(0.0);
+
+		widget_->theme().addFlag(VideoWidget::Theme::FlagTick);
+		widget_->theme().addFlag(VideoWidget::Theme::FlagTickLabel);
+		widget_->theme().setTickSize(20.0);
+		widget_->theme().setTickLabelDistance(4.0);
+		widget_->theme().setTickLabelFontSize(7.0);
+
+		widget_->theme().addFlag(VideoWidget::Theme::FlagNeedle);
+		widget_->theme().setNeedleType(VideoWidget::Theme::NeedleTypeLight);
+	}
 }
 

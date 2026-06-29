@@ -1521,6 +1521,23 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						widget_selected_->dispatchEvent(false);
 					}
 			));
+
+	// Unit distance
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_distance_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_distance_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: unit distance changed to '%.1f'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setUnitDistance(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
 }
 
 
@@ -2090,6 +2107,13 @@ void GPX2VideoWidgetFrame::update_content(void) {
 		throw std::runtime_error("No \"unit_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().unitFontSize());
+
+	// Widget unit distance
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_distance_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_distance_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().unitDistance());
 
 	// Widget settings
 	update_shape_content();

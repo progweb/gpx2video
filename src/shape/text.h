@@ -41,7 +41,7 @@ public:
 	void setSize(int width, int height) {
 		ShapeBase::setSize(width, height);
 
-		size_ = height;
+		size_ = theme().textOrientation() == VideoWidget::OrientationHorizontal ? height : width;
 	}
 
 	void setPadding(int left, int right, int top, int bottom) {
@@ -67,12 +67,22 @@ public:
 		value_height_ = height;
 	}
 
+	void setUnitExtents(int x, int y, int width, int height) {
+		unit_x_ = x;
+		unit_y_ = y;
+
+		unit_width_ = width;
+		unit_height_ = height;
+	}
+
 	virtual OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) = 0;
 
 	void icon(cairo_t *cr, const std::string &filename, const float *fill);
 	void label(cairo_t *cr, TextShape::Font &font, 
 			const float *fill, const float *outline, const char *text);
 	void value(cairo_t *cr, TextShape::Font &font, 
+			const float *fill, const float *outline, const char *text);
+	void unit(cairo_t *cr, TextShape::Font &font, 
 			const float *fill, const float *outline, const char *text);
 
 	void clear(void) {
@@ -81,6 +91,7 @@ public:
 		setPadding(0, 0, 0, 0);
 		setLabelExtents(0, 0, 0, 0);
 		setValueExtents(0, 0, 0, 0);
+		setUnitExtents(0, 0, 0, 0);
 	}
 
 	void xmlwrite(std::ostream &os);
@@ -95,6 +106,7 @@ private:
 
 	int label_x_, label_y_, label_width_, label_height_;
 	int value_x_, value_y_, value_width_, value_height_;
+	int unit_x_, unit_y_, unit_width_, unit_height_;
 };
 
 #endif

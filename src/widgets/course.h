@@ -118,6 +118,8 @@ public:
 
 		widget = new CourseWidget(app, source);
 
+		widget->setValueUnit(TelemetryData::UnitDegree);
+
 		return widget;
 	}
 

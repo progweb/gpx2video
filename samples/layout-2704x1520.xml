@@ -101,12 +101,6 @@
 		<unit>kph</unit>
 		<text-shadow>3</text-shadow>
 	</widget>		
-	<widget width="200" height="200" position="top-left" display="true">
-		<type>image</type>
-		<margin>5</margin>
-		<zoom>fit</zoom>
-		<source>./assets/linux.png</source>
-	</widget>
 
 	<track x="500" y="350" width="1800" height="350" position="top" orientation="horizontal" display="false">
 		<border>1</border>

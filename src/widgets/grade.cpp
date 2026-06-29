@@ -58,7 +58,7 @@ void GradeTextShape::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888) + "%";
+		std::string txt = std::to_string(888);
 
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
@@ -76,6 +76,26 @@ void GradeTextShape::initialize(cairo_t *cr) {
 		setValueExtents(x, y, width, height);
 	}
 
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
+	}
+
 	is_initialized_ = true;
 }
 
@@ -85,9 +105,6 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	TextShape::Font font;
 
-	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-		"%" : "";
-
 	// Initialize
 	initialize(cr);
 
@@ -95,32 +112,38 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataGrade);
 
 	if (!no_value_)
-		sprintf(s, "%d%s", (int) std::round(data.grade()), unit.c_str());
+		sprintf(s, "%d", (int) std::round(data.grade()));
 	else
-		sprintf(s, "--%s", unit.c_str());
+		sprintf(s, "--");
 
-	// Draw background
-	background(cr, theme().roundCorner());
+	// Restore surface
+	if (!restoreCairoSurface(cr)) {
+		// Draw background
+		background(cr, theme().roundCorner());
 
-	// Draw icon
-	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_, theme().iconColor());
-	}
+		// Draw icon
+		if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
+			icon(cr, icon_filename_, theme().iconColor());
+		}
 
-	// Draw label
-	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
-		font = (TextShape::Font) {
-			.size = theme().labelFontSize(),
-			.border = theme().labelBorderWidth(),
-			.shadow_opacity = theme().labelShadowOpacity(),
-			.shadow_distance = theme().labelShadowDistance(),
-			.family = theme().labelFontFamily(),
-			.align = theme().labelHorizontalAlign(),
-			.style = theme().labelFontStyle(),
-			.weight = theme().labelFontWeight(),
-		};
+		// Draw label
+		if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+			font = (TextShape::Font) {
+				.size = theme().labelFontSize(),
+				.border = theme().labelBorderWidth(),
+				.shadow_opacity = theme().labelShadowOpacity(),
+				.shadow_distance = theme().labelShadowDistance(),
+				.family = theme().labelFontFamily(),
+				.align = theme().labelHorizontalAlign(),
+				.style = theme().labelFontStyle(),
+				.weight = theme().labelFontWeight(),
+			};
 
-		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
+			label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
+		}
+
+		// Save surface
+		saveCairoSurface(cr);
 	}
 
 	// Draw value
@@ -137,6 +160,24 @@ void GradeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
+	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
 	}
 }
 

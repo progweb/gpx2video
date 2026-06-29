@@ -34,6 +34,21 @@ GPX2VideoTextShapeSettingsBox::GPX2VideoTextShapeSettingsBox(BaseObjectType *cob
 void GPX2VideoTextShapeSettingsBox::load_models(void) {
 	log_call();
 
+	text_orientation_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = text_orientation_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = VideoWidget::OrientationHorizontal;
+		row[model_.m_name] = _("Horizontal");
+		row[model_.m_enable] = true;
+
+		row = *(text_orientation_model_->append());
+		row[model_.m_id] = VideoWidget::OrientationVertical;
+		row[model_.m_name] = _("Vertical");
+		row[model_.m_enable] = true;
+	}
+
 	auto model = Gio::ListStore<GPX2VideoTextShapeSettingsBox::Icon>::create();
 
 	// Internal icon
@@ -96,7 +111,7 @@ void GPX2VideoTextShapeSettingsBox::bind_content(void) {
 	log_call();
 
 	Gtk::Switch *sw;
-//	Gtk::ComboBox *combobox;
+	Gtk::ComboBox *combobox;
 	Gtk::MenuButton *menubutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -125,6 +140,23 @@ void GPX2VideoTextShapeSettingsBox::bind_content(void) {
 
 	menubutton->set_create_popup_func(sigc::bind(
 			sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::create_popover), menubutton));
+
+	// Icon size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_size_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: icon size changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						widget_->theme().setIconSize(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
 
 	// Icon color
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_color_button");
@@ -160,6 +192,26 @@ void GPX2VideoTextShapeSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Text orientation
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("text_orientation_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"text_orientation_combobox\" object in " + resource_file_);
+	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: text orientation changed to '%s'", 
+								widget_->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_->theme().setTextOrientation((VideoWidget::Orientation) value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
 	// Icon model
 	media_model_->signal_items_changed().connect(sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_model_changed));
 }
@@ -174,11 +226,11 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 
 	Gtk::Switch *sw;
 	Gtk::Image *image;
-//	Gtk::ComboBox *combobox;
+	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
 
-//	Gtk::TreeModel::iterator iter;
+	Gtk::TreeModel::iterator iter;
 
 	// Mask value changed
 	loading_ = true;
@@ -198,6 +250,13 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 	image->set_pixel_size(24);
 	image->set(widget_->widget()->getIconFilename(widget_->theme().icon()));
 
+	// Icon size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_size_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"icon_size_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(widget_->theme().iconSize());
+
 	// Widget icon color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_color_button");
 	if (!colorbutton)
@@ -215,6 +274,16 @@ void GPX2VideoTextShapeSettingsBox::update_content(void) {
 		throw std::runtime_error("No \"linespace_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(widget_->theme().lineSpace());
+
+	// Text orientation button
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("text_orientation_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"text_orientation_spinbutton\" object in " + resource_file_);
+
+	combobox->set_model(text_orientation_model_);
+
+	if (find_in_listtore(text_orientation_model_, widget_->theme().textOrientation(), iter))
+		combobox->set_active(iter);
 
 	// Unmask value changed
 	loading_ = false;
@@ -248,24 +317,58 @@ void GPX2VideoTextShapeSettingsBox::update_boundaries(void) {
 void GPX2VideoTextShapeSettingsBox::set_default(void) {
 	log_call();
 
-	widget_->theme().setIcon(VideoWidget::Theme::IconDefault);
-	widget_->theme().setIconSize(50.0);
+	bool with_label = widget_->theme().hasFlag(VideoWidget::Theme::FlagLabel);
 
-	widget_->theme().setLabelFontSize(30.0);
-	widget_->theme().setLabelShadowOpacity(80);
-	widget_->theme().setLabelShadowDistance(5.05);
-	widget_->theme().setLabelHorizontalAlign(VideoWidget::Theme::AlignLeft);
-	widget_->theme().setLabelVerticalAlign(VideoWidget::Theme::AlignTop);
-	widget_->theme().setLabelBorderWidth(5.0);
+	if (widget_->theme().textOrientation() == VideoWidget::OrientationHorizontal) {
+		widget_->theme().setRoundCorner(5.0);
 
-	widget_->theme().setValueFontSize(50.0);
-	widget_->theme().setValueShadowOpacity(80);
-	widget_->theme().setValueShadowDistance(5.0);
-	widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignLeft);
-	widget_->theme().setValueVerticalAlign(VideoWidget::Theme::AlignBottom);
-	widget_->theme().setValueBorderWidth(5.0);
+		widget_->theme().setIcon(VideoWidget::Theme::IconDefault);
+		widget_->theme().setIconSize(100.0);
 
-	widget_->theme().setUnitFontSize(50.0);
+		widget_->theme().setLabelFontSize(30.0);
+		widget_->theme().setLabelShadowOpacity(80);
+		widget_->theme().setLabelShadowDistance(5.0);
+		widget_->theme().setLabelBorderWidth(2.0);
+		widget_->theme().setLabelHorizontalAlign(VideoWidget::Theme::AlignLeft);
+		widget_->theme().setLabelVerticalAlign(VideoWidget::Theme::AlignTop);
+
+		widget_->theme().setValueFontSize(with_label ? 50.0 : 90.0);
+		widget_->theme().setValueShadowOpacity(80);
+		widget_->theme().setValueShadowDistance(5.0);
+		widget_->theme().setValueBorderWidth(2.0);
+		widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignLeft);
+		widget_->theme().setValueVerticalAlign(with_label ? VideoWidget::Theme::AlignBottom : VideoWidget::Theme::AlignCenter);
+
+		widget_->theme().setUnitFontSize(with_label ? 50.0 : 90.0);
+		widget_->theme().setUnitDistance(5.0);
+
+		widget_->theme().setLineSpace(5.0);
+	}
+	else {
+		widget_->theme().setRoundCorner(100.0);
+
+		widget_->theme().setIcon(VideoWidget::Theme::IconDefault);
+		widget_->theme().setIconSize(25.0);
+
+		widget_->theme().setLabelFontSize(20.0);
+		widget_->theme().setLabelShadowOpacity(80);
+		widget_->theme().setLabelShadowDistance(5.0);
+		widget_->theme().setLabelBorderWidth(2.0);
+		widget_->theme().setLabelHorizontalAlign(VideoWidget::Theme::AlignCenter);
+		widget_->theme().setLabelVerticalAlign(VideoWidget::Theme::AlignCenter);
+
+		widget_->theme().setValueFontSize(with_label ? 20.0 : 20.0);
+		widget_->theme().setValueShadowOpacity(80);
+		widget_->theme().setValueShadowDistance(5.0);
+		widget_->theme().setValueBorderWidth(2.0);
+		widget_->theme().setValueHorizontalAlign(VideoWidget::Theme::AlignCenter);
+		widget_->theme().setValueVerticalAlign(VideoWidget::Theme::AlignCenter);
+
+		widget_->theme().setUnitFontSize(15.0);
+		widget_->theme().setUnitDistance(with_label ? 5.0 : 15.0);
+
+		widget_->theme().setLineSpace(2.0);
+	}
 }
 
 

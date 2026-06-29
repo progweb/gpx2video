@@ -60,9 +60,6 @@ void PowerTextShape::initialize(cairo_t *cr) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
 		std::string txt = std::to_string(888);
 
-		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-			widget_->getFriendlyName(widget_->valueUnit()) : "";
-
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
 			.border = theme().valueBorderWidth(),
@@ -74,11 +71,29 @@ void PowerTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		txt = txt + unit;
-
 		extents(cr, font, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
 	}
 
 	is_initialized_ = true;
@@ -92,9 +107,6 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	int power = data.power(widget_->valueUnit());
 
-	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-		widget_->getFriendlyName(widget_->valueUnit()) : "";
-
 	// Initialize
 	initialize(cr);
 
@@ -102,9 +114,9 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataPower);
 
 	if (!no_value_)
-		sprintf(s, "%d %s", power, unit.c_str());
+		sprintf(s, "%d", power);
 	else
-		sprintf(s, "-- %s", unit.c_str());
+		sprintf(s, "--");
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -145,6 +157,24 @@ void PowerTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
 	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+	}
 }
 
 
@@ -175,6 +205,13 @@ PowerWidget::PowerWidget(GPXApplication &app, TelemetrySource *source)
 	})
 
 	ADD_SHAPE(VideoWidget::ShapeText);
+
+#define ADD_UNIT(unit) \
+	units_supported_.push_back((VideoWidget::ListItem) { \
+		unit, VideoWidget::getFriendlyName(unit), VideoWidget::unit2string(unit) \
+	})
+
+	ADD_UNIT(TelemetryData::UnitWatt);
 
 	setShape(VideoWidget::ShapeText);
 }

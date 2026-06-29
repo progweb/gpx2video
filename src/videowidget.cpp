@@ -38,7 +38,7 @@ VideoWidget::Theme::Theme() {
 	setRoundCorner(0);
 
 	setIcon(VideoWidget::Theme::IconDefault);
-	setIconSize(50.0);
+	setIconSize(100.0);
 	setIconColor(1.0, 1.0, 1.0, 1.0);
 
 	setCursorWidth(1.0);
@@ -71,8 +71,10 @@ VideoWidget::Theme::Theme() {
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 
 	setUnitFontSize(50.0);
+	setUnitDistance(0.0);
 
 	setLineSpace(20.0);
+	setTextOrientation(VideoWidget::OrientationHorizontal);
 
 	setGaugeAngle(300);
 	setGaugeRotation(0);
@@ -257,6 +259,9 @@ const double& VideoWidget::Theme::iconSize(void) const {
 }
 
 void VideoWidget::Theme::setIconSize(const double &size) {
+	if (size < 0)
+		return;
+
 	icon_size_ = size;
 }
 
@@ -543,6 +548,17 @@ void VideoWidget::Theme::setUnitFontSize(double size) {
 	unit_font_size_ = size;
 }
 
+double VideoWidget::Theme::unitDistance(void) const {
+	return unit_distance_;
+}
+
+void VideoWidget::Theme::setUnitDistance(double size) {
+	if (size < 0)
+		return;
+
+	unit_distance_ = size;
+}
+
 double VideoWidget::Theme::lineSpace(void) const {
 	return line_space_;
 }
@@ -552,6 +568,14 @@ void VideoWidget::Theme::setLineSpace(double size) {
 		return;
 
 	line_space_ = size;
+}
+
+const VideoWidget::Orientation& VideoWidget::Theme::textOrientation(void) const {
+	return text_orientation_;
+}
+
+void VideoWidget::Theme::setTextOrientation(VideoWidget::Orientation orientation) {
+	text_orientation_ = orientation;
 }
 
 const int& VideoWidget::Theme::gaugeAngle(void) const {
@@ -2054,6 +2078,10 @@ std::string VideoWidget::getFriendlyName(VideoWidget::Widget type) {
 
 std::string VideoWidget::getFriendlyName(TelemetryData::Unit unit) {
 	switch (unit) {
+	case TelemetryData::UnitPercent:
+		return "%";
+	case TelemetryData::UnitDegree:
+		return "°";
 	case TelemetryData::UnitMeterPerSec:
 		return "m/s";
 	case TelemetryData::UnitMilesPerSec:

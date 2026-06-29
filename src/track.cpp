@@ -54,15 +54,15 @@ TrackSettings::TrackSettings() {
 
 	setIcon(TrackSettings::IconStart, TrackSettings::IconDefault);
 	setIconColor(TrackSettings::IconStart, 0.0, 0.0, 0.0, 0.0);
-	setIconSize(TrackSettings::IconStart, 1.0);
+	setIconSize(TrackSettings::IconStart, 10.0);
 
 	setIcon(TrackSettings::IconEnd, TrackSettings::IconDefault);
 	setIconColor(TrackSettings::IconEnd, 0.0, 0.0, 0.0, 0.0);
-	setIconSize(TrackSettings::IconEnd, 1.0);
+	setIconSize(TrackSettings::IconEnd, 10.0);
 
 	setIcon(TrackSettings::IconPosition, TrackSettings::IconDefault);
 	setIconColor(TrackSettings::IconPosition, 0.0, 0.0, 0.0, 0.0);
-	setIconSize(TrackSettings::IconPosition, 1.0);
+	setIconSize(TrackSettings::IconPosition, 10.0);
 }
 
 

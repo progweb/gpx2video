@@ -63,6 +63,7 @@ namespace layout
 	_text(this, "text", Node::ELEMENT, false),
 
 	_line_space(this, "line-space", Node::ELEMENT, false),
+	_text_orientation(this, "text-orientation", Node::ELEMENT, false),
 
     _icon_name(this, "icon-name",   Node::ELEMENT, false),
 	_icon_size(this, "icon-size", Node::ELEMENT, false),
@@ -97,6 +98,7 @@ namespace layout
     _value_format(this, "value-format",   Node::ELEMENT, false),
 
 	_unit_fontsize(this, "unit-font-size", Node::ELEMENT, false),
+	_unit_distance(this, "unit-distance", Node::ELEMENT, false),
 
 	_gauge_angle(this, "gauge-angle", Node::ELEMENT, false),
 	_gauge_rotation(this, "gauge-rotation", Node::ELEMENT, false),
@@ -170,6 +172,7 @@ namespace layout
     getInterfaces().push_back(&_text);
 
     getInterfaces().push_back(&_line_space);
+    getInterfaces().push_back(&_text_orientation);
 
     getInterfaces().push_back(&_icon_name);
     getInterfaces().push_back(&_icon_size);
@@ -204,6 +207,7 @@ namespace layout
     getInterfaces().push_back(&_value_format);
 
     getInterfaces().push_back(&_unit_fontsize);
+    getInterfaces().push_back(&_unit_distance);
 
 	getInterfaces().push_back(&_gauge_angle);
 	getInterfaces().push_back(&_gauge_rotation);
@@ -260,7 +264,7 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
-	_icon_size.setValue("1");
+	_icon_size.setValue("-1");
 
 	_label_fontsize.setValue("-1");
 	_label_shadowopacity.setValue("-1");
@@ -271,6 +275,9 @@ namespace layout
 	_value_shadowopacity.setValue("-1");
 	_value_shadowdistance.setValue("-1");
 	_value_borderwidth.setValue("-1");
+
+	_unit_fontsize.setValue("-1");
+	_unit_distance.setValue("-1");
 
 	_gauge_angle.setValue("-1");
 	_gauge_rotation.setValue("-1");

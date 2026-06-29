@@ -183,11 +183,11 @@ void ArcShape::value(cairo_t *cr, ArcShape::Font &font,
 	}
 	else if (valign == VideoWidget::Theme::AlignCenter) {
 		y += theme().height() / 2 + theme().padding(VideoWidget::Theme::PaddingTop) - theme().padding(VideoWidget::Theme::PaddingBottom);
-		y -= height / 2;
+		y -= (value_height_ + unit_height_) / 2;
 	}
 	else if (valign == VideoWidget::Theme::AlignBottom) {
 		y += theme().height() - theme().border() - theme().padding(VideoWidget::Theme::PaddingBottom);
-		y -= height;
+		y -= value_height_ + unit_height_;
 	}
 
 	ShapeBase::text(cr, x, y, font, fill, outline, text);
@@ -199,7 +199,8 @@ void ArcShape::unit(cairo_t *cr, ArcShape::Font &font,
 	int x, y;
 	int width, height;
 
-	enum VideoWidget::Theme::Align textAlign = theme().valueHorizontalAlign();
+	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
+	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
 
 	this->extents(cr, font, text, x, y, width, height);
 
@@ -208,20 +209,32 @@ void ArcShape::unit(cairo_t *cr, ArcShape::Font &font,
 	y = -y;
 
 	// Text position
-	if (textAlign == VideoWidget::Theme::AlignLeft) {
+	if (halign == VideoWidget::Theme::AlignLeft) {
 		x += padding_left_;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignCenter) {
+	else if (halign == VideoWidget::Theme::AlignCenter) {
 		x += theme().width() / 2;
 		x -= width / 2;
 	}
-	else if (textAlign == VideoWidget::Theme::AlignRight) {
+	else if (halign == VideoWidget::Theme::AlignRight) {
 		x += theme().width() - padding_right_;
 		x -= width;
 	}
 
-	y += theme().height() - padding_bottom_;
-	y += height / 3.0;
+	// Text vertical position
+	if (valign == VideoWidget::Theme::AlignTop) {
+		y += theme().border() + theme().padding(VideoWidget::Theme::PaddingTop);
+		y += value_height_;
+	}
+	else if (valign == VideoWidget::Theme::AlignCenter) {
+		y += theme().height() / 2 + theme().padding(VideoWidget::Theme::PaddingTop) - theme().padding(VideoWidget::Theme::PaddingBottom);
+		y -= (value_height_ + unit_height_) / 2;
+		y += value_height_;
+	}
+	else if (valign == VideoWidget::Theme::AlignBottom) {
+		y += theme().height() - theme().border() - theme().padding(VideoWidget::Theme::PaddingBottom);
+		y -= unit_height_;
+	}
 
 	ShapeBase::text(cr, x, y, font, fill, outline, text);
 }

@@ -21,6 +21,12 @@ void ShapeBase::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, V
 
 	// Open image
 	auto img = OIIO::ImageInput::open(name);
+
+	if (!img) {
+		log_error("Can't open '%s' image file!", name);
+		return;
+	}
+
 	const OIIO::ImageSpec& spec = img->spec();
 	VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
 	OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
@@ -367,6 +373,7 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 	if (hasFeature(ShapeBase::FeatureUnit)) {
 		os << "<with-unit>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
 		os << "<unit-font-size>" << theme_.unitFontSize() << "</unit-font-size>" << std::endl;
+		os << "<unit-distance>" << theme_.unitDistance() << "</unit-distance>" << std::endl;
 	}
 }
 

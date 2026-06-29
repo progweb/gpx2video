@@ -202,6 +202,11 @@ void TimeArcShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
 
+	int x, y;
+	int width, height;
+
+	ArcShape::Font font;
+
 	(void) cr;
 
 	setSize(theme().width(), theme().height());
@@ -211,6 +216,26 @@ void TimeArcShape::initialize(cairo_t *cr) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = std::to_string(888);
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }

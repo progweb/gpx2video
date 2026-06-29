@@ -58,10 +58,7 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888.8);
-
-		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-			widget_->getFriendlyName(widget_->valueUnit()) : "";
+		std::string txt = std::to_string(888);
 
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
@@ -74,11 +71,29 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		txt = txt + unit;
-
 		extents(cr, font, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (ArcShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, u.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
 	}
 
 	is_initialized_ = true;
@@ -92,9 +107,6 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	bool pace_unit = false;
 	double speed = data.speed(widget_->valueUnit());
-
-	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Initialize
 	initialize(cr);
@@ -118,38 +130,44 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	if (no_value_)
-		sprintf(s, "-- %s", unit.c_str());
+		sprintf(s, "--");
 	else if (pace_unit) {
 		int min = (int) speed;
 		int sec = (int) round((speed - min) * 60) % 60;
 
-		sprintf(s, "%d:%02d %s", min, sec, unit.c_str());
+		sprintf(s, "%d:%02d", min, sec);
 	} 
 	else
-		sprintf(s, "%.1f %s", speed, unit.c_str());
+		sprintf(s, "%.1f", speed);
 
-	// Draw background
-	background(cr, theme().roundCorner());
+	// Restore surface
+	if (!restoreCairoSurface(cr)) {
+		// Draw background
+		background(cr, theme().roundCorner());
 
-	// Draw icon
-	if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
-		icon(cr, icon_filename_, theme().iconColor());
-	}
+		// Draw icon
+		if (theme().hasFlag(VideoWidget::Theme::FlagIcon)) {
+			icon(cr, icon_filename_, theme().iconColor());
+		}
 
-	// Draw label
-	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
-		font = (TextShape::Font) {
-			.size = theme().labelFontSize(),
-			.border = theme().labelBorderWidth(),
-			.shadow_opacity = theme().labelShadowOpacity(),
-			.shadow_distance = theme().labelShadowDistance(),
-			.family = theme().labelFontFamily(),
-			.align = theme().labelHorizontalAlign(),
-			.style = theme().labelFontStyle(),
-			.weight = theme().labelFontWeight(),
-		};
+		// Draw label
+		if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
+			font = (TextShape::Font) {
+				.size = theme().labelFontSize(),
+				.border = theme().labelBorderWidth(),
+				.shadow_opacity = theme().labelShadowOpacity(),
+				.shadow_distance = theme().labelShadowDistance(),
+				.family = theme().labelFontFamily(),
+				.align = theme().labelHorizontalAlign(),
+				.style = theme().labelFontStyle(),
+				.weight = theme().labelFontWeight(),
+			};
 
-		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
+			label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
+		}
+
+		// Save surface
+		saveCairoSurface(cr);
 	}
 
 	// Draw value
@@ -166,6 +184,24 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
+	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
 	}
 }
 
@@ -207,6 +243,11 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 	if (is_initialized_)
 		return;
 
+	int x, y;
+	int width, height;
+
+	ArcShape::Font font;
+
 	(void) cr;
 
 	setSize(theme().width(), theme().height());
@@ -216,6 +257,51 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 		theme().border() + theme().padding(VideoWidget::Theme::PaddingRight),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingTop),
    		theme().border() + theme().padding(VideoWidget::Theme::PaddingBottom));
+
+	// Value height
+	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+		std::string txt = std::to_string(888);
+
+		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
+			widget_->getFriendlyName(widget_->valueUnit()) : "";
+
+		font = (TextShape::Font) {
+			.size = theme().valueFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		txt = txt + unit;
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (ArcShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, u.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
+	}
 
 	is_initialized_ = true;
 }

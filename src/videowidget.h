@@ -347,8 +347,14 @@ public:
 		double unitFontSize(void) const;
 		void setUnitFontSize(double size);
 
+		double unitDistance(void) const;
+		void setUnitDistance(double size);
+
 		double lineSpace(void) const;
 		void setLineSpace(double size);
+
+		const VideoWidget::Orientation& textOrientation(void) const;
+		void setTextOrientation(VideoWidget::Orientation orientation);
 
 		const int& gaugeAngle(void) const;
 		void setGaugeAngle(int angle);
@@ -545,8 +551,10 @@ public:
 		float value_border_color_[4];
 
 		double unit_font_size_;
+		double unit_distance_;
 
 		double line_space_;
+		VideoWidget::Orientation text_orientation_;
 
 		int gauge_angle_;
 		int gauge_rotation_;

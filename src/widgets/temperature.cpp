@@ -60,9 +60,6 @@ void TemperatureTextShape::initialize(cairo_t *cr) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
 		std::string txt = std::to_string(888);
 
-		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-			widget_->getFriendlyName(widget_->valueUnit()) : "";
-
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
 			.border = theme().valueBorderWidth(),
@@ -74,11 +71,29 @@ void TemperatureTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		txt = txt + unit;
-
 		extents(cr, font, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
 	}
 
 	is_initialized_ = true;
@@ -92,9 +107,6 @@ void TemperatureTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	double temperature = data.temperature(widget_->valueUnit());
 
-	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-		widget_->getFriendlyName(widget_->valueUnit()) : "";
-
 	// Initialize
 	initialize(cr);
 
@@ -102,9 +114,9 @@ void TemperatureTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	no_value_ = !data.hasValue(TelemetryData::DataGrade);
 
 	if (!no_value_)
-		sprintf(s, "%.0f %s", temperature, unit.c_str());
+		sprintf(s, "%.0f", temperature);
 	else
-		sprintf(s, "-- %s", unit.c_str());
+		sprintf(s, "--");
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -144,6 +156,24 @@ void TemperatureTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
+	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
 	}
 }
 

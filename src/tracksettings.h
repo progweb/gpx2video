@@ -216,6 +216,9 @@ public:
 	}
 
 	void setIconSize(const Icon &type, const double &size) {
+		if (size < 0)
+			return;
+
 		switch (type) {
 		case IconStart:
 			icon_start_size_ = size;

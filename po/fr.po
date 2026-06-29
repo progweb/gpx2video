@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-06-26 15:25+0200\n"
+"POT-Creation-Date: 2026-06-29 14:50+0200\n"
 "PO-Revision-Date: 2026-05-17 16:18+0200\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -15,127 +15,127 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
-#: ../src/videowidget.cpp:1981
+#: ../src/videowidget.cpp:2005
 msgid "Arc"
 msgstr "Arc"
 
-#: ../src/videowidget.cpp:1983
+#: ../src/videowidget.cpp:2007
 msgid "Bar"
 msgstr "Barre"
 
-#: ../src/videowidget.cpp:1985
+#: ../src/videowidget.cpp:2009
 msgid "Chart"
 msgstr ""
 
-#: ../src/videowidget.cpp:1987 ../src/videowidget.cpp:2042
+#: ../src/videowidget.cpp:2011 ../src/videowidget.cpp:2066
 msgid "Text"
 msgstr "Texte"
 
-#: ../src/videowidget.cpp:1996
+#: ../src/videowidget.cpp:2020
 msgid "Average speed"
 msgstr "Vitesse moyenne"
 
-#: ../src/videowidget.cpp:1998
+#: ../src/videowidget.cpp:2022
 msgid "Average ride speed"
 msgstr "Vitesse moyenne en déplacement"
 
-#: ../src/videowidget.cpp:2000
+#: ../src/videowidget.cpp:2024
 msgid "Battery level"
 msgstr "Niveau de batterie"
 
-#: ../src/videowidget.cpp:2002
+#: ../src/videowidget.cpp:2026
 msgid "Cadence"
 msgstr "Cadence"
 
-#: ../src/videowidget.cpp:2004 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:2028 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr "Date"
 
-#: ../src/videowidget.cpp:2006
+#: ../src/videowidget.cpp:2030
 msgid "Distance"
 msgstr "Distance"
 
-#: ../src/videowidget.cpp:2008 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:2032 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr "Durée"
 
-#: ../src/videowidget.cpp:2010
+#: ../src/videowidget.cpp:2034
 msgid "Elevation"
 msgstr "Altitude"
 
-#: ../src/videowidget.cpp:2012
+#: ../src/videowidget.cpp:2036
 msgid "GForce"
 msgstr "G-Force"
 
-#: ../src/videowidget.cpp:2014
+#: ../src/videowidget.cpp:2038
 msgid "GPX"
 msgstr "GPX"
 
-#: ../src/videowidget.cpp:2016
+#: ../src/videowidget.cpp:2040
 msgid "Grade / Slope"
 msgstr "Pente"
 
-#: ../src/videowidget.cpp:2018 ../gtk/src/widgets/map.cpp:203
+#: ../src/videowidget.cpp:2042 ../gtk/src/widgets/map.cpp:203
 #: ../gtk/src/widgets/track.cpp:203
 msgid "Course"
 msgstr "Route"
 
-#: ../src/videowidget.cpp:2020 ../gtk/src/widgets/map.cpp:208
+#: ../src/videowidget.cpp:2044 ../gtk/src/widgets/map.cpp:208
 #: ../gtk/src/widgets/track.cpp:208
 msgid "Heading"
 msgstr "Cap"
 
-#: ../src/videowidget.cpp:2022
+#: ../src/videowidget.cpp:2046
 msgid "Heart rate"
 msgstr "Fréquence cardiaque"
 
-#: ../src/videowidget.cpp:2024
+#: ../src/videowidget.cpp:2048
 msgid "Home distance"
 msgstr "Distance depuis le départ"
 
-#: ../src/videowidget.cpp:2026 ../gtk/src/ui/media_stackpage.ui:102
+#: ../src/videowidget.cpp:2050 ../gtk/src/ui/media_stackpage.ui:102
 #: ../gtk/src/media.cpp:14
 msgid "Image"
 msgstr "Image"
 
-#: ../src/videowidget.cpp:2028
+#: ../src/videowidget.cpp:2052
 msgid "Lap"
 msgstr "Tour"
 
-#: ../src/videowidget.cpp:2030 ../gtk/src/ui/widgets/map_box.ui:175
+#: ../src/videowidget.cpp:2054 ../gtk/src/ui/widgets/map_box.ui:175
 msgid "Map"
 msgstr "Carte"
 
-#: ../src/videowidget.cpp:2032
+#: ../src/videowidget.cpp:2056
 msgid "Maximum speed"
 msgstr "Vitesse maximale"
 
-#: ../src/videowidget.cpp:2034
+#: ../src/videowidget.cpp:2058
 msgid "Position"
 msgstr "Position"
 
-#: ../src/videowidget.cpp:2036
+#: ../src/videowidget.cpp:2060
 msgid "Power"
 msgstr "Puissance"
 
-#: ../src/videowidget.cpp:2038
+#: ../src/videowidget.cpp:2062
 msgid "Speed"
 msgstr "Vitesse"
 
-#: ../src/videowidget.cpp:2040
+#: ../src/videowidget.cpp:2064
 msgid "Temperature"
 msgstr "Température"
 
-#: ../src/videowidget.cpp:2044 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:2068 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr "Heure"
 
-#: ../src/videowidget.cpp:2046 ../gtk/src/ui/widgets/map_box.ui:307
+#: ../src/videowidget.cpp:2070 ../gtk/src/ui/widgets/map_box.ui:307
 #: ../gtk/src/ui/widgets/track_box.ui:168
 msgid "Track"
 msgstr "Trace"
 
-#: ../src/videowidget.cpp:2048
+#: ../src/videowidget.cpp:2072
 msgid "Vertical speed"
 msgstr "Vitesse verticale"
 
@@ -153,7 +153,7 @@ msgstr "Rechercher par nom"
 
 #: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
 #: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:827
-#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/image_box.ui:105
+#: ../gtk/src/ui/shape/text_box.ui:183 ../gtk/src/ui/widgets/image_box.ui:105
 #: ../gtk/src/ui/widgets/map_box.ui:143 ../gtk/src/ui/widgets/track_box.ui:136
 #: ../gtk/src/window.cpp:828 ../gtk/src/window.cpp:882
 #: ../gtk/src/window.cpp:961
@@ -185,7 +185,7 @@ msgid "Audio"
 msgstr "Audio"
 
 #: ../gtk/src/ui/media_stackpage.ui:70 ../gtk/src/ui/shape/bar_box.ui:998
-#: ../gtk/src/ui/shape/chart_box.ui:712 ../gtk/src/ui/shape/text_box.ui:34
+#: ../gtk/src/ui/shape/chart_box.ui:712 ../gtk/src/ui/shape/text_box.ui:42
 #: ../gtk/src/ui/widgets/map_box.ui:507 ../gtk/src/ui/widgets/track_box.ui:425
 #: ../gtk/src/media.cpp:12 ../gtk/src/shape/bar.cpp:92
 #: ../gtk/src/shape/chart.cpp:48
@@ -323,97 +323,97 @@ msgstr "Date de début de la vidéo"
 msgid "Set the video start time"
 msgstr "Modifier la date de début de la vidéo"
 
-#: ../gtk/src/ui/video_stackpage.ui:80 ../gtk/src/ui/widget_frame.ui:339
+#: ../gtk/src/ui/video_stackpage.ui:80 ../gtk/src/ui/widget_frame.ui:346
 msgid "Size"
 msgstr "Dimensions"
 
-#: ../gtk/src/ui/widget_frame.ui:219
+#: ../gtk/src/ui/widget_frame.ui:226
 msgid "Widget properties"
 msgstr "Propriétés du widget"
 
-#: ../gtk/src/ui/widget_frame.ui:229
+#: ../gtk/src/ui/widget_frame.ui:236
 msgid "Use default setting values"
 msgstr ""
 
-#: ../gtk/src/ui/widget_frame.ui:237
+#: ../gtk/src/ui/widget_frame.ui:244
 msgid "Shape"
 msgstr "Forme"
 
-#: ../gtk/src/ui/widget_frame.ui:256
+#: ../gtk/src/ui/widget_frame.ui:263
 msgid "Position & Orientation"
 msgstr "Position & Orientation"
 
-#: ../gtk/src/ui/widget_frame.ui:276
+#: ../gtk/src/ui/widget_frame.ui:283
 msgid "X:"
 msgstr "X :"
 
-#: ../gtk/src/ui/widget_frame.ui:306
+#: ../gtk/src/ui/widget_frame.ui:313
 msgid "Y:"
 msgstr "Y :"
 
-#: ../gtk/src/ui/widget_frame.ui:359
+#: ../gtk/src/ui/widget_frame.ui:366
 msgid "Width:"
 msgstr "Largeur :"
 
-#: ../gtk/src/ui/widget_frame.ui:389
+#: ../gtk/src/ui/widget_frame.ui:396
 msgid "Height:"
 msgstr "Hauteur :"
 
-#: ../gtk/src/ui/widget_frame.ui:414
+#: ../gtk/src/ui/widget_frame.ui:421
 msgid "Margin"
 msgstr "Marges"
 
-#: ../gtk/src/ui/widget_frame.ui:434
+#: ../gtk/src/ui/widget_frame.ui:441
 msgid "Margin left:"
 msgstr "Marge à gauche :"
 
-#: ../gtk/src/ui/widget_frame.ui:464
+#: ../gtk/src/ui/widget_frame.ui:471
 msgid "Margin right:"
 msgstr "Marge à droite :"
 
-#: ../gtk/src/ui/widget_frame.ui:494
+#: ../gtk/src/ui/widget_frame.ui:501
 msgid "Margin top:"
 msgstr "Marge en haut :"
 
-#: ../gtk/src/ui/widget_frame.ui:524
+#: ../gtk/src/ui/widget_frame.ui:531
 msgid "Margin bottom:"
 msgstr "Marge en bas :"
 
-#: ../gtk/src/ui/widget_frame.ui:549
+#: ../gtk/src/ui/widget_frame.ui:556
 msgid "Padding"
 msgstr "Espace"
 
-#: ../gtk/src/ui/widget_frame.ui:569
+#: ../gtk/src/ui/widget_frame.ui:576
 msgid "Padding left:"
 msgstr "Espace à gauche :"
 
-#: ../gtk/src/ui/widget_frame.ui:599
+#: ../gtk/src/ui/widget_frame.ui:606
 msgid "Padding right:"
 msgstr "Espace à droite :"
 
-#: ../gtk/src/ui/widget_frame.ui:629
+#: ../gtk/src/ui/widget_frame.ui:636
 msgid "Padding top:"
 msgstr "Espace en haut :"
 
-#: ../gtk/src/ui/widget_frame.ui:659
+#: ../gtk/src/ui/widget_frame.ui:666
 msgid "Padding bottom:"
 msgstr "Espace en bas :"
 
-#: ../gtk/src/ui/widget_frame.ui:684
+#: ../gtk/src/ui/widget_frame.ui:691
 msgid "Border"
 msgstr "Bord"
 
-#: ../gtk/src/ui/widget_frame.ui:704
+#: ../gtk/src/ui/widget_frame.ui:711
 msgid "Border width:"
 msgstr "Largeur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:735
+#: ../gtk/src/ui/widget_frame.ui:742
 msgid "Border color:"
 msgstr "Couleur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:748 ../gtk/src/ui/widget_frame.ui:823
-#: ../gtk/src/ui/widget_frame.ui:1080 ../gtk/src/ui/widget_frame.ui:1201
-#: ../gtk/src/ui/widget_frame.ui:1432 ../gtk/src/ui/widget_frame.ui:1553
+#: ../gtk/src/ui/widget_frame.ui:755 ../gtk/src/ui/widget_frame.ui:830
+#: ../gtk/src/ui/widget_frame.ui:1087 ../gtk/src/ui/widget_frame.ui:1208
+#: ../gtk/src/ui/widget_frame.ui:1439 ../gtk/src/ui/widget_frame.ui:1560
 #: ../gtk/src/ui/shape/arc_box.ui:309 ../gtk/src/ui/shape/arc_box.ui:338
 #: ../gtk/src/ui/shape/arc_box.ui:367 ../gtk/src/ui/shape/arc_box.ui:396
 #: ../gtk/src/ui/shape/arc_box.ui:499 ../gtk/src/ui/shape/arc_box.ui:617
@@ -428,7 +428,7 @@ msgstr "Couleur du bord :"
 #: ../gtk/src/ui/shape/chart_box.ui:346 ../gtk/src/ui/shape/chart_box.ui:375
 #: ../gtk/src/ui/shape/chart_box.ui:404 ../gtk/src/ui/shape/chart_box.ui:508
 #: ../gtk/src/ui/shape/chart_box.ui:670 ../gtk/src/ui/shape/chart_box.ui:700
-#: ../gtk/src/ui/shape/chart_box.ui:900 ../gtk/src/ui/shape/text_box.ui:217
+#: ../gtk/src/ui/shape/chart_box.ui:900 ../gtk/src/ui/shape/text_box.ui:256
 #: ../gtk/src/ui/widgets/map_box.ui:437 ../gtk/src/ui/widgets/map_box.ui:466
 #: ../gtk/src/ui/widgets/map_box.ui:495 ../gtk/src/ui/widgets/map_box.ui:598
 #: ../gtk/src/ui/widgets/map_box.ui:717 ../gtk/src/ui/widgets/map_box.ui:836
@@ -441,154 +441,158 @@ msgstr "Couleur du bord :"
 msgid "Select a color"
 msgstr "Sélectionner une couleur"
 
-#: ../gtk/src/ui/widget_frame.ui:764
+#: ../gtk/src/ui/widget_frame.ui:771
 msgid "Round corner:"
 msgstr "Coins arrondis :"
 
-#: ../gtk/src/ui/widget_frame.ui:790
+#: ../gtk/src/ui/widget_frame.ui:797
 msgid "Background"
 msgstr "Fond"
 
-#: ../gtk/src/ui/widget_frame.ui:810
+#: ../gtk/src/ui/widget_frame.ui:817
 msgid "Background color:"
 msgstr "Couleur du fond :"
 
-#: ../gtk/src/ui/widget_frame.ui:834
+#: ../gtk/src/ui/widget_frame.ui:841
 msgid "Label"
 msgstr "Label"
 
-#: ../gtk/src/ui/widget_frame.ui:855
+#: ../gtk/src/ui/widget_frame.ui:862
 msgid "Label enable:"
 msgstr "Afficher :"
 
-#: ../gtk/src/ui/widget_frame.ui:881
+#: ../gtk/src/ui/widget_frame.ui:888
 msgid "Label text:"
 msgstr "Texte :"
 
-#: ../gtk/src/ui/widget_frame.ui:906
+#: ../gtk/src/ui/widget_frame.ui:913
 msgid "Label font family:"
 msgstr "Police :"
 
-#: ../gtk/src/ui/widget_frame.ui:932
+#: ../gtk/src/ui/widget_frame.ui:939
 msgid "Label font size:"
 msgstr "Taille "
 
-#: ../gtk/src/ui/widget_frame.ui:964
+#: ../gtk/src/ui/widget_frame.ui:971
 msgid "Label style:"
 msgstr "Style :"
 
-#: ../gtk/src/ui/widget_frame.ui:990
+#: ../gtk/src/ui/widget_frame.ui:997
 msgid "Label weight:"
 msgstr "Epaisseur :"
 
-#: ../gtk/src/ui/widget_frame.ui:1016
+#: ../gtk/src/ui/widget_frame.ui:1023
 msgid "Label horizontal align:"
 msgstr "Alignement horizontal :"
 
-#: ../gtk/src/ui/widget_frame.ui:1042
+#: ../gtk/src/ui/widget_frame.ui:1049
 msgid "Label vertical align:"
 msgstr "Alignement vertical :"
 
-#: ../gtk/src/ui/widget_frame.ui:1067
+#: ../gtk/src/ui/widget_frame.ui:1074
 msgid "Label color:"
 msgstr "Couleur :"
 
-#: ../gtk/src/ui/widget_frame.ui:1096
+#: ../gtk/src/ui/widget_frame.ui:1103
 msgid "Label shadow opacity:"
 msgstr "Opacité de l'ombre :"
 
-#: ../gtk/src/ui/widget_frame.ui:1126
+#: ../gtk/src/ui/widget_frame.ui:1133
 msgid "Label shadow distance:"
 msgstr "Distance de l'ombre :"
 
-#: ../gtk/src/ui/widget_frame.ui:1157
+#: ../gtk/src/ui/widget_frame.ui:1164
 msgid "Label border width:"
 msgstr "Largeur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:1188
+#: ../gtk/src/ui/widget_frame.ui:1195
 msgid "Label border color:"
 msgstr "Couleur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:1212 ../gtk/src/shape/bar.cpp:96
+#: ../gtk/src/ui/widget_frame.ui:1219 ../gtk/src/shape/bar.cpp:96
 #: ../gtk/src/shape/chart.cpp:52
 msgid "Value"
 msgstr "Valeur"
 
-#: ../gtk/src/ui/widget_frame.ui:1233
+#: ../gtk/src/ui/widget_frame.ui:1240
 msgid "Value enable:"
 msgstr "Afficher :"
 
-#: ../gtk/src/ui/widget_frame.ui:1258
+#: ../gtk/src/ui/widget_frame.ui:1265
 msgid "Value font family:"
 msgstr "Police :"
 
-#: ../gtk/src/ui/widget_frame.ui:1284
+#: ../gtk/src/ui/widget_frame.ui:1291
 msgid "Value font size:"
 msgstr "Taille :"
 
-#: ../gtk/src/ui/widget_frame.ui:1316
+#: ../gtk/src/ui/widget_frame.ui:1323
 msgid "Value style:"
 msgstr "Style :"
 
-#: ../gtk/src/ui/widget_frame.ui:1342
+#: ../gtk/src/ui/widget_frame.ui:1349
 msgid "Value weight:"
 msgstr "Epaisseur :"
 
-#: ../gtk/src/ui/widget_frame.ui:1368
+#: ../gtk/src/ui/widget_frame.ui:1375
 msgid "Value horizontal align:"
 msgstr "Alignemnt horizontal :"
 
-#: ../gtk/src/ui/widget_frame.ui:1394
+#: ../gtk/src/ui/widget_frame.ui:1401
 msgid "Value vertical align:"
 msgstr "Alignemnt vertical :"
 
-#: ../gtk/src/ui/widget_frame.ui:1419
+#: ../gtk/src/ui/widget_frame.ui:1426
 msgid "Value color:"
 msgstr "Couleur :"
 
-#: ../gtk/src/ui/widget_frame.ui:1448
+#: ../gtk/src/ui/widget_frame.ui:1455
 msgid "Value shadow opacity:"
 msgstr "Opacité de l'ombre"
 
-#: ../gtk/src/ui/widget_frame.ui:1478
+#: ../gtk/src/ui/widget_frame.ui:1485
 msgid "Value shadow distance:"
 msgstr "Distance de l'ombre"
 
-#: ../gtk/src/ui/widget_frame.ui:1509
+#: ../gtk/src/ui/widget_frame.ui:1516
 msgid "Value border width:"
 msgstr "Largeur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:1540
+#: ../gtk/src/ui/widget_frame.ui:1547
 msgid "Value border color:"
 msgstr "Couleur du bord :"
 
-#: ../gtk/src/ui/widget_frame.ui:1569
+#: ../gtk/src/ui/widget_frame.ui:1576
 msgid "Value min.:"
 msgstr "Valeur min. :"
 
-#: ../gtk/src/ui/widget_frame.ui:1599
+#: ../gtk/src/ui/widget_frame.ui:1606
 msgid "Value max.:"
 msgstr "Valeur max. :"
 
-#: ../gtk/src/ui/widget_frame.ui:1630
+#: ../gtk/src/ui/widget_frame.ui:1637
 msgid "Value format:"
 msgstr "Format :"
 
-#: ../gtk/src/ui/widget_frame.ui:1656
+#: ../gtk/src/ui/widget_frame.ui:1663
 msgid "Value unit:"
 msgstr "Unité :"
 
-#: ../gtk/src/ui/widget_frame.ui:1677
+#: ../gtk/src/ui/widget_frame.ui:1684
 msgid "Unit"
 msgstr "Unité"
 
-#: ../gtk/src/ui/widget_frame.ui:1698
+#: ../gtk/src/ui/widget_frame.ui:1705
 msgid "Unit enable:"
 msgstr "Afficher les unités :"
 
-#: ../gtk/src/ui/widget_frame.ui:1723
+#: ../gtk/src/ui/widget_frame.ui:1730
 msgid "Unit font size:"
 msgstr "Taille :"
+
+#: ../gtk/src/ui/widget_frame.ui:1761
+msgid "Unit distance:"
+msgstr "Distance :"
 
 #: ../gtk/src/ui/window.ui:21
 msgid "Open"
@@ -758,12 +762,12 @@ msgid "Needle background color:"
 msgstr "Couleur du fond :"
 
 #: ../gtk/src/ui/shape/bar_box.ui:1018 ../gtk/src/ui/shape/chart_box.ui:732
-#: ../gtk/src/ui/shape/text_box.ui:80
+#: ../gtk/src/ui/shape/text_box.ui:88
 msgid "Icon:"
 msgstr "Icône :"
 
 #: ../gtk/src/ui/shape/bar_box.ui:1029 ../gtk/src/ui/shape/chart_box.ui:743
-#: ../gtk/src/ui/shape/text_box.ui:91 ../gtk/src/ui/widgets/map_box.ui:564
+#: ../gtk/src/ui/shape/text_box.ui:99 ../gtk/src/ui/widgets/map_box.ui:564
 #: ../gtk/src/ui/widgets/map_box.ui:683 ../gtk/src/ui/widgets/map_box.ui:802
 #: ../gtk/src/ui/widgets/track_box.ui:482
 #: ../gtk/src/ui/widgets/track_box.ui:601
@@ -772,17 +776,18 @@ msgid "Set the icon"
 msgstr "Sélectionner une icône"
 
 #: ../gtk/src/ui/shape/bar_box.ui:1105 ../gtk/src/ui/shape/chart_box.ui:819
-#: ../gtk/src/ui/shape/text_box.ui:167 ../gtk/src/ui/widgets/map_box.ui:135
+#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/map_box.ui:135
 #: ../gtk/src/ui/widgets/track_box.ui:128
 msgid "Use default"
 msgstr "Par défaut"
 
 #: ../gtk/src/ui/shape/bar_box.ui:1142 ../gtk/src/ui/shape/chart_box.ui:856
+#: ../gtk/src/ui/shape/text_box.ui:212
 msgid "Icon size:"
 msgstr "Taille de l'icône :"
 
 #: ../gtk/src/ui/shape/bar_box.ui:1173 ../gtk/src/ui/shape/chart_box.ui:887
-#: ../gtk/src/ui/shape/text_box.ui:204
+#: ../gtk/src/ui/shape/text_box.ui:243
 msgid "Icon color:"
 msgstr "Couleur :"
 
@@ -838,21 +843,25 @@ msgstr "Couleur :"
 msgid "Curve fill color:"
 msgstr "Couleur de remplissage :"
 
-#: ../gtk/src/ui/shape/text_box.ui:25
+#: ../gtk/src/ui/shape/text_box.ui:33
 msgid "Text extension"
 msgstr "Paramètres du texte"
 
-#: ../gtk/src/ui/shape/text_box.ui:55
+#: ../gtk/src/ui/shape/text_box.ui:63
 msgid "Icon enable:"
 msgstr "Afficher :"
 
-#: ../gtk/src/ui/shape/text_box.ui:230
+#: ../gtk/src/ui/shape/text_box.ui:269
 msgid "Misc."
 msgstr "Autres"
 
-#: ../gtk/src/ui/shape/text_box.ui:251
+#: ../gtk/src/ui/shape/text_box.ui:290
 msgid "Text line space:"
 msgstr "Espace entre les lignes :"
+
+#: ../gtk/src/ui/shape/text_box.ui:322
+msgid "Text orientation:"
+msgstr "Orientation :"
 
 #: ../gtk/src/ui/widgets/image_box.ui:18
 msgid "Image properties"
@@ -998,10 +1007,12 @@ msgid "Butterworth"
 msgstr "Butterworth"
 
 #: ../gtk/src/widgetframe.cpp:90 ../gtk/src/shape/bar.cpp:43
+#: ../gtk/src/shape/text.cpp:43
 msgid "Horizontal"
 msgstr "Horizontal"
 
 #: ../gtk/src/widgetframe.cpp:95 ../gtk/src/shape/bar.cpp:48
+#: ../gtk/src/shape/text.cpp:48
 msgid "Vertical"
 msgstr "Vertical"
 

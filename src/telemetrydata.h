@@ -66,6 +66,7 @@ public:
 		UnitDefault,
 
 		UnitPercent,
+		UnitDegree,
 
 		UnitMeterPerSec, // Meter / Sec
 		UnitMilesPerSec, // Miles / Sec

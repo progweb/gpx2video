@@ -65,7 +65,7 @@ void GPXWidget::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888.8);
+		std::string txt = std::to_string(888);
 
 		font = (ShapeBase::Font) {
 			.size = theme().valueFontSize(),

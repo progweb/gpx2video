@@ -58,10 +58,7 @@ void AvgRideSpeedTextShape::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888.8);
-
-		std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-			widget_->getFriendlyName(widget_->valueUnit()) : "";
+		std::string txt = std::to_string(888);
 
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
@@ -74,11 +71,31 @@ void AvgRideSpeedTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		txt = txt + unit;
+		txt = txt;
 
 		extents(cr, font, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
+	}
+
+	// Unit height
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		extents(cr, font, txt.c_str(), x, y, width, height);
+		
+		setUnitExtents(x, y, width, height);
 	}
 
 	is_initialized_ = true;
@@ -92,9 +109,6 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	bool pace_unit = false;
 	double speed = data.avgridespeed(widget_->valueUnit());
-
-	std::string unit = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
-		widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 	// Initialize
 	initialize(cr);
@@ -118,15 +132,15 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	if (no_value_)
-		sprintf(s, "-- %s", unit.c_str());
+		sprintf(s, "--");
 	else if (pace_unit) {
 		int min = (int) speed;
 		int sec = (int) round((speed - min) * 60) % 60;
 
-		sprintf(s, "%d:%02d %s", min, sec, unit.c_str());
+		sprintf(s, "%d:%02d", min, sec);
 	} 
 	else
-		sprintf(s, "%.1f %s", speed, unit.c_str());
+		sprintf(s, "%.1f", speed);
 
 	// Draw background
 	background(cr, theme().roundCorner());
@@ -166,6 +180,24 @@ void AvgRideSpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
+	}
+
+	// Draw unit
+	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
+		std::string u = widget_->getFriendlyName(widget_->valueUnit());
+
+		font = (TextShape::Font) {
+			.size = theme().unitFontSize(),
+			.border = theme().valueBorderWidth(),
+			.shadow_opacity = theme().valueShadowOpacity(),
+			.shadow_distance = theme().valueShadowDistance(),
+			.family = theme().valueFontFamily(),
+			.align = theme().valueHorizontalAlign(),
+			.style = theme().valueFontStyle(),
+			.weight = theme().valueFontWeight(),
+		};
+
+		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
 	}
 }
 

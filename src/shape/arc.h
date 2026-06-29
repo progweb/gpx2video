@@ -64,6 +64,22 @@ public:
 		center_y_ = height / 2;
 	}
 
+	void setValueExtents(int x, int y, int width, int height) {
+		value_x_ = x;
+		value_y_ = y;
+
+		value_width_ = width;
+		value_height_ = height;
+	}
+
+	void setUnitExtents(int x, int y, int width, int height) {
+		unit_x_ = x;
+		unit_y_ = y;
+
+		unit_width_ = width;
+		unit_height_ = height;
+	}
+
 	void setPadding(int left, int right, int top, int bottom) {
 		padding_left_ = left;
 		padding_right_ = right;
@@ -126,6 +142,8 @@ public:
 		ShapeBase::clear();
 
 		setPadding(0, 0, 0, 0);
+		setValueExtents(0, 0, 0, 0);
+		setUnitExtents(0, 0, 0, 0);
 	}
 
 	void xmlwrite(std::ostream &os);
@@ -137,6 +155,9 @@ private:
 	int padding_right_;
 	int padding_top_;
 	int padding_bottom_;
+
+	int value_x_, value_y_, value_width_, value_height_;
+	int unit_x_, unit_y_, unit_width_, unit_height_;
 
 	void arc_i(cairo_t *cr, double a1, double a2, double offset, double width, double border, const float *fill, const float *outline = NULL);
 };

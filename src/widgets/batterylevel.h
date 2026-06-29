@@ -118,6 +118,8 @@ public:
 
 		widget = new BatteryLevelWidget(app, source);
 
+		widget->setValueUnit(TelemetryData::UnitPercent);
+
 		return widget;
 	}
 

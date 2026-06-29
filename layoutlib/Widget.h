@@ -274,6 +274,13 @@ namespace layout
     ///
     Decimal &lineSpace() { return _line_space; }
 
+	///
+	/// Get text orientation
+	/// 
+	/// @return the text orientation element
+	///
+	String &textOrientation() { return _text_orientation; }
+
     ///
     /// Get icon name
     ///
@@ -483,6 +490,13 @@ namespace layout
     /// @return the unit font size element
     ///
     Decimal  &unitFontSize() { return _unit_fontsize; }
+
+    ///
+    /// Get unit distance
+    ///
+    /// @return the unit distance element
+    ///
+    Decimal  &unitDistance() { return _unit_distance; }
 
     ///
     /// Get gauge angle
@@ -745,6 +759,7 @@ namespace layout
 	String       _text;
 
 	Decimal      _line_space;
+	String       _text_orientation;
 
     String       _icon_name;
 	Decimal      _icon_size;
@@ -779,6 +794,7 @@ namespace layout
     String       _value_format;
 
 	Decimal      _unit_fontsize;
+	Decimal      _unit_distance;
 
 	Decimal      _gauge_angle;
 	Decimal      _gauge_rotation;
