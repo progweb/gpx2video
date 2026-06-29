@@ -616,7 +616,7 @@ void GPX2VideoApplicationWindow::open_telemetry_file(const Glib::RefPtr<const Gi
 
 	// Update telemetry settings
 	// TODO load user preferences...
-//	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
+	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 250);
 //	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 1000);
 //	telemetry_settings_.setTelemetryMethod(TelemetrySettings::MethodInterpolate, 2000);
 

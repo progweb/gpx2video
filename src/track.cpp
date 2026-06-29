@@ -1232,9 +1232,9 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = (posY + last_posY_) / 2;
 
 		// Move ?
-		is_move = (posX == last_posX_) && (posY == last_posY_);
+		is_move = !((posX == last_posX_) && (posY == last_posY_));
 
-		if (is_move) {
+		if (!is_move) {
 			if (settings().follow() != TrackSettings::FollowHeading) {
 				is_update = false;
 				goto skip;

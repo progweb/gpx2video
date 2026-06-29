@@ -57,7 +57,7 @@ void AvgSpeedTextShape::initialize(cairo_t *cr) {
 
 	// Value height
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-		std::string txt = std::to_string(888);
+		std::string txt = std::to_string(888) + "/";
 
 		font = (TextShape::Font) {
 			.size = theme().valueFontSize(),
