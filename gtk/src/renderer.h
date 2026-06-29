@@ -97,7 +97,6 @@ private:
 	uint64_t player_timestamp_;
 
 	TelemetryData data_;
-	TelemetrySource *source_;
 
 	Glib::Dispatcher dispatcher_;
 	type_signal_widget_appened signal_widget_appened_;

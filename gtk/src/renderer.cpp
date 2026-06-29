@@ -11,7 +11,6 @@
 GPX2VideoRenderer::GPX2VideoRenderer(GPXApplication &app, 
 		RendererSettings &renderer_settings, TelemetrySettings &telemetry_settings)
 	: Renderer(app, renderer_settings, telemetry_settings) 
-	, source_(NULL)
 	, dispatcher_() {
 	log_call();
 
