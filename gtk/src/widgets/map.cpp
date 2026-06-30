@@ -893,6 +893,25 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 }
 
 
+void GPX2VideoMapWidgetSettingsBox::set_default(void) {
+	log_call();
+
+	MapSettings &settings = ((Map *) widget_->widget())->settings();
+
+	settings.setIcon(MapSettings::IconStart, MapSettings::IconDefault);
+	settings.setIconFile(MapSettings::IconStart, "");
+	settings.setIconSize(MapSettings::IconStart, 10.0);
+
+	settings.setIcon(MapSettings::IconEnd, MapSettings::IconDefault);
+	settings.setIconFile(MapSettings::IconEnd, "");
+	settings.setIconSize(MapSettings::IconEnd, 10.0);
+
+	settings.setIcon(MapSettings::IconPosition, MapSettings::IconDefault);
+	settings.setIconFile(MapSettings::IconPosition, "");
+	settings.setIconSize(MapSettings::IconPosition, 10.0);
+}
+
+
 void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 

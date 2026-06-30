@@ -43,6 +43,8 @@ public:
 
 	virtual void update_content(void) = 0;
 
+	virtual void set_default(void) = 0;
+
 protected:
 	class Model : public Gtk::TreeModel::ColumnRecord {
 	public:

@@ -2535,7 +2535,7 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 void GPX2VideoWidgetFrame::on_widget_reset_clicked(void) {
 	log_call();
 
-	if (!shape_child_box_)
+	if (!shape_child_box_ && !widget_child_box_)
 		return;
 
 	log_info("Widget %s: use default settings", 
@@ -2545,7 +2545,10 @@ void GPX2VideoWidgetFrame::on_widget_reset_clicked(void) {
 	std::lock_guard<std::mutex> lock(widget_selected_->mutex());
 
 	// Reset to default settings
-	shape_child_box_->set_default();
+	if (shape_child_box_)
+		shape_child_box_->set_default();
+	if (widget_child_box_)
+		widget_child_box_->set_default();
 
 	// Refresh widget required
 	renderer_->refresh(widget_selected_, true);

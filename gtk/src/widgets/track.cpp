@@ -813,6 +813,25 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 }
 
 
+void GPX2VideoTrackWidgetSettingsBox::set_default(void) {
+	log_call();
+
+	TrackSettings &settings = ((Track *) widget_->widget())->settings();
+
+	settings.setIcon(TrackSettings::IconStart, TrackSettings::IconDefault);
+	settings.setIconFile(TrackSettings::IconStart, "");
+	settings.setIconSize(TrackSettings::IconStart, 10.0);
+
+	settings.setIcon(TrackSettings::IconEnd, TrackSettings::IconDefault);
+	settings.setIconFile(TrackSettings::IconEnd, "");
+	settings.setIconSize(TrackSettings::IconEnd, 10.0);
+
+	settings.setIcon(TrackSettings::IconPosition, TrackSettings::IconDefault);
+	settings.setIconFile(TrackSettings::IconPosition, "");
+	settings.setIconSize(TrackSettings::IconPosition, 10.0);
+}
+
+
 void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 

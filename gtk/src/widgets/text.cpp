@@ -86,6 +86,11 @@ void GPX2VideoTextWidgetSettingsBox::update_content(void) {
 }
 
 
+void GPX2VideoTextWidgetSettingsBox::set_default(void) {
+	log_call();
+}
+
+
 void GPX2VideoTextWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 }

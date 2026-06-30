@@ -188,6 +188,11 @@ void GPX2VideoImageWidgetSettingsBox::update_content(void) {
 }
 
 
+void GPX2VideoImageWidgetSettingsBox::set_default(void) {
+	log_call();
+}
+
+
 void GPX2VideoImageWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 

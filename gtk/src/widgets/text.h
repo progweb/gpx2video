@@ -39,6 +39,8 @@ public:
 	void update_content(void);
 	void update_boundaries(void);
 
+	void set_default(void);
+
 protected:
 	Glib::RefPtr<Gtk::ListStore> view_model_;
 };
