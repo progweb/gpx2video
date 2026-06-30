@@ -222,6 +222,8 @@ public:
 
 		widget = new TimeWidget(app, source);
 
+		widget->setValueFormat("%H-%M-%S");
+
 		return widget;
 	}
 
