@@ -82,6 +82,7 @@ void TextShape::label(cairo_t *cr, TextShape::Font &font,
 		const float *fill, const float *outline, const char *text) {
 	int x, y;
 
+	double distance = theme().unitDistance();
 	double linespace = theme().lineSpace();
 
 	bool with_icon = theme().hasFlag(VideoWidget::Theme::FlagIcon);
@@ -90,6 +91,7 @@ void TextShape::label(cairo_t *cr, TextShape::Font &font,
 	enum VideoWidget::Theme::Align valign = theme().labelVerticalAlign();
 
 	// Scaling
+	distance = size2pixels(distance);
 	linespace = size2pixels(linespace);
 
 	// Text offset
@@ -185,9 +187,9 @@ void TextShape::label(cairo_t *cr, TextShape::Font &font,
 				if (valign == VideoWidget::Theme::AlignTop) {
 				}
 				else if (valign == VideoWidget::Theme::AlignCenter)
-					y -= (linespace + unit_height_) / 2;
+					y -= (distance + unit_height_) / 2;
 				else if (valign == VideoWidget::Theme::AlignBottom)
-					y -= linespace + unit_height_;
+					y -= distance + unit_height_;
 			}
 		}
 	}
@@ -209,7 +211,7 @@ void TextShape::value(cairo_t *cr, TextShape::Font &font,
 	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
 	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
 
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, TextShape::TextNumeric, text, x, y, width, height);
 
 	setValueExtents(x, value_y_, width, value_height_);
 
@@ -319,9 +321,9 @@ void TextShape::value(cairo_t *cr, TextShape::Font &font,
 			if (valign == VideoWidget::Theme::AlignTop) {
 			}
 			else if (valign == VideoWidget::Theme::AlignCenter)
-				y -= (linespace + unit_height_) / 2;
+				y -= (distance + unit_height_) / 2;
 			else if (valign == VideoWidget::Theme::AlignBottom)
-				y -= linespace + unit_height_;
+				y -= distance + unit_height_;
 		}
 	}
 
@@ -426,11 +428,11 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 		}
 		else if (valign == VideoWidget::Theme::AlignCenter) {
 			y += theme().height() / 2 + padding_top_ - padding_bottom_;
-			y -= value_height_ / 2;
+			y -= unit_height_ / 2;
 		}
 		else if (valign == VideoWidget::Theme::AlignBottom) {
 			y += theme().height() - padding_bottom_;
-			y -= value_height_;
+			y -= unit_height_;
 		}
 
 		// Label offset 
@@ -448,9 +450,9 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 		// Value offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
 			if (valign == VideoWidget::Theme::AlignTop)
-				y += linespace + value_height_;
+				y += distance + value_height_;
 			else if (valign == VideoWidget::Theme::AlignCenter)
-				y += (linespace + value_height_) / 2;
+				y += (distance + value_height_) / 2;
 			else if (valign == VideoWidget::Theme::AlignBottom) {
 			}
 		}

@@ -51,7 +51,7 @@ void DistanceTextShape::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -71,7 +71,7 @@ void DistanceTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		extents(cr, font, txt.c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
 	}
@@ -79,6 +79,8 @@ void DistanceTextShape::initialize(cairo_t *cr) {
 	// Unit height
 	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
 		std::string txt = widget_->getFriendlyName(widget_->valueUnit());
+
+		TextShape::TextType alphanum = (theme().textOrientation() == VideoWidget::OrientationHorizontal) ? TextShape::TextNumeric : TextShape::TextAlpha;
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
@@ -91,7 +93,7 @@ void DistanceTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		extents(cr, font, txt.c_str(), x, y, width, height);
+		extents(cr, font, alphanum, txt.c_str(), x, y, width, height);
 		
 		setUnitExtents(x, y, width, height);
 	}
@@ -257,7 +259,7 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+		extents(cr, font, BarShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -315,7 +317,7 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 				.weight = theme().valueFontWeight(),
 			};
 
-			this->extents(cr, font, s, txtx, txty, txtw, txth);
+			this->extents(cr, font, BarShape::TextAlpha, s, txtx, txty, txtw, txth);
 
 			tick_label_width_ = std::max(tick_label_width_, txtw - txtx);
 			tick_label_height_ = std::max(tick_label_height_, txth - txty);

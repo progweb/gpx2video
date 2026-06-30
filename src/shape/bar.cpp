@@ -145,7 +145,7 @@ void BarShape::ticklabel(cairo_t *cr, double v, double d, Font &font, const floa
 	struct BarShape::point p; // = locate(v, d);
 
 	// Text dimensions
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, BarShape::TextAlpha, text, x, y, width, height);
 
 	// Compute position
 	p = locate(v, size2pixels(d));
@@ -228,7 +228,7 @@ void BarShape::value(cairo_t *cr, double v, BarShape::Font &font,
 	padding = border + shadow2pixels(font);
 
 	// Text dimensions
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, BarShape::TextNumeric, text, x, y, width, height);
 
 	// Needle size
 	if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
@@ -330,7 +330,7 @@ void BarShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 
 	case VideoWidget::Theme::NeedleTypeValue:
 		// Text dimensions
-		this->extents(cr, font, text, x, y, width, height);
+		this->extents(cr, font, BarShape::TextNumeric, text, x, y, width, height);
 
 		// Needle size
 		needlesize = 2 * (height / 3);

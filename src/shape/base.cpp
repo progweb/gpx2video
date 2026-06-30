@@ -244,8 +244,17 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 //	pango_font_description_set_size(desc, fontsize * PANGO_SCALE);
 	pango_font_description_set_absolute_size(desc, fontsize2pixels(font.size));
 
+//	// Linespace
+//	if (linespace > 0) {
+//		PangoAttrList *attrs = pango_attr_list_new();
+//		PangoAttribute *lh = pango_attr_line_height_new(linespace / 10.0);
+//		pango_attr_list_insert(attrs, lh);
+//		pango_layout_set_attributs(layout, attrs);
+//	}
+
 	// Draw text into layout
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
+	pango_layout_set_spacing(layout, theme_.lineSpace() * PANGO_SCALE);
 	pango_layout_set_line_spacing(layout, 0);
 	pango_layout_set_font_description(layout, desc);
 	pango_layout_set_text(layout, text, -1);
@@ -283,13 +292,25 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 }
 
 
-void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
+void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, ShapeBase::TextType type, const char *text,
 		int &x, int &y, int &width, int &height) {
+	std::string dummy;
+   
 	PangoLayout *layout;
 
 	PangoFontDescription *desc;
 
 	PangoRectangle rectangle;
+
+	// Alpha / Numeric
+	dummy = 
+		"0123456789";
+
+	if (type == ShapeBase::TextAlpha) {
+		dummy += 
+			"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			"abcdefghijklmnopqrstuvwxyz";
+	}
 
 	// Pango layout
 	layout = pango_cairo_create_layout(cr);
@@ -304,13 +325,14 @@ void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
 //	pango_font_description_set_size(desc, fontsize * PANGO_SCALE);
 	pango_font_description_set_absolute_size(desc, fontsize2pixels(font.size));
 
-	// Draw text into layout
+	// Text properties
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
+	pango_layout_set_spacing(layout, 0);
 	pango_layout_set_line_spacing(layout, 0);
 	pango_layout_set_font_description(layout, desc);
-	pango_layout_set_text(layout, text, -1);
 
 	// Get text size
+	pango_layout_set_text(layout, text, -1);
 	pango_layout_get_pixel_extents(layout, &rectangle, NULL);
 
 	// Return text position & size
@@ -318,6 +340,16 @@ void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
 	y = (rectangle.y - 1);
 	width = rectangle.width;
 	height = rectangle.height;
+
+	if (type != ShapeBase::TextMultiLine) {
+		// Get dummy size
+		pango_layout_set_text(layout, dummy.c_str(), -1);
+		pango_layout_get_pixel_extents(layout, &rectangle, NULL);
+
+		// Return dummy position & size
+		y = (rectangle.y - 1);
+		height = rectangle.height;
+	}
 
 	pango_font_description_free(desc);
 

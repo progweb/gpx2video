@@ -56,7 +56,7 @@ void DurationTextShape::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -76,7 +76,7 @@ void DurationTextShape::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		extents(cr, font, txt.c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
 	}

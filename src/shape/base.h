@@ -22,6 +22,12 @@ public:
 		FeatureUnknown
 	};
 
+	enum TextType {
+		TextAlpha,
+		TextNumeric,
+		TextMultiLine
+	};
+
 	struct Font {
 		double size;
 		double border;
@@ -117,9 +123,10 @@ protected:
 
 	void background(cairo_t *cr, double radius = 0.0);
 
-	void text(cairo_t *cr, int x, int y, Font &font, const float *fill, const float *outline, const char *text);
+	void text(cairo_t *cr, int x, int y, Font &font, 
+			const float *fill, const float *outline, const char *text);
 
-	void extents(cairo_t *cr, ShapeBase::Font &font, const char *text,
+	void extents(cairo_t *cr, ShapeBase::Font &font, ShapeBase::TextType type, const char *text,
 			int &x, int &y, int &width, int &height);
 
 	double size2pixels(double size) {

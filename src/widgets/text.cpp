@@ -62,7 +62,7 @@ void TextWidget::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, s.c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextAlpha, s.c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -82,7 +82,7 @@ void TextWidget::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		extents(cr, font, txt.c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextMultiLine, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
 	}

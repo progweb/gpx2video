@@ -132,7 +132,7 @@ void ArcShape::ticklabel(cairo_t *cr, double a, double d, ArcShape::Font &font,
 	struct ArcShape::point p;
 
 	// Text dimensions
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, ArcShape::TextAlpha, text, x, y, width, height);
 
 	// Compute position
 	p = locate(a, (height / 2) + size2pixels(d));
@@ -158,7 +158,7 @@ void ArcShape::value(cairo_t *cr, ArcShape::Font &font,
 	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
 
 	// Text dimensions
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, ArcShape::TextNumeric, text, x, y, width, height);
 
 	// Text offset
 	x = -x;
@@ -202,7 +202,7 @@ void ArcShape::unit(cairo_t *cr, ArcShape::Font &font,
 	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
 	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
 
-	this->extents(cr, font, text, x, y, width, height);
+	this->extents(cr, font, ArcShape::TextAlpha, text, x, y, width, height);
 
 	// Text offset
 	x = -x;

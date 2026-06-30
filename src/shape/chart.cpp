@@ -136,7 +136,7 @@ void ChartShape::value(cairo_t *cr, double y, ChartShape::Font &font,
 	p = locate(x, y);
 
 	// Text dimensions
-	this->extents(cr, font, text, txtx, txty, width, height);
+	this->extents(cr, font, ChartShape::TextNumeric, text, txtx, txty, width, height);
 
 	// Text offset
 	x = -txtx;
@@ -177,7 +177,7 @@ void ChartShape::value(cairo_t *cr, double x, double y, ChartShape::Font &font,
 	padding = border + shadow2pixels(font);
 
 	// Text dimensions
-	this->extents(cr, font, text, txtx, txty, width, height);
+	this->extents(cr, font, ChartShape::TextNumeric, text, txtx, txty, width, height);
 
 	// Needle size
 	if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
@@ -242,7 +242,7 @@ void ChartShape::unit(cairo_t *cr, ChartShape::Font &font,
 	p = locate(x, y);
 
 	// Text dimensions
-	this->extents(cr, font, text, txtx, txty, width, height);
+	this->extents(cr, font, ChartShape::TextAlpha, text, txtx, txty, width, height);
 
 	// Text offset
 	x = -txtx;
@@ -309,7 +309,7 @@ void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 
 	case VideoWidget::Theme::NeedleTypeValue:
 		// Text dimensions
-		this->extents(cr, font, text, txtx, txty, width, height);
+		this->extents(cr, font, ChartShape::TextNumeric, text, txtx, txty, width, height);
 
 		// Needle size
 		needlesize = 2 * (height / 3);

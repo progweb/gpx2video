@@ -58,7 +58,7 @@ void GPXWidget::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, s.c_str(), x, y, width, height);
+		extents(cr, font, ShapeBase::TextAlpha, s.c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -78,7 +78,7 @@ void GPXWidget::initialize(cairo_t *cr) {
 			.weight = theme().valueFontWeight(),
 		};
 
-		extents(cr, font, txt.c_str(), x, y, width, height);
+		extents(cr, font, ShapeBase::TextAlpha, txt.c_str(), x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
 	}
@@ -293,7 +293,7 @@ int GPXWidget::value(cairo_t *cr, int y, ShapeBase::Font &font,
 
 	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
 
-	this->extents(cr, font, text, tx, ty, width, height);
+	this->extents(cr, font, ShapeBase::TextAlpha, text, tx, ty, width, height);
 
 	// Text offset
 	x = -value_x_; //-tx;

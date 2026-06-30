@@ -61,7 +61,7 @@ void DateTextShape::initialize(cairo_t *cr) {
 			.weight = theme().labelFontWeight(),
 		};
 
-		extents(cr, font, widget_->label().c_str(), x, y, width, height);
+		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
 
 		setLabelExtents(x, y, width, height);
 	}
@@ -84,7 +84,7 @@ void DateTextShape::initialize(cairo_t *cr) {
 		localtime_r(&now, &tm);
 		strftime(s, sizeof(s), widget_->valueFormat().c_str(), &tm);
 
-		extents(cr, font, s, x, y, width, height);
+		extents(cr, font, TextShape::TextNumeric, s, x, y, width, height);
 		
 		setValueExtents(x, y, width, height);
 	}
