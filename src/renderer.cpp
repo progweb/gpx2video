@@ -740,12 +740,6 @@ bool Renderer::loadWidget(layout::Widget *w) {
 		goto error;
 	}
 
-	// Lap
-	if (type == VideoWidget::WidgetLap) {
-		LapWidget *lap = (LapWidget *) widget;
-		lap->setTargetLap(w->nbrLap());
-	}
-
 	// Flags
 	if (w->withLabel())
 		flags |= VideoWidget::Theme::FlagLabel;
@@ -798,6 +792,12 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setValueFormat(format);
 	widget->setZoom(zoom);
 	widget->setSource((const char *) w->source());
+
+	// Lap
+	if (type == VideoWidget::WidgetLap) {
+		LapWidget *lap = (LapWidget *) widget;
+		lap->setTargetLap(w->nbrLap());
+	}
 
 	// Widget theme
 	widget->theme().setFlags(flags);
