@@ -180,9 +180,9 @@ void GPX2VideoTextShapeSettingsBox::bind_content(void) {
 	if (!spinbutton)
 		throw std::runtime_error("No \"linespace_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_int_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: linespace changed to '%d'",
+				sigc::mem_fun(*this, &GPX2VideoTextShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: linespace changed to '%f'",
 							   widget_->name().c_str(), value);
 
 						widget_->theme().setLineSpace(value);

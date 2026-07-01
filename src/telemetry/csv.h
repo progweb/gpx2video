@@ -400,7 +400,7 @@ private:
 	std::string trim(std::string str) {
 		size_t position;
 
-		const std::string whitespaces = " \t\n\t\f\v";
+		const std::string whitespaces = " \r\n\t\f\v";
 
 		position = str.find_first_not_of(whitespaces);
 		str.erase(0, position);

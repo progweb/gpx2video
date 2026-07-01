@@ -344,8 +344,40 @@ public:
 		bool setValueBorderColor(std::string color);
 		bool setValueBorderColor(double r, double g, double b, double a);
 
+		enum Align unitHorizontalAlign(void) const;
+		virtual void setUnitHorizontalAlign(Align align);
+
+		enum Align unitVerticalAlign(void) const;
+		virtual void setUnitVerticalAlign(Align align);
+
+		const std::string& unitFontFamily(void) const;
+		virtual void setUnitFontFamily(std::string family);
+
 		double unitFontSize(void) const;
 		void setUnitFontSize(double size);
+
+		enum FontStyle unitFontStyle(void) const;
+		void setUnitFontStyle(FontStyle style);
+
+		enum FontWeight unitFontWeight(void) const;
+		void setUnitFontWeight(FontWeight weight);
+
+		const float * unitColor(void) const;
+		bool setUnitColor(std::string color);
+		bool setUnitColor(double r, double g, double b, double a);
+
+		double unitShadowDistance(void) const;
+		void setUnitShadowDistance(double distance);
+
+		int unitShadowOpacity(void) const;
+		void setUnitShadowOpacity(int opacity);
+
+		const double& unitBorderWidth(void) const;
+		void setUnitBorderWidth(double width);
+
+		const float * unitBorderColor(void) const;
+		bool setUnitBorderColor(std::string color);
+		bool setUnitBorderColor(double r, double g, double b, double a);
 
 		double unitDistance(void) const;
 		void setUnitDistance(double size);
@@ -550,7 +582,17 @@ public:
 		float value_color_[4];
 		float value_border_color_[4];
 
+		Align unit_horizontal_align_;
+		Align unit_vertical_align_;
+		std::string unit_font_family_;
 		double unit_font_size_;
+		FontStyle unit_font_style_;
+		FontWeight unit_font_weight_;
+		double unit_border_width_;
+		int unit_shadow_opacity_;
+		double unit_shadow_distance_;
+		float unit_color_[4];
+		float unit_border_color_[4];
 		double unit_distance_;
 
 		double line_space_;

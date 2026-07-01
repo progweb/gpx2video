@@ -19,6 +19,11 @@ std::string capitalize(std::string s);
 
 bool starts_with(const std::string &s, const std::string &prefix);
 
+std::string ltrim(std::string str);
+std::string rtrim(std::string str);
+
+std::string trimlines(const std::string &input);
+
 class IndentingOStreambuf : public std::streambuf {
 	std::streambuf *myDest;
 	bool myIsAtStartOfLine;

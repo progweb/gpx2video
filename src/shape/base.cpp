@@ -254,8 +254,8 @@ void ShapeBase::text(cairo_t *cr, int x, int y, ShapeBase::Font &font,
 
 	// Draw text into layout
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
-	pango_layout_set_spacing(layout, theme_.lineSpace() * PANGO_SCALE);
-	pango_layout_set_line_spacing(layout, 0);
+	pango_layout_set_spacing(layout, 0);
+	pango_layout_set_line_spacing(layout, font.linespace);
 	pango_layout_set_font_description(layout, desc);
 	pango_layout_set_text(layout, text, -1);
 
@@ -328,7 +328,7 @@ void ShapeBase::extents(cairo_t *cr, ShapeBase::Font &font, ShapeBase::TextType 
 	// Text properties
 	pango_layout_set_alignment(layout, (PangoAlignment) font.align);
 	pango_layout_set_spacing(layout, 0);
-	pango_layout_set_line_spacing(layout, 0);
+	pango_layout_set_line_spacing(layout, font.linespace);
 	pango_layout_set_font_description(layout, desc);
 
 	// Get text size
@@ -404,6 +404,16 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 
 	if (hasFeature(ShapeBase::FeatureUnit)) {
 		os << "<with-unit>" << VideoWidget::bool2string(theme_.hasFlag(VideoWidget::Theme::FlagUnit)) << "</with-unit>" << std::endl;
+		os << "<unit-font-family>" << theme_.unitFontFamily() << "</unit-font-family>" << std::endl;
+		os << "<unit-font-style>" << VideoWidget::fontstyle2string(theme_.unitFontStyle()) << "</unit-font-style>" << std::endl;
+		os << "<unit-font-weight>" << VideoWidget::fontweight2string(theme_.unitFontWeight()) << "</unit-font-weight>" << std::endl;
+		os << "<unit-horizontal-align>" << VideoWidget::align2string(theme_.unitHorizontalAlign()) << "</unit-horizontal-align>" << std::endl;
+		os << "<unit-vertical-align>" << VideoWidget::align2string(theme_.unitVerticalAlign()) << "</unit-vertical-align>" << std::endl;
+		os << "<unit-color>" << VideoWidget::Theme::color2hex(theme_.unitColor()) << "</unit-color>" << std::endl;
+		os << "<unit-shadow-opacity>" << theme_.unitShadowOpacity() << "</unit-shadow-opacity>" << std::endl;
+		os << "<unit-shadow-distance>" << theme_.unitShadowDistance() << "</unit-shadow-distance>" << std::endl;
+		os << "<unit-border-width>" << theme_.unitBorderWidth() << "</unit-border-width>" << std::endl;
+		os << "<unit-border-color>" << VideoWidget::Theme::color2hex(theme_.unitBorderColor()) << "</unit-border-color>" << std::endl;
 		os << "<unit-font-size>" << theme_.unitFontSize() << "</unit-font-size>" << std::endl;
 		os << "<unit-distance>" << theme_.unitDistance() << "</unit-distance>" << std::endl;
 	}

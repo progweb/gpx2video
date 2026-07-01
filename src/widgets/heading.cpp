@@ -49,6 +49,7 @@ void HeadingTextShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -69,6 +70,7 @@ void HeadingTextShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
@@ -84,13 +86,14 @@ void HeadingTextShape::initialize(cairo_t *cr) {
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, alphanum, txt.c_str(), x, y, width, height);
@@ -137,6 +140,7 @@ void HeadingTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -153,6 +157,7 @@ void HeadingTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
@@ -164,16 +169,17 @@ void HeadingTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
-		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+		unit(cr, font, theme().unitColor(), theme().unitBorderColor(), u.c_str());
 	}
 }
 

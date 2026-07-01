@@ -183,7 +183,7 @@ void TextShape::label(cairo_t *cr, TextShape::Font &font,
 
 		// Unit offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
-			if (valign == theme().valueVerticalAlign()) {
+			if (valign == theme().unitVerticalAlign()) {
 				if (valign == VideoWidget::Theme::AlignTop) {
 				}
 				else if (valign == VideoWidget::Theme::AlignCenter)
@@ -266,12 +266,14 @@ void TextShape::value(cairo_t *cr, TextShape::Font &font,
 
 		// Unit offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
-			if (halign == VideoWidget::Theme::AlignLeft) {
+			if (halign == theme().unitHorizontalAlign()) {
+				if (halign == VideoWidget::Theme::AlignLeft) {
+				}
+				else if (halign == VideoWidget::Theme::AlignCenter)
+					x -= (distance + unit_width_) / 2;
+				else if (halign == VideoWidget::Theme::AlignRight)
+					x -= distance + unit_width_;
 			}
-			else if (halign == VideoWidget::Theme::AlignLeft)
-				x -= (distance + unit_width_) / 2;
-			else if (halign == VideoWidget::Theme::AlignRight)
-				x -= distance + unit_width_;
 		}
 	}
 	else {
@@ -318,12 +320,14 @@ void TextShape::value(cairo_t *cr, TextShape::Font &font,
 
 		// Unit offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
-			if (valign == VideoWidget::Theme::AlignTop) {
+			if (valign == theme().unitVerticalAlign()) {
+				if (valign == VideoWidget::Theme::AlignTop) {
+				}
+				else if (valign == VideoWidget::Theme::AlignCenter)
+					y -= (distance + unit_height_) / 2;
+				else if (valign == VideoWidget::Theme::AlignBottom)
+					y -= distance + unit_height_;
 			}
-			else if (valign == VideoWidget::Theme::AlignCenter)
-				y -= (distance + unit_height_) / 2;
-			else if (valign == VideoWidget::Theme::AlignBottom)
-				y -= distance + unit_height_;
 		}
 	}
 
@@ -340,8 +344,8 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 
 	bool with_icon = theme().hasFlag(VideoWidget::Theme::FlagIcon);
 
-	enum VideoWidget::Theme::Align halign = theme().valueHorizontalAlign();
-	enum VideoWidget::Theme::Align valign = theme().valueVerticalAlign();
+	enum VideoWidget::Theme::Align halign = theme().unitHorizontalAlign();
+	enum VideoWidget::Theme::Align valign = theme().unitVerticalAlign();
 
 	// Scaling
 	distance = size2pixels(distance);
@@ -368,19 +372,68 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 		}
 
 		// Text vertical position
-		if (valign == VideoWidget::Theme::AlignTop) {
-			y += padding_top_;
-			y += value_height_;
-			y -= unit_height_;
+		if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
+			switch (theme().valueVerticalAlign()) {
+			case VideoWidget::Theme::AlignTop:
+				if (valign == VideoWidget::Theme::AlignTop) {
+					y += padding_top_;
+				}
+				else if (valign == VideoWidget::Theme::AlignCenter) {
+					y += padding_top_;
+					y += value_height_ / 2;
+					y -= unit_height_ / 2;
+				}
+				else if (valign == VideoWidget::Theme::AlignBottom) {
+					y += padding_top_;
+					y += value_height_;
+					y -= unit_height_;
+				}
+				break;
+			case VideoWidget::Theme::AlignCenter:
+				if (valign == VideoWidget::Theme::AlignTop) {
+					y += theme().height() / 2 + padding_top_ - padding_bottom_;
+					y -= value_height_ / 2;
+				}
+				else if (valign == VideoWidget::Theme::AlignCenter) {
+					y += theme().height() / 2 + padding_top_ - padding_bottom_;
+					y -= unit_height_ / 2;
+				}
+				else if (valign == VideoWidget::Theme::AlignBottom) {
+					y += theme().height() / 2 + padding_top_ - padding_bottom_;
+					y += value_height_ / 2;
+					y -= unit_height_;
+				}
+				break;
+			case VideoWidget::Theme::AlignBottom:
+			default:
+				if (valign == VideoWidget::Theme::AlignTop) {
+					y += theme().height() - padding_bottom_;
+					y -= value_height_;
+				}
+				else if (valign == VideoWidget::Theme::AlignCenter) {
+					y += theme().height() - padding_bottom_;
+					y -= value_height_ / 2;
+					y -= unit_height_ / 2;
+				}
+				else if (valign == VideoWidget::Theme::AlignBottom) {
+					y += theme().height() - padding_bottom_;
+					y -= unit_height_;
+				}
+				break;
+			}
 		}
-		else if (valign == VideoWidget::Theme::AlignCenter) {
-			y += theme().height() / 2 + padding_top_ - padding_bottom_;
-			y += value_height_ / 2;
-			y -= unit_height_;
-		}
-		else if (valign == VideoWidget::Theme::AlignBottom) {
-			y += theme().height() - padding_bottom_;
-			y -= unit_height_;
+		else {
+			if (valign == VideoWidget::Theme::AlignTop) {
+				y += padding_top_;
+			}
+			else if (valign == VideoWidget::Theme::AlignCenter) {
+				y += theme().height() / 2 + padding_top_ - padding_bottom_;
+				y -= unit_height_ / 2;
+			}
+			else if (valign == VideoWidget::Theme::AlignBottom) {
+				y += theme().height() - padding_bottom_;
+				y -= unit_height_;
+			}
 		}
 
 		// Label offset 
@@ -397,11 +450,13 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 
 		// Value offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-			if (halign == VideoWidget::Theme::AlignLeft)
-				x += value_width_ + distance;
-			else if (halign == VideoWidget::Theme::AlignCenter)
-				x += (value_width_ + distance) / 2;
-			else if (halign == VideoWidget::Theme::AlignRight) {
+			if (halign == theme().valueHorizontalAlign()) {
+				if (halign == VideoWidget::Theme::AlignLeft)
+					x += value_width_ + distance;
+				else if (halign == VideoWidget::Theme::AlignCenter)
+					x += (value_width_ + distance) / 2;
+				else if (halign == VideoWidget::Theme::AlignRight) {
+				}
 			}
 		}
 	}
@@ -449,11 +504,13 @@ void TextShape::unit(cairo_t *cr, TextShape::Font &font,
 
 		// Value offset 
 		if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {
-			if (valign == VideoWidget::Theme::AlignTop)
-				y += distance + value_height_;
-			else if (valign == VideoWidget::Theme::AlignCenter)
-				y += (distance + value_height_) / 2;
-			else if (valign == VideoWidget::Theme::AlignBottom) {
+			if (valign == theme().valueVerticalAlign()) {
+				if (valign == VideoWidget::Theme::AlignTop)
+					y += distance + value_height_;
+				else if (valign == VideoWidget::Theme::AlignCenter)
+					y += (distance + value_height_) / 2;
+				else if (valign == VideoWidget::Theme::AlignBottom) {
+				}
 			}
 		}
 	}

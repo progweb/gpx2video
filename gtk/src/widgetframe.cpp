@@ -269,6 +269,7 @@ void GPX2VideoWidgetFrame::load_models(void) {
 
 	label_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
 	value_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
+	unit_font_weight_model_ = duplicate_liststore(font_weight_model, model_);
 }
 
 
@@ -1505,6 +1506,29 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					} 
 			), false);
 
+	// Unit font family
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("unit_font_family_fontbutton");
+	if (!fontbutton)
+		throw std::runtime_error("No \"unit_font_family_fontbutton\" object in widget_frame.ui");
+
+	fontbutton->signal_font_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_font_changed), fontbutton, 
+					[this](const Pango::FontDescription &description) {
+						std::string value = description.get_family();
+
+						log_notice("Widget %s: unit font family changed to '%s'",
+							   widget_selected_->widget()->name().c_str(), value.c_str());
+
+						// Update unit font weight combobox
+						update_font_weight_model(unit_font_weight_model_, value);
+
+						widget_selected_->widget()->theme().setUnitFontFamily(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
 	// Unit font size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_font_size_spinbutton");
 	if (!spinbutton)
@@ -1512,10 +1536,244 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
 						log_notice("Widget %s: unit font size changed to '%.1f'",
 							   widget_selected_->widget()->name().c_str(), value);
 
+						// Update unit font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("unit_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"unit_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+//						description.set_size(value * Pango::SCALE);
+						description.set_absolute_size(value * Pango::SCALE);
+
+						button->set_font_desc(description);
+
 						widget_selected_->widget()->theme().setUnitFontSize(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit shadow opacity
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_shadow_opacity_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_shadow_opacity_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_int_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Widget %s: unit shadow opacity_changed to '%d'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setUnitShadowOpacity(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit shadow distance
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_shadow_distance_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_shadow_distance_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: unit shadow distance_changed to '%.1f'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setUnitShadowDistance(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit font style
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_fontstyle_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_fontstyle_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: unit style changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update unit font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("unit_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"unit_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_style((Pango::Style) value);
+
+						button->set_font_desc(description);
+
+						widget_selected_->widget()->theme().setUnitFontStyle((VideoWidget::Theme::FontStyle) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit font weight
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_fontweight_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_fontweight_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						Gtk::FontButton *button;
+
+						Pango::FontDescription description;
+
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: unit weight changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						// Update unit font family button
+						button = ref_builder_->get_widget<Gtk::FontButton>("unit_font_family_fontbutton");
+
+						if (!button)
+							throw std::runtime_error("No \"unit_font_family_fontbutton\" object in widget_frame.ui");
+
+						description = button->get_font_desc();
+
+						description.set_weight((Pango::Weight) value);
+
+						button->set_font_desc(description);
+
+						widget_selected_->widget()->theme().setUnitFontWeight((VideoWidget::Theme::FontWeight) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_horizontal_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_horizontal_align_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: unit horizontal align changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_selected_->widget()->theme().setUnitHorizontalAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+//	combobox->pack_start(model_.m_name);
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: unit vertical align changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						widget_selected_->widget()->theme().setUnitVerticalAlign((VideoWidget::Theme::Align) value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("unit_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"unit_color_button\" object in widget_frame.ui");
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: unit color changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), color.c_str());
+
+						widget_selected_->widget()->theme().setUnitColor(color);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_border_width_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_border_width_spinbutton\" object in widget_frame.ui");
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: unit border width changed to '%.1f'",
+							   widget_selected_->widget()->name().c_str(), value);
+
+						widget_selected_->widget()->theme().setUnitBorderWidth(value);
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(false);
+					}
+			));
+
+	// Unit border color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("unit_border_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"unit_border_color_button\" object in widget_frame.ui");
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: unit border color changed to '%s'", 
+								widget_selected_->widget()->name().c_str(), color.c_str());
+
+						widget_selected_->widget()->theme().setUnitBorderColor(color);
 
 						// Broadcast widget change
 						widget_selected_->dispatchEvent(false);
@@ -1551,11 +1809,9 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	const float *color;
 
-	Gtk::Box *box;
 	Gtk::Entry *entry;
 	Gtk::Switch *sw;
 	Gtk::ComboBox *combobox;
-	Gtk::Expander *expander;
 	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
 	Gtk::ColorButton *colorbutton;
@@ -1588,11 +1844,6 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	shapes = widget_selected_->widget()->shapes();
 	units = widget_selected_->widget()->units();
 	formats = widget_selected_->widget()->formats();
-
-	// Widget shape expander container
-	expander = ref_builder_->get_widget<Gtk::Expander>("shape_expander");
-
-	expander->set_visible((shapes.size() > 1));
 
 	// Widget shape
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("shape_combobox");
@@ -1805,28 +2056,28 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	fontbutton->set_preview_text(widget_selected_->widget()->label());
 	fontbutton->set_font_desc(description);
 
-	// Widget label size
+	// Label size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().labelFontSize());
 
-	// Widget label shadow opacity
+	// Label shadow opacity
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_shadow_opacity_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_shadow_opacity_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().labelShadowOpacity());
 
-	// Widget label shadow distance
+	// Label shadow distance
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_shadow_distance_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_shadow_distance_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().labelShadowDistance());
 
-	// Widget label font style
+	// Label font style
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_fontstyle_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_fontstyle_combobox\" object in widget_frame.ui");
@@ -1836,7 +2087,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(font_style_model_, widget_selected_->widget()->theme().labelFontStyle(), iter))
 		combobox->set_active(iter);
 
-	// Widget label font weight
+	// Label font weight
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_fontweight_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_fontweight_combobox\" object in widget_frame.ui");
@@ -1846,7 +2097,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(label_font_weight_model_, widget_selected_->widget()->theme().labelFontWeight(), iter))
 		combobox->set_active(iter);
 
-	// Widget label horizontal align
+	// Label horizontal align
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_horizontal_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_horizontal_align_combobox\" object in widget_frame.ui");
@@ -1856,7 +2107,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(text_horizontal_align_model_, widget_selected_->widget()->theme().labelHorizontalAlign(), iter))
 		combobox->set_active(iter);
 
-	// Widget label vertical align
+	// Label vertical align
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("label_vertical_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"label_vertical_align_combobox\" object in widget_frame.ui");
@@ -1866,7 +2117,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(text_vertical_align_model_, widget_selected_->widget()->theme().labelVerticalAlign(), iter))
 		combobox->set_active(iter);
 
-	// Widget label color button
+	// Label color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("label_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"label_color_button\" object in widget_frame.ui");
@@ -1877,14 +2128,14 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget label border width
+	// Label border width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_border_width_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"label_border_width_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().labelBorderWidth());
 
-	// Widget label border color button
+	// Label border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("label_border_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"label_border_color_button\" object in widget_frame.ui");
@@ -1895,7 +2146,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget value enable switch
+	// Value enable switch
 	sw = ref_builder_->get_widget<Gtk::Switch>("value_enable_switch");
 	if (!sw)
 		throw std::runtime_error("No \"value_enable_switch\" object in widget_frame.ui");
@@ -1918,28 +2169,28 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	fontbutton->set_level(Gtk::FontButton::Level::FAMILY);
 	fontbutton->set_font_desc(description);
 
-	// Widget value size
+	// Value size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueFontSize());
 
-	// Widget value shadow opacity
+	// Value shadow opacity
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_shadow_opacity_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_shadow_opacity_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueShadowOpacity());
 
-	// Widget value shadow distance
+	// Value shadow distance
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_shadow_distance_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_shadow_distance_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueShadowDistance());
 
-	// Widget value font style
+	// Value font style
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_fontstyle_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_fontstyle_combobox\" object in widget_frame.ui");
@@ -1949,7 +2200,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(font_style_model_, widget_selected_->widget()->theme().valueFontStyle(), iter))
 		combobox->set_active(iter);
 
-	// Widget value font weight
+	// Value font weight
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_fontweight_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_fontweight_combobox\" object in widget_frame.ui");
@@ -1959,7 +2210,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(value_font_weight_model_, widget_selected_->widget()->theme().valueFontWeight(), iter))
 		combobox->set_active(iter);
 
-	// Widget value horizontal align
+	// Value horizontal align
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_horizontal_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_horizontal_align_combobox\" object in widget_frame.ui");
@@ -1969,7 +2220,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(text_horizontal_align_model_, widget_selected_->widget()->theme().valueHorizontalAlign(), iter))
 		combobox->set_active(iter);
 
-	// Widget value vertical align
+	// Value vertical align
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_vertical_align_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_vertical_align_combobox\" object in widget_frame.ui");
@@ -1979,7 +2230,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(text_vertical_align_model_, widget_selected_->widget()->theme().valueVerticalAlign(), iter))
 		combobox->set_active(iter);
 
-	// Widget value color button
+	// Value color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("value_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"value_color_button\" object in widget_frame.ui");
@@ -1990,14 +2241,14 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget value border width
+	// Value border width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_border_width_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_border_width_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueBorderWidth());
 
-	// Widget value border color button
+	// Value border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("value_border_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"value_border_color_button\" object in widget_frame.ui");
@@ -2008,35 +2259,21 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget value min.
+	// Value min.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_min_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMin());
 
-	// Widget value max.
+	// Value max.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
 
-	// Widget unit expander container
-	expander = ref_builder_->get_widget<Gtk::Expander>("unit_expander");
-	if (!expander)
-		throw std::runtime_error("No \"unit_expander\" object in widget_frame.ui");
-
-	expander->set_visible(units.size() > 0);
-
-	// Widget value unit box container
-	box = ref_builder_->get_widget<Gtk::Box>("value_unit_box");
-	if (!box)
-		throw std::runtime_error("No \"value_unit_box\" object in widget_frame.ui");
-
-	box->set_visible(units.size() > 1);
-
-	// Widget value unit 
+	// Value unit 
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_unit_combobox\" object in widget_frame.ui");
@@ -2060,12 +2297,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 			combobox->set_active(iter);
 	}
 
-	// Widget value format box container
-	box = ref_builder_->get_widget<Gtk::Box>("value_format_box");
-
-	box->set_visible(formats.size() > 1);
-
-	// Widget value format
+	// Value format
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_format_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"value_format_combobox\" object in widget_frame.ui");
@@ -2094,21 +2326,120 @@ void GPX2VideoWidgetFrame::update_content(void) {
 			combobox->set_active(iter);
 	}
 
-	// Widget unit enable switch
+	// Unit enable switch
 	sw = ref_builder_->get_widget<Gtk::Switch>("unit_enable_switch");
 	if (!sw)
 		throw std::runtime_error("No \"unit_enable_switch\" object in widget_frame.ui");
 
 	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagUnit));
 
-	// Widget unit size
+	// Unit font family
+	fontbutton = ref_builder_->get_widget<Gtk::FontButton>("unit_font_family_fontbutton");
+	if (!fontbutton)
+		throw std::runtime_error("No \"unit_font_family_fontbutton\" object in widget_frame.ui");
+
+	description.set_family(widget_selected_->widget()->theme().unitFontFamily());
+	description.set_style((Pango::Style) widget_selected_->widget()->theme().unitFontStyle());
+	description.set_variant(Pango::Variant::NORMAL);
+	description.set_weight((Pango::Weight) widget_selected_->widget()->theme().unitFontWeight());
+	description.set_stretch(Pango::Stretch::NORMAL);
+//	description.set_size(widget_selected_->widget()->theme().unitFontSize() * Pango::SCALE);
+	description.set_absolute_size(widget_selected_->widget()->theme().unitFontSize() * Pango::SCALE);
+
+	fontbutton->set_level(Gtk::FontButton::Level::FAMILY);
+	fontbutton->set_font_desc(description);
+
+	// Unit size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_font_size_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"unit_font_size_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().unitFontSize());
 
-	// Widget unit distance
+	// Unit shadow opacity
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_shadow_opacity_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_shadow_opacity_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().unitShadowOpacity());
+
+	// Unit shadow distance
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_shadow_distance_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_shadow_distance_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().unitShadowDistance());
+
+	// Unit font style
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_fontstyle_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_fontstyle_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(font_style_model_);
+
+	if (find_in_listtore(font_style_model_, widget_selected_->widget()->theme().unitFontStyle(), iter))
+		combobox->set_active(iter);
+
+	// Unit font weight
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_fontweight_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_fontweight_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(unit_font_weight_model_);
+
+	if (find_in_listtore(unit_font_weight_model_, widget_selected_->widget()->theme().unitFontWeight(), iter))
+		combobox->set_active(iter);
+
+	// Unit horizontal align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_horizontal_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_horizontal_align_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(text_horizontal_align_model_);
+
+	if (find_in_listtore(text_horizontal_align_model_, widget_selected_->widget()->theme().unitHorizontalAlign(), iter))
+		combobox->set_active(iter);
+
+	// Unit vertical align
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("unit_vertical_align_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"unit_vertical_align_combobox\" object in widget_frame.ui");
+
+	combobox->set_model(text_vertical_align_model_);
+
+	if (find_in_listtore(text_vertical_align_model_, widget_selected_->widget()->theme().unitVerticalAlign(), iter))
+		combobox->set_active(iter);
+
+	// Unit color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("unit_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"unit_color_button\" object in widget_frame.ui");
+
+	color = widget_selected_->widget()->theme().unitColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Unit border width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_border_width_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"unit_border_width_spinbutton\" object in widget_frame.ui");
+
+	spinbutton->set_value(widget_selected_->widget()->theme().unitBorderWidth());
+
+	// Unit border color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("unit_border_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"unit_border_color_button\" object in widget_frame.ui");
+
+	color = widget_selected_->widget()->theme().unitBorderColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Unit distance
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("unit_distance_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"unit_distance_spinbutton\" object in widget_frame.ui");
@@ -2137,14 +2468,28 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	Gtk::Expander *expander;
 	Gtk::SpinButton *spinbutton;
 
+	std::list<VideoWidget::ListItem> shapes;
+	std::list<VideoWidget::ListItem> units;
+	std::list<VideoWidget::ListItem> formats;
+
 	log_call();
 
 	// No widget
 	if (widget_selected_ == NULL)
 		return;
 
+	// Widget shapes, units & formats supported list
+	shapes = widget_selected_->widget()->shapes();
+	units = widget_selected_->widget()->units();
+	formats = widget_selected_->widget()->formats();
+
 //	// Widget type
 //	type = widget_selected_->widget()->type();
+
+	// Widget shape expander container
+	expander = ref_builder_->get_widget<Gtk::Expander>("shape_expander");
+
+	expander->set_visible((shapes.size() > 1));
 
 	// Paddings
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_left_spinbutton");
@@ -2215,38 +2560,17 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		throw std::runtime_error("No \"round_corner_box\" object in widget_frame.ui");
 	box->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureRoundCorner));
 
-//	// Round corner
-//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
-//	if (!spinbutton)
-//		throw std::runtime_error("No \"round_cornder_spinbutton\" object in widget_frame.ui");
-//
-//	spinbutton->set_range(0, (std::min(width, height) / 2));
-
 	// Label expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("label_expander");
 	if (!expander)
 		throw std::runtime_error("No \"label_expander\" object in widget_frame.ui");
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureLabel));
 
-//	// Label font size
-//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("label_font_size_spinbutton");
-//	if (!spinbutton)
-//		throw std::runtime_error("No \"label_font_size_spinbutton\" object in widget_frame.ui");
-//
-//	spinbutton->set_range(0, height - margin);
-
 	// Value expander
 	expander = ref_builder_->get_widget<Gtk::Expander>("value_expander");
 	if (!expander)
 		throw std::runtime_error("No \"value_expander\" object in widget_frame.ui");
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
-
-//	// Value font size
-//	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_font_size_spinbutton");
-//	if (!spinbutton)
-//		throw std::runtime_error("No \"value_font_size_spinbutton\" object in widget_frame.ui");
-//
-//	spinbutton->set_range(0, height - margin);
 
 	// Value min.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
@@ -2271,6 +2595,26 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		value = std::numeric_limits<int>::min();
 
 	spinbutton->set_range(value, std::numeric_limits<int>::max());
+
+	// Unit expander container
+	expander = ref_builder_->get_widget<Gtk::Expander>("unit_expander");
+	if (!expander)
+		throw std::runtime_error("No \"unit_expander\" object in widget_frame.ui");
+
+	expander->set_visible(units.size() > 0);
+
+	// Value unit box container
+	box = ref_builder_->get_widget<Gtk::Box>("value_unit_box");
+	if (!box)
+		throw std::runtime_error("No \"value_unit_box\" object in widget_frame.ui");
+
+	box->set_visible(units.size() > 1);
+
+	// Value format box container
+	box = ref_builder_->get_widget<Gtk::Box>("value_format_box");
+
+	box->set_visible(formats.size() > 1);
+
 }
 
 

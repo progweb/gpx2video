@@ -59,6 +59,7 @@ void DateTextShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -79,6 +80,7 @@ void DateTextShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		localtime_r(&now, &tm);
@@ -141,6 +143,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -157,6 +160,7 @@ void DateTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);

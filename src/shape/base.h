@@ -37,6 +37,7 @@ public:
 		VideoWidget::Theme::Align align;
 		VideoWidget::Theme::FontStyle style;
 		VideoWidget::Theme::FontWeight weight;
+		double linespace;
 	};
 
 	virtual ~ShapeBase() {

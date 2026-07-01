@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <string>
+#include <sstream>
 #include <cstring>
 
 #include <limits.h>
@@ -136,6 +137,43 @@ std::string capitalize(std::string s) {
 bool starts_with(const std::string &s, const std::string &prefix) {
 	return s.size() >= prefix.size() &&
 		(s.compare(0, prefix.size(), prefix) == 0);
+}
+
+std::string ltrim(std::string str) {
+	size_t position;
+
+	const std::string whitespaces = " \t\f\v";
+
+	position = str.find_first_not_of(whitespaces);
+	str.erase(0, position);
+
+	return str;
+}
+
+std::string rtrim(std::string str) {
+	size_t position;
+
+	const std::string whitespaces = " \t\f\v";
+
+	position = str.find_last_not_of(whitespaces);
+	str.erase(position + 1);
+
+	return str;
+}
+
+std::string trimlines(const std::string &input) {
+	std::string line, result;
+
+	std::stringstream ss(input);
+
+	while (std::getline(ss, line)) {
+		if (!result.empty())
+			result += "\n";
+
+		result += ltrim(rtrim(line));
+	}
+
+	return result;
 }
 
 }

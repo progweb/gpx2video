@@ -71,6 +71,7 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> text_vertical_align_model_;
 	Glib::RefPtr<Gtk::ListStore> label_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_font_weight_model_;
+	Glib::RefPtr<Gtk::ListStore> unit_font_weight_model_;
 	Glib::RefPtr<Gtk::ListStore> value_format_model_;
 	Glib::RefPtr<Gtk::ListStore> value_unit_model_;
 

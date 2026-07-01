@@ -49,6 +49,7 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -69,6 +70,7 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
@@ -84,13 +86,14 @@ void SpeedTextShape::initialize(cairo_t *cr) {
 
 		font = (ArcShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, alphanum, u.c_str(), x, y, width, height);
@@ -163,6 +166,7 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = theme().labelHorizontalAlign(),
 				.style = theme().labelFontStyle(),
 				.weight = theme().labelFontWeight(),
+				.linespace = 0.0,
 			};
 
 			label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -183,6 +187,7 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
@@ -194,16 +199,17 @@ void SpeedTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
-		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+		unit(cr, font, theme().unitColor(), theme().unitBorderColor(), u.c_str());
 	}
 }
 
@@ -276,6 +282,7 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		txt = txt + unit;
@@ -291,13 +298,14 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 
 		font = (ArcShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, ArcShape::TextAlpha, u.c_str(), x, y, width, height);
@@ -558,6 +566,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
 				.weight = theme().valueFontWeight(),
+				.linespace = 0.0,
 			};
 
 			ticklabel(cr, xa, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), str.c_str());
@@ -588,6 +597,7 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
@@ -597,20 +607,19 @@ void SpeedArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 	if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
 		std::string u = widget_->getFriendlyName(widget_->valueUnit());
 
-		double factor = (double) theme().unitFontSize() / (double) theme().valueFontSize();
-
 		font = (ArcShape::Font) {
-			.size = theme().valueFontSize() * factor,
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.size = theme().unitFontSize(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
-		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+		unit(cr, font, theme().unitColor(), theme().unitBorderColor(), u.c_str());
 	}
 
 	// Draw needle

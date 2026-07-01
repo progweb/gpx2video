@@ -70,7 +70,17 @@ VideoWidget::Theme::Theme() {
 	setValueBorderWidth(1.0);
 	setValueBorderColor(0.0, 0.0, 0.0, 1.0);
 
+	setUnitFontFamily("Sans");
 	setUnitFontSize(50.0);
+	setUnitFontStyle(VideoWidget::Theme::FontStyleNormal);
+	setUnitFontWeight(VideoWidget::Theme::FontWeightNormal);
+	setUnitShadowOpacity(80);
+	setUnitShadowDistance(1.0);
+	setUnitHorizontalAlign(VideoWidget::Theme::AlignLeft);
+	setUnitVerticalAlign(VideoWidget::Theme::AlignBottom);
+	setUnitColor(1.0, 1.0, 1.0, 1.0);
+	setUnitBorderWidth(1.0);
+	setUnitBorderColor(0.0, 0.0, 0.0, 1.0);
 	setUnitDistance(0.0);
 
 	setLineSpace(20.0);
@@ -537,6 +547,33 @@ bool VideoWidget::Theme::setValueBorderColor(double r, double g, double b, doubl
 	return true;
 }
 
+enum VideoWidget::Theme::Align VideoWidget::Theme::unitHorizontalAlign(void) const {
+	return unit_horizontal_align_;
+}
+
+void VideoWidget::Theme::setUnitHorizontalAlign(VideoWidget::Theme::Align align) {
+	unit_horizontal_align_ = align;
+}
+
+enum VideoWidget::Theme::Align VideoWidget::Theme::unitVerticalAlign(void) const {
+	return unit_vertical_align_;
+}
+
+void VideoWidget::Theme::setUnitVerticalAlign(VideoWidget::Theme::Align align) {
+	unit_vertical_align_ = align;
+}
+
+const std::string& VideoWidget::Theme::unitFontFamily(void) const {
+	return unit_font_family_;
+}
+
+void VideoWidget::Theme::setUnitFontFamily(std::string family) {
+	if (family.empty())
+		return;
+
+	unit_font_family_ = family;
+};
+
 double VideoWidget::Theme::unitFontSize(void) const {
 	return unit_font_size_;
 }
@@ -546,6 +583,87 @@ void VideoWidget::Theme::setUnitFontSize(double size) {
 		return;
 
 	unit_font_size_ = size;
+}
+
+enum VideoWidget::Theme::FontStyle VideoWidget::Theme::unitFontStyle(void) const {
+	return unit_font_style_;
+}
+
+void VideoWidget::Theme::setUnitFontStyle(VideoWidget::Theme::FontStyle style) {
+	unit_font_style_ = style;
+}
+
+enum VideoWidget::Theme::FontWeight VideoWidget::Theme::unitFontWeight(void) const {
+	return unit_font_weight_;
+}
+
+void VideoWidget::Theme::setUnitFontWeight(VideoWidget::Theme::FontWeight weight) {
+	unit_font_weight_ = weight;
+}
+
+const float * VideoWidget::Theme::unitColor(void) const {
+	return unit_color_;
+}
+
+bool VideoWidget::Theme::setUnitColor(std::string color) {
+	return hex2color(unit_color_, color);
+}
+
+bool VideoWidget::Theme::setUnitColor(double r, double g, double b, double a) {
+	unit_color_[0] = r;
+	unit_color_[1] = g;
+	unit_color_[2] = b;
+	unit_color_[3] = a;
+	return true;
+}
+
+double VideoWidget::Theme::unitShadowDistance(void) const {
+	return unit_shadow_distance_;
+}
+
+void VideoWidget::Theme::setUnitShadowDistance(double distance) {
+	if (distance < 0)
+		return;
+
+	unit_shadow_distance_ = distance;
+}
+
+int VideoWidget::Theme::unitShadowOpacity(void) const {
+	return unit_shadow_opacity_;
+}
+
+void VideoWidget::Theme::setUnitShadowOpacity(int opacity) {
+	if (opacity < 0)
+		return;
+
+	unit_shadow_opacity_ = opacity;
+}
+
+const double& VideoWidget::Theme::unitBorderWidth(void) const {
+	return unit_border_width_;
+}
+
+void VideoWidget::Theme::setUnitBorderWidth(double width) {
+	if (width < 0)
+		return;
+
+	unit_border_width_ = width;
+}
+
+const float * VideoWidget::Theme::unitBorderColor(void) const {
+	return unit_border_color_;
+}
+
+bool VideoWidget::Theme::setUnitBorderColor(std::string color) {
+	return hex2color(unit_border_color_, color);
+}
+
+bool VideoWidget::Theme::setUnitBorderColor(double r, double g, double b, double a) {
+	unit_border_color_[0] = r;
+	unit_border_color_[1] = g;
+	unit_border_color_[2] = b;
+	unit_border_color_[3] = a;
+	return true;
 }
 
 double VideoWidget::Theme::unitDistance(void) const {

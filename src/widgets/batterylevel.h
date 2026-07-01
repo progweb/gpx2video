@@ -22,18 +22,6 @@ public:
 		return shape;
 	}
 
-	bool hasFeature(ShapeBase::Feature feature) const {
-		switch (feature) {
-		case FeatureUnit:
-			return false;
-
-		default:
-			break;
-		}
-
-		return TextShape::hasFeature(feature);
-	}
-
 	OIIO::ImageBuf * render(const TelemetryData &data, bool &is_update) {
 		cairo_t *cairo;
 

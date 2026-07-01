@@ -785,10 +785,10 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->setMargin(VideoWidget::MarginRight, w->marginRight());
 	widget->setMargin(VideoWidget::MarginTop, w->marginTop());
 	widget->setMargin(VideoWidget::MarginBottom, w->marginBottom());
-	
+
 	// Widget misc. settings
 	widget->setLabel((const char *) w->name());
-	widget->setValue((const char *) w->text());
+	widget->setValue(Utils::trimlines((const char *) w->text()));
 	widget->setValueUnit(unit);
 	widget->setValueFormat(format);
 	widget->setZoom(zoom);

@@ -53,6 +53,7 @@ void TimeTextShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -73,6 +74,7 @@ void TimeTextShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
@@ -135,6 +137,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -151,6 +154,7 @@ void TimeTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
@@ -230,6 +234,7 @@ void TimeArcShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
@@ -368,6 +373,7 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
 				.weight = theme().valueFontWeight(),
+				.linespace = 0.0,
 			};
 
 			ticklabel(cr, xa, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), str.c_str());
@@ -411,6 +417,7 @@ void TimeArcShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);

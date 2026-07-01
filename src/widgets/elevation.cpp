@@ -49,6 +49,7 @@ void ElevationTextShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -69,6 +70,7 @@ void ElevationTextShape::initialize(cairo_t *cr) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, TextShape::TextNumeric, txt.c_str(), x, y, width, height);
@@ -85,13 +87,14 @@ void ElevationTextShape::initialize(cairo_t *cr) {
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, alphanum, txt.c_str(), x, y, width, height);
@@ -141,6 +144,7 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = theme().labelHorizontalAlign(),
 				.style = theme().labelFontStyle(),
 				.weight = theme().labelFontWeight(),
+				.linespace = 0.0,
 			};
 
 			label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -161,6 +165,7 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 			.align = theme().valueHorizontalAlign(),
 			.style = theme().valueFontStyle(),
 			.weight = theme().valueFontWeight(),
+			.linespace = 0.0,
 		};
 
 		value(cr, font, theme().valueColor(), theme().valueBorderColor(), s);
@@ -172,16 +177,17 @@ void ElevationTextShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		font = (TextShape::Font) {
 			.size = theme().unitFontSize(),
-			.border = theme().valueBorderWidth(),
-			.shadow_opacity = theme().valueShadowOpacity(),
-			.shadow_distance = theme().valueShadowDistance(),
-			.family = theme().valueFontFamily(),
-			.align = theme().valueHorizontalAlign(),
-			.style = theme().valueFontStyle(),
-			.weight = theme().valueFontWeight(),
+			.border = theme().unitBorderWidth(),
+			.shadow_opacity = theme().unitShadowOpacity(),
+			.shadow_distance = theme().unitShadowDistance(),
+			.family = theme().unitFontFamily(),
+			.align = theme().unitHorizontalAlign(),
+			.style = theme().unitFontStyle(),
+			.weight = theme().unitFontWeight(),
+			.linespace = 0.0,
 		};
 
-		unit(cr, font, theme().valueColor(), theme().valueBorderColor(), u.c_str());
+		unit(cr, font, theme().unitColor(), theme().unitBorderColor(), u.c_str());
 	}
 }
 
@@ -252,6 +258,7 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 			.align = theme().labelHorizontalAlign(),
 			.style = theme().labelFontStyle(),
 			.weight = theme().labelFontWeight(),
+			.linespace = 0.0,
 		};
 
 		extents(cr, font, BarShape::TextAlpha, widget_->label().c_str(), x, y, width, height);
@@ -310,6 +317,7 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
 				.weight = theme().valueFontWeight(),
+				.linespace = 0.0,
 			};
 
 			this->extents(cr, font, BarShape::TextAlpha, s, txtx, txty, txtw, txth);
@@ -438,6 +446,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = theme().labelHorizontalAlign(),
 				.style = theme().labelFontStyle(),
 				.weight = theme().labelFontWeight(),
+				.linespace = 0.0,
 			};
 
 			label(cr, font, theme().labelColor(), theme().labelBorderColor(), widget_->label().c_str());
@@ -518,6 +527,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 				.align = VideoWidget::Theme::AlignCenter,
 				.style = theme().valueFontStyle(),
 				.weight = theme().valueFontWeight(),
+				.linespace = 0.0,
 			};
 
 			ticklabel(cr, xb, distance, font, theme().tickLabelColor(), theme().tickLabelBorderColor(), s);
@@ -545,6 +555,7 @@ void ElevationBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		.align = VideoWidget::Theme::AlignCenter,
 		.style = theme().valueFontStyle(),
 		.weight = theme().valueFontWeight(),
+		.linespace = 0.0,
 	};
 
 	// Draw needle / icon / value
@@ -725,23 +736,22 @@ void ElevationChartShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 		// Draw unit
 		if (theme().hasFlag(VideoWidget::Theme::FlagUnit)) {
-			double factor = (double) theme().unitFontSize() / (double) theme().valueFontSize();
-
 			std::string str = theme().hasFlag(VideoWidget::Theme::FlagUnit) ?
 				widget_->getFriendlyName(widget_->valueUnit()) : "";
 
 			font = (ChartShape::Font) {
-				.size = theme().valueFontSize() * factor,
-				.border = theme().valueBorderWidth(),
-				.shadow_opacity = theme().valueShadowOpacity(),
-				.shadow_distance = theme().valueShadowDistance(),
-				.family = theme().valueFontFamily(),
-				.align = theme().valueHorizontalAlign(),
-				.style = theme().valueFontStyle(),
-				.weight = theme().valueFontWeight(),
+				.size = theme().unitFontSize(),
+				.border = theme().unitBorderWidth(),
+				.shadow_opacity = theme().unitShadowOpacity(),
+				.shadow_distance = theme().unitShadowDistance(),
+				.family = theme().unitFontFamily(),
+				.align = theme().unitHorizontalAlign(),
+				.style = theme().unitFontStyle(),
+				.weight = theme().unitFontWeight(),
+				.linespace = 0.0,
 			};
 
-			unit(cr, font, theme().valueColor(), theme().valueBorderColor(), str.c_str());
+			unit(cr, font, theme().unitColor(), theme().unitBorderColor(), str.c_str());
 		}
 
 		// Save surface
@@ -769,6 +779,7 @@ void ElevationChartShape::draw(cairo_t *cr, const TelemetryData &data) {
 		.align = VideoWidget::Theme::AlignCenter,
 		.style = theme().valueFontStyle(),
 		.weight = theme().valueFontWeight(),
+		.linespace = 0.0,
 	};
 
 	if (theme().hasFlag(VideoWidget::Theme::FlagValue)) {

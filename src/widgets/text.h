@@ -84,7 +84,7 @@ protected:
 	void xmlwrite(std::ostream &os) {
 		VideoWidget::xmlwrite(os);
 
-		ShapeBase::xmlwrite(os);
+		TextShape::xmlwrite(os);
 
 		os << "<text>" << VideoWidget::value() << "</text>" << std::endl;
 	}
