@@ -12,7 +12,7 @@
 		<property name="lower">0</property>
 		<property name="upper">10</property>
 		<property name="value">0</property>
-		<property name="step-increment">0.1</property>
+		<property name="step-increment">0.01</property>
 		<property name="page-increment">1</property>
 	</object>
 	<object class="GtkAdjustment" id="path_smooth_adjustment">
@@ -285,9 +285,9 @@
 									<object class="GtkSpinButton" id="factor_spinbutton">
 										<property name="halign">end</property>
 										<property name="hexpand">True</property>
-										<property name="digits">1</property>
-										<property name="width-chars">3</property>
-										<property name="max-width-chars">3</property>
+										<property name="digits">2</property>
+										<property name="width-chars">5</property>
+										<property name="max-width-chars">5</property>
 										<property name="numeric">True</property>
 										<property name="orientation">horizontal</property>
 										<property name="valign">center</property>

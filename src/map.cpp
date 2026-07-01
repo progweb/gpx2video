@@ -48,6 +48,8 @@
 
 MapSettings::MapSettings() 
 	: TrackSettings() {
+	zoom_ = 16;
+
 	divider_ = 2.0;
 
 	source_ = MapSettings::SourceNull;
@@ -603,7 +605,8 @@ void Map::download(void) {
 
 	log_call();
 
-	if (tiles_.empty() || !refresh_is_required_) {
+	if (tiles_.empty() || !refresh_is_required_ 
+			|| (settings().source() == MapSettings::SourceNull)) {
 		complete();
 
 		goto done;

@@ -92,8 +92,13 @@ bool Renderer::load(void) {
 	std::cout << "Parsing '" << filename << "' layout file" << std::endl;
 
 	// Load telemetry data
-	if (source_ == NULL)
+	if (source_ == NULL) {
+		// Open & load telemetry file
 		source_ = TelemetryMedia::open(app_.settings().inputfile(), telemetrySettings(), false);
+		
+		// Compute range
+		this->computeTelemetryRange();
+	}
 
 	// For each layout elements
 	nodes = root->getElements();
@@ -926,8 +931,10 @@ void Renderer::computeTelemetryRange(void) {
 	ts = container_->startTime();
 	duration = container_->duration();
 
-	if (source_)
+	if (source_) {
 		source_->settings().setViewRange(ts, ts + duration);
+		source_->loadData(false);
+	}
 }
 
 
