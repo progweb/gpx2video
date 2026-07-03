@@ -14,6 +14,7 @@
 #include "datetime.h"
 #include "telemetry/csv.h"
 #include "telemetry/gpx.h"
+#include "telemetry/tcx.h"
 #include "telemetry.h"
 
 
@@ -477,7 +478,7 @@ void TelemetryData::writeHeader(void) {
 
 
 void TelemetryData::writeData(size_t index) const {
-	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %4d° | %5.1f%%\n",
+	printf("%5ld | %5d | %s | %s | %8d | %11.3f | %6.1f | %12.8f | %1s | %12.8f | %12.8f | %8.1f | %3d° | %5.1f%%\n",
 		index,
 		line_,
 		type2string(),
@@ -2933,6 +2934,9 @@ TelemetrySource * TelemetryMedia::open(const std::string &filename, const Teleme
 
 	if (ext == ".gpx") {
 		source = new GPX(filename);
+	}
+	else if (ext == ".tcx") {
+		source = new TCX(filename);
 	}
 	else if (ext == ".csv") {
 		source = new CSV(filename);

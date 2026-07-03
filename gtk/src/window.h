@@ -64,8 +64,7 @@ protected:
 	Glib::ustring media_file_;
 	Glib::ustring layout_file_;
 
-//    Gtk::Stack *stack_ = NULL;
-    Gtk::MenuButton *gears_ = NULL;
+	Gtk::MenuButton *gears_ = NULL;
 
 	Gtk::Button *play_button_ = NULL;
 
@@ -146,6 +145,8 @@ protected:
 	void on_file_dialog_save_clicked(int response_id,
 			Gtk::FileChooserDialog *dialog);
 #endif
+
+	Glib::ustring get_file_extension(const Glib::RefPtr<const Gio::File> &file);
 
 private:
 	bool loop_;

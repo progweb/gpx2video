@@ -22,11 +22,7 @@ To fix:
 
 To do:
 - redraw each icon (in real svg)
-- to be able to use user icons
-- arc & bar settings customization
 - add more widget shapes (ramp & curve)
-- add chart support
-- text editable for the 'text' widget
 - option to enable / disable sound
 - optimization & fix cpu usage
 - add progress bar, bufferization information...

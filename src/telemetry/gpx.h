@@ -26,7 +26,9 @@ public:
 		: TelemetrySource(filename)
 		, root_(NULL)
 		, trk_(NULL)
-		, eof_(false) {
+		, eof_(false) 
+		, trksegs_(trksegs_dummy_list_) 
+		, trkpts_(trkpts_dummy_list_) {
 		gpx::Parser parser(NULL); //&report);
 
 //		gpx::ReportCerr report;
@@ -69,18 +71,17 @@ failure:
 			if (trk == nullptr)
 				continue;
 
-			std::list<gpx::TRKSeg*> &trksegs = trk->trksegs().list();
+			trksegs_ = trk->trksegs().list();
 
 			// Retrieve first segment & first track
 			trk_ = trk;
-			iter_seg_ = trksegs.begin();
+			iter_seg_ = trksegs_.begin();
 			
-			if (iter_seg_ != trksegs.end()) {
+			if (iter_seg_ != trksegs_.end()) {
 				gpx::TRKSeg *trkseg = (*iter_seg_);
 
-				std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
-
-				iter_pts_ = trkpts.begin();
+				trkpts_ = trkseg->trkpts().list();
+				iter_pts_ = trkpts_.begin();
 			}
 
 			// Parse only the first track
@@ -109,9 +110,6 @@ eof:
 	enum TelemetrySource::Data readNode(gpx::WPT **wpt) {
 		gpx::TRKSeg *trkseg = (*iter_seg_);
 
-		std::list<gpx::WPT*> &trkpts = trkseg->trkpts().list();
-		std::list<gpx::TRKSeg*> &trksegs = trk_->trksegs().list();
-
 		log_call();
 
 		if (eof_)
@@ -122,18 +120,18 @@ eof:
 		// Next point
 		iter_pts_++;
 
-		for (; iter_pts_ == trkpts.end();) {
+		for (; iter_pts_ == trkpts_.end();) {
 			iter_seg_++;
 
-			if (iter_seg_ == trksegs.end()) {
+			if (iter_seg_ == trksegs_.end()) {
 				eof_ = true;
 				break;
 			}
 
 			trkseg = (*iter_seg_);
 
-			trkpts = trkseg->trkpts().list();
-			iter_pts_ = trkpts.begin();
+			trkpts_ = trkseg->trkpts().list();
+			iter_pts_ = trkpts_.begin();
 		}
 
 		return TelemetrySource::DataAgain;
@@ -216,6 +214,12 @@ private:
 
 	std::list<gpx::WPT*>::iterator iter_pts_;
 	std::list<gpx::TRKSeg*>::iterator iter_seg_;
+
+	std::list<gpx::TRKSeg*> trksegs_dummy_list_;
+	std::list<gpx::TRKSeg*> &trksegs_;
+
+	std::list<gpx::WPT*> trkpts_dummy_list_;
+	std::list<gpx::WPT*> &trkpts_;
 };
 
 #endif

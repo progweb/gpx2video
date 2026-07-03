@@ -26,7 +26,9 @@ Then view renderer result.
 
 gpx2video should work with any video. Orientation, SAR & DAR video parameters are supported.
 
-gpx2video can read and extract from your gpx input file:
+gpx2video supports GPX, TCX and CSV telemetry file formats.
+
+gpx2video can read and extract from your telemtry input file:
   - time, 
   - position, 
   - elevation, 
@@ -264,7 +266,7 @@ you can apply different filters. You can export the results to test:
 $ ./tools/gpx2video -g ACTIVITY.gpx -o data.csv compute
 ```
 
-This tool permits to convert GPX to CSV and/or apply a filter on the GPS data (lat. and lon. values).
+This tool permits to convert GPX/TCX to CSV and/or apply a filter on the GPS data (lat. and lon. values).
 gpx2video interpolates data in using different methods: linear, kalman or interpolation.
 
 By default, telemetry is updated each 1000 ms. You can overwrite this value :

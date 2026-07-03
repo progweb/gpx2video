@@ -548,7 +548,6 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, value);
 					}
 			));
-
 }
 
 

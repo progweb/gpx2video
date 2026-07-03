@@ -903,8 +903,10 @@ void GPX2VideoApplicationWindow::on_action_append(void) {
 	Glib::RefPtr<Gtk::FileFilter> default_filter;
 
 	auto filter_gpx = Gtk::FileFilter::create();
-	filter_gpx->set_name(_("All GPX files"));
+	filter_gpx->set_name(_("All GPX/TCX files"));
 	filter_gpx->add_mime_type("application/gpx+xml");
+	filter_gpx->add_mime_type("application/vnd.garmin.tcx+xml");
+	filter_gpx->add_suffix("tcx");
 
 	auto filter_csv = Gtk::FileFilter::create();
 	filter_csv->set_name(_("All CSV files"));
@@ -1390,17 +1392,20 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(const Glib::RefPtr<
 	// Get filename
 	auto info = file->query_info();
 	auto type = info->get_content_type();
+	auto ext = get_file_extension(file).lowercase();
 
-	log_notice("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
+	log_notice("Open %s file with '%s' mimetype (ext: '%s')", file->get_parse_name().c_str(), std::string(type).c_str(), ext.c_str());
 
 	// Open layout or media file
-	if (type == "application/xml") {
+	if ((type == "application/gpx+xml") || (type == "text/csv")) 
+		open_telemetry_file(file);
+	else if ((ext == "tcx") || (type == "application/vnd.garmin.tcx+xml"))
+		open_telemetry_file(file);
+	else if (type == "application/xml") {
 		open_layout_file(file);
 
 		working_layout_ = file;
 	}
-	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
-		open_telemetry_file(file);
 	else if (type == "image/svg+xml")
 		open_icon_file(file);
 	else if ((type == "image/png") || (type == "image/jpeg")) 
@@ -1440,16 +1445,19 @@ void GPX2VideoApplicationWindow::on_file_dialog_open_clicked(
 	// Open layout or media file
 	auto info = file->query_info();
 	auto type = info->get_content_type();
+	auto ext = get_file_extension(file).lowercase();
 
-	log_notice("Open %s file with '%s' mimetype", file->get_parse_name().c_str(), std::string(type).c_str());
+	log_notice("Open %s file with '%s' mimetype (ext: '%s')", file->get_parse_name().c_str(), std::string(type).c_str(), ext.c_str());
 
-	if (type == "application/xml") {
+	if ((type == "application/gpx+xml") || (type == "text/csv")) 
+		open_telemetry_file(file);
+	else if ((ext == "tcx") || (type == "application/vnd.garmin.tcx+xml"))
+		open_telemetry_file(file);
+	else if (type == "application/xml") {
 		open_layout_file(file);
 
 		working_layout_ = file;
 	}
-	else if ((type == "application/gpx+xml") || (type == "text/csv")) 
-		open_telemetry_file(file);
 	else if (type == "image/svg+xml")
 		open_icon_file(file);
 	else if ((type == "image/png") || (type == "image/jpeg")) 
@@ -1507,4 +1515,21 @@ void GPX2VideoApplicationWindow::on_file_dialog_save_clicked(
 	save_layout_file(file);
 }
 #endif
+
+
+Glib::ustring GPX2VideoApplicationWindow::get_file_extension(const Glib::RefPtr<const Gio::File> &file) {
+	log_call();
+
+	if (!file)
+		return "";
+
+	std::string basename = file->get_basename();
+
+	std::size_t pos = basename.rfind('.');
+
+	if ((pos == std::string::npos) || (pos == 0) || (pos == basename.length() - 1))
+		return "";
+
+	return basename.substr(pos + 1);
+}
 
