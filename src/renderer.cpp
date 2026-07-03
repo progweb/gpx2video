@@ -540,12 +540,16 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	VideoWidget::Theme::Align label_vertical_align = VideoWidget::Theme::AlignTop;
 	VideoWidget::Theme::Align value_horizontal_align = VideoWidget::Theme::AlignLeft;
 	VideoWidget::Theme::Align value_vertical_align = VideoWidget::Theme::AlignBottom;
+	VideoWidget::Theme::Align unit_horizontal_align = VideoWidget::Theme::AlignLeft;
+	VideoWidget::Theme::Align unit_vertical_align = VideoWidget::Theme::AlignBottom;
 
 	VideoWidget::Theme::FontStyle label_font_style = VideoWidget::Theme::FontStyleNormal;
 	VideoWidget::Theme::FontStyle value_font_style = VideoWidget::Theme::FontStyleNormal;
+	VideoWidget::Theme::FontStyle unit_font_style = VideoWidget::Theme::FontStyleNormal;
 
 	VideoWidget::Theme::FontWeight label_font_weight = VideoWidget::Theme::FontWeightNormal;
 	VideoWidget::Theme::FontWeight value_font_weight = VideoWidget::Theme::FontWeightNormal;
+	VideoWidget::Theme::FontWeight unit_font_weight = VideoWidget::Theme::FontWeightNormal;
 
 	VideoWidget::Theme::Icon icon = VideoWidget::Theme::IconDefault;
 	VideoWidget::Theme::GaugeCap gauge_cap = VideoWidget::Theme::GaugeCapSquare;
@@ -700,6 +704,46 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	else if (align != VideoWidget::Theme::AlignNone)
 		value_vertical_align = align;
 
+	// Font style for unit
+	s = (const char *) w->unitFontStyle();
+	unit_font_style = VideoWidget::string2fontstyle(s);
+
+	if (unit_font_style == VideoWidget::Theme::FontStyleUnknown) {
+		log_error("Widget loading error, unit font style value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Font weight for unit
+	s = (const char *) w->unitFontWeight();
+	unit_font_weight = VideoWidget::string2fontweight(s);
+
+	if (unit_font_weight == VideoWidget::Theme::FontWeightUnknown) {
+		log_error("Widget loading error, unit font weight value '%s' unknown", s.c_str());
+		goto error;
+	}
+
+	// Text horizontal alignment for unit
+	s = (const char *) w->unitHorizontalAlign();
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, unit horizontal align value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		unit_horizontal_align = align;
+
+	// Text vertical alignment for unit
+	s = (const char *) w->unitVerticalAlign();
+	align = VideoWidget::string2align(s);
+
+	if (align == VideoWidget::Theme::AlignUnknown) {
+		log_error("Widget loading error, unit vertical align value '%s' unknown", s.c_str());
+		goto error;
+	}
+	else if (align != VideoWidget::Theme::AlignNone)
+		unit_vertical_align = align;
+
 	// Text orientation
 	s = (const char *) w->textOrientation();
 	text_orientation = VideoWidget::string2orientation(s);
@@ -850,7 +894,17 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueMax(w->valueMax());
 
 	// Widget unit settings
+	widget->theme().setUnitFontFamily((const char *) w->unitFontFamily());
 	widget->theme().setUnitFontSize(w->unitFontSize());
+	widget->theme().setUnitFontStyle(unit_font_style);
+	widget->theme().setUnitFontWeight(unit_font_weight);
+	widget->theme().setUnitHorizontalAlign(unit_horizontal_align);
+	widget->theme().setUnitVerticalAlign(unit_vertical_align);
+	widget->theme().setUnitColor((const char *) w->unitColor());
+	widget->theme().setUnitShadowOpacity(w->unitShadowOpacity());
+	widget->theme().setUnitShadowDistance(w->unitShadowDistance());
+	widget->theme().setUnitBorderWidth(w->unitBorderWidth());
+	widget->theme().setUnitBorderColor((const char *) w->unitBorderColor());
 	widget->theme().setUnitDistance(w->unitDistance());
 
 	// Width gauge settings

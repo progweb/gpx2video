@@ -485,11 +485,81 @@ namespace layout
     String &valueFormat() { return _value_format; }
 
     ///
+    /// Get unit font family
+    ///
+    /// @return the unit font family element
+    ///
+    String &unitFontFamily() { return _unit_fontfamily; }
+
+    ///
     /// Get unit font size
     ///
     /// @return the unit font size element
     ///
     Decimal  &unitFontSize() { return _unit_fontsize; }
+
+    ///
+    /// Get unit font style
+    ///
+    /// @return the unit font style element
+    ///
+    String &unitFontStyle() { return _unit_fontstyle; }
+
+    ///
+    /// Get unit font weight
+    ///
+    /// @return the unit font weight element
+    ///
+    String &unitFontWeight() { return _unit_fontweight; }
+
+    ///
+    /// Get unit horizontal align
+    ///
+    /// @return the unit horizontal align element
+    ///
+    String &unitHorizontalAlign() { return _unit_horizontal_align; }
+
+    ///
+    /// Get unit vertical align
+    ///
+    /// @return the unit vertical align element
+    ///
+    String &unitVerticalAlign() { return _unit_vertical_align; }
+
+    ///
+    /// Get unit color
+    ///
+    /// @return the unit color element
+    ///
+    String &unitColor() { return _unit_color; }
+
+    ///
+    /// Get unit shadow opacity
+    ///
+    /// @return the unit shadow opacity element
+    ///
+    Decimal  &unitShadowOpacity() { return _unit_shadowopacity; }
+
+    ///
+    /// Get unit shadow distance
+    ///
+    /// @return the unit shadow distance element
+    ///
+    Decimal  &unitShadowDistance() { return _unit_shadowdistance; }
+
+    ///
+    /// Get unit border width
+    ///
+    /// @return the unit border width element
+    ///
+    Decimal  &unitBorderWidth() { return _unit_borderwidth; }
+
+    ///
+    /// Get unit border color
+    ///
+    /// @return the unit border color element
+    ///
+    String &unitBorderColor() { return _unit_bordercolor; }
 
     ///
     /// Get unit distance
@@ -793,7 +863,17 @@ namespace layout
     String       _value_unit;
     String       _value_format;
 
+	String       _unit_fontfamily;
 	Decimal      _unit_fontsize;
+	String       _unit_fontstyle;
+	String       _unit_fontweight;
+	String       _unit_horizontal_align;
+	String       _unit_vertical_align;
+	String       _unit_color;
+	Decimal      _unit_shadowopacity;
+	Decimal      _unit_shadowdistance;
+	Decimal      _unit_borderwidth;
+	String       _unit_bordercolor;
 	Decimal      _unit_distance;
 
 	Decimal      _gauge_angle;

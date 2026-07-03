@@ -97,7 +97,17 @@ namespace layout
     _value_unit(this, "value-unit",   Node::ELEMENT, false),
     _value_format(this, "value-format",   Node::ELEMENT, false),
 
+	_unit_fontfamily(this, "unit-font-family", Node::ELEMENT, false),
 	_unit_fontsize(this, "unit-font-size", Node::ELEMENT, false),
+	_unit_fontstyle(this, "unit-font-style", Node::ELEMENT, false),
+	_unit_fontweight(this, "unit-font-weight", Node::ELEMENT, false),
+	_unit_horizontal_align(this, "unit-horizontal-align", Node::ELEMENT, false),
+	_unit_vertical_align(this, "unit-vertical-align", Node::ELEMENT, false),
+	_unit_color(this, "unit-color", Node::ELEMENT, false),
+	_unit_shadowopacity(this, "unit-shadow-opactiy", Node::ELEMENT, false),
+	_unit_shadowdistance(this, "unit-shadow-distance", Node::ELEMENT, false),
+	_unit_borderwidth(this, "unit-border-width", Node::ELEMENT, false),
+	_unit_bordercolor(this, "unit-border-color", Node::ELEMENT, false),
 	_unit_distance(this, "unit-distance", Node::ELEMENT, false),
 
 	_gauge_angle(this, "gauge-angle", Node::ELEMENT, false),
@@ -206,7 +216,17 @@ namespace layout
     getInterfaces().push_back(&_value_unit);
     getInterfaces().push_back(&_value_format);
 
+    getInterfaces().push_back(&_unit_fontfamily);
     getInterfaces().push_back(&_unit_fontsize);
+    getInterfaces().push_back(&_unit_fontstyle);
+    getInterfaces().push_back(&_unit_fontweight);
+    getInterfaces().push_back(&_unit_horizontal_align);
+    getInterfaces().push_back(&_unit_vertical_align);
+    getInterfaces().push_back(&_unit_color);
+    getInterfaces().push_back(&_unit_shadowopacity);
+    getInterfaces().push_back(&_unit_shadowdistance);
+    getInterfaces().push_back(&_unit_borderwidth);
+    getInterfaces().push_back(&_unit_bordercolor);
     getInterfaces().push_back(&_unit_distance);
 
 	getInterfaces().push_back(&_gauge_angle);
@@ -277,6 +297,9 @@ namespace layout
 	_value_borderwidth.setValue("-1");
 
 	_unit_fontsize.setValue("-1");
+	_unit_shadowopacity.setValue("-1");
+	_unit_shadowdistance.setValue("-1");
+	_unit_borderwidth.setValue("-1");
 	_unit_distance.setValue("-1");
 
 	_gauge_angle.setValue("-1");
