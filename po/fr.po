@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-01 16:43+0200\n"
+"POT-Creation-Date: 2026-07-03 21:27+0200\n"
 "PO-Revision-Date: 2026-05-17 16:18+0200\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -916,6 +916,14 @@ msgstr "Sélectionner une image"
 msgid "Image zoom:"
 msgstr "Zoom :"
 
+#: ../gtk/src/ui/widgets/lap_box.ui:26
+msgid "Lap properties"
+msgstr "Paramètres des tours"
+
+#: ../gtk/src/ui/widgets/lap_box.ui:45
+msgid "Lap total:"
+msgstr ""
+
 #: ../gtk/src/ui/widgets/map_box.ui:166
 msgid "Map properties"
 msgstr "Paramètres de la carte"
@@ -1021,7 +1029,7 @@ msgid "Track properties"
 msgstr "Paramètres de la trace"
 
 #: ../gtk/src/telemetryframe.cpp:46 ../gtk/src/telemetryframe.cpp:71
-#: ../gtk/src/widgetframe.cpp:85 ../gtk/src/widgetframe.cpp:107
+#: ../gtk/src/widgetframe.cpp:86 ../gtk/src/widgetframe.cpp:108
 #: ../gtk/src/widgets/image.cpp:87 ../gtk/src/widgets/map.cpp:198
 #: ../gtk/src/widgets/track.cpp:198
 msgid "None"
@@ -1047,103 +1055,103 @@ msgstr "Moyenne par fenêtre glissante"
 msgid "Butterworth"
 msgstr "Butterworth"
 
-#: ../gtk/src/widgetframe.cpp:90 ../gtk/src/shape/bar.cpp:43
+#: ../gtk/src/widgetframe.cpp:91 ../gtk/src/shape/bar.cpp:43
 #: ../gtk/src/shape/text.cpp:43
 msgid "Horizontal"
 msgstr "Horizontal"
 
-#: ../gtk/src/widgetframe.cpp:95 ../gtk/src/shape/bar.cpp:48
+#: ../gtk/src/widgetframe.cpp:96 ../gtk/src/shape/bar.cpp:48
 #: ../gtk/src/shape/text.cpp:48
 msgid "Vertical"
 msgstr "Vertical"
 
-#: ../gtk/src/widgetframe.cpp:112 ../gtk/src/widgetframe.cpp:232
+#: ../gtk/src/widgetframe.cpp:113 ../gtk/src/widgetframe.cpp:233
 #: ../gtk/src/shape/bar.cpp:71
 msgid "Left"
 msgstr "Gauche"
 
-#: ../gtk/src/widgetframe.cpp:117 ../gtk/src/widgetframe.cpp:242
+#: ../gtk/src/widgetframe.cpp:118 ../gtk/src/widgetframe.cpp:243
 #: ../gtk/src/shape/bar.cpp:79
 msgid "Right"
 msgstr "Droite"
 
-#: ../gtk/src/widgetframe.cpp:122 ../gtk/src/widgetframe.cpp:262
+#: ../gtk/src/widgetframe.cpp:123 ../gtk/src/widgetframe.cpp:263
 msgid "Bottom"
 msgstr "Bas"
 
-#: ../gtk/src/widgetframe.cpp:127 ../gtk/src/widgetframe.cpp:252
+#: ../gtk/src/widgetframe.cpp:128 ../gtk/src/widgetframe.cpp:253
 msgid "Top"
 msgstr "Haut"
 
-#: ../gtk/src/widgetframe.cpp:132
+#: ../gtk/src/widgetframe.cpp:133
 msgid "Bottom - Left"
 msgstr "Bas - Gauche"
 
-#: ../gtk/src/widgetframe.cpp:137
+#: ../gtk/src/widgetframe.cpp:138
 msgid "Bottom - Right"
 msgstr "Bas - Droite"
 
-#: ../gtk/src/widgetframe.cpp:142
+#: ../gtk/src/widgetframe.cpp:143
 msgid "Top - Left"
 msgstr "Haut - Gauche"
 
-#: ../gtk/src/widgetframe.cpp:147
+#: ../gtk/src/widgetframe.cpp:148
 msgid "Top - Right"
 msgstr "Haut - Droite"
 
-#: ../gtk/src/widgetframe.cpp:157
+#: ../gtk/src/widgetframe.cpp:158
 msgid "Normal"
 msgstr "Normal"
 
-#: ../gtk/src/widgetframe.cpp:162
+#: ../gtk/src/widgetframe.cpp:163
 msgid "Italic"
 msgstr "Italic"
 
-#: ../gtk/src/widgetframe.cpp:172
+#: ../gtk/src/widgetframe.cpp:173
 msgid "Thin (100)"
 msgstr "Extrêmement fin (100)"
 
-#: ../gtk/src/widgetframe.cpp:177
+#: ../gtk/src/widgetframe.cpp:178
 msgid "Ultra light (200)"
 msgstr "Ultra fin (200)"
 
-#: ../gtk/src/widgetframe.cpp:182
+#: ../gtk/src/widgetframe.cpp:183
 msgid "Light (300)"
 msgstr "Très fin (300)"
 
-#: ../gtk/src/widgetframe.cpp:187
+#: ../gtk/src/widgetframe.cpp:188
 msgid "Semi light (350)"
 msgstr "Fin (350)"
 
-#: ../gtk/src/widgetframe.cpp:192
+#: ../gtk/src/widgetframe.cpp:193
 msgid "Book (380)"
 msgstr "Peu fin (380)"
 
-#: ../gtk/src/widgetframe.cpp:197
+#: ../gtk/src/widgetframe.cpp:198
 msgid "Normal (400)"
 msgstr "Normal (400)"
 
-#: ../gtk/src/widgetframe.cpp:202
+#: ../gtk/src/widgetframe.cpp:203
 msgid "Medium (500)"
 msgstr "Peu gras (500)"
 
-#: ../gtk/src/widgetframe.cpp:207
+#: ../gtk/src/widgetframe.cpp:208
 msgid "Semi bold (600)"
 msgstr "Gras (600)"
 
-#: ../gtk/src/widgetframe.cpp:212
+#: ../gtk/src/widgetframe.cpp:213
 msgid "Ultra bold (800)"
 msgstr "Très gras (800)"
 
-#: ../gtk/src/widgetframe.cpp:217
+#: ../gtk/src/widgetframe.cpp:218
 msgid "Heavy (900)"
 msgstr "Epais (900)"
 
-#: ../gtk/src/widgetframe.cpp:222
+#: ../gtk/src/widgetframe.cpp:223
 msgid "Ultra heavy (1000)"
 msgstr "Très épais (1000)"
 
-#: ../gtk/src/widgetframe.cpp:237 ../gtk/src/widgetframe.cpp:257
+#: ../gtk/src/widgetframe.cpp:238 ../gtk/src/widgetframe.cpp:258
 #: ../gtk/src/shape/bar.cpp:75 ../gtk/src/widgets/map.cpp:182
 #: ../gtk/src/widgets/track.cpp:182
 msgid "Center"

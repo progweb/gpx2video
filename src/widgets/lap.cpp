@@ -163,8 +163,7 @@ void LapTextShape::clear(void) {
 LapWidget::LapWidget(GPXApplication &app, TelemetrySource *source)
 	: VideoWidget(app, VideoWidget::WidgetLap, source)
 	, ShapeBase(VideoWidget::theme())
-	, shape_(NULL)
-	, nbr_target_lap_(1) {
+	, shape_(NULL) {
 
 #define ADD_SHAPE(shape) \
 	shapes_supported_.push_back((VideoWidget::ListItem) { \
@@ -174,5 +173,7 @@ LapWidget::LapWidget(GPXApplication &app, TelemetrySource *source)
 	ADD_SHAPE(VideoWidget::ShapeText);
 
 	setShape(VideoWidget::ShapeText);
+
+	setTargetLap(1);
 }
 

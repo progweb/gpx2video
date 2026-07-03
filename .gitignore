@@ -34,3 +34,6 @@
 # Build
 build*
 
+# Indexation
+tags
+

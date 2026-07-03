@@ -24,6 +24,10 @@ public:
 		return shape;
 	}
 
+	const int& targetLap(void) const {
+		return nbr_target_lap_;
+	}
+
 	void setTargetLap(int target) {
 		nbr_target_lap_ = target;
 	}
@@ -142,6 +146,11 @@ public:
 			delete shape_;
 
 		shape_ = LapTextShape::create(this, nbr_target_lap_);
+	}
+
+
+	const int& targetLap(void) const {
+		return nbr_target_lap_;
 	}
 
 	void setTargetLap(int target) {

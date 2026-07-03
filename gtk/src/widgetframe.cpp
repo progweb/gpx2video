@@ -20,6 +20,7 @@
 #include "shape/chart.h"
 #include "shape/text.h"
 #include "widgets/image.h"
+#include "widgets/lap.h"
 #include "widgets/map.h"
 #include "widgets/text.h"
 #include "widgets/track.h"
@@ -401,6 +402,10 @@ void GPX2VideoWidgetFrame::build_widget_settings(void) {
 		switch (widget_selected_->widget()->type()) {
 		case VideoWidget::WidgetImage:
 			widget_child_box_ = GPX2VideoImageWidgetSettingsBox::create(widget_selected_, media_model_);
+			break;
+
+		case VideoWidget::WidgetLap:
+			widget_child_box_ = GPX2VideoLapWidgetSettingsBox::create(widget_selected_);
 			break;
 
 		case VideoWidget::WidgetMap:
@@ -1870,7 +1875,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 			combobox->set_active(iter);
 	}
 
-	// Widget X x Y
+	// X x Y
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("x_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"x_spinbutton\" object in widget_frame.ui");
@@ -1887,7 +1892,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_value(widget_selected_->widget()->y());
 	spinbutton->set_sensitive(widget_selected_->widget()->position() == VideoWidget::PositionNone);
 
-	// Widget position
+	// Position
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("position_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"position_combobox\" object in widget_frame.ui");
@@ -1897,7 +1902,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(position_model_, widget_selected_->widget()->position(), iter))
 		combobox->set_active(iter);
 
-	// Widget orientation
+	// Orientation
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("orientation_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"orientation_combobox\" object in widget_frame.ui");
@@ -1907,7 +1912,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	if (find_in_listtore(orientation_model_, widget_selected_->widget()->orientation(), iter))
 		combobox->set_active(iter);
 
-	// Widget width
+	// Width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("width_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"width_spinbutton\" object in widget_frame.ui");
@@ -1918,7 +1923,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, width - margin);
 	spinbutton->set_value(widget_selected_->widget()->theme().width());
 
-	// Widget height
+	// Height
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("height_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"height_spinbutton\" object in widget_frame.ui");
@@ -1929,7 +1934,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, height - margin);
 	spinbutton->set_value(widget_selected_->widget()->theme().height());
 
-	// Widget margin left
+	// Margin left
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("margin_left_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"margin_left_spinbutton\" object in widget_frame.ui");
@@ -1937,7 +1942,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, width - widget_selected_->widget()->theme().width());
 	spinbutton->set_value(widget_selected_->widget()->margin(VideoWidget::MarginLeft));
 
-	// Widget margin right
+	// Margin right
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("margin_right_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"margin_right_spinbutton\" object in widget_frame.ui");
@@ -1945,7 +1950,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, width - widget_selected_->widget()->theme().width());
 	spinbutton->set_value(widget_selected_->widget()->margin(VideoWidget::MarginRight));
 
-	// Widget margin top
+	// Margin top
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("margin_top_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"margin_top_spinbutton\" object in widget_frame.ui");
@@ -1953,7 +1958,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, height - widget_selected_->widget()->theme().height());
 	spinbutton->set_value(widget_selected_->widget()->margin(VideoWidget::MarginTop));
 
-	// Widget margin bottom
+	// Margin bottom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("margin_bottom_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"margin_bottom_spinbutton\" object in widget_frame.ui");
@@ -1961,42 +1966,42 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	spinbutton->set_range(0, height - widget_selected_->widget()->theme().height());
 	spinbutton->set_value(widget_selected_->widget()->margin(VideoWidget::MarginBottom));
 
-	// Widget padding left
+	// Padding left
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_left_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"padding_left_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().padding(VideoWidget::Theme::PaddingLeft));
 
-	// Widget padding right
+	// Padding right
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_right_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"padding_right_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().padding(VideoWidget::Theme::PaddingRight));
 
-	// Widget padding top
+	// Padding top
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_top_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"padding_top_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().padding(VideoWidget::Theme::PaddingTop));
 
-	// Widget padding bottom
+	// Padding bottom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("padding_bottom_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"padding_bottom_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().padding(VideoWidget::Theme::PaddingBottom));
 
-	// Widget border width
+	// Border width
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("border_width_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"border_width_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().border());
 
-	// Widget border color button
+	// Border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("border_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"border_color_button\" object in widget_frame.ui");
@@ -2007,14 +2012,14 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget round corner
+	// Round corner
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("round_corner_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"round_corner_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().roundCorner());
 
-	// Widget background color button
+	// Background color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("background_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"background_color_button\" object in widget_frame.ui");
@@ -2025,14 +2030,14 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget label enable switch
+	// Label enable switch
 	sw = ref_builder_->get_widget<Gtk::Switch>("label_enable_switch");
 	if (!sw)
 		throw std::runtime_error("No \"label_enable_switch\" object in widget_frame.ui");
 
 	sw->set_active(widget_selected_->widget()->theme().hasFlag(VideoWidget::Theme::FlagLabel));
 
-	// Widget label text entry
+	// Label text entry
 	entry = ref_builder_->get_widget<Gtk::Entry>("label_text_entry");
 	if (!entry)
 		throw std::runtime_error("No \"label_text_entry\" object in widget_frame.ui");
