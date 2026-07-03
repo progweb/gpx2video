@@ -1,6 +1,8 @@
 #ifndef __GPX2VIDEO__GTK__TELEMETRYSTACKPAGE_H__
 #define __GPX2VIDEO__GTK__TELEMETRYSTACKPAGE_H__
 
+#include <glibmm/i18n.h>
+
 #include <gtkmm/builder.h>
 #include <gtkmm/box.h>
 
@@ -22,7 +24,7 @@ public:
 	}
 
 	std::string title(void) {
-		return "Telemetry";
+		return _("Telemetry");
 	}
 
 	std::string icon_name(void) {

@@ -115,6 +115,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	media_stackpage_ = GPX2VideoMediaStackPage::create();
 	video_stackpage_ = GPX2VideoVideoStackPage::create();
 	widget_stackpage_ = GPX2VideoWidgetStackPage::create(*this);
+	settings_stackpage_ = GPX2VideoSettingsStackPage::create();
 	telemetry_stackpage_ = GPX2VideoTelemetryStackPage::create();
 
 	// Append video, widget & telemetry stackpage objects to stack
@@ -129,6 +130,8 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	stackpage->set_icon_name(telemetry_stackpage_->icon_name());
 	stackpage = info_stack_->add(*(widget_stackpage_), widget_stackpage_->name(), widget_stackpage_->title());
 	stackpage->set_icon_name(widget_stackpage_->icon_name());
+	stackpage = info_stack_->add(*(settings_stackpage_), settings_stackpage_->name(), settings_stackpage_->title());
+	stackpage->set_icon_name(settings_stackpage_->icon_name());
 
 	// Video frame object
 	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/video_frame.ui");
@@ -148,6 +151,12 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	if (!widget_frame_)
 		throw std::runtime_error("No \"widget_frame\" object in widget_frame.ui");
 
+	// Settings frame object
+	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/settings_frame.ui");
+	settings_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoSettingsFrame>(builder, "settings_frame");
+	if (!settings_frame_)
+		throw std::runtime_error("No \"settings_frame\" object in settings_frame.ui");
+
 	// Telemetry frame object
 	builder = Gtk::Builder::create_from_resource("/com/progweb/gpx2video/ui/telemetry_frame.ui");
 	telemetry_frame_ = Gtk::Builder::get_widget_derived<GPX2VideoTelemetryFrame>(builder, "telemetry_frame");
@@ -161,8 +170,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 
 	box->append(*media_frame_);
 	box->append(*video_frame_);
-	box->append(*telemetry_frame_);
 	box->append(*widget_frame_);
+	box->append(*settings_frame_);
+	box->append(*telemetry_frame_);
 
 	// By default
 	video_frame_->set_visible(true);
@@ -185,6 +195,7 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	video_frame_->signal_video_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_video_changed));
 	video_frame_->signal_timesync_requested().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_timesync_requested));
 	widget_frame_->signal_widget_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_changed));
+	settings_frame_->signal_widget_load_default_settings_requested().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_load_default_settings_requested));
 	telemetry_frame_->signal_telemetry_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_telemetry_changed));
 
 	// Connect signals
@@ -282,6 +293,9 @@ GPX2VideoApplicationWindow::GPX2VideoApplicationWindow(BaseObjectType *cobject,
 	widget_stackpage_->signal_widget_remove_clicked().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_remove_clicked));
 	widget_stackpage_->signal_widget_visible_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_widget_visible_changed));
 
+	// Connect settings section
+	settings_stackpage_->signal_section_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_settings_section_changed));
+
 	// Listen stack changes
 	info_stack_->property_visible_child().signal_changed().connect(sigc::mem_fun(*this, &GPX2VideoApplicationWindow::on_stack_changed));
 }
@@ -309,6 +323,7 @@ GPX2VideoApplicationWindow * GPX2VideoApplicationWindow::create(void) {
 	static_cast<void>(GPX2VideoMediaFrame());
 	static_cast<void>(GPX2VideoVideoFrame());
 	static_cast<void>(GPX2VideoWidgetFrame());
+	static_cast<void>(GPX2VideoSettingsFrame());
 	static_cast<void>(GPX2VideoTelemetryFrame());
 
 	// Load the Builder file and instantiate its widgets.
@@ -1064,6 +1079,29 @@ void GPX2VideoApplicationWindow::on_widget_appened(GPX2VideoWidget *widget) {
 	widget_stackpage_->append(widget);
 }
 
+/**
+ * Notification widgets position computed
+ *
+ * Update the UI
+ *
+ * Called from GTK main thread
+ */
+void GPX2VideoApplicationWindow::on_widget_position_changed(GPX2VideoWidget *widget) {
+	log_call();
+
+	(void) widget;
+
+	widget_frame_->update();
+}
+
+
+void GPX2VideoApplicationWindow::on_widget_load_default_settings_requested(void) {
+	log_call();
+
+	// Apply default settings for each widget
+	renderer_->apply_default_settings();
+}
+
 
 /**
  * Notification telemetry settings change
@@ -1080,22 +1118,6 @@ void GPX2VideoApplicationWindow::on_telemetry_changed(void) {
 
 	renderer_->update_telemetry_settings();
 	renderer_->refresh();
-}
-
-
-/**
- * Notification widgets position computed
- *
- * Update the UI
- *
- * Called from GTK main thread
- */
-void GPX2VideoApplicationWindow::on_widget_position_changed(GPX2VideoWidget *widget) {
-	log_call();
-
-	(void) widget;
-
-	widget_frame_->update();
 }
 
 
@@ -1278,8 +1300,9 @@ void GPX2VideoApplicationWindow::on_stack_changed(void) {
 	// Update visible frame
 	video_frame_->set_visible((name == "video_page"));
 	media_frame_->set_visible((name == "media_page"));
-	telemetry_frame_->set_visible((name == "telemetry_page"));
 	widget_frame_->set_visible((name == "widget_page"));
+	settings_frame_->set_visible((name == "settings_page"));
+	telemetry_frame_->set_visible((name == "telemetry_page"));
 }
 
 
@@ -1367,6 +1390,14 @@ void GPX2VideoApplicationWindow::on_widget_visible_changed(GPX2VideoWidget *widg
 
 	// Refresh
 	renderer_->refresh(widget);
+}
+
+
+void GPX2VideoApplicationWindow::on_settings_section_changed(void) {
+	log_call();
+
+	// Show settings section
+	settings_frame_->set_section(settings_stackpage_->get_section());
 }
 
 

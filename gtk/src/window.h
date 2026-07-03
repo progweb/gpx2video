@@ -30,10 +30,12 @@
 #include "mediaframe.h"
 #include "videoframe.h"
 #include "widgetframe.h"
+#include "settingsframe.h"
 #include "telemetryframe.h"
 #include "mediastackpage.h"
 #include "videostackpage.h"
 #include "widgetstackpage.h"
+#include "settingsstackpage.h"
 #include "telemetrystackpage.h"
 
 
@@ -75,6 +77,7 @@ protected:
 	GPX2VideoMediaStackPage *media_stackpage_ = NULL;
 	GPX2VideoVideoStackPage *video_stackpage_ = NULL;
 	GPX2VideoWidgetStackPage *widget_stackpage_ = NULL;
+	GPX2VideoSettingsStackPage *settings_stackpage_ = NULL;
 	GPX2VideoTelemetryStackPage *telemetry_stackpage_ = NULL;
 
 	GPX2VideoArea *video_area_ = NULL;
@@ -82,6 +85,7 @@ protected:
 	GPX2VideoMediaFrame *media_frame_ = NULL;
 	GPX2VideoVideoFrame *video_frame_ = NULL;
 	GPX2VideoWidgetFrame *widget_frame_ = NULL;
+	GPX2VideoSettingsFrame *settings_frame_ = NULL;
 	GPX2VideoTelemetryFrame *telemetry_frame_ = NULL;
 
 	GPX2VideoAudioDevice *audio_device_ = NULL;
@@ -110,7 +114,9 @@ protected:
 	void on_widget_changed(void);
 	void on_widget_appened(GPX2VideoWidget *widget);
 	void on_widget_position_changed(GPX2VideoWidget *widget);
+	void on_widget_load_default_settings_requested(void);
 	void on_telemetry_changed(void);
+	void on_settings_section_changed(void);
 
 	void on_play_clicked(void);
 

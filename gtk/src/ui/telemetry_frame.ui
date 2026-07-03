@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<requires lib="gtk" version="4.0"/>
+
 	<object class="GtkAdjustment" id="timeoffset_adjustment">
 		<property name="lower">-100000</property>
 		<property name="upper">100000</property>
@@ -71,6 +72,7 @@
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
+
 	<object class="gtkmm__CustomObject_GPX2VideoTelemetryFrame" id="telemetry_frame">
 		<property name="halign">fill</property>
 		<property name="valign">fill</property>

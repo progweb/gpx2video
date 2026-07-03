@@ -7,6 +7,7 @@
 ../gtk/src/ui/media_frame.ui
 ../gtk/src/ui/media_stackpage.ui
 ../gtk/src/ui/prefs.ui
+../gtk/src/ui/settings_stackpage.ui
 ../gtk/src/ui/telemetry_frame.ui
 ../gtk/src/ui/telemetry_stackpage.ui
 ../gtk/src/ui/video_frame.ui
@@ -24,7 +25,14 @@
 ../gtk/src/ui/widgets/text_box.ui
 ../gtk/src/ui/widgets/track_box.ui
 
-# GTK
+# GTK headers
+../gtk/src/mediastackpage.h
+../gtk/src/settingsstackpage.h
+../gtk/src/telemetrystackpage.h
+../gtk/src/videostackpage.h
+../gtk/src/widgetstackpage.h
+
+# GTK sources
 ../gtk/src/media.cpp
 ../gtk/src/telemetryframe.cpp
 ../gtk/src/videoframe.cpp

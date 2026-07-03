@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
 	<requires lib="gtk" version="4.0"/>
+
 	<object class="GtkAdjustment" id="x_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">1000</property>
@@ -204,6 +205,7 @@
 		<property name="step-increment">0.1</property>
 		<property name="page-increment">1</property>
 	</object>
+
 	<object class="gtkmm__CustomObject_GPX2VideoWidgetFrame" id="widget_frame">
 		<property name="halign">fill</property>
 		<property name="valign">fill</property>

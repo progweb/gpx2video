@@ -31,9 +31,10 @@
 *.out
 *.app
 
-# Build
-build*
-
 # Indexation
 tags
+cscope.out
+
+# Build
+build*
 

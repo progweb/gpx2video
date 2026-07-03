@@ -1,6 +1,8 @@
 #ifndef __GPX2VIDEO__GTK__WIDGETSTACKPAGE_H__
 #define __GPX2VIDEO__GTK__WIDGETSTACKPAGE_H__
 
+#include <glibmm/i18n.h>
+
 #include <gtkmm/builder.h>
 #include <gtkmm/label.h>
 #include <gtkmm/button.h>
@@ -28,7 +30,7 @@ public:
 	}
 
 	std::string title(void) {
-		return "Widgets";
+		return _("Widgets");
 	}
 
 	std::string icon_name(void) {
@@ -64,8 +66,6 @@ protected:
 
 	const std::string resource_file_;
 
-//	static const Glib::SignalProxyInfo signal_info_;
-
 	type_signal_widget_selected m_signal_widget_selected;
 	type_signal_widget_remove_clicked m_signal_widget_remove_clicked;
 	type_signal_widget_visible_changed m_signal_widget_visible_changed;
@@ -74,9 +74,6 @@ private:
 	Gtk::Window &parent_window_;
 
 	GPX2VideoRenderer *renderer_;
-
-//	sigc::signal<void(int)> widget_index_;
-//	sigc::signal<void()> signal_custom_;
 
 	void on_selected(Gtk::ListBoxRow *row);
 

@@ -1,6 +1,7 @@
 #ifndef __GPX2VIDEO__GTK__MEDIASTACKPAGE_H__
 #define __GPX2VIDEO__GTK__MEDIASTACKPAGE_H__
 
+#include <glibmm/i18n.h>
 #include <glibmm/dispatcher.h>
 
 #include <gtkmm/builder.h>
@@ -24,7 +25,7 @@ public:
 	}
 
 	std::string title(void) {
-		return "Media";
+		return _("Media");
 	}
 
 	std::string icon_name(void) {

@@ -4,6 +4,7 @@
 
 #include "log_i.h"
 #include "datetime.h"
+#include "settings.h"
 #include "videowidget.h"
 #include "renderer.h"
 
@@ -267,6 +268,9 @@ void GPX2VideoRenderer::append(VideoWidget::Widget type) {
 	// Create gtk widget widget item
 	item = GPX2VideoWidget::create(widget);
 
+	// Load default settings
+	set_default_settings(item);
+
 	// Center
 	widget->setPosition(
 		(layout_width_ - widget->theme().width()) / 2, 
@@ -313,6 +317,67 @@ void GPX2VideoRenderer::remove(GPX2VideoWidget *widget) {
 	// Refresh
 	compute();
 	refresh();
+}
+
+	
+void GPX2VideoRenderer::apply_default_settings(void) {
+	log_call();
+
+	// Apply default settings for each widget
+	for (GPX2VideoWidget *item : widgets_)
+		set_default_settings(item);
+
+	// Refresh
+	refresh();
+}
+
+
+void GPX2VideoRenderer::set_default_settings(GPX2VideoWidget *item) {
+	log_call();
+
+	VideoWidget::Shape shape = item->shape()->type();
+	VideoWidget::Theme &theme = item->widget()->theme();
+
+	GPX2VideoSettings *settings = GPX2VideoSettings::handle();
+
+	theme.setLabelFontFamily(settings->widget().labelFontFamily());
+	if (shape == VideoWidget::ShapeText)
+		theme.setLabelFontSize(settings->widget().labelFontSize());
+	theme.setLabelShadowOpacity(settings->widget().labelShadowOpacity());
+	theme.setLabelShadowDistance(settings->widget().labelShadowDistance());
+	theme.setLabelFontStyle(settings->widget().labelFontStyle());
+	theme.setLabelFontWeight(settings->widget().labelFontWeight());
+	theme.setLabelHorizontalAlign(settings->widget().labelHorizontalAlign());
+	theme.setLabelVerticalAlign(settings->widget().labelVerticalAlign());
+	theme.setLabelColor(VideoWidget::Theme::color2hex(settings->widget().labelColor()));
+	theme.setLabelBorderWidth(settings->widget().labelBorderWidth());
+	theme.setLabelBorderColor(VideoWidget::Theme::color2hex(settings->widget().labelBorderColor()));
+
+	theme.setValueFontFamily(settings->widget().valueFontFamily());
+	if (shape == VideoWidget::ShapeText)
+		theme.setValueFontSize(settings->widget().valueFontSize());
+	theme.setValueShadowOpacity(settings->widget().valueShadowOpacity());
+	theme.setValueShadowDistance(settings->widget().valueShadowDistance());
+	theme.setValueFontStyle(settings->widget().valueFontStyle());
+	theme.setValueFontWeight(settings->widget().valueFontWeight());
+	theme.setValueHorizontalAlign(settings->widget().valueHorizontalAlign());
+	theme.setValueVerticalAlign(settings->widget().valueVerticalAlign());
+	theme.setValueColor(VideoWidget::Theme::color2hex(settings->widget().valueColor()));
+	theme.setValueBorderWidth(settings->widget().valueBorderWidth());
+	theme.setValueBorderColor(VideoWidget::Theme::color2hex(settings->widget().valueBorderColor()));
+
+	theme.setUnitFontFamily(settings->widget().unitFontFamily());
+	if (shape == VideoWidget::ShapeText)
+		theme.setUnitFontSize(settings->widget().unitFontSize());
+	theme.setUnitShadowOpacity(settings->widget().unitShadowOpacity());
+	theme.setUnitShadowDistance(settings->widget().unitShadowDistance());
+	theme.setUnitFontStyle(settings->widget().unitFontStyle());
+	theme.setUnitFontWeight(settings->widget().unitFontWeight());
+	theme.setUnitHorizontalAlign(settings->widget().unitHorizontalAlign());
+	theme.setUnitVerticalAlign(settings->widget().unitVerticalAlign());
+	theme.setUnitColor(VideoWidget::Theme::color2hex(settings->widget().unitColor()));
+	theme.setUnitBorderWidth(settings->widget().unitBorderWidth());
+	theme.setUnitBorderColor(VideoWidget::Theme::color2hex(settings->widget().unitBorderColor()));
 }
 
 

@@ -293,11 +293,22 @@ Here all widget common element settings:
 	<value-border-width>2</value-border-width>
 	<value-border-color>#000000ff</value-border-color>
 
+	<with-unit>true</with-unit>
+	<unit-font-size>20</unit-font-size>
+	<unit-font-style>normal</unit-font-style>
+	<unit-font-weight>400</unit-font-weight>
+	<unit-horizontal-align>left</unit-horizontal-align>
+	<unit-vertical-align>center</unit-vertical-align>
+	<unit-color>#00ff00ff</unit-color>
+	<unit-shadow-opacity>3</unit-shadow-opacity>
+	<unit-shadow-distance>3</unit-shadow-distance>
+	<unit-border-width>2</unit-border-width>
+	<unit-border-color>#000000ff</unit-border-color>
+
 	<icon-color>#00ff00ff</icon-color>
     <line-space>5</line-space>
 
 	<with-icon>true</with-icon>
-	<with-unit>true</with-unit>
 </widget>		
 ```
 
@@ -319,7 +330,7 @@ Node elements are:
   - **border-color**: to set the border color in #RGBA.
   - **background-color**: to set the background color in #RGBA.
 
-Label or value node elements are:
+Label, value or unitnode elements are:
   - **xxxx-font-size**: to set the text size.
   - **xxxx-font-style**: to set the text style (normal or italic).
   - **xxxx-font-weight**: to set the text weight value (100, 200, 300, 350, 380, 400, 500, 600, 700, 800, 900 or 1000)).

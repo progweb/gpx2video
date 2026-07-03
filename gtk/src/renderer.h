@@ -38,6 +38,9 @@ public:
 	void append(VideoWidget::Widget type);
 	void remove(GPX2VideoWidget *widget);
 
+	void apply_default_settings(void);
+	void set_default_settings(GPX2VideoWidget *item);
+
 	GPX2VideoWidget * get_at(const double &x, const double &y);
 
 	void seek(double pos);
