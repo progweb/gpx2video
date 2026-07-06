@@ -490,17 +490,9 @@ void TelemetryData::writeData(size_t index) const {
 }
 
 
-double TelemetrySource::Point::distanceTo(const Point &to) {
-	double d = 0.0;
-
-	GeographicLib::Geodesic gsic(6378137.0, 1.0/298.2572);
-
-	// Maths
-	gsic.Inverse(lat_, lon_, to.lat_, to.lon_, d);
-
-	return d;
-}
-
+/**
+ * TelemetrySource::Point
+ */
 
 double TelemetrySource::Point::courseTo(const Point &to) {
 	double azi1, azi2;
@@ -511,9 +503,21 @@ double TelemetrySource::Point::courseTo(const Point &to) {
 	gsic.Inverse(lat_, lon_, to.lat_, to.lon_, azi1, azi2);
 
 	if (azi1 < 0)
-		azi1 += 380.0;
+		azi1 += 360.0;
 
 	return azi1; //1 + 180.0;
+}
+
+
+double TelemetrySource::Point::distanceTo(const Point &to) {
+	double d = 0.0;
+
+	GeographicLib::Geodesic gsic(6378137.0, 1.0/298.2572);
+
+	// Maths
+	gsic.Inverse(lat_, lon_, to.lat_, to.lon_, d);
+
+	return d;
 }
 
 
@@ -1199,8 +1203,10 @@ void TelemetrySource::smooth_step_one(void) {
 	double maxspeed = 0;
 
 	double speed_sum = 0;
-	double course_sum = 0;
-	double heading_sum = 0;
+	double course_x_sum = 0;
+	double course_y_sum = 0;
+	double heading_x_sum = 0;
+	double heading_y_sum = 0;
 	double elevation_sum = 0;
 	double acceleration_sum = 0;
 
@@ -1264,7 +1270,8 @@ void TelemetrySource::smooth_step_one(void) {
 		course_points.emplace_back(nextPoint);
 
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			course_sum += nextPoint.course();
+			course_x_sum += std::cos(nextPoint.course() * M_PI / 180.0);
+			course_y_sum += std::sin(nextPoint.course() * M_PI / 180.0);
 			course_count += 1;
 		}
 	}
@@ -1280,7 +1287,8 @@ void TelemetrySource::smooth_step_one(void) {
 		heading_points.emplace_back(nextPoint);
 
 		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			heading_sum += nextPoint.heading();
+			heading_x_sum += std::cos(nextPoint.heading() * M_PI / 180.0);
+			heading_y_sum += std::sin(nextPoint.heading() * M_PI / 180.0);
 			heading_count += 1;
 		}
 	}
@@ -1408,7 +1416,8 @@ void TelemetrySource::smooth_step_one(void) {
 
 					if (nextPoint.type() != TelemetryData::TypeUnknown) {
 						if (nextPoint.hasValue(TelemetryData::DataFix)) {
-							course_sum += nextPoint.course();
+							course_x_sum += std::cos(nextPoint.course() * M_PI / 180.0);
+							course_y_sum += std::sin(nextPoint.course() * M_PI / 180.0);
 							course_count += 1;
 						}
 					}
@@ -1419,7 +1428,8 @@ void TelemetrySource::smooth_step_one(void) {
 						course_points.pop_front();
 
 						if (previousPoint.hasValue(TelemetryData::DataFix)) {
-							course_sum -= previousPoint.course();
+							course_x_sum -= std::cos(previousPoint.course() * M_PI / 180.0);
+							course_y_sum -= std::sin(previousPoint.course() * M_PI / 180.0);
 							course_count -= 1;
 						}
 					}
@@ -1427,7 +1437,8 @@ void TelemetrySource::smooth_step_one(void) {
 					// Compute 'course' smooth values
 					if (pool_.current().hasValue(TelemetryData::DataFix)) {
 						if (!pool_.current().isPause()) {
-							pool_.current().setCourse(course_sum / course_count);
+							double course = std::atan2(course_y_sum / course_count, course_x_sum / course_count) * 180.0 / M_PI;
+							pool_.current().setCourse(course);
 						}
 					}
 				}
@@ -1461,7 +1472,8 @@ void TelemetrySource::smooth_step_one(void) {
 
 					if (nextPoint.type() != TelemetryData::TypeUnknown) {
 						if (nextPoint.hasValue(TelemetryData::DataHeading)) {
-							heading_sum += nextPoint.heading();
+							heading_x_sum += std::cos(nextPoint.heading() * M_PI / 180.0);
+							heading_y_sum += std::sin(nextPoint.heading() * M_PI / 180.0);
 							heading_count += 1;
 						}
 					}
@@ -1472,7 +1484,8 @@ void TelemetrySource::smooth_step_one(void) {
 						heading_points.pop_front();
 
 						if (previousPoint.hasValue(TelemetryData::DataHeading)) {
-							heading_sum -= previousPoint.heading();
+							heading_x_sum -= std::cos(previousPoint.heading() * M_PI / 180.0);
+							heading_y_sum -= std::sin(previousPoint.heading() * M_PI / 180.0);
 							heading_count -= 1;
 						}
 					}
@@ -1480,7 +1493,8 @@ void TelemetrySource::smooth_step_one(void) {
 					// Compute 'heading' smooth values
 					if (pool_.current().hasValue(TelemetryData::DataHeading)) {
 						if (!pool_.current().isPause()) {
-							pool_.current().setHeading(heading_sum / heading_count);
+							double heading = std::atan2(heading_y_sum / heading_count, heading_x_sum / heading_count) * 180.0 / M_PI;
+							pool_.current().setHeading(heading);
 						}
 					}
 				}
@@ -2602,11 +2616,47 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataGrade) && nextPoint.hasValue(TelemetryData::DataGrade))
 			point.setGrade(prevPoint.grade_ + k * (nextPoint.grade_ - prevPoint.grade_));
 
-		if (prevPoint.hasValue(TelemetryData::DataCourse) && nextPoint.hasValue(TelemetryData::DataCourse))
-			point.setCourse(prevPoint.course_ + k * (nextPoint.course_ - prevPoint.course_));
+		if (prevPoint.hasValue(TelemetryData::DataCourse) && nextPoint.hasValue(TelemetryData::DataCourse)) {
+			double course;
 
-		if (prevPoint.hasValue(TelemetryData::DataHeading) && nextPoint.hasValue(TelemetryData::DataHeading))
-			point.setHeading(prevPoint.heading_ + k * (nextPoint.heading_ - prevPoint.heading_));
+			double prev_course = prevPoint.course_;
+			double next_course = nextPoint.course_;
+
+			if (std::abs(next_course - prev_course) > 180.0) {
+				if (next_course > prev_course)
+					prev_course += 360.0;
+				else
+					next_course += 360.0;
+			}
+			
+			course = prev_course + k * (next_course - prev_course);
+
+			if (course >= 360.0)
+				course -= 360.0;
+
+			point.setCourse(course);
+		}
+
+		if (prevPoint.hasValue(TelemetryData::DataHeading) && nextPoint.hasValue(TelemetryData::DataHeading)) {
+			double heading;
+
+			double prev_heading = prevPoint.heading_;
+			double next_heading = nextPoint.heading_;
+
+			if (std::abs(next_heading - prev_heading) > 180.0) {
+				if (next_heading > prev_heading)
+					prev_heading += 360.0;
+				else
+					next_heading += 360.0;
+			}
+			
+			heading = prev_heading + k * (next_heading - prev_heading);
+
+			if (heading >= 360.0)
+				heading -= 360.0;
+
+			point.setHeading(heading);
+		}
 
 		if (prevPoint.hasValue(TelemetryData::DataHomeDistance) && nextPoint.hasValue(TelemetryData::DataHomeDistance))
 			point.setHomeDistance(prevPoint.homedistance_ + k * (nextPoint.homedistance_ - prevPoint.homedistance_));
@@ -2677,11 +2727,47 @@ void TelemetrySource::predictData(TelemetryData &data, TelemetrySettings::Method
 		if (prevPoint.hasValue(TelemetryData::DataGrade) && curPoint.hasValue(TelemetryData::DataGrade))
 			point.setGrade(curPoint.grade_ + k * (curPoint.grade_ - prevPoint.grade_));
 
-		if (prevPoint.hasValue(TelemetryData::DataCourse) && curPoint.hasValue(TelemetryData::DataCourse))
-			point.setCourse(curPoint.course_ + k * (curPoint.course_ - prevPoint.course_));
+		if (prevPoint.hasValue(TelemetryData::DataCourse) && curPoint.hasValue(TelemetryData::DataCourse)) {
+			double course;
 
-		if (prevPoint.hasValue(TelemetryData::DataHeading) && curPoint.hasValue(TelemetryData::DataHeading))
-			point.setHeading(curPoint.heading_ + k * (curPoint.heading_ - prevPoint.heading_));
+			double prev_course = prevPoint.course_;
+			double cur_course = curPoint.course_;
+
+			if (std::abs(cur_course - prev_course) > 180.0) {
+				if (cur_course > prev_course)
+					prev_course += 360.0;
+				else
+					cur_course += 360.0;
+			}
+			
+			course = cur_course + k * (cur_course - prev_course);
+
+			if (course >= 360.0)
+				course -= 360.0;
+
+			point.setCourse(course);
+		}
+
+		if (prevPoint.hasValue(TelemetryData::DataHeading) && curPoint.hasValue(TelemetryData::DataHeading)) {
+			double heading;
+
+			double prev_heading = prevPoint.heading_;
+			double cur_heading = curPoint.heading_;
+
+			if (std::abs(cur_heading - prev_heading) > 180.0) {
+				if (cur_heading > prev_heading)
+					prev_heading += 360.0;
+				else
+					cur_heading += 360.0;
+			}
+			
+			heading = cur_heading + k * (cur_heading - prev_heading);
+
+			if (heading >= 360.0)
+				heading -= 360.0;
+
+			point.setHeading(heading);
+		}
 
 		if (prevPoint.hasValue(TelemetryData::DataHomeDistance) && curPoint.hasValue(TelemetryData::DataHomeDistance))
 			point.setHomeDistance(curPoint.homedistance_ + k * (curPoint.homedistance_ - prevPoint.homedistance_));

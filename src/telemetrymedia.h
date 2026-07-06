@@ -359,8 +359,8 @@ public:
 				setValue(has_value_ | (point.has_value_ & mask));
 		}
 
-		double distanceTo(const Point &to);
 		double courseTo(const Point &to);
+		double distanceTo(const Point &to);
 	};
 
 	class PointPool {
