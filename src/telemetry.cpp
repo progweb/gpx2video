@@ -526,6 +526,8 @@ const std::string TelemetrySettings::getFriendlySmoothName(const TelemetrySettin
 		return "None";
 	case SmoothWindowedMovingAverage:
 		return "Use 'windowed moving average' smooth filter";
+	case SmoothSavitzkyGolay:
+		return "Use 'Savitzky & Golay' smooth filter";
 	case SmoothButterworth:
 		return "Use 'butterworth' smooth filter";
 	case SmoothCount:

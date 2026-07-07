@@ -43,6 +43,7 @@ public:
 		SmoothNone = 0,
 
 		SmoothWindowedMovingAverage,
+		SmoothSavitzkyGolay,
 		SmoothButterworth,
 
 		SmoothCount

@@ -19,6 +19,8 @@ public:
 	GPX2VideoTelemetryFrame(BaseObjectType *cobject, const Glib::RefPtr<Gtk::Builder> &ref_builder);
 	virtual ~GPX2VideoTelemetryFrame();
 
+	void load_models(void);
+
 	void set_telemetry(TelemetrySource *source);
 
 	void set_visible(bool visible);

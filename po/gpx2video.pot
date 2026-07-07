@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-03 21:58+0200\n"
+"POT-Creation-Date: 2026-07-07 19:16+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1050,30 +1050,34 @@ msgstr ""
 msgid "Telemetry"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:46 ../gtk/src/telemetryframe.cpp:71
+#: ../gtk/src/telemetryframe.cpp:63 ../gtk/src/telemetryframe.cpp:88
 #: ../gtk/src/widgetframe.cpp:86 ../gtk/src/widgetframe.cpp:108
 #: ../gtk/src/widgets/image.cpp:87 ../gtk/src/widgets/map.cpp:198
 #: ../gtk/src/widgets/track.cpp:198
 msgid "None"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:51
+#: ../gtk/src/telemetryframe.cpp:68
 msgid "Sample"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:56
+#: ../gtk/src/telemetryframe.cpp:73
 msgid "Linear"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:61
+#: ../gtk/src/telemetryframe.cpp:78
 msgid "Interpolate"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:76
+#: ../gtk/src/telemetryframe.cpp:93
 msgid "Windowed moving average"
 msgstr ""
 
-#: ../gtk/src/telemetryframe.cpp:81
+#: ../gtk/src/telemetryframe.cpp:98
+msgid "Savitzky & Golay"
+msgstr ""
+
+#: ../gtk/src/telemetryframe.cpp:103
 msgid "Butterworth"
 msgstr ""
 

@@ -33,6 +33,8 @@ public:
 
 	class Point : public TelemetryData {
 	public:
+		const static double projection_;
+
 		Point()
 			: TelemetryData() {
 		};
@@ -96,6 +98,22 @@ public:
 		void setPosition(double lat, double lon) {
 			lat_ = lat;
 			lon_ = lon;
+
+			// Compute X x Y
+			project();
+		}
+
+		double x(void) {
+			return x_;
+		}
+
+		double y(void) {
+			return y_;
+		}
+
+		void setXY(double x, double y) {
+			x_ = x;
+			y_ = y;
 		}
 
 		void setElevation(double ele) {
@@ -361,6 +379,13 @@ public:
 
 		double courseTo(const Point &to);
 		double distanceTo(const Point &to);
+
+		void project(void);
+		void unproject(void);
+
+	private:
+		double x_;
+		double y_;
 	};
 
 	class PointPool {
@@ -476,11 +501,11 @@ public:
 			return points_.back();
 		}
 
-		Point& previous(size_t index = 0) {
+		Point& previous(size_t index = 0, bool check = true) {
 			size_t n = 0;
 
 			for (int i=1; (size_t) i<=backlog(); i++) {
-				if (points_[index_ - i].type() == TelemetryData::TypeError)
+				if (check && (points_[index_ - i].type() == TelemetryData::TypeError))
 					continue;
 
 				if (index > n++)
@@ -496,11 +521,11 @@ public:
 			return points_[index_];
 		}
 
-		Point& next(size_t index=0) {
+		Point& next(size_t index=0, bool check = true) {
 			size_t n = 0;
 
 			for (size_t i=index_ + 1; i<points_.size(); i++) {
-				if (points_[i].type() == TelemetryData::TypeError)
+				if (check && (points_[i].type() == TelemetryData::TypeError))
 					continue;
 
 				if (index > n++)
@@ -528,6 +553,11 @@ public:
 		std::deque<Point> points_;
 
 		Point default_;
+	};
+
+	class SavitzkyGolay {
+	public:
+		static std::vector<double> coefficients(int window_size, int poly_order, int deriv_order = 0);
 	};
 
 	TelemetrySource(const std::string &filename);

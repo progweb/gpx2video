@@ -29,13 +29,30 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 	, source_(NULL) {
 	log_call();
 
-	Glib::RefPtr<Gtk::ListStore> smooth_method_model;
-
 	loading_ = false;
 	is_visible_ = false;
 
 	// Populate models
-	//-----------------
+	load_models();
+
+	// Binding
+	bind_content();
+
+	// Update ui
+	update_content();
+	update_boundaries();
+}
+
+
+GPX2VideoTelemetryFrame::~GPX2VideoTelemetryFrame() {
+	log_call();
+}
+
+
+void GPX2VideoTelemetryFrame::load_models(void) {
+	log_call();
+
+	Glib::RefPtr<Gtk::ListStore> smooth_method_model;
 
 	prediction_method_model_ = Gtk::ListStore::create(model_);
 
@@ -77,6 +94,11 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 		row[model_.m_enable] = true;
 
 		row = *(smooth_method_model->append());
+		row[model_.m_id] = TelemetrySettings::SmoothSavitzkyGolay;
+		row[model_.m_name] = _("Savitzky & Golay");
+		row[model_.m_enable] = true;
+
+		row = *(smooth_method_model->append());
 		row[model_.m_id] = TelemetrySettings::SmoothButterworth;
 		row[model_.m_name] = _("Butterworth");
 		row[model_.m_enable] = true;
@@ -90,18 +112,6 @@ GPX2VideoTelemetryFrame::GPX2VideoTelemetryFrame(BaseObjectType *cobject, const 
 	acceleration_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	speed_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
 	verticalspeed_smooth_method_model_ = duplicate_liststore(smooth_method_model, model_);
-
-	// Binding
-	bind_content();
-
-	// Update ui
-	update_content();
-	update_boundaries();
-}
-
-
-GPX2VideoTelemetryFrame::~GPX2VideoTelemetryFrame() {
-	log_call();
 }
 
 

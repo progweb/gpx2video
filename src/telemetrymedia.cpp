@@ -494,6 +494,9 @@ void TelemetryData::writeData(size_t index) const {
  * TelemetrySource::Point
  */
 
+const double TelemetrySource::Point::projection_ = 2 * 6378137.0 * M_PI / 2.0;
+
+
 double TelemetrySource::Point::courseTo(const Point &to) {
 	double azi1, azi2;
 
@@ -520,6 +523,117 @@ double TelemetrySource::Point::distanceTo(const Point &to) {
 	return d;
 }
 
+
+void TelemetrySource::Point::project(void) {
+	x_ = projection_ * lon_ / 180.0;
+	y_ = log(tan((lat_ + 90.0 ) * M_PI / 360.0)) / (M_PI / 180.0) * projection_ / 180.0;
+}
+
+
+void TelemetrySource::Point::unproject(void) {
+	double lat = (y_ / projection_) * 180.0;
+
+	lat_ = 180.0 / M_PI * (2 * atan(exp(lat * M_PI / 180.0)) - M_PI / 2.0);
+	lon_ = (x_ / projection_) * 180.0;
+}
+
+
+/**
+ * TelemetrySource::SavitzkyGolay class
+ */
+
+std::vector<double> TelemetrySource::SavitzkyGolay::coefficients(int window_size, int poly_order, int deriv_order) {
+	std::vector<double> null(0);
+
+    if (window_size % 2 == 0) {
+		log_error("Window size must be odd");
+		return null;
+	}
+
+    int m = (window_size - 1) / 2;
+	if (poly_order == 0) {
+        log_error("Poly order invalid");
+		return null;
+	}
+    if (poly_order > m) {
+        log_error("Poly order too large");
+		return null;
+	}
+
+    int n = window_size;
+    int p = poly_order;
+
+    // Build design matrix A (n × (p+1))
+    std::vector<double> A(n * (p + 1));
+    for (int i = 0; i < n; ++i) {
+        int t = i - m;
+        double v = 1.0;
+        for (int k = 0; k <= p; ++k) {
+            A[i*(p+1) + k] = v;
+            v *= t;
+        }
+    }
+
+    // Compute ATA = AᵀA
+    std::vector<double> ATA((p+1)*(p+1), 0.0);
+    for (int i = 0; i <= p; ++i)
+        for (int j = 0; j <= p; ++j)
+            for (int r = 0; r < n; ++r)
+                ATA[i*(p+1)+j] += A[r*(p+1)+i] * A[r*(p+1)+j];
+
+    // Invert ATA (Gauss–Jordan)
+    int dim = p + 1;
+    std::vector<double> inv(dim * dim, 0.0);
+    for (int i = 0; i < dim; ++i)
+        inv[i*dim + i] = 1.0;
+
+    for (int c = 0; c < dim; ++c) {
+        double pivot = ATA[c*dim + c];
+        double ip = 1.0 / pivot;
+
+        for (int j = 0; j < dim; ++j) {
+            ATA[c*dim + j] *= ip;
+            inv[c*dim + j] *= ip;
+        }
+
+        for (int r = 0; r < dim; ++r) {
+            if (r == c) continue;
+            double f = ATA[r*dim + c];
+            for (int j = 0; j < dim; ++j) {
+                ATA[r*dim + j] -= f * ATA[c*dim + j];
+                inv[r*dim + j] -= f * inv[c*dim + j];
+            }
+        }
+    }
+
+    // Derivative selector vector d
+    std::vector<double> d(dim, 0.0);
+    for (int k = deriv_order; k <= p; ++k) {
+        double v = 1.0;
+        for (int r = k - deriv_order + 1; r <= k; ++r)
+            v *= r;
+        d[k] = v;
+    }
+
+    // tmp = inv * d
+    std::vector<double> tmp(dim, 0.0);
+    for (int i = 0; i < dim; ++i)
+        for (int j = 0; j < dim; ++j)
+            tmp[i] += inv[i*dim + j] * d[j];
+
+    // coeffs = A * tmp
+    std::vector<double> coeffs(n, 0.0);
+    for (int i = 0; i < n; ++i)
+        for (int k = 0; k < dim; ++k)
+            coeffs[i] += A[i*(p+1) + k] * tmp[k];
+
+    return coeffs;
+}
+
+
+/**
+ * TelemetrySource class
+ */
 
 TelemetrySource::TelemetrySource(const std::string &filename) 
 	: filename_(filename)
@@ -1210,6 +1324,10 @@ void TelemetrySource::smooth_step_one(void) {
 	double elevation_sum = 0;
 	double acceleration_sum = 0;
 
+	std::vector<double> speed_coeff;
+	std::vector<double> elevation_coeff;
+	std::vector<double> acceleration_coeff;
+
 	TelemetrySettings::Smooth speed_method;
 	TelemetrySettings::Smooth course_method;
 	TelemetrySettings::Smooth heading_method;
@@ -1244,85 +1362,128 @@ void TelemetrySource::smooth_step_one(void) {
 		(settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1 : 0;
 
 	// Fill 'speed' window
-	for (size_t i=0; i<speed_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if ((speed_method == TelemetrySettings::SmoothWindowedMovingAverage) 
+			|| (speed_method == TelemetrySettings::SmoothSavitzkyGolay)) {
+		for (size_t i=0; i<speed_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		speed_points.emplace_back(nextPoint);
+			// Save point
+			speed_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			speed_sum += nextPoint.speed();
-			speed_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				speed_sum += nextPoint.speed();
+				speed_count += 1;
+			}
 		}
 	}
 
 	// Fill 'course' window
-	for (size_t i=0; i<course_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if (course_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+		for (size_t i=0; i<course_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		course_points.emplace_back(nextPoint);
+			// Save point
+			course_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			course_x_sum += std::cos(nextPoint.course() * M_PI / 180.0);
-			course_y_sum += std::sin(nextPoint.course() * M_PI / 180.0);
-			course_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				course_x_sum += std::cos(nextPoint.course() * M_PI / 180.0);
+				course_y_sum += std::sin(nextPoint.course() * M_PI / 180.0);
+				course_count += 1;
+			}
 		}
 	}
 
 	// Fill 'heading' window
-	for (size_t i=0; i<heading_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if (heading_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+		for (size_t i=0; i<heading_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		heading_points.emplace_back(nextPoint);
+			// Save point
+			heading_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			heading_x_sum += std::cos(nextPoint.heading() * M_PI / 180.0);
-			heading_y_sum += std::sin(nextPoint.heading() * M_PI / 180.0);
-			heading_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				heading_x_sum += std::cos(nextPoint.heading() * M_PI / 180.0);
+				heading_y_sum += std::sin(nextPoint.heading() * M_PI / 180.0);
+				heading_count += 1;
+			}
 		}
 	}
 
 	// Fill 'elevation' window
-	for (size_t i=0; i<elevation_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if ((elevation_method == TelemetrySettings::SmoothWindowedMovingAverage) 
+			|| (elevation_method == TelemetrySettings::SmoothSavitzkyGolay)) {
+		for (size_t i=0; i<elevation_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		elevation_points.emplace_back(nextPoint);
+			// Save point
+			elevation_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			elevation_sum += nextPoint.elevation();
-			elevation_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				elevation_sum += nextPoint.elevation();
+				elevation_count += 1;
+			}
 		}
 	}
 
 	// Fill 'acceleration' window
-	for (size_t i=0; i<acceleration_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if ((acceleration_method == TelemetrySettings::SmoothWindowedMovingAverage) 
+			|| (acceleration_method == TelemetrySettings::SmoothSavitzkyGolay)) {
+		for (size_t i=0; i<acceleration_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		acceleration_points.emplace_back(nextPoint);
+			// Save point
+			acceleration_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			acceleration_sum += nextPoint.acceleration();
-			acceleration_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				acceleration_sum += nextPoint.acceleration();
+				acceleration_count += 1;
+			}
 		}
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (speed_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t speed_order;
+
+		speed_order = (speed_window / 2) - 1;
+		speed_order = std::clamp((int) speed_order, 2, 7);
+
+	   	speed_coeff = SavitzkyGolay::coefficients(speed_window, speed_order);
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (elevation_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t elevation_order;
+
+		elevation_order = (elevation_window / 2) - 1;
+		elevation_order = std::clamp((int) elevation_order, 2, 7);
+
+	   	elevation_coeff = SavitzkyGolay::coefficients(elevation_window, elevation_order);
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (acceleration_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t acceleration_order;
+
+		acceleration_order = (acceleration_window / 2) - 1;
+		acceleration_order = std::clamp((int) acceleration_order, 2, 7);
+
+	   	acceleration_coeff = SavitzkyGolay::coefficients(acceleration_window, acceleration_order);
 	}
 
 	// Move to first point
@@ -1399,6 +1560,46 @@ void TelemetrySource::smooth_step_one(void) {
 						// Don't update values in pause
 						else
 							pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+					}
+				}
+			}
+			else if (speed_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if ((speed_window > 1) && (speed_coeff.size() > 0)) {
+					// Add new point
+					nextPoint = pool_.next(speed_window/2 - 1);
+
+					// Save point
+					if (nextPoint.type() != TelemetryData::TypeUnknown)
+						speed_points.emplace_back(nextPoint);
+
+					// Remove old point
+					if (speed_points.size() > speed_window) {
+						previousPoint = speed_points.front();
+						speed_points.pop_front();
+					}
+
+					if (speed_points.size() == speed_window) {
+						double sum = 0;
+
+						for (size_t k=0; k<speed_window; k++) {
+							sum += speed_points[k].speed() * speed_coeff[k];
+						}
+
+						// Update speed
+						if (pool_.current().hasValue(TelemetryData::DataFix)) {
+							if (!pool_.current().isPause()) {
+								pool_.current().setSpeed(sum);
+
+								if (pool_.current().hasValue(TelemetryData::DataMaxSpeed)) {
+									maxspeed = MAX(maxspeed, pool_.current().speed());
+
+									pool_.current().setMaxSpeed(maxspeed);
+								}
+							}
+							// Don't update values in pause
+							else
+								pool_.current().setMaxSpeed(pool_.previous().maxspeed());
+						}
 					}
 				}
 			}
@@ -1570,6 +1771,36 @@ void TelemetrySource::smooth_step_one(void) {
 					}
 				}
 			}
+			else if (elevation_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if ((elevation_window > 1) && (elevation_coeff.size() > 0)) {
+					// Add new point
+					nextPoint = pool_.next(elevation_window/2 - 1);
+
+					// Save point
+					if (nextPoint.type() != TelemetryData::TypeUnknown)
+						elevation_points.emplace_back(nextPoint);
+
+					// Remove old point
+					if (elevation_points.size() > elevation_window) {
+						previousPoint = elevation_points.front();
+						elevation_points.pop_front();
+					}
+
+					if (elevation_points.size() == elevation_window) {
+						double sum = 0;
+
+						for (size_t k=0; k<elevation_window; k++) {
+							sum += elevation_points[k].elevation() * elevation_coeff[k];
+						}
+
+						// Update elevation
+						if (pool_.current().hasValue(TelemetryData::DataFix)) {
+							if (!pool_.current().isPause())
+								pool_.current().setElevation(sum);
+						}
+					}
+				}
+			}
 
 			// acceleration
 			//--------------
@@ -1620,6 +1851,36 @@ void TelemetrySource::smooth_step_one(void) {
 									(pool_.current().acceleration() + (pool_.previous().acceleration() * (a + ((a * a) / (2 * z * z)))) \
 									- (pool_.previous(1).acceleration() * (a * a) / (4 * z * z))) / (1 + a + ((a * a) / (4 * z * z)))
 							);
+						}
+					}
+				}
+			}
+			else if (acceleration_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if ((acceleration_window > 1) && (acceleration_coeff.size() > 0)) {
+					// Add new point
+					nextPoint = pool_.next(acceleration_window/2 - 1);
+
+					// Save point
+					if (nextPoint.type() != TelemetryData::TypeUnknown)
+						acceleration_points.emplace_back(nextPoint);
+
+					// Remove old point
+					if (acceleration_points.size() > acceleration_window) {
+						previousPoint = acceleration_points.front();
+						acceleration_points.pop_front();
+					}
+
+					if (acceleration_points.size() == acceleration_window) {
+						double sum = 0;
+
+						for (size_t k=0; k<acceleration_window; k++) {
+							sum += acceleration_points[k].acceleration() * acceleration_coeff[k];
+						}
+
+						// Update acceleration
+						if (pool_.current().hasValue(TelemetryData::DataFix)) {
+							if (!pool_.current().isPause())
+								pool_.current().setAcceleration(sum);
 						}
 					}
 				}
@@ -1683,6 +1944,9 @@ void TelemetrySource::smooth_step_two(void) {
 	double grade_sum = 0;
 	double verticalspeed_sum = 0;
 
+	std::vector<double> grade_coeff;
+	std::vector<double> verticalspeed_coeff;
+
 	TelemetrySettings::Smooth grade_method;
 	TelemetrySettings::Smooth verticalspeed_method;
 
@@ -1696,41 +1960,64 @@ void TelemetrySource::smooth_step_two(void) {
 	grade_method = settings().telemetrySmoothMethod(TelemetryData::DataGrade);
 	verticalspeed_method = settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed);
 
-	grade_window = (settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
-		(settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1 : 0;
-	verticalspeed_window = (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) 
-		? (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1 : 0;
+	grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
+	verticalspeed_window = (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1;
 
 	// Fill 'grade' window
-	for (size_t i=0; i<grade_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if ((grade_method == TelemetrySettings::SmoothWindowedMovingAverage) 
+			|| (grade_method == TelemetrySettings::SmoothSavitzkyGolay)) {
+		for (size_t i=0; i<grade_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		grade_points.emplace_back(nextPoint);
+			// Save point
+			grade_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			grade_sum += nextPoint.grade();
-			grade_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				grade_sum += nextPoint.grade();
+				grade_count += 1;
+			}
 		}
 	}
 
 	// Fill 'verticalspeed' window
-	for (size_t i=0; i<verticalspeed_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if (verticalspeed_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+		for (size_t i=0; i<verticalspeed_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		verticalspeed_points.emplace_back(nextPoint);
+			// Save point
+			verticalspeed_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			verticalspeed_sum += nextPoint.verticalspeed();
-			verticalspeed_count += 1;
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				verticalspeed_sum += nextPoint.verticalspeed();
+				verticalspeed_count += 1;
+			}
 		}
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (grade_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t grade_order;
+
+		grade_order = (grade_window / 2) - 1;
+		grade_order = std::clamp((int) grade_order, 2, 7);
+
+	   	grade_coeff = SavitzkyGolay::coefficients(grade_window, grade_order);
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (verticalspeed_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t verticalspeed_order;
+
+		verticalspeed_order = (verticalspeed_window / 2) - 1;
+		verticalspeed_order = std::clamp((int) verticalspeed_order, 2, 7);
+
+	   	verticalspeed_coeff = SavitzkyGolay::coefficients(verticalspeed_window, verticalspeed_order);
 	}
 
 	// Move to first point
@@ -1800,6 +2087,33 @@ void TelemetrySource::smooth_step_two(void) {
 					}
 				}
 			}
+			else if (grade_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if ((grade_window > 1) && (grade_coeff.size() > 0)) {
+					// Add new point
+					nextPoint = pool_.next(grade_window/2 - 1);
+
+					// Save point
+					if (nextPoint.type() != TelemetryData::TypeUnknown)
+						grade_points.emplace_back(nextPoint);
+
+					// Remove old point
+					if (grade_points.size() > grade_window) {
+						previousPoint = grade_points.front();
+						grade_points.pop_front();
+					}
+
+					if (grade_points.size() == grade_window) {
+						double sum = 0;
+
+						for (size_t k=0; k<grade_window; k++) {
+							sum += grade_points[k].grade() * grade_coeff[k];
+						}
+
+						// Update grade
+						pool_.current().setGrade(sum);
+					}
+				}
+			}
 
 			// verticalspeed
 			//--------------
@@ -1853,6 +2167,33 @@ void TelemetrySource::smooth_step_two(void) {
 					}
 				}
 			}
+			else if (verticalspeed_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if ((verticalspeed_window > 1) && (verticalspeed_coeff.size() > 0)) {
+					// Add new point
+					nextPoint = pool_.next(verticalspeed_window/2 - 1);
+
+					// Save point
+					if (nextPoint.type() != TelemetryData::TypeUnknown)
+						verticalspeed_points.emplace_back(nextPoint);
+
+					// Remove old point
+					if (verticalspeed_points.size() > verticalspeed_window) {
+						previousPoint = verticalspeed_points.front();
+						verticalspeed_points.pop_front();
+					}
+
+					if (verticalspeed_points.size() == verticalspeed_window) {
+						double sum = 0;
+
+						for (size_t k=0; k<verticalspeed_window; k++) {
+							sum += verticalspeed_points[k].verticalspeed() * verticalspeed_coeff[k];
+						}
+
+						// Update verticalspeed
+						pool_.current().setVerticalSpeed(sum);
+					}
+				}
+			}
 		}
 
 		// Move to next
@@ -1867,10 +2208,14 @@ void TelemetrySource::smooth_step_two(void) {
 void TelemetrySource::smooth_step_three(void) {
 	int position_count = 0;
 
+	size_t position_half = 0;
+
 	size_t position_window = 0;
 
 	double lat_sum = 0;
 	double lon_sum = 0;
+
+	std::vector<double> position_coeff;
 
 	TelemetrySettings::Smooth position_method;
 
@@ -1882,32 +2227,46 @@ void TelemetrySource::smooth_step_three(void) {
 
 	position_method = settings().telemetrySmoothMethod(TelemetryData::DataPosition);
 
-	position_window = (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) ? 
-		(settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1 : 0;
+	position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
+
+	// Half window
+   	position_half = position_window / 2;
 
 	// Fill 'position' window
-	for (size_t i=0; i<position_window/2; i++) {
-		nextPoint = pool_.next(i);
+	if (position_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+		for (size_t i=0; i<position_window/2; i++) {
+			nextPoint = pool_.next(i);
 
-		if (nextPoint.type() == TelemetryData::TypeUnknown)
-			break;
+			if (nextPoint.type() == TelemetryData::TypeUnknown)
+				break;
 
-		// Save point
-		position_points.emplace_back(nextPoint);
+			// Save point
+			position_points.emplace_back(nextPoint);
 
-		if (nextPoint.hasValue(TelemetryData::DataFix)) {
-			lat_sum += nextPoint.latitude();
-			lon_sum += nextPoint.longitude();
+			if (nextPoint.hasValue(TelemetryData::DataFix)) {
+				lat_sum += nextPoint.latitude();
+				lon_sum += nextPoint.longitude();
 
-			position_count += 1;
+				position_count += 1;
+			}
 		}
+	}
+
+	// Compute Savitzky Golay coefficients
+	if (position_method == TelemetrySettings::SmoothSavitzkyGolay) {
+		size_t position_order;
+
+		position_order = (position_window / 2) - 1;
+		position_order = std::clamp((int) position_order, 2, 7);
+
+	   	position_coeff = SavitzkyGolay::coefficients(position_window, position_order);
 	}
 
 	// Move to first point
 	pool_.seek(1);
 
 	// Compute average value for each point
-	while (!pool_.empty()) {
+	for (size_t i = 0; !pool_.empty(); i++) {
 		if (pool_.current().type() != TelemetryData::TypeError) {
 			// position
 			//----------
@@ -1962,12 +2321,55 @@ void TelemetrySource::smooth_step_three(void) {
 					}
 				}
 			}
+			else if (position_method == TelemetrySettings::SmoothSavitzkyGolay) {
+				if (position_coeff.size() > 0) {
+					double x = 0;
+					double y = 0;
+
+					double old_x = 0;
+					double old_y = 0;
+
+					// Save values
+					old_x = pool_.current().x();
+					old_y = pool_.current().y();
+
+					if ((i >= position_half) && (i < pool_.count() - position_half)) {
+						x += pool_.current().x() * position_coeff[position_half];
+						y += pool_.current().y() * position_coeff[position_half];
+
+						for (size_t k = 1; k <= position_half; k++) {
+							nextPoint = pool_.next(k - 1, false);
+							previousPoint = pool_.previous(k - 1, false);
+
+							if (previousPoint.type() != TelemetryData::TypeUnknown) {
+								x += previousPoint.x() * position_coeff[-k + position_half];
+								y += previousPoint.y() * position_coeff[-k + position_half];
+							}
+
+							if (nextPoint.type() != TelemetryData::TypeUnknown) {
+								x += nextPoint.x() * position_coeff[k + position_half];
+								y += nextPoint.y() * position_coeff[k + position_half];
+							}
+						}
+					}
+					else {
+						x = pool_.current().x();
+						y = pool_.current().y();
+					}
+
+					// Update lat/lon
+					pool_.current().setXY(x, y);
+					pool_.current().unproject();
+
+					// Restore previous values for smoothing
+					pool_.current().setXY(old_x, old_y);
+				}
+			}
 		}
 
 		// Move to next
 		pool_.seek(1);
 	}
-
 
 //	int index = 0;
 //
@@ -2023,109 +2425,132 @@ void TelemetrySource::smooth_step_three(void) {
 
 
 void TelemetrySource::smooth(void) {
-	size_t position_window = (settings().telemetrySmoothPoints(TelemetryData::DataPosition) * 2) + 1;
-	size_t grade_window = (settings().telemetrySmoothPoints(TelemetryData::DataGrade) * 2) + 1;
-	size_t speed_window = (settings().telemetrySmoothPoints(TelemetryData::DataSpeed) * 2) + 1;
-	size_t course_window = (settings().telemetrySmoothPoints(TelemetryData::DataCourse) * 2) + 1;
-	size_t heading_window = (settings().telemetrySmoothPoints(TelemetryData::DataHeading) * 2) + 1;
-	size_t elevation_window = (settings().telemetrySmoothPoints(TelemetryData::DataElevation) * 2) + 1;
-	size_t acceleration_window = (settings().telemetrySmoothPoints(TelemetryData::DataAcceleration) * 2) + 1;
-	size_t verticalspeed_window = (settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed) * 2) + 1;
+	size_t points;
+
+	TelemetrySettings::Smooth method;
 
 	log_call();
 
 	if (!quiet_) {
-		// 1/
-		printf("%s: Smooth telemetry data using 'windowed moving average' filter\n", name().c_str());
+		printf("%s: Apply smooth telemetry filter\n", name().c_str());
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothWindowedMovingAverage) && (position_window > 1))
-			printf("     - position: window size '%ld' (+/- %d points)\n", 
-					position_window, settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+		// 1/ position
+		method = settings().telemetrySmoothMethod(TelemetryData::DataPosition);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataPosition);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - position: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - position: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - position: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - position: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothWindowedMovingAverage) && (grade_window > 1))
-			printf("     - grade: window size '%ld' (+/- %d points)\n", 
-					grade_window, settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+		// 2/ grade
+		method = settings().telemetrySmoothMethod(TelemetryData::DataGrade);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataGrade);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - grade: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - grade: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - grade: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - grade: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) && (speed_window > 1))
-			printf("     - speed: window size '%ld' (+/- %d points)\n", 
-					speed_window, settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+		// 3/ speed
+		method = settings().telemetrySmoothMethod(TelemetryData::DataSpeed);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataSpeed);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - speed: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - speed: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - speed: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - speed: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataCourse) == TelemetrySettings::SmoothWindowedMovingAverage) && (course_window > 1))
-			printf("     - course: window size '%ld' (+/- %d points)\n", 
-					course_window, settings().telemetrySmoothPoints(TelemetryData::DataCourse));
+		// 4/ course
+		method = settings().telemetrySmoothMethod(TelemetryData::DataCourse);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataCourse);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - course: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - course: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - course: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - course: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothWindowedMovingAverage) && (heading_window > 1))
-			printf("     - heading: window size '%ld' (+/- %d points)\n", 
-					heading_window, settings().telemetrySmoothPoints(TelemetryData::DataHeading));
+		// 4/ heading
+		method = settings().telemetrySmoothMethod(TelemetryData::DataHeading);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataHeading);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - heading: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - heading: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - heading: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - heading: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothWindowedMovingAverage) && (elevation_window > 1))
-			printf("     - elevation: window size '%ld' (+/- %d points)\n", 
-					elevation_window, settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+		// 5/ elevation
+		method = settings().telemetrySmoothMethod(TelemetryData::DataElevation);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataElevation);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - elevation: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - elevation: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - elevation: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - elevation: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothWindowedMovingAverage) && (acceleration_window > 1))
-			printf("     - acceleration: window size '%ld' (+/- %d points)\n", 
-					acceleration_window, settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+		// 6/ acceleration
+		method = settings().telemetrySmoothMethod(TelemetryData::DataAcceleration);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataAcceleration);
+
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - acceleration: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - acceleration: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - acceleration: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - acceleration: no\n");
 
-		if ((settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothWindowedMovingAverage) && (verticalspeed_window > 1))
-			printf("     - verticalspeed: window size '%ld' (+/- %d points)\n", 
-					verticalspeed_window, settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
-		else
-			printf("     - verticalspeed: no\n");
+		// 7/ verticalspeed
+		method = settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed);
+		points = settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed);
 
-		// 2/
-		printf("%s: Smooth telemetry data using 'butterworth' filter\n", name().c_str());
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataPosition) == TelemetrySettings::SmoothButterworth)
-			printf("     - position: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - position: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataGrade) == TelemetrySettings::SmoothButterworth)
-			printf("     - grade: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - grade: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataSpeed) == TelemetrySettings::SmoothButterworth)
-			printf("     - speed: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - speed: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataCourse) == TelemetrySettings::SmoothButterworth)
-			printf("     - course: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - course: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataHeading) == TelemetrySettings::SmoothButterworth)
-			printf("     - heading: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - heading: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataElevation) == TelemetrySettings::SmoothButterworth)
-			printf("     - elevation: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - elevation: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataAcceleration) == TelemetrySettings::SmoothButterworth)
-			printf("     - acceleration: a = 4.0 / z = 0.7\n");
-		else
-			printf("     - acceleration: no\n");
-
-		if (settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed) == TelemetrySettings::SmoothButterworth)
-			printf("     - verticalspeed: a = 4.0 / z = 0.7\n");
+		if ((method == TelemetrySettings::SmoothWindowedMovingAverage) && (points > 1))
+			printf("     - verticalspeed: 'windowed moving average' filter - window size '%ld' (+/- %ld points)\n", 
+					2 * points + 1, points);
+		else if ((method == TelemetrySettings::SmoothSavitzkyGolay) && (points > 1))
+			printf("     - verticalspeed: 'Savitzky & Golay' filter - window size '%ld' (+/- %ld points)\n",
+					2 * points + 1, points);
+		else if (method == TelemetrySettings::SmoothButterworth)
+			printf("     - verticalspeed: 'butterworth' filter - a = 4.0 / z = 0.7\n");
 		else
 			printf("     - verticalspeed: no\n");
 	}
