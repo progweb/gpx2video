@@ -952,11 +952,11 @@ msgstr "Mode :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:248
 msgid "Zoom:"
-msgstr "Zoom :"
+msgstr "Echelle :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:279 ../gtk/src/ui/widgets/track_box.ui:215
 msgid "Factor:"
-msgstr "Multiplicateur :"
+msgstr "Zoom :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:329 ../gtk/src/ui/widgets/track_box.ui:247
 msgid "Path smooth:"
