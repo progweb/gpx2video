@@ -53,20 +53,28 @@ public:
 			int telemetry_rate=0,
 			TelemetrySettings::Smooth telemetry_smooth_position_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_position_points=0,
+			int telemetry_smooth_position_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_grade_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_grade_points=0,
+			int telemetry_smooth_grade_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_speed_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_speed_points=0,
+			int telemetry_smooth_speed_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_course_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_course_points=0,
+			int telemetry_smooth_course_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_heading_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_heading_points=0,
+			int telemetry_smooth_heading_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_elevation_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_elevation_points=0,
+			int telemetry_smooth_elevation_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_acceleration_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_acceleration_points=0,
+			int telemetry_smooth_acceleration_order=0,
 			TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method=TelemetrySettings::SmoothNone,
 			int telemetry_smooth_verticalspeed_points=0,
+			int telemetry_smooth_verticalspeed_order=0,
 			ExportCodec::Codec video_codec=ExportCodec::CodecH264,
 			std::string video_hw_device="",
 			std::string video_preset="medium",
@@ -110,27 +118,35 @@ public:
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataPosition, telemetry_smooth_position_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataPosition, telemetry_smooth_position_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataPosition, telemetry_smooth_position_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataGrade, telemetry_smooth_grade_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataGrade, telemetry_smooth_grade_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataGrade, telemetry_smooth_grade_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataSpeed, telemetry_smooth_speed_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataSpeed, telemetry_smooth_speed_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataSpeed, telemetry_smooth_speed_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataCourse, telemetry_smooth_course_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataCourse, telemetry_smooth_course_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataCourse, telemetry_smooth_course_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataHeading, telemetry_smooth_heading_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataHeading, telemetry_smooth_heading_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataHeading, telemetry_smooth_heading_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataElevation, telemetry_smooth_elevation_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataElevation, telemetry_smooth_elevation_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataElevation, telemetry_smooth_elevation_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataAcceleration, telemetry_smooth_acceleration_order);
 
 			TelemetrySettings::setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, telemetry_smooth_verticalspeed_method);
 			TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, telemetry_smooth_verticalspeed_points);
+			TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::DataVerticalSpeed, telemetry_smooth_verticalspeed_order);
 		}
 
 		const std::string& gpxfile(void) const {
@@ -198,7 +214,7 @@ public:
 	void setSettings(const Settings &settings);
 
 	int parseTelemetrySmoothArg(char *arg,
-		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &number);
+		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &points, int &order);
 	int parseCommandLine(int argc, char *argv[]);
 
 	MediaContainer * media(void);

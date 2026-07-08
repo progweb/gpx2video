@@ -123,6 +123,7 @@ void GPX2VideoTelemetryFrame::set_telemetry(TelemetrySource *source) {
 
 	// Update ui content
 	update_content();
+	update_boundaries();
 }
 
 
@@ -132,6 +133,7 @@ void GPX2VideoTelemetryFrame::set_visible(bool visible) {
 	is_visible_ = visible;
 
 	update_content();
+	update_boundaries();
 }
 
 
@@ -297,6 +299,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataPosition, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -311,6 +316,26 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for position data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataPosition, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Position order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("position_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"position_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for position data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataPosition, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -332,6 +357,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataGrade, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -346,6 +374,23 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for grade data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataGrade, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Grade order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("grade_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"grade_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for grade data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataGrade, value);
 					}
 			));
 
@@ -367,6 +412,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataCourse, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -381,6 +429,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for course data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataCourse, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -402,6 +453,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataHeading, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -416,6 +470,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for heading data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataHeading, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -437,6 +494,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataElevation, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -451,6 +511,26 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for elevation data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataElevation, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Elevation order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("elevation_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"elevation_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for elevation data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataElevation, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -472,6 +552,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataAcceleration, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -486,6 +569,26 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for acceleration data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataAcceleration, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Acceleration order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"acceleration_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for acceleration data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataAcceleration, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -507,6 +610,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataSpeed, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -521,6 +627,26 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for speed data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataSpeed, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"speed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for speed data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataSpeed, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -542,6 +668,9 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 								iter->get_value(model_.m_name).c_str());
 
 						source_->settings().setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, (TelemetrySettings::Smooth) value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 
@@ -556,6 +685,26 @@ void GPX2VideoTelemetryFrame::bind_content(void) {
 						log_notice("Telemetry window size value changed to '%d' for vertical speed data", value);
 
 						source_->settings().setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, value);
+
+						// Update
+						update_boundaries();
+					}
+			));
+
+	// Vertical speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"verticalspeed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoTelemetryFrame::on_telemetry_spin_changed), spinbutton, 
+					[this](const int &value) {
+						log_notice("Telemetry order value changed to '%d' for vertical speed data", value);
+
+						source_->settings().setTelemetrySmoothOrder(TelemetryData::DataVerticalSpeed, value);
+
+						// Update
+						update_boundaries();
 					}
 			));
 }
@@ -644,6 +793,13 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataPosition));
 
+	// Position order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("position_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"position_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataPosition));
+
 	// Grade smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("grade_method_combobox");
 	if (!combobox)
@@ -660,6 +816,13 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 		throw std::runtime_error("No \"grade_winsize_spinbutton\" object in telemetry_frame.ui");
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+
+	// Grade order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("grade_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"grade_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataGrade));
 
 	// Course smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("course_method_combobox");
@@ -712,6 +875,13 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataElevation));
 
+	// Elevation order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("elevation_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"elevation_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataElevation));
+
 	// Acceleration smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("acceleration_method_combobox");
 	if (!combobox)
@@ -729,7 +899,12 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
 
-	log_info("Telemetry settings loaded");
+	// Acceleration order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"acceleration_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataAcceleration));
 
 	// Speed smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("speed_method_combobox");
@@ -748,6 +923,13 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
 
+	// Speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"speed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataSpeed));
+
 	// Vertical speed smooth method
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("verticalspeed_method_combobox");
 	if (!combobox)
@@ -765,6 +947,15 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 
 	spinbutton->set_value(source_->settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
 
+	// Vertical speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"verticalspeed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_value(source_->settings().telemetrySmoothOrder(TelemetryData::DataVerticalSpeed));
+
+	log_info("Telemetry settings loaded");
+
 	// Unmask value changed
 	loading_ = false;
 }
@@ -773,9 +964,166 @@ void GPX2VideoTelemetryFrame::update_content(void) {
 void GPX2VideoTelemetryFrame::update_boundaries(void) {
 	log_call();
 
+	int nbr_points;
+
+	enum TelemetrySettings::Smooth method;
+
+	Gtk::SpinButton *spinbutton;
+
+	Gtk::TreeModel::iterator iter;
+
 	// No telemetry source
 	if (source_ == NULL)
 		return;
+
+	// Number of points
+	nbr_points = source_->numberOfPoints();
+
+	// Position smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataPosition);
+
+	// Position window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("position_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"position_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Position order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("position_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"position_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
+
+	// Grade smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataGrade);
+
+	// Grade window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("grade_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"grade_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Grade order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("grade_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"grade_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
+
+	// Course smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataCourse);
+
+	for (iter = course_smooth_method_model_->children().begin(); iter != course_smooth_method_model_->children().end(); iter++) {
+		bool enable = (iter->get_value(model_.m_id) != TelemetrySettings::SmoothSavitzkyGolay);
+		iter->set_value(model_.m_enable, enable);
+	}
+
+	// Course window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("course_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"course_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Course smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataHeading);
+
+	for (iter = heading_smooth_method_model_->children().begin(); iter != heading_smooth_method_model_->children().end(); iter++) {
+		bool enable = (iter->get_value(model_.m_id) != TelemetrySettings::SmoothSavitzkyGolay);
+		iter->set_value(model_.m_enable, enable);
+	}
+
+	// Heading window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("heading_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"heading_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Elevation smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataElevation);
+
+	// Elevation window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("elevation_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"elevation_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Elevation order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("elevation_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"elevation_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
+
+	// Acceleration smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataAcceleration);
+
+	// Acceleration window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"acceleration_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Acceleration order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("acceleration_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"acceleration_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
+
+	// Speed smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataSpeed);
+
+	// Speed window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"speed_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("speed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"speed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
+
+	// Vertical speed smooth method
+	method = source_->settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed);
+
+	// Vertical speed window size
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_winsize_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"verticalspeed_winsize_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, nbr_points);
+	spinbutton->set_sensitive((method == TelemetrySettings::SmoothWindowedMovingAverage) || (method == TelemetrySettings::SmoothSavitzkyGolay));
+
+	// Vertical speed order
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("verticalspeed_order_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"verticalspeed_order_spinbutton\" object in telemetry_frame.ui");
+
+	spinbutton->set_range(0, source_->settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
+	spinbutton->set_sensitive(method == TelemetrySettings::SmoothSavitzkyGolay);
 }
 
 

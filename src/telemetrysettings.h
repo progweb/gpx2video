@@ -103,6 +103,9 @@ public:
 	const int& telemetrySmoothPoints(TelemetryData::Data type) const;
 	void setTelemetrySmoothPoints(TelemetryData::Data type, int number);
 
+	const int& telemetrySmoothOrder(TelemetryData::Data type) const;
+	void setTelemetrySmoothOrder(TelemetryData::Data type, int number);
+
 	static const std::string getFriendlyFilterName(const Filter &filter);
 	static const std::string getFriendlyMethodName(const Method &method);
 	static const std::string getFriendlySmoothName(const Smooth &smooth);
@@ -153,6 +156,16 @@ private:
 	int telemetry_smooth_elevation_points_;
 	int telemetry_smooth_acceleration_points_;
 	int telemetry_smooth_verticalspeed_points_;
+
+	int telemetry_smooth_default_order_;
+	int telemetry_smooth_position_order_;
+	int telemetry_smooth_grade_order_;
+	int telemetry_smooth_speed_order_;
+	int telemetry_smooth_course_order_;
+	int telemetry_smooth_heading_order_;
+	int telemetry_smooth_elevation_order_;
+	int telemetry_smooth_acceleration_order_;
+	int telemetry_smooth_verticalspeed_order_;
 };
 
 

@@ -156,7 +156,7 @@ void GPXTools::setSettings(const GPXTools::Settings &settings) {
 
 
 int GPXTools::parseTelemetrySmoothArg(char *arg,
-		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &number) {
+		TelemetryData::Data &type, TelemetrySettings::Smooth &method, int &points, int &order) {
 	int result = 0;
 
 	int value;
@@ -168,20 +168,23 @@ int GPXTools::parseTelemetrySmoothArg(char *arg,
 	enum {
 		TELEMETRY_SMOOTH_DATA = 0,
 		TELEMETRY_SMOOTH_METHOD,
-		TELEMETRY_SMOOTH_POINTS
+		TELEMETRY_SMOOTH_POINTS,
+		TELEMETRY_SMOOTH_ORDER
 	};
 
 	const char * const token[] = {
 		[TELEMETRY_SMOOTH_DATA] = "data",
 		[TELEMETRY_SMOOTH_METHOD] = "method",
 		[TELEMETRY_SMOOTH_POINTS] = "points",
+		[TELEMETRY_SMOOTH_ORDER] = "order",
 		NULL
 	};
 
 	// Default values
 	type = TelemetryData::DataNone;
 	method = TelemetrySettings::SmoothNone;
-	number = 0;
+	points = 0;
+	order = 0;
 
 	// Parse args
 	while (*subopts != '\0' && (result != -1)) {
@@ -221,7 +224,11 @@ int GPXTools::parseTelemetrySmoothArg(char *arg,
 			break;
 
 		case TELEMETRY_SMOOTH_POINTS:
-			number = std::stoi(subopt);
+			points = std::stoi(subopt);
+			break;
+
+		case TELEMETRY_SMOOTH_ORDER:
+			order = std::stoi(subopt);
 			break;
 
 		default:
@@ -249,27 +256,35 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	// By default, disable position smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_position_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_position_points = 2; 
+	int telemetry_smooth_position_order = 1; 
 	// By default, disable grade smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_grade_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_grade_points = 2; 
+	int telemetry_smooth_grade_order = 1; 
 	// By default, disable speed smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_speed_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_speed_points = 2;
+	int telemetry_smooth_speed_order = 1;
 	// By default, disable course smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_course_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_course_points = 2;
+	int telemetry_smooth_course_order = 1;
 	// By default, disable heading smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_heading_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_heading_points = 2;
+	int telemetry_smooth_heading_order = 1;
 	// By default, disable elevation smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_elevation_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_elevation_points = 2;
+	int telemetry_smooth_elevation_order = 1;
 	// By default, disable acceleration smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_acceleration_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_acceleration_points = 2;
+	int telemetry_smooth_acceleration_order = 1;
 	// By default, enable verticalspeed smooth filter
 	TelemetrySettings::Smooth telemetry_smooth_verticalspeed_method = TelemetrySettings::SmoothNone;
 	int telemetry_smooth_verticalspeed_points = 2;
+	int telemetry_smooth_verticalspeed_order = 1;
 
 	const char *s;
 
@@ -336,78 +351,95 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 				rate = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "telemetry-smooth")) {
-				int number;
+				int order;
+				int points;
 				TelemetryData::Data type;
 				TelemetrySettings::Smooth method;
 
-				// Format : "data:method:points"
-				parseTelemetrySmoothArg(optarg, type, method, number);
+				// Format : "data:method:points:order"
+				parseTelemetrySmoothArg(optarg, type, method, points, order);
 
 				switch (type) {
 				case TelemetryData::DataPosition:
 					telemetry_smooth_position_method = method;
-					telemetry_smooth_position_points = number;
+					telemetry_smooth_position_points = points;
+					telemetry_smooth_position_order = order;
 					break;
 
 				case TelemetryData::DataGrade:
 					telemetry_smooth_grade_method = method;
-					telemetry_smooth_grade_points = number;
+					telemetry_smooth_grade_points = points;
+					telemetry_smooth_grade_order = order;
 					break;
 
 				case TelemetryData::DataSpeed:
 					telemetry_smooth_speed_method = method;
-					telemetry_smooth_speed_points = number;
+					telemetry_smooth_speed_points = points;
+					telemetry_smooth_speed_order = order;
 					break;
 
 				case TelemetryData::DataCourse:
 					telemetry_smooth_course_method = method;
-					telemetry_smooth_course_points = number;
+					telemetry_smooth_course_points = points;
+					telemetry_smooth_course_order = order;
 					break;
 
 				case TelemetryData::DataHeading:
 					telemetry_smooth_heading_method = method;
-					telemetry_smooth_heading_points = number;
+					telemetry_smooth_heading_points = points;
+					telemetry_smooth_heading_order = order;
 					break;
 
 				case TelemetryData::DataElevation:
 					telemetry_smooth_elevation_method = method;
-					telemetry_smooth_elevation_points = number;
+					telemetry_smooth_elevation_points = points;
+					telemetry_smooth_elevation_order = order;
 					break;
 
 				case TelemetryData::DataAcceleration:
 					telemetry_smooth_acceleration_method = method;
-					telemetry_smooth_acceleration_points = number;
+					telemetry_smooth_acceleration_points = points;
+					telemetry_smooth_acceleration_order = order;
 					break;
 
 				case TelemetryData::DataVerticalSpeed:
 					telemetry_smooth_verticalspeed_method = method;
-					telemetry_smooth_verticalspeed_points = number;
+					telemetry_smooth_verticalspeed_points = points;
+					telemetry_smooth_verticalspeed_order = order;
 					break;
 
 				case TelemetryData::DataAll:
 					telemetry_smooth_position_method = method;
-					telemetry_smooth_position_points = number;
+					telemetry_smooth_position_points = points;
+					telemetry_smooth_position_order = order;
 
 					telemetry_smooth_grade_method = method;
-					telemetry_smooth_grade_points = number;
+					telemetry_smooth_grade_points = points;
+					telemetry_smooth_grade_order = order;
 
 					telemetry_smooth_speed_method = method;
-					telemetry_smooth_speed_points = number;
+					telemetry_smooth_speed_points = points;
+					telemetry_smooth_speed_order = order;
 
 					telemetry_smooth_course_method = method;
-					telemetry_smooth_course_points = number;
+					telemetry_smooth_course_points = points;
+					telemetry_smooth_course_order = order;
 
 					telemetry_smooth_heading_method = method;
-					telemetry_smooth_heading_points = number;
+					telemetry_smooth_heading_points = points;
+					telemetry_smooth_heading_order = order;
 
 					telemetry_smooth_elevation_method = method;
-					telemetry_smooth_elevation_points = number;
+					telemetry_smooth_elevation_points = points;
+					telemetry_smooth_elevation_order = order;
 
 					telemetry_smooth_acceleration_method = method;
-					telemetry_smooth_acceleration_points = number;
+					telemetry_smooth_acceleration_points = points;
+					telemetry_smooth_acceleration_order = order;
 
 					telemetry_smooth_verticalspeed_method = method;
-					telemetry_smooth_verticalspeed_points = number;
+					telemetry_smooth_verticalspeed_points = points;
+					telemetry_smooth_verticalspeed_order = order;
 					break;
 
 				default:
@@ -523,20 +555,28 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 		rate,
 		telemetry_smooth_position_method,
 		telemetry_smooth_position_points,
+		telemetry_smooth_position_order,
 		telemetry_smooth_grade_method,
 		telemetry_smooth_grade_points,
+		telemetry_smooth_grade_order,
 		telemetry_smooth_speed_method,
 		telemetry_smooth_speed_points,
+		telemetry_smooth_speed_order,
 		telemetry_smooth_course_method,
 		telemetry_smooth_course_points,
+		telemetry_smooth_course_order,
 		telemetry_smooth_heading_method,
 		telemetry_smooth_heading_points,
+		telemetry_smooth_heading_order,
 		telemetry_smooth_elevation_method,
 		telemetry_smooth_elevation_points,
+		telemetry_smooth_elevation_order,
 		telemetry_smooth_acceleration_method,
 		telemetry_smooth_acceleration_points,
+		telemetry_smooth_acceleration_order,
 		telemetry_smooth_verticalspeed_method,
 		telemetry_smooth_verticalspeed_points,
+		telemetry_smooth_verticalspeed_order,
 		format)
 	);
 
@@ -635,27 +675,35 @@ int main(int argc, char *argv[], char *envp[]) {
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataPosition, app.settings().telemetrySmoothMethod(TelemetryData::DataPosition));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataPosition, app.settings().telemetrySmoothPoints(TelemetryData::DataPosition));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataPosition, app.settings().telemetrySmoothOrder(TelemetryData::DataPosition));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataGrade, app.settings().telemetrySmoothMethod(TelemetryData::DataGrade));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataGrade, app.settings().telemetrySmoothPoints(TelemetryData::DataGrade));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataGrade, app.settings().telemetrySmoothOrder(TelemetryData::DataGrade));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataSpeed));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataSpeed));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataSpeed, app.settings().telemetrySmoothOrder(TelemetryData::DataSpeed));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataCourse, app.settings().telemetrySmoothMethod(TelemetryData::DataCourse));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataCourse, app.settings().telemetrySmoothPoints(TelemetryData::DataCourse));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataCourse, app.settings().telemetrySmoothOrder(TelemetryData::DataCourse));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataHeading, app.settings().telemetrySmoothMethod(TelemetryData::DataHeading));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataHeading, app.settings().telemetrySmoothPoints(TelemetryData::DataHeading));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataHeading, app.settings().telemetrySmoothOrder(TelemetryData::DataHeading));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataElevation, app.settings().telemetrySmoothMethod(TelemetryData::DataElevation));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataElevation, app.settings().telemetrySmoothPoints(TelemetryData::DataElevation));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataElevation, app.settings().telemetrySmoothOrder(TelemetryData::DataElevation));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataAcceleration, app.settings().telemetrySmoothMethod(TelemetryData::DataAcceleration));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataAcceleration, app.settings().telemetrySmoothPoints(TelemetryData::DataAcceleration));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataAcceleration, app.settings().telemetrySmoothOrder(TelemetryData::DataAcceleration));
 
 			settings.setTelemetrySmoothMethod(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothMethod(TelemetryData::DataVerticalSpeed));
 			settings.setTelemetrySmoothPoints(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothPoints(TelemetryData::DataVerticalSpeed));
+			settings.setTelemetrySmoothOrder(TelemetryData::DataVerticalSpeed, app.settings().telemetrySmoothOrder(TelemetryData::DataVerticalSpeed));
 
 			// Create gpxtools telemetry task
 			telemetry = Telemetry::create(app, settings);

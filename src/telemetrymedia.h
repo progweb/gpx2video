@@ -114,6 +114,9 @@ public:
 		void setXY(double x, double y) {
 			x_ = x;
 			y_ = y;
+
+			// Compute lon x lat
+			unproject();
 		}
 
 		void setElevation(double ele) {
@@ -380,12 +383,12 @@ public:
 		double courseTo(const Point &to);
 		double distanceTo(const Point &to);
 
-		void project(void);
-		void unproject(void);
-
 	private:
 		double x_;
 		double y_;
+
+		void project(void);
+		void unproject(void);
 	};
 
 	class PointPool {

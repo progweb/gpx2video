@@ -23,7 +23,21 @@
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
+	<object class="GtkAdjustment" id="position_order_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="GtkAdjustment" id="grade_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="grade_order_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">100</property>
 		<property name="value">0</property>
@@ -51,7 +65,21 @@
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
+	<object class="GtkAdjustment" id="elevation_order_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="GtkAdjustment" id="acceleration_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="acceleration_order_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">100</property>
 		<property name="value">0</property>
@@ -65,7 +93,21 @@
 		<property name="step-increment">1</property>
 		<property name="page-increment">10</property>
 	</object>
+	<object class="GtkAdjustment" id="speed_order_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
 	<object class="GtkAdjustment" id="verticalspeed_winsize_adjustment">
+		<property name="lower">0</property>
+		<property name="upper">100</property>
+		<property name="value">0</property>
+		<property name="step-increment">1</property>
+		<property name="page-increment">10</property>
+	</object>
+	<object class="GtkAdjustment" id="verticalspeed_order_adjustment">
 		<property name="lower">0</property>
 		<property name="upper">100</property>
 		<property name="value">0</property>
@@ -304,6 +346,36 @@
 												</child>
 											</object>
 										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="position_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">position_order_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
 									</object>
 								</child>
 							</object>
@@ -372,6 +444,36 @@
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
 														<property name="adjustment">grade_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="grade_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">grade_order_adjustment</property>
 													</object>
 												</child>
 											</object>
@@ -592,6 +694,36 @@
 												</child>
 											</object>
 										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="elevation_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">elevation_order_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
 									</object>
 								</child>
 							</object>
@@ -660,6 +792,36 @@
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
 														<property name="adjustment">acceleration_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="acceleration_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">acceleration_order_adjustment</property>
 													</object>
 												</child>
 											</object>
@@ -736,6 +898,36 @@
 												</child>
 											</object>
 										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="speed_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">speed_order_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
 									</object>
 								</child>
 							</object>
@@ -804,6 +996,36 @@
 														<property name="orientation">horizontal</property>
 														<property name="valign">center</property>
 														<property name="adjustment">verticalspeed_winsize_adjustment</property>
+													</object>
+												</child>
+											</object>
+										</child>
+										<child>
+											<object class="GtkBox">
+												<property name="orientation">horizontal</property>
+												<property name="halign">fill</property>
+												<property name="hexpand">True</property>
+												<property name="valign">start</property>
+												<property name="vexpand">False</property>
+												<child>
+													<object class="GtkLabel">
+														<property name="can-focus">False</property>
+														<property name="justify">left</property>
+														<property name="label" translatable="yes">Order:</property>
+														<property name="valign">baseline</property>
+														<property name="xalign">0.5</property>
+													</object>
+												</child>
+												<child>
+													<object class="GtkSpinButton" id="verticalspeed_order_spinbutton">
+														<property name="halign">end</property>
+														<property name="hexpand">True</property>
+														<property name="width-chars">4</property>
+														<property name="max-width-chars">3</property>
+														<property name="numeric">True</property>
+														<property name="orientation">horizontal</property>
+														<property name="valign">center</property>
+														<property name="adjustment">verticalspeed_order_adjustment</property>
 													</object>
 												</child>
 											</object>

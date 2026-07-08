@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-07 19:16+0200\n"
+"POT-Creation-Date: 2026-07-08 16:13+0200\n"
 "PO-Revision-Date: 2026-05-17 16:18+0200\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -204,81 +204,87 @@ msgstr ""
 msgid "Widgets"
 msgstr ""
 
-#: ../gtk/src/ui/telemetry_frame.ui:108
+#: ../gtk/src/ui/telemetry_frame.ui:150
 msgid "Telemetry properties"
 msgstr "Paramètres de la télémétrie"
 
-#: ../gtk/src/ui/telemetry_frame.ui:116
+#: ../gtk/src/ui/telemetry_frame.ui:158
 msgid "Filter"
 msgstr "Filtre"
 
-#: ../gtk/src/ui/telemetry_frame.ui:136
+#: ../gtk/src/ui/telemetry_frame.ui:178
 msgid "Time offset (in ms):"
 msgstr "Offset temporel (en ms) :"
 
-#: ../gtk/src/ui/telemetry_frame.ui:160
+#: ../gtk/src/ui/telemetry_frame.ui:202
 msgid "Check & drop invalid points"
 msgstr "Vérfie & supprime les points invalides"
 
-#: ../gtk/src/ui/telemetry_frame.ui:168
+#: ../gtk/src/ui/telemetry_frame.ui:210
 msgid "Enable pause detection"
 msgstr "Détection des arrêts"
 
-#: ../gtk/src/ui/telemetry_frame.ui:176
+#: ../gtk/src/ui/telemetry_frame.ui:218
 msgid "Apply 'Iglewicz & Hoaglin' modified z-scores"
 msgstr "Applique la méthode 'Iglewicz & Hoaglin'"
 
-#: ../gtk/src/ui/telemetry_frame.ui:191
+#: ../gtk/src/ui/telemetry_frame.ui:233
 msgid "Prediction method:"
 msgstr "Méthode de prédiction :"
 
-#: ../gtk/src/ui/telemetry_frame.ui:216
+#: ../gtk/src/ui/telemetry_frame.ui:258
 msgid "Rate (in ms):"
 msgstr "Taux de rafraichissement (en ms) :"
 
-#: ../gtk/src/ui/telemetry_frame.ui:242
+#: ../gtk/src/ui/telemetry_frame.ui:284
 msgid "Position filter & smooth"
 msgstr "Filtre & lissage de la position"
 
-#: ../gtk/src/ui/telemetry_frame.ui:263 ../gtk/src/ui/telemetry_frame.ui:335
-#: ../gtk/src/ui/telemetry_frame.ui:407 ../gtk/src/ui/telemetry_frame.ui:479
-#: ../gtk/src/ui/telemetry_frame.ui:551 ../gtk/src/ui/telemetry_frame.ui:623
-#: ../gtk/src/ui/telemetry_frame.ui:695 ../gtk/src/ui/telemetry_frame.ui:767
+#: ../gtk/src/ui/telemetry_frame.ui:305 ../gtk/src/ui/telemetry_frame.ui:407
+#: ../gtk/src/ui/telemetry_frame.ui:509 ../gtk/src/ui/telemetry_frame.ui:581
+#: ../gtk/src/ui/telemetry_frame.ui:653 ../gtk/src/ui/telemetry_frame.ui:755
+#: ../gtk/src/ui/telemetry_frame.ui:857 ../gtk/src/ui/telemetry_frame.ui:959
 msgid "Method:"
 msgstr "Méthode :"
 
-#: ../gtk/src/ui/telemetry_frame.ui:288 ../gtk/src/ui/telemetry_frame.ui:360
-#: ../gtk/src/ui/telemetry_frame.ui:432 ../gtk/src/ui/telemetry_frame.ui:504
-#: ../gtk/src/ui/telemetry_frame.ui:576 ../gtk/src/ui/telemetry_frame.ui:648
-#: ../gtk/src/ui/telemetry_frame.ui:720 ../gtk/src/ui/telemetry_frame.ui:792
+#: ../gtk/src/ui/telemetry_frame.ui:330 ../gtk/src/ui/telemetry_frame.ui:432
+#: ../gtk/src/ui/telemetry_frame.ui:534 ../gtk/src/ui/telemetry_frame.ui:606
+#: ../gtk/src/ui/telemetry_frame.ui:678 ../gtk/src/ui/telemetry_frame.ui:780
+#: ../gtk/src/ui/telemetry_frame.ui:882 ../gtk/src/ui/telemetry_frame.ui:984
 msgid "Window size (in points):"
 msgstr "Taille de la fenêtre (en points) :"
 
-#: ../gtk/src/ui/telemetry_frame.ui:314
+#: ../gtk/src/ui/telemetry_frame.ui:360 ../gtk/src/ui/telemetry_frame.ui:462
+#: ../gtk/src/ui/telemetry_frame.ui:708 ../gtk/src/ui/telemetry_frame.ui:810
+#: ../gtk/src/ui/telemetry_frame.ui:912 ../gtk/src/ui/telemetry_frame.ui:1014
+msgid "Order:"
+msgstr "Ordre :"
+
+#: ../gtk/src/ui/telemetry_frame.ui:386
 msgid "Grade filter & smooth"
 msgstr "Filtre & lissage de la pente"
 
-#: ../gtk/src/ui/telemetry_frame.ui:386
+#: ../gtk/src/ui/telemetry_frame.ui:488
 msgid "Course filter & smooth"
 msgstr "Filtre & lissage de la route"
 
-#: ../gtk/src/ui/telemetry_frame.ui:458
+#: ../gtk/src/ui/telemetry_frame.ui:560
 msgid "Heading filter & smooth"
 msgstr "Filtre & lissage du cap"
 
-#: ../gtk/src/ui/telemetry_frame.ui:530
+#: ../gtk/src/ui/telemetry_frame.ui:632
 msgid "Elevation filter & smooth"
 msgstr "Filtre & lissage de l'altitude"
 
-#: ../gtk/src/ui/telemetry_frame.ui:602
+#: ../gtk/src/ui/telemetry_frame.ui:734
 msgid "Acceleration filter & smooth"
 msgstr "Filtre & lissage de l'accélération"
 
-#: ../gtk/src/ui/telemetry_frame.ui:674
+#: ../gtk/src/ui/telemetry_frame.ui:836
 msgid "Speed filter & smooth"
 msgstr "Filtre & lissage de la vitesse"
 
-#: ../gtk/src/ui/telemetry_frame.ui:746
+#: ../gtk/src/ui/telemetry_frame.ui:938
 msgid "Vertical speed filter & smooth"
 msgstr "Filtre & lissage de la vitesse verticale"
 

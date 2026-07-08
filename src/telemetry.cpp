@@ -53,6 +53,16 @@ TelemetrySettings::TelemetrySettings(
 	telemetry_smooth_elevation_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_acceleration_points_ = telemetry_smooth_default_points_;
 	telemetry_smooth_verticalspeed_points_ = telemetry_smooth_default_points_;
+
+	telemetry_smooth_default_order_ = 0;
+	telemetry_smooth_position_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_grade_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_speed_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_course_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_heading_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_elevation_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_acceleration_order_ = telemetry_smooth_default_order_;
+	telemetry_smooth_verticalspeed_order_ = telemetry_smooth_default_order_;
 }
 
 
@@ -475,6 +485,87 @@ void TelemetrySettings::setTelemetrySmoothPoints(TelemetryData::Data type, int n
 
 	case TelemetryData::DataVerticalSpeed:
 		telemetry_smooth_verticalspeed_points_ = number;
+		break;
+
+	default:
+		// Not yet supported
+		break;
+	}
+}
+
+
+const int& TelemetrySettings::telemetrySmoothOrder(TelemetryData::Data type) const {
+	switch (type) {
+	case TelemetryData::DataPosition:
+		return telemetry_smooth_position_order_;
+		break;
+
+	case TelemetryData::DataGrade:
+		return telemetry_smooth_grade_order_;
+		break;
+
+	case TelemetryData::DataSpeed:
+		return telemetry_smooth_speed_order_;
+		break;
+
+	case TelemetryData::DataCourse:
+		return telemetry_smooth_course_order_;
+		break;
+
+	case TelemetryData::DataHeading:
+		return telemetry_smooth_heading_order_;
+		break;
+
+	case TelemetryData::DataElevation:
+		return telemetry_smooth_elevation_order_;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		return telemetry_smooth_acceleration_order_;
+		break;
+
+	case TelemetryData::DataVerticalSpeed:
+		return telemetry_smooth_verticalspeed_order_;
+		break;
+
+	default:
+		return telemetry_smooth_default_order_;
+	}
+}
+
+
+void TelemetrySettings::setTelemetrySmoothOrder(TelemetryData::Data type, int number) {
+	switch (type) {
+	case TelemetryData::DataPosition:
+		telemetry_smooth_position_order_ = number;
+		break;
+
+	case TelemetryData::DataGrade:
+		telemetry_smooth_grade_order_ = number;
+		break;
+
+	case TelemetryData::DataSpeed:
+		telemetry_smooth_speed_order_ = number;
+		break;
+
+	case TelemetryData::DataCourse:
+		telemetry_smooth_course_order_ = number;
+		break;
+
+	case TelemetryData::DataHeading:
+		telemetry_smooth_heading_order_ = number;
+		break;
+
+	case TelemetryData::DataElevation:
+		telemetry_smooth_elevation_order_ = number;
+		break;
+
+	case TelemetryData::DataAcceleration:
+		telemetry_smooth_acceleration_order_ = number;
+		break;
+
+	case TelemetryData::DataVerticalSpeed:
+		telemetry_smooth_verticalspeed_order_ = number;
 		break;
 
 	default:
