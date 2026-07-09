@@ -499,6 +499,12 @@ bool VideoRenderer::stop(void) {
 		decoder_audio_->close();
 	decoder_video_->close();
 
+	// Free
+	if (decoder_audio_)
+		delete decoder_audio_;
+	if (decoder_video_)
+		delete decoder_video_;
+
 	decoder_audio_ = NULL;
 	decoder_video_ = NULL;
 

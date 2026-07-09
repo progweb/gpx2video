@@ -202,14 +202,14 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, co
 
 error:
 	// Free
-	if (masksurface)
-		cairo_surface_destroy(masksurface);
-	if (surface)
-		cairo_surface_destroy(surface);
 	if (mask)
 		cairo_destroy(mask);
+	if (masksurface)
+		cairo_surface_destroy(masksurface);
 	if (cr)
 		cairo_destroy(cr);
+	if (surface)
+		cairo_surface_destroy(surface);
 
 	if (handle != NULL)
 		g_object_unref(handle);

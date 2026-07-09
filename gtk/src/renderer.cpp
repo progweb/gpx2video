@@ -158,8 +158,8 @@ void GPX2VideoRenderer::set_telemetry(TelemetrySource *source) {
 	for (GPX2VideoWidget *item : widgets_)
 		item->widget()->setTelemetrySource(source);
 
-	// Restart each widget & request buffering
-	refresh(NULL, true);
+	// Timestamp change
+	reset_timestamp();
 }
 
 
@@ -489,7 +489,7 @@ void GPX2VideoRenderer::draw(void) {
 					source_->retrieveFrom(data);
 
 					// Set timestamp requested
-					data.setDatetime(timestamp_);
+					data.setDatetime(timestamp);
 				}
 				else {
 					// Continue from the previous point 

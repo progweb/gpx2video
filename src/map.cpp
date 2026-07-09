@@ -286,6 +286,12 @@ Map::~Map() {
 	if (filename_ != "")
 		::unlink(filename_.c_str());
 
+	while (!tiles_.empty()) {
+		Tile *tile = tiles_.front();
+		tiles_.pop_front();
+		delete tile;
+	}
+
 	if (mapbuf_ != NULL)
 		delete mapbuf_;
 	if (bg_buf_)

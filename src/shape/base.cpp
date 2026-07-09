@@ -141,10 +141,10 @@ void ShapeBase::renderCairoContext(OIIO::ImageBuf *buf, cairo_t *cairo) {
 void ShapeBase::destroyCairoContext(cairo_t *cairo) {
 	cairo_surface_t *surface = cairo_get_target(cairo);
 
-	if (surface_ != NULL)
-		cairo_surface_destroy(surface);
-
 	cairo_destroy(cairo);
+
+	if (surface != NULL)
+		cairo_surface_destroy(surface);
 }
 
 

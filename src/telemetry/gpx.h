@@ -52,6 +52,8 @@ failure:
 	}
 
 	virtual ~GPX() {
+		if (root_)
+			delete root_;
 	}
 
 	std::string name(void) {

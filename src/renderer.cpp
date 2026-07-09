@@ -32,6 +32,10 @@ Renderer::Renderer(GPXApplication &app,
 
 
 Renderer::~Renderer() {
+	drop();
+
+	if (source_)
+		delete source_;
 }
 
 
@@ -118,6 +122,9 @@ bool Renderer::load(void) {
 		else if (name == "widget")
 			loadWidget((layout::Widget *) node);
 	}
+
+	// Free
+	delete root;
 
 done:
 	return true;

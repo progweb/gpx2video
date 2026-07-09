@@ -657,6 +657,7 @@ TelemetrySource::TelemetrySource(const std::string &filename)
 
 
 TelemetrySource::~TelemetrySource() {
+	free_filter(kalman_);
 }
 
 
@@ -1044,7 +1045,7 @@ bool TelemetrySource::load(void) {
 	pool_.reset();
 
 	if (!quiet_ && (count > 0))
-		log_notice("%s: %lu skip points", name().c_str(), count);
+		printf("%s: %lu skip points\n", name().c_str(), count);
 
 	return true;
 }
@@ -1068,7 +1069,7 @@ void TelemetrySource::range(void) {
 
 	// Data range sumup
 	if (!quiet_) {
-		log_info("%s: Telemetry available data range from '%s' to '%s'", 
+		printf("%s: Telemetry available data range from '%s' to '%s'\n", 
 				name().c_str(),
 				Datetime::timestamp2string(begin_).c_str(),
 				Datetime::timestamp2string(end_).c_str());
@@ -1107,7 +1108,7 @@ void TelemetrySource::filter(void) {
 	switch (settings().telemetryFilter()) {
 	case TelemetrySettings::FilterOutlier:
 		if (!quiet_)
-			log_info("%s: Filter telemetry data in using 'Iglewicz & Hoaglin' method.", name().c_str());
+			printf("%s: Filter telemetry data in using 'Iglewicz & Hoaglin' method.\n", name().c_str());
 
 		// Build acceleration sorted list
 		for (size_t i=1; i<=pool_.size(); i++)
@@ -1136,7 +1137,7 @@ void TelemetrySource::filter(void) {
 		}
 
 		if (!quiet_)
-			log_notice("%s: %lu outliers detected", name().c_str(), n);
+			printf("%s: %lu outliers detected\n", name().c_str(), n);
 		break;
 
 	default:
@@ -1168,11 +1169,11 @@ void TelemetrySource::compute(void) {
 	TelemetryData data;
 
 	if (!quiet_) {
-		log_info("%s: Compute telemetry data from '%s' to '%s'", 
+		printf("%s: Compute telemetry data from '%s' to '%s'\n", 
 				name().c_str(),
 				Datetime::timestamp2string(compute_start_).c_str(),
 				Datetime::timestamp2string(compute_stop_).c_str());
-		log_info("%s: Pause detection: %s",
+		printf("%s: Pause detection: %s\n",
 				name().c_str(),
 				pause_detection_ ? "enabled" : "disabled");
 	}
@@ -2952,7 +2953,7 @@ enum TelemetrySource::Data TelemetrySource::loadData(void) {
 	log_call();
 
 	if (!quiet_)
-		log_info("%s: Load telemetry data.", name().c_str());
+		printf("%s: Load telemetry data.\n", name().c_str());
 
 	reset();
 	clear();
