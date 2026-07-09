@@ -884,10 +884,6 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	}
 
 	if ((last_posX_ != -1) && (last_posY_ != -1)) {
-		// Smooth
-		posX = (posX + last_posX_) / 2;
-		posY = (posY + last_posY_) / 2;
-
 		// Move ?
 		is_move = (posX != last_posX_) || (posY != last_posY_);
 

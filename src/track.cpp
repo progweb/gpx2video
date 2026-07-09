@@ -1034,10 +1034,6 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		y2 *= divider;
 
 		if (last_data_.type() != TelemetryData::TypeUnknown) {
-			// Smooth
-			x2 = (x1 + x2) / 2;
-			y2 = (y1 + y2) / 2;
-
 			// Move ?
 			if ((x1 == x2) && (y1 == y2))
 				goto skip;
@@ -1227,10 +1223,6 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	}
 
 	if ((last_posX_ != -1) && (last_posY_ != -1)) {
-		// Smooth
-		posX = (posX + last_posX_) / 2;
-		posY = (posY + last_posY_) / 2;
-
 		// Move ?
 		is_move = (posX != last_posX_) || (posY != last_posY_);
 
