@@ -247,7 +247,7 @@ int GPXTools::parseCommandLine(int argc, char *argv[]) {
 	int option;
 
 	bool check = false;
-	bool pause_detection = true;
+	bool pause_detection = false;
 
 	int rate = 0; // By default, no change
 	int offset = 0; // By default, no offset
