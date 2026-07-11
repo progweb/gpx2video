@@ -68,9 +68,6 @@ public:
 	const double& divider(void) const;
 	void setDivider(const double &divier);
 
-	const int& pathSmooth(void) const;
-	void setPathSmooth(const int &smooth);
-
 	const double& pathThick(void) const;
 	void setPathThick(const double &thick);
 
@@ -252,7 +249,6 @@ protected:
 	double null_;
 	double divider_;
 
-	int path_smooth_;
 	double path_thick_;
 	double path_border_;
 

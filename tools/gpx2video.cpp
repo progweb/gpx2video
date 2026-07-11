@@ -102,12 +102,11 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --telemetry-filter=filter         : Telemetry filter" << std::endl;
 	std::cout << "\t-    --telemetry-method=method         : Telemetry interpolate method (none, sample, linear...)" << std::endl;
 	std::cout << "\t-    --telemetry-rate                  : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
-	std::cout << "\t-    --telemetry-smooth=smooth         : Data type, method and number of points to smooth data" << std::endl;
+	std::cout << "\t-    --telemetry-smooth=smooth         : Data type, method, number of points and order to smooth data" << std::endl;
 //	std::cout << "\t- r, --rate                            : Frame per second (not implemented" << std::endl;
 	std::cout << "\t-    --map-factor                      : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source                      : Map source" << std::endl;
 	std::cout << "\t-    --map-zoom                        : Map zoom" << std::endl;
-	std::cout << "\t-    --path-smooth                     : Path smooth (default: 1)" << std::endl;
 	std::cout << "\t-    --path-thick                      : Path thick (default: 3.0)" << std::endl;
 	std::cout << "\t-    --path-border                     : Path border (default: 1.4)" << std::endl;
 	std::cout << "\t- v, --verbose                         : Show trace" << std::endl;
@@ -373,7 +372,6 @@ Map * GPX2Video::buildMap(void) {
 	mapSettings.setZoom(settings().mapzoom());
 	mapSettings.setDivider(settings().mapfactor());
 	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
-	mapSettings.setPathSmooth(settings().pathsmooth());
 	mapSettings.setPathThick(settings().paththick());
 	mapSettings.setPathBorder(settings().pathborder());
 
@@ -496,7 +494,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	double map_factor = 1.0;
 
-	int path_smooth = 1;
 	double path_thick = 3.0;
 	double path_border = 1.4;
 
@@ -613,9 +610,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 			}
 			else if (s && !strcmp(s, "map-source")) {
 				map_source = (MapSettings::Source) atoi(optarg);
-			}
-			else if (s && !strcmp(s, "path-smooth")) {
-				path_smooth = atoi(optarg);
 			}
 			else if (s && !strcmp(s, "path-thick")) {
 				path_thick = strtod(optarg, NULL);
@@ -1054,7 +1048,6 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		map_zoom,
 		max_duration_ms,
 		map_source,
-		path_smooth,
 		path_thick,
 		path_border,
 		gpx_begin,

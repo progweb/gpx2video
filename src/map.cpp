@@ -450,6 +450,8 @@ void Map::init(void) {
 
 	int padding_horizontal, padding_vertical;
 
+#define SCALE(x) ((x) * divider_)
+
 	log_call();
 
 	zoom = settings().zoom();
@@ -468,11 +470,11 @@ void Map::init(void) {
 	divider_ = Track::divider_;
 
 	// lat/lon to tile index
-	vx1_ = floorf((float) pvx1_ / (float) TILESIZE);
-	vy1_ = floorf((float) pvy1_ / (float) TILESIZE);
+	vx1_ = floorf((float) pvx1_ / (float) TILESIZE / divider_);
+	vy1_ = floorf((float) pvy1_ / (float) TILESIZE / divider_);
 
-	vx2_ = floorf((float) pvx2_ / (float) TILESIZE);
-	vy2_ = floorf((float) pvy2_ / (float) TILESIZE);
+	vx2_ = floorf((float) pvx2_ / (float) TILESIZE / divider_);
+	vy2_ = floorf((float) pvy2_ / (float) TILESIZE / divider_);
 
 	// width x height of widget
 	width = settings().width() - 2 * theme().border();
@@ -490,13 +492,13 @@ void Map::init(void) {
 	// Apply zoom fit - center track
 	case MapSettings::ViewZoomFit:
 		// Append tile so as width tiles sum is enough
-		while (((vx2_ - vx1_) * TILESIZE * divider_) < width) {
+		while (SCALE((vx2_ - vx1_) * TILESIZE) < width) {
 			vx1_ -= 1;
 			vx2_ += 1;
 		}
 
 		// Append tile so as height tiles sum is enough
-		while (((vy2_ - vy1_) * TILESIZE * divider_) < height) {
+		while (SCALE((vy2_ - vy1_) * TILESIZE) < height) {
 			vy1_ -= 1;
 			vy2_ += 1;
 		}
@@ -507,17 +509,17 @@ void Map::init(void) {
 		offsetx = theme().padding(VideoWidget::Theme::PaddingLeft) - theme().padding(VideoWidget::Theme::PaddingRight);
 		offsety = theme().padding(VideoWidget::Theme::PaddingTop) - theme().padding(VideoWidget::Theme::PaddingBottom);
 
-		space = ((width + offsetx) / 2.0) - ((pvx1_ - (vx1_ * TILESIZE)) * divider_);
-		vx1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
+		space = ((width + offsetx) / 2.0) - (pvx1_ - SCALE(vx1_ * TILESIZE));
+		vx1_ -= (int) ceilf((space / divider_) / TILESIZE);
 
-		space = ((width - offsetx) / 2.0) - ((TILESIZE - (pvx2_ - (vx2_ * TILESIZE))) * divider_);
-		vx2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
+		space = ((width - offsetx) / 2.0) - (SCALE(TILESIZE) - (pvx2_ - SCALE(vx2_ * TILESIZE)));
+		vx2_ += (int) ceilf(((space / divider_) / TILESIZE));
 
-		space = ((height + offsety) / 2.0) - ((pvy1_ - (vy1_ * TILESIZE)) * divider_);
-		vy1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
+		space = ((height + offsety) / 2.0) - (pvy1_ - SCALE(vy1_ * TILESIZE));
+		vy1_ -= (int) ceilf((space / divider_) / TILESIZE);
 
-		space = ((height - offsety) / 2.0) - ((TILESIZE - (pvy2_ - (vy2_ * TILESIZE))) * divider_);
-		vy2_ += std::max(0.0f, ceilf((space / divider_) / TILESIZE));
+		space = ((height - offsety) / 2.0) - (SCALE(TILESIZE) - (pvy2_ - SCALE(vy2_ * TILESIZE)));
+		vy2_ += (int) ceilf((space / divider_) / TILESIZE);
 
 		break;
 
@@ -528,58 +530,58 @@ void Map::init(void) {
 		offsety = theme().padding(VideoWidget::Theme::PaddingTop) - theme().padding(VideoWidget::Theme::PaddingBottom);
 
 		// width x height of data area
-		data_width = (lim_px2_ - lim_px1_) * divider_;
-		data_height = (lim_py2_ - lim_py1_) * divider_;
+		data_width = (lim_px2_ - lim_px1_);
+		data_height = (lim_py2_ - lim_py1_);
 
 		// Track fit in width
 		if (data_width > width) {
 			if ((width_available / 2) > (pvx1_ - lim_px1_))
-				space = theme().padding(VideoWidget::Theme::PaddingLeft) + (((vx1_ * TILESIZE) - lim_px1_) * divider_);
+				space = theme().padding(VideoWidget::Theme::PaddingLeft) + (SCALE(vx1_ * TILESIZE) - lim_px1_);
 			else if ((width_available / 2) > (lim_px2_ - pvx2_))
-				space = (width - theme().padding(VideoWidget::Theme::PaddingRight)) - ((lim_px2_ - (vx1_ * TILESIZE)) * divider_);
+				space = (width - theme().padding(VideoWidget::Theme::PaddingRight)) - (lim_px2_ - SCALE(vx1_ * TILESIZE));
 			else
-				space = (width / 2.0) - ((pvx1_ - (vx1_ * TILESIZE)) * divider_);
-			vx1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
+				space = (width / 2.0) - (pvx1_ - SCALE(vx1_ * TILESIZE));
+			vx1_ -= (int) ceilf((space / divider_) / TILESIZE);
 
 			if ((width_available / 2) > (lim_px2_ - pvx2_))
-				space = theme().padding(VideoWidget::Theme::PaddingRight) + ((lim_px2_ - ((vx2_ * TILESIZE) + TILESIZE)) * divider_);
+				space = theme().padding(VideoWidget::Theme::PaddingRight) + (lim_px2_ - SCALE((vx2_ * TILESIZE) + TILESIZE));
 			else if ((width_available / 2) > (pvx1_ - lim_px1_))
-				space = (width - theme().padding(VideoWidget::Theme::PaddingLeft)) - ((((vx2_ * TILESIZE) + TILESIZE) - lim_px1_) * divider_);
+				space = (width - theme().padding(VideoWidget::Theme::PaddingLeft)) - (SCALE((vx2_ * TILESIZE) + TILESIZE) - lim_px1_);
 			else
-				space = (width / 2.0) - (TILESIZE - (pvx2_ - (vx2_ * TILESIZE)) * divider_);
-			vx2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
+				space = (width / 2.0) - (SCALE(TILESIZE) - (pvx2_ - SCALE(vx2_ * TILESIZE)));
+			vx2_ += (int) ceilf(((space / divider_) / TILESIZE));
 		}
 		else {
-			space = ((width - data_width) / 2.0) + (((vx1_ * TILESIZE) - lim_px1_) * divider_);
+			space = ((width - data_width) / 2.0) + (SCALE(vx1_ * TILESIZE) - lim_px1_);
 			vx1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
-			space = ((width - data_width) / 2.0) + ((lim_px2_ - ((vx2_ * TILESIZE) + TILESIZE)) * divider_);
+			space = ((width - data_width) / 2.0) + (lim_px2_ - SCALE((vx2_ * TILESIZE) + TILESIZE));
 			vx2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
 		}
 
 		// Track fit in height
 		if (data_height > height) {
 			if ((height_available / 2) > (pvy1_ - lim_py1_))
-				space = theme().padding(VideoWidget::Theme::PaddingTop) + (((vy1_ * TILESIZE) - lim_py1_) * divider_);
+				space = theme().padding(VideoWidget::Theme::PaddingTop) + (SCALE(vy1_ * TILESIZE) - lim_py1_);
 			else if ((height_available / 2) > (lim_py2_ - pvy2_))
-				space = (height - theme().padding(VideoWidget::Theme::PaddingBottom)) - ((lim_py2_ - (vy1_ * TILESIZE)) * divider_);
+				space = (height - theme().padding(VideoWidget::Theme::PaddingBottom)) - (lim_py2_ - SCALE(vy1_ * TILESIZE));
 			else
-				space = (height / 2.0) - ((pvy1_ - (vy1_ * TILESIZE)) * divider_);
+				space = (height / 2.0) - (pvy1_ - SCALE(vy1_ * TILESIZE));
 			vy1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
 			if ((height_available / 2) > (lim_py2_ - pvy2_))
-				space = theme().padding(VideoWidget::Theme::PaddingBottom) + ((lim_py2_ - ((vy2_ * TILESIZE) + TILESIZE)) * divider_);
+				space = theme().padding(VideoWidget::Theme::PaddingBottom) + (lim_py2_ - SCALE((vy2_ * TILESIZE) + TILESIZE));
 			else if ((height_available / 2) > (pvy1_ - lim_py1_))
-				space = (height - theme().padding(VideoWidget::Theme::PaddingTop)) - ((((vy2_ * TILESIZE) + TILESIZE) - lim_py1_) * divider_);
+				space = (height - theme().padding(VideoWidget::Theme::PaddingTop)) - (SCALE((vy2_ * TILESIZE) + TILESIZE) - lim_py1_);
 			else
-				space = (height / 2.0) - (TILESIZE - (pvy2_ - (vy2_ * TILESIZE)) * divider_);
+				space = (height / 2.0) - (SCALE(TILESIZE) - (pvy2_ - SCALE(vy2_ * TILESIZE)));
 			vy2_ += std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 		}
 		else {
-			space = ((height - data_height) / 2.0) + (((vy1_ * TILESIZE) - lim_py1_) * divider_);
+			space = ((height - data_height) / 2.0) + (SCALE(vy1_ * TILESIZE) - lim_py1_);
 			vy1_ -= std::max(0.0f, ceilf((space / divider_) / TILESIZE));
 
-			space = ((height - data_height) / 2.0) + ((lim_py2_ - ((vy2_ * TILESIZE) + TILESIZE)) * divider_);
+			space = ((height - data_height) / 2.0) + (lim_py2_ - SCALE((vy2_ * TILESIZE) + TILESIZE));
 			vy2_ += std::max(0.0f, ceilf(((space / divider_) / TILESIZE)));
 		}
 
@@ -816,8 +818,8 @@ bool Map::load(void) {
 	OIIO::ImageBufAlgo::resize(*mapbuf_, buf);
 
 	// Background track image over
-	trackbuf_->specmod().x = (pevx1_ - (vx1_ * TILESIZE)) * divider_;
-	trackbuf_->specmod().y = (pevy1_ - (vy1_ * TILESIZE)) * divider_;
+	trackbuf_->specmod().x = (pevx1_ - (vx1_ * TILESIZE * divider_));
+	trackbuf_->specmod().y = (pevy1_ - (vy1_ * TILESIZE * divider_));
 	OIIO::ImageBufAlgo::over(*mapbuf_, *trackbuf_, *mapbuf_);
 
 	return (mapbuf_ != NULL);
@@ -872,11 +874,8 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		posY = y_end_;
 	}
 	else if (data.timestamp() > ts_start_) {
-		posX = floorf((float) Track::lon2pixel(zoom, data.longitude())) - pevx1_;
-		posY = floorf((float) Track::lat2pixel(zoom, data.latitude())) - pevy1_;
-
-		posX *= divider_;
-		posY *= divider_;
+		posX = Track::lon2pixel(zoom, divider_, data.longitude()) - pevx1_;
+		posY = Track::lat2pixel(zoom, divider_, data.latitude()) - pevy1_;
 	}
 	else {
 		posX = x_start_;
@@ -900,8 +899,8 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	y = theme().border();
 
 	// width x height of track
-	w = (pevx2_ - pevx1_) * divider_;
-	h = (pevy2_ - pevy1_) * divider_;
+	w = (pevx2_ - pevx1_);
+	h = (pevy2_ - pevy1_);
 
 	// width x height of widget
 	width = settings().width() - 2 * theme().border();
@@ -938,16 +937,16 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	case MapSettings::ViewDefault:
 	default:
 		// width x height of data area
-		data_width = (lim_px2_ - lim_px1_) * divider_;
-		data_height = (lim_py2_ - lim_py1_) * divider_;
+		data_width = (lim_px2_ - lim_px1_);
+		data_height = (lim_py2_ - lim_py1_);
 
 		// Compute lim1 (top-left)
-		pos_lim_x1 = (lim_px1_ - pevx1_) * divider_;
-		pos_lim_y1 = (lim_py1_ - pevy1_) * divider_;
+		pos_lim_x1 = (lim_px1_ - pevx1_);
+		pos_lim_y1 = (lim_py1_ - pevy1_);
 
 		// Compute lim2 (bottom-right)
-		pos_lim_x2 = (lim_px2_ - pevx1_) * divider_;
-		pos_lim_y2 = (lim_py2_ - pevy1_) * divider_;
+		pos_lim_x2 = (lim_px2_ - pevx1_);
+		pos_lim_y2 = (lim_py2_ - pevy1_);
 
 		// Compute offset
 		offsetX = theme().padding(VideoWidget::Theme::PaddingLeft);
@@ -1001,14 +1000,14 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	if (mapbuf_ != NULL) {
 		// Update path progress
 		if (is_move) {
-			mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE)) * divider_;
-			mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE)) * divider_;
+			mapbuf_->specmod().x = -(pevx1_ - (vx1_ * TILESIZE * divider_));
+			mapbuf_->specmod().y = -(pevy1_ - (vy1_ * TILESIZE * divider_));
 			path(*mapbuf_, data, divider_);
 		}
 
 		// Map & track image over
-		mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE)) * divider_);
-		mapbuf_->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE)) * divider_);
+		mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE * divider_)));
+		mapbuf_->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE * divider_)));
 		OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
 
 		// Draw picto

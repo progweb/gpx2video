@@ -37,7 +37,6 @@ public:
 			int map_zoom=8, 
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
-			int path_smooth=1,
 			double path_thick=3.0,
 			double path_border=1.4,
 			std::string begin="",
@@ -107,7 +106,6 @@ public:
 			, map_factor_(map_factor)
 			, map_zoom_(map_zoom)
 			, map_source_(map_source)
-			, path_smooth_(path_smooth)
 			, path_thick_(path_thick)
 			, path_border_(path_border)
 	   		, extract_format_(extract_format) {
@@ -165,10 +163,6 @@ public:
 			return map_source_;
 		}
 
-		const int& pathsmooth(void) const {
-			return path_smooth_;
-		}
-
 		const double& paththick(void) const {
 			return path_thick_;
 		}
@@ -197,7 +191,6 @@ public:
 		int map_zoom_;
 		MapSettings::Source map_source_;
 
-		int path_smooth_;
 		double path_thick_;
 		double path_border_;
 

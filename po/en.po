@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-08 16:13+0200\n"
+"POT-Creation-Date: 2026-07-10 10:50+0200\n"
 "PO-Revision-Date: 2026-05-17 11:33+0200\n"
 "Language-Team: English\n"
 "Language: en_US\n"
@@ -102,7 +102,7 @@ msgstr ""
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:2172 ../gtk/src/ui/widgets/map_box.ui:175
+#: ../src/videowidget.cpp:2172 ../gtk/src/ui/widgets/map_box.ui:168
 msgid "Map"
 msgstr ""
 
@@ -130,8 +130,8 @@ msgstr ""
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:2188 ../gtk/src/ui/widgets/map_box.ui:307
-#: ../gtk/src/ui/widgets/track_box.ui:168
+#: ../src/videowidget.cpp:2188 ../gtk/src/ui/widgets/map_box.ui:300
+#: ../gtk/src/ui/widgets/track_box.ui:161
 msgid "Track"
 msgstr ""
 
@@ -154,7 +154,7 @@ msgstr ""
 #: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
 #: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:827
 #: ../gtk/src/ui/shape/text_box.ui:183 ../gtk/src/ui/widgets/image_box.ui:105
-#: ../gtk/src/ui/widgets/map_box.ui:143 ../gtk/src/ui/widgets/track_box.ui:136
+#: ../gtk/src/ui/widgets/map_box.ui:136 ../gtk/src/ui/widgets/track_box.ui:129
 #: ../gtk/src/window.cpp:843 ../gtk/src/window.cpp:897
 #: ../gtk/src/window.cpp:978
 msgid "Ok"
@@ -186,7 +186,7 @@ msgstr ""
 
 #: ../gtk/src/ui/media_stackpage.ui:70 ../gtk/src/ui/shape/bar_box.ui:998
 #: ../gtk/src/ui/shape/chart_box.ui:712 ../gtk/src/ui/shape/text_box.ui:42
-#: ../gtk/src/ui/widgets/map_box.ui:507 ../gtk/src/ui/widgets/track_box.ui:425
+#: ../gtk/src/ui/widgets/map_box.ui:468 ../gtk/src/ui/widgets/track_box.ui:386
 #: ../gtk/src/media.cpp:12 ../gtk/src/shape/bar.cpp:92
 #: ../gtk/src/shape/chart.cpp:48
 msgid "Icon"
@@ -444,15 +444,15 @@ msgstr ""
 #: ../gtk/src/ui/shape/chart_box.ui:404 ../gtk/src/ui/shape/chart_box.ui:508
 #: ../gtk/src/ui/shape/chart_box.ui:670 ../gtk/src/ui/shape/chart_box.ui:700
 #: ../gtk/src/ui/shape/chart_box.ui:900 ../gtk/src/ui/shape/text_box.ui:256
-#: ../gtk/src/ui/widgets/map_box.ui:437 ../gtk/src/ui/widgets/map_box.ui:466
-#: ../gtk/src/ui/widgets/map_box.ui:495 ../gtk/src/ui/widgets/map_box.ui:598
-#: ../gtk/src/ui/widgets/map_box.ui:717 ../gtk/src/ui/widgets/map_box.ui:836
-#: ../gtk/src/ui/widgets/track_box.ui:355
-#: ../gtk/src/ui/widgets/track_box.ui:384
-#: ../gtk/src/ui/widgets/track_box.ui:413
-#: ../gtk/src/ui/widgets/track_box.ui:516
-#: ../gtk/src/ui/widgets/track_box.ui:635
-#: ../gtk/src/ui/widgets/track_box.ui:754
+#: ../gtk/src/ui/widgets/map_box.ui:398 ../gtk/src/ui/widgets/map_box.ui:427
+#: ../gtk/src/ui/widgets/map_box.ui:456 ../gtk/src/ui/widgets/map_box.ui:559
+#: ../gtk/src/ui/widgets/map_box.ui:678 ../gtk/src/ui/widgets/map_box.ui:797
+#: ../gtk/src/ui/widgets/track_box.ui:316
+#: ../gtk/src/ui/widgets/track_box.ui:345
+#: ../gtk/src/ui/widgets/track_box.ui:374
+#: ../gtk/src/ui/widgets/track_box.ui:477
+#: ../gtk/src/ui/widgets/track_box.ui:596
+#: ../gtk/src/ui/widgets/track_box.ui:715
 msgid "Select a color"
 msgstr ""
 
@@ -822,17 +822,17 @@ msgid "Icon:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/bar_box.ui:1029 ../gtk/src/ui/shape/chart_box.ui:743
-#: ../gtk/src/ui/shape/text_box.ui:99 ../gtk/src/ui/widgets/map_box.ui:564
-#: ../gtk/src/ui/widgets/map_box.ui:683 ../gtk/src/ui/widgets/map_box.ui:802
-#: ../gtk/src/ui/widgets/track_box.ui:482
-#: ../gtk/src/ui/widgets/track_box.ui:601
-#: ../gtk/src/ui/widgets/track_box.ui:720
+#: ../gtk/src/ui/shape/text_box.ui:99 ../gtk/src/ui/widgets/map_box.ui:525
+#: ../gtk/src/ui/widgets/map_box.ui:644 ../gtk/src/ui/widgets/map_box.ui:763
+#: ../gtk/src/ui/widgets/track_box.ui:443
+#: ../gtk/src/ui/widgets/track_box.ui:562
+#: ../gtk/src/ui/widgets/track_box.ui:681
 msgid "Set the icon"
 msgstr ""
 
 #: ../gtk/src/ui/shape/bar_box.ui:1105 ../gtk/src/ui/shape/chart_box.ui:819
-#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/map_box.ui:135
-#: ../gtk/src/ui/widgets/track_box.ui:128
+#: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/map_box.ui:128
+#: ../gtk/src/ui/widgets/track_box.ui:121
 msgid "Use default"
 msgstr ""
 
@@ -938,99 +938,95 @@ msgstr ""
 msgid "Lap total:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:166
+#: ../gtk/src/ui/widgets/map_box.ui:159
 msgid "Map properties"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:196
+#: ../gtk/src/ui/widgets/map_box.ui:189
 msgid "Source:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:222 ../gtk/src/ui/widgets/track_box.ui:189
+#: ../gtk/src/ui/widgets/map_box.ui:215 ../gtk/src/ui/widgets/track_box.ui:182
 msgid "View:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:248
+#: ../gtk/src/ui/widgets/map_box.ui:241
 msgid "Zoom:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:279 ../gtk/src/ui/widgets/track_box.ui:215
+#: ../gtk/src/ui/widgets/map_box.ui:272 ../gtk/src/ui/widgets/track_box.ui:208
 msgid "Factor:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:329 ../gtk/src/ui/widgets/track_box.ui:247
-msgid "Path smooth:"
-msgstr ""
-
-#: ../gtk/src/ui/widgets/map_box.ui:361 ../gtk/src/ui/widgets/track_box.ui:279
+#: ../gtk/src/ui/widgets/map_box.ui:322 ../gtk/src/ui/widgets/track_box.ui:240
 msgid "Path thick:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:393 ../gtk/src/ui/widgets/track_box.ui:311
+#: ../gtk/src/ui/widgets/map_box.ui:354 ../gtk/src/ui/widgets/track_box.ui:272
 msgid "Path border:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:424 ../gtk/src/ui/widgets/track_box.ui:342
+#: ../gtk/src/ui/widgets/map_box.ui:385 ../gtk/src/ui/widgets/track_box.ui:303
 msgid "Path border color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:453 ../gtk/src/ui/widgets/track_box.ui:371
+#: ../gtk/src/ui/widgets/map_box.ui:414 ../gtk/src/ui/widgets/track_box.ui:332
 msgid "Path primary color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:482 ../gtk/src/ui/widgets/track_box.ui:400
+#: ../gtk/src/ui/widgets/map_box.ui:443 ../gtk/src/ui/widgets/track_box.ui:361
 msgid "Path secondary color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:528 ../gtk/src/ui/widgets/track_box.ui:446
+#: ../gtk/src/ui/widgets/map_box.ui:489 ../gtk/src/ui/widgets/track_box.ui:407
 msgid "Icon start enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:553 ../gtk/src/ui/widgets/track_box.ui:471
+#: ../gtk/src/ui/widgets/map_box.ui:514 ../gtk/src/ui/widgets/track_box.ui:432
 msgid "Icon start image:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:585 ../gtk/src/ui/widgets/track_box.ui:503
+#: ../gtk/src/ui/widgets/map_box.ui:546 ../gtk/src/ui/widgets/track_box.ui:464
 msgid "Icon start color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:615 ../gtk/src/ui/widgets/track_box.ui:533
+#: ../gtk/src/ui/widgets/map_box.ui:576 ../gtk/src/ui/widgets/track_box.ui:494
 msgid "Icon start size:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:647 ../gtk/src/ui/widgets/track_box.ui:565
+#: ../gtk/src/ui/widgets/map_box.ui:608 ../gtk/src/ui/widgets/track_box.ui:526
 msgid "Icon end enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:672 ../gtk/src/ui/widgets/track_box.ui:590
+#: ../gtk/src/ui/widgets/map_box.ui:633 ../gtk/src/ui/widgets/track_box.ui:551
 msgid "Icon end image:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:704 ../gtk/src/ui/widgets/track_box.ui:622
+#: ../gtk/src/ui/widgets/map_box.ui:665 ../gtk/src/ui/widgets/track_box.ui:583
 msgid "Icon end color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:734 ../gtk/src/ui/widgets/track_box.ui:652
+#: ../gtk/src/ui/widgets/map_box.ui:695 ../gtk/src/ui/widgets/track_box.ui:613
 msgid "Icon end size:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:766 ../gtk/src/ui/widgets/track_box.ui:684
+#: ../gtk/src/ui/widgets/map_box.ui:727 ../gtk/src/ui/widgets/track_box.ui:645
 msgid "Icon position enable:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:791 ../gtk/src/ui/widgets/track_box.ui:709
+#: ../gtk/src/ui/widgets/map_box.ui:752 ../gtk/src/ui/widgets/track_box.ui:670
 msgid "Icon position image:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:823 ../gtk/src/ui/widgets/track_box.ui:741
+#: ../gtk/src/ui/widgets/map_box.ui:784 ../gtk/src/ui/widgets/track_box.ui:702
 msgid "Icon position color:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:853 ../gtk/src/ui/widgets/track_box.ui:771
+#: ../gtk/src/ui/widgets/map_box.ui:814 ../gtk/src/ui/widgets/track_box.ui:732
 msgid "Icon position size:"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/map_box.ui:885 ../gtk/src/ui/widgets/track_box.ui:803
+#: ../gtk/src/ui/widgets/map_box.ui:846 ../gtk/src/ui/widgets/track_box.ui:764
 msgid "Icon position follow:"
 msgstr ""
 
@@ -1038,7 +1034,7 @@ msgstr ""
 msgid "Text properties"
 msgstr ""
 
-#: ../gtk/src/ui/widgets/track_box.ui:159
+#: ../gtk/src/ui/widgets/track_box.ui:152
 msgid "Track properties"
 msgstr ""
 

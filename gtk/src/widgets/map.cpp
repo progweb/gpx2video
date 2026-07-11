@@ -332,24 +332,6 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Path smooth
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_smooth_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"path_smooth_spinbutton\" object in " + resource_file_);
-
-	spinbutton->signal_value_changed().connect(sigc::bind(
-				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_int_changed), spinbutton, 
-					[this](const int &value) {
-						log_notice("Widget %s: path smooth changed to '%d'",
-							   widget_->name().c_str(), value);
-
-						((Map *) widget_->widget())->settings().setPathSmooth(value);
-
-						// Broadcast widget change
-						widget_->dispatchEvent(true);
-					}
-			));
-
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
 	if (!spinbutton)
@@ -715,13 +697,6 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(settings.divider());
-
-	// Path smooth
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_smooth_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"path_smooth_spinbutton\" object in " + resource_file_);
-
-	spinbutton->set_value(settings.pathSmooth());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");

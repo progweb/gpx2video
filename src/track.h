@@ -66,8 +66,8 @@ public:
 		return true;
 	}
 
-	static int lat2pixel(int zoom, float lat);
-	static int lon2pixel(int zoom, float lon);
+	static int lat2pixel(int zoom, double divider, float lat);
+	static int lon2pixel(int zoom, double divider, float lon);
 
 	// Draw track path
 	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider=1.0);

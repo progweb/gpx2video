@@ -792,10 +792,8 @@ bool Telemetry::run(void) {
 		if (data_.type() != TelemetryData::TypeError) {
 			gpx_extension = data_.hasValue((TelemetryData::Data) (TelemetryData::DataCadence | TelemetryData::DataHeartrate | TelemetryData::DataTemperature));
 
-			out_ << std::fixed;
 			out_ << std::setprecision(15);
 			out_ << "      <trkpt lat=\"" << data_.latitude() << "\" lon=\"" << data_.longitude() << "\">" << std::endl;
-			out_.unsetf(std::ios_base::fixed);
 			if (data_.hasValue(TelemetryData::DataElevation))
 				out_ << "        <ele>" << data_.elevation() << "</ele>" << std::endl;
 			out_ << "        <time>" << Datetime::timestamp2iso(data_.timestamp()) << "</time>" << std::endl;
