@@ -458,6 +458,9 @@ public:
 		const double& needleDistance(void) const;
 		void setNeedleDistance(double distance);
 
+		const double& needleWidth(void) const;
+		void setNeedleWidth(double width);
+
 		const double& needleBorder(void) const;
 		void setNeedleBorder(double border);
 
@@ -562,6 +565,7 @@ public:
 
 		NeedleType needle_type_;
 		double needle_distance_;
+		double needle_width_;
 		double needle_border_;
 		float needle_border_color_[4];
 		float needle_background_color_[4];

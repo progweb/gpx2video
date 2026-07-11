@@ -125,6 +125,7 @@ namespace layout
 
 	_needle_type(this, "needle-type", Node::ELEMENT, false),
 	_needle_distance(this, "needle-distance", Node::ELEMENT, false),
+	_needle_width(this, "needle-width", Node::ELEMENT, false),
 	_needle_border(this, "needle-border", Node::ELEMENT, false),
 	_needle_border_color(this, "needle-border-color", Node::ELEMENT, false),
 	_needle_background_color(this, "needle-background-color", Node::ELEMENT, false),
@@ -244,6 +245,7 @@ namespace layout
 
     getInterfaces().push_back(&_needle_type);
     getInterfaces().push_back(&_needle_distance);
+    getInterfaces().push_back(&_needle_width);
     getInterfaces().push_back(&_needle_border);
     getInterfaces().push_back(&_needle_border_color);
     getInterfaces().push_back(&_needle_background_color);

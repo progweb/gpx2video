@@ -661,6 +661,13 @@ namespace layout
     Decimal &needleDistance() { return _needle_distance; }
 
     ///
+    /// Get needle width
+    ///
+    /// @return the needle width attribute
+    ///
+    Decimal  &needleWidth() { return _needle_width; }
+
+    ///
     /// Get needle border
     ///
     /// @return the needle border attribute
@@ -891,6 +898,7 @@ namespace layout
 
 	String       _needle_type;
 	Decimal      _needle_distance;
+	Decimal      _needle_width;
 	Decimal      _needle_border;
 	String       _needle_border_color;
 	String       _needle_background_color;

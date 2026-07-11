@@ -797,7 +797,8 @@ void ElevationChartShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 			needle(cr, theme().needleType(),
 					x, y, font, str.c_str(),
-					theme().needleBorder(), theme().needleBackgroundColor(), theme().needleBorderColor());
+					theme().needleWidth(), theme().needleBorder(), 
+					theme().needlePrimaryColor(), theme().needleBackgroundColor(), theme().needleBorderColor());
 
 			switch (theme().needleType()) {
 			case VideoWidget::Theme::NeedleTypeIcon:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-10 10:50+0200\n"
+"POT-Creation-Date: 2026-07-11 12:07+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,127 +17,127 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: ../src/videowidget.cpp:2123
+#: ../src/videowidget.cpp:2132
 msgid "Arc"
 msgstr ""
 
-#: ../src/videowidget.cpp:2125
+#: ../src/videowidget.cpp:2134
 msgid "Bar"
 msgstr ""
 
-#: ../src/videowidget.cpp:2127
+#: ../src/videowidget.cpp:2136
 msgid "Chart"
 msgstr ""
 
-#: ../src/videowidget.cpp:2129 ../src/videowidget.cpp:2184
+#: ../src/videowidget.cpp:2138 ../src/videowidget.cpp:2193
 msgid "Text"
 msgstr ""
 
-#: ../src/videowidget.cpp:2138
+#: ../src/videowidget.cpp:2147
 msgid "Average speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:2140
+#: ../src/videowidget.cpp:2149
 msgid "Average ride speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:2142
+#: ../src/videowidget.cpp:2151
 msgid "Battery level"
 msgstr ""
 
-#: ../src/videowidget.cpp:2144
+#: ../src/videowidget.cpp:2153
 msgid "Cadence"
 msgstr ""
 
-#: ../src/videowidget.cpp:2146 ../gtk/src/ui/video_stackpage.ui:20
+#: ../src/videowidget.cpp:2155 ../gtk/src/ui/video_stackpage.ui:20
 msgid "Date"
 msgstr ""
 
-#: ../src/videowidget.cpp:2148
+#: ../src/videowidget.cpp:2157
 msgid "Distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:2150 ../gtk/src/ui/video_stackpage.ui:140
+#: ../src/videowidget.cpp:2159 ../gtk/src/ui/video_stackpage.ui:140
 msgid "Duration"
 msgstr ""
 
-#: ../src/videowidget.cpp:2152
+#: ../src/videowidget.cpp:2161
 msgid "Elevation"
 msgstr ""
 
-#: ../src/videowidget.cpp:2154
+#: ../src/videowidget.cpp:2163
 msgid "GForce"
 msgstr ""
 
-#: ../src/videowidget.cpp:2156
+#: ../src/videowidget.cpp:2165
 msgid "GPX"
 msgstr ""
 
-#: ../src/videowidget.cpp:2158
+#: ../src/videowidget.cpp:2167
 msgid "Grade / Slope"
 msgstr ""
 
-#: ../src/videowidget.cpp:2160 ../gtk/src/widgets/map.cpp:203
+#: ../src/videowidget.cpp:2169 ../gtk/src/widgets/map.cpp:203
 #: ../gtk/src/widgets/track.cpp:203
 msgid "Course"
 msgstr ""
 
-#: ../src/videowidget.cpp:2162 ../gtk/src/widgets/map.cpp:208
+#: ../src/videowidget.cpp:2171 ../gtk/src/widgets/map.cpp:208
 #: ../gtk/src/widgets/track.cpp:208
 msgid "Heading"
 msgstr ""
 
-#: ../src/videowidget.cpp:2164
+#: ../src/videowidget.cpp:2173
 msgid "Heart rate"
 msgstr ""
 
-#: ../src/videowidget.cpp:2166
+#: ../src/videowidget.cpp:2175
 msgid "Home distance"
 msgstr ""
 
-#: ../src/videowidget.cpp:2168 ../gtk/src/ui/media_stackpage.ui:102
+#: ../src/videowidget.cpp:2177 ../gtk/src/ui/media_stackpage.ui:102
 #: ../gtk/src/media.cpp:14
 msgid "Image"
 msgstr ""
 
-#: ../src/videowidget.cpp:2170
+#: ../src/videowidget.cpp:2179
 msgid "Lap"
 msgstr ""
 
-#: ../src/videowidget.cpp:2172 ../gtk/src/ui/widgets/map_box.ui:168
+#: ../src/videowidget.cpp:2181 ../gtk/src/ui/widgets/map_box.ui:168
 msgid "Map"
 msgstr ""
 
-#: ../src/videowidget.cpp:2174
+#: ../src/videowidget.cpp:2183
 msgid "Maximum speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:2176
+#: ../src/videowidget.cpp:2185
 msgid "Position"
 msgstr ""
 
-#: ../src/videowidget.cpp:2178
+#: ../src/videowidget.cpp:2187
 msgid "Power"
 msgstr ""
 
-#: ../src/videowidget.cpp:2180
+#: ../src/videowidget.cpp:2189
 msgid "Speed"
 msgstr ""
 
-#: ../src/videowidget.cpp:2182
+#: ../src/videowidget.cpp:2191
 msgid "Temperature"
 msgstr ""
 
-#: ../src/videowidget.cpp:2186 ../gtk/src/ui/video_stackpage.ui:50
+#: ../src/videowidget.cpp:2195 ../gtk/src/ui/video_stackpage.ui:50
 msgid "Time"
 msgstr ""
 
-#: ../src/videowidget.cpp:2188 ../gtk/src/ui/widgets/map_box.ui:300
+#: ../src/videowidget.cpp:2197 ../gtk/src/ui/widgets/map_box.ui:300
 #: ../gtk/src/ui/widgets/track_box.ui:161
 msgid "Track"
 msgstr ""
 
-#: ../src/videowidget.cpp:2190
+#: ../src/videowidget.cpp:2199
 msgid "Vertical speed"
 msgstr ""
 
@@ -154,7 +154,7 @@ msgid "Search by name"
 msgstr ""
 
 #: ../gtk/src/ui/append.ui:54 ../gtk/src/ui/video_frame.ui:161
-#: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:827
+#: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:896
 #: ../gtk/src/ui/shape/text_box.ui:183 ../gtk/src/ui/widgets/image_box.ui:105
 #: ../gtk/src/ui/widgets/map_box.ui:136 ../gtk/src/ui/widgets/track_box.ui:129
 #: ../gtk/src/window.cpp:843 ../gtk/src/window.cpp:897
@@ -187,7 +187,7 @@ msgid "Audio"
 msgstr ""
 
 #: ../gtk/src/ui/media_stackpage.ui:70 ../gtk/src/ui/shape/bar_box.ui:998
-#: ../gtk/src/ui/shape/chart_box.ui:712 ../gtk/src/ui/shape/text_box.ui:42
+#: ../gtk/src/ui/shape/chart_box.ui:781 ../gtk/src/ui/shape/text_box.ui:42
 #: ../gtk/src/ui/widgets/map_box.ui:468 ../gtk/src/ui/widgets/track_box.ui:386
 #: ../gtk/src/media.cpp:12 ../gtk/src/shape/bar.cpp:92
 #: ../gtk/src/shape/chart.cpp:48
@@ -441,15 +441,15 @@ msgstr ""
 #: ../gtk/src/ui/shape/bar_box.ui:660 ../gtk/src/ui/shape/bar_box.ui:690
 #: ../gtk/src/ui/shape/bar_box.ui:794 ../gtk/src/ui/shape/bar_box.ui:956
 #: ../gtk/src/ui/shape/bar_box.ui:986 ../gtk/src/ui/shape/bar_box.ui:1186
-#: ../gtk/src/ui/shape/chart_box.ui:208 ../gtk/src/ui/shape/chart_box.ui:237
-#: ../gtk/src/ui/shape/chart_box.ui:346 ../gtk/src/ui/shape/chart_box.ui:375
-#: ../gtk/src/ui/shape/chart_box.ui:404 ../gtk/src/ui/shape/chart_box.ui:508
-#: ../gtk/src/ui/shape/chart_box.ui:670 ../gtk/src/ui/shape/chart_box.ui:700
-#: ../gtk/src/ui/shape/chart_box.ui:900 ../gtk/src/ui/shape/text_box.ui:256
-#: ../gtk/src/ui/widgets/map_box.ui:398 ../gtk/src/ui/widgets/map_box.ui:427
-#: ../gtk/src/ui/widgets/map_box.ui:456 ../gtk/src/ui/widgets/map_box.ui:559
-#: ../gtk/src/ui/widgets/map_box.ui:678 ../gtk/src/ui/widgets/map_box.ui:797
-#: ../gtk/src/ui/widgets/track_box.ui:316
+#: ../gtk/src/ui/shape/chart_box.ui:215 ../gtk/src/ui/shape/chart_box.ui:244
+#: ../gtk/src/ui/shape/chart_box.ui:353 ../gtk/src/ui/shape/chart_box.ui:382
+#: ../gtk/src/ui/shape/chart_box.ui:411 ../gtk/src/ui/shape/chart_box.ui:515
+#: ../gtk/src/ui/shape/chart_box.ui:677 ../gtk/src/ui/shape/chart_box.ui:739
+#: ../gtk/src/ui/shape/chart_box.ui:769 ../gtk/src/ui/shape/chart_box.ui:969
+#: ../gtk/src/ui/shape/text_box.ui:256 ../gtk/src/ui/widgets/map_box.ui:398
+#: ../gtk/src/ui/widgets/map_box.ui:427 ../gtk/src/ui/widgets/map_box.ui:456
+#: ../gtk/src/ui/widgets/map_box.ui:559 ../gtk/src/ui/widgets/map_box.ui:678
+#: ../gtk/src/ui/widgets/map_box.ui:797 ../gtk/src/ui/widgets/track_box.ui:316
 #: ../gtk/src/ui/widgets/track_box.ui:345
 #: ../gtk/src/ui/widgets/track_box.ui:374
 #: ../gtk/src/ui/widgets/track_box.ui:477
@@ -748,17 +748,17 @@ msgid "Tick label border color:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/arc_box.ui:659 ../gtk/src/ui/shape/bar_box.ui:806
-#: ../gtk/src/ui/shape/chart_box.ui:520
+#: ../gtk/src/ui/shape/chart_box.ui:527
 msgid "Needle"
 msgstr ""
 
 #: ../gtk/src/ui/shape/arc_box.ui:680 ../gtk/src/ui/shape/bar_box.ui:827
-#: ../gtk/src/ui/shape/chart_box.ui:541
+#: ../gtk/src/ui/shape/chart_box.ui:548
 msgid "Needle enable:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/arc_box.ui:706 ../gtk/src/ui/shape/bar_box.ui:853
-#: ../gtk/src/ui/shape/chart_box.ui:567
+#: ../gtk/src/ui/shape/chart_box.ui:574
 msgid "Needle type:"
 msgstr ""
 
@@ -786,44 +786,44 @@ msgstr ""
 msgid "Tick align:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:702 ../gtk/src/ui/shape/chart_box.ui:416
+#: ../gtk/src/ui/shape/bar_box.ui:702 ../gtk/src/ui/shape/chart_box.ui:423
 msgid "Cursor"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:723 ../gtk/src/ui/shape/chart_box.ui:437
+#: ../gtk/src/ui/shape/bar_box.ui:723 ../gtk/src/ui/shape/chart_box.ui:444
 msgid "Cursor enable:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:749 ../gtk/src/ui/shape/chart_box.ui:463
+#: ../gtk/src/ui/shape/bar_box.ui:749 ../gtk/src/ui/shape/chart_box.ui:470
 msgid "Cursor width:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:781 ../gtk/src/ui/shape/chart_box.ui:495
+#: ../gtk/src/ui/shape/bar_box.ui:781 ../gtk/src/ui/shape/chart_box.ui:502
 msgid "Cursor color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:879 ../gtk/src/ui/shape/chart_box.ui:593
+#: ../gtk/src/ui/shape/bar_box.ui:879 ../gtk/src/ui/shape/chart_box.ui:600
 msgid "Needle distance:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:911 ../gtk/src/ui/shape/chart_box.ui:625
+#: ../gtk/src/ui/shape/bar_box.ui:911 ../gtk/src/ui/shape/chart_box.ui:694
 msgid "Needle border:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:943 ../gtk/src/ui/shape/chart_box.ui:657
+#: ../gtk/src/ui/shape/bar_box.ui:943 ../gtk/src/ui/shape/chart_box.ui:726
 msgid "Needle border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:973 ../gtk/src/ui/shape/chart_box.ui:687
+#: ../gtk/src/ui/shape/bar_box.ui:973 ../gtk/src/ui/shape/chart_box.ui:756
 msgid "Needle background color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:1018 ../gtk/src/ui/shape/chart_box.ui:732
+#: ../gtk/src/ui/shape/bar_box.ui:1018 ../gtk/src/ui/shape/chart_box.ui:801
 #: ../gtk/src/ui/shape/text_box.ui:88
 msgid "Icon:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:1029 ../gtk/src/ui/shape/chart_box.ui:743
+#: ../gtk/src/ui/shape/bar_box.ui:1029 ../gtk/src/ui/shape/chart_box.ui:812
 #: ../gtk/src/ui/shape/text_box.ui:99 ../gtk/src/ui/widgets/map_box.ui:525
 #: ../gtk/src/ui/widgets/map_box.ui:644 ../gtk/src/ui/widgets/map_box.ui:763
 #: ../gtk/src/ui/widgets/track_box.ui:443
@@ -832,72 +832,80 @@ msgstr ""
 msgid "Set the icon"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:1105 ../gtk/src/ui/shape/chart_box.ui:819
+#: ../gtk/src/ui/shape/bar_box.ui:1105 ../gtk/src/ui/shape/chart_box.ui:888
 #: ../gtk/src/ui/shape/text_box.ui:175 ../gtk/src/ui/widgets/map_box.ui:128
 #: ../gtk/src/ui/widgets/track_box.ui:121
 msgid "Use default"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:1142 ../gtk/src/ui/shape/chart_box.ui:856
+#: ../gtk/src/ui/shape/bar_box.ui:1142 ../gtk/src/ui/shape/chart_box.ui:925
 #: ../gtk/src/ui/shape/text_box.ui:212
 msgid "Icon size:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/bar_box.ui:1173 ../gtk/src/ui/shape/chart_box.ui:887
+#: ../gtk/src/ui/shape/bar_box.ui:1173 ../gtk/src/ui/shape/chart_box.ui:956
 #: ../gtk/src/ui/shape/text_box.ui:243
 msgid "Icon color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:76
+#: ../gtk/src/ui/shape/chart_box.ui:83
 msgid "Chart extension"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:85
+#: ../gtk/src/ui/shape/chart_box.ui:92
 msgid "Axis"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:106
+#: ../gtk/src/ui/shape/chart_box.ui:113
 msgid "Axis enable:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:132
+#: ../gtk/src/ui/shape/chart_box.ui:139
 msgid "Axis thick:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:164
+#: ../gtk/src/ui/shape/chart_box.ui:171
 msgid "Axis border:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:195
+#: ../gtk/src/ui/shape/chart_box.ui:202
 msgid "Axis border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:224
+#: ../gtk/src/ui/shape/chart_box.ui:231
 msgid "Axis color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:249
+#: ../gtk/src/ui/shape/chart_box.ui:256
 msgid "Curve"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:270
+#: ../gtk/src/ui/shape/chart_box.ui:277
 msgid "Curve thick:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:302
+#: ../gtk/src/ui/shape/chart_box.ui:309
 msgid "Curve border:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:333
+#: ../gtk/src/ui/shape/chart_box.ui:340
 msgid "Curve border color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:362
+#: ../gtk/src/ui/shape/chart_box.ui:369
 msgid "Curve color:"
 msgstr ""
 
-#: ../gtk/src/ui/shape/chart_box.ui:391
+#: ../gtk/src/ui/shape/chart_box.ui:398
 msgid "Curve fill color:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/chart_box.ui:632
+msgid "Needle width:"
+msgstr ""
+
+#: ../gtk/src/ui/shape/chart_box.ui:664
+msgid "Needle color:"
 msgstr ""
 
 #: ../gtk/src/ui/shape/text_box.ui:33

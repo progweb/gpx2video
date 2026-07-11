@@ -392,6 +392,7 @@ void BarShape::icon(cairo_t *cr, double v, const std::string &filename, const fl
 	RsvgHandle *handle = NULL;
 
 	double size;
+	double border;
 	double needlesize;
 	double distance;
 
@@ -410,6 +411,7 @@ void BarShape::icon(cairo_t *cr, double v, const std::string &filename, const fl
     }
 
 	// Scaling
+	border = size2pixels(theme().needleBorder()) / 2.0;
 	distance = size2pixels(theme().needleDistance());
 
 	// Compute icon size
@@ -421,9 +423,9 @@ void BarShape::icon(cairo_t *cr, double v, const std::string &filename, const fl
 	needlesize = theme().hasFlag(VideoWidget::Theme::FlagNeedle) ? (size / 6) : 0;
 
 	if (orientation_ == VideoWidget::OrientationVertical)
-		p.x = p.x - (size / 2) - needlesize - distance;
+		p.x = p.x - (size / 2) - needlesize - border - distance;
 	else
-		p.y  = p.y - (size / 2) - needlesize - distance;
+		p.y  = p.y - (size / 2) - needlesize - border - distance;
 
 	if (apply_color) {
 		// Create alpha only surface

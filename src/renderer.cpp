@@ -936,6 +936,7 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	// Widget needle settings
 	widget->theme().setNeedleType(needle_type);
 	widget->theme().setNeedleDistance(w->needleDistance());
+	widget->theme().setNeedleWidth(w->needleWidth());
 	widget->theme().setNeedleBorder(w->needleBorder());
 	widget->theme().setNeedleBorderColor((const char *) w->needleBorderColor());
 	widget->theme().setNeedleBackgroundColor((const char *) w->needleBackgroundColor());

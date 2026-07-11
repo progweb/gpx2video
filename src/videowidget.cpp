@@ -109,6 +109,7 @@ VideoWidget::Theme::Theme() {
 
 	setNeedleType(VideoWidget::Theme::NeedleTypeBasic);
 	setNeedleDistance(0);
+	setNeedleWidth(1.0);
 	setNeedleBorder(0);
 	setNeedleBorderColor(1.0, 1.0, 1.0, 1.0);
 	setNeedleBackgroundColor(0.0, 0.0, 0.0, 0.8);
@@ -939,6 +940,14 @@ void VideoWidget::Theme::setNeedleDistance(double distance) {
 		return;
 
 	needle_distance_ = distance;
+}
+
+const double& VideoWidget::Theme::needleWidth(void) const {
+	return needle_width_;
+}
+
+void VideoWidget::Theme::setNeedleWidth(double width) {
+	needle_width_ = width;
 }
 
 const double& VideoWidget::Theme::needleBorder(void) const {

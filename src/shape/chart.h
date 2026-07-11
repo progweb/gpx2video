@@ -106,7 +106,8 @@ public:
 			const float *fill, const float *outline, const char *text);
 	void needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 		double x, double y, Font &font, const char *text,
-		double border, const float *fill, const float *outline);
+		double width, double border, 
+		const float *color, const float *fill, const float *outline);
 	void icon(cairo_t *cr, double x, double y, const std::string &filename, const float *fill);
 
 	void curve_create(struct curve **curvep, cairo_t *cr, double width, double border, 

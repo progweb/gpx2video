@@ -417,6 +417,40 @@ void GPX2VideoChartShapeSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Needle width
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("needle_width_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"needle_width_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoChartShapeSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: needle width changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						widget_->theme().setNeedleWidth(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
+	// Needle color
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"needle_color_button\" object in " + resource_file_);
+	colorbutton->signal_color_set().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoChartShapeSettingsBox::on_widget_color_changed), colorbutton, 
+					[this](const std::string &color) {
+						log_notice("Widget %s: needle color changed to '%s'", 
+								widget_->name().c_str(), color.c_str());
+
+						widget_->theme().setNeedlePrimaryColor(color);
+
+						// Broadcast widget change
+						widget_->dispatchEvent();
+					}
+			));
+
 	// Needle border
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("needle_border_spinbutton");
 	if (!spinbutton)
@@ -648,14 +682,14 @@ void GPX2VideoChartShapeSettingsBox::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget needle enable switch
+	// Needle enable switch
 	sw = ref_builder_->get_widget<Gtk::Switch>("needle_enable_switch");
 	if (!sw)
 		throw std::runtime_error("No \"needle_enable_switch\" object in " + resource_file_);
 
 	sw->set_active(widget_->theme().hasFlag(VideoWidget::Theme::FlagNeedle));
 
-	// Widget needle type combobox
+	// Needle type combobox
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("needle_type_combobox");
 	if (!combobox)
 		throw std::runtime_error("No \"needle_type_combobox\" object in " + resource_file_);
@@ -665,21 +699,39 @@ void GPX2VideoChartShapeSettingsBox::update_content(void) {
 	if (find_in_listtore(needle_type_model_, widget_->theme().needleType(), iter))
 		combobox->set_active(iter);
 
-	// Widget needle distance button
+	// Needle distance button
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("needle_distance_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"needle_distance_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(widget_->theme().needleDistance());
 
-	// Widget needle border button
+	// Needle width button
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("needle_width_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"needle_width_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(widget_->theme().needleWidth());
+
+	// Needle color button
+	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_color_button");
+	if (!colorbutton)
+		throw std::runtime_error("No \"needle_color_button\" object in " + resource_file_);
+
+	color = widget_->theme().needlePrimaryColor();
+
+	rgba.set_rgba(color[0], color[1], color[2], color[3]);
+
+	colorbutton->set_rgba(rgba);
+
+	// Needle border button
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("needle_border_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"needle_border_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(widget_->theme().needleBorder());
 
-	// Widget needle border color button
+	// Needle border color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_border_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"needle_border_color_button\" object in " + resource_file_);
@@ -690,7 +742,7 @@ void GPX2VideoChartShapeSettingsBox::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget needle background color button
+	// Needle background color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("needle_background_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"needle_background_color_button\" object in " + resource_file_);
@@ -701,7 +753,7 @@ void GPX2VideoChartShapeSettingsBox::update_content(void) {
 
 	colorbutton->set_rgba(rgba);
 
-	// Widget icon image
+	// Icon image
 	image = ref_builder_->get_widget<Gtk::Image>("icon_image");
 	if (!image)
 		throw std::runtime_error("No \"icon_image\" object in " + resource_file_);
@@ -709,14 +761,14 @@ void GPX2VideoChartShapeSettingsBox::update_content(void) {
 	image->set_pixel_size(24);
 	image->set(widget_->widget()->getIconFilename(widget_->theme().icon()));
 
-	// icon size
+	// Icon size
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("icon_size_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"icon_size_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(widget_->theme().iconSize());
 
-	// Widget icon color button
+	// Icon color button
 	colorbutton = ref_builder_->get_widget<Gtk::ColorButton>("icon_color_button");
 	if (!colorbutton)
 		throw std::runtime_error("No \"icon_color_button\" object in " + resource_file_);

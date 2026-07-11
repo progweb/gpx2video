@@ -194,11 +194,12 @@ void ChartShape::value(cairo_t *cr, double x, double y, ChartShape::Font &font,
 	// Compute position
 	p = locate(x, y);
 
-	p.x = p.x + (width / 2) + padding + needlesize + distance;
+	p.x = p.x + (width / 2) + padding + needlesize;
+	p.y = p.y - distance;
 
 	if (theme().hasFlag(VideoWidget::Theme::FlagNeedle)) {
 		if (theme().needleType() == VideoWidget::Theme::NeedleTypeValue) {
-			p.x = p.x - padding;
+			p.x = p.x - padding + distance;
 			p.y = p.y - height - padding;
 		}
 	}
@@ -259,9 +260,10 @@ void ChartShape::unit(cairo_t *cr, ChartShape::Font &font,
 
 void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 	double x, double y, ChartShape::Font &font, const char *text,
-	double border, const float *fill, const float *outline) {
+	double width, double border, 
+	const float *color, const float *fill, const float *outline) {
 	int txtx, txty;
-	int width, height;
+	int txtwidth, txtheight;
 
 	double size;
 	double needlesize;
@@ -272,7 +274,8 @@ void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 	double padding;
 
 	// Scaling
-	border = size2pixels(theme().needleBorder()) / 2.0;
+	width = size2pixels(width);
+	border = size2pixels(border) / 2.0;
 	distance = size2pixels(theme().needleDistance());
 
 	// Compute icon size
@@ -290,10 +293,19 @@ void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 		needlesize = size / 6;
 
 		// Compute position
-		p.x = p.x + distance;
+		p.y = p.y - distance;
 
 		cairo_save(cr);
 
+		// line
+		cairo_move_to(cr, p.x, p.y);
+		cairo_line_to(cr, p.x, p.y + distance);
+		cairo_set_source_rgba(cr, color[0], color[1], color[2], color[3]);
+		cairo_set_line_width(cr, width);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+		cairo_stroke(cr);
+
+		// needle
 		cairo_move_to(cr, p.x, p.y);
 		cairo_line_to(cr, p.x + needlesize, p.y - needlesize);
 		cairo_line_to(cr, p.x + needlesize, p.y + needlesize);
@@ -304,29 +316,31 @@ void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 		cairo_set_line_width(cr, border);
 		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
 		cairo_stroke(cr);
+
 		cairo_restore(cr);
+
 		break;
 
 	case VideoWidget::Theme::NeedleTypeValue:
 		// Text dimensions
-		this->extents(cr, font, ChartShape::TextNumeric, text, txtx, txty, width, height);
+		this->extents(cr, font, ChartShape::TextNumeric, text, txtx, txty, txtwidth, txtheight);
 
 		// Needle size
-		needlesize = 2 * (height / 3);
+		needlesize = 2 * (txtheight / 3);
 
 		// Compute position
-		p.x = p.x + (width / 2) + needlesize + distance;
-		p.y = p.y - (height / 2) - needlesize;
+		p.x = p.x + (txtwidth / 2) + needlesize + distance;
+		p.y = p.y - (txtheight / 2) - needlesize - distance;
 
 		// Draw needle
 		cairo_save(cr);
 
-		cairo_move_to(cr, p.x - (width / 2) - padding, p.y - (height / 2) - padding);
-		cairo_line_to(cr, p.x + (width / 2) + padding, p.y - (height / 2) - padding);
-		cairo_line_to(cr, p.x + (width / 2) + padding, p.y + (height / 2) + padding);
-		cairo_line_to(cr, p.x - (width / 2) + needlesize - padding, p.y + (height / 2) + padding);
-		cairo_line_to(cr, p.x - (width / 2) - needlesize, p.y + (height / 2) + needlesize);
-		cairo_line_to(cr, p.x - (width / 2) - padding, p.y + (height / 2) - needlesize + padding);
+		cairo_move_to(cr, p.x - (txtwidth / 2) - padding, p.y - (txtheight / 2) - padding);
+		cairo_line_to(cr, p.x + (txtwidth / 2) + padding, p.y - (txtheight / 2) - padding);
+		cairo_line_to(cr, p.x + (txtwidth / 2) + padding, p.y + (txtheight / 2) + padding);
+		cairo_line_to(cr, p.x - (txtwidth / 2) + needlesize - padding, p.y + (txtheight / 2) + padding);
+		cairo_line_to(cr, p.x - (txtwidth / 2) - needlesize - distance, p.y + (txtheight / 2) + needlesize + distance);
+		cairo_line_to(cr, p.x - (txtwidth / 2) - padding, p.y + (txtheight / 2) - needlesize + padding);
 
 		cairo_close_path(cr);
 		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
@@ -334,6 +348,40 @@ void ChartShape::needle(cairo_t *cr, VideoWidget::Theme::NeedleType type,
 		cairo_set_line_width(cr, border);
 		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
 		cairo_stroke(cr);
+
+		cairo_restore(cr);
+
+		break;
+
+	case VideoWidget::Theme::NeedleTypeIcon:
+		// Needle size
+		needlesize = size / 6;
+
+		// Compute position
+		p.y = p.y - distance;
+
+		cairo_save(cr);
+
+		// line
+		cairo_move_to(cr, p.x, p.y);
+		cairo_line_to(cr, p.x, p.y + distance);
+		cairo_set_source_rgba(cr, color[0], color[1], color[2], color[3]);
+		cairo_set_line_width(cr, width);
+		cairo_set_line_join(cr, CAIRO_LINE_JOIN_ROUND);
+		cairo_stroke(cr);
+
+		// needle
+		cairo_move_to(cr, p.x, p.y);
+		cairo_line_to(cr, p.x + needlesize, p.y - needlesize);
+		cairo_line_to(cr, p.x - needlesize, p.y - needlesize);
+
+		cairo_close_path(cr);
+		cairo_set_source_rgba(cr, fill[0], fill[1], fill[2], fill[3]);
+		cairo_fill_preserve(cr);
+		cairo_set_line_width(cr, border);
+		cairo_set_source_rgba(cr, outline[0], outline[1], outline[2], outline[3]);
+		cairo_stroke(cr);
+
 		cairo_restore(cr);
 
 		break;
@@ -359,9 +407,16 @@ void ChartShape::icon(cairo_t *cr, double x, double y, const std::string &filena
 	RsvgHandle *handle = NULL;
 
 	double size;
+	double border;
+	double needlesize;
+	double distance;
 
 	if (filename.empty())
 		return;
+
+	// Scaling
+	border = size2pixels(theme().needleBorder()) / 2.0;
+	distance = size2pixels(theme().needleDistance());
 
 	// Set color
 	apply_color = (fill != NULL) && (fill[3] != 0);
@@ -379,6 +434,10 @@ void ChartShape::icon(cairo_t *cr, double x, double y, const std::string &filena
 
 	// Compute position
 	p = locate(x, y);
+
+	needlesize = theme().hasFlag(VideoWidget::Theme::FlagNeedle) ? (size / 6) : 0;
+
+	p.y = p.y - (size / 2) - needlesize - border - distance;
 
 	if (apply_color) {
 		// Create alpha only surface
@@ -527,8 +586,10 @@ void ChartShape::xmlwrite(std::ostream &os) {
 	os << "<with-needle>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagNeedle)) << "</with-needle>" << std::endl;
 	os << "<needle-type>" << VideoWidget::needletype2string(theme().needleType()) << "</needle-type>" << std::endl;
 	os << "<needle-distance>" << theme().needleDistance() << "</needle-distance>" << std::endl;
+	os << "<needle-width>" << theme().needleWidth() << "</needle-width>" << std::endl;
 	os << "<needle-border>" << theme().needleBorder() << "</needle-border>" << std::endl;
 	os << "<needle-border-color>" << VideoWidget::Theme::color2hex(theme().needleBorderColor()) << "</needle-border-color>" << std::endl;
+	os << "<needle-primary-color>" << VideoWidget::Theme::color2hex(theme().needlePrimaryColor()) << "</needle-primary-color>" << std::endl;
 	os << "<needle-background-color>" << VideoWidget::Theme::color2hex(theme().needleBackgroundColor()) << "</needle-background-color>" << std::endl;
 
 	os << "<icon-name>" << VideoWidget::icon2string(theme_.icon()) << theme_.iconFile() << "</icon-name>" << std::endl;
