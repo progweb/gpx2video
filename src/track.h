@@ -133,6 +133,7 @@ protected:
 	OIIO::ImageBuf *icon_start_buf_;
 	OIIO::ImageBuf *icon_position_buf_;
 
+	TelemetryData last_wpt_;
 	TelemetryData last_data_;
 
 	double divider_;

@@ -507,6 +507,7 @@ bool Track::preinit(void) {
 
 	is_init_ = false;
 
+	last_wpt_ = TelemetryData();
 	last_data_ = TelemetryData();
 
 	// Assets path
@@ -996,7 +997,7 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 
 		int width, height;
 
-		TelemetryData wpt = last_data_;
+		TelemetryData wpt = (last_wpt_.type() == TelemetryData::TypeUnknown) ? last_data_ : last_wpt_;
 
 		const OIIO::ImageSpec& spec = outbuf.spec();
 
@@ -1021,13 +1022,13 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		}
 
 		// Move segment at origin
-		xoff = std::min(x1, x2);
-		yoff = std::min(y1, y2);
+		xoff = std::min(x1, x2) - path_thick;
+		yoff = std::min(y1, y2) - path_thick;
 
-		x1 = x1 - xoff + path_thick;
-		x2 = x2 - xoff + path_thick;
-		y1 = y1 - yoff + path_thick;
-		y2 = y2 - yoff + path_thick;
+		x1 = x1 - xoff;
+		x2 = x2 - xoff;
+		y1 = y1 - yoff;
+		y2 = y2 - yoff;
 
 		// Compute area change
 		width = std::max(x1, x2) + path_thick;
@@ -1056,6 +1057,9 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 			if (result == TelemetrySource::DataEof)
 				break;
 
+			if (wpt.timestamp() < last_data_.timestamp())
+				continue;
+
 			if (wpt.timestamp() > data.timestamp())
 				break;
 
@@ -1063,10 +1067,13 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 			y = Track::lat2pixel(zoom, divider, wpt.latitude()) - pevy1_;
 
 			// Offset
-			x = x - xoff + path_thick;
-			y = y - yoff + path_thick;
+			x = x - xoff;
+			y = y - yoff;
 
 			cairo_line_to(cairo, x, y);
+
+			// Save last measured point
+			last_wpt_ = wpt;
 		}
 
 		// Add the current point
@@ -1075,9 +1082,6 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		cairo_restore(cairo);
 
 		// Overlay offset
-		xoff -= path_thick;
-		yoff -= path_thick;
-
 		roi = OIIO::ROI(xoff, xoff + width, yoff, yoff + height);
 	}
 
