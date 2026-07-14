@@ -39,6 +39,7 @@ public:
 		IconPositionStop,
 		IconPositionBike,
 		IconPositionDronePotensic,
+		IconDronePotensic,
 
 		// At last user icons
 		IconUserFile,

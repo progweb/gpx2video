@@ -280,6 +280,8 @@ TrackSettings::Icon TrackSettings::string2icon(std::string &s) {
 		icon = TrackSettings::IconPositionBike;
 	else if (s == "internal:position-drone-potensic")
 		icon = TrackSettings::IconPositionDronePotensic;
+	else if (s == "internal:drone-potensic")
+		icon = TrackSettings::IconDronePotensic;
 	// At last user icons
 	else if (Utils::starts_with(s, "file:"))
 		icon = TrackSettings::IconUserFile;
@@ -345,6 +347,8 @@ std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 		return "internal:position-bike";
 	case TrackSettings::IconPositionDronePotensic:
 		return "internal:position-drone-potensic";
+	case TrackSettings::IconDronePotensic:
+		return "internal:drone-potensic";
 
 	// At last user icons
 	case TrackSettings::IconUserFile:
@@ -1499,6 +1503,8 @@ std::string Track::getIconFilename(TrackSettings::Icon icon, TrackSettings::Icon
 		return path + "/position-bike.svg";
 	case TrackSettings::IconPositionDronePotensic:
 		return path + "/position-drone-potensic.svg";
+	case TrackSettings::IconDronePotensic:
+		return path + "/drone-potensic.svg";
 	default:
 		return "";
 	}
