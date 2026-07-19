@@ -2056,7 +2056,8 @@ void TelemetrySource::smooth_step_two(void) {
 	}
 
 	// Fill 'verticalspeed' window
-	if (verticalspeed_method == TelemetrySettings::SmoothWindowedMovingAverage) {
+	if ((verticalspeed_method == TelemetrySettings::SmoothWindowedMovingAverage) 
+			|| (verticalspeed_method == TelemetrySettings::SmoothSavitzkyGolay)) {
 		for (size_t i=0; i<verticalspeed_window/2; i++) {
 			nextPoint = pool_.next(i);
 
