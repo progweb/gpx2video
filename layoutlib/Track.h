@@ -212,11 +212,11 @@ namespace layout
     String  &view() { return _view; }
 
 	///
-	/// Get factor
+	/// Get zoom
 	/// 
-	/// @return the factor elememnt
+	/// @return the zoom elememnt
 	///
-	Decimal &factor() { return _factor; }
+	Decimal &zoom() { return _zoom; }
 
     ///
     /// Get border
@@ -355,7 +355,7 @@ namespace layout
 	Decimal      _padding_bottom;
 
 	String       _view;
-	Decimal      _factor;
+	Decimal      _zoom;
 	Unsigned     _border;
 	String       _bordercolor;
 	Unsigned     _round_corner;

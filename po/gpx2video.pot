@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-11 12:07+0200\n"
+"POT-Creation-Date: 2026-07-24 19:17+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -157,8 +157,8 @@ msgstr ""
 #: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:896
 #: ../gtk/src/ui/shape/text_box.ui:183 ../gtk/src/ui/widgets/image_box.ui:105
 #: ../gtk/src/ui/widgets/map_box.ui:136 ../gtk/src/ui/widgets/track_box.ui:129
-#: ../gtk/src/window.cpp:843 ../gtk/src/window.cpp:897
-#: ../gtk/src/window.cpp:978
+#: ../gtk/src/window.cpp:845 ../gtk/src/window.cpp:899
+#: ../gtk/src/window.cpp:980
 msgid "Ok"
 msgstr ""
 
@@ -961,11 +961,11 @@ msgid "View:"
 msgstr ""
 
 #: ../gtk/src/ui/widgets/map_box.ui:241
-msgid "Zoom:"
+msgid "Scale:"
 msgstr ""
 
 #: ../gtk/src/ui/widgets/map_box.ui:272 ../gtk/src/ui/widgets/track_box.ui:208
-msgid "Factor:"
+msgid "Zoom:"
 msgstr ""
 
 #: ../gtk/src/ui/widgets/map_box.ui:322 ../gtk/src/ui/widgets/track_box.ui:240
@@ -1193,39 +1193,39 @@ msgstr ""
 msgid "Center"
 msgstr ""
 
-#: ../gtk/src/window.cpp:799
+#: ../gtk/src/window.cpp:801
 msgid "All video files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:803 ../gtk/src/window.cpp:862
+#: ../gtk/src/window.cpp:805 ../gtk/src/window.cpp:864
 msgid "All layout files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:817 ../gtk/src/window.cpp:834
+#: ../gtk/src/window.cpp:819 ../gtk/src/window.cpp:836
 msgid "Open a file"
 msgstr ""
 
-#: ../gtk/src/window.cpp:872 ../gtk/src/window.cpp:889
+#: ../gtk/src/window.cpp:874 ../gtk/src/window.cpp:891
 msgid "Export layout"
 msgstr ""
 
-#: ../gtk/src/window.cpp:921
+#: ../gtk/src/window.cpp:923
 msgid "All GPX/TCX files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:927
+#: ../gtk/src/window.cpp:929
 msgid "All CSV files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:931
+#: ../gtk/src/window.cpp:933
 msgid "All icon files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:935
+#: ../gtk/src/window.cpp:937
 msgid "All image files"
 msgstr ""
 
-#: ../gtk/src/window.cpp:949 ../gtk/src/window.cpp:968
+#: ../gtk/src/window.cpp:951 ../gtk/src/window.cpp:970
 msgid "Open an image or a telemetry file"
 msgstr ""
 

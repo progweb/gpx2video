@@ -307,6 +307,8 @@ GPX2VideoApplicationWindow::~GPX2VideoApplicationWindow() {
 	// Stop & destroy GPX2Video application thread
 	stop();
 
+	if (renderer_)
+		delete renderer_;
 	if (video_area_)
 		delete video_area_;
 }

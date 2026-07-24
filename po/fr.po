@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gpx2video\n"
 "Report-Msgid-Bugs-To: https://github.com/gpx2video\n"
-"POT-Creation-Date: 2026-07-11 12:07+0200\n"
+"POT-Creation-Date: 2026-07-24 19:17+0200\n"
 "PO-Revision-Date: 2026-05-17 16:18+0200\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -25,7 +25,7 @@ msgstr "Barre"
 
 #: ../src/videowidget.cpp:2136
 msgid "Chart"
-msgstr ""
+msgstr "Graphique"
 
 #: ../src/videowidget.cpp:2138 ../src/videowidget.cpp:2193
 msgid "Text"
@@ -155,8 +155,8 @@ msgstr "Rechercher par nom"
 #: ../gtk/src/ui/shape/bar_box.ui:1113 ../gtk/src/ui/shape/chart_box.ui:896
 #: ../gtk/src/ui/shape/text_box.ui:183 ../gtk/src/ui/widgets/image_box.ui:105
 #: ../gtk/src/ui/widgets/map_box.ui:136 ../gtk/src/ui/widgets/track_box.ui:129
-#: ../gtk/src/window.cpp:843 ../gtk/src/window.cpp:897
-#: ../gtk/src/window.cpp:978
+#: ../gtk/src/window.cpp:845 ../gtk/src/window.cpp:899
+#: ../gtk/src/window.cpp:980
 msgid "Ok"
 msgstr "Ok"
 
@@ -198,11 +198,11 @@ msgstr "Préférences"
 
 #: ../gtk/src/ui/settings_stackpage.ui:38 ../gtk/src/videostackpage.h:27
 msgid "Video"
-msgstr ""
+msgstr "Vidéo"
 
 #: ../gtk/src/ui/settings_stackpage.ui:70 ../gtk/src/widgetstackpage.h:33
 msgid "Widgets"
-msgstr ""
+msgstr "Widgets"
 
 #: ../gtk/src/ui/telemetry_frame.ui:150
 msgid "Telemetry properties"
@@ -347,7 +347,7 @@ msgstr "Propriétés du widget"
 
 #: ../gtk/src/ui/widget_frame.ui:259
 msgid "Use default setting values"
-msgstr ""
+msgstr "Appliquer les valeurs par défaut"
 
 #: ../gtk/src/ui/widget_frame.ui:267
 msgid "Shape"
@@ -944,7 +944,7 @@ msgstr "Paramètres des tours"
 
 #: ../gtk/src/ui/widgets/lap_box.ui:45
 msgid "Lap total:"
-msgstr ""
+msgstr "Nombre total de tours :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:159
 msgid "Map properties"
@@ -959,11 +959,11 @@ msgid "View:"
 msgstr "Mode :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:241
-msgid "Zoom:"
+msgid "Scale:"
 msgstr "Echelle :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:272 ../gtk/src/ui/widgets/track_box.ui:208
-msgid "Factor:"
+msgid "Zoom:"
 msgstr "Zoom :"
 
 #: ../gtk/src/ui/widgets/map_box.ui:322 ../gtk/src/ui/widgets/track_box.ui:240
@@ -1191,39 +1191,39 @@ msgstr "Très épais (1000)"
 msgid "Center"
 msgstr "Centre"
 
-#: ../gtk/src/window.cpp:799
+#: ../gtk/src/window.cpp:801
 msgid "All video files"
 msgstr "Tous les fichiers vidéo"
 
-#: ../gtk/src/window.cpp:803 ../gtk/src/window.cpp:862
+#: ../gtk/src/window.cpp:805 ../gtk/src/window.cpp:864
 msgid "All layout files"
 msgstr "Tous les fichiers layout"
 
-#: ../gtk/src/window.cpp:817 ../gtk/src/window.cpp:834
+#: ../gtk/src/window.cpp:819 ../gtk/src/window.cpp:836
 msgid "Open a file"
 msgstr "Ouvrir un fichier"
 
-#: ../gtk/src/window.cpp:872 ../gtk/src/window.cpp:889
+#: ../gtk/src/window.cpp:874 ../gtk/src/window.cpp:891
 msgid "Export layout"
 msgstr "Exporter le fichier layout"
 
-#: ../gtk/src/window.cpp:921
+#: ../gtk/src/window.cpp:923
 msgid "All GPX/TCX files"
 msgstr "Tous les fichiers GPX/TCX"
 
-#: ../gtk/src/window.cpp:927
+#: ../gtk/src/window.cpp:929
 msgid "All CSV files"
 msgstr "Tous les fichiers CSV"
 
-#: ../gtk/src/window.cpp:931
+#: ../gtk/src/window.cpp:933
 msgid "All icon files"
 msgstr "Tous les fichiers icônes"
 
-#: ../gtk/src/window.cpp:935
+#: ../gtk/src/window.cpp:937
 msgid "All image files"
 msgstr "Tous les fichiers images"
 
-#: ../gtk/src/window.cpp:949 ../gtk/src/window.cpp:968
+#: ../gtk/src/window.cpp:951 ../gtk/src/window.cpp:970
 msgid "Open an image or a telemetry file"
 msgstr "Ouvrir un fichier image ou de télémétrie"
 

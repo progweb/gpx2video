@@ -252,17 +252,17 @@ void GPX2VideoTrackWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
+	// Zoom
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoTrackWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_notice("Widget %s: factor changed to '%.1f'",
+						log_notice("Widget %s: zoom changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
-						((Track *) widget_->widget())->settings().setDivider(value);
+						((Track *) widget_->widget())->settings().setZoom(value);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
@@ -611,12 +611,12 @@ void GPX2VideoTrackWidgetSettingsBox::update_content(void) {
 	if (find_in_listtore(view_model_, settings.view(), iter))
 		combobox->set_active(iter);
 
-	// factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
+	// zoom
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(settings.divider());
+	spinbutton->set_value(settings.zoom());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
@@ -813,12 +813,12 @@ void GPX2VideoTrackWidgetSettingsBox::update_boundaries(void) {
 	Gtk::Button *button;
 	Gtk::SpinButton *spinbutton;
 
-	// Factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
+	// Zoom
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 
-	spinbutton->set_value(((Track *) widget_->widget())->settings().divider());
+	spinbutton->set_value(((Track *) widget_->widget())->settings().zoom());
 	spinbutton->set_sensitive(((Track *) widget_->widget())->settings().view() != TrackSettings::ViewZoomFit);
 
 	// Icon zoomin button

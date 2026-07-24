@@ -66,8 +66,8 @@ public:
 		return true;
 	}
 
-	static int lat2pixel(int zoom, double divider, float lat);
-	static int lon2pixel(int zoom, double divider, float lon);
+	static int lat2pixel(int scale, double divider, float lat);
+	static int lon2pixel(int scale, double divider, float lon);
 
 	// Draw track path
 	void path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider=1.0);
@@ -136,7 +136,7 @@ protected:
 	TelemetryData last_wpt_;
 	TelemetryData last_data_;
 
-	double divider_;
+	double zoom_;
 
 	int last_posX_, last_posY_;
 
@@ -154,6 +154,10 @@ protected:
 	int x_end_, y_end_;
 	int x_start_, y_start_;
 	uint64_t ts_start_, ts_end_;
+
+	// Elevation range
+	double elevation_min_;
+	double elevation_max_;
 };
 
 #endif

@@ -239,8 +239,8 @@ You can edit `layout.xml` file to enable/disable gauge or edit label and positio
 	</track>
 	<map x="800" y="300" width="640" height="480" position="none">
 		<source>1</source>
-		<zoom>12</zoom>
-		<factor>2.0</factor>
+		<scale>12</scale>
+		<zoom>2.0</zoom>
 	</map>
 </layout>
 ```
@@ -507,24 +507,24 @@ You can specify units for some widgets.
 
 You can specify map source from a list. Warning, all maps aren't free.
 
-gpx2video downloads each tile with the zoom level in your `~/.gpx2video/cache` path. 
+gpx2video downloads each tile with the scale level in your `~/.gpx2video/cache` path. 
 Then build the map.
 
 Finally, gpx2video renders a mapbox in applying the zoom factor.
 
-As you use map or track command line, please provide map settings (source, zoom, factor) on the
+As you use map or track command line, please provide map settings (source, scale, zoom) on the
 command lines.
 
   - To render map:
 
 ```bash
-$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 map
+$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-scale=11 --map-zoom 2.0 map
 ```
 
   - To render map & track:
 
 ```bash
-$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-zoom=11 --map-factor 2.0 track
+$ ./gpx2video -g ACTIVITY.gpx -o map.png --map-source=1 --map-scale=11 --map-zoom 2.0 track
 ```
 
 **--map-source** to select map provider. Map providers list is given by the option **--map-source-list**.
@@ -534,9 +534,9 @@ Map settings:
 ```xml
 <map x="250" y="450" width="600" height="120" position="left" display="true">
 	<source>1</source>
-	<zoom>11</zoom>
 	<view>default</view>
-	<factor>1.2</factor>
+	<scale>11</scale>
+	<zoom>1.2</zoom>
     <with-icon-start>true</with-icon-start>
     <with-icon-end>true</with-icon-end>
     <with-icon-position>true</with-icon-position>
@@ -555,8 +555,8 @@ Map settings:
 ```
 
 **source** map provider.
-**zoom** value sets the map details.
-**factor** value applies a zoom factor as render.
+**scale** value sets the map details.
+**zoom** value applies a zoom factor as render.
 **icon-xxxx-size** icon size in pixels.
 **path-thick** path thick.
 **path-border** border size of path.
@@ -565,8 +565,8 @@ Map settings:
 
 **view** values are "zoomfit", "center", "default".
 
-As **view** is set to "zoomfit", gpx2video computes **factor** value to fit the map in the widget area. 
-In this case, **factor** value is ignored.
+As **view** is set to "zoomfit", gpx2video computes **zoom** value to fit the map in the widget area. 
+In this case, **zoom** value is ignored.
 
 Map widget can be auto positionned as **x**, **y** and/or **width**, **height** aren't set. 
 At last, you can define several map widgets.
@@ -592,7 +592,7 @@ Track settings:
 	<icon-start-size>1</icon-start-size>
 	<icon-position-size>1</icon-position-size>
 	<view>zoomfit</view>
-	<factor>1.2</factor>
+	<zoom>1.2</zoom>
 	<border>5</border>
 	<border-color>#000000b0</border-color>
 	<background-color>#0000004c</background-color>
@@ -603,8 +603,8 @@ Track settings:
 
 **view** values are "zoomfit", "center", "default".
 
-As **view** is set to "zoomfit", gpx2video computes **factor** value to fit the track in the widget area. 
-In this case, **factor** value is ignored.
+As **view** is set to "zoomfit", gpx2video computes **zoom** value to fit the track in the widget area. 
+In this case, **zoom** value is ignored.
 
 *Track widget accepts the same common attibutes and elements that the standard widget (**at**, **duration**...)*
 

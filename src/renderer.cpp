@@ -262,9 +262,9 @@ bool Renderer::loadMap(layout::Map *m) {
 	// Map settings
 	mapSettings.setSize(width, height);
 	mapSettings.setSource((MapSettings::Source) mapsource);
+	mapSettings.setScale(m->scale());
 	mapSettings.setZoom(m->zoom());
 	mapSettings.setView((MapSettings::View) view);
-	mapSettings.setDivider(m->factor());
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
 	mapSettings.setPathBorderColor((const char *) m->pathBorderColor());
@@ -449,7 +449,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 	// Track settings
 	trackSettings.setSize(width, height);
 	trackSettings.setView((TrackSettings::View) view);
-	trackSettings.setDivider(t->factor());
+	trackSettings.setZoom(t->zoom());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 	trackSettings.setPathBorder((double) t->pathBorder());

@@ -57,17 +57,17 @@ public:
 	const int& height(void) const;
 	void setSize(const int &width, const int &height);
 
-	const int& zoom(void) const;
-	void setZoom(const int &zoom);
+	const int& scale(void) const;
+	void setScale(const int &scale);
+
+	const double& zoom(void) const;
+	void setZoom(const double &zoom);
 
 	const bool& zoomfit(void) const;
 	void setZoomfit(const bool &enable);
 
 	const View& view(void) const;
 	void setView(const View &view);
-
-	const double& divider(void) const;
-	void setDivider(const double &divier);
 
 	const double& pathThick(void) const;
 	void setPathThick(const double &thick);
@@ -244,11 +244,11 @@ public:
 	static std::string icon2string(Icon icon);
 
 protected:
-	int zoom_;
+	int scale_;
 	View view_;
 
 	double null_;
-	double divider_;
+	double zoom_;
 
 	double path_thick_;
 	double path_border_;

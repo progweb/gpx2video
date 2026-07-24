@@ -54,8 +54,8 @@ namespace layout
     _padding_bottom(this, "padding-bottom", Node::ELEMENT, false),
 
     _view(this, "view", Node::ELEMENT, false),
+    _scale(this, "scale", Node::ELEMENT, false),
     _zoom(this, "zoom", Node::ELEMENT, false),
-    _factor(this, "factor", Node::ELEMENT, false),
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_round_corner(this, "round-corner", Node::ELEMENT, false),
@@ -106,8 +106,8 @@ namespace layout
     getInterfaces().push_back(&_padding_bottom);
 
     getInterfaces().push_back(&_view);
+    getInterfaces().push_back(&_scale);
     getInterfaces().push_back(&_zoom);
-    getInterfaces().push_back(&_factor);
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_round_corner);
@@ -148,8 +148,8 @@ namespace layout
 	_padding_top.setValue("-1");
 	_padding_bottom.setValue("-1");
 
-	_zoom.setValue("12");
-	_factor.setValue("1.0");
+	_scale.setValue("12");
+	_zoom.setValue("1.0");
 
 	_path_smooth.setValue("1");
 	_path_thick.setValue("3.0");

@@ -28,7 +28,7 @@ public:
 	public:
 		time_t last_update_;
 
-		Tile(Map &map, int zoom, int x, int y);
+		Tile(Map &map, int scale, int x, int y);
 		virtual ~Tile();
 
 		Map& map(void);
@@ -51,7 +51,7 @@ public:
 
 	private:
 		Map &map_;
-		int zoom_;
+		int scale_;
 		int x_, y_;
 		std::string uri_;
 		std::string path_;
@@ -144,7 +144,7 @@ protected:
 		Track::xmlwrite(os);
 
 		os << "<source>" << settings().source() << "</source>" << std::endl;
-		os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
+		os << "<scale>" << settings().scale() << "</scale>" << std::endl;
 	}
 
 private:
@@ -153,9 +153,9 @@ private:
 
 	Map(GPXApplication &app, const MapSettings &map_settings, TelemetrySource *telemetry_source, struct event_base *evbase);
 
-	std::string buildURI(int zoom, int x, int y);
-	std::string buildPath(int zoom, int x, int y);
-	std::string buildFilename(int zoom, int x, int y);
+	std::string buildURI(int scale, int x, int y);
+	std::string buildPath(int scale, int x, int y);
+	std::string buildFilename(int scale, int x, int y);
 
 	MapSettings map_settings_;
 

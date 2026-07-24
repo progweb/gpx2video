@@ -298,34 +298,34 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
-	// Zoom
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
+	// Scale
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("scale_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"scale_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_int_changed), spinbutton, 
 					[this](const int &value) {
-						log_notice("Widget %s: zoom changed to '%d'",
+						log_notice("Widget %s: scale changed to '%d'",
 							   widget_->name().c_str(), value);
 
-						((Map *) widget_->widget())->settings().setZoom(value);
+						((Map *) widget_->widget())->settings().setScale(value);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
 					}
 			));
 
-	// Factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
+	// Zoom
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
+		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 	spinbutton->signal_value_changed().connect(sigc::bind(
 				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
 					[this](const double &value) {
-						log_notice("Widget %s: factor changed to '%.1f'",
+						log_notice("Widget %s: zoom changed to '%.1f'",
 							   widget_->name().c_str(), value);
 
-						((Map *) widget_->widget())->settings().setDivider(value);
+						((Map *) widget_->widget())->settings().setZoom(value);
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
@@ -684,19 +684,19 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 	if (find_in_listtore(view_model_, settings.view(), iter))
 		combobox->set_active(iter);
 
+	// scale
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("scale_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"scale_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.scale());
+
 	// zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(settings.zoom());
-
-	// factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
-
-	spinbutton->set_value(settings.divider());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
@@ -896,18 +896,18 @@ void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 	MapSettings::Source source = ((Map *) widget_->widget())->settings().source();
 
 	// Update UI range for source
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("scale_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"scale_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_range(
+			MapSettings::getMinScale(source),
+			MapSettings::getMaxScale(source));
+
+	// Zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
-
-	spinbutton->set_range(
-			MapSettings::getMinZoom(source),
-			MapSettings::getMaxZoom(source));
-
-	// Factor
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("factor_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"factor_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_sensitive(((Map *) widget_->widget())->settings().view() != MapSettings::ViewZoomFit);
 

@@ -46,7 +46,7 @@ static const struct option options[] = {
 	{ "start-time",                 required_argument, 0, 0 },
 	{ "time-factor",                required_argument, 0, 0 },
 	{ "map-source",                 required_argument, 0, 0 },
-	{ "map-factor",                 required_argument, 0, 0 },
+	{ "map-scale",                  required_argument, 0, 0 },
 	{ "map-zoom",                   required_argument, 0, 0 },
 	{ "map-source-list",            no_argument,       0, 0 },
 	{ "extract-format",             required_argument, 0, 0 },
@@ -104,9 +104,9 @@ static void print_usage(const std::string &name) {
 	std::cout << "\t-    --telemetry-rate                  : Telemetry rate (refresh each ms) (default: 250 ms))" << std::endl;
 	std::cout << "\t-    --telemetry-smooth=smooth         : Data type, method, number of points and order to smooth data" << std::endl;
 //	std::cout << "\t- r, --rate                            : Frame per second (not implemented" << std::endl;
-	std::cout << "\t-    --map-factor                      : Map factor (default: 1.0)" << std::endl;
 	std::cout << "\t-    --map-source                      : Map source" << std::endl;
-	std::cout << "\t-    --map-zoom                        : Map zoom" << std::endl;
+	std::cout << "\t-    --map-scale                       : Map scale" << std::endl;
+	std::cout << "\t-    --map-zoom                        : Map zoom (default: 1.0)" << std::endl;
 	std::cout << "\t-    --path-thick                      : Path thick (default: 3.0)" << std::endl;
 	std::cout << "\t-    --path-border                     : Path border (default: 1.4)" << std::endl;
 	std::cout << "\t- v, --verbose                         : Show trace" << std::endl;
@@ -369,8 +369,8 @@ Map * GPX2Video::buildMap(void) {
 	// Map settings
 	MapSettings mapSettings;
 	mapSettings.setSource(settings().mapsource());
+	mapSettings.setScale(settings().mapscale());
 	mapSettings.setZoom(settings().mapzoom());
-	mapSettings.setDivider(settings().mapfactor());
 	mapSettings.setBoundingBox(p1.latitude(), p1.longitude(), p2.latitude(), p2.longitude());
 	mapSettings.setPathThick(settings().paththick());
 	mapSettings.setPathBorder(settings().pathborder());
@@ -484,7 +484,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 
 	int rate = 0; // Video fps - by default, no change
 	int verbose = 0;
-	int map_zoom = 12;
+	int map_scale = 12;
 	int max_duration_ms = 0; // By default process whole media
 
 	std::string start_time;
@@ -492,7 +492,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 	bool time_factor_auto = false;
 	double time_factor_value = 1.0;
 
-	double map_factor = 1.0;
+	double map_zoom = 1.0;
 
 	double path_thick = 3.0;
 	double path_border = 1.4;
@@ -602,8 +602,8 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 				setCommand(GPX2Video::CommandSource);
 				return 0;
 			}
-			else if (s && !strcmp(s, "map-factor")) {
-				map_factor = strtod(optarg, NULL);
+			else if (s && !strcmp(s, "map-zoom")) {
+				map_zoom = strtod(optarg, NULL);
 			}
 			else if (s && !strcmp(s, "map-zoom")) {
 				map_zoom = atoi(optarg);
@@ -1044,7 +1044,7 @@ int GPX2Video::parseCommandLine(int argc, char *argv[]) {
 		start_time,
 		time_factor_auto,
 		time_factor_value,
-		map_factor,
+		map_scale,
 		map_zoom,
 		max_duration_ms,
 		map_source,

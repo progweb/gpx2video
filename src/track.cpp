@@ -38,10 +38,10 @@ TrackSettings::TrackSettings() {
 
 	null_ = 0.0;
 
-	zoom_ = 18;
+	scale_ = 18;
 	view_ = TrackSettings::ViewZoomFit;
 
-	divider_ = 1.0;
+	zoom_ = 1.0;
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
@@ -86,12 +86,22 @@ void TrackSettings::setSize(const int &width, const int &height) {
 }
 
 
-const int& TrackSettings::zoom(void) const {
+const int& TrackSettings::scale(void) const {
+	return scale_;
+}
+
+
+void TrackSettings::setScale(const int &scale) {
+	scale_ = scale;
+}
+
+
+const double& TrackSettings::zoom(void) const {
 	return zoom_;
 }
 
 
-void TrackSettings::setZoom(const int &zoom) {
+void TrackSettings::setZoom(const double &zoom) {
 	zoom_ = zoom;
 }
 
@@ -103,16 +113,6 @@ const TrackSettings::View& TrackSettings::view(void) const {
 
 void TrackSettings::setView(const TrackSettings::View &view) {
 	view_ = view;
-}
-
-
-const double& TrackSettings::divider(void) const {
-	return divider_;
-}
-
-
-void TrackSettings::setDivider(const double &divider) {
-	divider_ = divider;
 }
 
 
@@ -389,7 +389,7 @@ Track::Track(GPXApplication &app, const TrackSettings &track_settings, VideoWidg
 	icon_start_buf_ = NULL;
 	icon_position_buf_ = NULL;
 
-	divider_ = 1.0;
+	zoom_ = 1.0;
 
 	pvx1_ = pvy1_ = pvx2_ = pvy2_ = 0;
 	pevx1_ = pevy1_ = pevx2_ = pevy2_ = 0;
@@ -458,7 +458,7 @@ void Track::setSize(int width, int height) {
 }
 
 
-int Track::lat2pixel(int zoom, double divider, float lat) {
+int Track::lat2pixel(int scale, double zoom, float lat) {
     float lat_m;
     int pixel_y;
 
@@ -469,24 +469,24 @@ int Track::lat2pixel(int zoom, double divider, float lat) {
     // the formula is some more notes
     // http://manialabs.wordpress.com/2013/01/26/converting-latitude-and-longitude-to-map-tile-in-mercator-projection/
     //
-    // pixel_y = -(2^zoom * TILESIZE * lat_m) / 2PI + (2^zoom * TILESIZE) / 2
-    pixel_y = -(int)( (lat_m * TILESIZE * (1 << zoom) * divider) / (2*M_PI)) +
-        ((1 << zoom) * (TILESIZE/2) * divider);
+    // pixel_y = -(2^scale * TILESIZE * lat_m) / 2PI + (2^scale * TILESIZE) / 2
+    pixel_y = -(int)( (lat_m * TILESIZE * (1 << scale) * zoom) / (2*M_PI)) +
+        ((1 << scale) * (TILESIZE/2) * zoom);
 
     return pixel_y;
 }
 
 
-int Track::lon2pixel(int zoom, double divider, float lon) {
+int Track::lon2pixel(int scale, double zoom, float lon) {
     int pixel_x;
 
     double lonrad = lon * M_PI / 180.0;
 
     // the formula is
     //
-    // pixel_x = (2^zoom * TILESIZE * lon) / 2PI + (2^zoom * TILESIZE) / 2
-    pixel_x = (int)(( lonrad * TILESIZE * (1 << zoom) * divider) / (2*M_PI)) +
-        ( (1 << zoom) * (TILESIZE/2) * divider);
+    // pixel_x = (2^scale * TILESIZE * lon) / 2PI + (2^scale * TILESIZE) / 2
+    pixel_x = (int)(( lonrad * TILESIZE * (1 << scale) * zoom) / (2*M_PI)) +
+        ( (1 << scale) * (TILESIZE/2) * zoom);
 
     return pixel_x;
 }
@@ -548,8 +548,8 @@ abort:
 
 
 void Track::init(void) {
-	int zoom;
-	double divider;
+	int scale;
+	double zoom;
 
 	int space;
 	int padding_vertical;
@@ -578,11 +578,11 @@ void Track::init(void) {
 	if (!preinit())
 		return;
 
+	scale = settings().scale();
 	zoom = settings().zoom();
-	divider = settings().divider();
 
 	// Save settings
-	divider_ = divider;
+	zoom_ = zoom;
 
 	// Size
 	ShapeBase::setSize(width, height);
@@ -600,18 +600,18 @@ void Track::init(void) {
 	// +---------+---------+---------+ ..... +---------+
 
 	// Convert view area lat/lon to pixel
-	pvx1_ = Track::lon2pixel(zoom, divider, lon1);
-	pvy1_ = Track::lat2pixel(zoom, divider, lat1);
+	pvx1_ = Track::lon2pixel(scale, zoom, lon1);
+	pvy1_ = Track::lat2pixel(scale, zoom, lat1);
 
-	pvx2_ = Track::lon2pixel(zoom, divider, lon2);
-	pvy2_ = Track::lat2pixel(zoom, divider, lat2);
+	pvx2_ = Track::lon2pixel(scale, zoom, lon2);
+	pvy2_ = Track::lat2pixel(scale, zoom, lat2);
 
 	// Convert limit lat/lon to pixel
-	lim_px1_ = Track::lon2pixel(zoom, divider, lim_p1_.longitude());
-	lim_py1_ = Track::lat2pixel(zoom, divider, lim_p1_.latitude());
+	lim_px1_ = Track::lon2pixel(scale, zoom, lim_p1_.longitude());
+	lim_py1_ = Track::lat2pixel(scale, zoom, lim_p1_.latitude());
 
-	lim_px2_ = Track::lon2pixel(zoom, divider, lim_p2_.longitude());
-	lim_py2_ = Track::lat2pixel(zoom, divider, lim_p2_.latitude());
+	lim_px2_ = Track::lon2pixel(scale, zoom, lim_p2_.longitude());
+	lim_py2_ = Track::lat2pixel(scale, zoom, lim_p2_.latitude());
 
 	// Compute extended view area to match with widget size
 	pevx1_ = pvx1_;
@@ -637,33 +637,33 @@ void Track::init(void) {
 		width -= padding_horizontal + 2 * space;
 		height -= padding_vertical + 2 * space;
 
-		// Compute divider to match with the size of widget
-		w = ceilf((float) (pevx2_ - pevx1_) / divider);
-		h = ceilf((float) (pevy2_ - pevy1_) / divider);
+		// Compute zoom to match with the size of widget
+		w = ceilf((float) (pevx2_ - pevx1_) / zoom);
+		h = ceilf((float) (pevy2_ - pevy1_) / zoom);
 
 		if ((w > 0) && (h > 0)) {
 			if (((float) width / w) > ((float) height / h))
-				divider_ = (float) height / h;
+				zoom_ = (float) height / h;
 			else
-				divider_ = (float) width / w;
+				zoom_ = (float) width / w;
 		}
 
-		// Compute with new divider value
-		divider = divider_;
+		// Compute with new zoom value
+		zoom = zoom_;
 
 		// Convert view area lat/lon to pixel
-		pvx1_ = Track::lon2pixel(zoom, divider, lon1);
-		pvy1_ = Track::lat2pixel(zoom, divider, lat1);
+		pvx1_ = Track::lon2pixel(scale, zoom, lon1);
+		pvy1_ = Track::lat2pixel(scale, zoom, lat1);
 
-		pvx2_ = Track::lon2pixel(zoom, divider, lon2);
-		pvy2_ = Track::lat2pixel(zoom, divider, lat2);
+		pvx2_ = Track::lon2pixel(scale, zoom, lon2);
+		pvy2_ = Track::lat2pixel(scale, zoom, lat2);
 
 		// Convert limit lat/lon to pixel
-		lim_px1_ = Track::lon2pixel(zoom, divider, lim_p1_.longitude());
-		lim_py1_ = Track::lat2pixel(zoom, divider, lim_p1_.latitude());
+		lim_px1_ = Track::lon2pixel(scale, zoom, lim_p1_.longitude());
+		lim_py1_ = Track::lat2pixel(scale, zoom, lim_p1_.latitude());
 
-		lim_px2_ = Track::lon2pixel(zoom, divider, lim_p2_.longitude());
-		lim_py2_ = Track::lat2pixel(zoom, divider, lim_p2_.latitude());
+		lim_px2_ = Track::lon2pixel(scale, zoom, lim_p2_.longitude());
+		lim_py2_ = Track::lat2pixel(scale, zoom, lim_p2_.latitude());
 
 		// Compute extended view area to match with widget size
 		pevx1_ = pvx1_;
@@ -826,8 +826,8 @@ void Track::init(void) {
 }
 
 
-void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider) {
-	int zoom;
+void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double zoom) {
+	int scale;
 	int stride;
 	double path_thick;
 	double path_border;
@@ -844,7 +844,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 
 	log_call();
 
-	zoom = settings().zoom();
+	scale = settings().scale();
 	path_thick = settings().pathThick();
 	path_border = settings().pathBorder();
 
@@ -868,8 +868,8 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 
 		// Draw each WPT
 		for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
-			x = Track::lon2pixel(zoom, divider, wpt.longitude()) - pevx1_;
-			y = Track::lat2pixel(zoom, divider, wpt.latitude()) - pevy1_;
+			x = Track::lon2pixel(scale, zoom, wpt.longitude()) - pevx1_;
+			y = Track::lat2pixel(scale, zoom, wpt.latitude()) - pevy1_;
 
 			cairo_line_to(cairo, x, y);
 		}
@@ -884,8 +884,8 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 	cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 	for (result = source->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = source->retrieveNext(wpt)) {
-		x = Track::lon2pixel(zoom, divider, wpt.longitude()) - pevx1_;
-		y = Track::lat2pixel(zoom, divider, wpt.latitude()) - pevy1_;
+		x = Track::lon2pixel(scale, zoom, wpt.longitude()) - pevx1_;
+		y = Track::lat2pixel(scale, zoom, wpt.latitude()) - pevy1_;
 
 		cairo_line_to(cairo, x, y);
 	}
@@ -919,8 +919,8 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double divider
 }
 
 
-void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divider) {
-	int zoom;
+void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double zoom) {
+	int scale;
 	int stride;
 	double path_thick;
 	unsigned char *bytes;
@@ -948,7 +948,7 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 
 	log_call();
 
-	zoom = settings().zoom();
+	scale = settings().scale();
 	path_thick = settings().pathThick();
 
 	fill = settings().pathPrimaryColor();
@@ -975,8 +975,8 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
 
 		for (result = telemetry_source_->retrieveFirst(wpt); result != TelemetrySource::DataEof; result = telemetry_source_->retrieveNext(wpt)) {
-			x = Track::lon2pixel(zoom, divider, wpt.longitude()) - pevx1_;
-			y = Track::lat2pixel(zoom, divider, wpt.latitude()) - pevy1_;
+			x = Track::lon2pixel(scale, zoom, wpt.longitude()) - pevx1_;
+			y = Track::lat2pixel(scale, zoom, wpt.latitude()) - pevy1_;
 
 			cairo_line_to(cairo, x, y);
 
@@ -1008,16 +1008,16 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 		OIIO::TypeDesc::BASETYPE type = (OIIO::TypeDesc::BASETYPE) spec.format.basetype;
 
 		// Last point
-		x1 = Track::lon2pixel(zoom, divider, last_data_.longitude()) - pevx1_;
-		y1 = Track::lat2pixel(zoom, divider, last_data_.latitude()) - pevy1_;
+		x1 = Track::lon2pixel(scale, zoom, last_data_.longitude()) - pevx1_;
+		y1 = Track::lat2pixel(scale, zoom, last_data_.latitude()) - pevy1_;
 
 		// Last point
 		x1 = last_posX_;
 		y1 = last_posY_;
 
 		// Current point
-		x2 = Track::lon2pixel(zoom, divider, data.longitude()) - pevx1_;
-		y2 = Track::lat2pixel(zoom, divider, data.latitude()) - pevy1_;
+		x2 = Track::lon2pixel(scale, zoom, data.longitude()) - pevx1_;
+		y2 = Track::lat2pixel(scale, zoom, data.latitude()) - pevy1_;
 
 		if (last_data_.type() != TelemetryData::TypeUnknown) {
 			// Move ?
@@ -1067,8 +1067,8 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double divid
 			if (wpt.timestamp() > data.timestamp())
 				break;
 
-			x = Track::lon2pixel(zoom, divider, wpt.longitude()) - pevx1_;
-			y = Track::lat2pixel(zoom, divider, wpt.latitude()) - pevy1_;
+			x = Track::lon2pixel(scale, zoom, wpt.longitude()) - pevx1_;
+			y = Track::lat2pixel(scale, zoom, wpt.latitude()) - pevy1_;
 
 			// Offset
 			x = x - xoff;
@@ -1127,7 +1127,7 @@ bool Track::load(void) {
 	int width = settings().width();
 	int height = settings().height();
 
-	int zoom = settings().zoom();
+	int scale = settings().scale();
 
 	std::string filename = app_.settings().inputfile();
 
@@ -1148,23 +1148,29 @@ bool Track::load(void) {
 		trackbuf_ = new OIIO::ImageBuf(OIIO::ImageSpec(width, height, 4, OIIO::TypeDesc::UINT8)); //, OIIO::InitializePixels::No);
 
 		// Draw background path
-		path(*trackbuf_, telemetry_source_, divider_);
+		path(*trackbuf_, telemetry_source_, zoom_);
 
 		// Compute begin
 		telemetry_source_->retrieveFirst(wpt);
 
-		x_start_ = Track::lon2pixel(zoom, divider_, wpt.longitude()) - pevx1_;
-		y_start_ = Track::lat2pixel(zoom, divider_, wpt.latitude()) - pevy1_;
+		x_start_ = Track::lon2pixel(scale, zoom_, wpt.longitude()) - pevx1_;
+		y_start_ = Track::lat2pixel(scale, zoom_, wpt.latitude()) - pevy1_;
 
 		ts_start_ = telemetry_source_->beginTimestamp();
 
 		// Compute end
 		telemetry_source_->retrieveLast(wpt);
 
-		x_end_ = Track::lon2pixel(zoom, divider_, wpt.longitude()) - pevx1_;
-		y_end_ = Track::lat2pixel(zoom, divider_, wpt.latitude()) - pevy1_;
+		x_end_ = Track::lon2pixel(scale, zoom_, wpt.longitude()) - pevx1_;
+		y_end_ = Track::lat2pixel(scale, zoom_, wpt.latitude()) - pevy1_;
 
 		ts_end_ = telemetry_source_->endTimestamp();
+
+		// TODO 
+		// Save telemetry range
+		elevation_min_ = wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin);
+		elevation_max_ = wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+
 	}
 	else {
 		log_warn("Can't read telemetry data");
@@ -1199,7 +1205,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 	int padding_vertical;
 	int padding_horizontal;
 
-	int zoom = settings().zoom();
+	int scale = settings().scale();
 
 	cairo_t *cairo;
 
@@ -1219,8 +1225,8 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		posY = y_end_;
 	}
 	else if (data.timestamp() > ts_start_) {
-		posX = Track::lon2pixel(zoom, divider_, data.longitude()) - pevx1_;
-		posY = Track::lat2pixel(zoom, divider_, data.latitude()) - pevy1_;
+		posX = Track::lon2pixel(scale, zoom_, data.longitude()) - pevx1_;
+		posY = Track::lat2pixel(scale, zoom_, data.latitude()) - pevy1_;
 	}
 	else {
 		posX = x_start_;
@@ -1351,7 +1357,7 @@ OIIO::ImageBuf * Track::render(const TelemetryData &data, bool &is_update) {
 		if (is_move) {
 			trackbuf_->specmod().x = 0;
 			trackbuf_->specmod().y = 0;
-			path(*trackbuf_, data, divider_);
+			path(*trackbuf_, data, zoom_);
 		}
 
 		// Draw track image over
@@ -1392,7 +1398,7 @@ skip:
 bool Track::updated(const TelemetryData &data) const {
 	int posX, posY;
 
-	int zoom = settings().zoom();
+	int scale = settings().scale();
 
 	// Check track buffer
 	if (trackbuf_ == NULL)
@@ -1408,8 +1414,8 @@ bool Track::updated(const TelemetryData &data) const {
 		posY = y_end_;
 	}
 	else if (data.timestamp() > ts_start_) {
-		posX = Track::lon2pixel(zoom, divider_, data.longitude()) - pevx1_;
-		posY = Track::lat2pixel(zoom, divider_, data.latitude()) - pevy1_;
+		posX = Track::lon2pixel(scale, zoom_, data.longitude()) - pevx1_;
+		posY = Track::lat2pixel(scale, zoom_, data.latitude()) - pevy1_;
 	}
 	else {
 		posX = x_start_;
@@ -1521,7 +1527,7 @@ void Track::xmlwrite(std::ostream &os) {
 	os << "<with-icon-position>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) << "</with-icon-position>" << std::endl;
 
 	os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
-	os << "<factor>" << settings().divider() << "</factor>" << std::endl;
+	os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
 
 	os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
 	os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;

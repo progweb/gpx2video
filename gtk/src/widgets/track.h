@@ -6,7 +6,7 @@
 #include <librsvg/rsvg.h>
 #include <cairomm/cairomm.h>
 
-#include "../../src/track.h"
+#include "../../../src/track.h"
 #include "../videowidget.h"
 #include "../media.h"
 #include "base.h"

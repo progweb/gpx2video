@@ -33,8 +33,8 @@ public:
 			std::string start_time="",
 			bool time_factor_auto=false,
 			double time_factor_value=1.0,
-			double map_factor=1.0,
 			int map_zoom=8, 
+			double map_scale=1.0,
 			int max_duration_ms=0,
 			MapSettings::Source map_source=MapSettings::SourceOpenStreetMap,
 			double path_thick=3.0,
@@ -103,7 +103,7 @@ public:
 					video_max_bit_rate)
 			, rate_(rate)
 			, start_time_(start_time)
-			, map_factor_(map_factor)
+			, map_scale_(map_scale)
 			, map_zoom_(map_zoom)
 			, map_source_(map_source)
 			, path_thick_(path_thick)
@@ -175,11 +175,11 @@ public:
 			return extract_format_;
 		}
 
-		const double& mapfactor(void) const {
-			return map_factor_;
+		const int& mapscale(void) const {
+			return map_scale_;
 		}
 
-		const int& mapzoom(void) const {
+		const double& mapzoom(void) const {
 			return map_zoom_;
 		}
 
@@ -187,8 +187,8 @@ public:
 		int rate_;
 		std::string start_time_;
 
-		double map_factor_;
-		int map_zoom_;
+		int map_scale_;
+		double map_zoom_;
 		MapSettings::Source map_source_;
 
 		double path_thick_;

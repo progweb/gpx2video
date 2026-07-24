@@ -213,9 +213,14 @@ set(GPX2VIDEO_SOURCES
 )
 
 # Subdirectories
+add_subdirectory(data)
+add_subdirectory(icons)
 
 # Binaries
 add_executable(gpx2video-gtk ${GPX2VIDEO_SOURCES} ${GPX2VIDEO_RESOURCES} ${GPX2VIDEO_GSCHEMA})
 add_dependencies(gpx2video-gtk pot-build)
 target_link_libraries(gpx2video-gtk gpxcore gpxlib tcxlib layoutlib ${LIBPULSE_LIBRARIES} ${LIBGLM_LIBRARIES} ${LIBEPOXY_LIBRARIES} ${LIBGTKMM4_LIBRARIES} ${LIBAVUTIL_LIBRARIES} ${LIBAVFORMAT_LIBRARIES} ${LIBAVCODEC_LIBRARIES} ${LIBAVFILTER_LIBRARIES} ${LIBSWRESAMPLE_LIBRARIES} ${LIBSWSCALE_LIBRARIES} ${Intl_LIBRARIES} ${OIIO_LIBRARIES} ${LIBFREETYPE_LIBRARIES} ${LIBRSVG_LIBRARIES} ${LIBPANGOCAIRO_LIBRARIES} ${LIBCAIRO_LIBRARIES})
+
+# Installation
+install(TARGETS gpx2video-gtk DESTINATION bin)
 

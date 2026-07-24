@@ -40,8 +40,8 @@ public:
 
 	static const std::string getFriendlyName(const Source &source);
 	static const std::string getCopyright(const Source &source);
-	static int getMinZoom(const Source &source);
-	static int getMaxZoom(const Source &source);
+	static int getMinScale(const Source &source);
+	static int getMaxScale(const Source &source);
 	static const std::string getRepoURI(const Source &source);
 
 private:
