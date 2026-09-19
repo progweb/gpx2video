@@ -1,0 +1,12 @@
+Format: http://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: gpx2video
+Upstream-Contact: gpx2video 
+Source:
+ Source code downloads at: http://github.com/gpx2video
+ Main homepage and documentation at: http://github.com/gpx2video
+
+Files: *
+Copyright:
+ Copyright 2020-2026 gpx2video
+License: GPL-3
+

@@ -1,0 +1,49 @@
+Source: gpx2video
+Section: video
+Priority: optional
+Maintainer: Progweb <progweb@free.fr>
+Build-Depends: cdbs, debhelper (>= 7.0.50~), pkg-config, cmake, gettext, libevent-dev(>= 2.0.0),
+ libssl-dev, libcurl4-gnutls-dev, libopenimageio-dev, libgeographic-dev | libgeographiclib-dev, 
+ libpango1.0-dev, libcairo2-dev, librsvg2-dev, libopenexr-dev, libfreetype-dev, libpulse-dev, 
+ libavutil-dev, libavformat-dev, libavcodec-dev, libavfilter-dev, libswresample-dev, libswscale-dev,
+ libgtkmm-4.0-dev, libglibmm-2.68-dev, libepoxy-dev, libglm-dev
+Standards-Version: 3.9.1
+
+Package: gpx2video-tools
+Architecture: i386 armhf amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: gpx2video-data (= ${binary:Version})
+Description: gpx2video tools 
+ Command line tools to edit your GPX/TCX/CSV telemetry files and
+ render video with telemetry overly information.
+
+Package: gpx2video-tools-dbg
+Section: debug
+Architecture: i386 armhf amd64 arm64
+Depends: gpx2video (= ${binary:Version}), ${misc:Depends}
+Description: gpx2video command line tools - debug symbols
+ This package contains the debug symbols for gpx2video-tools. Tools to
+ edit telemtry files and render video. See the description of that package
+ for more information.
+
+Package: gpx2video-gtk
+Architecture: i386 armhf amd64 arm64
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: gpx2video-data (= ${binary:Version})
+Description: gpx2video gtk interface
+ gpx2video gtk interface to render video with telemtry overlay information.
+
+Package: gpx2video-gtk-dbg
+Section: debug
+Architecture: i386 armhf amd64 arm64
+Depends: gpx2video-gtk (= ${binary:Version}), gpx2video-gtk-data (= ${binary:Version}), ${misc:Depends}
+Description: gpx2video gtk interface - debug symbols
+ This package contains the debug symbols for gpx2video-gtk. Interface
+ to render video. See the description of that package for more information.
+
+Package: gpx2video-data
+Architecture: i386 armhf amd64 arm64
+Depends: ${misc:Depends}
+Description: gpx2video assets data
+ This package contains the icons and other data used by gpx2video application.
+

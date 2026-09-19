@@ -1,0 +1,41 @@
+#!/usr/bin/make -f
+# Based on the multi2 sample debian/rules file:
+# ---
+# Sample debian/rules that uses debhelper.
+# This file is public domain software, originally written by Joey Hess.
+
+#export DH_VERBOSE=1
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/cmake.mk
+#include /usr/share/cdbs/1/class/autotools.mk
+#include /usr/share/cdbs/1/rules/simple-patchsys.mk
+
+# The following is for systems that support hardened builds.
+# Not all systems have this support, so make it conditional on buildflags.mk
+ifneq ($(strip $(wildcard /usr/share/dpkg/buildflags.mk)),)
+export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+export DEB_CFLAGS_MAINT_APPEND = -Wall
+include /usr/share/dpkg/buildflags.mk
+endif
+
+# where sources are
+DEB_SRCDIR = .
+
+# in which directory to build
+#DEB_BUILDDIR = build-debian
+
+# in which directory to install the sofware
+DEB_DESTDIR = $(CURDIR)/debian/tmp
+
+#CDBS automatically handles common flags to pass to the configure script,
+#but it is possible to give some extra parameters :
+
+DEB_DH_BUILDDEB_ARGS = -- -Zgzip
+ 
+DEB_CMAKE_NORMAL_ARGS = -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_GTK=ON
+
+DEB_MAKE_BUILD_TARGET := -j4
+
+DEB_MAKE_INSTALL_TARGET = DESTDIR=$(DEB_DESTDIR) $(MAKE) install
+
