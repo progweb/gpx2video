@@ -255,8 +255,8 @@ void ElevationBarShape::initialize(cairo_t *cr) {
 
 		source->retrieveLast(data);
 
-		value_min = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin);
-		value_max = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+		value_min = data.elevation(widget_->valueUnit(), TelemetryData::RangeMin);
+		value_max = data.elevation(widget_->valueUnit(), TelemetryData::RangeMax);
 	}
 
 	// Range auto disabled
@@ -669,8 +669,8 @@ void ElevationChartShape::initialize(cairo_t *cr) {
 		x_min = data.distance(TelemetryData::UnitKm, TelemetryData::RangeMin);
 		x_max = data.distance(TelemetryData::UnitKm, TelemetryData::RangeMax);
 
-		y_min = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin);
-		y_max = data.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+		y_min = data.elevation(widget_->valueUnit(), TelemetryData::RangeMin);
+		y_max = data.elevation(widget_->valueUnit(), TelemetryData::RangeMax);
 	}
 
 	// Range auto disabled

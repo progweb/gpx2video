@@ -260,8 +260,8 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 
 		source->retrieveLast(data);
 
-		value_min = data.distance(TelemetryData::UnitMeter, TelemetryData::RangeMin);
-		value_max = data.distance(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+		value_min = data.distance(widget_->valueUnit(), TelemetryData::RangeMin);
+		value_max = data.distance(widget_->valueUnit(), TelemetryData::RangeMax);
 	}
 
 	// Range auto disabled
