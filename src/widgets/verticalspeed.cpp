@@ -252,6 +252,15 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 
 		value_min = data.verticalspeed(widget_->valueUnit(), TelemetryData::RangeMin);
 		value_max = data.verticalspeed(widget_->valueUnit(), TelemetryData::RangeMax);
+
+		value_min = std::floor(value_min / 10.0);
+		value_max = std::ceil(value_max / 10.0);
+
+		value_min -= ((int) value_min % 2);
+		value_max += ((int) value_max % 2);
+
+		value_min *= 10.0;
+		value_max *= 10.0;
 	}
 
 	// Range auto disabled
