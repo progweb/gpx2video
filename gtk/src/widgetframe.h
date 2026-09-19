@@ -105,6 +105,7 @@ protected:
 	void on_widget_entry_changed(Gtk::Entry *entry, std::function<void(const Glib::ustring&)> set);
 	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
 	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);
+	void on_widget_checkbutton_toggled(Gtk::CheckButton *button, std::function<void(const int&)> set);
 
 	void on_widget_reset_clicked(void);
 

@@ -895,7 +895,9 @@ bool Renderer::loadWidget(layout::Widget *w) {
 	widget->theme().setValueShadowDistance(w->valueShadowDistance());
 	widget->theme().setValueBorderWidth(w->valueBorderWidth());
 	widget->theme().setValueBorderColor((const char *) w->valueBorderColor());
+	widget->theme().setValueMinAuto(w->valueMinAuto());
 	widget->theme().setValueMin(w->valueMin());
+	widget->theme().setValueMaxAuto(w->valueMaxAuto());
 	widget->theme().setValueMax(w->valueMax());
 
 	// Widget unit settings

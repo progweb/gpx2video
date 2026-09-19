@@ -130,14 +130,14 @@ public:
 	double course(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double heading(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double grade(void) const;
-	double speed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double speed(TelemetryData::Unit unit = TelemetryData::UnitDefault, TelemetryData::Range range = TelemetryData::RangeNone) const;
 	double maxspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double acceleration(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double rideTime(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double elapsedTime(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double avgspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double avgridespeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
-	double verticalspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
+	double verticalspeed(TelemetryData::Unit unit = TelemetryData::UnitDefault, TelemetryData::Range range = TelemetryData::RangeNone) const;
 	double homedistance(TelemetryData::Unit unit = TelemetryData::UnitDefault) const;
 	double batterylevel(void) const;
 	int lap(void) const;
@@ -181,14 +181,14 @@ protected:
 	double heading_;
 	double duration_;
 	double grade_;
-	double speed_;
+	double speed_, speed_min_, speed_max_;
 	double maxspeed_;
 	double acceleration_;
 	double ridetime_;
 	double elapsedtime_;
 	double avgspeed_;
 	double avgridespeed_;
-	double verticalspeed_;
+	double verticalspeed_, verticalspeed_min_, verticalspeed_max_;
 	double homedistance_;
 	double batterylevel_;
 

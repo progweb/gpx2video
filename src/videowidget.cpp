@@ -56,7 +56,9 @@ VideoWidget::Theme::Theme() {
 	setLabelBorderWidth(1.0);
 	setLabelBorderColor(0.0, 0.0, 0.0, 1.0);
 
+	setValueMinAuto(true);
 	setValueMin(0);
+	setValueMaxAuto(true);
 	setValueMax(100);
 	setValueFontFamily("Sans");
 	setValueFontSize(50.0);
@@ -411,6 +413,14 @@ bool VideoWidget::Theme::setLabelBorderColor(double r, double g, double b, doubl
 	return true;
 }
 
+const bool& VideoWidget::Theme::valueMinAuto(void) const {
+	return value_min_auto_;
+}
+
+void VideoWidget::Theme::setValueMinAuto(bool enable) {
+	value_min_auto_ = enable;
+}
+
 const int& VideoWidget::Theme::valueMin(void) const {
 	return value_min_;
 }
@@ -418,6 +428,14 @@ const int& VideoWidget::Theme::valueMin(void) const {
 void VideoWidget::Theme::setValueMin(int value) {
 	if (value < value_max_)
 		value_min_ = value;
+}
+
+const bool& VideoWidget::Theme::valueMaxAuto(void) const {
+	return value_max_auto_;
+}
+
+void VideoWidget::Theme::setValueMaxAuto(bool enable) {
+	value_max_auto_ = enable;
 }
 
 const int& VideoWidget::Theme::valueMax(void) const {

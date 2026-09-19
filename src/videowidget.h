@@ -305,8 +305,14 @@ public:
 		bool setLabelBorderColor(std::string color);
 		bool setLabelBorderColor(double r, double g, double b, double a);
 
+		const bool& valueMinAuto(void) const;
+		void setValueMinAuto(bool enable);
+
 		const int& valueMin(void) const;
 		void setValueMin(int value);
+
+		const bool& valueMaxAuto(void) const;
+		void setValueMaxAuto(bool enable);
 
 		const int& valueMax(void) const;
 		void setValueMax(int value);
@@ -574,7 +580,9 @@ public:
 		float needle_primary_color_[4];
 		float needle_secondary_color_[4];
 
+		bool value_min_auto_;
 		int value_min_;
+		bool value_max_auto_;
 		int value_max_;
 		Align value_horizontal_align_;
 		Align value_vertical_align_;

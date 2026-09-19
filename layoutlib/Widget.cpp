@@ -92,7 +92,9 @@ namespace layout
 	_value_shadowdistance(this, "value-shadow-distance", Node::ELEMENT, false),
 	_value_borderwidth(this, "value-border-width", Node::ELEMENT, false),
 	_value_bordercolor(this, "value-border-color", Node::ELEMENT, false),
+    _value_min_auto(this, "value-min-auto",   Node::ELEMENT, false),
     _value_min(this, "value-min",   Node::ELEMENT, false),
+    _value_max_auto(this, "value-max-auto",   Node::ELEMENT, false),
     _value_max(this, "value-max",   Node::ELEMENT, false),
     _value_unit(this, "value-unit",   Node::ELEMENT, false),
     _value_format(this, "value-format",   Node::ELEMENT, false),
@@ -212,7 +214,9 @@ namespace layout
     getInterfaces().push_back(&_value_shadowdistance);
     getInterfaces().push_back(&_value_borderwidth);
     getInterfaces().push_back(&_value_bordercolor);
+    getInterfaces().push_back(&_value_min_auto);
     getInterfaces().push_back(&_value_min);
+    getInterfaces().push_back(&_value_max_auto);
     getInterfaces().push_back(&_value_max);
     getInterfaces().push_back(&_value_unit);
     getInterfaces().push_back(&_value_format);
@@ -297,6 +301,8 @@ namespace layout
 	_value_shadowopacity.setValue("-1");
 	_value_shadowdistance.setValue("-1");
 	_value_borderwidth.setValue("-1");
+	_value_min_auto.setValue("false");
+	_value_max_auto.setValue("false");
 
 	_unit_fontsize.setValue("-1");
 	_unit_shadowopacity.setValue("-1");

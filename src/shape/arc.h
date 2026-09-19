@@ -87,6 +87,16 @@ public:
 		padding_bottom_ = bottom;
 	}
 
+	void getValueRange(double &min, double &max) {
+		min = value_min_;
+		max = value_max_;
+	}
+
+	void setValueRange(double min, double max) {
+		value_min_ = min;
+		value_max_ = max;
+	}
+
 	const double& start(void) const {
 		return start_angle_;
 	}
@@ -155,6 +165,8 @@ private:
 	int padding_right_;
 	int padding_top_;
 	int padding_bottom_;
+
+	double value_min_, value_max_;
 
 	int value_x_, value_y_, value_width_, value_height_;
 	int unit_x_, unit_y_, unit_width_, unit_height_;

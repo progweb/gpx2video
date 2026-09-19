@@ -81,6 +81,16 @@ public:
 		label_height_ = height;
 	}
 
+	void getValueRange(double &min, double &max) {
+		min = value_min_;
+		max = value_max_;
+	}
+
+	void setValueRange(double min, double max) {
+		value_min_ = min;
+		value_max_ = max;
+	}
+
 	double scale(double min, double max, double value, int rotate = 0) {
 		double v_point = (value - min) / (max - min);
 
@@ -158,6 +168,8 @@ private:
 	int padding_right_;
 	int padding_top_;
 	int padding_bottom_;
+
+	double value_min_, value_max_;
 
 	int label_x_, label_y_, label_width_, label_height_;
 };

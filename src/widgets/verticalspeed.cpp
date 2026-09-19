@@ -233,14 +233,40 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 
 	char s[128];
 
+	double value_min = 0, value_max = 0;
+
+	TelemetrySource *source;
+
 	TextShape::Font font;
 
 	// Icon
 	icon_filename_ = widget_->getIconFilename(theme().icon());
 
+	// Last point
+	source = widget_->telemetrySource();
+
+	if (source) {
+		TelemetryData data;
+
+		source->retrieveLast(data);
+
+		value_min = data.verticalspeed(widget_->valueUnit(), TelemetryData::RangeMin);
+		value_max = data.verticalspeed(widget_->valueUnit(), TelemetryData::RangeMax);
+	}
+
+	// Range auto disabled
+	if (!theme().valueMinAuto())
+		value_min = theme().valueMin();
+
+	if (!theme().valueMaxAuto())
+		value_max = theme().valueMax();
+
 	// Size
 	setOrientation(theme().gaugeOrientation());
 	setSize(theme().width(), theme().height());
+
+	// Data range
+	setValueRange(value_min, value_max);
 
 	// Label height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -270,11 +296,8 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 
 	// Tick label space
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int amin = theme().valueMin();
-		int amax = theme().valueMax();
-
-		int min = amin;
-		int max = amax;
+		int min = value_min;
+		int max = value_max;
 
 		bool first = true;
 
@@ -300,7 +323,7 @@ void VerticalSpeedBarShape::initialize(cairo_t *cr) {
 			else
 				sprintf(s, "%d", value);
 
-			if (value < amin)
+			if (value < value_min)
 				continue;
 
 			font = (TextShape::Font) {
@@ -396,7 +419,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	int rotate = 0;
 
-	int amin, amax;
+	double value_min, value_max;
 
 	double xb1, xb2;
 
@@ -408,9 +431,8 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Initialize
 	initialize(cr);
 
-	// Limit
-	amin = theme().valueMin();
-	amax = theme().valueMax();
+	// Range
+	getValueRange(value_min, value_max);
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataVerticalSpeed);
@@ -428,12 +450,12 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	// Draw gauge
-	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (verticalspeed >= amin)) {
-		double to = std::min(verticalspeed, (double) amax);
-		double from = (to > 0) ? std::max(0, amin) : std::min(0, amax);
+	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (verticalspeed >= value_min)) {
+		double to = std::min(verticalspeed, (double) value_max);
+		double from = (to > 0) ? std::max(0.0, value_min) : std::min(0.0, value_max);
 
-		xb1 = scale(amin, amax, from, rotate);
-		xb2 = scale(amin, amax, to, rotate);
+		xb1 = scale(value_min, value_max, from, rotate);
+		xb2 = scale(value_min, value_max, to, rotate);
 
 		bar(cr, xb1, xb2, theme().gaugeWidth() - (2 * theme().gaugeBorder()), 0,
 				theme().gaugePrimaryColor());
@@ -441,12 +463,12 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick lines on bar
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
-		for (int value = amin; value < amax + tick_step_; value = value + tick_step_) {
+		for (int value = value_min; value < value_max + tick_step_; value = value + tick_step_) {
 			double ticklen;
 			double tickwidth;
 			double tickoffset;
 
-			double xb = scale(amin, amax, value, rotate);
+			double xb = scale(value_min, value_max, value, rotate);
 
 			ticklenwidth(value / tick_mstep_, &tickoffset, &ticklen, &tickwidth);
 
@@ -456,8 +478,8 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int min = amin;
-		int max = amax;
+		int min = value_min;
+		int max = value_max;
 
 		bool first = true;
 
@@ -477,7 +499,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		distance += std::max(tick_width / 2, gauge_width / 2);
 
 		for (int value = min; value < max + step; value = value + step) {
-			double xb = scale(amin, amax, value, rotate);
+			double xb = scale(value_min, value_max, value, rotate);
 
 			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
 
@@ -486,7 +508,7 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			else
 				sprintf(s, "%d", value);
 
-			if (value < amin)
+			if (value < value_min)
 				continue;
 
 			font = (TextShape::Font) {
@@ -508,8 +530,8 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	// Draw cursor
-	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((verticalspeed >= amin) && (verticalspeed <= amax))) {
-		double xb = scale(amin, amax, verticalspeed, rotate);
+	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((verticalspeed >= value_min) && (verticalspeed <= value_max))) {
+		double xb = scale(value_min, value_max, verticalspeed, rotate);
 
 		cursor(cr, xb, theme().cursorWidth(), theme().cursorColor());
 	}
@@ -530,8 +552,8 @@ void VerticalSpeedBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	};
 
 	// Draw needle / icon / value
-	if ((verticalspeed >= amin) && (verticalspeed <= amax)) {
-		double xb = scale(amin, amax, verticalspeed, rotate);
+	if ((verticalspeed >= value_min) && (verticalspeed <= value_max)) {
+		double xb = scale(value_min, value_max, verticalspeed, rotate);
 
 		if (theme().hasFlag(VideoWidget::Theme::FlagNeedle))
 			needle(cr, theme().needleType(),

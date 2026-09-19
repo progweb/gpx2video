@@ -398,7 +398,9 @@ void ShapeBase::xmlwrite(std::ostream &os) {
 		os << "<value-shadow-distance>" << theme_.valueShadowDistance() << "</value-shadow-distance>" << std::endl;
 		os << "<value-border-width>" << theme_.valueBorderWidth() << "</value-border-width>" << std::endl;
 		os << "<value-border-color>" << VideoWidget::Theme::color2hex(theme_.valueBorderColor()) << "</value-border-color>" << std::endl;
+		os << "<value-min-auto>" << VideoWidget::bool2string(theme_.valueMinAuto()) << "</value-min-auto>" << std::endl;
 		os << "<value-min>" << theme_.valueMin() << "</value-min>" << std::endl;
+		os << "<value-max-auto>" << VideoWidget::bool2string(theme_.valueMaxAuto()) << "</value-max-auto>" << std::endl;
 		os << "<value-max>" << theme_.valueMax() << "</value-max>" << std::endl;
 	}
 

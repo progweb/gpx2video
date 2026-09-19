@@ -243,14 +243,40 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 
 	char s[128];
 
+	double value_min = 0, value_max = 0;
+
+	TelemetrySource *source;
+
 	TextShape::Font font;
 
 	// Icon
 	icon_filename_ = widget_->getIconFilename(theme().icon());
 
+	// Last point
+	source = widget_->telemetrySource();
+
+	if (source) {
+		TelemetryData data;
+
+		source->retrieveLast(data);
+
+		value_min = data.distance(TelemetryData::UnitMeter, TelemetryData::RangeMin);
+		value_max = data.distance(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+	}
+
+	// Range auto disabled
+	if (!theme().valueMinAuto())
+		value_min = theme().valueMin();
+
+	if (!theme().valueMaxAuto())
+		value_max = theme().valueMax();
+
 	// Size
 	setOrientation(theme().gaugeOrientation());
 	setSize(theme().width(), theme().height());
+
+	// Data range
+	setValueRange(value_min, value_max);
 
 	// Label width / height
 	if (theme().hasFlag(VideoWidget::Theme::FlagLabel)) {
@@ -280,11 +306,8 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 
 	// Tick label space
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int dmin = theme().valueMin();
-		int dmax = theme().valueMax();
-
-		int min = dmin;
-		int max = dmax;
+		int min = value_min;
+		int max = value_max;
 
 		bool first = true;
 
@@ -310,7 +333,7 @@ void DistanceBarShape::initialize(cairo_t *cr) {
 			else
 				sprintf(s, "%d", value);
 
-			if (value < dmin)
+			if (value < value_min)
 				continue;
 
 			font = (TextShape::Font) {
@@ -406,7 +429,7 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	int rotate = 0;
 
-	int dmin, dmax;
+	double value_min, value_max;
 
 	double xb1, xb2;
 
@@ -418,9 +441,8 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	// Initialize
 	initialize(cr);
 
-	// Limit
-	dmin = theme().valueMin();
-	dmax = theme().valueMax();
+	// Range
+	getValueRange(value_min, value_max);
 
 	// Format data
 	no_value_ = !data.hasValue(TelemetryData::DataDistance);
@@ -438,12 +460,12 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	// Draw gauge
-	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (distance >= dmin)) {
-		double to = std::min(distance, (double) dmax);
-		double from = (to > 0) ? std::max(0, dmin) : std::min(0, dmax);
+	if (theme().hasFlag(VideoWidget::Theme::FlagGauge) && (distance >= value_min)) {
+		double to = std::min(distance, (double) value_max);
+		double from = (to > 0) ? std::max(0.0, value_min) : std::min(0.0, value_max);
 
-		xb1 = scale(dmin, dmax, from, rotate);
-		xb2 = scale(dmin, dmax, to, rotate);
+		xb1 = scale(value_min, value_max, from, rotate);
+		xb2 = scale(value_min, value_max, to, rotate);
 
 		bar(cr, xb1, xb2, theme().gaugeWidth() - (2 * theme().gaugeBorder()), 0,
 				theme().gaugePrimaryColor());
@@ -451,12 +473,12 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick lines on bar
 	if (theme().hasFlag(VideoWidget::Theme::FlagTick)) {
-		for (int value = dmin; value < dmax + tick_step_; value = value + tick_step_) {
+		for (int value = value_min; value < value_max + tick_step_; value = value + tick_step_) {
 			double ticklen;
 			double tickwidth;
 			double tickoffset;
 
-			double xb = scale(dmin, dmax, value, rotate);
+			double xb = scale(value_min, value_max, value, rotate);
 
 			ticklenwidth(value / tick_mstep_, &tickoffset, &ticklen, &tickwidth);
 
@@ -466,8 +488,8 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 
 	// Draw tick label
 	if (theme().hasFlag(VideoWidget::Theme::FlagTickLabel)) {
-		int min = dmin;
-		int max = dmax;
+		int min = value_min;
+		int max = value_max;
 
 		bool first = true;
 
@@ -487,7 +509,7 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 		distance += std::max(tick_width / 2, gauge_width / 2);
 
 		for (int value = min; value < max + step; value = value + step) {
-			double xb = scale(dmin, dmax, value, rotate);
+			double xb = scale(value_min, value_max, value, rotate);
 
 			double factor = (double) theme().tickLabelFontSize() / (double) theme().valueFontSize();
 
@@ -496,7 +518,7 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 			else
 				sprintf(s, "%d", value);
 
-			if (value < dmin)
+			if (value < value_min)
 				continue;
 
 			font = (TextShape::Font) {
@@ -518,8 +540,8 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	}
 
 	// Draw cursor
-	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((distance >= dmin) && (distance <= dmax))) {
-		double xb = scale(dmin, dmax, distance, rotate);
+	if (theme().hasFlag(VideoWidget::Theme::FlagCursor) && ((distance >= value_min) && (distance <= value_max))) {
+		double xb = scale(value_min, value_max, distance, rotate);
 
 		cursor(cr, xb, theme().cursorWidth(), theme().cursorColor());
 	}
@@ -540,8 +562,8 @@ void DistanceBarShape::draw(cairo_t *cr, const TelemetryData &data) {
 	};
 
 	// Draw needle / icon / value
-	if ((distance >= dmin) && (distance <= dmax)) {
-		double xb = scale(dmin, dmax, distance, rotate);
+	if ((distance >= value_min) && (distance <= value_max)) {
+		double xb = scale(value_min, value_max, distance, rotate);
 
 		if (theme().hasFlag(VideoWidget::Theme::FlagNeedle))
 			needle(cr, theme().needleType(),

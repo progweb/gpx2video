@@ -276,24 +276,39 @@ double TelemetryData::grade(void) const {
 }
 
 
-double TelemetryData::speed(TelemetryData::Unit unit) const {
+double TelemetryData::speed(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double speed;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		speed = speed_min_;
+		break;
+	case TelemetryData::RangeMax:
+		speed = speed_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		speed = speed_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitMilesPerHour:
-		return speed_ * 0.6213711922;
+		return speed * 0.6213711922;
 
 	case TelemetryData::UnitMinPerMile:
-		return 60.0 / (speed_ * 0.6213711922);
+		return 60.0 / (speed * 0.6213711922);
 
 	case TelemetryData::UnitMinPerKm:
-		return 60.0 / speed_;
+		return 60.0 / speed;
 
 	case TelemetryData::UnitMeterPerHour:
-		return speed_ * 1000.0;
+		return speed * 1000.0;
 
 	case TelemetryData::UnitKmPerHour:
 	case TelemetryData::UnitDefault:
 	default:
-		return speed_;
+		return speed;
 	}
 }
 
@@ -398,18 +413,33 @@ double TelemetryData::avgridespeed(TelemetryData::Unit unit) const {
 }
 
 
-double TelemetryData::verticalspeed(TelemetryData::Unit unit) const {
+double TelemetryData::verticalspeed(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double verticalspeed;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		verticalspeed = verticalspeed_min_;
+		break;
+	case TelemetryData::RangeMax:
+		verticalspeed = verticalspeed_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		verticalspeed = verticalspeed_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitMilesPerSec:
-		return (verticalspeed_ * 0.6213711922) / 1000.0;
+		return (verticalspeed * 0.6213711922) / 1000.0;
 
 	case TelemetryData::UnitFeetPerSec:
-		return verticalspeed_ * 3.28084;
+		return verticalspeed * 3.28084;
 
 	case TelemetryData::UnitMeterPerSec:
 	case TelemetryData::UnitDefault:
 	default:
-		return verticalspeed_;
+		return verticalspeed;
 	}
 }
 
@@ -2848,6 +2878,12 @@ void TelemetrySource::bounds(void) {
 	point.distance_min_ = point.distance_;
 	point.distance_max_ = point.distance_;
 
+	point.speed_min_ = point.speed_;
+	point.speed_max_ = point.speed_;
+
+	point.verticalspeed_min_ = point.verticalspeed_;
+	point.verticalspeed_max_ = point.verticalspeed_;
+
 	// Save point
 	pool_.current() = point;
 
@@ -2865,6 +2901,12 @@ void TelemetrySource::bounds(void) {
 
 		point.distance_min_ = std::min(prevPoint.distance_min_, point.distance_);
 		point.distance_max_ = std::max(prevPoint.distance_max_, point.distance_);
+
+		point.speed_min_ = std::min(prevPoint.speed_min_, point.speed_);
+		point.speed_max_ = std::max(prevPoint.speed_max_, point.speed_);
+
+		point.verticalspeed_min_ = std::min(prevPoint.verticalspeed_min_, point.verticalspeed_);
+		point.verticalspeed_max_ = std::max(prevPoint.verticalspeed_max_, point.verticalspeed_);
 
 		// Save point
 		pool_.current() = point;

@@ -456,12 +456,24 @@ namespace layout
     ///
     String &valueBorderColor() { return _value_bordercolor; }
 
+	/// Get min auto
+	///
+	/// @return the min auto element
+	///
+	Boolean &valueMinAuto() { return _value_min_auto; }
+
     ///
     /// Get min
     ///
     /// @return the min element
     ///
     Decimal &valueMin() { return _value_min; }
+
+	/// Get max auto
+	///
+	/// @return the max auto element
+	///
+	Boolean &valueMaxAuto() { return _value_max_auto; }
 
     ///
     /// Get max
@@ -865,7 +877,9 @@ namespace layout
 	Decimal      _value_shadowdistance;
 	Decimal      _value_borderwidth;
 	String       _value_bordercolor;
+	Boolean      _value_min_auto;
     Decimal      _value_min;
+	Boolean      _value_max_auto;
     Decimal      _value_max;
     String       _value_unit;
     String       _value_format;

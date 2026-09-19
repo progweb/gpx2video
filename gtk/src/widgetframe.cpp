@@ -9,6 +9,7 @@
 #include <gtkmm/expander.h>
 #include <gtkmm/fontbutton.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/colorbutton.h>
 
 #include <pangomm/cairofontmap.h>
@@ -473,6 +474,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 	Gtk::ComboBox *combobox;
 	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
+	Gtk::CheckButton *checkbutton;
 	Gtk::ColorButton *colorbutton;
 
 	auto renderer = Gtk::make_managed<Gtk::CellRendererText>();
@@ -1412,6 +1414,27 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 					}
 			));
 
+	// Value min. auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_min_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_min_checkbutton\" object in widget_frame.ui");
+
+	checkbutton->signal_toggled().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_checkbutton_toggled), checkbutton, 
+					[this](const bool active) {
+						log_notice("Widget %s: value min. auto toggled to '%s'",
+							   widget_selected_->widget()->name().c_str(), std::to_string(active).c_str());
+
+						widget_selected_->widget()->theme().setValueMinAuto(active);
+
+						// Update limits
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(true);
+					}
+				));
+
 	// Value max.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
 	if (!spinbutton)
@@ -1431,6 +1454,27 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						widget_selected_->dispatchEvent(false);
 					}
 			));
+
+	// Value max. auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_max_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_max_checkbutton\" object in widget_frame.ui");
+
+	checkbutton->signal_toggled().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoWidgetFrame::on_widget_checkbutton_toggled), checkbutton, 
+					[this](const bool active) {
+						log_notice("Widget %s: value max. auto toggled to '%s'",
+							   widget_selected_->widget()->name().c_str(), std::to_string(active).c_str());
+
+						widget_selected_->widget()->theme().setValueMaxAuto(active);
+
+						// Update limits
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_selected_->dispatchEvent(true);
+					}
+				));
 
 	// Value unit
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
@@ -1452,7 +1496,7 @@ void GPX2VideoWidgetFrame::bind_content(void) {
 						widget_selected_->widget()->setValueUnit((TelemetryData::Unit) value);
 
 						// Broadcast widget change
-						widget_selected_->dispatchEvent(false);
+						widget_selected_->dispatchEvent(true);
 					}
 			));
 
@@ -1819,6 +1863,7 @@ void GPX2VideoWidgetFrame::update_content(void) {
 	Gtk::ComboBox *combobox;
 	Gtk::FontButton *fontbutton;
 	Gtk::SpinButton *spinbutton;
+	Gtk::CheckButton *checkbutton;
 	Gtk::ColorButton *colorbutton;
 
 	Pango::FontDescription description;
@@ -2271,12 +2316,26 @@ void GPX2VideoWidgetFrame::update_content(void) {
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMin());
 
+	// Value min. auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_min_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_min_checkbutton\" object in widget_frame.ui");
+
+	checkbutton->set_active(widget_selected_->widget()->theme().valueMinAuto());
+
 	// Value max.
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
 
 	spinbutton->set_value(widget_selected_->widget()->theme().valueMax());
+
+	// Value max. auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_max_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_max_checkbutton\" object in widget_frame.ui");
+
+	checkbutton->set_active(widget_selected_->widget()->theme().valueMaxAuto());
 
 	// Value unit 
 	combobox = ref_builder_->get_widget<Gtk::ComboBox>("value_unit_combobox");
@@ -2593,6 +2652,7 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		value = std::numeric_limits<int>::max();
 
 	spinbutton->set_range(std::numeric_limits<int>::min(), value);
+	spinbutton->set_sensitive(!widget_selected_->widget()->theme().valueMinAuto());
 
 	// Value max.
 	box = ref_builder_->get_widget<Gtk::Box>("value_max_box");
@@ -2610,6 +2670,7 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 		value = std::numeric_limits<int>::min();
 
 	spinbutton->set_range(value, std::numeric_limits<int>::max());
+	spinbutton->set_sensitive(!widget_selected_->widget()->theme().valueMaxAuto());
 
 	// Unit expander container
 	expander = ref_builder_->get_widget<Gtk::Expander>("unit_expander");
@@ -2888,6 +2949,21 @@ bool GPX2VideoWidgetFrame::on_widget_switch_changed(bool state, Gtk::Switch *sw,
 	set(state);
 
 	return true;
+}
+
+
+void GPX2VideoWidgetFrame::on_widget_checkbutton_toggled(Gtk::CheckButton *button, std::function<void(const int&)> set) {
+	log_call();
+
+	bool active;
+
+	if (loading_)
+		return;
+
+	active = button->get_active();
+
+	// Set active
+	set(active);
 }
 
 
