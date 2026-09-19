@@ -174,43 +174,103 @@ double TelemetryData::elevation(TelemetryData::Unit unit, TelemetryData::Range r
 }
 
 
-int TelemetryData::cadence(TelemetryData::Unit unit) const {
+int TelemetryData::cadence(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	int cadence;
+
 	(void) unit;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		cadence = cadence_min_;
+		break;
+	case TelemetryData::RangeMax:
+		cadence = cadence_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		cadence = cadence_;
+		break;
+	}
 
 	// tr/min
 
-	return cadence_;
+	return cadence;
 }
 
 
-int TelemetryData::heartrate(TelemetryData::Unit unit) const {
+int TelemetryData::heartrate(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	int heartrate;
+
 	(void) unit;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		heartrate = heartrate_min_;
+		break;
+	case TelemetryData::RangeMax:
+		heartrate = heartrate_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		heartrate = heartrate_;
+		break;
+	}
 
 	// bpm
 
-	return heartrate_;
+	return heartrate;
 }
 
 
-double TelemetryData::temperature(TelemetryData::Unit unit) const {
+double TelemetryData::temperature(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double temperature;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		temperature = temperature_min_;
+		break;
+	case TelemetryData::RangeMax:
+		temperature = temperature_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		temperature = temperature_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitFarenheit:
-		return (temperature_ * 9.0 / 5.0) + 32.0;
+		return (temperature * 9.0 / 5.0) + 32.0;
 
 	case TelemetryData::UnitCelsius:
 	case TelemetryData::UnitDefault:
 	default:
-		return temperature_;
+		return temperature;
 	}
 }
 
 
-int TelemetryData::power(TelemetryData::Unit unit) const {
+int TelemetryData::power(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	int power;
+
 	(void) unit;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		power = power_min_;
+		break;
+	case TelemetryData::RangeMax:
+		power = power_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		power = power_;
+		break;
+	}
 
 	// watt
 
-	return power_;
+	return power;
 }
 
 
@@ -257,22 +317,69 @@ double TelemetryData::distance(TelemetryData::Unit unit, TelemetryData::Range ra
 }
 
 
-double TelemetryData::course(TelemetryData::Unit unit) const {
+double TelemetryData::course(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double course;
+
 	(void) unit;
 
-	return course_;
+	switch (range) {
+	case TelemetryData::RangeMin:
+		course = course_min_;
+		break;
+	case TelemetryData::RangeMax:
+		course = course_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		course = course_;
+		break;
+	}
+
+	return course;
 }
 
 
-double TelemetryData::heading(TelemetryData::Unit unit) const {
+double TelemetryData::heading(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double heading;
+
 	(void) unit;
 
-	return heading_;
+	switch (range) {
+	case TelemetryData::RangeMin:
+		heading = heading_min_;
+		break;
+	case TelemetryData::RangeMax:
+		heading = heading_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		heading = heading_;
+		break;
+	}
+
+	return heading;
 }
 
 
-double TelemetryData::grade(void) const {
-	return grade_;
+double TelemetryData::grade(TelemetryData::Range range) const {
+	double grade;
+
+	(void) range;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		grade = grade_min_;
+		break;
+	case TelemetryData::RangeMax:
+		grade = grade_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		grade = grade_;
+		break;
+	}
+
+	return grade;
 }
 
 
@@ -313,40 +420,70 @@ double TelemetryData::speed(TelemetryData::Unit unit, TelemetryData::Range range
 }
 
 
-double TelemetryData::maxspeed(TelemetryData::Unit unit) const {
+double TelemetryData::maxspeed(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double maxspeed;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		maxspeed = maxspeed_min_;
+		break;
+	case TelemetryData::RangeMax:
+		maxspeed = maxspeed_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		maxspeed = maxspeed_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitMilesPerHour:
-		return maxspeed_ * 0.6213711922;
+		return maxspeed * 0.6213711922;
 
 	case TelemetryData::UnitMinPerMile:
-		return 60.0 / (maxspeed_ * 0.6213711922);
+		return 60.0 / (maxspeed * 0.6213711922);
 
 	case TelemetryData::UnitMinPerKm:
-		return 60.0 / maxspeed_;
+		return 60.0 / maxspeed;
 
 	case TelemetryData::UnitMeterPerHour:
-		return maxspeed_ * 1000.0;
+		return maxspeed * 1000.0;
 
 	case TelemetryData::UnitKmPerHour:
 	case TelemetryData::UnitDefault:
 	default:
-		return maxspeed_;
+		return maxspeed;
 	}
 }
 
 
-double TelemetryData::acceleration(TelemetryData::Unit unit) const {
+double TelemetryData::acceleration(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double acceleration;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		acceleration = acceleration_min_;
+		break;
+	case TelemetryData::RangeMax:
+		acceleration = acceleration_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		acceleration = acceleration_;
+		break;
+	}
+
 	// acceleration m/s²
 	// gforce g (= 9,80665 m/s²)
 
 	switch (unit) {
 	case TelemetryData::UnitG:
-		return acceleration_ / 9.81;
+		return acceleration / 9.81;
 
 	case TelemetryData::UnitMeterPerSec2:
 	case TelemetryData::UnitDefault:
 	default:
-		return acceleration_;
+		return acceleration;
 	}
 }
 
@@ -369,46 +506,76 @@ double TelemetryData::elapsedTime(TelemetryData::Unit unit) const {
 }
 
 
-double TelemetryData::avgspeed(TelemetryData::Unit unit) const {
+double TelemetryData::avgspeed(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double avgspeed;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		avgspeed = avgspeed_min_;
+		break;
+	case TelemetryData::RangeMax:
+		avgspeed = avgspeed_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		avgspeed = avgspeed_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitMilesPerHour:
-		return avgspeed_ * 0.6213711922;
+		return avgspeed * 0.6213711922;
 
 	case TelemetryData::UnitMinPerMile:
-		return 60.0 / (avgspeed_ * 0.6213711922);
+		return 60.0 / (avgspeed * 0.6213711922);
 
 	case TelemetryData::UnitMinPerKm:
-		return 60.0 / avgspeed_;
+		return 60.0 / avgspeed;
 
 	case TelemetryData::UnitMeterPerHour:
-		return avgspeed_ * 1000.0;
+		return avgspeed * 1000.0;
 
 	case TelemetryData::UnitKmPerHour:
 	case TelemetryData::UnitDefault:
 	default:
-		return avgspeed_;
+		return avgspeed;
 	}
 }
 
 
-double TelemetryData::avgridespeed(TelemetryData::Unit unit) const {
+double TelemetryData::avgridespeed(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double avgridespeed;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		avgridespeed = avgridespeed_min_;
+		break;
+	case TelemetryData::RangeMax:
+		avgridespeed = avgridespeed_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		avgridespeed = avgridespeed_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitMilesPerHour:
-		return avgridespeed_ * 0.6213711922;
+		return avgridespeed * 0.6213711922;
 
 	case TelemetryData::UnitMinPerMile:
-		return 60.0 / (avgridespeed_ * 0.6213711922);
+		return 60.0 / (avgridespeed * 0.6213711922);
 
 	case TelemetryData::UnitMinPerKm:
-		return 60.0 / avgridespeed_;
+		return 60.0 / avgridespeed;
 
 	case TelemetryData::UnitMeterPerHour:
-		return avgridespeed_ * 1000.0;
+		return avgridespeed * 1000.0;
 
 	case TelemetryData::UnitKmPerHour:
 	case TelemetryData::UnitDefault:
 	default:
-		return avgridespeed_;
+		return avgridespeed;
 	}
 }
 
@@ -444,27 +611,57 @@ double TelemetryData::verticalspeed(TelemetryData::Unit unit, TelemetryData::Ran
 }
 
 
-double TelemetryData::homedistance(TelemetryData::Unit unit) const {
+double TelemetryData::homedistance(TelemetryData::Unit unit, TelemetryData::Range range) const {
+	double homedistance;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		homedistance = homedistance_min_;
+		break;
+	case TelemetryData::RangeMax:
+		homedistance = homedistance_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		homedistance = homedistance_;
+		break;
+	}
+
 	switch (unit) {
 	case TelemetryData::UnitFeet:
-		return homedistance_ * 3.28084;
+		return homedistance * 3.28084;
 
 	case TelemetryData::UnitMiles:
-		return (homedistance_ * 0.6213711922) / 1000.0;
+		return (homedistance * 0.6213711922) / 1000.0;
 
 	case TelemetryData::UnitKm:
-		return homedistance_ / 1000.0;
+		return homedistance / 1000.0;
 
 	case TelemetryData::UnitMeter:
 	case TelemetryData::UnitDefault:
 	default:
-		return homedistance_;
+		return homedistance;
 	}
 }
 
 
-double TelemetryData::batterylevel(void) const {
-	return batterylevel_;
+double TelemetryData::batterylevel(TelemetryData::Range range) const {
+	double batterylevel;
+
+	switch (range) {
+	case TelemetryData::RangeMin:
+		batterylevel = batterylevel_min_;
+		break;
+	case TelemetryData::RangeMax:
+		batterylevel = batterylevel_max_;
+		break;
+	case TelemetryData::RangeNone:
+	default:
+		batterylevel = batterylevel_;
+		break;
+	}
+
+	return batterylevel;
 }
 
 
@@ -2872,17 +3069,58 @@ void TelemetrySource::bounds(void) {
 	// Initialize
 	point = pool_.current();
 
+	// Measured values
 	point.ele_min_ = point.ele_;
 	point.ele_max_ = point.ele_;
 
+	point.temperature_min_ = point.temperature_;
+	point.temperature_max_ = point.temperature_;
+
+	point.heartrate_min_ = point.heartrate_;
+	point.heartrate_max_ = point.heartrate_;
+
+	point.cadence_min_ = point.cadence_;
+	point.cadence_max_ = point.cadence_;
+
+	point.power_min_ = point.power_;
+	point.power_max_ = point.power_;
+
+	// Computed values
 	point.distance_min_ = point.distance_;
 	point.distance_max_ = point.distance_;
+
+	point.course_min_ = point.course_;
+	point.course_max_ = point.course_;
+
+	point.heading_min_ = point.heading_;
+	point.heading_max_ = point.heading_;
+
+	point.grade_min_ = point.grade_;
+	point.grade_max_ = point.grade_;
 
 	point.speed_min_ = point.speed_;
 	point.speed_max_ = point.speed_;
 
+	point.maxspeed_min_ = point.maxspeed_;
+	point.maxspeed_max_ = point.maxspeed_;
+
+	point.acceleration_min_ = point.acceleration_;
+	point.acceleration_max_ = point.acceleration_;
+
+	point.avgspeed_min_ = point.avgspeed_;
+	point.avgspeed_max_ = point.avgspeed_;
+
+	point.avgridespeed_min_ = point.avgridespeed_;
+	point.avgridespeed_max_ = point.avgridespeed_;
+
 	point.verticalspeed_min_ = point.verticalspeed_;
 	point.verticalspeed_max_ = point.verticalspeed_;
+
+	point.homedistance_min_ = point.homedistance_;
+	point.homedistance_max_ = point.homedistance_;
+
+	point.ele_min_ = point.batterylevel_;
+	point.ele_max_ = point.batterylevel_;
 
 	// Save point
 	pool_.current() = point;
@@ -2896,17 +3134,58 @@ void TelemetrySource::bounds(void) {
 	while (!pool_.empty()) {
 		point = pool_.current();
 
+		// Measured values
 		point.ele_min_ = std::min(prevPoint.ele_min_, point.ele_);
 		point.ele_max_ = std::max(prevPoint.ele_max_, point.ele_);
 
+		point.temperature_min_ = std::min(prevPoint.temperature_min_, point.temperature_);
+		point.temperature_max_ = std::max(prevPoint.temperature_max_, point.temperature_);
+
+		point.heartrate_min_ = std::min(prevPoint.heartrate_min_, point.heartrate_);
+		point.heartrate_max_ = std::max(prevPoint.heartrate_max_, point.heartrate_);
+
+		point.cadence_min_ = std::min(prevPoint.cadence_min_, point.cadence_);
+		point.cadence_max_ = std::max(prevPoint.cadence_max_, point.cadence_);
+
+		point.power_min_ = std::min(prevPoint.power_min_, point.power_);
+		point.power_max_ = std::max(prevPoint.power_max_, point.power_);
+
+		// Computed values
 		point.distance_min_ = std::min(prevPoint.distance_min_, point.distance_);
 		point.distance_max_ = std::max(prevPoint.distance_max_, point.distance_);
+
+		point.course_min_ = std::min(prevPoint.course_min_, point.course_);
+		point.course_max_ = std::max(prevPoint.course_max_, point.course_);
+
+		point.heading_min_ = std::min(prevPoint.heading_min_, point.heading_);
+		point.heading_max_ = std::max(prevPoint.heading_max_, point.heading_);
+
+		point.grade_min_ = std::min(prevPoint.grade_min_, point.grade_);
+		point.grade_max_ = std::max(prevPoint.grade_max_, point.grade_);
 
 		point.speed_min_ = std::min(prevPoint.speed_min_, point.speed_);
 		point.speed_max_ = std::max(prevPoint.speed_max_, point.speed_);
 
+		point.maxspeed_min_ = std::min(prevPoint.maxspeed_min_, point.maxspeed_);
+		point.maxspeed_max_ = std::max(prevPoint.maxspeed_max_, point.maxspeed_);
+
+		point.acceleration_min_ = std::min(prevPoint.acceleration_min_, point.acceleration_);
+		point.acceleration_max_ = std::max(prevPoint.acceleration_max_, point.acceleration_);
+
+		point.avgspeed_min_ = std::min(prevPoint.avgspeed_min_, point.avgspeed_);
+		point.avgspeed_max_ = std::max(prevPoint.avgspeed_max_, point.avgspeed_);
+
+		point.avgridespeed_min_ = std::min(prevPoint.avgridespeed_min_, point.avgridespeed_);
+		point.avgridespeed_max_ = std::max(prevPoint.avgridespeed_max_, point.avgridespeed_);
+
 		point.verticalspeed_min_ = std::min(prevPoint.verticalspeed_min_, point.verticalspeed_);
 		point.verticalspeed_max_ = std::max(prevPoint.verticalspeed_max_, point.verticalspeed_);
+
+		point.homedistance_min_ = std::min(prevPoint.homedistance_min_, point.homedistance_);
+		point.homedistance_max_ = std::max(prevPoint.homedistance_max_, point.homedistance_);
+
+		point.batterylevel_min_ = std::min(prevPoint.batterylevel_min_, point.batterylevel_);
+		point.batterylevel_max_ = std::max(prevPoint.batterylevel_max_, point.batterylevel_);
 
 		// Save point
 		pool_.current() = point;
