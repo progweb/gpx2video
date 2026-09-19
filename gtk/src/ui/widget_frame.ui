@@ -1586,7 +1586,7 @@
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="value_min_box">
 												<property name="orientation">horizontal</property>
 												<property name="halign">fill</property>
 												<property name="hexpand">True</property>
@@ -1616,7 +1616,7 @@
 											</object>
 										</child>
 										<child>
-											<object class="GtkBox">
+											<object class="GtkBox" id="value_max_box">
 												<property name="orientation">horizontal</property>
 												<property name="halign">fill</property>
 												<property name="hexpand">True</property>

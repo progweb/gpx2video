@@ -2578,6 +2578,11 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	expander->set_visible(widget_selected_->shape()->hasFeature(ShapeBase::FeatureValue));
 
 	// Value min.
+	box = ref_builder_->get_widget<Gtk::Box>("value_min_box");
+	if (!box)
+		throw std::runtime_error("No \"value_min_box\" object in widget_frame.ui");
+	box->set_visible(widget_selected_->shape()->type() != VideoWidget::ShapeText);
+
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_min_spinbutton\" object in widget_frame.ui");
@@ -2590,6 +2595,11 @@ void GPX2VideoWidgetFrame::update_boundaries(void) {
 	spinbutton->set_range(std::numeric_limits<int>::min(), value);
 
 	// Value max.
+	box = ref_builder_->get_widget<Gtk::Box>("value_max_box");
+	if (!box)
+		throw std::runtime_error("No \"value_max_box\" object in widget_frame.ui");
+	box->set_visible(widget_selected_->shape()->type() != VideoWidget::ShapeText);
+
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"value_max_spinbutton\" object in widget_frame.ui");
