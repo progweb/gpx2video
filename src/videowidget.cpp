@@ -1597,6 +1597,10 @@ VideoWidget::Theme::Icon VideoWidget::string2icon(std::string &s) {
 		icon = VideoWidget::Theme::IconRunning;
 	else if (s == "internal:bike")
 		icon = VideoWidget::Theme::IconBike;
+	else if (s == "internal:horse")
+		icon = VideoWidget::Theme::IconHorse;
+	else if (s == "internal:kart")
+		icon = VideoWidget::Theme::IconKart;
 	else if (Utils::starts_with(s, "file:"))
 		icon = VideoWidget::Theme::IconUserFile;
 	else
@@ -1962,6 +1966,10 @@ std::string VideoWidget::icon2string(VideoWidget::Theme::Icon icon) {
 		return "internal:running";
 	case VideoWidget::Theme::IconBike:
 		return "internal:bike";
+	case VideoWidget::Theme::IconHorse:
+		return "internal:horse";
+	case VideoWidget::Theme::IconKart:
+		return "internal:kart";
 
 	case VideoWidget::Theme::IconUserFile:
 		return "file:";
@@ -2120,6 +2128,10 @@ std::string VideoWidget::getIconFilename(VideoWidget::Theme::Icon icon) {
 		return path + "/running.svg";
 	case VideoWidget::Theme::IconBike:
 		return path + "/bike.svg";
+	case VideoWidget::Theme::IconHorse:
+		return path + "/horse.svg";
+	case VideoWidget::Theme::IconKart:
+		return path + "/kart.svg";
 	default:
 		return "";
 	}

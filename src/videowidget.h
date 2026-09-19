@@ -204,6 +204,8 @@ public:
 			IconSpot,
 			IconRunning,
 			IconBike,
+			IconHorse,
+			IconKart,
 
 			// At last user icons
 			IconUserFile,
