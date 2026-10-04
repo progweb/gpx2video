@@ -1,0 +1,13 @@
+# docker build context — Dockerfile only does `ADD docker/locale.gen`.
+# Without this, every build ships data/ (3GB), build*/ (300MB), renders, .git.
+
+.git
+.gitignore
+/build*
+/Testing/
+/data/
+/docs/
+*.mp4
+*.MP4
+*.mov
+*.mkv

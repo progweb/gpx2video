@@ -59,8 +59,8 @@ bool Renderer::load(void) {
 	std::ifstream stream;
 
 	layout::Layout *root;
-//	layout::ReportCerr report;
-	layout::Parser parser(NULL); //&report);
+	layout::ReportCerr report;
+	layout::Parser parser(&report);
 
 	std::list<layout::Node *> nodes;
 

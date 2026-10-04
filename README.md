@@ -68,11 +68,21 @@ gpx2video can synchronize your video with your gpx input file.
 
 #### Debian
 
-By default docker will use debian:12.8-slim as base image, but you can change it.
+Supported: debian-bookworm (12), debian-trixie (13)
+
+By default docker will use debian:13-slim as base image, but you can change it.
 
 ```bash
 make build-docker
 make build-gpx2video
+```
+
+Or for specific debian version:
+
+```bash
+make debian-bookworm
+# or
+make debian-trixie
 ```
 
 Copy video files to data folder then you can start docker and try it out
@@ -86,22 +96,30 @@ make run VIDEO_DIR=~/Videos
 
 #### Ubuntu
 
-If you prefer build & run for ubuntu, fist create docker image, then build the application.
+Supported: ubuntu-noble (24.04), ubuntu-resolute (26.04)
+
+If you prefer build & run for ubuntu, first create docker image, then build the application.
 
 ```bash
 make ubuntu-noble
+# or
+make ubuntu-resolute
 ```
 
-To rebuild the applicatio
+To rebuild the application
 
 ```bash
-make buid-ubuntu-noble
+make build-ubuntu-noble
+# or
+make build-ubuntu-resolute
 ```
 
 To execute the application
 
 ```bash
 make run-ubuntu-noble VIDEO_DIR=~/Videos
+# or
+make run-ubuntu-resolute VIDEO_DIR=~/Videos
 
 # run gpx2video
 ./tools/gpx2video -v -m /data/SOME_VID.mp4 -g /data/SOME_GPX.gpx -l /data/layout.xml -o /data/output.mp4
