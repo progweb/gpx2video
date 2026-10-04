@@ -1,40 +1,24 @@
-# Prerequisites
-*.d
+# Build output (root-level only; /build* must not eat .github/ISSUE_TEMPLATE/build-issue.md)
+/build*
+/Testing/
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
+# Transient (Makefile cp/rm, best-effort)
+docker/locale.gen
 
-# Precompiled Headers
-*.gch
-*.pch
+# CMake in-tree leftovers
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
 
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
+# Media: source videos + render outputs (none tracked)
+*.mp4
+*.MP4
+*.mov
+*.mkv
 
-# Fortran module files
-*.mod
-*.smod
+# Local docs
+docs/plans/
 
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app
-
-# Indexation
+# Editor / index
 tags
 cscope.out
-
-# Build
-build*
-

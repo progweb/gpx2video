@@ -1,10 +1,11 @@
-ARG BASE_IMAGE=debian:11.10-slim
+ARG BASE_IMAGE=debian:13-slim
 
 FROM ${BASE_IMAGE}
 
+ARG DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update \
-    && apt-get --yes --force-yes dist-upgrade \
-    && apt-get install --yes --force-yes --no-install-recommends \
+    && apt-get install --yes --no-install-recommends \
         procps \
 		locales \
         \
