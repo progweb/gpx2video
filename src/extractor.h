@@ -120,6 +120,8 @@ protected:
 
 	void init(MediaContainer *container);
 
+	double compute(struct gpmd_data *data, int index, double scal);
+
 private:
 	int n_;
 

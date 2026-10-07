@@ -236,22 +236,23 @@ gpx2video is provided with several tools to extract, convert... your telemetry d
 
 ### Extract tools
 
-You can extract and parse GoPro MET stream:
+You can extract the GoPro MET stream as raw data:
 
 ```bash
-$ ./tools/gpx2video -m GH010434.MP4 -o data.txt --extract-format=1 extract
+$ ./tools/gpx2video -m GH010434.MP4 -o data.bin --extract-format=1 extract
 ```
 
-Or, you can extract the GoPro MET stream as raw data:
+Or, you can extract and parse GoPro MET stream:
 
 ```bash
-$ ./tools/gpx2video -m GH010434.MP4 -o data.bin --extract-format=2 extract
+$ ./tools/gpx2video -m GH010434.MP4 -o data-raw.txt --extract-format=2 extract
+$ ./tools/gpx2video -m GH010434.MP4 -o data-info.txt --extract-format=3 extract
 ```
 
 As exiftool, you can extract GPX from GoPro MP4 video file too:
 
 ```bash
-$ ./tools/gpx2video -m GH010434.MP4 -o track.gpx --extract-format=3 extract
+$ ./tools/gpx2video -m GH010434.MP4 -o track.gpx --extract-format=4 extract
 ```
 
 In future release, gpx2video should be able to use more data from this stream as accelerometer and gyroscope.

@@ -10,9 +10,10 @@ public:
 	enum Format {
 		FormatNone = 0,
 
-		FormatDump,
-		FormatRAW,
-		FormatGPX,
+		FormatRAW, // Binary stream
+		FormatDump, // Parse GPMF stream
+		FormatText, // Parse and interpret GPMF stream
+		FormatGPX, // Parse and build GPX
 
 		FormatCount
 	};

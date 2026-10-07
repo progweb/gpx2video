@@ -243,23 +243,49 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_STRING_ASCII: // 0x63
-			memcpy(string, data->value.string, len);
-			string[len] = '\0';
+			inputtypesize = 1;
+			for (i=0, k=0; i<data->header.count; i++) {
+				const char *token = &(data->value.string[k]);
+
+				memcpy(string, token, data->header.size / inputtypesize);
+				string[data->header.size / inputtypesize] = '\0';
+
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_SIGNED_SHORT: // 0x73
-			for (i=0; i<data->header.count; i++)
-				data->value.s16[i] = bswap_16(data->value.s16[i]);
+			inputtypesize = 2;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++)
+					data->value.s16[k+j] = __bswap_16(data->value.s16[k+j]);
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_UNSIGNED_SHORT: // 0x53
-			for (i=0; i<data->header.count; i++)
-				data->value.u16[i] = bswap_16(data->value.u16[i]);
+			inputtypesize = 2;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++)
+					data->value.u16[k+j] = __bswap_16(data->value.u16[k+j]);
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_FLOAT: // 0x66
-			for (i=0; i<data->header.count; i++)
-				data->value.real[i] = __bswap_32(data->value.real[i]);
+			inputtypesize = 4;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					float *result;
+
+					uint32_t value = __bswap_32(data->value.u32[k+j]);
+
+					result = (float *) &value;
+
+					data->value.real[k+j] = *result;
+				}
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_SIGNED_LONG: // 0x6c
@@ -282,8 +308,20 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 
 		case GPMFDecoder::GPMF_TYPE_UNSIGNED_64BIT_INT: // 0x4a
 			inputtypesize = 8;
-			for (i=0; i<data->header.count; i++)
-				data->value.u64[i] = __bswap_64(data->value.u64[i]);
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++)
+					data->value.u64[k+j] = __bswap_64(data->value.u64[k+j]);
+				k += data->header.size / inputtypesize;
+			}
+			break;
+
+		case GPMFDecoder::GPMF_TYPE_DOUBLE:
+			inputtypesize = 8;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++)
+					data->value.u64[k+j] = __bswap_64(data->value.u64[k+j]);
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case GPMFDecoder::GPMF_TYPE_UTC_DATE_TIME: { // 0x55 16 bytes
@@ -302,11 +340,6 @@ bool GPMFDecoder::parseData(GPMFData &gpmd, uint8_t *buffer, size_t size) {
 						bytes[13], bytes[14], bytes[15] // MS
 					);
 			}
-			break;
-
-		case GPMFDecoder::GPMF_TYPE_DOUBLE:
-			for (i=0; i<data->header.count; i++)
-				data->value.u64[i] = __bswap_64(data->value.u64[i]);
 			break;
 
 		default:

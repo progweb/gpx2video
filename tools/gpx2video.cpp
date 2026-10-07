@@ -173,7 +173,7 @@ static void print_format_supported(const std::string &name) {
 
 	std::cout << "Extract format supported: " << name << std::endl;
 
-	for (i=ExtractorSettings::FormatDump; i != ExtractorSettings::FormatCount; i++) {
+	for (i=ExtractorSettings::FormatNone+1; i != ExtractorSettings::FormatCount; i++) {
 		std::string name = ExtractorSettings::getFriendlyName((ExtractorSettings::Format) i);
 
 		std::cout << "\t- " << i << ":\t" << name << std::endl;

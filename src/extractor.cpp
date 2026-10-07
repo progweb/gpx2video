@@ -16,6 +16,15 @@ extern "C" {
 #include "extractor.h"
 
 
+struct Formatter {
+	int width;
+	friend std::ostream& operator<<(std::ostream& os, const Formatter& fmt) {
+		os << std::setfill(' ') << std::setw(fmt.width);
+		return os;
+	}
+};
+
+
 // Extractor settings
 //--------------------
 
@@ -41,10 +50,12 @@ const std::string ExtractorSettings::getFriendlyName(const ExtractorSettings::Fo
 	switch (format) {
 	case FormatNone:
 		return "None";
-	case FormatDump:
-		return "Dump GPMD data to text";
 	case FormatRAW:
 		return "Dump GoPro GPMD stream to binary data";
+	case FormatDump:
+		return "Dump GPMD data to text";
+	case FormatText:
+		return "Dump GPMD data and interpret the content";
 	case FormatGPX:
 		return "Extract GPS data from GoPro GPMD stream";
 	case FormatCount:
@@ -199,7 +210,7 @@ bool Extractor::run(void) {
 	}
 	else {
 		// Append MP4 stream info
-		if (settings().format() == ExtractorSettings::FormatDump)
+		if ((settings().format() == ExtractorSettings::FormatDump) || (settings().format() == ExtractorSettings::FormatText))
 			out_ << "PACKET: " << n_ << " - PTS: " << timecode << " TIMESTAMP: " << timecode_ms << " ms" << std::endl;
 
 		// Parsing stream packet
@@ -218,7 +229,7 @@ bool Extractor::run(void) {
 				out_ << "      </trkpt>" << std::endl;
 			}
 		}
-		else if (settings().format() == ExtractorSettings::FormatDump)
+		else if ((settings().format() == ExtractorSettings::FormatDump) || (settings().format() == ExtractorSettings::FormatText))
 			out_ << "###############################################" << std::endl;
 	}
 
@@ -350,6 +361,33 @@ int Extractor::getPacket(AVPacket *packet) {
 }
 
 
+double Extractor::compute(struct gpmd_data *data, int index, double scal) {
+	switch (data->header.type) {
+	case Extractor::GPMF_TYPE_SIGNED_SHORT: // 0x73
+		return (double) data->value.s16[index] / (double) scal;
+		break;
+
+	case Extractor::GPMF_TYPE_UNSIGNED_SHORT: // 0x53
+		return (double) data->value.u16[index] / (double) scal;
+		break;
+
+	case Extractor::GPMF_TYPE_SIGNED_LONG: // 0x6c
+		return (double) data->value.s32[index] / (double) scal;
+		break;
+
+	case Extractor::GPMF_TYPE_UNSIGNED_LONG: // 0x4c
+		return (double) data->value.u32[index] / (double) scal;
+		break;
+
+	case Extractor::GPMF_TYPE_FLOAT: // 0x66
+		return (double) data->value.real[index] / (double) scal;
+		break;
+
+	default:
+		return 0.0;
+	}
+}
+
 void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::ofstream &out) {
 	int i, j, k;
 	int nstream = 0;
@@ -363,14 +401,49 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 	uint32_t key;
 	char string[128];
 
-	uint32_t scal[5] = { 1, 1, 1, 1, 1 };
+	std::vector<std::string> titles;
+	std::vector<uint32_t> scales;
+	std::vector<std::string> units;
 
 	struct gpmd_data *data;
 
-	bool dump = (settings().format() == ExtractorSettings::FormatDump);
+	bool dumpvalue;
+
+	bool dumpinfo = (settings().format() == ExtractorSettings::FormatText);
+
+	bool dump = (settings().format() == ExtractorSettings::FormatDump) || (settings().format() == ExtractorSettings::FormatText);
 
 #define MAKEKEY(label)		((uint32_t *) &label)[0]
 #define STR2FOURCC(s)		((s[0]<<0)|(s[1]<<8)|(s[2]<<16)|(s[3]<<24))
+
+	auto format = [](const int& width) {
+		return Formatter{width}; 
+	};
+
+	auto title = [&titles](const size_t& index) {
+		if (index < titles.size())
+			return titles[index] + ": ";
+		else
+			return std::string();
+	};
+
+	auto scale = [&scales](const size_t& index) {
+		if (index < scales.size())
+			return scales[index];
+		else if (!scales.empty())
+			return scales.back();
+		else
+			return (uint32_t) 1;
+	};
+
+	auto unit = [&units](const size_t& index) {
+		if (index < units.size())
+			return std::string(" ") + units[index];
+		else if (!units.empty())
+			return std::string(" ") + units.back();
+		else
+			return std::string("");
+	};
 
 	for (n=0; n<size; n=n+sizeof(data->header)) {
 		data = (struct gpmd_data *) (buffer + n);
@@ -383,6 +456,15 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		key = MAKEKEY(data->header);
 
 		if (key == STR2FOURCC("STRM")) {
+			// No title by default
+			titles.clear();
+
+			// No scale by default
+			scales.clear();
+
+			// No unit by default
+			units.clear();
+
 			if (nstream > 1) {
 				Utils::IndentingOStreambuf indent(out, 4 * (nstream - 1));
  
@@ -405,43 +487,67 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 			out << string << std::endl;
 		}
 
+		// Doesn't dump values for parsed & known sections
+		if (dumpinfo) {
+			if (key == STR2FOURCC("GPS5"))
+				dumpvalue = false;
+			else if ((key == STR2FOURCC("ACCL")) || (key == STR2FOURCC("GYRO")) || (key == STR2FOURCC("MAGN")) || (key == STR2FOURCC("GRAV")))
+				dumpvalue = false;
+			else if ((key == STR2FOURCC("CORI")) || (key == STR2FOURCC("IORI")))
+				dumpvalue = false;
+			else if (key == STR2FOURCC("ISOE"))
+				dumpvalue = false;
+			else if (key == STR2FOURCC("SHUT"))
+				dumpvalue = false;
+			else
+				dumpvalue = dump;
+		}
+		else
+			dumpvalue = dump;
+
 		// Parse data
 		switch (data->header.type) {
 		case 0x00:
 			break;
 
 		case Extractor::GPMF_TYPE_STRING_ASCII: // 0x63
-			memcpy(string, data->value.string, len);
-			string[len] = '\0';
+			inputtypesize = 1;
+			for (i=0, k=0; i<data->header.count; i++) {
+				const char *token = &(data->value.string[k]);
 
-			if (dump)
-				out << "  value: " << string << std::endl;
+				memcpy(string, token, data->header.size / inputtypesize);
+				string[data->header.size / inputtypesize] = '\0';
+
+				if (dumpvalue)
+					out << "  value[" << i << "]: " << string << std::endl;
+
+				k += data->header.size / inputtypesize;
+			}
 			break;
 
 		case Extractor::GPMF_TYPE_SIGNED_SHORT: // 0x73
-			for (i=0; i<data->header.count; i++) {
-				data->value.s16[i] = bswap_16(data->value.s16[i]);
+			inputtypesize = 2;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					data->value.s16[k+j] = __bswap_16(data->value.s16[k+j]);
 
-				if (dump)
-					out << "  value: " << data->value.s16[i] << std::endl;
+					if (dumpvalue)
+						out << "  value[" << k+j << "]: " << data->value.s16[k+j] << std::endl;
+				}
+				k += data->header.size / inputtypesize;
 			}
 			break;
 
 		case Extractor::GPMF_TYPE_UNSIGNED_SHORT: // 0x53
-			for (i=0; i<data->header.count; i++) {
-				data->value.u16[i] = bswap_16(data->value.u16[i]);
+			inputtypesize = 2;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					data->value.u16[k+j] = __bswap_16(data->value.u16[k+j]);
 
-				if (dump)
-					out << "  value[" << i << "]: " << data->value.u16[i] << std::endl;
-			}
-			break;
-
-		case Extractor::GPMF_TYPE_FLOAT: // 0x66
-			for (i=0; i<data->header.count; i++) {
-				data->value.real[i] = __bswap_32(data->value.real[i]);
-
-				if (dump)
-					out << "  value: " << data->value.real[i] << std::endl;
+					if (dumpvalue)
+						out << "  value[" << k+j << "]: " << data->value.u16[k+j] << std::endl;
+				}
+				k += data->header.size / inputtypesize;
 			}
 			break;
 
@@ -451,7 +557,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				for (j=0; j<data->header.size / inputtypesize; j++) {
 					data->value.s32[k+j] = __bswap_32(data->value.s32[k+j]);
 
-					if (dump)
+					if (dumpvalue)
 						out << "  value[" << k+j << "]: " << data->value.s32[k+j] << std::endl;
 				}
 				k += data->header.size / inputtypesize;
@@ -464,7 +570,7 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 				for (j=0; j<data->header.size / inputtypesize; j++) {
 					data->value.u32[k+j] = __bswap_32(data->value.u32[k+j]);
 
-					if (dump)
+					if (dumpvalue)
 						out << "  value[" << k+j << "]: " << data->value.u32[k+j] << std::endl;
 				}
 				k += data->header.size / inputtypesize;
@@ -473,11 +579,46 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 
 		case Extractor::GPMF_TYPE_UNSIGNED_64BIT_INT: // 0x4a
 			inputtypesize = 8;
-			for (i=0; i<data->header.count; i++) {
-				data->value.u64[i] = __bswap_64(data->value.u64[i]);
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					data->value.u64[k+j] = __bswap_64(data->value.u64[k+j]);
 
-				if (dump)
-					out << "  value: " << (uint64_t) data->value.u64[i] << std::endl;
+					if (dumpvalue)
+						out << "  value: " << (uint64_t) data->value.u64[k+j] << std::endl;
+				}
+				k += data->header.size / inputtypesize;
+			}
+			break;
+
+		case Extractor::GPMF_TYPE_FLOAT: // 0x66
+			inputtypesize = 4;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					float *result;
+
+					uint32_t value = __bswap_32(data->value.u32[k+j]);
+
+					result = (float *) &value;
+
+					data->value.real[k+j] = *result;
+
+					if (dumpvalue)
+						out << "  value[" << k+j << "]: " << data->value.real[k+j] << std::endl;
+				}
+				k += data->header.size / inputtypesize;
+			}
+			break;
+
+		case Extractor::GPMF_TYPE_DOUBLE:
+			inputtypesize = 8;
+			for (i=0, k=0; i<data->header.count; i++) {
+				for (j=0; j<data->header.size / inputtypesize; j++) {
+					data->value.u64[k+j] = __bswap_64(data->value.u64[k+j]);
+
+					if (dumpvalue)
+						out << "  value: " << (double) data->value.u64[k+j] << std::endl;
+				}
+				k += data->header.size / inputtypesize;
 			}
 			break;
 
@@ -497,17 +638,8 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 						bytes[13], bytes[14], bytes[15] // MS
 					);
 
-				if (dump)
+				if (dumpvalue)
 					out << "  value: " << string << std::endl;
-			}
-			break;
-
-		case Extractor::GPMF_TYPE_DOUBLE:
-			for (i=0; i<data->header.count; i++) {
-				data->value.u64[i] = __bswap_64(data->value.u64[i]);
-
-				if (dump)
-					out << "  mmmmmvalue: " << (double) data->value.u64[i] << std::endl;
 			}
 			break;
 
@@ -516,39 +648,159 @@ void Extractor::parse(Extractor::GPMD &gpmd, uint8_t *buffer, size_t size, std::
 		}
 
 		// Save data
-		if (key == STR2FOURCC("STRM"))
+		switch (key) {
+		case STR2FOURCC("STRM"):
 			nstream++;
-		else if (key == STR2FOURCC("DVNM")) {
+			break;
+
+		case STR2FOURCC("DVNM"):
 			gpmd.device_name = string;
-		}
-		else if (key == STR2FOURCC("GPSF")) {
+			break;
+
+		case STR2FOURCC("GPSF"):
 			if ((data->header.type == 'L') && data->header.count) {
 				gpmd.fix = data->value.u32[0];
 			}
-		}
-		else if (key == STR2FOURCC("GPSU")) {
+			break;
+
+		case STR2FOURCC("GPSU"):
 			gpmd.date = string;
-		}
-		else if (key == STR2FOURCC("SCAL")) {
+			break;
+
+		case STR2FOURCC("STNM"): {
+				// Ex:
+				//   GPS (Lat., Long., Alt., 2D speed, 3D speed)
+				//   Wind Processing[wind_enable, meter_value(0 - 100)]
+				//   Microphone Wet[mic_wet, all_mics, confidence]
+				//   AGC audio level[rms_level ,peak_level]
+				char sep;
+
+				std::string title(&(data->value.string[0]));
+
+				if (title.back() == ']')
+					sep = '[';
+				else if (title.back() == ')')
+					sep = '(';
+				else
+					sep = 0;
+
+				if (sep != 0) {
+					size_t pos = title.find(sep);
+
+					title.pop_back();
+
+					if (pos != std::string::npos) {
+						size_t start = 0, end;
+
+						title = title.substr(pos + 1);
+
+						// Split string
+						while ((end = title.find(',', start)) != std::string::npos) {
+							std::string token = title.substr(start, end - start);
+
+							token = Utils::ltrim(token);
+							token = Utils::rtrim(token);
+
+							titles.push_back(token);
+
+							start = end + 1;
+						}
+
+						titles.push_back(title.substr(start));
+					}
+				}
+			}
+			break;
+
+		case STR2FOURCC("SCAL"):
 			for (i=0, k=0; i<data->header.count; i++) {
-				if (k < (int) sizeof(scal))
-					scal[k] = data->value.u32[k];
+				const uint32_t value = data->value.u32[k];
+
+				scales.push_back(value);
 
 				k += data->header.size / inputtypesize;
 			}
-		}
-		else if (key == STR2FOURCC("GPS5")) {
+			break;
+		
+		case STR2FOURCC("UNIT"):
+		case STR2FOURCC("SIUN"):
 			for (i=0, k=0; i<data->header.count; i++) {
+				const char *token = &(data->value.string[k]);
+
+				memcpy(string, token, data->header.size / inputtypesize);
+				string[data->header.size / inputtypesize] = '\0';
+
+				units.push_back(string);
+
+				k += data->header.size / inputtypesize;
+			}
+			break;
+
+		case STR2FOURCC("GPS5"):
+			for (i=0; i<data->header.count; i++) {
 				// GPS point freq: 18 Hz
 				// 1st point match on the GPSU value
-				if (k == 0) {
-					gpmd.lat = (double) data->value.s32[k] / (double) scal[0];
-					gpmd.lon = (double) data->value.s32[k+1] / (double) scal[1];
-					gpmd.ele = (double) data->value.s32[k+2] / (double) scal[2];
-				}
+				gpmd.lat = (double) data->value.s32[i] / (double) scale(0);
+				gpmd.lon = (double) data->value.s32[i+1] / (double) scale(1);
+				gpmd.ele = (double) data->value.s32[i+2] / (double) scale(2);
 
-				k += data->header.size / inputtypesize;
+				// Process only the fist point
+				break;
 			}
+
+		default:
+			break;
+		};
+
+		// Dump info
+		if (dumpinfo) {
+			switch (key) {
+			case STR2FOURCC("STRM"):
+			case STR2FOURCC("DVNM"):
+			case STR2FOURCC("GPSF"):
+			case STR2FOURCC("GPSU"):
+			case STR2FOURCC("SCAL"):
+			case STR2FOURCC("UNIT"):
+			case STR2FOURCC("SIUN"):
+				// Don't print info
+				break;
+
+			case STR2FOURCC("ACCL"):
+			case STR2FOURCC("GYRO"):
+			case STR2FOURCC("MAGN"): {
+					out << "  " << "TODO: Apply orientation matrix in/out (ORIO & ORIN)" << std::endl;
+				}
+				// fallthrough
+				[[fallthrough]];
+
+			case STR2FOURCC("GPS5"):
+			case STR2FOURCC("GRAV"):
+			case STR2FOURCC("CORI"):
+			case STR2FOURCC("IORI"):
+			case STR2FOURCC("ISOE"):
+			case STR2FOURCC("SHUT"): {
+					out << std::setprecision(12);
+
+					for (i=0, k=0; i<data->header.count; i++) {
+						out << "  " << format(3) << i   << ". ";
+
+						for (j=0; j<data->header.size / inputtypesize; j++) {
+							if (j > 0)
+								out << ", ";
+
+							out << title(j) << format(18) << (double) compute(data, k+j, (double) scale(j)) << unit(j);
+						}
+
+						out << std::endl;
+
+						k += data->header.size / inputtypesize;
+					}
+				}
+				break;
+
+			default:
+				break;
+			};
 		}
 
 		if (data->header.type != 0x00) { 
