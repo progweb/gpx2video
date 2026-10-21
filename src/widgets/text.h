@@ -3,7 +3,6 @@
 
 #include <pango/pangocairo.h>
 
-#include "../oiio.h"
 #include "../shape/text.h"
 
 

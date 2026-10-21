@@ -4,7 +4,6 @@
 #include <pango/pangocairo.h>
 
 #include "../utils.h"
-#include "../oiio.h"
 #include "../oiioutils.h"
 #include "../telemetrydata.h"
 #include "../videowidget.h"

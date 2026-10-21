@@ -1,7 +1,6 @@
 #ifndef __GPX2VIDEO__WIDGETS__GPX_H__
 #define __GPX2VIDEO__WIDGETS__GPX_H__
 
-#include "../oiio.h"
 #include "../shape/base.h"
 
 

@@ -10,7 +10,6 @@
 #include "log_i.h"
 #include "utils.h"
 #include "i18n.h"
-#include "oiio.h"
 #include "oiioutils.h"
 #include "videowidget.h"
 
