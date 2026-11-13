@@ -188,6 +188,27 @@ void GPX2VideoMapWidgetSettingsBox::load_models(void) {
 		row[model_.m_enable] = true;
 	}
 
+	// Map zoom model
+	zoom_adjust_model_ = Gtk::ListStore::create(model_);
+
+	{
+		auto iter = zoom_adjust_model_->append();
+		auto row = *iter;
+		row[model_.m_id] = MapSettings::ZoomAdjustNone;
+		row[model_.m_name] = _("Constant");
+		row[model_.m_enable] = true;
+
+		row = *(zoom_adjust_model_->append());
+		row[model_.m_id] = MapSettings::ZoomAdjustWithSpeed;
+		row[model_.m_name] = _("Speed");
+		row[model_.m_enable] = true;
+
+		row = *(zoom_adjust_model_->append());
+		row[model_.m_id] = MapSettings::ZoomAdjustWithElevation;
+		row[model_.m_name] = _("Elevation");
+		row[model_.m_enable] = true;
+	}
+
 	// Map follow model
 	follow_model_ = Gtk::ListStore::create(model_);
 
@@ -237,6 +258,7 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 	Gtk::ComboBox *combobox;
 	Gtk::MenuButton *menubutton;
 	Gtk::SpinButton *spinbutton;
+	Gtk::CheckButton *checkbutton;
 	Gtk::ColorButton *colorbutton;
 
 	auto renderer = Gtk::make_managed<Gtk::CellRendererText>();
@@ -315,6 +337,33 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 					}
 			));
 
+	// Zoom adjust
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("zoom_adjust_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"zoom_adjust_combobox\" object in" + resource_file_);
+
+	combobox->pack_start(*renderer, true);
+	combobox->add_attribute(renderer->property_text(), model_.m_name);
+	combobox->add_attribute(renderer->property_sensitive(), model_.m_enable);
+
+	combobox->signal_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_combobox_changed), combobox, 
+					[this](const Gtk::TreeModel::const_iterator &iter) {
+						int value = iter->get_value(model_.m_id);
+
+						log_notice("Widget %s: zoom adjust changed to '%s'", 
+								widget_->widget()->name().c_str(), iter->get_value(model_.m_name).c_str());
+
+						((Map *) widget_->widget())->settings().setZoomAdjust((MapSettings::ZoomAdjust) value);
+
+						// Update
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
 	// Zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
@@ -326,6 +375,120 @@ void GPX2VideoMapWidgetSettingsBox::bind_content(void) {
 							   widget_->name().c_str(), value);
 
 						((Map *) widget_->widget())->settings().setZoom(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Zoom min
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_min_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: zoom min changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Map *) widget_->widget())->settings().setZoomMin(value);
+
+						// Update
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// Zoom max
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_max_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: zoom max changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Map *) widget_->widget())->settings().setZoomMax(value);
+
+						// Update
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// value at zoom min
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_min_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: value at zoom min changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Map *) widget_->widget())->settings().setValueAtZoomMin(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// value at zoom min auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_min_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_min_checkbutton\" object in " + resource_file_);
+	checkbutton->signal_toggled().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_checkbutton_toggled), checkbutton, 
+					[this](const bool active) {
+						log_notice("Widget %s: value at zoom min auto toggled to '%s'",
+							   widget_->name().c_str(), std::to_string(active).c_str());
+
+						((Map *) widget_->widget())->settings().setValueAtZoomMinAuto(active);
+
+						// Update limits
+						update_boundaries();
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// value at zoom max
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_max_spinbutton\" object in " + resource_file_);
+	spinbutton->signal_value_changed().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_spin_double_changed), spinbutton, 
+					[this](const double &value) {
+						log_notice("Widget %s: value at zoom max changed to '%.1f'",
+							   widget_->name().c_str(), value);
+
+						((Map *) widget_->widget())->settings().setValueAtZoomMax(value);
+
+						// Broadcast widget change
+						widget_->dispatchEvent(true);
+					}
+			));
+
+	// value at zoom max auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_max_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_max_checkbutton\" object in " + resource_file_);
+	checkbutton->signal_toggled().connect(sigc::bind(
+				sigc::mem_fun(*this, &GPX2VideoMapWidgetSettingsBox::on_widget_checkbutton_toggled), checkbutton, 
+					[this](const bool active) {
+						log_notice("Widget %s: value at zoom max auto toggled to '%s'",
+							   widget_->name().c_str(), std::to_string(active).c_str());
+
+						((Map *) widget_->widget())->settings().setValueAtZoomMaxAuto(active);
+
+						// Update limits
+						update_boundaries();
 
 						// Broadcast widget change
 						widget_->dispatchEvent(true);
@@ -655,6 +818,7 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 	Gtk::Image *image;
 	Gtk::ComboBox *combobox;
 	Gtk::SpinButton *spinbutton;
+	Gtk::CheckButton *checkbutton;
 	Gtk::ColorButton *colorbutton;
 
 	Gtk::TreeModel::iterator iter;
@@ -691,12 +855,64 @@ void GPX2VideoMapWidgetSettingsBox::update_content(void) {
 
 	spinbutton->set_value(settings.scale());
 
+	// zoom adjust
+	combobox = ref_builder_->get_widget<Gtk::ComboBox>("zoom_adjust_combobox");
+	if (!combobox)
+		throw std::runtime_error("No \"zoom_adjust_combobox\" object in " + resource_file_);
+
+	combobox->set_model(zoom_adjust_model_);
+
+	if (find_in_listtore(zoom_adjust_model_, settings.zoomAdjust(), iter))
+		combobox->set_active(iter);
+
 	// zoom
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
 	if (!spinbutton)
 		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
 
 	spinbutton->set_value(settings.zoom());
+
+	// zoom min
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_min_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.zoomMin());
+
+	// zoom max
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_max_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.zoomMax());
+
+	// value at zoom min
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_min_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.valueAtZoomMin());
+
+	// value at zoom min auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_min_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_min_checkbutton\" object in " + resource_file_);
+
+	checkbutton->set_active(settings.valueAtZoomMinAuto());
+
+	// value at zoom max
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_max_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_value(settings.valueAtZoomMax());
+
+	// value at zoom max auto
+	checkbutton = ref_builder_->get_widget<Gtk::CheckButton>("value_max_checkbutton");
+	if (!checkbutton)
+		throw std::runtime_error("No \"value_max_checkbutton\" object in " + resource_file_);
+
+	checkbutton->set_active(settings.valueAtZoomMaxAuto());
 
 	// Path thick
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("path_thick_spinbutton");
@@ -890,10 +1106,17 @@ void GPX2VideoMapWidgetSettingsBox::set_default(void) {
 void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 	log_call();
 
+	bool is_zoom_fit;
+
+	Gtk::Box *box;
 	Gtk::Button *button;
 	Gtk::SpinButton *spinbutton;
 
+	MapSettings &settings = ((Map *) widget_->widget())->settings();
 	MapSettings::Source source = ((Map *) widget_->widget())->settings().source();
+
+	// Zoom fit enabled
+	is_zoom_fit = (settings.view() == MapSettings::ViewZoomFit);
 
 	// Update UI range for source
 	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("scale_spinbutton");
@@ -904,12 +1127,71 @@ void GPX2VideoMapWidgetSettingsBox::update_boundaries(void) {
 			MapSettings::getMinScale(source),
 			MapSettings::getMaxScale(source));
 
-	// Zoom
-	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_spinbutton");
-	if (!spinbutton)
-		throw std::runtime_error("No \"zoom_spinbutton\" object in " + resource_file_);
+	// zoom adjust
+	box = ref_builder_->get_widget<Gtk::Box>("zoom_adjust_box");
+	if (!box)
+		throw std::runtime_error("No \"zoom_adjust_box\" object in " + resource_file_);
 
-	spinbutton->set_sensitive(((Map *) widget_->widget())->settings().view() != MapSettings::ViewZoomFit);
+	box->set_visible(!is_zoom_fit);
+
+	// zoom
+	box = ref_builder_->get_widget<Gtk::Box>("zoom_box");
+	if (!box)
+		throw std::runtime_error("No \"zoom_box\" object in " + resource_file_);
+
+	box->set_visible(!is_zoom_fit && (settings.zoomAdjust() == MapSettings::ZoomAdjustNone));
+
+	// zoom min
+	box = ref_builder_->get_widget<Gtk::Box>("zoom_min_box");
+	if (!box)
+		throw std::runtime_error("No \"zoom_min_box\" object in " + resource_file_);
+
+	box->set_visible(!is_zoom_fit && (settings.zoomAdjust() != MapSettings::ZoomAdjustNone));
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_min_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_range(0.0, settings.zoomMax());
+
+	// zoom max
+	box = ref_builder_->get_widget<Gtk::Box>("zoom_max_box");
+	if (!box)
+		throw std::runtime_error("No \"zoom_max_box\" object in " + resource_file_);
+
+	box->set_visible(!is_zoom_fit && (settings.zoomAdjust() != MapSettings::ZoomAdjustNone));
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("zoom_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"zoom_max_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_range(settings.zoomMin(), 10.0);
+
+	// value at zoom min
+	box = ref_builder_->get_widget<Gtk::Box>("value_min_box");
+	if (!box)
+		throw std::runtime_error("No \"value_min_box\" object in " + resource_file_);
+
+	box->set_visible(!is_zoom_fit && (settings.zoomAdjust() != MapSettings::ZoomAdjustNone));
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_min_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_min_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_sensitive(!settings.valueAtZoomMinAuto());
+
+	// value at zoom max
+	box = ref_builder_->get_widget<Gtk::Box>("value_max_box");
+	if (!box)
+		throw std::runtime_error("No \"value_max_box\" object in " + resource_file_);
+
+	box->set_visible(!is_zoom_fit && (settings.zoomAdjust() != MapSettings::ZoomAdjustNone));
+
+	spinbutton = ref_builder_->get_widget<Gtk::SpinButton>("value_max_spinbutton");
+	if (!spinbutton)
+		throw std::runtime_error("No \"value_max_spinbutton\" object in " + resource_file_);
+
+	spinbutton->set_sensitive(!settings.valueAtZoomMaxAuto());
 
 	// Icon zoomin button
 	button = ref_builder_->get_widget<Gtk::Button>("icon_zoomin_button");

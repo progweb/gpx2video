@@ -54,7 +54,16 @@ namespace layout
     _padding_bottom(this, "padding-bottom", Node::ELEMENT, false),
 
     _view(this, "view", Node::ELEMENT, false),
+
+	_zoom_adjust(this, "zoom-adjust", Node::ELEMENT, false),
     _zoom(this, "zoom", Node::ELEMENT, false),
+    _zoom_min(this, "zoom-min", Node::ELEMENT, false),
+    _zoom_max(this, "zoom-max", Node::ELEMENT, false),
+	_value_at_zoom_min(this, "value-at-zoom-min", Node::ELEMENT, false),
+	_value_at_zoom_max(this, "value-at-zoom-max", Node::ELEMENT, false),
+	_value_at_zoom_min_auto(this, "value-at-zoom-min-auto", Node::ELEMENT, false),
+	_value_at_zoom_max_auto(this, "value-at-zoom-max-auto", Node::ELEMENT, false),
+
 	_border(this, "border", Node::ELEMENT, false),
 	_bordercolor(this, "border-color", Node::ELEMENT, false),
 	_round_corner(this, "round-corner", Node::ELEMENT, false),
@@ -105,7 +114,16 @@ namespace layout
     getInterfaces().push_back(&_padding_bottom);
 
     getInterfaces().push_back(&_view);
+
+    getInterfaces().push_back(&_zoom_adjust);
     getInterfaces().push_back(&_zoom);
+    getInterfaces().push_back(&_zoom_min);
+    getInterfaces().push_back(&_zoom_max);
+    getInterfaces().push_back(&_value_at_zoom_min);
+    getInterfaces().push_back(&_value_at_zoom_max);
+    getInterfaces().push_back(&_value_at_zoom_min_auto);
+    getInterfaces().push_back(&_value_at_zoom_max_auto);
+
     getInterfaces().push_back(&_border);
     getInterfaces().push_back(&_bordercolor);
     getInterfaces().push_back(&_round_corner);
@@ -147,7 +165,15 @@ namespace layout
 	_padding_bottom.setValue("-1");
 
 	_view.setValue("zoomfit");
+
+	_zoom_adjust.setValue("none");
 	_zoom.setValue("1.0");
+	_zoom_min.setValue("1.0");
+	_zoom_max.setValue("1.0");
+	_value_at_zoom_min.setValue("0.0");
+	_value_at_zoom_max.setValue("100.0");
+	_value_at_zoom_min_auto.setValue("true");
+	_value_at_zoom_max_auto.setValue("true");
 
 	_path_smooth.setValue("1");
 	_path_thick.setValue("3.0");

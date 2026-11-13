@@ -59,8 +59,8 @@ bool Renderer::load(void) {
 	std::ifstream stream;
 
 	layout::Layout *root;
-	layout::ReportCerr report;
-	layout::Parser parser(&report);
+//	layout::ReportCerr report;
+	layout::Parser parser(NULL); //&report);
 
 	std::list<layout::Node *> nodes;
 
@@ -151,6 +151,7 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	MapSettings::View view;
 	MapSettings::Follow follow;
+	MapSettings::ZoomAdjust zoom_adjust;
 
 	MapSettings mapSettings;
 
@@ -194,6 +195,13 @@ bool Renderer::loadMap(layout::Map *m) {
 
 	if (follow == MapSettings::FollowUnknown)
 		log_error("Map follow value '%s' unknown", s.c_str());
+
+	// Zoom adjust
+	s = (const char *) m->zoomAdjust();
+	zoom_adjust = MapSettings::string2zoomadjust(s);
+
+	if (zoom_adjust == MapSettings::ZoomAdjustUnknown)
+		log_error("Map zoom adjust '%s' unknown", s.c_str());
 
 	// Position
 	s = (const char *) m->position();
@@ -263,7 +271,10 @@ bool Renderer::loadMap(layout::Map *m) {
 	mapSettings.setSize(width, height);
 	mapSettings.setSource((MapSettings::Source) mapsource);
 	mapSettings.setScale(m->scale());
+	mapSettings.setZoomAdjust((MapSettings::ZoomAdjust) zoom_adjust);
 	mapSettings.setZoom(m->zoom());
+	mapSettings.setZoomMin(m->zoomMin());
+	mapSettings.setZoomMax(m->zoomMax());
 	mapSettings.setView((MapSettings::View) view);
 	mapSettings.setPathThick((double) m->pathThick());
 	mapSettings.setPathBorder((double) m->pathBorder());
@@ -346,6 +357,7 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	TrackSettings::View view;
 	TrackSettings::Follow follow;
+	TrackSettings::ZoomAdjust zoom_adjust;
 
 	TrackSettings trackSettings;
 
@@ -381,6 +393,13 @@ bool Renderer::loadTrack(layout::Track *t) {
 
 	if (follow == TrackSettings::FollowUnknown)
 		log_error("Track follow value '%s' unknown", s.c_str());
+
+	// Zoom adjust
+	s = (const char *) t->zoomAdjust();
+	zoom_adjust = TrackSettings::string2zoomadjust(s);
+
+	if (zoom_adjust == TrackSettings::ZoomAdjustUnknown)
+		log_error("Track zoom adjust '%s' unknown", s.c_str());
 
 	// Position
 	s = (const char *) t->position();
@@ -449,7 +468,10 @@ bool Renderer::loadTrack(layout::Track *t) {
 	// Track settings
 	trackSettings.setSize(width, height);
 	trackSettings.setView((TrackSettings::View) view);
+	trackSettings.setZoomAdjust((TrackSettings::ZoomAdjust) zoom_adjust);
 	trackSettings.setZoom(t->zoom());
+	trackSettings.setZoomMin(t->zoomMin());
+	trackSettings.setZoomMax(t->zoomMax());
 	trackSettings.setPathThick((double) t->pathThick());
 	trackSettings.setPathBorder((double) t->pathBorder());
 	trackSettings.setPathBorder((double) t->pathBorder());

@@ -118,6 +118,25 @@ bool GPX2VideoWidgetBaseSettingsBox::on_widget_switch_changed(bool state, Gtk::S
 }
 
 
+void GPX2VideoWidgetBaseSettingsBox::on_widget_checkbutton_toggled(Gtk::CheckButton *button, std::function<void(const int&)> set) {
+	log_call();
+
+	bool active;
+
+	if (loading_)
+		return;
+
+	// Lock
+	std::lock_guard<std::mutex> lock(widget_->mutex());
+
+	// Checkbox active
+	active = button->get_active();
+
+	// Set active
+	set(active);
+}
+
+
 void GPX2VideoWidgetBaseSettingsBox::on_widget_textview_changed(Gtk::TextView *textview, std::function<void(Glib::RefPtr<Gtk::TextBuffer>)> set) {
 	log_call();
 

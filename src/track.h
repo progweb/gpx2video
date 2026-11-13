@@ -137,8 +137,15 @@ protected:
 	TelemetryData last_data_;
 
 	double zoom_;
+	double zoom_min_;
+	double zoom_max_;
+
+	TrackSettings::ZoomAdjust zoom_adjust_ = TrackSettings::ZoomAdjustNone;
 
 	int last_posX_, last_posY_;
+
+	double last_speed_;
+	double last_elevation_;
 
 	// Data boudning box (range)
 	TelemetryData lim_p1_, lim_p2_;
@@ -154,6 +161,10 @@ protected:
 	int x_end_, y_end_;
 	int x_start_, y_start_;
 	uint64_t ts_start_, ts_end_;
+
+	// Speed range
+	double speed_min_;
+	double speed_max_;
 
 	// Elevation range
 	double elevation_min_;

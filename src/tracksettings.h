@@ -23,6 +23,13 @@ public:
 		FollowUnknown
 	};
 
+	enum ZoomAdjust {
+		ZoomAdjustNone,
+		ZoomAdjustWithSpeed,
+		ZoomAdjustWithElevation,
+		ZoomAdjustUnknown
+	};
+
 	enum Icon {
 		IconDefault = -1,
 
@@ -63,11 +70,32 @@ public:
 	const double& zoom(void) const;
 	void setZoom(const double &zoom);
 
+	const double& zoomMin(void) const;
+	void setZoomMin(const double &zoom);
+
+	const double& zoomMax(void) const;
+	void setZoomMax(const double &zoom);
+
 	const bool& zoomfit(void) const;
 	void setZoomfit(const bool &enable);
 
 	const View& view(void) const;
 	void setView(const View &view);
+
+	const ZoomAdjust& zoomAdjust(void) const;
+	void setZoomAdjust(const ZoomAdjust &adjust);
+
+	const bool& valueAtZoomMinAuto(void) const;
+	void setValueAtZoomMinAuto(bool enable);
+
+	const double& valueAtZoomMin(void) const;
+	void setValueAtZoomMin(const double &value);
+
+	const bool& valueAtZoomMaxAuto(void) const;
+	void setValueAtZoomMaxAuto(bool enable);
+
+	const double& valueAtZoomMax(void) const;
+	void setValueAtZoomMax(const double &value);
 
 	const double& pathThick(void) const;
 	void setPathThick(const double &thick);
@@ -237,18 +265,30 @@ public:
 
 	static View string2view(std::string &s);
 	static Follow string2follow(std::string &s);
+	static ZoomAdjust string2zoomadjust(std::string &s);
 	static Icon string2icon(std::string &s);
 
 	static std::string view2string(View view);
 	static std::string follow2string(Follow follow);
+	static std::string zoomadjust2string(ZoomAdjust adjust);
 	static std::string icon2string(Icon icon);
+
+	void dump(void);
 
 protected:
 	int scale_;
 	View view_;
+	ZoomAdjust zoom_adjust_;
 
 	double null_;
+
 	double zoom_;
+	double zoom_min_;
+	double zoom_max_;
+	bool value_at_zoom_min_auto_;
+	double value_at_zoom_min_;
+	bool value_at_zoom_max_auto_;
+	double value_at_zoom_max_;
 
 	double path_thick_;
 	double path_border_;

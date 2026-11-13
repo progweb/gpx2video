@@ -254,7 +254,7 @@ void SpeedArcShape::initialize(cairo_t *cr) {
 	int x, y;
 	int width, height;
 
-	double value_min = 0, value_max = 0;
+	double value_min = 0, value_max = 100.0;
 
 	TelemetrySource *source;
 

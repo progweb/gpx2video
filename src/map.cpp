@@ -45,14 +45,14 @@
 #define URI_MARKER_R    "#R"
 
 
-//#define TEST_AUTO_ZOOM
-
 
 MapSettings::MapSettings() 
 	: TrackSettings() {
 	scale_ = 16;
 
 	zoom_ = 2.0;
+	zoom_min_ = 2.0;
+	zoom_max_ = 2.0;
 
 	source_ = MapSettings::SourceNull;
 }
@@ -268,6 +268,7 @@ Map::Map(GPXApplication &app, const MapSettings &map_settings, TelemetrySource *
 
 	bg_buf_ = NULL;
 	fg_buf_ = NULL;
+
 	mapbuf_ = NULL;
 
 	filename_ = "";
@@ -457,7 +458,7 @@ void Map::init(void) {
 	log_call();
 
 	scale = settings().scale();
-	zoom_ = settings().zoom();
+//	zoom_ = settings().zoom();
 
 	// Update track settings
 	Track::setSettings(settings());
@@ -468,8 +469,8 @@ void Map::init(void) {
 	if (!isInitialized())
 		return;
 
-	// Track can change zoom value as zoomfit is enabled
-	zoom_ = Track::zoom_;
+//	// Track can change zoom value as zoomfit is enabled
+//	zoom_ = Track::zoom_;
 
 	// lat/lon to tile index
 	vx1_ = floorf((float) pvx1_ / (float) TILESIZE / zoom_);
@@ -830,6 +831,7 @@ bool Map::load(void) {
 
 OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	bool is_move = true;
+	bool is_resize = false;
 
 	int x, y;
 
@@ -852,9 +854,14 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 	double modifier = 1.0;
 
+	double speed;
+	double elevation;
+
 	int scale = settings().scale();
 
 	cairo_t *cairo;
+
+	OIIO::ImageBuf *mapbuf = NULL;
 
 	// Load map & track
 	if (this->load() == false)
@@ -871,6 +878,13 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		is_update = false;
 		goto skip;
 	}
+
+	// Check if map has to be resized
+	is_resize = (zoom_adjust_ != TrackSettings::ZoomAdjustNone);
+
+	// Telemetry data
+	speed = data.speed(TelemetryData::UnitKmPerHour);
+	elevation = data.elevation(TelemetryData::UnitMeter);
 
 	// Compute position on map
 	if (data.timestamp() > ts_end_) {
@@ -889,9 +903,23 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	if ((last_posX_ != -1) && (last_posY_ != -1)) {
 		// Move ?
 		is_move = (posX != last_posX_) || (posY != last_posY_);
-#ifdef TEST_AUTO_ZOOM
-		is_move = true;
-#endif
+
+		// Check if speed or elevation change
+		switch (zoom_adjust_) {
+		case MapSettings::ZoomAdjustWithSpeed:
+			is_move |= (speed != last_speed_);			
+			break;
+
+		case MapSettings::ZoomAdjustWithElevation:
+			is_move |= (elevation != last_elevation_);			
+			break;
+			
+		case MapSettings::ZoomAdjustNone:
+		case MapSettings::ZoomAdjustUnknown:
+		default:
+			break;
+		}
+
 		if (!is_move) {
 			if (settings().follow() != TrackSettings::FollowHeading) {
 				is_update = false;
@@ -920,24 +948,33 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 	width_available = width - padding_horizontal;
 	height_available = height - padding_vertical;
 
-	// TODO
-	// Compute zoom modifier (in function of elevation or speed)
-	// zoom = 2 => 4 tiles => alt = 0
-	// zoom = 1 => 8 tiles => alt = 10
-#ifdef TEST_AUTO_ZOOM
-	if (true) {
-		double zoom_min_ = zoom_;
-		double zoom_max_ = 4 * zoom_;
+	// Compute zoom modifier (in function of speed or elevation)
+	switch (zoom_adjust_) {
+	case MapSettings::ZoomAdjustWithSpeed:
+		modifier = (zoom_min_ - zoom_max_) / std::abs(speed_max_ - speed_min_) * (speed - speed_min_) + zoom_max_;
+		modifier /= zoom_min_;
 
-		modifier = (zoom_min_ - zoom_max_) / (elevation_max_ - elevation_min_) * (data.elevation(TelemetryData::UnitMeter) - elevation_min_) + zoom_max_;
-		modifier /= zoom_min_; //max_;
+		modifier = std::clamp(modifier, 1.0, zoom_max_ / zoom_min_);
+		break;
+
+	case MapSettings::ZoomAdjustWithElevation:
+		modifier = (zoom_min_ - zoom_max_) / std::abs(elevation_max_ - elevation_min_) * (elevation - elevation_min_) + zoom_max_;
+		modifier /= zoom_min_;
+
+		modifier = std::clamp(modifier, 1.0, zoom_max_ / zoom_min_);
+		break;
+		
+	case MapSettings::ZoomAdjustNone:
+	case MapSettings::ZoomAdjustUnknown:
+	default:
+		break;
 	}
-#endif
 
 	// Compute map offset position
 	switch (settings().view()) {
 	// Apply zoom fit - center track
 	case MapSettings::ViewZoomFit:
+		// modifier should be equal to '1.0'
 		offsetX = theme().padding(VideoWidget::Theme::PaddingLeft) + (width_available - (w * modifier)) / 2;
 		offsetY = theme().padding(VideoWidget::Theme::PaddingTop) + (height_available - (h * modifier)) / 2;
 
@@ -977,8 +1014,8 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		offsetY += (height_available / 2) - (posY * modifier);
 
 		if (data_width > width_available) {
-			double offx1 = (posX - pos_lim_x1) * modifier;
-			double offx2 = (pos_lim_x2 - posX) * modifier;
+			double offx1 = (posX * modifier) - pos_lim_x1;
+			double offx2 = pos_lim_x2 - (posX * modifier);
 
 			if (offx1 < (width_available / 2))
 				offsetX += offx1 - (width_available / 2);
@@ -990,8 +1027,8 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		}
 
 		if (data_height > height_available) {
-			double offy1 = (posY - pos_lim_y1) * modifier;
-			double offy2 = (pos_lim_y2 - posY) * modifier;
+			double offy1 = (posY * modifier) - pos_lim_y1;
+			double offy2 = pos_lim_y2 - (posY * modifier);
 
 			if (offy2 < (height_available / 2))
 				offsetY += -offy2 + (height_available / 2);
@@ -1036,31 +1073,31 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		mapbuf_->specmod().x = 0;
 		mapbuf_->specmod().y = 0;
 
-#ifdef TEST_AUTO_ZOOM
-		// Resize map in function of modifier
-		const OIIO::ImageSpec& spec = mapbuf_->spec();
-		VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
-		OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
+		if (is_resize) {
+			// Resize map in function of modifier
+			const OIIO::ImageSpec& spec = mapbuf_->spec();
+			VideoParams::Format img_fmt = OIIOUtils::getFormatFromOIIOBaseType((OIIO::TypeDesc::BASETYPE) spec.format.basetype);
+			OIIO::TypeDesc::BASETYPE type = OIIOUtils::getOIIOBaseTypeFromFormat(img_fmt);
 
-		// TODO: Resize viewport
-		OIIO::ImageBuf mapbuf(OIIO::ImageSpec(spec.width * modifier, spec.height * modifier, spec.nchannels, type)); //, OIIO::InitializePixels::No);
-		OIIO::ImageBufAlgo::resize(mapbuf, *mapbuf_);
+			// Resize viewport
+			mapbuf = new OIIO::ImageBuf(OIIO::ImageSpec(spec.width * modifier, spec.height * modifier, spec.nchannels, type)); //, OIIO::InitializePixels::No);
+			OIIO::ImageBufAlgo::resize(*mapbuf, *mapbuf_);
+		}
+		else {
+			// Don't resize image buffer
+			mapbuf = mapbuf_;
+		}
 
 		// Map & track image over
-		mapbuf.specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE * zoom_)) * modifier);
-		mapbuf.specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE * zoom_)) * modifier);
-		OIIO::ImageBufAlgo::over(*fg_buf_, mapbuf, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-#else
-		// Map & track image over
-		mapbuf_->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE * zoom_)));
-		mapbuf_->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE * zoom_)));
-		OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf_, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
-#endif
+		mapbuf->specmod().x = x + offsetX - ((pevx1_ - (vx1_ * TILESIZE * zoom_)) * modifier);
+		mapbuf->specmod().y = y + offsetY - ((pevy1_ - (vy1_ * TILESIZE * zoom_)) * modifier);
+		OIIO::ImageBufAlgo::over(*fg_buf_, *mapbuf, *fg_buf_, OIIO::ROI(x, x + width, y, y + height));
+
 		// Draw picto
 		if (icon_start_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconStart))
-			icon(*fg_buf_, *icon_start_buf_, x + offsetX + x_start_, y + offsetY + y_start_, OIIO::ROI(x, x + width, y, y + height));
+			icon(*fg_buf_, *icon_start_buf_, x + offsetX + (x_start_ * modifier), y + offsetY + (y_start_ * modifier), OIIO::ROI(x, x + width, y, y + height));
 		if (icon_end_buf_ && theme().hasFlag(VideoWidget::Theme::FlagIconEnd))
-			icon(*fg_buf_, *icon_end_buf_, x + offsetX + x_end_, y + offsetY + y_end_, OIIO::ROI(x, x + width, y, y + height));
+			icon(*fg_buf_, *icon_end_buf_, x + offsetX + (x_end_ * modifier), y + offsetY + (y_end_ * modifier), OIIO::ROI(x, x + width, y, y + height));
 	
 		if (icon_position_buf_ && data.hasValue(TelemetryData::DataFix) && theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) {
 			if (settings().follow() != TrackSettings::FollowNone) {
@@ -1068,16 +1105,25 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 
 				OIIO::ImageBuf position = OIIO::ImageBufAlgo::rotate(*icon_position_buf_, angle * M_PI / 180.0);
 
-				icon(*fg_buf_, position, x + offsetX + posX, y + offsetY + posY, OIIO::ROI(x, x + width, y, y + height));
+				icon(*fg_buf_, position, x + offsetX + (posX * modifier), y + offsetY + (posY * modifier), OIIO::ROI(x, x + width, y, y + height));
 			}
 			else 
 				icon(*fg_buf_, *icon_position_buf_, x + offsetX + (posX * modifier), y + offsetY + (posY * modifier), OIIO::ROI(x, x + width, y, y + height));
+		}
+
+		if (is_resize) {
+			// Destroy image buffer
+			delete mapbuf;
 		}
 	}
 
 	// Save last position
 	last_posX_ = posX;
 	last_posY_ = posY;
+
+	// Save last telemetry data
+	last_speed_ = speed;
+	last_elevation_ = elevation;
 
 	is_update = true;
 skip:
@@ -1163,6 +1209,14 @@ void Map::downloadComplete(Map::Tile &tile) {
 
 	// Now build full map)
 	map.build();
+}
+
+
+void Map::xmlwrite(std::ostream &os) {
+	Track::xmlwrite(os);
+
+	os << "<source>" << settings().source() << "</source>" << std::endl;
+	os << "<scale>" << settings().scale() << "</scale>" << std::endl;
 }
 
 

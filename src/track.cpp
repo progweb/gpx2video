@@ -40,8 +40,15 @@ TrackSettings::TrackSettings() {
 
 	scale_ = 18;
 	view_ = TrackSettings::ViewZoomFit;
+	zoom_adjust_ = TrackSettings::ZoomAdjustNone;
 
 	zoom_ = 1.0;
+	zoom_min_ = 1.0;
+	zoom_max_ = 1.0;
+	value_at_zoom_min_ = 1000.0;
+	value_at_zoom_max_ = 0.0;
+	value_at_zoom_min_auto_ = true;
+	value_at_zoom_max_auto_ = true;
 
 	path_thick_ = 3.0;
 	path_border_ = 1.4;
@@ -106,6 +113,26 @@ void TrackSettings::setZoom(const double &zoom) {
 }
 
 
+const double& TrackSettings::zoomMin(void) const {
+	return zoom_min_;
+}
+
+
+void TrackSettings::setZoomMin(const double &zoom) {
+	zoom_min_ = zoom;
+}
+
+
+const double& TrackSettings::zoomMax(void) const {
+	return zoom_max_;
+}
+
+
+void TrackSettings::setZoomMax(const double &zoom) {
+	zoom_max_ = zoom;
+}
+
+
 const TrackSettings::View& TrackSettings::view(void) const {
 	return view_;
 }
@@ -113,6 +140,56 @@ const TrackSettings::View& TrackSettings::view(void) const {
 
 void TrackSettings::setView(const TrackSettings::View &view) {
 	view_ = view;
+}
+
+
+const TrackSettings::ZoomAdjust& TrackSettings::zoomAdjust(void) const {
+	return zoom_adjust_;
+}
+
+
+void TrackSettings::setZoomAdjust(const TrackSettings::ZoomAdjust &adjust) {
+	zoom_adjust_ = adjust;
+}
+
+
+const bool& TrackSettings::valueAtZoomMinAuto(void) const {
+	return value_at_zoom_min_auto_;
+}
+
+
+void TrackSettings::setValueAtZoomMinAuto(bool enable) {
+	value_at_zoom_min_auto_ = enable;
+}
+
+
+const double& TrackSettings::valueAtZoomMin(void) const {
+	return value_at_zoom_min_;
+}
+
+
+void TrackSettings::setValueAtZoomMin(const double &value) {
+	value_at_zoom_min_ = value;
+}
+
+
+const bool& TrackSettings::valueAtZoomMaxAuto(void) const {
+	return value_at_zoom_max_auto_;
+}
+
+
+void TrackSettings::setValueAtZoomMaxAuto(bool enable) {
+	value_at_zoom_max_auto_ = enable;
+}
+
+
+const double& TrackSettings::valueAtZoomMax(void) const {
+	return value_at_zoom_max_;
+}
+
+
+void TrackSettings::setValueAtZoomMax(const double &value) {
+	value_at_zoom_max_ = value;
 }
 
 
@@ -253,6 +330,22 @@ TrackSettings::Follow TrackSettings::string2follow(std::string &s) {
 }
 
 
+TrackSettings::ZoomAdjust TrackSettings::string2zoomadjust(std::string &s) {
+	TrackSettings::ZoomAdjust adjust;
+
+	if (s.empty() || (s == "none"))
+		adjust = TrackSettings::ZoomAdjustNone;
+	else if (s == "speed")
+		adjust = TrackSettings::ZoomAdjustWithSpeed;
+	else if (s == "elevation")
+		adjust = TrackSettings::ZoomAdjustWithElevation;
+	else 
+		adjust = TrackSettings::ZoomAdjustUnknown;
+
+	return adjust;
+}
+
+
 TrackSettings::Icon TrackSettings::string2icon(std::string &s) {
 	TrackSettings::Icon icon;
 
@@ -319,6 +412,19 @@ std::string TrackSettings::follow2string(Follow follow) {
 }
 
 
+std::string TrackSettings::zoomadjust2string(ZoomAdjust adjust) {
+	switch (adjust) {
+	case TrackSettings::ZoomAdjustNone:
+		return "none";
+	case TrackSettings::ZoomAdjustWithSpeed:
+		return "speed";
+	case TrackSettings::ZoomAdjustWithElevation:
+		return "elevation";
+	default:
+		return "";
+	}
+}
+
 std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 	switch (icon) {
 	case TrackSettings::IconDefault:
@@ -357,6 +463,14 @@ std::string TrackSettings::icon2string(TrackSettings::Icon icon) {
 	default:
 		return "";
 	}
+}
+
+
+void TrackSettings::dump(void) {
+	std::cout << "Track settings:" << std::endl;
+	std::cout << " - scale: " << scale_ << std::endl;
+	std::cout << " - zoom: " << zoom_ << std::endl;
+	std::cout << " - zoom range: " << zoom_min_ << " - " << zoom_max_ << std::endl;
 }
 
 
@@ -501,6 +615,7 @@ bool Track::preinit(void) {
 
 	log_call();
 
+	// zoom fit
 	zoomfit = (settings().view() == TrackSettings::ViewZoomFit);
 
 	// Init
@@ -548,6 +663,8 @@ abort:
 
 
 void Track::init(void) {
+	bool is_zoom_fit;
+
 	int scale;
 	double zoom;
 
@@ -580,6 +697,17 @@ void Track::init(void) {
 
 	scale = settings().scale();
 	zoom = settings().zoom();
+	zoom_min_ = settings().zoomMin();
+	zoom_max_ = settings().zoomMax();
+	zoom_adjust_ = settings().zoomAdjust();
+
+	// Zoom adjust ?
+	is_zoom_fit = (settings().view() == TrackSettings::ViewZoomFit);
+
+	if (!is_zoom_fit && (zoom_adjust_ != TrackSettings::ZoomAdjustNone))
+		zoom = zoom_min_;
+	else if (is_zoom_fit)
+		zoom_adjust_ = TrackSettings::ZoomAdjustNone;
 
 	// Save settings
 	zoom_ = zoom;
@@ -1166,11 +1294,20 @@ bool Track::load(void) {
 
 		ts_end_ = telemetry_source_->endTimestamp();
 
-		// TODO 
 		// Save telemetry range
-		elevation_min_ = wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin);
-		elevation_max_ = wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax);
+		speed_min_ = settings().valueAtZoomMaxAuto() ? 
+			wpt.speed(TelemetryData::UnitKmPerHour, TelemetryData::RangeMin)
+			: settings().valueAtZoomMax();
+		speed_max_ = settings().valueAtZoomMinAuto() ? 
+			wpt.speed(TelemetryData::UnitKmPerHour, TelemetryData::RangeMax)
+			: settings().valueAtZoomMin();
 
+		elevation_min_ = settings().valueAtZoomMaxAuto() ?
+			wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMin)
+			: settings().valueAtZoomMax();
+		elevation_max_ = settings().valueAtZoomMinAuto() ?
+			wpt.elevation(TelemetryData::UnitMeter, TelemetryData::RangeMax)
+			: settings().valueAtZoomMin();
 	}
 	else {
 		log_warn("Can't read telemetry data");
@@ -1527,7 +1664,18 @@ void Track::xmlwrite(std::ostream &os) {
 	os << "<with-icon-position>" << VideoWidget::bool2string(theme().hasFlag(VideoWidget::Theme::FlagIconPosition)) << "</with-icon-position>" << std::endl;
 
 	os << "<view>" << TrackSettings::view2string(settings().view()) << "</view>" << std::endl;
+
+	os << "<zoom-adjust>" << TrackSettings::zoomadjust2string(settings().zoomAdjust()) << "</zoom-adjust>" << std::endl;
+
 	os << "<zoom>" << settings().zoom() << "</zoom>" << std::endl;
+	os << "<zoom-min>" << settings().zoomMin() << "</zoom-min>" << std::endl;
+	os << "<zoom-max>" << settings().zoomMax() << "</zoom-max>" << std::endl;
+
+	os << "<value-at-zoom-min>" << settings().valueAtZoomMin() << "</value-at-zoom-min>" << std::endl;
+	os << "<value-at-zoom-max>" << settings().valueAtZoomMax() << "</value-at-zoom-max>" << std::endl;
+
+	os << "<value-at-zoom-min-auto>" << VideoWidget::bool2string(settings().valueAtZoomMinAuto()) << "</value-at-zoom-min-auto>" << std::endl;
+	os << "<value-at-zoom-max-auto>" << VideoWidget::bool2string(settings().valueAtZoomMaxAuto()) << "</value-at-zoom-max-auto>" << std::endl;
 
 	os << "<path-thick>" << settings().pathThick() << "</path-thick>" << std::endl;
 	os << "<path-border>" << settings().pathBorder() << "</path-border>" << std::endl;

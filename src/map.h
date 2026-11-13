@@ -140,12 +140,7 @@ protected:
 		os << "</map>" << std::endl;
 	}
 
-	void xmlwrite(std::ostream &os) {
-		Track::xmlwrite(os);
-
-		os << "<source>" << settings().source() << "</source>" << std::endl;
-		os << "<scale>" << settings().scale() << "</scale>" << std::endl;
-	}
+	void xmlwrite(std::ostream &os);
 
 private:
 	OIIO::ImageBuf *bg_buf_;

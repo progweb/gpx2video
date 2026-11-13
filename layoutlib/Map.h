@@ -218,12 +218,61 @@ namespace layout
 	///
 	Unsigned &scale() { return _scale; }
 
+	///
+	/// Get zoom adjust
+	/// 
+	/// @return the zoom adjust elememnt
+	///
+	String  &zoomAdjust() { return _zoom_adjust; }
+
     ///
     /// Get zoom
     ///
     /// @return the zoom element
     ///
     Decimal  &zoom() { return _zoom; }
+
+	///
+	/// Get zoom min
+	/// 
+	/// @return the zoom min elememnt
+	///
+	Decimal &zoomMin() { return _zoom_min; }
+
+	///
+	/// Get zoom max
+	/// 
+	/// @return the zoom max elememnt
+	///
+	Decimal &zoomMax() { return _zoom_max; }
+
+	///
+	/// Get value at zoom min
+	/// 
+	/// @return the value at zoom min elememnt
+	///
+	Decimal &valueAtZoomMin() { return _value_at_zoom_min; }
+
+	///
+	/// Get value at zoom max
+	/// 
+	/// @return the value at zoom max elememnt
+	///
+	Decimal &valueAtZoomMax() { return _value_at_zoom_max; }
+
+	/// 
+	/// Get value at zoom min auto
+	///
+	/// @return the value at zoom min auto attribute
+	///
+	Boolean  &valueAtZoomMinAuto() { return _value_at_zoom_min_auto; }
+
+	/// 
+	/// Get value at zoom max auto
+	///
+	/// @return the value at zoom max auto attribute
+	///
+	Boolean  &valueAtZoomMaxAuto() { return _value_at_zoom_max_auto; }
 
     ///
     /// Get border
@@ -363,7 +412,16 @@ namespace layout
 
 	String       _view;
 	Unsigned     _scale;
+
+	String       _zoom_adjust;
 	Decimal      _zoom;
+	Decimal      _zoom_min;
+	Decimal      _zoom_max;
+	Decimal      _value_at_zoom_min;
+	Decimal      _value_at_zoom_max;
+	Boolean      _value_at_zoom_min_auto;
+	Boolean      _value_at_zoom_max_auto;
+
 	Unsigned     _border;
 	String       _bordercolor;
 	Unsigned     _round_corner;

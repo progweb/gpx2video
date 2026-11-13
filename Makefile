@@ -92,7 +92,6 @@ dev-gpx2video:
 		-e LC_ALL=$(LANG) \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
-		-v /etc/timezone:/etc/timezone \
 		-v /etc/localtime:/etc/localtime \
 		-v /etc/locale.gen:/etc/locale.gen \
 		-v /etc/locale.conf:/etc/locale.conf \
@@ -126,7 +125,6 @@ run-gpx2video:
 		-e LC_ALL=$(LANG) \
 		-e XDG_RUNTIME_DIR=/tmp \
 		-e WAYLAND_DISPLAY=$(WAYLAND_DISPLAY) \
-		-v /etc/timezone:/etc/timezone \
 		-v /etc/localtime:/etc/localtime \
 		-v /etc/locale.gen:/etc/locale.gen \
 		-v $(XDG_RUNTIME_DIR)/$(WAYLAND_DISPLAY):/tmp/$(WAYLAND_DISPLAY)  \

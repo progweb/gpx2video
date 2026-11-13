@@ -6,6 +6,7 @@
 #include <gtkmm/switch.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/spinbutton.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/colorbutton.h>
 #include <gtkmm/textbuffer.h>
 #include <gtkmm/textview.h>
@@ -76,6 +77,7 @@ protected:
 	void on_widget_color_changed(Gtk::ColorButton *button, std::function<void(const std::string&)> set);
 	void on_widget_combobox_changed(Gtk::ComboBox *combobox, std::function<void(const Gtk::TreeModel::const_iterator&)> set);
 	bool on_widget_switch_changed(bool state, Gtk::Switch *sw, std::function<void(const bool&)> set);
+	void on_widget_checkbutton_toggled(Gtk::CheckButton *button, std::function<void(const int&)> set);
 	void on_widget_textview_changed(Gtk::TextView *textview, std::function<void(Glib::RefPtr<Gtk::TextBuffer>)> set);
 };
 

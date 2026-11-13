@@ -95,6 +95,7 @@ protected:
 	Glib::RefPtr<Gtk::ListStore> view_model_;
 	Glib::RefPtr<Gtk::ListStore> follow_model_;
 	Glib::RefPtr<Gtk::ListStore> source_model_;
+	Glib::RefPtr<Gtk::ListStore> zoom_adjust_model_;
 
 	void create_popover(Gtk::MenuButton *menubutton, MapSettings::Icon type);
 
