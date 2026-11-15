@@ -536,10 +536,17 @@ Map settings:
 	<source>1</source>
 	<view>default</view>
 	<scale>11</scale>
+	<zoom-adjust>none</zoom-adjust>
 	<zoom>1.2</zoom>
-    <with-icon-start>true</with-icon-start>
-    <with-icon-end>true</with-icon-end>
-    <with-icon-position>true</with-icon-position>
+	<zoom-min>1</zoom-min>
+	<zoom-max>1</zoom-max>
+	<value-at-zoom-min>1000</value-at-zoom-min>
+	<value-at-zoom-max>0</value-at-zoom-max>
+	<value-at-zoom-min-auto>true</value-at-zoom-min-auto>
+	<value-at-zoom-max-auto>true</value-at-zoom-max-auto>
+	<with-icon-start>true</with-icon-start>
+	<with-icon-end>true</with-icon-end>
+	<with-icon-position>true</with-icon-position>
 	<icon-end-name>default</icon-end-name>
 	<icon-start-name>default</icon-start-name>
 	<icon-position-name>default</icon-position-name>
@@ -556,10 +563,21 @@ Map settings:
 
 **source** map provider.
 **scale** value sets the map details.
-**zoom** value applies a zoom factor as render.
+**zoom-adjust** zoom behavior (constant or dynamic). 
+**zoom** value applies a zoom factor as render (zoom constant).
+**zoom-min** value applies a zoom min factor as render (zoom dynamic).
+**zoom-max** value applies a zoom max factor as render (zoom dynamic).
+**value-at-zoom-min** value at zoom min.
+**value-at-zoom-max** value at zoom max.
+**value-at-zoom-min-auto** compute value at zoom min (true or false).
+**value-at-zoom-max-auto** compute value at zoom max (true or false).
 **icon-xxxx-size** icon size in pixels.
 **path-thick** path thick.
 **path-border** border size of path.
+
+**zoom-adjust** values are "none", "speed" or "elevation".
+**zoom** can be computed from "speed" or "elevation" values. The range values
+can be set or computed and clamp between **zoom-min** and **zoom-max**.
 
 **with-icon-xxxx** enable/disable start, end or position icon.
 
