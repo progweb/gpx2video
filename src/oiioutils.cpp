@@ -109,9 +109,15 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, co
 	cairo_surface_t *surface = NULL;
 	cairo_surface_t *masksurface = NULL;
 
+#if OIIO_VERSION_LESS(3, 0, 0)
+	int channelorder[] = { 2, 1, 0, 3 };
+	float channelvalues[] = { };
+	std::string channelnames[] = { "B", "G", "R", "A" };
+#else
 	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
 	OIIO::cspan<float> channelvalues = { };
 	OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
+#endif
 
 	RsvgRectangle viewport;
 

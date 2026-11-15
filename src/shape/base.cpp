@@ -84,9 +84,15 @@ void ShapeBase::drawImage(OIIO::ImageBuf *buf, int x, int y, const char *name, V
 
 	// Add alpha channel
 	if (spec.nchannels != 4) {
+#if OIIO_VERSION_LESS(3, 0, 0)
+		int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
+		float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+		std::string channelnames[] = { "", "", "", "A" };
+#else
 		OIIO::cspan<int> channelorder = { 0, 1, 2, -1 /*use a float value*/ };
 		OIIO::cspan<float> channelvalues = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
 		OIIO::cspan<std::string> channelnames = { "", "", "", "A" };
+#endif
 
 		outbuf = OIIO::ImageBufAlgo::channels(outbuf, 4, channelorder, channelvalues, channelnames);
 	}
@@ -130,9 +136,15 @@ void ShapeBase::renderCairoContext(OIIO::ImageBuf *buf, cairo_t *cairo) {
 	}
 
 	// BGRA => RGBA
+#if OIIO_VERSION_LESS(3, 0, 0)
+	int channelorder[] = { 2, 1, 0, 3 };
+	float channelvalues[] = { };
+	std::string channelnames[] = { "B", "G", "R", "A" };
+#else
 	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
 	OIIO::cspan<float> channelvalues = { };
 	OIIO::cspan<std::string> channelnames = { "B", "G", "R", "A" };
+#endif
 
 	OIIO::ImageBufAlgo::channels(*buf, *buf, 4, channelorder, channelvalues, channelnames);
 }
