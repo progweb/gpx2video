@@ -529,7 +529,7 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 	// Save name
 	layout_file_ = layout_file;
 
-	// Check if media file is already opened
+	// Check if video media file is already opened
 	if (media_ == NULL)
 		return;
 
@@ -545,9 +545,23 @@ void GPX2VideoApplicationWindow::open_layout_file(const Glib::RefPtr<const Gio::
 //	// Exec async widgets tasks
 //	perform(Task::ActionStart);
 
-	// Populate widgets list
+	// Populate widgets & media list
 	for (GPX2VideoWidget *item : renderer_->widgets()) {
 		widget_stackpage_->append(item);
+
+		if (item->widget()->theme().icon() == VideoWidget::Theme::IconUserFile) {
+			media_model_->append(
+				GPX2VideoMedia::MediaIcon,
+				item->widget()->theme().iconFile().c_str()
+			);
+		}
+
+		if (item->widget()->type() == VideoWidget::WidgetImage) {
+			media_model_->append(
+				GPX2VideoMedia::MediaImage,
+				item->widget()->source().c_str()
+			);
+		}
 	}
 
 	// Refresh video preview
