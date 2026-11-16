@@ -1032,17 +1032,7 @@ void Track::path(OIIO::ImageBuf &outbuf, TelemetrySource *source, double zoom) {
 		stride);
 
 	// BGRA => RGBA
-#if OIIO_VERSION_LESS(3, 0, 0)
-	int channelorder[] = { 2, 1, 0, 3 };
-	float channelvalues[] = { };
-	std::string channelnames[] = { "B", "G", "R", "A" };
-#else
-	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
-	OIIO::cspan<float> channelvalues = { };
-	OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
-#endif
-
-	OIIO::ImageBufAlgo::channels(buf, buf, 4, channelorder, channelvalues, channelnames);
+	OIIOUtils::bgra2rgba(buf, buf);
 
 	// Cairo over
 	OIIO::ImageBufAlgo::over(outbuf, buf, outbuf);
@@ -1065,16 +1055,6 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double zoom)
 
 	int xoff = 0;
 	int yoff = 0;
-
-#if OIIO_VERSION_LESS(3, 0, 0)
-	int channelorder[] = { 2, 1, 0, 3 };
-	float channelvalues[] = { };
-	std::string channelnames[] = { "B", "G", "R", "A" };
-#else
-	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
-	OIIO::cspan<float> channelvalues = { };
-	OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
-#endif
 
 	OIIO::ROI roi = OIIO::ROI::All();
 	OIIO::ImageBuf buf;
@@ -1241,7 +1221,7 @@ void Track::path(OIIO::ImageBuf &outbuf, const TelemetryData &data, double zoom)
 		stride);
 
 	// BGRA => RGBA 
-	OIIO::ImageBufAlgo::channels(buf, buf, 4, channelorder, channelvalues, channelnames);
+	OIIOUtils::bgra2rgba(buf, buf);
 
 	// Cairo over
 	buf.specmod().x = xoff;

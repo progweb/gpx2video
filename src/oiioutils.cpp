@@ -94,6 +94,44 @@ error:
 }
 
 
+bool OIIOUtils::addalpha(OIIO::ImageBuf &dst, OIIO::ImageBuf &src) {
+//	OIIO::cspan<int> channelorder = { 0, 1, 2, -1 /*use a float value*/ };
+//	OIIO::cspan<float> channelvalues = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+//	OIIO::cspan<std::string> channelnames = { "", "", "", "A" };
+
+	std::vector<int> channelorder = { 0, 1, 2, -1 /*use a float value*/ };
+	std::vector<float> channelvalues = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
+	std::vector<std::string> channelnames = { "", "", "", "A" };
+
+	return OIIO::ImageBufAlgo::channels(dst, src, 4, channelorder, channelvalues, channelnames);
+}
+
+
+bool OIIOUtils::bgra2rgba(OIIO::ImageBuf &dst, OIIO::ImageBuf &src) {
+//	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
+//	OIIO::cspan<float> channelvalues = { };
+//#if OIIO_VERSION_LESS(3, 0, 0)
+//	OIIO::cspan<std::string> channelnames = { "B", "G", "R", "A" };
+//#else
+//	OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
+//#endif
+//
+//	OIIO::ImageBufAlgo::channels(dst, src, 4, channelorder, channelvalues, channelnames);
+
+//  #if OIIO_VERSION_LESS(3, 0, 0)
+	std::vector<int> channelorder = { 2, 1, 0, 3 };
+	std::vector<float> channelvalues = { };
+	std::vector<std::string> channelnames = { "B", "G", "R", "A" };
+//  #else
+//      OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
+//      OIIO::cspan<float> channelvalues = { };
+//      OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
+//  #endif
+
+	return OIIO::ImageBufAlgo::channels(dst, src, 4, channelorder, channelvalues, channelnames);
+}
+
+
 OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, const float *color) {
 	bool apply_color;
 
@@ -108,16 +146,6 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, co
 	cairo_t *mask = NULL;
 	cairo_surface_t *surface = NULL;
 	cairo_surface_t *masksurface = NULL;
-
-#if OIIO_VERSION_LESS(3, 0, 0)
-	int channelorder[] = { 2, 1, 0, 3 };
-	float channelvalues[] = { };
-	std::string channelnames[] = { "B", "G", "R", "A" };
-#else
-	OIIO::cspan<int> channelorder = { 2, 1, 0, 3 };
-	OIIO::cspan<float> channelvalues = { };
-	OIIO::cspan<std::string> channelnames = { }; // "B", "G", "R", "A"
-#endif
 
 	RsvgRectangle viewport;
 
@@ -204,7 +232,7 @@ OIIO::ImageBuf * OIIOUtils::loadsvg(const char *filename, const double &size, co
 	}
 
 	// BGRA => RGBA
-	OIIO::ImageBufAlgo::channels(*buf, *buf, 4, channelorder, channelvalues, channelnames);
+	OIIOUtils::bgra2rgba(*buf, *buf);
 
 error:
 	// Free

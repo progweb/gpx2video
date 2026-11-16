@@ -703,16 +703,12 @@ void Map::build(void) {
 			img->read_image(img->current_subimage(), img->current_miplevel(), 0, -1, type, buf.localpixels());
 
 			// Add alpha channel
-			int channelorder[] = { 0, 1, 2, -1 /*use a float value*/ };
-			float channelvalues[] = { 0 /*ignore*/, 0 /*ignore*/, 0 /*ignore*/, 1.0 };
-			std::string channelnames[] = { "", "", "", "A" };
-
-			OIIO::ImageBuf outbuf = OIIO::ImageBufAlgo::channels(buf, 4, channelorder, channelvalues, channelnames);
+			OIIOUtils::addalpha(buf, buf);
 
 			// Write tile
-			outbuf.specmod().x = (tile->x() - vx1_) * TILESIZE;
-			outbuf.specmod().y = (tile->y() - vy1_) * TILESIZE;
-			OIIO::ImageBufAlgo::over(image_buffer, outbuf, image_buffer, outbuf.roi());
+			buf.specmod().x = (tile->x() - vx1_) * TILESIZE;
+			buf.specmod().y = (tile->y() - vy1_) * TILESIZE;
+			OIIO::ImageBufAlgo::over(image_buffer, buf, image_buffer, buf.roi());
 		}
 
 		// Write map file
@@ -907,11 +903,11 @@ OIIO::ImageBuf * Map::render(const TelemetryData &data, bool &is_update) {
 		// Check if speed or elevation change
 		switch (zoom_adjust_) {
 		case MapSettings::ZoomAdjustWithSpeed:
-			is_move |= (speed != last_speed_);			
+			is_move |= std::abs((speed - last_speed_) > 0.1);
 			break;
 
 		case MapSettings::ZoomAdjustWithElevation:
-			is_move |= (elevation != last_elevation_);			
+			is_move |= std::abs((elevation - last_elevation_) > 0.1);
 			break;
 			
 		case MapSettings::ZoomAdjustNone:

@@ -27,6 +27,8 @@ public:
 
 	static void bufferToFile(const OIIO::ImageBuf &buf, const std::string &filename);
 
+	static bool addalpha(OIIO::ImageBuf &dst, OIIO::ImageBuf &src);
+	static bool bgra2rgba(OIIO::ImageBuf &dst, OIIO::ImageBuf &src);
 
 	static OIIO::ImageBuf * loadsvg(const char *filename, const double &divider, const float *color=NULL);
 };
